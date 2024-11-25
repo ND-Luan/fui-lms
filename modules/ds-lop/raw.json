@@ -1,0 +1,24 @@
+{
+    "data": [],
+    "watch": {},
+    "controls": [
+        {
+            "prop": "fluid ",
+            "rows": [
+                {
+                    "prop": "",
+                    "cols": [
+                        {
+                            "el": "uc-main-layout",
+                            "attr": {
+                            },
+                            "w": 12
+                        }
+                    ]
+                }
+            ]
+        }
+    ],
+    "set": {
+    }
+}

@@ -1,0 +1,117 @@
+.v-expansion-panel-text__wrapper {
+    padding: 0px !important;
+}
+
+.custom-border table {
+    border-left: thin solid rgba(var(--v-border-color), var(--v-border-opacity));
+}
+
+.custom-border table th+th {
+    border-left: thin solid rgba(var(--v-border-color), var(--v-border-opacity));
+    border-right: thin solid rgba(var(--v-border-color), var(--v-border-opacity));
+}
+
+.custom-border table td+td {
+    border-left: thin solid rgba(var(--v-border-color), var(--v-border-opacity));
+    border-right: thin solid rgba(var(--v-border-color), var(--v-border-opacity));
+}
+
+.custom-border .v-data-table__td {
+    padding: 0px 0px;
+}
+
+.v-data-table-column--last-fixed {
+    position: sticky !important;
+    background: rgb(var(--v-theme-surface));
+    right: 0;
+    border-left: 1px solid rgba(var(--v-border-color), var(--v-border-opacity));
+}
+
+.v-table__wrapper {
+    scrollbar-width: thin;
+}
+
+.style-row-cot-diem {
+    border-top: thin solid rgba(var(--v-border-color), var(--v-border-opacity));
+}
+
+.style-height-row-cot-diem {
+    padding: 10px 0px;
+    height: 50px;
+}
+
+.swal2-actions {
+    gap: 50px;
+}
+
+.custom-toast {
+    position: fixed !important;
+    right: 10px !important;
+    z-index: 1060 !important;
+}
+
+.v-toast__item {
+    background-color: white !important;
+}
+
+.v-toast__item .v-toast__icon {
+    display: none !important;
+}
+
+.v-toast__item .v-toast__text {
+    padding: 0 !important;
+}
+
+.v-toast__item {
+    padding: 0 !important;
+}
+
+.v-toast__text {
+    height: 100% !important;
+}
+
+.jexcel_container {
+    padding-right: 0 !important;
+    display: block !important;
+}
+
+/* jexcel */
+.jexcel_content {
+    padding-right: 0 !important;
+    padding-bottom: 0 !important;
+}
+
+.jexcel thead tr {
+    height: 50px;
+    /* Đặt chiều cao theo ý muốn */
+}
+
+
+.expand-height {
+    min-height: 40px !important;
+    max-height: 48px !important;
+}
+
+.jexcel>thead>tr>td {
+    text-wrap: wrap;
+    overflow-wrap: break-word;
+}
+
+.shadow-box {
+    box-shadow: 0px 7px 15px 0px rgba(0, 0, 0, 0.13),
+        0px 1px 4px 0px rgba(0, 0, 0, 0.11);
+}
+
+.noLineClamp {
+    -webkit-line-clamp: unset !important;
+}
+
+.custom-tab {
+    min-height: 100px;
+    /* width: 100wh; */
+    /* width: 150px; */
+}
+
+/* .custom-tab .v-btn__content{
+     white-space: normal;
+} */
