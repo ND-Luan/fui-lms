@@ -1,90 +1,128 @@
-const apiUtil = {
-    TemplateBangDiem: (url, params = null) => {
-        return new Promise((resolve, reject) => {
-            vueData.v_Loading = true
-            $.ajax({
-                type: 'POST',
-                headers: {
-                    authorization: $awt,
-                },
-                url: vueData.v_Set.apiDomain + 'lms/TemplateBangDiem_' + url,
-                contentType: 'application/json; charset=utf-8',
-                dataType: 'json',
-                crossDomain: true,
-                data: JSON.stringify(params),
-                success: function (d) {
-                    resolve(d)
-                },
-                error: function (xhr, ajaxOptions, thrownError) {
-                    Toast.error({
-                        title: 'Thông báo',
-                        text: xhr?.responseJSON?.Message,
-                    })
-                    reject(xhr)
-                },
-                complete: function (data) {
-                    vueData.v_Loading = false
-                },
-            })
+let response = {
+    IsSuccess: false,
+    Message: null,
+    Result: null
+}
+const EnumMethod = {
+    GET: 'Get',
+    DELETE: 'Del',
+    UPDATE: 'Udp',
+    INSERT: 'Ins'
+}
+const SUB_DOMAIN = {
+    STUDENT: 'student/',
+    LMS: 'lms/'
+}
+
+const AJAX = (url, params = null) => {
+    return new Promise((resolve) => {
+        vueData.v_Loading = true
+        $.ajax({
+            type: 'POST',
+            headers: {
+                authorization: $awt,
+            },
+            url: vueData.v_Set.apiDomain + url,
+            contentType: 'application/json; charset=utf-8',
+            dataType: 'json',
+            crossDomain: true,
+            data: JSON.stringify(params),
+            success: function (d) {
+                console.log(d, 1)
+                response = {
+                    IsSuccess: true,
+                    Message: null,
+                    Result: d.data
+                }
+                resolve(response)
+            },
+            error: function (xhr, ajaxOptions, thrownError) {
+                Toast.error({
+                    title: 'Thông báo',
+                    text: xhr?.responseJSON?.Message,
+                })
+                response = {
+                    IsSuccess: false,
+                    Message: xhr.responseJSON?.Message,
+                    Result: null
+                }
+                resolve(response)
+            },
+            complete: function (data) {
+                vueData.v_Loading = false
+            },
         })
+
+    })
+}
+const AJAX_SINGLE = (url, params = null) => {
+    return new Promise((resolve) => {
+        vueData.v_Loading = true
+        $.ajax({
+            type: 'POST',
+            headers: {
+                authorization: $awt,
+            },
+            url: vueData.v_Set.apiDomain + url,
+            contentType: 'application/json; charset=utf-8',
+            dataType: 'json',
+            crossDomain: true,
+            data: JSON.stringify(params),
+            success: function (d) {
+                console.log(d, 1)
+                response = {
+                    IsSuccess: true,
+                    Message: null,
+                    Result: d.data
+                }
+                resolve(response)
+            },
+            error: function (xhr, ajaxOptions, thrownError) {
+                Toast.error({
+                    title: 'Thông báo',
+                    text: xhr?.responseJSON?.Message,
+                })
+                response = {
+                    IsSuccess: false,
+                    Message: xhr.responseJSON?.Message,
+                    Result: null
+                }
+                resolve(response)
+            },
+            complete: function (data) {
+                vueData.v_Loading = false
+            },
+        })
+
+    })
+}
+
+const apiUtilLMS = {
+    post: (url, params = null) => {
+        return AJAX(SUB_DOMAIN.LMS + url, params)
     },
-    TemplateBangDiemChiTiet: (url, params = null) => {
-        return new Promise((resolve, reject) => {
-            vueData.v_Loading = true
-            $.ajax({
-                type: 'POST',
-                headers: {
-                    authorization: $awt,
-                },
-                url: vueData.v_Set.apiDomain + 'lms/TemplateBangDiemChiTiet_' + url,
-                contentType: 'application/json; charset=utf-8',
-                dataType: 'json',
-                crossDomain: true,
-                data: JSON.stringify(params),
-                success: function (d) {
-                    resolve(d)
-                },
-                error: function (xhr, ajaxOptions, thrownError) {
-                    Toast.error({
-                        title: 'Thông báo',
-                        text: xhr?.responseJSON?.Message,
-                    })
-                    reject(xhr)
-                },
-                complete: function (data) {
-                    vueData.v_Loading = false
-                },
-            })
-        })
+    postSingle: () => {
+        return AJAX_SINGLE(SUB_DOMAIN.LMS + url, params)
+    },
+}
+const apiUtilStudent = {
+    post: () => {
+        return AJAX(SUB_DOMAIN.STUDENT + url, params)
+    },
+    postSingle: () => {
+        return AJAX_SINGLE(SUB_DOMAIN.STUDENT + url, params)
+    }
+}
+
+const apiUtil = {
+    TemplateBangDiem: (METHOD, params = null) => {
+        return AJAX('lms/TemplateBangDiem_' + METHOD, params)
+    },
+    TemplateBangDiemChiTiet: (METHOD, params = null) => {
+        return AJAX('lms/TemplateBangDiemChiTiet_' + METHOD, params)
     },
     NhapDiem: (url, params = null) => {
-        return new Promise((resolve, reject) => {
-            vueData.v_Loading = true
-            $.ajax({
-                type: 'POST',
-                headers: {
-                    authorization: $awt,
-                },
-                url: vueData.v_Set.apiDomain + 'lms/' + url,
-                contentType: 'application/json; charset=utf-8',
-                dataType: 'json',
-                crossDomain: true,
-                data: JSON.stringify(params),
-                success: function (d) {
-                    resolve(d)
-                },
-                error: function (xhr, ajaxOptions, thrownError) {
-                    Toast.error({
-                        title: 'Thông báo',
-                        text: xhr?.responseJSON?.Message,
-                    })
-                    reject(xhr)
-                },
-                complete: function (data) {
-                    vueData.v_Loading = false
-                },
-            })
-        })
+        return AJAX('lms/' + url, params)
     },
     ChuKy: (url, params = null) => {
         return new Promise((resolve, reject) => {
@@ -173,35 +211,35 @@ const apiUtil = {
             })
         })
     },
-    Edubot: (url, params = null) => {
-        return new Promise((resolve, reject) => {
-            vueData.v_Loading = true
-            $.ajax({
-                type: 'POST',
-                headers: {
-                    authorization: $awt,
-                },
-                url: vueData.v_Set.apiDomain + 'lms/' + url,
-                contentType: 'application/json; charset=utf-8',
-                dataType: 'json',
-                crossDomain: true,
-                data: JSON.stringify(params),
-                success: function (d) {
-                    resolve(d)
-                },
-                error: function (xhr, ajaxOptions, thrownError) {
-                    Toast.error({
-                        title: 'Thông báo',
-                        text: xhr?.responseJSON?.Message,
-                    })
-                    reject(xhr)
-                },
-                complete: function (data) {
-                    vueData.v_Loading = false
-                },
-            })
-        })
-    },
+    // Edubot: (url, params = null) => {
+    //     return new Promise((resolve, reject) => {
+    //         vueData.v_Loading = true
+    //         $.ajax({
+    //             type: 'POST',
+    //             headers: {
+    //                 authorization: $awt,
+    //             },
+    //             url: vueData.v_Set.apiDomain + 'lms/' + url,
+    //             contentType: 'application/json; charset=utf-8',
+    //             dataType: 'json',
+    //             crossDomain: true,
+    //             data: JSON.stringify(params),
+    //             success: function (d) {
+    //                 resolve(d)
+    //             },
+    //             error: function (xhr, ajaxOptions, thrownError) {
+    //                 Toast.error({
+    //                     title: 'Thông báo',
+    //                     text: xhr?.responseJSON?.Message,
+    //                 })
+    //                 reject(xhr)
+    //             },
+    //             complete: function (data) {
+    //                 vueData.v_Loading = false
+    //             },
+    //         })
+    //     })
+    // },
     lhbs: (url, params = null) => {
         return new Promise((resolve, reject) => {
             vueData.v_Loading = true
@@ -245,141 +283,113 @@ const apiUtil = {
 
 //Xem params https://tapi.lhbs.vn/help/lms/
 
-//Page cấu hình mẫu bảng điểm
-const TemplateBangDiem_Service = {
-    Get: async (params) => {
-        //TemplateBangDiemID (0: Lấy tất cả)
-        const res = await apiUtil.TemplateBangDiem('Get', params)
-        if (res?.data) {
-            return res.data
-        } else {
-            return []
-        }
-    },
-    Ins: async (params) => {
-        //"TemplateBangDiemName": "String"
-        const res = await apiUtil.TemplateBangDiem('Ins', params)
-        if (res?.data) {
-            return true
-        } else {
-            return false
-        }
-    },
-    Upd: async (params) => {
-        //     "TemplateBangDiemID": "Int32",
-        // "TemplateBangDiemName": "String"
-        const res = await apiUtil.TemplateBangDiem('Upd', params)
-        if (res?.data) {
-            return true
-        } else {
-            return false
-        }
-    },
-    Del: async (params) => {
-        //     "TemplateBangDiemID": "Int32",
-        const res = await apiUtil.TemplateBangDiem('Del', params)
-        if (res?.data) {
-            return true
-        } else {
-            return false
-        }
-    },
-}
+// //Page cấu hình mẫu bảng điểm
+// const TemplateBangDiem_Service = {
+//     //TemplateBangDiemID (0: Lấy tất cả)
+//     Get: (params) => apiUtil.TemplateBangDiem(EnumMethod.GET, params),
+//     //"TemplateBangDiemName": "String"
+//     Ins: async (params) => apiUtil.TemplateBangDiem(EnumMethod.INSERT, params),
+//     // "TemplateBangDiemID": "Int32",
+//     // "TemplateBangDiemName": "String"
+//     Upd: async (params) => apiUtil.TemplateBangDiem(EnumMethod.UPDATE, params),
+//     // "TemplateBangDiemID": "Int32",
+//     Del: async (params) => apiUtil.TemplateBangDiem(EnumMethod.DELETE, params)
+// }
 
-const TemplateBangDiemChiTiet_Service = {
-    Del: async (params) => {
-        //   "CotDiemID": "Int32",
-        //   "TemplateBangDiemID": "Int32"
-        const res = await apiUtil.TemplateBangDiemChiTiet('Del', params)
-        if (res?.data) {
-            return true
-        } else {
-            return false
-        }
-    },
-    Get_ById: async (params) => {
-        //TemplateBangDiemID : Int32
-        const res = await apiUtil.TemplateBangDiemChiTiet('Get_ById', params)
-        if (res?.data) {
-            return res.data
-        } else {
-            return []
-        }
-    },
-    Upd: async (params) => {
-        //         "CotDiemID": "Int32",
-        //   "TemplateBangDiemID": "Int32",
-        //   "IDHeThong": "String",
-        //   "MaCotDiem": "String",
-        //   "TenCotDiem_VI": "String",
-        //   "TenCotDiem_EN": "String",
-        //   "TenHienThi_VI": "String",
-        //   "TenHienThi_EN": "String",
-        //   "MotaCotDiem_VI": "String",
-        //   "MotaCotDiem_EN": "String",
-        //   "LoaiCotDiem": "String",
-        //   "KieuDanhGiaID": "Byte",
-        //   "GiaTriCotDiem": "AnsiString",
-        //   "LamTronBaoNhieuSo": "Byte",
-        //   "Formula": "String",
-        //   "ThuTuCotDiem": "Byte",
-        //   "MaNhomCotDiem": "String",
-        //   "TenNhomCotDiem_VI": "String",
-        //   "TenNhomCotDiem_EN": "String",
-        //   "ThuTuNhom": "Byte",
-        //   "IsUserInput": "Boolean",
-        //   "IsVisibleToParents": "Boolean",
-        //   "IsSendToManager": "Boolean"
-        const res = await apiUtil.TemplateBangDiemChiTiet('Upd', params)
-        if (res?.data) {
-            return true
-        } else {
-            return false
-        }
-    },
-    Ins: async (params) => {
-        //   "TemplateBangDiemID": "Int32",
-        // JsonData: {
-        //     IDHeThong NVARCHAR(50),
-        //     MaCotDiem NVARCHAR(50),
-        //     TenCotDiem_VI NVARCHAR(200),
-        //     TenCotDiem_EN NVARCHAR(200),
-        //     TenHienThi_VI NVARCHAR(200),
-        //     TenHienThi_EN NVARCHAR(200),
-        //     MotaCotDiem_VI NVARCHAR(200),
-        //     MotaCotDiem_EN NVARCHAR(200),
-        //     LoaiCotDiem NVARCHAR(50),
-        //     KieuDanhGiaID TINYINT,
-        //     GiaTriCotDiem VARCHAR(50),
-        //     LamTronBaoNhieuSo TINYINT,
-        //     Formula NVARCHAR(255),
-        //     ThuTuCotDiem TINYINT,
-        //     MaNhomCotDiem NVARCHAR(50),
-        //     TenNhomCotDiem_VI NVARCHAR(500),
-        //     TenNhomCotDiem_EN NVARCHAR(500),
-        //     ThuTuNhom TINYINT,
-        //     IsUserInput BIT,
-        //     IsVisibleToParents BIT,
-        //     IsSendToManager BIT
-        // }
-        const res = await apiUtil.TemplateBangDiemChiTiet('Ins', params)
-        if (res?.data) {
-            return true
-        } else {
-            return false
-        }
-    },
-    Copy: async (params) => {
-        // @TemplateBangDiemID_Src INT,
-        // @TemplateBangDiemID_Des INT,
-        const res = await apiUtil.TemplateBangDiemChiTiet('Copy', params)
-        if (res?.data) {
-            return true
-        } else {
-            return false
-        }
-    },
-}
+// const TemplateBangDiemChiTiet_Service = {
+//     Del: async (params) => {
+//         //   "CotDiemID": "Int32",
+//         //   "TemplateBangDiemID": "Int32"
+//         const res = await apiUtil.TemplateBangDiemChiTiet('Del', params)
+//         if (res?.data) {
+//             return true
+//         } else {
+//             return false
+//         }
+//     },
+//     Get_ById: async (params) => {
+//         //TemplateBangDiemID : Int32
+//         const res = await apiUtil.TemplateBangDiemChiTiet('Get_ById', params)
+//         if (res?.data) {
+//             return res.data
+//         } else {
+//             return []
+//         }
+//     },
+//     Upd: async (params) => {
+//         //         "CotDiemID": "Int32",
+//         //   "TemplateBangDiemID": "Int32",
+//         //   "IDHeThong": "String",
+//         //   "MaCotDiem": "String",
+//         //   "TenCotDiem_VI": "String",
+//         //   "TenCotDiem_EN": "String",
+//         //   "TenHienThi_VI": "String",
+//         //   "TenHienThi_EN": "String",
+//         //   "MotaCotDiem_VI": "String",
+//         //   "MotaCotDiem_EN": "String",
+//         //   "LoaiCotDiem": "String",
+//         //   "KieuDanhGiaID": "Byte",
+//         //   "GiaTriCotDiem": "AnsiString",
+//         //   "LamTronBaoNhieuSo": "Byte",
+//         //   "Formula": "String",
+//         //   "ThuTuCotDiem": "Byte",
+//         //   "MaNhomCotDiem": "String",
+//         //   "TenNhomCotDiem_VI": "String",
+//         //   "TenNhomCotDiem_EN": "String",
+//         //   "ThuTuNhom": "Byte",
+//         //   "IsUserInput": "Boolean",
+//         //   "IsVisibleToParents": "Boolean",
+//         //   "IsSendToManager": "Boolean"
+//         const res = await apiUtil.TemplateBangDiemChiTiet('Upd', params)
+//         if (res?.data) {
+//             return true
+//         } else {
+//             return false
+//         }
+//     },
+//     Ins: async (params) => {
+//         //   "TemplateBangDiemID": "Int32",
+//         // JsonData: {
+//         //     IDHeThong NVARCHAR(50),
+//         //     MaCotDiem NVARCHAR(50),
+//         //     TenCotDiem_VI NVARCHAR(200),
+//         //     TenCotDiem_EN NVARCHAR(200),
+//         //     TenHienThi_VI NVARCHAR(200),
+//         //     TenHienThi_EN NVARCHAR(200),
+//         //     MotaCotDiem_VI NVARCHAR(200),
+//         //     MotaCotDiem_EN NVARCHAR(200),
+//         //     LoaiCotDiem NVARCHAR(50),
+//         //     KieuDanhGiaID TINYINT,
+//         //     GiaTriCotDiem VARCHAR(50),
+//         //     LamTronBaoNhieuSo TINYINT,
+//         //     Formula NVARCHAR(255),
+//         //     ThuTuCotDiem TINYINT,
+//         //     MaNhomCotDiem NVARCHAR(50),
+//         //     TenNhomCotDiem_VI NVARCHAR(500),
+//         //     TenNhomCotDiem_EN NVARCHAR(500),
+//         //     ThuTuNhom TINYINT,
+//         //     IsUserInput BIT,
+//         //     IsVisibleToParents BIT,
+//         //     IsSendToManager BIT
+//         // }
+//         const res = await apiUtil.TemplateBangDiemChiTiet('Ins', params)
+//         if (res?.data) {
+//             return true
+//         } else {
+//             return false
+//         }
+//     },
+//     Copy: async (params) => {
+//         // @TemplateBangDiemID_Src INT,
+//         // @TemplateBangDiemID_Des INT,
+//         const res = await apiUtil.TemplateBangDiemChiTiet('Copy', params)
+//         if (res?.data) {
+//             return true
+//         } else {
+//             return false
+//         }
+//     },
+// }
 
 const NhapDiem_Service = {
     Lop_Get_ByKhoiID: async (params) => {

@@ -124,9 +124,9 @@ export default {
             this.$emit('update:dataSource', this.jExcelObj.getJson())
         },
         onselection(instance, x1, y1, x2, y2, origin) {
-            console.log(this.jExcelObj.getValueFromCoords(x1, y1))
-            let cellName = jexcel.getColumnNameFromId([x1, y1])
-            console.log(this.jExcelObj.getCell(cellName).innerHTML)
+            // console.log(this.jExcelObj.getValueFromCoords(x1, y1))
+            // let cellName = jexcel.getColumnNameFromId([x1, y1])
+            // console.log(this.jExcelObj.getCell(cellName).innerHTML)
         },
         onblur() {
 
