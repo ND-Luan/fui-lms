@@ -130,32 +130,43 @@ export default {
     methods: {
         async loadDSLop() {
             if (this.KhoiID > 0) {
-                this.DSLop = await NhapDiem_Service.Lop_Get_ByKhoiID({
+                const response = await lopService.GetByKhoiID({
                     KhoiID: this.KhoiID,
                 })
+                if (response.IsSuccess) {
+                    this.DSLop = response.Result
+
+                }
             }
         },
         async loadDSHocSinh() {
             if (this.LopID > 0) {
-                this.DSHocSinh = await NhapDiem_Service.HocSinhLop_Get_ByLopID({
+                const response = await hocSinhLopService.GetByLopID({
                     LopID: this.LopID,
                 })
+                if (response.IsSuccess) {
+                    this.DSHocSinh = response.Result
+                }
             }
         },
         async loadDSMonHoc() {
             if (this.LopID > 0) {
-                this.DSMonHoc = await NhapDiem_Service.MonHoc_Get_ByLopID({
+                const response = await monHocService.GetByLopID({
                     LopID: this.LopID,
                 })
+                if (response.IsSuccess) {
+                    this.DSMonHoc = response.Result
+                }
             }
         },
         async loadDSNhomDiem(TemplateBangDiemID) {
             this.TemplateBangDiemID = TemplateBangDiemID
             if (TemplateBangDiemID > 0) {
-                const data = await NhapDiem_Service.NhomCauTrucDiem_Get_ByTemplateBangDiemID({
+                const response = await NhapDiem_Service.NhomCauTrucDiemGetByTemplateBangDiemID({
                     TemplateBangDiemID: this.TemplateBangDiemID,
                 })
-                if (data.length > 0) {
+                let data = response.Result
+                if (response.IsSuccess) {
                     const mapArr = data.map((x) => {
                         let obj = {
                             CssClass: x.CssClass,
@@ -169,17 +180,19 @@ export default {
                     })
                     this.DSNhomDiem = [...new Set(mapArr)]
                 }
+
             }
         },
         async loadDSCotDiem() {
             if (this.MaNhomCotDiem !== '' || this.MaNhomCotDiem !== null) {
-                const data = await NhapDiem_Service.HocSinhBangDiem_Get_ByMonHocID_MaNhom({
+                const response = await NhapDiem_Service.HocSinhBangDiemGetByMonHocIDMaNhom({
                     LopID: this.LopID,
                     MonHocID: this.MonHocID,
                     TemplateBangDiemID: this.TemplateBangDiemID,
                     MaNhomCotDiem: this.MaNhomCotDiem,
                 })
-                if (data.length > 0) {
+                let data = response.Result
+                if (response.IsSuccess) {
                     let SLCotDiem_OfFirstSTD = data.filter((item) => item.HocSinhID === data[0].HocSinhID) // lấy ra các cột điểm của học sinh đầu tiên
                     this.DSCotDiem_ByMaNhomCotDiem = SLCotDiem_OfFirstSTD
                     //Xử lý động cột điểm header jexcel
@@ -347,8 +360,8 @@ export default {
                 TemplateBangDiemID: this.TemplateBangDiemID,
                 KetQuaObjArr: JSON.stringify(dataBeforeInsertToDB),
             }
-            const res = await NhapDiem_Service.KQHT_MonHocLop_Ins(params)
-            if (res) {
+            const { IsSuccess } = await NhapDiem_Service.KQHTMonHocLopIns(params)
+            if (IsSuccess) {
                 Toast.success({ text: 'Nhập điểm thành công!' })
                 this.loadDSCotDiem()
             }

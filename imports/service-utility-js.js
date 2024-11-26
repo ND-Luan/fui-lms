@@ -391,124 +391,124 @@ const apiUtil = {
 //     },
 // }
 
-const NhapDiem_Service = {
-    Lop_Get_ByKhoiID: async (params) => {
-        //"KhoiID":"Int32"
-        const res = await apiUtil.NhapDiem('Lop_Get_ByKhoiID', params)
-        if (res?.data) {
-            return res.data
-        } else {
-            return []
-        }
-    },
-    HocSinhLop_Get_ByLopID: async (params) => {
-        //"LopID":"Int32"
-        const res = await apiUtil.NhapDiem('HocSinhLop_Get_ByLopID', params)
-        if (res?.data) {
-            return res.data
-        } else {
-            return []
-        }
-    },
-    HocSinhLop_Get: async (params) => {
-        //"LopID":"Int32"
-        const res = await apiUtil.NhapDiem('HocSinhLop_Get', params)
-        if (res?.data) {
-            return res.data
-        } else {
-            return []
-        }
-    },
-    MonHoc_Get_ByLopID: async (params) => {
-        //"LopID":"Int32"
-        const res = await apiUtil.NhapDiem('MonHoc_Get_ByLopID', params)
-        if (res?.data) {
-            return res.data
-        } else {
-            return []
-        }
-    },
-    MonHoc_Get: async (params) => {
-        // CapID: int
-        const res = await apiUtil.NhapDiem('MonHoc_Get', params)
-        if (res?.data) {
-            return res.data
-        } else {
-            return []
-        }
-    },
-    MonHoc_Get_ByCapID: async (params) => {
-        // CapID INT
-        const res = await apiUtil.NhapDiem('MonHoc_Get_ByCapID', params)
-        if (res?.data) {
-            return res.data
-        } else {
-            return []
-        }
-    },
-    NhomCauTrucDiem_Get_ByTemplateBangDiemID: async (params) => {
-        //"TemplateBangDiemID":"Int32"
-        const res = await apiUtil.NhapDiem('NhomCauTrucDiem_Get_ByTemplateBangDiemID', params)
-        if (res?.data) {
-            return res.data
-        } else {
-            return []
-        }
-    },
+// const NhapDiem_Service = {
+//     Lop_Get_ByKhoiID: async (params) => {
+//         //"KhoiID":"Int32"
+//         const res = await apiUtil.NhapDiem('Lop_Get_ByKhoiID', params)
+//         if (res?.data) {
+//             return res.data
+//         } else {
+//             return []
+//         }
+//     },
+//     HocSinhLop_Get_ByLopID: async (params) => {
+//         //"LopID":"Int32"
+//         const res = await apiUtil.NhapDiem('HocSinhLop_Get_ByLopID', params)
+//         if (res?.data) {
+//             return res.data
+//         } else {
+//             return []
+//         }
+//     },
+//     HocSinhLop_Get: async (params) => {
+//         //"LopID":"Int32"
+//         const res = await apiUtil.NhapDiem('HocSinhLop_Get', params)
+//         if (res?.data) {
+//             return res.data
+//         } else {
+//             return []
+//         }
+//     },
+//     MonHoc_Get_ByLopID: async (params) => {
+//         //"LopID":"Int32"
+//         const res = await apiUtil.NhapDiem('MonHoc_Get_ByLopID', params)
+//         if (res?.data) {
+//             return res.data
+//         } else {
+//             return []
+//         }
+//     },
+//     MonHoc_Get: async (params) => {
+//         // CapID: int
+//         const res = await apiUtil.NhapDiem('MonHoc_Get', params)
+//         if (res?.data) {
+//             return res.data
+//         } else {
+//             return []
+//         }
+//     },
+//     MonHoc_Get_ByCapID: async (params) => {
+//         // CapID INT
+//         const res = await apiUtil.NhapDiem('MonHoc_Get_ByCapID', params)
+//         if (res?.data) {
+//             return res.data
+//         } else {
+//             return []
+//         }
+//     },
+//     NhomCauTrucDiem_Get_ByTemplateBangDiemID: async (params) => {
+//         //"TemplateBangDiemID":"Int32"
+//         const res = await apiUtil.NhapDiem('NhomCauTrucDiem_Get_ByTemplateBangDiemID', params)
+//         if (res?.data) {
+//             return res.data
+//         } else {
+//             return []
+//         }
+//     },
 
-    HocSinhBangDiem_Get_ByMonHocID_MaNhom: async (params) => {
-        // @LopID INT,
-        // @MonHocID INT,
-        // @TemplateBangDiemID INT,
-        // @MaNhomCotDiem NVARCHAR(100),
-        const res = await apiUtil.NhapDiem('HocSinhBangDiem_Get_ByMonHocID_MaNhom', params)
-        if (res?.data) {
-            return res.data
-        } else {
-            return []
-        }
-    },
-    KQHT_MonHocLop_Ins: async (params) => {
-        // @MonHocLopID INT,
-        // @LopID INT,
-        // @MonHocID INT,
-        // @TemplateBangDiemID INT,
-        // @KetQuaObjArr NVARCHAR(MAX),
-        const res = await apiUtil.NhapDiem('KQHT_MonHocLop_Ins', params)
-        if (res?.data) {
-            return true
-        } else {
-            return false
-        }
-    },
-    IO_IN_HocSinh_Ins: async (params) => {
-        // @HocSinhObjArr Object Jason,
-        const res = await apiUtil.NhapDiem('IO_IN_HocSinh_Ins', params)
-        if (res?.data) {
-            return true
-        } else {
-            return false
-        }
-    },
-    IO_IN_HocSinhLop_Ins: async (params) => {
-        // @HocSinhLopObjArr Object Jason,
-        const res = await apiUtil.NhapDiem('IO_IN_HocSinhLop_Ins', params)
-        if (res?.data) {
-            return true
-        } else {
-            return false
-        }
-    },
-    Lop_Get_ByNienKhoa: async (params) => {
-        // @NienKhoa INT,
-        const res = await apiUtil.NhapDiem('Lop_Get_ByNienKhoa', params)
-        if (res?.data) {
-            return res.data
-        } else {
-            return []
-        }
-    },
-}
+//     HocSinhBangDiem_Get_ByMonHocID_MaNhom: async (params) => {
+//         // @LopID INT,
+//         // @MonHocID INT,
+//         // @TemplateBangDiemID INT,
+//         // @MaNhomCotDiem NVARCHAR(100),
+//         const res = await apiUtil.NhapDiem('HocSinhBangDiem_Get_ByMonHocID_MaNhom', params)
+//         if (res?.data) {
+//             return res.data
+//         } else {
+//             return []
+//         }
+//     },
+//     KQHT_MonHocLop_Ins: async (params) => {
+//         // @MonHocLopID INT,
+//         // @LopID INT,
+//         // @MonHocID INT,
+//         // @TemplateBangDiemID INT,
+//         // @KetQuaObjArr NVARCHAR(MAX),
+//         const res = await apiUtil.NhapDiem('KQHT_MonHocLop_Ins', params)
+//         if (res?.data) {
+//             return true
+//         } else {
+//             return false
+//         }
+//     },
+//     IO_IN_HocSinh_Ins: async (params) => {
+//         // @HocSinhObjArr Object Jason,
+//         const res = await apiUtil.NhapDiem('IO_IN_HocSinh_Ins', params)
+//         if (res?.data) {
+//             return true
+//         } else {
+//             return false
+//         }
+//     },
+//     IO_IN_HocSinhLop_Ins: async (params) => {
+//         // @HocSinhLopObjArr Object Jason,
+//         const res = await apiUtil.NhapDiem('IO_IN_HocSinhLop_Ins', params)
+//         if (res?.data) {
+//             return true
+//         } else {
+//             return false
+//         }
+//     },
+//     Lop_Get_ByNienKhoa: async (params) => {
+//         // @NienKhoa INT,
+//         const res = await apiUtil.NhapDiem('Lop_Get_ByNienKhoa', params)
+//         if (res?.data) {
+//             return res.data
+//         } else {
+//             return []
+//         }
+//     },
+// }
 
 const GiaoVien_Service = {
     GiaoVien_Get: async () => {
