@@ -160,6 +160,51 @@ function getColorChipGiaTriCotDiem(value) {
     return colorChip
 }
 
+function getColorTinhTrangDiem(TinhTrang) {
+    let color = ''
+    if (TinhTrang === 0) color = ''
+    if (TinhTrang === 1) color = 'primary'
+    if (TinhTrang === 2) color = 'warning'
+    if (TinhTrang === 3) color = 'error'
+    if (TinhTrang === 4) color = 'success'
+    return color
+}
+
+function getTextTinhTrangDiem(TinhTrang) {
+    let text = ''
+    if (TinhTrang === 0) text = 'Chưa gửi điểm'
+    if (TinhTrang === 1) text = 'Đã gửi điểm'
+    if (TinhTrang === 2) text = 'Đã duyệt điểm'
+    if (TinhTrang === 3) text = 'Từ chối'
+    if (TinhTrang === 4) text = 'Đã công bố điểm cho phụ huynh'
+    return text
+}
+
+function fn_IsDisabledTinhTrangDiem(TinhTrang, type) {
+    const arrStatusGV = [0, 1, 2, 3, 4]
+    const obj = {
+        color: getColorTinhTrangDiem(TinhTrang),
+        isDisabled: false,
+        text: getTextTinhTrangDiem(TinhTrang)
+    }
+    if (type === 'GV') {
+        if (arrStatusGV.indexOf(TinhTrang) >= 0) {
+            if (TinhTrang == 0 || TinhTrang == 3) {
+                obj.isDisabled = false
+            } else {
+                obj.isDisabled = true
+            }
+        }
+    } else {
+        if (TinhTrang == 1) {
+            obj.isDisabled = false
+        } else {
+            obj.isDisabled = true
+        }
+    }
+    return obj
+}
+
 // Tính chiều rộng dựa trên số lượng ký tự
 function calculateColumnWidth(text) {
     const charWidth = 15; // Kích thước trung bình mỗi ký tự

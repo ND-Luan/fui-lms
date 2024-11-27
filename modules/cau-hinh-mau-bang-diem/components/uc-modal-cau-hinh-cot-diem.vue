@@ -274,12 +274,12 @@ export default {
 		async loadDSCotDiem() {
 			const $this = this
 			$this.isLoadingTB = true
-			const res = await TemplateBangDiemChiTiet_Service.Get_ById({
+			const response = await TemplateBangDiemChiTiet_Service.Get_ById({
 				TemplateBangDiemID: $this.recordMauBangDiem.TemplateBangDiemID
 			}).finally(() => $this.isLoadingTB = false)
-			if (res) {
+			if (response.IsSuccess) {
 				//Lấy các nhóm cột điểm
-				let groupNhom = res.reduce((rs, item, index) => {
+				let groupNhom = response.Result.reduce((rs, item, index) => {
 					if (!rs[item.TenNhomCotDiem_VI]) {
 						rs[item.TenNhomCotDiem_VI] = item.TenNhomCotDiem_VI
 					}
@@ -290,7 +290,7 @@ export default {
 				for (let i in groupNhom) {
 					//Tạo obj để render lên table
 					let obj = {}
-					let items = res.filter(item => item.TenNhomCotDiem_VI === i) // filter lấy các cột điểm có cùng mã nhóm
+					let items = response.Result.filter(item => item.TenNhomCotDiem_VI === i) // filter lấy các cột điểm có cùng mã nhóm
 					obj.ThuTuCotDiem = items
 					obj.MaCotDiem = items
 					obj.TenCotDiem = items

@@ -3,7 +3,7 @@
         <v-dialog v-model="isOpen" max-width="1400">
             <v-card>
                 <template #title>
-                    <div class="d-flex justify-space-between">
+                    <div class="d-flex justify-space-between w-100">
                         Cập nhật nhóm cột điểm {{ recordNhomCotDiem_Obj.TenNhomCotDiem_VI }}
                         <v-icon @click="onHandleCloseModal()">mdi-close</v-icon>
                     </div>
@@ -127,7 +127,7 @@
                     </v-row>
                     <v-card flat class="mt-3">
                         <template #title>
-                            <div class="d-flex justify-space-between align-center">
+                            <div class="d-flex justify-space-between align-center w-100">
                                 <span>Các cột điểm</span>
                                 <v-btn color="success" @click="onHandleAddCotDiem()"><v-icon> mdi-plus</v-icon>Thêm cột
                                     điểm</v-btn>
@@ -179,7 +179,7 @@
         <v-dialog v-model="isShowModalAddCotDiem" max-width="400px">
             <v-card>
                 <template #title>
-                    <div class="d-flex justify-space-between">
+                    <div class="d-flex justify-space-between w-100">
                         Thêm cột điểm
                         <v-icon @click="onHandleCloseModalAddCotDiem()">mdi-close</v-icon>
                     </div>
@@ -230,22 +230,30 @@
         <v-dialog v-model="isShowModalEditCotDiem" max-width="800px">
             <v-card>
                 <template #title>
-                    <div class="d-flex justify-space-between">
+                    <div class="d-flex justify-space-between w-100">
                         Cập nhật cột điểm {{ titleEditCotDiem }}
                         <v-icon @click="onHandleCloseModalEditCotDiem()">mdi-close</v-icon>
                     </div>
                 </template>
                 <v-card-text>
                     <v-row>
-                        <v-col cols="2">
+                        <v-col cols="3">
+                            <v-text-field label="Thứ tự CĐ" v-model="recordCotDiem.ThuTuCotDiem"
+                                :rules="rules.ThuTuCotDDiem" density="compact">
+                            </v-text-field>
+                        </v-col>
+                        <v-col cols="9">
+
+                        </v-col>
+                        <v-col cols="4">
                             <v-text-field label="Mã CĐ" v-model="recordCotDiem.MaCotDiem"
                                 density="compact"></v-text-field>
                         </v-col>
-                        <v-col cols="5">
+                        <v-col cols="4">
                             <v-text-field label="Tên CĐ (VI)" v-model="recordCotDiem.TenCotDiem_VI"
                                 density="compact"></v-text-field>
                         </v-col>
-                        <v-col cols="5">
+                        <v-col cols="4">
                             <v-text-field label="Tên CĐ (EN)" v-model="recordCotDiem.TenCotDiem_EN"
                                 density="compact"></v-text-field>
                         </v-col>
@@ -387,7 +395,14 @@ export default {
             recordNhomCotDiem_Obj: {},
             soCotDiem: null,
             DSCotDiem: [],
-            titleEditCotDiem: ''
+            titleEditCotDiem: '',
+            rules: {
+                ThuTuCotDiem: [
+                    v => !!v || 'Vui lòng nhập thứ tự cột điểm',
+                ],
+
+            }
+
         }
     },
     mounted() { },
@@ -397,6 +412,7 @@ export default {
     watch: {
         isOpen: function (val) {
             if (val) {
+                console.log('this.recordNhomCotDiem', this.recordNhomCotDiem)
                 let receiveDSCotDiem = _.cloneDeep(this.recordNhomCotDiem)
                 //Lấy ra những thuộc tính không phải là mảng
                 let objNhomCotDiem = Object.entries(receiveDSCotDiem).reduce((result, [key, value]) => {
@@ -405,6 +421,7 @@ export default {
                     }
                     return result
                 }, {})
+                console.log('objNhomCotDiem', objNhomCotDiem)
                 this.recordNhomCotDiem_Obj = _.cloneDeep(objNhomCotDiem)
                 // Đảm bảo số lượng phần tử không vượt quá mảng nhỏ nhất
                 const minLengthOf_receiveDSCotDiem = this.getMinArrayLength(receiveDSCotDiem)
@@ -428,9 +445,8 @@ export default {
             this.$emit('update:isOpen', false)
         },
         async onHandleEdit() {
-            let params = { ...this.formData }
-            const res = await TemplateBangDiemChiTiet_Service.Upd(params)
-            if (res) {
+            const { IsSuccess } = await TemplateBangDiemChiTiet_Service.Upd(params)
+            if (IsSuccess) {
                 Vue.$toast.success('Cập nhật cột điểm thành công!', { position: 'top' })
                 this.$emit('onFinish')
                 this.onHandleCloseModal()
@@ -466,7 +482,7 @@ export default {
                 let obj = {}
                 obj = {
                     ...this.DSCotDiem[0],
-                    ThuTuCotDiem: this.DSCotDiem.length + 1,
+                    ThuTuCotDiem: null,
                     MaCotDiem: '',
                     TenCotDiem_VI: '',
                     TenCotDiem_EN: '',
@@ -485,11 +501,13 @@ export default {
         },
         async onSubmitEditCotDiem() {
             const $this = this
-            const res = await TemplateBangDiemChiTiet_Service.Upd({
-                ...$this.recordCotDiem
+            const { IsSuccess } = await TemplateBangDiemChiTiet_Service.Upd({
+                ...$this.recordCotDiem,
             })
-            if (res) {
+            if (IsSuccess) {
                 $this.onHandleCloseModalEditCotDiem()
+                // $this.onHandleCloseModal()
+                $this.$emit('onFinish')
                 Vue.$toast.success('Cập nhật cột điểm thành công!', { position: 'top' })
             }
         },

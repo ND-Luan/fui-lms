@@ -112,13 +112,6 @@ export default {
         }
     },
     methods: {
-
-        ExportExcel() {
-            this.jExcelObj.download()
-        },
-        onRenameColumn() {
-
-        },
         changed(instance, cell, x, y, value) {
             this.$emit('onChange', { instance, cell, x, y, value })
             this.$emit('update:dataSource', this.jExcelObj.getJson())
@@ -127,9 +120,6 @@ export default {
             // console.log(this.jExcelObj.getValueFromCoords(x1, y1))
             // let cellName = jexcel.getColumnNameFromId([x1, y1])
             // console.log(this.jExcelObj.getCell(cellName).innerHTML)
-        },
-        onblur() {
-
         },
         onload() {
             // this.$nextTick(() => {

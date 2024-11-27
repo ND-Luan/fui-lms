@@ -4,15 +4,12 @@
             <v-card-title class="text-primary"> Tìm kiếm </v-card-title>
             <v-card-text>
                 <v-row>
-                    <v-col cols="12" sm="6" md="2">
-                        <v-autocomplete label="Học kỳ" :items="['Học kỳ I', 'Học kỳ II', 'Cuối kỳ']"> </v-autocomplete>
-                    </v-col>
-                    <v-col cols="12" sm="6" md="2">
+                    <v-col cols="12" sm="6" md="3">
                         <v-autocomplete v-model="KhoiID" label="Khối" :items="DSKhoi" item-title="text"
                             item-value="value">
                         </v-autocomplete>
                     </v-col>
-                    <v-col cols="12" sm="6" md="2">
+                    <v-col cols="12" sm="6" md="3">
                         <v-autocomplete v-model="LopID" label="Lớp" :items="DSLop" item-title="TenLop"
                             item-value="LopID" :disabled="KhoiID === null">
                         </v-autocomplete>
@@ -33,16 +30,28 @@
         </v-card>
         <v-card class="mt-4">
             <v-card-title class="text-primary">
-                Nhập điểm
+                Xem điểm
+                <v-chip :color="fn_IsDisabledTinhTrangDiem(DSHocSinh[0]?.TinhTrang, 'GV').color" class="ms-3"
+                    v-if="DSHocSinh.length > 0">
+                    {{ fn_IsDisabledTinhTrangDiem(DSHocSinh[0]?.TinhTrang, 'GV').text }}
+                </v-chip>
                 <v-spacer></v-spacer>
                 <div>
-                    <v-btn color="success" @click="onHandleSubmit()" :disabled="!dataSource.length > 0"> Lưu
-                        điểm</v-btn>
-                    <v-btn icon="mdi-microsoft-excel" color="success" variant="text"
-                        @click="exportExcel = true"></v-btn>
+                    <v-btn icon="mdi-microsoft-excel" color="success" variant="text" @click="instance.download()"
+                        :disabled="!dataSource.length > 0">
+                    </v-btn>
+                    <v-btn color="error"
+                        :disabled="!dataSource.length > 0 || fn_IsDisabledTinhTrangDiem(DSHocSinh[0]?.TinhTrang, 'TT').isDisabled"
+                        @click="onHandleSendTinhTrang(3)">
+                        Từ chối
+                    </v-btn>
+                    <v-btn color="success"
+                        :disabled="!dataSource.length > 0 || fn_IsDisabledTinhTrangDiem(DSHocSinh[0]?.TinhTrang, 'TT').isDisabled"
+                        @click="onHandleSendTinhTrang(2)">
+                        Duyệt
+                    </v-btn>
                 </div>
             </v-card-title>
-            <!-- @onChange="onChange" -->
             <uc-jexcel v-if="dataSource.length > 0" v-model="instance" :freezeColumns="2"
                 v-model:dataSource="dataSource" :columns="colHeaders" :exportExcel="exportExcel" :isSubmit="isSubmit"
                 :updateTable="updateTable" :key="keyComp" styleExcel="height: calc(100vh - 252px)">
@@ -74,7 +83,6 @@ export default {
             DSKhoi: DSKhoi,
             DSLop: [],
             DSMonHoc: [],
-            DSHocSinh: [],
             DSNhomDiem: [],
             DSCotDiem: [],
             DSCotDiem_ByMaNhomCotDiem: [],
@@ -84,6 +92,7 @@ export default {
             TemplateBangDiemID: null,
             MaNhomCotDiem: null,
             MonHocLopID: null,
+            DSHocSinh: []
         }
     },
     mounted() { },
@@ -106,7 +115,6 @@ export default {
             if (val) {
                 this.dataSource = []
                 this.MonHocID = null
-                this.loadDSHocSinh()
                 this.loadDSMonHoc()
             }
         },
@@ -139,16 +147,6 @@ export default {
                 }
             }
         },
-        async loadDSHocSinh() {
-            if (this.LopID > 0) {
-                const response = await hocSinhLopService.GetByLopID({
-                    LopID: this.LopID,
-                })
-                if (response.IsSuccess) {
-                    this.DSHocSinh = response.Result
-                }
-            }
-        },
         async loadDSMonHoc() {
             if (this.LopID > 0) {
                 const response = await monHocService.GetByLopID({
@@ -168,7 +166,7 @@ export default {
                 let data = response.Result
                 if (response.IsSuccess) {
                     const mapArr = data.map((x) => {
-                        let obj = {
+                        return {
                             CssClass: x.CssClass,
                             MaNhomCotDiem: x.MaNhomCotDiem,
                             Semester: x.Semester,
@@ -176,7 +174,6 @@ export default {
                             TenNhomCotDiem_VI: x.TenNhomCotDiem_VI,
                             ThuTuNhom: x.ThuTuNhom,
                         }
-                        return obj
                     })
                     this.DSNhomDiem = [...new Set(mapArr)]
                 }
@@ -192,102 +189,114 @@ export default {
                     MaNhomCotDiem: this.MaNhomCotDiem,
                 })
                 let data = response.Result
-                if (response.IsSuccess) {
-                    let SLCotDiem_OfFirstSTD = data.filter((item) => item.HocSinhID === data[0].HocSinhID) // lấy ra các cột điểm của học sinh đầu tiên
-                    this.DSCotDiem_ByMaNhomCotDiem = SLCotDiem_OfFirstSTD
-                    //Xử lý động cột điểm header jexcel
-                    let columnsCotDiem = SLCotDiem_OfFirstSTD
-                        .map((x) => {
-                            if (x.GiaTriCotDiem === 'number') { // cấu hình header cột điểm có dạng number
-                                let column = {
-                                    type: 'numeric',
-                                    title: x.TenCotDiem_VI,
-                                    name: x.MaCotDiem,
-                                    typeValue: x.GiaTriCotDiem,
-                                    width: 80,
-                                    decimal: '.',
-                                    mask: '0.00',
-                                    backGroundColor: x.HexBackground,
-                                    wrapText: true,
-                                    readOnly: x.LoaiCotDiem === 'Công thức' ? true : false,
-                                }
-                                return column
-                            } else if (x.GiaTriCotDiem === 'text') { // cấu hình header cột điểm có dạng text
-                                let column = {
-                                    type: 'text',
-                                    title: x.TenCotDiem_VI,
-                                    name: x.MaCotDiem,
-                                    typeValue: x.GiaTriCotDiem,
-                                    width: this.calculateColumnWidth(x.TenCotDiem_VI),
-                                    backGroundColor: x.HexBackground,
-                                    wrap: true,
-                                }
-                                return column
-                            } else if (x.GiaTriCotDiem === 'ICO_Star') { // cấu hình header cột điểm có dạng ICO_Star
-                                let column = {
-                                    type: 'html',
-                                    title: x.TenCotDiem_VI,
-                                    name: x.MaCotDiem,
-                                    width: 120,
-                                    typeValue: x.GiaTriCotDiem,
-                                    backGroundColor: x.HexBackground,
-                                    wrap: true,
-                                    align: 'center',
-                                    readOnly: x.LoaiCotDiem === 'Công thức' ? true : false,
-                                }
-                                return column
-                            }
-                        })
-                    let columnThongTinHocSinh = [
-                        {
-                            type: 'text',
-                            title: 'Mã học sinh',
-                            name: 'HocSinhID',
-                            width: 120,
-                            backGroundColor: null,
-                            wrap: true,
-                        },
-                        {
-                            type: 'text',
-                            title: 'Họ tên học sinh',
-                            name: 'HoVaTenHocSinh',
-                            width: 300,
-                            backGroundColor: null,
-                            wrap: true,
-                        },
-                    ]
-                    this.colHeaders = [...columnThongTinHocSinh, ...columnsCotDiem]
-                    //Xử lý data jexcel
-                    const HocSinhIDList = data.map((x) => x.HocSinhID)  // lấy danh sách mã học sinh
-                    const uniqueHocSinhID = [...new Set(HocSinhIDList)] //Lấy danh sách mã học sinh phân biệt
-                    const dataJexcel = []
-                    let indexRow = 1
-                    for (var hocSinhID of uniqueHocSinhID) {
-                        const arrCotDiemExist = data.filter((x) => x.HocSinhID === hocSinhID) // Lấy danh sách điểm của học sinh
-                        if (arrCotDiemExist.length === 0) return
-                        let obj = {
-                            HocSinhID: arrCotDiemExist[0].HocSinhID,
-                            HoVaTenHocSinh: arrCotDiemExist[0].Ho + ' ' + arrCotDiemExist[0].Ten,
-                        }
-                        for (var cotDiemExist of arrCotDiemExist) {
-                            if (cotDiemExist.LoaiCotDiem !== 'Công thức') {
-                                obj[cotDiemExist.MaCotDiem] = cotDiemExist.GiaTriCotDiem === 'number' ? (cotDiemExist.KetQuaDanhGia_VI === '' || cotDiemExist.KetQuaDanhGia_VI === null ? null : parseFloat(cotDiemExist.KetQuaDanhGia_VI)) : cotDiemExist.KetQuaDanhGia_VI
-                            } else if (cotDiemExist.LoaiCotDiem == 'Công thức' && cotDiemExist.GiaTriCotDiem === 'number') {
-                                obj[cotDiemExist.MaCotDiem] = '=' + replaceFormula(columnsCotDiem, cotDiemExist.Formula, indexRow)
-                            } else if (cotDiemExist.LoaiCotDiem == 'Công thức' && cotDiemExist.GiaTriCotDiem === 'ICO_Star') {
-                                obj[cotDiemExist.MaCotDiem] = `=RATING(${replaceFormula(columnsCotDiem, cotDiemExist.Formula, indexRow)})`
-                            }
-                        }
-                        indexRow++
-                        dataJexcel.push(obj)
+                this.DSHocSinh = [...new Set(response.Result.map(x => x.HocSinhID))].map(x => {
+                    const hs = response.Result.find(y => y.HocSinhID === x)
+                    return {
+                        Ho: hs.Ho,
+                        HocSinhID: hs.HocSinhID,
+                        NgaySinh: hs.NgaySinh,
+                        Nu: hs.Nu,
+                        SoDanhBo: hs.SoDanhBo,
+                        Ten: hs.Ten,
+                        TinhTrang: hs.TinhTrang,
                     }
-                    console.log('$this.colHeaders', this.colHeaders)
-                    console.log('dataJexcel', dataJexcel)
-                    console.log('dataJexcel', data)
-                    this.dataSource = dataJexcel
-                    this.keyComp++
-                    this.DSCotDiem = data
+                })
+                console.log(' this.DSHocSinh', this.DSHocSinh);
+                if (!response.IsSuccess) return
+                let SLCotDiem_OfFirstSTD = data.filter((item) => item.HocSinhID === data[0].HocSinhID) // lấy ra các cột điểm của học sinh đầu tiên
+                this.DSCotDiem_ByMaNhomCotDiem = SLCotDiem_OfFirstSTD
+                //Xử lý động cột điểm header jexcel
+                let columnsCotDiem = SLCotDiem_OfFirstSTD
+                    .map((x) => {
+                        if (x.GiaTriCotDiem === 'number') { // cấu hình header cột điểm có dạng number
+                            let column = {
+                                type: 'numeric',
+                                title: x.TenCotDiem_VI,
+                                name: x.MaCotDiem,
+                                typeValue: x.GiaTriCotDiem,
+                                width: 80,
+                                decimal: '.',
+                                mask: '0.00',
+                                backGroundColor: x.HexBackground,
+                                wrapText: true,
+                                readOnly: true
+                            }
+                            return column
+                        } else if (x.GiaTriCotDiem === 'text') { // cấu hình header cột điểm có dạng text
+                            let column = {
+                                type: 'text',
+                                title: x.TenCotDiem_VI,
+                                name: x.MaCotDiem,
+                                typeValue: x.GiaTriCotDiem,
+                                width: this.calculateColumnWidth(x.TenCotDiem_VI),
+                                backGroundColor: x.HexBackground,
+                                wrap: true,
+                                readOnly: true
+                            }
+                            return column
+                        } else if (x.GiaTriCotDiem === 'ICO_Star') { // cấu hình header cột điểm có dạng ICO_Star
+                            let column = {
+                                type: 'html',
+                                title: x.TenCotDiem_VI,
+                                name: x.MaCotDiem,
+                                width: 120,
+                                typeValue: x.GiaTriCotDiem,
+                                backGroundColor: x.HexBackground,
+                                wrap: true,
+                                align: 'center',
+                                readOnly: true
+                            }
+                            return column
+                        }
+                    })
+                let columnThongTinHocSinh = [
+                    {
+                        type: 'text',
+                        title: 'Mã học sinh',
+                        name: 'HocSinhID',
+                        width: 120,
+                        backGroundColor: null,
+                        wrap: true,
+                    },
+                    {
+                        type: 'text',
+                        title: 'Họ tên học sinh',
+                        name: 'HoVaTenHocSinh',
+                        width: 300,
+                        backGroundColor: null,
+                        wrap: true,
+                    },
+                ]
+                this.colHeaders = [...columnThongTinHocSinh, ...columnsCotDiem]
+                //Xử lý data jexcel
+                const dataJexcel = []
+                let indexRow = 1
+                for (var hocSinh of this.DSHocSinh) {
+                    const arrCotDiemExist = data.filter((x) => x.HocSinhID === hocSinh.HocSinhID) // Lấy danh sách điểm của học sinh
+                    if (arrCotDiemExist.length === 0) return
+                    let obj = {
+                        HocSinhID: arrCotDiemExist[0].HocSinhID,
+                        HoVaTenHocSinh: arrCotDiemExist[0].Ho + ' ' + arrCotDiemExist[0].Ten,
+                    }
+                    for (var cotDiemExist of arrCotDiemExist) {
+                        if (cotDiemExist.LoaiCotDiem !== 'Công thức') {
+                            obj[cotDiemExist.MaCotDiem] = cotDiemExist.GiaTriCotDiem === 'number' ? (cotDiemExist.KetQuaDanhGia_VI === '' || cotDiemExist.KetQuaDanhGia_VI === null ? null : parseFloat(cotDiemExist.KetQuaDanhGia_VI)) : cotDiemExist.KetQuaDanhGia_VI
+                        } else if (cotDiemExist.LoaiCotDiem == 'Công thức' && cotDiemExist.GiaTriCotDiem === 'number') {
+                            obj[cotDiemExist.MaCotDiem] = '=' + replaceFormula(columnsCotDiem, cotDiemExist.Formula, indexRow)
+                        } else if (cotDiemExist.LoaiCotDiem == 'Công thức' && cotDiemExist.GiaTriCotDiem === 'ICO_Star') {
+                            obj[cotDiemExist.MaCotDiem] = `=RATING(${replaceFormula(columnsCotDiem, cotDiemExist.Formula, indexRow)})`
+                        }
+                    }
+                    indexRow++
+                    dataJexcel.push(obj)
                 }
+                console.log('$this.colHeaders', this.colHeaders)
+                console.log('dataJexcel', dataJexcel)
+                console.log('dataJexcel', data)
+                this.dataSource = dataJexcel
+                console.log('dataSource[0]', this.dataSource[0])
+                this.keyComp++
+                this.DSCotDiem = data
             }
         },
         updateTable(instance, cell, col, row, val, label, cellName) {
@@ -375,6 +384,20 @@ export default {
                 return 0
             }
         },
+        async onHandleSendTinhTrang(TinhTrang) {
+            const { IsSuccess } = await NhapDiem_Service.KQHT_MonHocLop_TinhTrang_Udp({
+                NienKhoa: 2024,
+                MonHocLopID: this.MonHocLopID,
+                LopID: this.LopID,
+                TinhTrang: TinhTrang,
+                MaNhomCotDiem: this.MaNhomCotDiem,
+            })
+            if (IsSuccess) {
+                this.loadDSCotDiem()
+                Toast.success({ text: 'Gửi tổ trưởng thành công!' })
+            }
+        },
+        fn_IsDisabledTinhTrangDiem,
         // Hàm tính width của cột điểm có giá trị dạng text
         calculateColumnWidth,
     },

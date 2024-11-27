@@ -50,8 +50,8 @@ export default {
         },
         async onHandleAdd() {
             let params = { ...this.formData, TemplateBangDiemID_Des: this.recordMauBangDiem.TemplateBangDiemID }
-            const res = await TemplateBangDiemChiTiet_Service.Copy(params)
-            if (res) {
+            const { IsSuccess } = await TemplateBangDiemChiTiet_Service.Copy(params)
+            if (IsSuccess) {
                 Vue.$toast.success('Sao chép cấu trúc thành công!', { position: 'top' })
                 this.$emit('onFinish')
                 this.onHandleCloseModal()

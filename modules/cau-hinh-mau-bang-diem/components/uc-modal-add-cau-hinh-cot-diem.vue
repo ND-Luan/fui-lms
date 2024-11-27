@@ -261,8 +261,8 @@ export default {
         },
         async onHandleAdd() {
             let params = { TemplateBangDiemID: this.recordMauBangDiem.TemplateBangDiemID, JsonData: JSON.stringify(this.formData) }
-            const res = await TemplateBangDiemChiTiet_Service.Ins(params)
-            if (res) {
+            const { IsSuccess } = await TemplateBangDiemChiTiet_Service.Ins(params)
+            if (IsSuccess) {
                 Vue.$toast.success('Thêm cột điểm thành công!', { position: 'top' })
                 this.$emit('onFinish')
                 this.onHandleCloseModal()

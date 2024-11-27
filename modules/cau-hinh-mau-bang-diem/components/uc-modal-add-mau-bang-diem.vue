@@ -55,8 +55,8 @@ export default {
         },
         async onHandleAdd() {
             let params = { ...this.formData }
-            const res = await TemplateBangDiem_Service.Ins(params)
-            if (res) {
+            const { IsSuccess } = await TemplateBangDiem_Service.Ins(params)
+            if (IsSuccess) {
                 Vue.$toast.success('Thêm mẫu bảng điểm thành công!', { position: 'top' })
                 this.$emit('onFinish')
                 this.onHandleCloseModal()

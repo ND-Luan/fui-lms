@@ -7,8 +7,25 @@
 						<v-img alt="John" :src="urlAvatarHocSinh + HocSinhDetail.HocSinhID"></v-img>
 					</v-avatar>
 					<div>
-						<v-btn color="primary" prepend-icon="mdi-account-circle-outline" size="small" variant="text"
-							@click="">Chọn học sinh</v-btn>
+						<v-menu>
+							<template v-slot:activator="{ props }">
+								<v-btn color="primary" prepend-icon="mdi-account-circle-outline" size="small"
+									variant="text" v-bind="props">Chọn học
+									sinh</v-btn>
+							</template>
+							<v-list>
+								<v-list-item v-for="(item, index) in DSHocSinh" :key="index" :value="index"
+									@click="onHandleSelectedSTD(item)" :disabled="item.Khoi <= 0">
+									<v-list-item-title>{{ item.HoTen }}</v-list-item-title>
+									<v-list-item-subtitle>{{ item.TenLop }}</v-list-item-subtitle>
+									<template v-slot:prepend>
+										<v-avatar>
+											<v-img :src="urlAvatarHocSinh + item.StudentID" />
+										</v-avatar>
+									</template>
+								</v-list-item>
+							</v-list>
+						</v-menu>
 					</div>
 				</div>
 				<p class="font-weight-bold text-primary ms-3 mt-2">
@@ -45,7 +62,7 @@
 					<v-icon v-if="userAccount.Sex" color="pink">mdi-gender-female</v-icon>
 					<v-icon v-else color="primary">mdi-gender-male</v-icon>
 				</v-list-item-title>
-				<v-list-item-subtitle>{{userAccount.Phone ?? '-'}}</v-list-item-subtitle>
+				<v-list-item-subtitle>{{ userAccount.Phone ?? '-' }}</v-list-item-subtitle>
 				<template v-slot:prepend>
 					<v-avatar>
 						<v-img :src="urlAvatarPhuHuynh + userAccount.UserID" />
@@ -90,7 +107,7 @@
 						<h2 class="text-primary px-5 mt-3">Các môn học</h2>
 						<v-expansion-panels v-model="arrayExpandValue" rounded multiple variant="popout"
 							v-if="DSMonHoc_ByGroup.length > 0">
-							
+
 							<v-expansion-panel v-for="(item) in DSMonHoc_ByGroup" :key="item.id" class="my-2 shadow-box"
 								selected-class="bg-primary">
 								<v-expansion-panel-title style="border-radius: 0">
@@ -121,7 +138,7 @@
 												<template v-slot:append>
 													<v-chip
 														:color="getColorChipDiem(parseFloat(diem.KetQuaDanhGia_VI))">{{
-														parseFloat(diem.KetQuaDanhGia_VI) }}</v-chip>
+															parseFloat(diem.KetQuaDanhGia_VI) }}</v-chip>
 												</template>
 											</v-list-item>
 										</div>
@@ -148,114 +165,125 @@
 </template>
 
 <script>
-	export default {
-		props: [],
-		data() {
-			return {
-				urlAvatarHocSinh: vueData.v_Set.urlAvatarHocSinh,
-				urlAvatarPhuHuynh: vueData.v_Set.urlAvatarPhuHuynh,
-				tabs: 'HK1',
-				tabIndex: 0,
-				isShowSheet: false,
-				arrayExpandValue: [],
-				DSHocSinh: [],
-				userAccount: vueData.user,
-				HocSinhDetail: {},
-				DSHocKy: [
-					{
-						id: 1,
-						name: 'HK1',
-					},
-					{
-						id: 2,
-						name: 'HK2',
-					}
-				],
-				DSMonHocGroup: [
-					{
-						MonHocGroup: 1,
-						Name_VI: 'KIẾN THỨC - KỸ NĂNG',
-						Name_EN: '',
-					},
-					{
-						MonHocGroup: 2,
-						Name_VI: 'NĂNG LỰC CHUNG',
-						Name_EN: '',
-					},
-					{
-						MonHocGroup: 3,
-						Name_VI: 'PHẨM CHẤT',
-						Name_EN: '',
-					},
-					{
-						MonHocGroup: 4,
-						Name_VI: 'NĂNG LỰC RIÊNG',
-						Name_EN: '',
-					}
-				],
-				DSMonHoc: [],
-				DSMonHoc_ByGroup: [],
-				MonHocGroup_Obj: {},
-				DSNhomDiem: []
+export default {
+	props: [],
+	data() {
+		return {
+			urlAvatarHocSinh: vueData.v_Set.urlAvatarHocSinh,
+			urlAvatarPhuHuynh: vueData.v_Set.urlAvatarPhuHuynh,
+			tabs: 'HK1',
+			tabIndex: 0,
+			isShowSheet: false,
+			arrayExpandValue: [],
+			DSHocSinh: [],
+			userAccount: vueData.user,
+			HocSinhDetail: {},
+			DSHocKy: [
+				{
+					id: 1,
+					name: 'HK1',
+				},
+				{
+					id: 2,
+					name: 'HK2',
+				}
+			],
+			DSMonHocGroup: [
+				{
+					MonHocGroup: 1,
+					Name_VI: 'KIẾN THỨC - KỸ NĂNG',
+					Name_EN: '',
+				},
+				{
+					MonHocGroup: 2,
+					Name_VI: 'NĂNG LỰC CHUNG',
+					Name_EN: '',
+				},
+				{
+					MonHocGroup: 3,
+					Name_VI: 'PHẨM CHẤT',
+					Name_EN: '',
+				},
+				{
+					MonHocGroup: 4,
+					Name_VI: 'NĂNG LỰC RIÊNG',
+					Name_EN: '',
+				}
+			],
+			DSMonHoc: [],
+			DSMonHoc_ByGroup: [],
+			MonHocGroup_Obj: {},
+			DSNhomDiem: [],
+			HocSinhSelected: null
+		}
+	},
+	mounted() {
+		this.loadInfoHocSinh()
+	},
+	computed: {},
+	watch: {
+		tabs: function (val) {
+			if (val) {
+				this.loadHocSinhKQHT()
 			}
 		},
-		mounted() {
-			this.loadInfoHocSinh()
-		},
-		computed: {},
-		watch: {
-			tabs: function (val) {
-				if (val) {
-					this.loadHocSinhKQHT()
-				}
+		HocSinhSelected: function (val) {
+			console.log(val);
+			if (val) {
+				this.loadHocSinhDetail()
 			}
 		},
-		methods: {
-			async loadInfoHocSinh() {
-				const res = await HocSinh_Service.Calen_GetInfoStudentByPhuHuynhID()
-				if (res.length > 0) {
-					this.DSHocSinh = res
-					this.loadHocSinhDetail()
-				}
-	
-			},
-			async loadHocSinhDetail() {
-				const res = await HocSinhLMS_Service.HocSinh_Detail_GetBy_HocSinhID({
-					HocSinhID: this.DSHocSinh[0].StudentID
-				})
-				if (res) {
-					this.HocSinhDetail = res
-					this.loadHocSinhKQHT()
-				}
-	
-			},
-			async loadHocSinhKQHT() {
-				const { DSMonHoc, DSDiem } = await HocSinhLMS_Service.HocSinh_KQHT({
-					HocSinhID: this.DSHocSinh[0].StudentID,
-					LopID: this.HocSinhDetail.LopID,
-					Semester: this.tabs
-				})
-				this.DSMonHoc = _.cloneDeep(DSMonHoc)
-				this.DSDiem = _.cloneDeep(DSDiem)
-				this.DSNhomDiem
-					= DSDiem.reduce((result, element) => {
-						if (!result[element.TenNhomCotDiem_VI]) {
-							result[element.TenNhomCotDiem_VI] = []
-						}
-						result[element.TenNhomCotDiem_VI].push(element)
-						return result
-					}, {});
-				for (var i = 0; i < this.DSDiem.length; i++) {
-	
-				}
-				console.log('this.DSNhomDiem', this.DSNhomDiem)
-			},
-			handleClickMonHocGroup(item) {
-				this.isShowSheet = true
-				this.DSMonHoc_ByGroup = this.DSMonHoc.filter(i => i.MonHocGroup === item.MonHocGroup)
-				this.MonHocGroup_Obj = _.cloneDeep(item)
-			},
-			getColorChipDiem: getColorChipDiem
+	},
+	methods: {
+		async loadInfoHocSinh() {
+			const response = await hocSinhLopService.Calen_GetInfoStudentByPhuHuynhID()
+			if (response.IsSuccess) {
+				this.DSHocSinh = response.Result
+				this.HocSinhSelected = response.Result[0]
+			}
+
 		},
-	}
+		async loadHocSinhDetail() {
+			const response = await hocSinhLopService.HocSinh_Detail_GetBy_HocSinhID({
+				HocSinhID: this.HocSinhSelected.StudentID
+			})
+			console.log('response.Result', response);
+			if (response.IsSuccess) {
+				this.HocSinhDetail = response.Result
+				this.loadHocSinhKQHT()
+			}
+
+		},
+		async loadHocSinhKQHT() {
+			const { DSMonHoc, DSDiem } = await HocSinhLMS_Service.HocSinh_KQHT({
+				HocSinhID: this.DSHocSinh[0].StudentID,
+				LopID: this.HocSinhDetail.LopID,
+				Semester: this.tabs
+			})
+			this.DSMonHoc = _.cloneDeep(DSMonHoc)
+			this.DSDiem = _.cloneDeep(DSDiem)
+			this.DSNhomDiem
+				= DSDiem.reduce((result, element) => {
+					if (!result[element.TenNhomCotDiem_VI]) {
+						result[element.TenNhomCotDiem_VI] = []
+					}
+					result[element.TenNhomCotDiem_VI].push(element)
+					return result
+				}, {});
+			for (var i = 0; i < this.DSDiem.length; i++) {
+
+			}
+			console.log('this.DSNhomDiem', this.DSNhomDiem)
+		},
+		handleClickMonHocGroup(item) {
+			this.isShowSheet = true
+			this.DSMonHoc_ByGroup = this.DSMonHoc.filter(i => i.MonHocGroup === item.MonHocGroup)
+			this.MonHocGroup_Obj = _.cloneDeep(item)
+		},
+		onHandleSelectedSTD(item) {
+			this.HocSinhSelected = item
+		},
+		getColorChipDiem: getColorChipDiem
+	},
+}
 </script>

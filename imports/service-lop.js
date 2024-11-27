@@ -7,6 +7,8 @@ const lopService = {
 const hocSinhLopService = {
     Get: (params) => apiUtilLMS.post('HocSinhLop_Get', params),
     GetByLopID: (params) => apiUtilLMS.post('HocSinhLop_Get_ByLopID', params),
+    HocSinh_Detail_GetBy_HocSinhID: (params) => apiUtilLMS.postSingle('HocSinh_Detail_GetBy_HocSinhID', params),
+    Calen_GetInfoStudentByPhuHuynhID: (params) => apiUtilStudent.post('Calen_GetInfoStudentByPhuHuynhID', params),
 }
 
 const monHocService = {

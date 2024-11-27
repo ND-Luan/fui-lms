@@ -53,8 +53,8 @@ export default {
         },
         async onHandleEdit() {
             let params = { ...this.recordMauBangDiem }
-            const res = await TemplateBangDiem_Service.Upd(params)
-            if (res) {
+            const { IsSuccess } = await TemplateBangDiem_Service.Upd(params)
+            if (IsSuccess) {
                 Vue.$toast.success('Cập nhật mẫu bảng điểm thành công!', { position: 'top' })
                 this.$emit('onFinish')
                 this.onHandleCloseModal()

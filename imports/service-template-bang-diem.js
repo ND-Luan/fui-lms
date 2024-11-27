@@ -1,9 +1,9 @@
 
-const URL = 'TemplateBangDiem_'
-const URL_GET = URL + EnumMethod.GET
-const URL_INS = URL + EnumMethod.INSERT
-const URL_UDP = URL + EnumMethod.UPDATE
-const URL_DEL = URL + EnumMethod.DELETE
+const _URL = 'TemplateBangDiem_'
+const URL_GET = _URL + EnumMethod.GET
+const URL_INS = _URL + EnumMethod.INSERT
+const URL_UDP = _URL + EnumMethod.UPDATE
+const URL_DEL = _URL + EnumMethod.DELETE
 
 const URL_CT = 'TemplateBangDiemChiTiet_'
 const URL_CT_GET = URL_CT + EnumMethod.GET
@@ -17,7 +17,7 @@ const TemplateBangDiem_Service = {
     //TemplateBangDiemID (0: Lấy tất cả)
     Get: (params) => apiUtilLMS.post(URL_GET, params),
     Ins: (params) => apiUtilLMS.post(URL_INS, params),
-    Udp: (params) => apiUtilLMS.post(URL_UDP, params),
+    Upd: (params) => apiUtilLMS.post(URL_UDP, params),
     Del: (params) => apiUtilLMS.post(URL_DEL, params),
 }
 

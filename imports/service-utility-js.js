@@ -6,7 +6,7 @@ let response = {
 const EnumMethod = {
     GET: 'Get',
     DELETE: 'Del',
-    UPDATE: 'Udp',
+    UPDATE: 'Upd',
     INSERT: 'Ins'
 }
 const SUB_DOMAIN = {
@@ -73,7 +73,7 @@ const AJAX_SINGLE = (url, params = null) => {
                 response = {
                     IsSuccess: true,
                     Message: null,
-                    Result: d.data
+                    Result: d
                 }
                 resolve(response)
             },
@@ -101,15 +101,15 @@ const apiUtilLMS = {
     post: (url, params = null) => {
         return AJAX(SUB_DOMAIN.LMS + url, params)
     },
-    postSingle: () => {
+    postSingle: (url, params = null) => {
         return AJAX_SINGLE(SUB_DOMAIN.LMS + url, params)
     },
 }
 const apiUtilStudent = {
-    post: () => {
+    post: (url, params = null) => {
         return AJAX(SUB_DOMAIN.STUDENT + url, params)
     },
-    postSingle: () => {
+    postSingle: (url, params = null) => {
         return AJAX_SINGLE(SUB_DOMAIN.STUDENT + url, params)
     }
 }
