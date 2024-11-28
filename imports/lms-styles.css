@@ -116,6 +116,49 @@
      white-space: normal;
 } */
 
-.jrating .jrating-selected{
+.jrating .jrating-selected {
     background-image: url(https://lms.lhbs.vn/_cdn/lhbs-lms/star.png) !important;
+}
+
+
+/*Smart phone nhỏ*/
+@media screen and (min-width: 240px) {
+    .screen-devices {
+        padding: 16px;
+        width: 100%;
+    }
+}
+
+/*Iphone(480 x 640)*/
+@media screen and (min-width: 320px) {
+    .screen-devices {
+        padding: 16px;
+        width: 100%;
+    }
+}
+
+/*Tablet nhỏ(480 x 640)*/
+@media screen and (min-width: 480px) {
+    .screen-devices {
+        padding: 16px;
+        width: 100%;
+    }
+}
+
+/*Ipad dọc(768 x 1024)*/
+@media screen and (min-width: 768px) {
+    .screen-devices {
+        padding: 16px;
+        /* width: 768px; */
+        width: 600px;
+
+    }
+}
+
+/*Ipad ngang(1024 x 768)*/
+@media screen and (min-width: 1024px) {
+    .screen-devices {
+        padding: 16px;
+        width: 700px;
+    }
 }

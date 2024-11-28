@@ -1,40 +1,31 @@
 <template>
-    <div>
+    <v-layout>
         <div v-if="isAdmin"></div>
         <div v-else style="
            background-image: url('/_cdn/lhbs-lms/bg_report_thang.png'); 
            background-repeat: no-repeat; 
-           background-size: cover; 
+           background-size: cover;
+           background-position: center center; 
            width: 100%; 
-           height: 100vh; 
+           min-height: 100vh; 
            position: relative; 
            z-index: 1;
+           background-attachment: fixed;
         ">
-            <img src="/_cdn/lhbs-lms/bg_report_thang_2.png" style="
-                width: 100%; 
-                height: 60%;
-                mix-blend-mode: multiply;
-                position: absolute;
-                bottom: 0;
-                z-index: 1;
-            " />
-            <div class="pa-4" style="height: 40%; width:100%; ">
-                <slot name="title">
-                </slot>
-            </div>
-            <div class="pa-4" style="height: 60%; width:100%; z-index: 2;">
-                <div class="mt-4">
-                    <slot name="detail">
-                    </slot>
+            <v-app-bar ref="appBar" elevation="4" dense class="pa-2">
+                <template v-slot:image>
+                    <v-img src="/_cdn/lhbs-lms/lhbs_logo.jpg" contain position="left" class="ma-1"></v-img>
+                </template>
+
+            </v-app-bar>
+
+            <v-main class="position-relative d-flex justify-center">
+                <div class="screen-devices">
+                    <slot></slot>
                 </div>
-            </div>
+            </v-main>
         </div>
-        <!-- <div style="
-            background-image: url(''); background-repeat: no-repeat; background-size: cover; background-position: center; width: 100%; height: 100vh; position: absolute; top: 0; left: 0; z-index: 2;
-        ">
-            <slot></slot>
-        </div> -->
-    </div>
+    </v-layout>
 </template>
 <script>
 export default {
@@ -44,6 +35,18 @@ export default {
             default: true,
         },
     },
-    methods: {},
+    created() {
+
+    },
+    mounted() {
+        document.getElementsByClassName('v-col')[0].style.padding = '0px'
+        document.getElementsByClassName('v-row')[0].style.margin = '0px'
+
+    },
+    methods: {
+        toggleDrawer() {
+
+        }
+    },
 }
 </script>

@@ -1,46 +1,163 @@
 <template>
     <uc-app :isAdmin="false">
-        <template v-slot:title>
-            <p class="text-center text-h6 text-primary">Class Report</p>
-            <p class="text-center font-italic">Tháng 10</p>
-            <v-row>
-                <v-col cols="6" class="text-center">
-                    <div class="d-flex justify-center algin-center ga-4">
-                        <p class="text-subtitle-1">Student Name:</p>
-                        <p class="text-subtitle-2">Nguyễn Văn A</p>
-                    </div>
-                    <v-divider class="mx-auto w-50 bg-white" style="height: 4px;"></v-divider>
-                </v-col>
-                <v-col cols="6" class="text-center">
-                    <p>Level & Section: <span class="font-weight-medium">xxxxxxx</span></p>
-                </v-col>
-                <v-col cols="6" class="text-center">
-                    <p>School Year: <span class="font-weight-medium">xxxxxxx</span></p>
-                </v-col>
-                <v-col cols="6" class="text-center">
-                    <p>Teacher Name: <span class="font-weight-medium">xxxxxxx</span></p>
-                </v-col>
-            </v-row>
-        </template>
-        <template v-slot:detail>
+        <!-- <template v-slot:subTitleAppbar>
+           
+        </template> -->
 
-            <v-row>
-                <v-col>Điểm</v-col>
-            </v-row>
-            <v-row>
-                <v-col xs="12" sm="12" md="6" lg="6">
-                    <p>Nhận xét</p>
-                    <p>Lorem, ipsum dolor sit amet consectetur adipisicing elit. Nesciunt quos magni ipsum error nostrum
-                        ea
-                        exercitationem facere ducimus deleniti, ipsa facilis, officiis, fuga soluta fugiat? Consequuntur
-                        sequi atque explicabo sint!</p>
+        <div class="font-weight-medium text-primary mt-4 d-flex justify-space-between align-center">
+            <p>KẾT QUẢ HỌC TẬP</p>
+            <v-chip label size="large" color="primary">
+                Tháng 10
+            </v-chip>
+        </div>
+        <v-divider class="mx-auto w-50 mt-2 mb-2" style="background-color: white; min-height:2px"></v-divider>
+        <div>
+            <p class="text-primary  font-weight-medium mb-2">Học sinh đang chọn</p>
+            <v-skeleton-loader v-if="IsLoadingPage" class="mx-auto" elevation="4" type="article"
+                boilerplate></v-skeleton-loader>
+            <v-card v-else>
+                <v-card-text>
+                    <v-row>
+                        <v-col cols="4" class="d-flex justify-center align-center">
+                            <v-avatar size="100" class="elevation-4">
+                                <v-img :src="urlAvatarHocSinh + HocSinhDetail?.HocSinhID" />
+                            </v-avatar>
+                        </v-col>
+                        <v-col cols="8">
+                            <div class="d-flex flex-column justify-center algin-center ga-1">
+                                <p class="text-h6 text-primary">{{ HocSinhDetail?.HoTen }}
+                                    <v-icon class="mb-1" size="20" v-if="!HocSinhDetail?.Nu">mdi-face-man</v-icon>
+                                    <v-icon class="mb-1" size="20" v-else>mdi-face-woman</v-icon>
+                                </p>
+                                <p class="text-caption">{{ HocSinhDetail?.NgaySinh }}</p>
+                                <v-divider class="mt-1 mb-1" style="height: 4px;"></v-divider>
+                                <div class="d-flex justify-space-evenly align-center">
+                                    <div class="text-center">
+                                        Khối
+                                        <p class="text-subtitle-2">{{ HocSinhDetail?.KhoiID }}</p>
+                                    </div>
+                                    <v-divider vertical></v-divider>
+                                    <div class="text-center">
+                                        Lớp
+                                        <p class="text-subtitle-2">{{ HocSinhDetail?.TenLop }}</p>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </v-col>
+                    </v-row>
+                </v-card-text>
+            </v-card>
+
+            <v-row class="mt-2">
+                <v-col cols="12" class="text-primary font-weight-medium pb-0">Nội dung đánh giá</v-col>
+                <v-col cols="12" v-for="item in 6">
+                    <v-card>
+                        <v-card-text>
+                            Lorem ipsum dolor sit, amet consectetur adipisicing elit. Ea rerum veniam excepturi
+                            quod doloribus reiciendis tenetur repellendus! Commodi atque natus culpa hic quas tempora
+                            amet fuga autem totam, consectetur quae.
+                        </v-card-text>
+                    </v-card>
                 </v-col>
             </v-row>
-        </template>
-
+            <v-row>
+                <v-col cols="12" class="pb-0">
+                    <p class="text-primary font-weight-medium ">Nhận xét</p>
+                </v-col>
+                <v-col cols="12" class="mb-16">
+                    <v-card>
+                        <v-card-text>
+                            <p>
+                                Lorem, ipsum dolor sit amet consectetur adipisicing elit. Nesciunt quos magni ipsum
+                                error
+                                nostrum
+                                ea
+                                exercitationem facere ducimus deleniti, ipsa facilis, officiis, fuga soluta fugiat?
+                                Consequuntur
+                                sequi atque explicabo sint!
+                            </p>
+                        </v-card-text>
+                    </v-card>
+                </v-col>
+            </v-row>
+            <v-menu transition="fab-transition">
+                <template v-slot:activator="{ props }">
+                    <v-btn v-bind="props" class="position-fixed" style="
+            z-index: 10;
+            bottom: 16px;
+            right: 16px;
+        " icon="" size="large" variant="elevated" :loading="IsLoadingDSHocSinh">
+                        <v-img src="/_cdn/lhbs-lms/hoc_sinh.png" width="40" height="40" />
+                    </v-btn>
+                </template>
+                <v-list>
+                    <v-list-subheader>Danh sách học sinh</v-list-subheader>
+                    <v-list-item v-for="item in DSHocSinh" :key="item.StudentID" :disabled="item.Khoi <= 0"
+                        @click="() => onSelectHocSinh(item)">
+                        <template v-slot:prepend>
+                            <v-avatar>
+                                <v-img :src="urlAvatarHocSinh + item.StudentID" />
+                            </v-avatar>
+                        </template>
+                        <v-list-item-title>{{ item.HoTen }}</v-list-item-title>
+                        <v-list-item-title>{{ item.TenLop ?? '-' }} • {{ item.StudentID }}</v-list-item-title>
+                    </v-list-item>
+                </v-list>
+            </v-menu>
+        </div>
+        <uc-loading-page v-model="IsLoadingPage"></uc-loading-page>
     </uc-app>
 </template>
 
 <script>
-export default {}
+export default {
+    props: {
+
+    },
+    data() {
+        return {
+            DSHocSinh: [],
+            HocSinhDetail: null,
+            IsLoadingDSHocSinh: false,
+            IsLoadingPage: false,
+            urlAvatarHocSinh: vueData.v_Set.urlAvatarHocSinh
+        }
+    },
+    mounted() {
+        this.loadDSHocSinh()
+    },
+    methods: {
+        async loadDSHocSinh() {
+            this.IsLoadingPage = true
+            this.IsLoadingDSHocSinh = true
+            const response = await hocSinhLopService.Calen_GetInfoStudentByPhuHuynhID()
+            if (response.IsSuccess) {
+                this.IsLoadingDSHocSinh = false
+                this.DSHocSinh = response.Result
+                this.loadHocSinhDetail(response.Result[0].StudentID).then(() => {
+                    this.IsLoadingPage = false
+                })
+            }
+        },
+        loadHocSinhDetail(HocSinhID) {
+            return new Promise(async resolve => {
+                const response = await hocSinhLopService.HocSinh_Detail_GetBy_HocSinhID({
+                    HocSinhID: HocSinhID
+                })
+                if (response.IsSuccess) {
+                    this.HocSinhDetail = response.Result
+                    resolve()
+                }
+            })
+
+        },
+        async onSelectHocSinh(item) {
+            this.IsLoadingPage = true
+            this.loadHocSinhDetail(item.StudentID).then(() => {
+                this.IsLoadingPage = false
+            })
+        }
+    }
+}
 </script>
