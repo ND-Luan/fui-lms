@@ -147,10 +147,10 @@
 				<v-btn text="Đóng" @click="onHandleCloseModal()" />
 			</v-card-actions>
 		</v-card>
-		<uc-modal-add-cau-hinh-cot-diem v-model:isOpen="isShowModalAddCauHinhCotDiem" @onFinish="loadDSCotDiem"
+		<uc-modal-add-cau-hinh-cot-diem v-model:isOpen="isShowModalAddCauHinhCotDiem" @onFinish="loadDSNhomCotDiem"
 			:recordMauBangDiem />
 		<uc-modal-edit-cau-hinh-cot-diem v-model:isOpen="isShowModalEditCauHinhCotDiem" :recordNhomCotDiem
-			@onFinish="loadDSCotDiem" :recordMauBangDiem />
+			@onFinish="onHandleReloadDSCotDiem" :recordMauBangDiem />
 	</v-dialog>
 </template>
 
@@ -266,12 +266,12 @@ export default {
 		isOpen: function (val) {
 			if (val) {
 				this.TBCauHinhCotDiem = Object.assign([], [])
-				this.loadDSCotDiem()
+				this.loadDSNhomCotDiem()
 			}
 		}
 	},
 	methods: {
-		async loadDSCotDiem() {
+		async loadDSNhomCotDiem() {
 			const $this = this
 			$this.isLoadingTB = true
 			const response = await TemplateBangDiemChiTiet_Service.Get_ById({
@@ -317,7 +317,6 @@ export default {
 		},
 		onOpenModalEditCauHinhCotDiem(record) {
 			this.recordNhomCotDiem = _.cloneDeep(record)
-			console.log('this.recordNhomCotDiem', this.recordNhomCotDiem)
 			this.isShowModalEditCauHinhCotDiem = true
 		},
 		onHandleDeleteCauHinhCotDiem(record) {
@@ -331,7 +330,7 @@ export default {
 					})
 					if (res) {
 						Vue.$toast.success('Xóa cột điểm thành công!', { position: 'top' })
-						this.loadDSCotDiem()
+						this.loadDSNhomCotDiem()
 					}
 				}
 			})
@@ -349,10 +348,13 @@ export default {
 				Formula: this.formData.Formula,
 			}).finally(() => item.isEdit = false)
 			if (res) {
-				console.log(res, item.TenCotDiem_VI)
 				Vue.$toast.success(`Cập nhật công thức cho cột điểm ${item.TenCotDiem_VI} thành công`, { position: 'top' })
-				this.loadDSCotDiem()
+				this.loadDSNhomCotDiem()
 			}
+		},
+		async onHandleReloadDSCotDiem(value) {
+			await this.loadDSNhomCotDiem()
+			this.recordNhomCotDiem = this.TBCauHinhCotDiem.find(item => item.MaNhomCotDiem === value)
 		},
 		getColorChipLoaiCotDiem: getColorChipLoaiCotDiem,
 		getColorChipGiaTriCotDiem: getColorChipGiaTriCotDiem

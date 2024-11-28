@@ -115,3 +115,7 @@
 /* .custom-tab .v-btn__content{
      white-space: normal;
 } */
+
+.jrating .jrating-selected{
+    background-image: url(https://lms.lhbs.vn/_cdn/lhbs-lms/star.png) !important;
+}

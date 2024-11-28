@@ -28,7 +28,6 @@ const AJAX = (url, params = null) => {
             crossDomain: true,
             data: JSON.stringify(params),
             success: function (d) {
-                console.log(d, 1)
                 response = {
                     IsSuccess: true,
                     Message: null,
@@ -69,7 +68,6 @@ const AJAX_SINGLE = (url, params = null) => {
             crossDomain: true,
             data: JSON.stringify(params),
             success: function (d) {
-                console.log(d, 1)
                 response = {
                     IsSuccess: true,
                     Message: null,

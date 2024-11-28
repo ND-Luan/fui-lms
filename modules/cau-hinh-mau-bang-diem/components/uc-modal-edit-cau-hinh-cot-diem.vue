@@ -236,45 +236,49 @@
                     </div>
                 </template>
                 <v-card-text>
-                    <v-row>
-                        <v-col cols="3">
-                            <v-text-field label="Thứ tự CĐ" v-model="recordCotDiem.ThuTuCotDiem"
-                                :rules="rules.ThuTuCotDDiem" density="compact">
-                            </v-text-field>
-                        </v-col>
-                        <v-col cols="9">
+                    <v-form ref="validForm" v-model="valid">
+                        <v-row>
+                            <v-col cols="4">
+                                <v-text-field label="Thứ tự CĐ" v-model="recordCotDiem.ThuTuCotDiem"
+                                    :rules="rules.ThuTuCotDiem" density="compact">
+                                </v-text-field>
+                            </v-col>
+                            <v-col cols="8">
 
-                        </v-col>
-                        <v-col cols="4">
-                            <v-text-field label="Mã CĐ" v-model="recordCotDiem.MaCotDiem"
-                                density="compact"></v-text-field>
-                        </v-col>
-                        <v-col cols="4">
-                            <v-text-field label="Tên CĐ (VI)" v-model="recordCotDiem.TenCotDiem_VI"
-                                density="compact"></v-text-field>
-                        </v-col>
-                        <v-col cols="4">
-                            <v-text-field label="Tên CĐ (EN)" v-model="recordCotDiem.TenCotDiem_EN"
-                                density="compact"></v-text-field>
-                        </v-col>
-                        <v-col cols="4">
-                            <v-select v-model="recordCotDiem.LoaiCotDiem" label="Loại cột điểm" :items="DSLoaiCotDiem"
-                                item-title="TenLoaiCotDiem" item-value="value" variant="outlined" density="compact" />
-                        </v-col>
-                        <v-col cols="4">
-                            <v-select v-model="recordCotDiem.GiaTriCotDiem" label="Giá trị cột điểm"
-                                :items="DSLoaiDuLieu" item-title="TenLoaiDuLieu" item-value="value" variant="outlined"
-                                density="compact" />
-                        </v-col>
-                        <v-col cols="4">
-                            <v-text-field label="ID hệ thống" v-model="recordCotDiem.IDHeThong"
-                                density="compact"></v-text-field>
-                        </v-col>
-                        <v-col cols="12">
-                            <v-textarea label="Công thức" v-model="recordCotDiem.Formula"
-                                density="compact"></v-textarea>
-                        </v-col>
-                    </v-row>
+                            </v-col>
+                            <v-col cols="4">
+                                <v-text-field label="Mã CĐ" v-model="recordCotDiem.MaCotDiem"
+                                    density="compact"></v-text-field>
+                            </v-col>
+                            <v-col cols="4">
+                                <v-text-field label="Tên CĐ (VI)" v-model="recordCotDiem.TenCotDiem_VI"
+                                    density="compact"></v-text-field>
+                            </v-col>
+                            <v-col cols="4">
+                                <v-text-field label="Tên CĐ (EN)" v-model="recordCotDiem.TenCotDiem_EN"
+                                    density="compact"></v-text-field>
+                            </v-col>
+                            <v-col cols="4">
+                                <v-select v-model="recordCotDiem.LoaiCotDiem" label="Loại cột điểm"
+                                    :items="DSLoaiCotDiem" item-title="TenLoaiCotDiem" item-value="value"
+                                    variant="outlined" density="compact" />
+                            </v-col>
+                            <v-col cols="4">
+                                <v-select v-model="recordCotDiem.GiaTriCotDiem" label="Giá trị cột điểm"
+                                    :items="DSLoaiDuLieu" item-title="TenLoaiDuLieu" item-value="value"
+                                    variant="outlined" density="compact" />
+                            </v-col>
+                            <v-col cols="4">
+                                <v-text-field label="ID hệ thống" v-model="recordCotDiem.IDHeThong"
+                                    density="compact"></v-text-field>
+                            </v-col>
+                            <v-col cols="12">
+                                <v-textarea label="Công thức" v-model="recordCotDiem.Formula"
+                                    density="compact"></v-textarea>
+                            </v-col>
+                        </v-row>
+                    </v-form>
+
                 </v-card-text>
                 <v-card-actions>
                     <v-spacer></v-spacer>
@@ -400,8 +404,8 @@ export default {
                 ThuTuCotDiem: [
                     v => !!v || 'Vui lòng nhập thứ tự cột điểm',
                 ],
-
-            }
+            },
+            valid: false
 
         }
     },
@@ -412,35 +416,41 @@ export default {
     watch: {
         isOpen: function (val) {
             if (val) {
-                console.log('this.recordNhomCotDiem', this.recordNhomCotDiem)
-                let receiveDSCotDiem = _.cloneDeep(this.recordNhomCotDiem)
-                //Lấy ra những thuộc tính không phải là mảng
-                let objNhomCotDiem = Object.entries(receiveDSCotDiem).reduce((result, [key, value]) => {
-                    if (!Array.isArray(receiveDSCotDiem[key])) {
-                        result[key] = value
-                    }
-                    return result
-                }, {})
-                console.log('objNhomCotDiem', objNhomCotDiem)
-                this.recordNhomCotDiem_Obj = _.cloneDeep(objNhomCotDiem)
-                // Đảm bảo số lượng phần tử không vượt quá mảng nhỏ nhất
-                const minLengthOf_receiveDSCotDiem = this.getMinArrayLength(receiveDSCotDiem)
-                //_.range(minLengthOf_receiveDSCotDiem) để vòng lặp từ 0 đến minLengthOf_receiveDSCotDiem -1
-                let handleDSCotDiem = _.range(minLengthOf_receiveDSCotDiem).map(index => {
-                    return {
-                        ...receiveDSCotDiem.MaCotDiem[index],
-                    }
-                })
-                this.DSCotDiem = handleDSCotDiem
+                // this.loadDSCotDiem()
             }
         },
         isShowModalEditCotDiem: function (val) {
             if (val) {
                 this.titleEditCotDiem = this.recordCotDiem?.TenCotDiem_VI
             }
-        }
+        },
+        recordNhomCotDiem: function (val) {
+            if (val) {
+                this.loadDSCotDiem()
+            }
+        },
     },
     methods: {
+        loadDSCotDiem() {
+            let receiveDSCotDiem = _.cloneDeep(this.recordNhomCotDiem)
+            //Lấy ra những thuộc tính không phải là mảng
+            let objNhomCotDiem = Object.entries(receiveDSCotDiem).reduce((result, [key, value]) => {
+                if (!Array.isArray(receiveDSCotDiem[key])) {
+                    result[key] = value
+                }
+                return result
+            }, {})
+            this.recordNhomCotDiem_Obj = _.cloneDeep(objNhomCotDiem)
+            // Đảm bảo số lượng phần tử không vượt quá mảng nhỏ nhất
+            const minLengthOf_receiveDSCotDiem = this.getMinArrayLength(receiveDSCotDiem)
+            //_.range(minLengthOf_receiveDSCotDiem) để vòng lặp từ 0 đến minLengthOf_receiveDSCotDiem -1
+            let handleDSCotDiem = _.range(minLengthOf_receiveDSCotDiem).map(index => {
+                return {
+                    ...receiveDSCotDiem.MaCotDiem[index],
+                }
+            })
+            this.DSCotDiem = handleDSCotDiem
+        },
         onHandleCloseModal() {
             this.$emit('update:isOpen', false)
         },
@@ -501,13 +511,17 @@ export default {
         },
         async onSubmitEditCotDiem() {
             const $this = this
+            this.$refs.validForm.validate()
+            console.log(this.valid)
+            if (!this.valid) return
             const { IsSuccess } = await TemplateBangDiemChiTiet_Service.Upd({
                 ...$this.recordCotDiem,
             })
             if (IsSuccess) {
                 $this.onHandleCloseModalEditCotDiem()
                 // $this.onHandleCloseModal()
-                $this.$emit('onFinish')
+                console.log('ref', this.$refs.validForm)
+                $this.$emit('onFinish', $this.recordNhomCotDiem_Obj.MaNhomCotDiem)
                 Vue.$toast.success('Cập nhật cột điểm thành công!', { position: 'top' })
             }
         },

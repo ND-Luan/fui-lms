@@ -199,7 +199,6 @@ export default {
                         TinhTrang: hs.TinhTrang,
                     }
                 })
-                console.log(' this.DSHocSinh', this.DSHocSinh);
                 if (!response.IsSuccess) return
                 let SLCotDiem_OfFirstSTD = data.filter((item) => item.HocSinhID === data[0].HocSinhID) // lấy ra các cột điểm của học sinh đầu tiên
                 this.DSCotDiem_ByMaNhomCotDiem = SLCotDiem_OfFirstSTD
@@ -217,7 +216,7 @@ export default {
                                 mask: '0.00',
                                 backGroundColor: x.HexBackground,
                                 wrapText: true,
-                                readOnly: x.LoaiCotDiem === 'Công thức' && fn_IsDisabledTinhTrangDiem(x.TinhTrang, 'GV').isDisabled ? true : false,
+                                readOnly: x.LoaiCotDiem === 'Công thức' ? true : false,
                             }
                             return column
                         } else if (x.GiaTriCotDiem === 'text') { // cấu hình header cột điểm có dạng text
@@ -234,14 +233,14 @@ export default {
                         } else if (x.GiaTriCotDiem === 'ICO_Star') { // cấu hình header cột điểm có dạng ICO_Star
                             let column = {
                                 type: 'html',
-                                title: x.TenCotDiem_VI,
+                                title: x.TenCotDiem_VI+ fn_IsDisabledTinhTrangDiem(x.TinhTrang, 'GV').isDisabled,
                                 name: x.MaCotDiem,
                                 width: 120,
                                 typeValue: x.GiaTriCotDiem,
                                 backGroundColor: x.HexBackground,
                                 wrap: true,
                                 align: 'center',
-                                readOnly: x.LoaiCotDiem === 'Công thức' && fn_IsDisabledTinhTrangDiem(x.TinhTrang, 'GV').isDisabled ? true : false,
+                                readOnly: x.LoaiCotDiem === 'Công thức' ? true : false,
                             }
                             return column
                         }
@@ -287,11 +286,7 @@ export default {
                     indexRow++
                     dataJexcel.push(obj)
                 }
-                console.log('$this.colHeaders', this.colHeaders)
-                console.log('dataJexcel', dataJexcel)
-                console.log('dataJexcel', data)
                 this.dataSource = dataJexcel
-                console.log('dataSource[0]', this.dataSource[0])
                 this.keyComp++
                 this.DSCotDiem = data
             }
@@ -319,7 +314,6 @@ export default {
             //Xử lý data mapping giá trị
             //B1: Vòng lặp thứ nhất để lặp các học sinh
             //B2: Vòng lặp bên trong để lặp các cột điểm của 1 học sinh
-            console.log('val', val)
             for (let i = 0; i < val.length; i++) {
                 for (let j = 0; j < DSCotDiem.length; j++) {
                     const cellAdresss = jexcel.getColumnNameFromId([j + 2, i]) // (j+2) là địa chỉ cột điểm đầu tiên, i là row
@@ -352,7 +346,6 @@ export default {
                     dataBeforeInsertToDB.push(cotDiem_HS)
                 }
             }
-            console.log('dataBeforeInsertToDB', dataBeforeInsertToDB)
             let validIndex = dataBeforeInsertToDB.findIndex((item) => item.IsError === 1)
             if (validIndex != -1) {
                 Toast.error({ text: 'Cột điểm chỉ cho phép nhập thang điểm 10!' })

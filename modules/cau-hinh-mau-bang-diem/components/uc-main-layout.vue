@@ -4,19 +4,11 @@
             <v-card-title class="d-flex align-center justify-center pe-2">
                 Mẫu bảng điểm
                 <v-spacer></v-spacer>
-                <v-text-field
-                    v-model="searchInput"
-                    :loading="loading"
-                    append-inner-icon="mdi-magnify"
-                    density="compact"
-                    variant="outlined"
-                    hide-details
-                    single-line
-                    @click:append-inner="onSearch()"
-                    placeholder="Tìm kiếm..."
-                    style="max-width: 300px"
-                />
-                <v-btn class="ms-2" color="success" @click="onOpenModalAddMauBangDiem()"> <v-icon>mdi-plus</v-icon> Thêm mẫu bảng điểm </v-btn>
+                <v-text-field v-model="searchInput" :loading="loading" append-inner-icon="mdi-magnify" density="compact"
+                    variant="outlined" hide-details single-line @click:append-inner="onSearch()"
+                    placeholder="Tìm kiếm..." style="max-width: 300px" />
+                <v-btn class="ms-2" color="success" @click="onOpenModalAddMauBangDiem()"> <v-icon>mdi-plus</v-icon> Thêm
+                    mẫu bảng điểm </v-btn>
             </v-card-title>
 
             <v-data-table :items="TBMauBangDiemFilter" :headers="headers" density="compact">
@@ -37,8 +29,7 @@
                             <v-list-item @click="onOpenModalEditMauBangDiem(item)">
                                 <v-list-item-title>
                                     <v-icon color="green darken-2" small class="mr-2"> mdi-square-edit-outline </v-icon>
-                                    Cập nhật</v-list-item-title
-                                >
+                                    Cập nhật</v-list-item-title>
                             </v-list-item>
                             <v-list-item @click="onOpenModalCHCotDiem(item)">
                                 <v-list-item-title>
@@ -65,8 +56,10 @@
         </v-card>
         <uc-modal-cau-hinh-cot-diem v-model:isOpen="isShowModalCHCotDiem" :recordMauBangDiem />
         <uc-modal-add-mau-bang-diem v-model:isOpen="isShowModalAddMauBangDiem" @onFinish="loadDSMauBangDiem" />
-        <uc-modal-edit-mau-bang-diem v-model:isOpen="isShowModalEditMauBangDiem" :recordMauBangDiem @onFinish="loadDSMauBangDiem" />
-        <uc-modal-copy-cot-diem v-model:isOpen="isShowModalCopyCotDiem" :recordMauBangDiem @onFinish="loadDSMauBangDiem" :TBMauBangDiem="TBMauBangDiem" />
+        <uc-modal-edit-mau-bang-diem v-model:isOpen="isShowModalEditMauBangDiem" :recordMauBangDiem
+            @onFinish="loadDSMauBangDiem" />
+        <uc-modal-copy-cot-diem v-model:isOpen="isShowModalCopyCotDiem" :recordMauBangDiem @onFinish="loadDSMauBangDiem"
+            :TBMauBangDiem="TBMauBangDiem" />
     </div>
 </template>
 
@@ -129,7 +122,6 @@ export default {
             const res = await TemplateBangDiem_Service.Get({
                 TemplateBangDiemID: 0,
             })
-            console.log(res)
             if (res.IsSuccess) {
                 this.TBMauBangDiem = res.Result
             }
