@@ -29,7 +29,8 @@
                                     <v-icon class="mb-1" size="20" v-if="!HocSinhDetail?.Nu">mdi-face-man</v-icon>
                                     <v-icon class="mb-1" size="20" v-else>mdi-face-woman</v-icon>
                                 </p>
-                                <p class="text-caption">{{ HocSinhDetail?.NgaySinh }}</p>
+                                <p class="text-caption">{{ HocSinhDetail?.HocSinhID }} • {{ HocSinhDetail?.NgaySinh }}
+                                </p>
                                 <v-divider class="mt-1 mb-1" style="height: 4px;"></v-divider>
                                 <div class="d-flex justify-space-evenly align-center">
                                     <div class="text-center">

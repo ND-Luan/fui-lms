@@ -21,7 +21,7 @@
                                 <v-icon class="mb-1" size="20" v-if="!HocSinhDetail?.Nu">mdi-face-man</v-icon>
                                 <v-icon class="mb-1" size="20" v-else>mdi-face-woman</v-icon>
                             </p>
-                            <p class="text-caption">{{ HocSinhDetail?.NgaySinh }}</p>
+                            <p class="text-caption">{{ HocSinhDetail?.HocSinhID }} • {{ HocSinhDetail?.NgaySinh }}</p>
                             <v-divider class="mt-1 mb-1" style="height: 4px;"></v-divider>
                             <div class="d-flex justify-space-evenly align-center">
                                 <div class="text-center">
@@ -399,12 +399,21 @@ export default {
                 'red-lighten-1',
                 'pink-lighten-1',
                 'purple-lighten-2',
+                'purple-lighten-3',
                 'deep-purple-lighten-2',
                 'indigo-lighten-2',
                 'blue-lighten-1',
                 'cyan-darken-1',
                 'teal-lighten-2',
                 'green-lighten-1',
+                'light-green-darken-1',
+                'lime-lighten-2',
+                'amber-lighten-4',
+                'orange-darken-1',
+                'deep-orange-lighten-1',
+                'brown-lighten-2',
+                'blue-grey-lighten-2',
+                'grey-darken-1',
             ]
             const randomIndex = Math.floor(Math.random() * colorList.length);
             return colorList[randomIndex];
