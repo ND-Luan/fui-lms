@@ -162,3 +162,7 @@
         width: 700px;
     }
 }
+
+.v-expansion-panel-title {
+    padding: 16px 16px !important;
+}

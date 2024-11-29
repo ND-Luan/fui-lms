@@ -16,7 +16,7 @@
             <v-skeleton-loader v-if="IsLoadingPage" class="mx-auto" elevation="4" type="article"
                 boilerplate></v-skeleton-loader>
             <v-card v-else>
-                <v-card-text>
+                <v-card-text v-if="HocSinhDetail">
                     <v-row>
                         <v-col cols="4" class="d-flex justify-center align-center">
                             <v-avatar size="100" class="elevation-4">
@@ -46,6 +46,9 @@
                             </div>
                         </v-col>
                     </v-row>
+                </v-card-text>
+                <v-card-text v-else>
+                    <uc-empty text="Không tìm thấy học sinh" />
                 </v-card-text>
             </v-card>
 
@@ -127,6 +130,11 @@ export default {
     mounted() {
         this.loadDSHocSinh()
     },
+    watch: {
+        HocSinhDetail: function (hocSinh) {
+            console.log(hocSinh);
+        }
+    },
     methods: {
         async loadDSHocSinh() {
             this.IsLoadingPage = true
@@ -135,9 +143,16 @@ export default {
             if (response.IsSuccess) {
                 this.IsLoadingDSHocSinh = false
                 this.DSHocSinh = response.Result
-                this.loadHocSinhDetail(response.Result[0].StudentID).then(() => {
+                const DSHocSinhWithoutMamNon = response.Result.filter(x => x.Khoi > 0)
+                if (DSHocSinhWithoutMamNon.length > 0) {
+                    const firstHocSinhDetail = DSHocSinhWithoutMamNon[0]
+                    this.loadHocSinhDetail(firstHocSinhDetail.StudentID).then(() => {
+                        this.IsLoadingPage = false
+                    })
+                } else {
+                    this.HocSinhDetail = null
                     this.IsLoadingPage = false
-                })
+                }
             }
         },
         loadHocSinhDetail(HocSinhID) {
