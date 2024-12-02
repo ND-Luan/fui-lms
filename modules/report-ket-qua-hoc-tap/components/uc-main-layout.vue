@@ -1,10 +1,10 @@
 <template>
     <uc-app :isAdmin="false">
         <div class="font-weight-medium text-primary mt-4 d-flex justify-space-between align-center">
-            <p>KẾT QUẢ HỌC TẬP</p>
+            <p>{{ $t('message.studyResult') }}</p>
         </div>
         <v-divider class="mb-1 mt-1"></v-divider>
-        <p class="text-primary  font-weight-medium mb-1">Học sinh đang chọn</p>
+        <p class="text-primary  font-weight-medium mb-1">{{ $t('message.selectedStudent') }}</p>
         <v-skeleton-loader v-if="IsLoadingPage" class="mx-auto" elevation="4" type="article"
             boilerplate></v-skeleton-loader>
         <v-card v-else>
@@ -25,12 +25,12 @@
                             <v-divider class="mt-1 mb-1" style="height: 4px;"></v-divider>
                             <div class="d-flex justify-space-evenly align-center">
                                 <div class="text-center">
-                                    Khối
+                                    {{ $t('message.grade') }}
                                     <p class="text-subtitle-2">{{ HocSinhDetail?.KhoiID }}</p>
                                 </div>
                                 <v-divider vertical></v-divider>
                                 <div class="text-center">
-                                    Lớp
+                                    {{ $t('message.class') }}
                                     <p class="text-subtitle-2">{{ HocSinhDetail?.TenLop }}</p>
                                 </div>
                             </div>
@@ -40,7 +40,9 @@
                 </v-row>
             </v-card-text>
         </v-card>
-        <p class="text-primary pt-4 font-weight-medium text-title mb-1">Phụ huynh</p>
+        <p class="text-primary pt-4 font-weight-medium text-title mb-1">
+            {{ $t('message.parent') }}
+        </p>
         <v-card :flat="false" variant="elevated">
             <v-list-item>
                 <v-list-item-title>
@@ -60,7 +62,9 @@
             </v-list-item>
         </v-card>
         <v-divider class="mx-auto mt-4" inset></v-divider>
-        <p class="text-primary pt-4 font-weight-medium text-title mb-1">Kỳ thi</p>
+        <p class="text-primary pt-4 font-weight-medium text-title mb-1">
+            {{ $t('message.semester') }}
+        </p>
         <div class="d-flex flex-column ga-4 mb-16">
             <v-card v-for="hk in DSHocKy" :key="hk.id">
                 <v-card-title class="d-flex ">
@@ -138,7 +142,7 @@
                 </v-btn>
             </template>
             <v-list>
-                <v-list-subheader>Danh sách học sinh</v-list-subheader>
+                <v-list-subheader>{{ $t('message.studentList') }}</v-list-subheader>
                 <v-list-item v-for="item in DSHocSinh" :key="item.StudentID" :disabled="item.Khoi <= 0"
                     @click="() => onSelectHocSinh(item)">
                     <template v-slot:prepend>
@@ -248,6 +252,8 @@
 export default {
     props: [],
     data() {
+        const { useI18n } = VueI18n
+        const { t } = useI18n()
         return {
             urlAvatarHocSinh: vueData.v_Set.urlAvatarHocSinh,
             urlAvatarPhuHuynh: vueData.v_Set.urlAvatarPhuHuynh,
@@ -273,25 +279,25 @@ export default {
             DSMonHocGroup: [
                 {
                     MonHocGroup: 1,
-                    Name_VI: 'KIẾN THỨC - KỸ NĂNG',
+                    Name_VI: t('message.Skill_Knowledge'),
                     Name_EN: '',
                     icon: '/_cdn/lhbs-lms/kienthuc_ki_nang_icon.png',
                 },
                 {
                     MonHocGroup: 2,
-                    Name_VI: 'NĂNG LỰC CHUNG',
+                    Name_VI: t('message.Common_Ability'),
                     Name_EN: '',
                     icon: '/_cdn/lhbs-lms/nang_luc_chung_icon.png',
                 },
                 {
                     MonHocGroup: 3,
-                    Name_VI: 'PHẨM CHẤT',
+                    Name_VI: t('message.Quality'),
                     Name_EN: '',
                     icon: '/_cdn/lhbs-lms/pham_chat_icon.png',
                 },
                 {
                     MonHocGroup: 4,
-                    Name_VI: 'NĂNG LỰC RIÊNG',
+                    Name_VI: t('message.Personal_Ability'),
                     Name_EN: '',
                     icon: '/_cdn/lhbs-lms/nang_luc_rieng.png',
                 },

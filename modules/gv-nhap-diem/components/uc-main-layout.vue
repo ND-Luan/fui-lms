@@ -52,7 +52,7 @@
             </v-card-title>
             <uc-jexcel v-if="dataSource.length > 0" v-model="instance" :freezeColumns="2"
                 v-model:dataSource="dataSource" :columns="colHeaders" :exportExcel="exportExcel" :isSubmit="isSubmit"
-                :updateTable="updateTable" :key="keyComp" styleExcel="height: calc(100vh - 252px)">
+                :updateTable="updateTable" :key="keyComp" styleExcel="height: calc(100vh - 268px)">
             </uc-jexcel>
         </v-card>
     </div>
@@ -233,7 +233,7 @@ export default {
                         } else if (x.GiaTriCotDiem === 'ICO_Star') { // cấu hình header cột điểm có dạng ICO_Star
                             let column = {
                                 type: 'html',
-                                title: x.TenCotDiem_VI+ fn_IsDisabledTinhTrangDiem(x.TinhTrang, 'GV').isDisabled,
+                                title: x.TenCotDiem_VI, // + fn_IsDisabledTinhTrangDiem(x.TinhTrang, 'GV').isDisabled,
                                 name: x.MaCotDiem,
                                 width: 120,
                                 typeValue: x.GiaTriCotDiem,
@@ -295,13 +295,11 @@ export default {
             cell.style.backgroundColor = this.colHeaders[col]?.backGroundColor
             this.colHeaders.forEach((x, index) => {
                 if (x.type == 'numeric') {
-                    if (col === index) {
-                        cell.style.textAlign = 'right'
-                    }
+                    if (col === index) cell.style.textAlign = 'right'
+
                 } else if (x.type == 'text') {
-                    if (col === index) {
-                        cell.style.textAlign = 'left'
-                    }
+                    if (col === index) cell.style.textAlign = 'left'
+
                 }
             })
         },
@@ -369,11 +367,8 @@ export default {
             this.isSubmit = false
         },
         validateSave(typeCell, value, min, max) {
-            if ((typeCell === 'number' && value < min) || value > max) {
-                return 1
-            } else {
-                return 0
-            }
+            if ((typeCell === 'number' && value < min) || value > max) return 1
+            else return 0
         },
         async onHandleSendTinhTrang(TinhTrang) {
             const { IsSuccess } = await NhapDiem_Service.KQHT_MonHocLop_TinhTrang_Udp({

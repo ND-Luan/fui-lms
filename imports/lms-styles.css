@@ -166,3 +166,7 @@
 .v-expansion-panel-title {
     padding: 16px 16px !important;
 }
+
+.switch-center .v-selection-control {
+    justify-content: center;
+}

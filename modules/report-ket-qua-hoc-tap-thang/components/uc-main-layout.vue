@@ -1,18 +1,14 @@
 <template>
     <uc-app :isAdmin="false">
-        <!-- <template v-slot:subTitleAppbar>
-           
-        </template> -->
-
         <div class="font-weight-medium text-primary mt-4 d-flex justify-space-between align-center">
-            <p>KẾT QUẢ HỌC TẬP</p>
+            <p>{{ $t('message.studyResult') }}</p>
             <v-chip label size="large" color="primary">
                 Tháng 10
             </v-chip>
         </div>
         <v-divider class="mx-auto w-50 mt-2 mb-2" style="background-color: white; min-height:2px"></v-divider>
         <div>
-            <p class="text-primary  font-weight-medium mb-2">Học sinh đang chọn</p>
+            <p class="text-primary  font-weight-medium mb-2">{{ $t('message.selectedStudent') }}</p>
             <v-skeleton-loader v-if="IsLoadingPage" class="mx-auto" elevation="4" type="article"
                 boilerplate></v-skeleton-loader>
             <v-card v-else>
@@ -34,12 +30,12 @@
                                 <v-divider class="mt-1 mb-1" style="height: 4px;"></v-divider>
                                 <div class="d-flex justify-space-evenly align-center">
                                     <div class="text-center">
-                                        Khối
+                                        {{ $t('message.grade') }}
                                         <p class="text-subtitle-2">{{ HocSinhDetail?.KhoiID }}</p>
                                     </div>
                                     <v-divider vertical></v-divider>
                                     <div class="text-center">
-                                        Lớp
+                                        {{ $t('message.class') }}
                                         <p class="text-subtitle-2">{{ HocSinhDetail?.TenLop }}</p>
                                     </div>
                                 </div>
@@ -54,7 +50,7 @@
             </v-card>
 
             <v-row class="mt-2">
-                <v-col cols="12" class="text-primary font-weight-medium pb-0">Nội dung đánh giá</v-col>
+                <v-col cols="12" class="text-primary font-weight-medium pb-0"> {{ $t('message.evaluation') }}</v-col>
                 <v-col cols="12" v-for="item in 6">
                     <v-card>
                         <v-card-text>
@@ -67,7 +63,7 @@
             </v-row>
             <v-row>
                 <v-col cols="12" class="pb-0">
-                    <p class="text-primary font-weight-medium ">Nhận xét</p>
+                    <p class="text-primary font-weight-medium ">{{ $t('message.comment') }}</p>
                 </v-col>
                 <v-col cols="12" class="mb-16">
                     <v-card>
@@ -96,7 +92,7 @@
                     </v-btn>
                 </template>
                 <v-list>
-                    <v-list-subheader>Danh sách học sinh</v-list-subheader>
+                    <v-list-subheader>{{ $t('message.studentList') }}</v-list-subheader>
                     <v-list-item v-for="item in DSHocSinh" :key="item.StudentID" :disabled="item.Khoi <= 0"
                         @click="() => onSelectHocSinh(item)">
                         <template v-slot:prepend>

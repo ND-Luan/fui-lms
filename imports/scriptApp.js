@@ -272,5 +272,52 @@ vueData.v_Set.themeStyle = {
 
 $('document').ready(() => {
     // app.component(Toasted)
+    const i18n = VueI18n.createI18n({
+        legacy: false,
+        locale: 'vi',
+        fallbackLocale: 'en',
+        messages: {
+            en: {
+                message: {
+                    language: 'English',
+                    studyResult: 'STUDY RESULT',
+                    selectedStudent: 'Selected student',
+                    grade: "Grade",
+                    class: "Class",
+                    parent: "Parent",
+                    semester: "Semester",
+                    Skill_Knowledge: 'SKILL - KNOWLEDGE',
+                    Common_Ability: 'COMMON ABILITY',
+                    Quality: 'Quality',
+                    Personal_Ability: 'PERSONAL ABILITY',
+
+                    evaluation: "Evaluation",
+                    comment: "Comment",
+
+                    studentList: "Student list"
+                }
+            },
+            vi: {
+                message: {
+                    language: 'Tiếng Việt',
+                    studyResult: 'KẾT QUẢ HỌC TẬP',
+                    selectedStudent: 'Học sinh đang chọn',
+                    grade: "Khối",
+                    class: "Lớp",
+                    parent: "Phụ huynh",
+                    semester: "Kỳ thi",
+                    Skill_Knowledge: 'KIẾN THỨC - KỸ NĂNG',
+                    Common_Ability: 'NĂNG LỰC CHUNG',
+                    Quality: 'PHẨM CHẤT',
+                    Personal_Ability: 'NĂNG LỰC RIÊNG',
+                    evaluation: "Nội dung đánh giá",
+                    comment: "Nhận xét",
+
+                    studentList: "Danh sách học sinh"
+                }
+            }
+        }
+    })
+    app.use(i18n);
 })
 
