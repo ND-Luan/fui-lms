@@ -1,1 +1,1 @@
-{"data":[],"watch":{},"controls":[{"prop":"fluid ","rows":[{"prop":"","cols":[{"el":"uc-main-layout","w":12}]}]}],"set":{}}
+{"data":[],"watch":{},"controls":[{"prop":"fluid","rows":[{"prop":"","cols":[{"el":"f-header","w":6,"attr":{"label":"Giao Diện","text":"Giao Diện","class":"text-h4 text-primary font-weight-medium"},"col":""},{"el":"div","attr":{}},{"el":"f-search","attr":{"label":"Search"},"innerHTML":"","col":"shrink","w":"200"}]}]}],"set":{}}

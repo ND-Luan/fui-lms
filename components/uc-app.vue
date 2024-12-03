@@ -42,8 +42,10 @@ export default {
         },
     },
     data() {
+        const IsLanguage = JSON.parse(localStorage.getItem('IsLanguage')) ?? false
+        this.$i18n.locale = IsLanguage ? "en" : "vi"
         return {
-            IsLanguage: false
+            IsLanguage: IsLanguage
         }
     },
     created() {
@@ -52,7 +54,6 @@ export default {
     mounted() {
         document.getElementsByClassName('v-col')[0].style.padding = '0px'
         document.getElementsByClassName('v-row')[0].style.margin = '0px'
-
     },
     watch: {
         IsLanguage: function (IsLanguage) {
@@ -61,6 +62,7 @@ export default {
             } else {
                 this.$i18n.locale = 'vi';
             }
+            localStorage.setItem('IsLanguage', IsLanguage)
         }
     },
     methods: {
