@@ -174,8 +174,7 @@ export default {
                         }
                     })
                     this.DSNhomDiem = [...new Set(mapArr)]
-                }
-
+                } 
             }
         },
         async loadDSCotDiem() {
@@ -372,7 +371,6 @@ export default {
         },
         async onHandleSendTinhTrang(TinhTrang) {
             const { IsSuccess } = await NhapDiem_Service.KQHT_MonHocLop_TinhTrang_Udp({
-                NienKhoa: 2024,
                 MonHocLopID: this.MonHocLopID,
                 LopID: this.LopID,
                 TinhTrang: TinhTrang,
