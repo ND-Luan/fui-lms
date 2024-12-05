@@ -217,12 +217,15 @@ function getColumnAddress(columns, columnName) {
     columns.forEach((column, index) => {
         const columnAddress = String.fromCharCode(67 + index); // 67 là mã ASCII của 'C'
         columnMap[column.name] = columnAddress;
+        // console.log(columnMap)
     });
+
     return columnMap[columnName] || columnName; // Trả về địa chỉ cột nếu có, nếu không giữ nguyên tên cột
 }
 function replaceFormula(columns, formula, indexRow) {
     return formula.replace(/\b\w+_\w+\b/g, (match) => {
         try {
+            console.log('match', match)
             // Lấy địa chỉ cột từ tên cột
             const columnAddress = getColumnAddress(columns, match);
 

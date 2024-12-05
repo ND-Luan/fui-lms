@@ -3,6 +3,9 @@
 		v-model:dataSource="vueData.DSHocSinh" :columns="vueData.columnHeader" :updateTable="updateTable"
 		:key="vueData.keyComp" styleExcel="height: calc(100vh - 268px)">
 	</uc-jexcel>
+	<div v-else>
+		<uc-empty />
+	</div>
 </template>
 
 <script>

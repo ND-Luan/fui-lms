@@ -30,6 +30,7 @@ function convertDSHocSinh() {
     //Xử lý động cột điểm header jexcel
     let columnsCotDiem = SLCotDiem_OfFirstSTD
         .map((x) => {
+            console.log('ma',x.MaCotDiem)
             if (x.GiaTriCotDiem === 'number') { // cấu hình header cột điểm có dạng number
                 let column = {
                     type: 'numeric',
@@ -111,14 +112,42 @@ function convertDSHocSinh() {
         indexRow++
         dataJexcel.push(obj)
     }
+    console.log('dataJexcel',dataJexcel)
     vueData.keyComp++
     vueData.columnHeader = headers
     vueData.DSHocSinh = dataJexcel
     vueData.DSCotDiem_ByMaNhomCotDiem = DSCotDiem_ByMaNhomCotDiem
+    console.log('DONE CONVERT')
 }
 function validateSave(typeCell, value, min, max) {
     if ((typeCell === 'number' && value < min) || value > max) return 1
     else return 0
+}
+function fn_IsDisabledTinhTrangDiem({ TinhTrang, type }) {
+    console.log(TinhTrang, type)
+    const arrStatusGV = [0, 1, 2, 3, 4]
+    const obj = {
+        color: getColorTinhTrangDiem(TinhTrang),
+        isDisabled: false,
+        text: getTextTinhTrangDiem(TinhTrang)
+    }
+    if (type === 'GV') {
+        if (arrStatusGV.indexOf(TinhTrang) >= 0) {
+            if (TinhTrang == 0 || TinhTrang == 3) {
+                obj.isDisabled = false
+            } else {
+                obj.isDisabled = true
+            }
+        }
+    } else {
+        if (TinhTrang == 1) {
+            obj.isDisabled = false
+        } else {
+            obj.isDisabled = true
+        }
+    }
+    console.log(obj)
+    return obj
 }
 function onLuuDiem() {
     let val = vueData.DSHocSinh
