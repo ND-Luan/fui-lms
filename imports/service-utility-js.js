@@ -209,6 +209,8 @@ const apiUtil = {
             })
         })
     },
+ 
+
     // Edubot: (url, params = null) => {
     //     return new Promise((resolve, reject) => {
     //         vueData.v_Loading = true
@@ -277,6 +279,29 @@ const apiUtil = {
             })
         })
     },
+}
+const  CallAPI ={
+    
+     // Các phương thức HTTP cụ thể
+    get(prefix, url, METHOD, params = null) {
+        let urlCall = METHOD!= '' ?`${prefix}${url}_${METHOD}` :`${prefix}${url}`
+        return AJAX( urlCall, params);
+    },
+    post(prefix, url, METHOD, params = null) {
+        let urlCall = METHOD!= ''?`${prefix}${url}_${METHOD}` :`${prefix}${url}`
+        return AJAX(urlCall, params);
+    },
+    put(prefix, url, METHOD, params = null) {
+        let urlCall = METHOD!= ''?`${prefix}${url}_${METHOD}` :`${prefix}${url}`
+        return AJAX(urlCall, params);
+    },
+    patch(prefix, url, METHOD, params = null) {
+        let urlCall = METHOD!= ''?`${prefix}${url}_${METHOD}` :`${prefix}${url}`
+        return AJAX(urlCall, params);
+    }
+
+
+
 }
 
 //Xem params https://tapi.lhbs.vn/help/lms/

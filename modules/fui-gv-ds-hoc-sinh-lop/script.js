@@ -29,6 +29,7 @@ function renderDSKhoi() {
 }
 function renderDSHocSinh() {
     const eduBotHocSinhLop = []
+    let items = []
     const currentDSHocSinhLop_LMS = vueData.DSHocSinhLop_LMS.filter(x => x.LopID === vueData.LopItem.LopID)
     for (var hsl of currentDSHocSinhLop_LMS) {
         const hs = vueData.DSHocSinh_LMS.find(x => x.HocSinhID === hsl.HocSinhID)
@@ -38,48 +39,39 @@ function renderDSHocSinh() {
     }
     const uniqueHocSinhID = [...new Set(eduBotHocSinhLop.map(x => x.HocSinhID))]
     for (var id of uniqueHocSinhID) {
-        const hocSinhLMS = eduBotHocSinhLop.find(x => x.HocSinhID === id)
+        let obj = {}
         const hocSinh = vueData.DSHocSinhLop.find(x => x.HocSinhID === id)
-        let HocSinhID = 0
-        let Ho = 0
-        let Ten = 0
-        let NgaySinh = 0
-        let Nu = 0
-        let TinhTrang = 0
-        let TenTinhTrang = 0
-        let TinhTrangKQHT
-        let TinhTrangQLHS
+        const hocSinhLMS = eduBotHocSinhLop.find(x => x.HocSinhID === id)
         if (hocSinh) {
-            console.log('hs', hocSinh)
-            HocSinhID = hocSinh.HocSinhID
-            Ho = hocSinh.Ho
-            Ten = hocSinh.Ten
-            NgaySinh = hocSinh.NgaySinh
-            Nu = hocSinh.Nu
-            TinhTrang = hocSinh.TinhTrang
-            TenTinhTrang = hocSinh.TenTinhTrang
-            TinhTrangKQHT = hocSinh?.TenTinhTrang ?? 'Không có'
-            TinhTrangQLHS = hocSinhLMS?.TenTinhTrang ?? 'Không có'
-        } else {
-            console.log('lms', hocSinhLMS)
-            HocSinhID = hocSinhLMS.HocSinhID
-            Ho = hocSinhLMS.Ho
-            Ten = hocSinhLMS.Ten
-            NgaySinh = hocSinhLMS.NgaySinh
-            Nu = hocSinhLMS.Nu
-            TinhTrang = hocSinhLMS.TinhTrang
-            TenTinhTrang = hocSinhLMS.TenTinhTrang
-            TinhTrangKQHT = hocSinh?.TenTinhTrang ?? 'Không có'
-            TinhTrangQLHS = hocSinhLMS?.TenTinhTrang ?? 'Không có'
+            //KQHT
+            const _hs = vueData.DSHocSinhLop.find(x => x.HocSinhID === hocSinh.HocSinhID)
+            obj.HSLopID = hocSinh.HSLopID
+            obj.LopID = hocSinh.LopID
+            obj.HocSinhID = _hs.HocSinhID
+            obj.HoTen = _hs.Ho + ' ' + _hs.Ten
+            obj.Ho = _hs.Ho
+            obj.Ten = _hs.Ten
+            obj.NgaySinh = _hs.NgaySinh
+            obj.Nu = _hs.Nu
+            obj.TinhTrangKQHT = _hs?.TinhTrang
+            obj.TenTinhTrangKQHT = _hs?.TenTinhTrang
         }
-        vueData.items.push({
-            HocSinhID: HocSinhID,
-            Ho: Ho,
-            Ten: Ten,
-            NgaySinh: NgaySinh,
-            Nu: Nu,
-            TinhTrang: TinhTrang,
-            TenTinhTrang: TenTinhTrang,
+        if (hocSinhLMS) {
+            //EDUBOT
+            const _hs = eduBotHocSinhLop.find(x => x.HocSinhID === hocSinhLMS.HocSinhID)
+            obj.HSLopID = hocSinhLMS.HSLopID
+            obj.LopID = hocSinhLMS.LopID
+            obj.HocSinhID = _hs.HocSinhID
+            obj.HoTen = _hs.Ho + ' ' + _hs.Ten
+            obj.Ho = _hs.Ho
+            obj.Ten = _hs.Ten
+            obj.NgaySinh = _hs.NgaySinh
+            obj.Nu = _hs.Nu
+            obj.TinhTrangQLHS = _hs?.TinhTrang
+            obj.TenTinhTrangQLHS = _hs?.TenTinhTrang
+        }
+        items.push({
+            ...obj,
             HSLopID: hocSinhLMS.HSLopID,
             LopID: hocSinhLMS.LopID,
             SoDanhBo: hocSinhLMS.SoDanhBo,
@@ -87,16 +79,14 @@ function renderDSHocSinh() {
             CreateTime: hocSinhLMS.CreateTime,
             UpdateUser: hocSinhLMS.UpdateUser,
             UpdateTime: hocSinhLMS.UpdateTime,
-            TinhTrangKQHT: TinhTrangKQHT,
-            TinhTrangQLHS: TinhTrangQLHS,
         })
     }
-    vueData.items = vueData.items.map((x, index) => {
+    items = items.map((x, index) => {
         return {
             ...x,
             STT: index + 1,
             HoTen: x.Ho + ' ' + x.Ten,
         }
     })
-    console.log(uniqueHocSinhID)
+    vueData.items = items
 }

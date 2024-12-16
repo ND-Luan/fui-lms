@@ -43,7 +43,7 @@
 .swal2-actions {
     gap: 50px;
 }
-
+/* 
 .custom-toast {
     position: fixed !important;
     right: 10px !important;
@@ -68,7 +68,7 @@
 
 .v-toast__text {
     height: 100% !important;
-}
+} */
 
 .jexcel_container {
     padding-right: 0 !important;

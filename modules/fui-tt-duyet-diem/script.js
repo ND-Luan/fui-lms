@@ -30,7 +30,6 @@ function convertDSHocSinh() {
     //Xử lý động cột điểm header jexcel
     let columnsCotDiem = SLCotDiem_OfFirstSTD
         .map((x) => {
-            console.log('ma',x.MaCotDiem)
             if (x.GiaTriCotDiem === 'number') { // cấu hình header cột điểm có dạng number
                 let column = {
                     type: 'numeric',
@@ -42,7 +41,7 @@ function convertDSHocSinh() {
                     mask: '0.00',
                     backGroundColor: x.HexBackground,
                     wrapText: true,
-                    readOnly: x.LoaiCotDiem === 'Công thức' ? true : false,
+                    readOnly: true
                 }
                 return column
             } else if (x.GiaTriCotDiem === 'text') { // cấu hình header cột điểm có dạng text
@@ -51,22 +50,23 @@ function convertDSHocSinh() {
                     title: x.TenCotDiem_VI,
                     name: x.MaCotDiem,
                     typeValue: x.GiaTriCotDiem,
-                    width: calculateColumnWidth(x.TenCotDiem_VI),
+                    width: this.calculateColumnWidth(x.TenCotDiem_VI),
                     backGroundColor: x.HexBackground,
                     wrap: true,
+                    readOnly: true
                 }
                 return column
             } else if (x.GiaTriCotDiem === 'ICO_Star') { // cấu hình header cột điểm có dạng ICO_Star
                 let column = {
                     type: 'html',
-                    title: x.TenCotDiem_VI, // + fn_IsDisabledTinhTrangDiem(x.TinhTrang, 'GV').isDisabled,
+                    title: x.TenCotDiem_VI,
                     name: x.MaCotDiem,
                     width: 120,
                     typeValue: x.GiaTriCotDiem,
                     backGroundColor: x.HexBackground,
                     wrap: true,
                     align: 'center',
-                    readOnly: x.LoaiCotDiem === 'Công thức' ? true : false,
+                    readOnly: true
                 }
                 return column
             }
@@ -102,29 +102,34 @@ function convertDSHocSinh() {
         }
         for (var cotDiemExist of arrCotDiemExist) {
             if (cotDiemExist.LoaiCotDiem !== 'Công thức') {
+                //Text
                 obj[cotDiemExist.MaCotDiem] = cotDiemExist.GiaTriCotDiem === 'number' ? (cotDiemExist.KetQuaDanhGia_VI === '' || cotDiemExist.KetQuaDanhGia_VI === null ? null : parseFloat(cotDiemExist.KetQuaDanhGia_VI)) : cotDiemExist.KetQuaDanhGia_VI
+            } else if (cotDiemExist.LoaiCotDiem == 'Công thức' && cotDiemExist.Formula !== null && arrCotDiemExist.length === 1) {
+                //dùng cho formula để hiển thị
+                obj[cotDiemExist.MaCotDiem] = parseFloat(cotDiemExist?.KetQuaDanhGia_VI ?? 0)
             } else if (cotDiemExist.LoaiCotDiem == 'Công thức' && cotDiemExist.GiaTriCotDiem === 'number') {
+                //Công thức
                 obj[cotDiemExist.MaCotDiem] = '=' + replaceFormula(columnsCotDiem, cotDiemExist.Formula, indexRow)
             } else if (cotDiemExist.LoaiCotDiem == 'Công thức' && cotDiemExist.GiaTriCotDiem === 'ICO_Star') {
+                //Ngôi sao
                 obj[cotDiemExist.MaCotDiem] = `=RATING(${replaceFormula(columnsCotDiem, cotDiemExist.Formula, indexRow)})`
             }
         }
         indexRow++
         dataJexcel.push(obj)
     }
-    console.log('dataJexcel',dataJexcel)
+    console.log('dataJexcel', dataJexcel)
     vueData.keyComp++
     vueData.columnHeader = headers
     vueData.DSHocSinh = dataJexcel
     vueData.DSCotDiem_ByMaNhomCotDiem = DSCotDiem_ByMaNhomCotDiem
-    console.log('DONE CONVERT')
 }
 function validateSave(typeCell, value, min, max) {
     if ((typeCell === 'number' && value < min) || value > max) return 1
     else return 0
 }
-function fn_IsDisabledTinhTrangDiem({ TinhTrang, type }) {
-    console.log(TinhTrang, type)
+function fn_IsDisabledTinhTrangDiem({ type }) {
+    const TinhTrang = vueData.DSCotDiem_ByMaNhomCotDiem.find(x => x.TinhTrang === 2) ? 2 : vueData.DSCotDiem_ByMaNhomCotDiem[0]?.TinhTrang
     const arrStatusGV = [0, 1, 2, 3, 4]
     const obj = {
         color: getColorTinhTrangDiem(TinhTrang),
@@ -146,7 +151,6 @@ function fn_IsDisabledTinhTrangDiem({ TinhTrang, type }) {
             obj.isDisabled = true
         }
     }
-    console.log(obj)
     return obj
 }
 function onLuuDiem() {
@@ -193,6 +197,7 @@ function onLuuDiem() {
         Vue.$toast.error('Cột điểm chỉ cho phép nhập thang điểm 10!', { position: 'top' })
         return
     }
+    //Insert xong cập nhật tình trạng
     const promise = () => {
         return new Promise(resolve => {
             CALL("insKQHT_MonHocLop")
@@ -206,8 +211,9 @@ function onLuuDiem() {
             TinhTrang: 0,
             MaNhomCotDiem: vueData.MaNhomCotDiemItem.MaNhomCotDiem
         })
+        CALL('getHocSinhBangDiem')
+        vueData.keyComp++
     })
-    this.keyComp++
 }
 function onGuiDiem() {
     const promise = () => {
@@ -223,7 +229,45 @@ function onGuiDiem() {
             TinhTrang: 1,
             MaNhomCotDiem: vueData.MaNhomCotDiemItem.MaNhomCotDiem
         })
-        this.keyComp++
+        CALL('getHocSinhBangDiem')
+        vueData.keyComp++
     })
-    console.log(123)
+}
+function onTuChoiDiem() {
+    const promise = () => {
+        return new Promise(resolve => {
+            CALL("udpKQHT_MonHocLop_TinhTrang", {
+                MonHocLopID: vueData.MonHocItem.MonHocLopID,
+                LopID: vueData.LopItem.LopID,
+                TinhTrang: 3,
+                MaNhomCotDiem: vueData.MaNhomCotDiemItem.MaNhomCotDiem,
+                IsSendToManager: false
+            })
+            CALL('getHocSinhBangDiem')
+            resolve()
+        })
+    }
+    promise().then(() => {
+        Vue.$toast.success('Từ chối điểm thành công', { postion: 'top' })
+        vueData.keyComp++
+    })
+}
+function onDuyetDiem() {
+    const promise = () => {
+        return new Promise(resolve => {
+            CALL("udpKQHT_MonHocLop_TinhTrang", {
+                MonHocLopID: vueData.MonHocItem.MonHocLopID,
+                LopID: vueData.LopItem.LopID,
+                TinhTrang: 2,
+                MaNhomCotDiem: vueData.MaNhomCotDiemItem.MaNhomCotDiem,
+                IsSendToManager: true
+            })
+            CALL('getHocSinhBangDiem')
+            resolve()
+        })
+    }
+    promise().then(() => {
+        Vue.$toast.success('Duyệt điểm thành công', { postion: 'top' })
+        vueData.keyComp++
+    })
 }

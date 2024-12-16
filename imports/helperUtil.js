@@ -225,7 +225,6 @@ function getColumnAddress(columns, columnName) {
 function replaceFormula(columns, formula, indexRow) {
     return formula.replace(/\b\w+_\w+\b/g, (match) => {
         try {
-            console.log('match', match)
             // Lấy địa chỉ cột từ tên cột
             const columnAddress = getColumnAddress(columns, match);
 
