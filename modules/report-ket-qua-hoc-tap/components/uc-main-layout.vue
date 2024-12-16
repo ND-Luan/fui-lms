@@ -133,7 +133,7 @@
         </div>
         <v-menu transition="fab-transition">
             <template v-slot:activator="{ props }">
-                <v-btn v-bind="props" class="position-fixed" style="
+                <v-btn v-bind="props" class="position-fixed elevation-8" style="
             z-index: 10;
             bottom: 16px;
             right: 16px;
@@ -308,7 +308,7 @@ export default {
             DSNhomDiem: [],
             MonHocSelected: null,
             IsLoadingPage: false,
-            IsLoadingDSHocSinh: false
+            IsLoadingDSHocSinh: false,
         }
     },
     mounted() {
@@ -319,7 +319,10 @@ export default {
             if (!isShow) {
                 this.MonHocSelected = null
             }
-        }
+        },
+        '$i18n.locale': function () {
+            this.updateDSMonHocGroup();
+        },
     },
     methods: {
         async loadInfoHocSinh() {
@@ -397,6 +400,34 @@ export default {
             if (event.currentTarget.classList.contains('v-expansion-panel--active')) {
                 // this.loadHocSinhKQHT(hk.code)
             }
+        },
+        updateDSMonHocGroup() {
+            this.DSMonHocGroup = [
+                {
+                    MonHocGroup: 1,
+                    Name_VI: this.$t('message.Skill_Knowledge'),
+                    Name_EN: '',
+                    icon: '/_cdn/lhbs-lms/kienthuc_ki_nang_icon.png',
+                },
+                {
+                    MonHocGroup: 2,
+                    Name_VI: this.$t('message.Common_Ability'),
+                    Name_EN: '',
+                    icon: '/_cdn/lhbs-lms/nang_luc_chung_icon.png',
+                },
+                {
+                    MonHocGroup: 3,
+                    Name_VI: this.$t('message.Quality'),
+                    Name_EN: '',
+                    icon: '/_cdn/lhbs-lms/pham_chat_icon.png',
+                },
+                {
+                    MonHocGroup: 4,
+                    Name_VI: this.$t('message.Personal_Ability'),
+                    Name_EN: '',
+                    icon: '/_cdn/lhbs-lms/nang_luc_rieng.png',
+                },
+            ];
         },
         getColorChipDiem,
         stringToColor,

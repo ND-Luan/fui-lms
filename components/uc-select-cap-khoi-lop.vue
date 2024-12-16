@@ -137,20 +137,28 @@
 	            if (newValue != oldValue) {
 	                this.DSKhoi = []
 	                this.DSLop = []
+					this.DSToGiangDay = []
+
 	                this.DSMonHoc = []
 	                this.KhoiID = null
 	                this.LopID = null
 	                this.MonID = null
+					this.ToGiangDayID = null
+
 	                this.DisableKhoi = false
 	                this.DisableLop = true
 	                this.DisableMon = false
 	                this.KhoiItem = null
 	                this.LopItem = null
 	                this.MonItem = null
+					this.ToGiangDayItem = null
+
 	                sessionStorage.setItem('CapIDSelected', newValue);
 	
 	                this.getKhoiHocByCapID(newValue) //Lấy khối học
 					this.getMonHoc(CapID =newValue )
+					this.getToGiangDay(CapID =newValue )
+
 	
 	
 	            }
@@ -191,18 +199,15 @@
 	
 	
 	        },
-			ToGiangDayItem: function (newValue, oldValue) {
-			console.log('Item changed:', newValue);
-			if (newValue != oldValue) {
-			// this.getLopHocbyKhoiID(newValue) //Lấy khối học
-			this.getGiaoVienByToGiangDay(GiaoVienID = null,ToGiangDay =newValue )
-			sessionStorage.setItem('ToGiangDayIDSelected', newValue);
-			
-			
-			}
-			
-			
-			},
+            ToGiangDayItem :function(newValue, oldValue){
+                 if (newValue != oldValue) {
+	                sessionStorage.setItem('ToGiangDayIDSelected', newValue);
+	            }
+                
+                // this.getGiaoVien(id = )
+                this.getGiaoVienByToGiangDay(ToGiangDayID = newValue)
+                debugger
+            },
 	        MonHocItem: function (newValue, oldValue) {
 	            console.log('Item changed:', newValue);
 	            if (newValue != oldValue) {
@@ -230,7 +235,7 @@
 	        GiaoVienItem: function (newValue, oldValue) {
 	            console.log('Item changed:', newValue);
 	            if (newValue != oldValue) {
-	                // this.getGiaoVien() //sửa hàm này nếu muốn lấy giáo viên theo id mỗi khi select giáo viên
+	                this.getGiaoVien() //sửa hàm này nếu muốn lấy giáo viên theo id mỗi khi select giáo viên
 	
 	                sessionStorage.setItem('GiaoVienIDSelected', newValue);
 	                // this.DSLop = []
@@ -342,6 +347,7 @@
 				} else {
 				res = await SearchLMSService.GetGiaoVienByID();
 				}
+				
 				// Xử lý kết quả trả về
 				if (res) {
 				this.DSGiaoVien = res?.Result;
@@ -352,7 +358,7 @@
 				}
 				});
 			},
-			async getGiaoVienByToGiangDay(GiaoVienID = null, ToGiangDayID = null) {
+			async getGiaoVienByToGiangDay( ToGiangDayID = null,GiaoVienID = null) {
 				return new Promise(async (resolve) => {
 				let res;
 				let params = {};
@@ -364,9 +370,9 @@
 				
 				// Gọi API
 				if (Object.keys(params).length > 0) {
-				res = await SearchLMSService.GiaoVienByToGiangDayID_Get(params);
+				res = await SearchLMSService.GetGiaoVienByID(params);
 				} else {
-				res = await SearchLMSService.GiaoVienByToGiangDayID_Get();
+				res = await SearchLMSService.GetGiaoVienByID();
 				}
 				
 				// Xử lý kết quả trả về
@@ -379,32 +385,33 @@
 				}
 				});
 			},
-			async getToBoMon(CapID = null) {
+			async getToGiangDay(CapID = null) {
 				return new Promise(async (resolve) => {
-				let res;
-				let params = {};
-				
-				// Kiểm tra từng tham số để thêm vào params
-				if (CapID) params.CapID = CapID;
-				
-				
-				// Gọi API
-				if (Object.keys(params).length > 0) {
-				res = await SearchLMSService.GetToBoMonByID(params);
-				} else {
-				res = await SearchLMSService.GetToBoMonByID();
-				}
-				
-				// Xử lý kết quả trả về
-				if (res) {
-				this.DSMonHoc = res?.Result;
-				sessionStorage.setItem('ListMonHoc', JSON.stringify(this.DSMonHoc));
-				resolve();
-				} else {
-				resolve(null); // Trả về null nếu không có dữ liệu
-				}
+					let res;
+					let params = {};
+					
+					// Kiểm tra từng tham số để thêm vào params
+					if (CapID) params.CapID = CapID;
+					
+					// Gọi API
+					if (Object.keys(params).length > 0) {
+						res = await SearchLMSService.GetToBoMonByID(params);
+					} else {
+						res = await SearchLMSService.GetToBoMonByID();
+					}
+					
+					// Xử lý kết quả trả về
+					if (res) {
+						this.DSToGiangDay = res?.Result;
+						debugger
+						sessionStorage.setItem('ListToGiangDay', JSON.stringify(this.DSToGiangDay));
+					resolve();
+					} else {
+					resolve(null); // Trả về null nếu không có dữ liệu
+					}
 				});
 			},
+			
 			async getMonHoc(CapID = null, LopID = null, NienKhoa = null) {
 				return new Promise(async (resolve) => {
 					let res;
@@ -425,7 +432,7 @@
 					// Xử lý kết quả trả về
 					if (res) {
 						this.DSMonHoc = res?.Result;
-						
+						debugger
 						sessionStorage.setItem('ListMonHoc', JSON.stringify(this.DSMonHoc));
 					resolve();
 					} else {
@@ -434,32 +441,7 @@
 				});
 			},
 
-			async getToGiangDay(CapID = null) {
-				return new Promise(async (resolve) => {
-					let res;
-					let params = {};
-					
-					// Kiểm tra từng tham số để thêm vào params
-					if (CapID) params.CapID = CapID;
-					
-					// Gọi API
-					if (Object.keys(params).length > 0) {
-						res = await SearchLMSService.GetToBoMonByID(params);
-					} else {
-						res = await SearchLMSService.GetToBoMonByID();
-					}
-					
-					// Xử lý kết quả trả về
-					if (res) {
-						this.DSToGiangDay = res?.Result;
-						
-						sessionStorage.setItem('ListToGiangDay', JSON.stringify(this.DSToGiangDay));
-					resolve();
-					} else {
-					resolve(null); // Trả về null nếu không có dữ liệu
-					}
-				});
-			},
+			
 			resetDataStorage()
 			{
 				sessionStorage.clear();

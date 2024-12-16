@@ -83,7 +83,7 @@
             </v-row>
             <v-menu transition="fab-transition">
                 <template v-slot:activator="{ props }">
-                    <v-btn v-bind="props" class="position-fixed" style="
+                    <v-btn v-bind="props" class="position-fixed  elevation-8" style="
             z-index: 10;
             bottom: 16px;
             right: 16px;
