@@ -205,7 +205,7 @@
 	            }
                 
                 // this.getGiaoVien(id = )
-                this.getGiaoVienByToGiangDay(ToGiangDayID = newValue)
+                this.getGiaoVien(GiaoVienID = null,ToGiangDayID = newValue)
                 debugger
             },
 	        MonHocItem: function (newValue, oldValue) {
@@ -332,14 +332,15 @@
 	            })
 	        },
 			
-	       async getGiaoVien(GiaoVienID = null) {
+	       async getGiaoVien(GiaoVienID = null,ToGiangDayID = null ) {
 				return new Promise(async (resolve) => {
 				let res;
 				let params = {};
 				
 				// Kiểm tra từng tham số để thêm vào params
 				if (GiaoVienID) params.GiaoVienID = GiaoVienID;
-				
+                if (ToGiangDayID) params.ToGiangDayID = ToGiangDayID;
+
 				
 				// Gọi API
 				if (Object.keys(params).length > 0) {
@@ -370,9 +371,9 @@
 				
 				// Gọi API
 				if (Object.keys(params).length > 0) {
-				res = await SearchLMSService.GetGiaoVienByID(params);
+				res = await SearchLMSService.GiaoVienByToGiangDayID(params);
 				} else {
-				res = await SearchLMSService.GetGiaoVienByID();
+				res = await SearchLMSService.GiaoVienByToGiangDayID();
 				}
 				
 				// Xử lý kết quả trả về

@@ -174,7 +174,7 @@ export default {
                         }
                     })
                     this.DSNhomDiem = [...new Set(mapArr)]
-                } 
+                }
             }
         },
         async loadDSCotDiem() {

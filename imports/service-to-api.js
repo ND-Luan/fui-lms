@@ -21,7 +21,7 @@ const SearchLMSService = {
     GetGiaoVienByID(params) {
         return CallAPI.get(PREFIX.LMS, "GiaoVienByID", "GET", params);  // Subdomain "LMS", methodSufix "Get" và params { id } 
     },
-    GiaoVienByToGiangDayID_Get(params) {
+    GiaoVienByToGiangDayID(params) {
         return CallAPI.get(PREFIX.LMS, "GiaoVienByToGiangDayID", "GET", params);  // Subdomain "LMS", methodSufix "Get" và params { id } 
     },
     GetMonHocByID(params) {
@@ -29,10 +29,6 @@ const SearchLMSService = {
     },
     GetToBoMonByID(params) {
         return CallAPI.get(PREFIX.LMS, "ToBoMon", "GET", params);  // Subdomain "LMS", methodSufix "Get" và params params nhận vào là  CapID, MonHocID muốn filter theo cái nào thì truyền vào cái đấy
-    },
-    
-   
-
-   
+    }, 
 
 };

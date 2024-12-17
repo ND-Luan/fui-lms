@@ -47,7 +47,7 @@
             "getNhomDiem": {
                 "API": "lms/NhomCauTrucDiem_Get_ByTemplateBangDiemID",
                 "IN": {
-                    "TemplateBangDiemID": "vueData.MonHocItem.TemplateBangDiemID"
+                    "MonHocLopID": "vueData.MonHocItem.MonHocLopID"
                 },
                 "OUT": "DSNhomDiem"
             }
@@ -59,7 +59,7 @@
                     "LopID": "vueData.LopItem.LopID",
                     "MonHocID": "vueData.MonHocItem.MonHocID",
                     "TemplateBangDiemID": "vueData.MonHocItem.TemplateBangDiemID",
-                    "MaNhomCotDiem": "vueData.MaNhomCotDiem"
+                    "MaNhomCotDiem": "vueData.MaNhomCotDiemItem.MaNhomCotDiem"
                 },
                 "OUT": "DSCotDiem",
                 "CALLBACK": [
@@ -69,9 +69,54 @@
                     {
                         "FUN": "fn_IsDisabledTinhTrangDiem",
                         "IN": {
-                            "type": "`TT"
+                            "type": "`GV"
                         },
                         "OUT": "TinhTrang"
+                    }
+                ]
+            }
+        },
+        {
+            "insKQHT_MonHocLop": {
+                "API": "lms/KQHT_MonHocLop_Ins",
+                "IN": {
+                    "MonHocLopID": "vueData.MonHocItem.MonHocLopID",
+                    "LopID": "vueData.LopItem.LopID",
+                    "MonHocID": "vueData.MonHocItem.MonHocID",
+                    "TemplateBangDiemID": "vueData.MonHocItem.TemplateBangDiemID",
+                    "KetQuaObjArr": "JSON.stringify(vueData.dataBeforeInsertToDB)"
+                },
+                "CALLBACK": [
+                    {
+                        "dataBeforeInsertToDB": []
+                    }
+                ]
+            }
+        },
+        {
+            "udpKQHT_MonHocLop_TinhTrang": {
+                "API": "lms/KQHT_MonHocLop_TinhTrang_Udp",
+                "IN": {
+                    "MonHocLopID": "vueData.MonHocItem.MonHocLopID",
+                    "LopID": "vueData.LopItem.LopID",
+                    "TinhTrang": "vueData.TinhTrang",
+                    "MaNhomCotDiem": "vueData.MaNhomCotDiemItem.MaNhomCotDiem"
+                }
+            }
+        },
+        {
+            "udpKQHT_NhomDiem_TinhTrang": {
+                "API": "lms/KQHT_NhomDiem_TinhTrang_Udp",
+                "IN": {
+                    "TinhTrang": "vueData.TinhTrang",
+                    "NhomDiem_MonHocLopID": "vueData.MaNhomCotDiemItem.NhomDiem_MonHocLopID"
+                },
+                "CALLBACK": [
+                    {
+                        "CALL": "getNhomDiem"
+                    },
+                    {
+                        "CALL": "getHocSinhBangDiem"
                     }
                 ]
             }
@@ -115,7 +160,7 @@
             "IF": "vueData.MonHocItem?.MonHocID > 0",
             "THEN": [
                 {
-                    "MaNhomCotDiem": null,
+                    "MaNhomCotDiemItem": null,
                     "DSHocSinh": [],
                     "step": null
                 },
@@ -124,14 +169,14 @@
                 }
             ]
         },
-        "MaNhomCotDiem": {
-            "IF": "vueData.MaNhomCotDiem?.length > 0",
+        "MaNhomCotDiemItem": {
+            "IF": "vueData.MaNhomCotDiemItem?.MaNhomCotDiem?.length > 0",
             "THEN": {
                 "CALL": "getHocSinhBangDiem"
             }
         },
         "step": {
-            "EXE": "vueData.MaNhomCotDiem = vueData.DSNhomDiem.find(x => x.ThuTuNhom === step)?.MaNhomCotDiem ?? ''"
+            "EXE": "vueData.MaNhomCotDiemItem = vueData.DSNhomDiem.find(x => x.ThuTuNhom === step) ?? ''"
         }
     },
     "controls": [
