@@ -181,6 +181,8 @@ function getTextTinhTrangDiem(TinhTrang) {
 }
 
 function fn_IsDisabledTinhTrangDiem(TinhTrang, type) {
+    if (!TinhTrang) return
+    console.log(TinhTrang);
     const arrStatusGV = [0, 1, 2, 3, 4]
     const obj = {
         color: getColorTinhTrangDiem(TinhTrang),
@@ -196,7 +198,7 @@ function fn_IsDisabledTinhTrangDiem(TinhTrang, type) {
             }
         }
     } else {
-        if (TinhTrang == 1) {
+        if (TinhTrang === 2) {
             obj.isDisabled = false
         } else {
             obj.isDisabled = true

@@ -19,11 +19,9 @@ const SearchLMSService = {
     },
     
     GetGiaoVienByID(params) {
-        return CallAPI.get(PREFIX.LMS, "GiaoVienByID", "GET", params);  // Subdomain "LMS", methodSufix "Get" và params { id } 
+        return CallAPI.post(PREFIX.LMS, "GiaoVienByID", "Get", params);  // Subdomain "LMS", methodSufix "Get" và params  nhận vào là "GiaoVienID" hoặc  "CapID" "ToGiangDayID" chỉ được 1 trong 2 không được nhập cả 2
     },
-    GiaoVienByToGiangDayID(params) {
-        return CallAPI.get(PREFIX.LMS, "GiaoVienByToGiangDayID", "GET", params);  // Subdomain "LMS", methodSufix "Get" và params { id } 
-    },
+  
     GetMonHocByID(params) {
         return CallAPI.get(PREFIX.LMS, "MonHoc_ByLopID_Or_CapID", "GET", params);  // Subdomain "LMS", methodSufix "Get" và params nhận vào là LopID, CapID, NienKhoaID, MonHocID, muốn filter theo cái nào thì truyền vào cái đấy
     },

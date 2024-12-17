@@ -128,122 +128,22 @@ function validateSave(typeCell, value, min, max) {
     if ((typeCell === 'number' && value < min) || value > max) return 1
     else return 0
 }
-function fn_IsDisabledTinhTrangDiem({ type }) {
-    const TinhTrang = vueData.DSCotDiem_ByMaNhomCotDiem.find(x => x.TinhTrang === 2) ? 2 : vueData.DSCotDiem_ByMaNhomCotDiem[0]?.TinhTrang
-    const arrStatusGV = [0, 1, 2, 3, 4]
-    const obj = {
-        color: getColorTinhTrangDiem(TinhTrang),
-        isDisabled: false,
-        text: getTextTinhTrangDiem(TinhTrang)
-    }
-    if (type === 'GV') {
-        if (arrStatusGV.indexOf(TinhTrang) >= 0) {
-            if (TinhTrang == 0 || TinhTrang == 3) {
-                obj.isDisabled = false
-            } else {
-                obj.isDisabled = true
-            }
-        }
-    } else {
-        if (TinhTrang == 1) {
-            obj.isDisabled = false
-        } else {
-            obj.isDisabled = true
-        }
-    }
-    return obj
-}
-function onLuuDiem() {
-    let val = vueData.DSHocSinh
-    //val là dữ liệu trên sheet jexcel
-    let DSCotDiem = vueData.DSCotDiem_ByMaNhomCotDiem //DS cột điểm của nhóm bảng điểm
-    //   let arrCotDiem = Object.keys(val[0]).splice(2); //Lấy các cột điểm của 1 học sinh
-    //Xử lý data mapping giá trị
-    //B1: Vòng lặp thứ nhất để lặp các học sinh
-    //B2: Vòng lặp bên trong để lặp các cột điểm của 1 học sinh
-    for (let i = 0; i < val.length; i++) {
-        for (let j = 0; j < DSCotDiem.length; j++) {
-            const cellAdresss = jexcel.getColumnNameFromId([j + 2, i]) // (j+2) là địa chỉ cột điểm đầu tiên, i là row
-            // let giaTriCotDiem = val[i][arrCotDiem[j]]
-            let giaTriCotDiem = vueData.instance.getCell(cellAdresss).innerHTML
-            let cotDiem_HS = {
-                HocSinhID: val[i].HocSinhID,
-                LopID: vueData.LopItem.LopID,
-                NienKhoa: 2024,
-                CotDiemID: DSCotDiem[j].CotDiemID,
-                KetQuaDanhGia_VI: DSCotDiem[j].GiaTriCotDiem === 'number' ? (giaTriCotDiem === '' || giaTriCotDiem === NaN ? null : parseFloat(giaTriCotDiem)) : giaTriCotDiem,
-                KetQuaDanhGia_EN: DSCotDiem[j].GiaTriCotDiem === 'number' ? (giaTriCotDiem === '' || giaTriCotDiem === NaN ? null : parseFloat(giaTriCotDiem)) : giaTriCotDiem,
-                Is_Reject: '',
-                ReasonReject: '',
-            }
-            let typeColumn = DSCotDiem[j].GiaTriCotDiem
-            let value = cotDiem_HS.KetQuaDanhGia_VI
-            const min = DSCotDiem[j].DiemMin
-            const max = DSCotDiem[j].DiemMax
-            cotDiem_HS.IsError = validateSave(typeColumn, value, min, max)
-            if (cotDiem_HS.IsError === 1) {
-                vueData.instance.setStyle(cellAdresss, 'background-color', 'red')
-                Toast.error({
-                    text: `Cột điểm chỉ cho phép nhập thang điểm từ ${min} đến ${max}!`,
-                })
-                return
-            }
-            cotDiem_HS.KetQuaDanhGia_VI = cotDiem_HS.KetQuaDanhGia_VI === NaN ? null : cotDiem_HS.KetQuaDanhGia_VI
-            vueData.dataBeforeInsertToDB.push(cotDiem_HS)
-        }
-    }
-    let validIndex = vueData.dataBeforeInsertToDB.findIndex((item) => item.IsError === 1)
-    if (validIndex != -1) {
-        Vue.$toast.error('Cột điểm chỉ cho phép nhập thang điểm 10!', { position: 'top' })
-        return
-    }
-    //Insert xong cập nhật tình trạng
-    const promise = () => {
-        return new Promise(resolve => {
-            CALL("insKQHT_MonHocLop")
-            resolve()
-        })
-    }
-    promise().then(() => {
-        CALL("udpKQHT_MonHocLop_TinhTrang", {
-            MonHocLopID: vueData.MonHocItem.MonHocLopID,
-            LopID: vueData.LopItem.LopID,
-            TinhTrang: 0,
-            MaNhomCotDiem: vueData.MaNhomCotDiemItem.MaNhomCotDiem
-        })
-        CALL('getHocSinhBangDiem')
-        vueData.keyComp++
-    })
-}
-function onGuiDiem() {
-    const promise = () => {
-        return new Promise(resolve => {
-            CALL("insKQHT_MonHocLop")
-            resolve()
-        })
-    }
-    promise().then(() => {
-        CALL("udpKQHT_MonHocLop_TinhTrang", {
-            MonHocLopID: vueData.MonHocItem.MonHocLopID,
-            LopID: vueData.LopItem.LopID,
-            TinhTrang: 1,
-            MaNhomCotDiem: vueData.MaNhomCotDiemItem.MaNhomCotDiem
-        })
-        CALL('getHocSinhBangDiem')
-        vueData.keyComp++
-    })
-}
+
 function onTuChoiDiem() {
+    const TINH_TRANG = 3
     const promise = () => {
         return new Promise(resolve => {
             CALL("udpKQHT_MonHocLop_TinhTrang", {
                 MonHocLopID: vueData.MonHocItem.MonHocLopID,
                 LopID: vueData.LopItem.LopID,
-                TinhTrang: 3,
+                TinhTrang: TINH_TRANG,
                 MaNhomCotDiem: vueData.MaNhomCotDiemItem.MaNhomCotDiem,
                 IsSendToManager: false
             })
-            CALL('getHocSinhBangDiem')
+            CALL("udpKQHT_NhomDiem_TinhTrang", {
+                TinhTrang: TINH_TRANG,
+                NhomDiem_MonHocLopID: vueData.MaNhomCotDiemItem.NhomDiem_MonHocLopID
+            })
             resolve()
         })
     }
@@ -253,16 +153,20 @@ function onTuChoiDiem() {
     })
 }
 function onDuyetDiem() {
+    const TINH_TRANG = 4
     const promise = () => {
         return new Promise(resolve => {
             CALL("udpKQHT_MonHocLop_TinhTrang", {
                 MonHocLopID: vueData.MonHocItem.MonHocLopID,
                 LopID: vueData.LopItem.LopID,
-                TinhTrang: 2,
+                TinhTrang: TINH_TRANG,
                 MaNhomCotDiem: vueData.MaNhomCotDiemItem.MaNhomCotDiem,
                 IsSendToManager: true
             })
-            CALL('getHocSinhBangDiem')
+            CALL("udpKQHT_NhomDiem_TinhTrang", {
+                TinhTrang: TINH_TRANG,
+                NhomDiem_MonHocLopID: vueData.MaNhomCotDiemItem.NhomDiem_MonHocLopID
+            })
             resolve()
         })
     }

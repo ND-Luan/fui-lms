@@ -80,7 +80,7 @@ export default {
         },
     },
     mounted: function () {
-        const jExcelObj = jexcel(this.$refs["spreadsheet"], this.jExcelOptions);
+        const jExcelObj = jspreadsheet(this.$refs["spreadsheet"], this.jExcelOptions);
         Object.assign(this, { jExcelObj }); // tucks all methods under jExcelObj object in component instance
         this.$emit('update:modelValue', jExcelObj)
     },
@@ -89,25 +89,30 @@ export default {
 
             const $this = this
             return {
-                data: this.dataSource,
-                columns: this.columns,
-                rowResize: true,
-                columnDrag: true,
-                nestedHeaders: this.nestedHeaders,
-                minDimensions: this.minDimensions,
-                tableWidth: this.tableWidth,
-                tableOverflow: true,
-                tableHeight: this.tableHeight,
-                lazyLoading: true,
-                freezeColumns: this.freezeColumns,
-                columnSorting: false,
-                contextMenu: false,
-                stripHTML: false,
-                onchange: this.changed,
-                onselection: this.onselection,
-                onload: this.onload,
-                wordWrap: true,
-                updateTable: (instance, cell, col, row, val, label, cellName) => this.updateTable(instance, cell, col, row, val, label, cellName)
+                worksheets: [
+                    {
+                        data: this.dataSource,
+                        columns: this.columns,
+                        rowResize: true,
+                        columnDrag: true,
+                        nestedHeaders: this.nestedHeaders,
+                        minDimensions: this.minDimensions,
+                        tableWidth: this.tableWidth,
+                        tableOverflow: true,
+                        tableHeight: this.tableHeight,
+                        lazyLoading: true,
+                        freezeColumns: this.freezeColumns,
+                        columnSorting: false,
+                        contextMenu: false,
+                        stripHTML: false,
+                        onchange: this.changed,
+                        onselection: this.onselection,
+                        onload: this.onload,
+                        wordWrap: true,
+                        updateTable: (instance, cell, col, row, val, label, cellName) => this.updateTable(instance, cell, col, row, val, label, cellName)
+                    }
+                ],
+
             };
         }
     },

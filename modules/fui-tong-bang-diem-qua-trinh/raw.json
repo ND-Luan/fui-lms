@@ -16,6 +16,7 @@
             "DSCotDiem": [],
             "DSCotDiem_ByMaNhomCotDiem": [],
             "DSCotDiem_TatCa": [],
+            "DSTinhTrang": [],
             "dataBeforeInsertToDB": [],
             "TinhTrang": null,
             "step": null,
@@ -49,7 +50,13 @@
                 "IN": {
                     "MonHocLopID": "vueData.MonHocItem.MonHocLopID"
                 },
-                "OUT": "DSNhomDiem"
+                "OUT": "res_DSNhomDiem",
+                "CALLBACK": [
+                    {
+                        "DSNhomDiem": "res_DSNhomDiem[0]",
+                        "DSTinhTrang": "res_DSNhomDiem[1]"
+                    }
+                ]
             }
         },
         {
@@ -75,6 +82,16 @@
                     }
                 ]
             }
+        },
+        {
+            "onRefresh": [
+                {
+                    "CALL": "getNhomDiem"
+                },
+                {
+                    "CALL": "getHocSinhBangDiem"
+                }
+            ]
         },
         {
             "insKQHT_MonHocLop": {
@@ -113,10 +130,7 @@
                 },
                 "CALLBACK": [
                     {
-                        "CALL": "getNhomDiem"
-                    },
-                    {
-                        "CALL": "getHocSinhBangDiem"
+                        "CALL": "onRefresh"
                     }
                 ]
             }
@@ -148,6 +162,7 @@
             "THEN": [
                 {
                     "DSHocSinh": [],
+                    "DSNhomDiem": [],
                     "MonHocItem": null,
                     "MaNhomCotDiem": null
                 },
@@ -267,7 +282,7 @@
                                                     "attr": {
                                                         "cols": 12
                                                     },
-                                                    "innerHTML": "<f-button label='Làm mới' :action='getHocSinhBangDiem' color='primary' />"
+                                                    "innerHTML": "<f-button label='Làm mới' :action='onRefresh' color='primary' />"
                                                 }
                                             ]
                                         }
