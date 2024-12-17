@@ -43,6 +43,7 @@
 .swal2-actions {
     gap: 50px;
 }
+
 /* 
 .custom-toast {
     position: fixed !important;
@@ -169,4 +170,14 @@
 
 .switch-center .v-selection-control {
     justify-content: center;
+}
+
+.v-stepper-item__avatar.v-avatar {
+    width: 36px !important;
+    height: 36px !important;
+    background: #ffffff00 !important;
+}
+
+.v-stepper-item__avatar.v-avatar .v-icon {
+    font-size: 1.8rem !important;
 }

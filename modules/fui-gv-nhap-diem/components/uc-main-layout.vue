@@ -42,7 +42,7 @@
                     </v-btn>
                     <v-btn color="success" @click="onHandleSubmit()"
                         :disabled="!dataSource.length > 0 || fn_IsDisabledTinhTrangDiem(DSHocSinh[0]?.TinhTrang, 'GV').isDisabled">
-                        Lưu điểm
+                        Lưu tạm
                     </v-btn>
                     <v-btn color="primary" @click="onHandleSendTinhTrang(1)"
                         :disabled="!dataSource.length > 0 || fn_IsDisabledTinhTrangDiem(DSHocSinh[0]?.TinhTrang, 'GV').isDisabled">

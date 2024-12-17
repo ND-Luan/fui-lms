@@ -5,7 +5,10 @@
 			<v-stepper-header>
 				<template v-for="(item, index) in vueData.DSNhomDiem" :key="index">
 					<v-stepper-item :value="item.ThuTuNhom" style="min-width: 150px !important;flex-basis: 150px;"
-						editable :selected-class="'text-' + item.MauTinhTrang">
+						:complete="item.TinhTrang === 2" editable :class="'text-' + item.MauTinhTrang">
+						<template v-slot:icon>
+							<v-icon :color="item.MauTinhTrang">{{ item.IconTinhTrang }}</v-icon>
+						</template>
 						<template v-slot:title>
 							{{ item.TenNhomCotDiem_VI }}
 						</template>
@@ -29,10 +32,9 @@
 							<v-btn icon="mdi-microsoft-excel" color="success" variant="text"
 								@click="instance.download()" :disabled="!vueData.DSHocSinh.length > 0">
 							</v-btn>
-							<!--  -->
 							<v-btn color="success" @click="onLuuDiem()"
 								:disabled="!vueData.DSHocSinh.length > 0 || fn_IsDisabledTinhTrangDiem({ type: 'GV' }).isDisabled">
-								Lưu điểm
+								Lưu tạm
 							</v-btn>
 							<v-btn color="primary" @click="onGuiDiem()"
 								:disabled="!vueData.DSHocSinh.length > 0 || fn_IsDisabledTinhTrangDiem({ type: 'GV' }).isDisabled">

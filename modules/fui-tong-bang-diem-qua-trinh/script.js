@@ -117,10 +117,10 @@ function convertDSHocSinh() {
         indexRow++
         dataJexcel.push(obj)
     }
-    vueData.keyComp++
     vueData.columnHeader = headers
     vueData.DSHocSinh = dataJexcel
     vueData.DSCotDiem_ByMaNhomCotDiem = DSCotDiem_ByMaNhomCotDiem
+    vueData.keyComp++
 }
 function validateSave(typeCell, value, min, max) {
     if ((typeCell === 'number' && value < min) || value > max) return 1
@@ -216,7 +216,7 @@ function onLuuDiem() {
         })
     }
     promise().then(() => {
-        Vue.$toast.success('Lưu điểm thành công', { position: 'top' })
+        Vue.$toast.success('Lưu tạm thành công', { position: 'top' })
         vueData.keyComp++
     })
 }
@@ -244,3 +244,4 @@ function onGuiDiem() {
         vueData.keyComp++
     })
 }
+
