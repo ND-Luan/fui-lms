@@ -77,7 +77,7 @@ export default {
             if (val) {
                 this.onSubmit()
             }
-        },
+        }
     },
     mounted: function () {
         const jExcelObj = jspreadsheet(this.$refs["spreadsheet"], this.jExcelOptions);

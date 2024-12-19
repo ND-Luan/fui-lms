@@ -1,1 +1,1 @@
-{"data":[],"watch":{},"controls":[{"prop":"fluid grid-list-md","rows":[{"prop":"","cols":[{"el":"uc-select-cap-khoi-lop","attr":{}}]}]}],"set":{}}
+{"data":[{"selectedFilters":{},"yearNow":"2025","pastYears":"5","futureYears":"5"}],"watch":{},"controls":[{"prop":"fluid grid-list-md","rows":[{"prop":"","cols":[{"el":"uc-select-cap-khoi-lop","attr":{"v-on:session-data-changed":"(sessionData)=>{    console.log('Dữ liệu sessionStorage đã thay đổi:', sessionData)}"}}]}]}],"set":{}}

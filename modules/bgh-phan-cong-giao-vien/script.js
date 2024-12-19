@@ -414,30 +414,7 @@
 //         </uc-admin-layout>
 //     `
 // })
-async function getGiaoVienLop_Get_ByLopID() {
-    const param = {
-        LopID: this.LopID,
-    }
-    const isSelect = await GiaoVien_Service.GiaoVienLop_Get_ByLopID(param)
-    if (isSelect) {
-        if (isSelect.length > 0) {
-            this.DSPhanCongGiaoVien = isSelect.map((item, index) => ({
-                ...item,
-                STT: index + 1,
-            }))
-        } else {
-            this.DSPhanCongGiaoVien = isSelect
-        }
-    }
-}
-async function getGiaoVien_Get() {
-    const isSelect = await GiaoVien_Service.GiaoVien_Get()
-    if (isSelect) {
-        this.DSGiaoVien = isSelect.map((item) => {
-            return {
-                ...item,
-                GiaoVienID: item.GiaoVienID?.trim(),
-            }
-        })
-    }
-}
+function handleDataSelected(sessionData) {
+    debugger
+    console.log("sessionData", sessionData)
+};

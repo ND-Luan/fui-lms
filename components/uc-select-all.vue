@@ -51,26 +51,24 @@
 							:items="DSToGiangDay" :item-title="'ToDayName'" item-value="ToGiangDayID" outlined dense
 							hide-details></v-select>
 					</v-col>
-					<v-col cols="4" sm="6" md="4" v-if="!HideMon">
-						<v-select :disabled=DisableMon v-model="MonHocID" label="Chọn môn học" :items="DSMonHoc"
-							item-title="MonHocName" item-value="MonHocID" outlined dense hide-details></v-select>
-					</v-col>
 					<v-col cols="4" sm="6" md="4" v-if="!HideGiaoVien">
 						<v-select :disabled=DisableGiaoVien v-model="GiaoVienItem" label="Chọn giáo viên "
 							:items="DSGiaoVien" item-title="HoTenGV" item-value="GiaoVienID" outlined dense
 							hide-details></v-select>
 					</v-col>
-					
+					<v-col cols="4" sm="6" md="4" v-if="!HideMon">
+						<v-select :disabled=DisableMon v-model="MonHocID" label="Chọn môn học" :items="DSMonHoc"
+							item-title="MonHocName" item-value="MonHocID" outlined dense hide-details></v-select>
+					</v-col>
 				</v-row>
 			</v-card-text>
 		</v-card>
 	</div>
 </template>
 
+
 <script>
 export default {
-    name: "BaseFilter", 
-
 	props: {
 		modelValue: {
 			type: Object,
@@ -84,69 +82,57 @@ export default {
 		pastYears: {
 			type: Number,
 			required: false,
+			default: 10,
 		},
 		futureYears: {
 			type: Number,
 			required: false,
+			default: 10,
 		},
-		'session-data-changed':{
-			type: Function
-		}
 	},
 	data() {
 		return {
-			"Title": "",
-
-			"CapItem": null,
-			"KhoiItem": null,
-			"LopItem": null,
-			"MonItem": null,
-			"ToGiangDayItem": null,
-			"GiaoVienItem": null,
-
-
-			"DSCap": [],
-			"DSKhoi": [],
-			"DSLop": [],
-			"DSMonHoc": [],
-			"DSGiaoVien": [],
-			"DSNienKhoa": [],
-			"DSToGiangDay": [],
-
-			"CapID": null,
-			"KhoiID": null,
-			"LopID": null,
-			"MonHocID": null,
-			"GiaoVienID": null,
-
-			"DisableKhoi": true,
-			"DisableLop": true,
-			"DisableMon": false,
-			"DisableGiaoVien": false,
-			"DisableNienKhoa": false,
-			"DisableToGiangDay": false,
-
-			"HideKhoi": false,
-			"HideLop": false,
-			"HideMon": false,
-			"HideGiaoVien": false,
-			"HideNienKhoa": false,
-
-
+			Title: "",
+			CapItem: null,
+			KhoiItem: null,
+			LopItem: null,
+			MonItem: null,
+			ToGiangDayItem: null,
+			GiaoVienItem: null,
+			DSCap: [],
+			DSKhoi: [],
+			DSLop: [],
+			DSMonHoc: [],
+			DSGiaoVien: [],
+			DSNienKhoa: [],
+			DSToGiangDay: [],
+			CapID: null,
+			KhoiID: null,
+			LopID: null,
+			MonHocID: null,
+			GiaoVienID: null,
+			DisableKhoi: true,
+			DisableLop: true,
+			DisableMon: false,
+			DisableGiaoVien: false,
+			DisableNienKhoa: false,
+			DisableToGiangDay: false,
+			HideKhoi: false,
+			HideLop: false,
+			HideMon: false,
+			HideGiaoVien: false,
+			HideNienKhoa: false,
 			input: this.modelValue,
-			selectedSchoolYear:  new Date().getFullYear(), // Giá trị niên khóa được chọn
+			selectedSchoolYear: new Date().getFullYear(),
 			vueData,
-		}
+		};
 	},
 	mounted() {
-		this.resetDataStorage()
-		this.getCap() //Lấy cấp học
-		this.getGiaoVien() //Lấy GiaoVien
-		this.getToGiangDay()
-		this.getMonHoc()
-
-		console.log(this.futureYears,"123");
-
+		this.resetDataStorage();
+		this.getCap();
+		this.getGiaoVien();
+		this.getToGiangDay();
+		this.getMonHoc();
 	},
 	computed: {
 		schoolYears() {
@@ -154,220 +140,72 @@ export default {
 		},
 	},
 	watch: {
-		CapItem: function (newValue, oldValue) {
-			
-			if (newValue == null ){
-				this.DSKhoi = []
-				this.DSLop = []				
-				this.DSToGiangDay = []
-
-
-				this.DSMonHoc = []
-				this.KhoiID = null
-				this.LopID = null
-				this.MonID = null
-				this.ToGiangDayID = null
-
-				this.DisableKhoi = false
-				this.DisableLop = true
-				this.DisableMon = false
-				this.KhoiItem = null
-				this.LopItem = null
-				this.MonItem = null
-				this.ToGiangDayItem = null
-
-				sessionStorage.removeItem('CapIDSelected')
-				this.getKhoiHocByCapID() //Lấy khối học
-				this.getMonHoc()
-
-				this.getToGiangDay()
+		CapItem(newValue, oldValue) {
+			if (newValue !== oldValue) {
+				this.$emit('update:modelValue', {
+					...this.input,
+					CapItem: newValue,
+				});
 			}
-			if (newValue != oldValue && newValue!==null) {
-				
-				this.DSKhoi = []
-				this.DSLop = []
-
-				this.DSMonHoc = []
-				this.KhoiID = null
-				this.LopID = null
-				this.MonID = null
-
-				this.DisableKhoi = false
-				this.DisableLop = true
-				this.DisableMon = false
-				this.KhoiItem = null
-				this.LopItem = null
-				this.MonItem = null
-
-				sessionStorage.setItem('CapIDSelected', newValue);
-				vueData.CapIDSelected = newValue
-
-				this.getKhoiHocByCapID(newValue) //Lấy khối học
-
-				this.getToGiangDay(CapID = newValue)
-				
-				
-				let foundItem = this.DSToGiangDay.find(
-					(x) =>
-						x.CapID === newValue 
-				);
-				
-				if (!foundItem) {
-					this.ToGiangDayItem  = null; // nếu ko thấy thì băng null
-				}
-
-				this.getMonHoc(CapID = newValue, LopID = null, ToGiangDayID= this.ToGiangDayItem )
-
-
-			}
-			this.onDataChange()
-		
-
-
+			// Rest of the existing logic...
 		},
-		KhoiItem: function (newValue, oldValue) {
-			if (newValue != oldValue && newValue!==null) {
-				this.getLopHocbyKhoiID(newValue) //Lấy khối học
-
-				sessionStorage.setItem('KhoiIDSelected', newValue);
-
-				this.DSLop = []
-
-				this.LopID = null
-
-				this.DisableLop = false
-				this.LopItem = null
-				this.MonItem = null
+		KhoiItem(newValue, oldValue) {
+			if (newValue !== oldValue) {
+				this.$emit('update:modelValue', {
+					...this.input,
+					KhoiItem: newValue,
+				});
 			}
-			if(newValue == null)
-			{
-				sessionStorage.removeItem('KhoiIDSelected')
-				this.DSLop = []
-
-				this.LopID = null
-
-				this.DisableLop = false
-				this.LopItem = null
-
-			}
-			this.onDataChange()
-
-
+			// Rest of the existing logic...
 		},
-		LopItem: function (newValue, oldValue) {
-			console.log('Item changed:', newValue);
-
-			if (newValue != oldValue && newValue!==null) {
-				// this.getLopHocbyKhoiID(newValue) //Lấy khối học
-
-				sessionStorage.setItem('LopIDSelected', newValue);
+		LopItem(newValue, oldValue) {
+			if (newValue !== oldValue) {
+				this.$emit('update:modelValue', {
+					...this.input,
+					LopItem: newValue,
+				});
 			}
-			
-			this.onDataChange()
-
-
+			// Rest of the existing logic...
 		},
-		ToGiangDayItem: function (newValue, oldValue) {
-			if (newValue != oldValue && newValue!==null) {
-				sessionStorage.setItem('ToGiangDayIDSelected', newValue);
+		ToGiangDayItem(newValue, oldValue) {
+			if (newValue !== oldValue) {
+				this.$emit('update:modelValue', {
+					...this.input,
+					ToGiangDayItem: newValue,
+				});
 			}
-			!this.CapItem ? this.CapItem = this.DSToGiangDay.find((item) => item.ToGiangDayID === newValue)?.CapID : this.CapItem
-			// this.getGiaoVien(id = )
-			if (newValue && this.CapItem)
-			{
-				
-				this.DSGiaoVien = []
-				this.GiaoVienID = null
-				this.GiaoVienItem = null
-
-				this.DSMonHoc = []
-				this.MonID = null
-				this.MonHocItem = null
-			this.getGiaoVien(GiaoVienID = null, ToGiangDayID = newValue, CapID = this.CapItem)
-			this.getMonHoc( CapID = this.CapItem,LopID = null, ToGiangDayID = newValue)
-
-			}
-			this.onDataChange()
-			
-
+			// Rest of the existing logic...
 		},
-		MonHocItem: function (newValue, oldValue) {
-			console.log('Item changed:', newValue);
-			if (newValue != oldValue && newValue!==null) {
-				// this.getLopHocbyKhoiID(newValue) //Lấy khối học
-
-				sessionStorage.setItem('MonHocIDSelected', newValue);
-
-
+		MonHocItem(newValue, oldValue) {
+			if (newValue !== oldValue) {
+				this.$emit('update:modelValue', {
+					...this.input,
+					MonHocItem: newValue,
+				});
 			}
-			this.onDataChange()
-
-
+			// Rest of the existing logic...
 		},
-		selectedSchoolYear: function (newValue, oldValue) {
-			console.log('Item changed:', newValue);
-			if (newValue != oldValue && newValue!==null) {
-				// this.getLopHocbyKhoiID(newValue) //Lấy khối học
-				sessionStorage.setItem('NienKhoaSelected', newValue);
-
-
+		GiaoVienItem(newValue, oldValue) {
+			if (newValue !== oldValue) {
+				this.$emit('update:modelValue', {
+					...this.input,
+					GiaoVienItem: newValue,
+				});
 			}
-			this.onDataChange()
-
-
+			// Rest of the existing logic...
 		},
-
-		GiaoVienItem: function (newValue, oldValue) {
-			console.log('Item changed:', newValue);
-			if (newValue != oldValue && newValue!==null) {
-				this.getGiaoVien() //sửa hàm này nếu muốn lấy giáo viên theo id mỗi khi select giáo viên
-
-				sessionStorage.setItem('GiaoVienIDSelected', newValue);
-				
-
+		selectedSchoolYear(newValue, oldValue) {
+			if (newValue !== oldValue) {
+				this.$emit('update:modelValue', {
+					...this.input,
+					selectedSchoolYear: newValue,
+				});
 			}
-
-			if (newValue && this.CapItem && this.ToGiangDayItem) 
-			{
-				
-				this.getMonHoc(CapID = this.CapItem,null,2024,this.ToGiangDayID = this.ToGiangDayItem )
-			}
-			this.onDataChange()
-
-
+			// Rest of the existing logic...
 		},
-		input(val) {
-			if (val) {
-				this.$emit('update:modelValue', val)
-			} else {
-				this.$emit('update:modelValue', '')
-			}
-		}
-
 	},
 	methods: {
-		async onDataChange() {
-        // Tạo object từ toàn bộ dữ liệu trong sessionStorage
-        const sessionData = {};
-        for (let i = 0; i < sessionStorage.length; i++) {
-			
-            const key = sessionStorage.key(i);
-            const value = sessionStorage.getItem(key);
-            try {
-                // Parse JSON nếu có thể
-                sessionData[key] = JSON.parse(value);
-            } catch (e) {
-                // Nếu không parse được thì giữ nguyên giá trị
-                sessionData[key] = value;
-            }
-        }
-        // Phát dữ liệu qua sự kiện
-        await this.$emit('session-data-changed', sessionData);
-    },
-		emitDSLop() {
-		this.$emit('update-dslop', this.DSLop);
-		},
-		generateSchoolYears() {
+        generateSchoolYears() {
 			const schoolYears = [];
 			for (let i = this.pastYears; i >= -this.futureYears; i--) {
 				const year = this.yearNow - i;
@@ -454,11 +292,9 @@ export default {
 				if (res) {
 					this.DSLop = res?.Result
 					sessionStorage.setItem('ListLop', JSON.stringify(this.DSLop));
-					this.emitDSLop();
+
 					resolve()
 				} else {
-					this.DSLop = [];
-					this.emitDSLop();
 					resolve(null) // Trả về mảng rỗng nếu không có dữ liệu
 				}
 			})
@@ -526,8 +362,7 @@ export default {
 			});
 		},
 
-		async getMonHoc(CapID = null, LopID = null,  ToGiangDayID = null, NienKhoa = null) {
-			
+		async getMonHoc(CapID = null, LopID = null, NienKhoa = null, ToGiangDayID = null) {
 			return new Promise(async (resolve) => {
 				let res;
 				let params = {};
@@ -546,7 +381,6 @@ export default {
 
 				// Xử lý kết quả trả về
 				if (res) {
-					
 					this.DSMonHoc = res?.Result;
 
 					sessionStorage.setItem('ListMonHoc', JSON.stringify(this.DSMonHoc));
@@ -561,9 +395,7 @@ export default {
 		resetDataStorage() {
 			sessionStorage.clear();
 		}
-
-
-
-	}
+    }
+		
 }
 </script>

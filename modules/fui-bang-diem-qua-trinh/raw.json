@@ -9,15 +9,19 @@
             "LopItem": null,
             "KhoiItem": null,
             "MonHocItem": null,
-            "MaNhomCotDiemItem": null,
+            "MaNhomCotDiem": null,
             "keyComp": 0,
             "columnHeader": [],
             "DSHocSinh": [],
             "DSCotDiem": [],
             "DSCotDiem_ByMaNhomCotDiem": [],
             "DSCotDiem_TatCa": [],
+            "DSTinhTrang": [],
             "dataBeforeInsertToDB": [],
-            "TinhTrang": null
+            "TinhTrang": null,
+            "step": null,
+            "headers": [],
+            "items": []
         },
         {
             "getLop": {
@@ -34,16 +38,35 @@
                 "IN": {
                     "LopID": "vueData.LopItem.LopID"
                 },
-                "OUT": "DSMonHoc"
+                "OUT": "DSMonHoc",
+                "CALLBACK": {
+                    "step": "DSMonHoc[0].MaNhomCotDiem"
+                }
+            }
+        },
+        {
+            "getNhomDiem": {
+                "API": "lms/NhomCauTrucDiem_Get_ByTemplateBangDiemID",
+                "IN": {
+                    "MonHocLopID": "vueData.MonHocItem.MonHocLopID"
+                },
+                "OUT": "res_DSNhomDiem",
+                "CALLBACK": [
+                    {
+                        "DSNhomDiem": "res_DSNhomDiem[0]",
+                        "DSTinhTrang": "res_DSNhomDiem[1]"
+                    }
+                ]
             }
         },
         {
             "getHocSinhBangDiem": {
-                "API": "lms/HocSinhBangDiem_Get_ByMonHocID",
+                "API": "lms/HocSinhBangDiem_Get_ByMonHocID_MaNhom",
                 "IN": {
                     "LopID": "vueData.LopItem.LopID",
                     "MonHocID": "vueData.MonHocItem.MonHocID",
-                    "TemplateBangDiemID": "vueData.MonHocItem.TemplateBangDiemID"
+                    "TemplateBangDiemID": "vueData.MonHocItem.TemplateBangDiemID",
+                    "MaNhomCotDiem": "vueData.MaNhomCotDiemItem.MaNhomCotDiem"
                 },
                 "OUT": "DSCotDiem",
                 "CALLBACK": [
@@ -53,13 +76,22 @@
                     {
                         "FUN": "fn_IsDisabledTinhTrangDiem",
                         "IN": {
-                            "TinhTrang": "vueData.DSCotDiem_ByMaNhomCotDiem[0]?.TinhTrang",
                             "type": "`GV"
                         },
                         "OUT": "TinhTrang"
                     }
                 ]
             }
+        },
+        {
+            "onRefresh": [
+                {
+                    "CALL": "getNhomDiem"
+                },
+                {
+                    "CALL": "getHocSinhBangDiem"
+                }
+            ]
         },
         {
             "insKQHT_MonHocLop": {
@@ -72,9 +104,6 @@
                     "KetQuaObjArr": "JSON.stringify(vueData.dataBeforeInsertToDB)"
                 },
                 "CALLBACK": [
-                    {
-                        "CALL": "getHocSinhBangDiem"
-                    },
                     {
                         "dataBeforeInsertToDB": []
                     }
@@ -93,6 +122,20 @@
             }
         },
         {
+            "udpKQHT_NhomDiem_TinhTrang": {
+                "API": "lms/KQHT_NhomDiem_TinhTrang_Udp",
+                "IN": {
+                    "TinhTrang": "vueData.TinhTrang",
+                    "NhomDiem_MonHocLopID": "vueData.MaNhomCotDiemItem.NhomDiem_MonHocLopID"
+                },
+                "CALLBACK": [
+                    {
+                        "CALL": "onRefresh"
+                    }
+                ]
+            }
+        },
+        {
             "EXE": "renderDSKhoi()"
         }
     ],
@@ -103,7 +146,7 @@
                 {
                     "LopItem": null,
                     "MonHocItem": null,
-                    "MaNhomCotDiemItem": null,
+                    "MaNhomCotDiem": null,
                     "DSLop": [],
                     "DSMonHoc": [],
                     "DSNhomDiem": [],
@@ -119,8 +162,9 @@
             "THEN": [
                 {
                     "DSHocSinh": [],
+                    "DSNhomDiem": [],
                     "MonHocItem": null,
-                    "MaNhomCotDiemItem": null
+                    "MaNhomCotDiem": null
                 },
                 {
                     "CALL": "getMonHoc"
@@ -132,12 +176,22 @@
             "THEN": [
                 {
                     "MaNhomCotDiemItem": null,
-                    "DSHocSinh": []
+                    "DSHocSinh": [],
+                    "step": null
                 },
                 {
-                    "CALL": "getHocSinhBangDiem"
+                    "CALL": "getNhomDiem"
                 }
             ]
+        },
+        "MaNhomCotDiemItem": {
+            "IF": "vueData.MaNhomCotDiemItem?.MaNhomCotDiem?.length > 0",
+            "THEN": {
+                "CALL": "getHocSinhBangDiem"
+            }
+        },
+        "step": {
+            "EXE": "vueData.MaNhomCotDiemItem = vueData.DSNhomDiem.find(x => x.ThuTuNhom === step) ?? ''"
         }
     },
     "controls": [
@@ -149,7 +203,6 @@
                     "cols": [
                         {
                             "el": "v-card",
-                            "attr": {},
                             "innerHTML": [
                                 {
                                     "el": "v-card-title",
@@ -166,6 +219,9 @@
                                             "innerHTML": [
                                                 {
                                                     "el": "v-col",
+                                                    "attr": {
+                                                        "cols": 12
+                                                    },
                                                     "innerHTML": [
                                                         {
                                                             "el": "v-select",
@@ -183,6 +239,9 @@
                                                 },
                                                 {
                                                     "el": "v-col",
+                                                    "attr": {
+                                                        "cols": 12
+                                                    },
                                                     "innerHTML": [
                                                         {
                                                             "el": "v-select",
@@ -200,6 +259,9 @@
                                                 },
                                                 {
                                                     "el": "v-col",
+                                                    "attr": {
+                                                        "cols": 12
+                                                    },
                                                     "innerHTML": [
                                                         {
                                                             "el": "v-select",
@@ -217,40 +279,21 @@
                                                 },
                                                 {
                                                     "el": "v-col",
-                                                    "innerHTML": "<f-button label='Làm mới' :action='getHocSinhBangDiem' color='primary' />"
+                                                    "attr": {
+                                                        "cols": 12
+                                                    },
+                                                    "innerHTML": "<f-button label='Làm mới' :action='onRefresh' color='primary' />"
                                                 }
                                             ]
                                         }
                                     ]
                                 }
                             ],
-                            "w": 12
+                            "w": 3
                         },
                         {
-                            "el": "v-card",
-                            "innerHTML": [
-                                {
-                                    "el": "v-card-title",
-                                    "innerHTML": [
-                                        {
-                                            "el": "div",
-                                            "attr": {
-                                                "class": "text-primary d-flex ga-2"
-                                            },
-                                            "innerHTML": [
-                                                {
-                                                    "el": "p",
-                                                    "innerHTML": "Tổng bảng điểm quá trình"
-                                                }
-                                            ]
-                                        }
-                                    ]
-                                },
-                                {
-                                    "el": "v-card-text",
-                                    "innerHTML": "<uc-nhap-diem />"
-                                }
-                            ]
+                            "el": "uc-stepper",
+                            "w": 9
                         }
                     ]
                 }
