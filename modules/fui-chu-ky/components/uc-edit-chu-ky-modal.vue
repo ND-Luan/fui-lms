@@ -55,6 +55,7 @@
 				item.IsExistFile = true
 			},
 			renderTextGiangVien(obj) {
+				console.log('obj',obj)
 				return `[${obj.GiaoVienID}] - ${obj.HoGV} ${obj.TenGV}`
 			},
 			onClose() {

@@ -94,8 +94,8 @@
 }
 
 .jexcel>thead>tr>td {
-    text-wrap: wrap;
-    overflow-wrap: break-word;
+    /* text-wrap: wrap;
+    overflow-wrap: break-word; */
 }
 
 .shadow-box {

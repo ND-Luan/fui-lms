@@ -180,20 +180,19 @@ function getTextTinhTrangDiem(TinhTrang) {
     return text
 }
 
-function fn_IsDisabledTinhTrangDiem(TinhTrang, type) {
+function fn_IsDisabledTinhTrangDiem({ TinhTrang, type }) {
     if (!TinhTrang) return
-    console.log(TinhTrang);
     const arrStatusGV = [0, 1, 2, 3, 4]
     const obj = {
-        color: getColorTinhTrangDiem(TinhTrang),
         isDisabled: false,
-        text: getTextTinhTrangDiem(TinhTrang)
     }
     if (type === 'GV') {
         if (arrStatusGV.indexOf(TinhTrang) >= 0) {
-            if (TinhTrang == 0 || TinhTrang == 3) {
+            if (TinhTrang == 0 || TinhTrang == 1 || TinhTrang == 3) {
+                console.log('Hiển thị')
                 obj.isDisabled = false
             } else {
+                console.log('Không Hiển thị')
                 obj.isDisabled = true
             }
         }
@@ -252,7 +251,7 @@ function calculateColumnWidth(text) {
 function getColumnAddress(columns, columnName) {
     const columnMap = {};
     columns.forEach((column, index) => {
-        const columnAddress = String.fromCharCode(67 + index); // 67 là mã ASCII của 'C'
+        const columnAddress = String.fromCharCode(68 + index); // 67 là mã ASCII của 'C'
         columnMap[column.name] = columnAddress;
         // console.log(columnMap)
     });
@@ -263,7 +262,6 @@ function replaceFormula(columns, formula, indexRow) {
         try {
             // Lấy địa chỉ cột từ tên cột
             const columnAddress = getColumnAddress(columns, match);
-            console.log(columnAddress);
             // Trả về địa chỉ cột + số dòng
             return `${columnAddress}${indexRow}`;
         } catch (error) {

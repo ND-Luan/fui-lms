@@ -51,10 +51,10 @@
 
             <v-row class="mt-2">
                 <v-col cols="12" class="text-primary font-weight-medium pb-0"> {{ $t('message.evaluation') }}</v-col>
-                <v-col cols="12" v-for="item in 6">
+                <v-col cols="12" v-for="item in NoiDungDanhGia">
                     <v-card>
                         <v-card-text>
-                            Nội dung đánh giá
+                            <b>{{ item.TieuDe }}</b> {{ item.NoiDung }}
                         </v-card-text>
                     </v-card>
                 </v-col>
@@ -67,42 +67,16 @@
                     <v-card>
                         <v-card-text>
                             <p>
-                                Lorem, ipsum dolor sit amet consectetur adipisicing elit. Nesciunt quos magni ipsum
-                                error
-                                nostrum
-                                ea
-                                exercitationem facere ducimus deleniti, ipsa facilis, officiis, fuga soluta fugiat?
-                                Consequuntur
-                                sequi atque explicabo sint!
+                                Chúng tôi rất vui khi thấy cháu có sự tiến bộ trong học tập và tích cực tham gia các
+                                hoạt động của lớp. Cháu ngoan ngoãn, lễ phép, và biết tự giác hoàn thành nhiệm vụ. Tuy
+                                nhiên, chúng tôi sẽ nhắc nhở cháu tập trung hơn trong giờ học, hạn chế nói chuyện riêng
+                                và rèn luyện thêm tính cẩn thận khi làm bài tập. Cảm ơn cô giáo đã quan tâm và hướng dẫn
+                                cháu tận tình!
                             </p>
                         </v-card-text>
                     </v-card>
                 </v-col>
             </v-row>
-            <v-menu transition="fab-transition">
-                <template v-slot:activator="{ props }">
-                    <v-btn v-bind="props" class="position-fixed  elevation-8" style="
-            z-index: 10;
-            bottom: 16px;
-            right: 16px;
-        " icon="" size="large" variant="elevated" :loading="IsLoadingDSHocSinh">
-                        <v-img src="/_cdn/lhbs-lms/hoc_sinh.png" width="40" height="40" />
-                    </v-btn>
-                </template>
-                <v-list>
-                    <v-list-subheader>{{ $t('message.studentList') }}</v-list-subheader>
-                    <v-list-item v-for="item in DSHocSinh" :key="item.StudentID" :disabled="item.Khoi <= 0"
-                        @click="() => onSelectHocSinh(item)">
-                        <template v-slot:prepend>
-                            <v-avatar>
-                                <v-img :src="urlAvatarHocSinh + item.StudentID" />
-                            </v-avatar>
-                        </template>
-                        <v-list-item-title>{{ item.HoTen }}</v-list-item-title>
-                        <v-list-item-title>{{ item.TenLop ?? '-' }} • {{ item.StudentID }}</v-list-item-title>
-                    </v-list-item>
-                </v-list>
-            </v-menu>
         </div>
         <uc-loading-page v-model="IsLoadingPage"></uc-loading-page>
     </uc-app>
@@ -115,6 +89,32 @@ export default {
     },
     data() {
         return {
+            NoiDungDanhGia: [
+                {
+                    TieuDe: "Học tập:",
+                    NoiDung: " Tiếp thu bài tốt, nắm được kiến thức các môn học trong tháng, vận dụng làm được các bài tập liên quan. Nhưng để đạt được kết quả tốt hơn, hãy ôn luyện kĩ các kiến thức đã học."
+                },
+                {
+                    TieuDe: "Môn Tiếng Việt:",
+                    NoiDung: "Có kĩ năng viết văn tốt, đọc to rõ ràng và trả lời được các câu hỏi trong bài, chữ viết đẹp."
+                },
+                {
+                    TieuDe: "Môn Toán:",
+                    NoiDung: "Có kĩ năng tính toán tốt, nắm vững bảng nhân, chia và vận dụng vào làm bài tốt. Tuy nhiên cần đọc kĩ đề bài và tính toán cẩn thận hơn."
+                },
+                {
+                    TieuDe: "Năng lực - Phẩm chất:",
+                    NoiDung: "Ngoan ngoãn, lễ phép, hòa đồng với bạn bè. Tích cực tham gia phát biểu, xây dựng bài. Biết tự giác chuẩn bị đồ dùng học tập cũng như hoàn thành các nhiệm vụ được giao trên lớp và ở nhà, biết tự giác phụ giúp gia đình. Tuy nhiên cần có sự tập trung hơn trong các giờ học, hạn chế nói chuyện và làm việc riêng trong giờ học."
+                },
+                {
+                    TieuDe: "Hoạt động khác",
+                    NoiDung: "Tích cực tham gia các hoạt động qua từng môn học, phong trào của lớp theo chủ đề trong tháng"
+                },
+                {
+                    TieuDe: "Robotics - AI:",
+                    NoiDung: "Chủ đề Mắc phơi đồ tự động thông minh."
+                },
+            ],
             DSHocSinh: [],
             HocSinhDetail: null,
             IsLoadingDSHocSinh: false,
@@ -123,7 +123,12 @@ export default {
         }
     },
     mounted() {
-        this.loadDSHocSinh()
+        const url = new URL(window.location.href); // Lấy URL hiện tại
+        const params = new URLSearchParams(url.search); // Lấy phần query string
+        const id = params.get("id"); // Lấy giá trị của tham số "id"
+        console.log(id); // Kết quả: 3
+        this.onSelectHocSinh(id)
+
     },
     watch: {
         HocSinhDetail: function (hocSinh) {
@@ -131,25 +136,6 @@ export default {
         }
     },
     methods: {
-        async loadDSHocSinh() {
-            this.IsLoadingPage = true
-            this.IsLoadingDSHocSinh = true
-            const response = await hocSinhLopService.Calen_GetInfoStudentByPhuHuynhID()
-            if (response.IsSuccess) {
-                this.IsLoadingDSHocSinh = false
-                this.DSHocSinh = response.Result
-                const DSHocSinhWithoutMamNon = response.Result.filter(x => x.Khoi > 0)
-                if (DSHocSinhWithoutMamNon.length > 0) {
-                    const firstHocSinhDetail = DSHocSinhWithoutMamNon[0]
-                    this.loadHocSinhDetail(firstHocSinhDetail.StudentID).then(() => {
-                        this.IsLoadingPage = false
-                    })
-                } else {
-                    this.HocSinhDetail = null
-                    this.IsLoadingPage = false
-                }
-            }
-        },
         loadHocSinhDetail(HocSinhID) {
             return new Promise(async resolve => {
                 const response = await hocSinhLopService.HocSinh_Detail_GetBy_HocSinhID({
@@ -162,9 +148,9 @@ export default {
             })
 
         },
-        async onSelectHocSinh(item) {
+        async onSelectHocSinh(id) {
             this.IsLoadingPage = true
-            this.loadHocSinhDetail(item.StudentID).then(() => {
+            this.loadHocSinhDetail(id).then(() => {
                 this.IsLoadingPage = false
             })
         }

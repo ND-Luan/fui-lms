@@ -82,6 +82,14 @@ function convertDSHocSinh() {
         },
         {
             type: 'text',
+            title: 'Số Danh Bộ',
+            name: 'SoDanhBo',
+            width: 120,
+            backGroundColor: null,
+            wrap: true,
+        },
+        {
+            type: 'text',
             title: 'Họ tên học sinh',
             name: 'HoVaTenHocSinh',
             width: 300,
@@ -99,6 +107,7 @@ function convertDSHocSinh() {
         let obj = {
             HocSinhID: arrCotDiemExist[0].HocSinhID,
             HoVaTenHocSinh: arrCotDiemExist[0].Ho + ' ' + arrCotDiemExist[0].Ten,
+            SoDanhBo: arrCotDiemExist[0].SoDanhBo ,
         }
         for (var cotDiemExist of arrCotDiemExist) {
             if (cotDiemExist.LoaiCotDiem !== 'Công thức') {

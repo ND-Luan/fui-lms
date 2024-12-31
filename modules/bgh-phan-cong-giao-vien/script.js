@@ -418,3 +418,9 @@ function handleDataSelected(sessionData) {
     debugger
     console.log("sessionData", sessionData)
 };
+function itemProps(item) {
+    return {
+        title: item.name,
+        subtitle: item.department,
+    }
+};

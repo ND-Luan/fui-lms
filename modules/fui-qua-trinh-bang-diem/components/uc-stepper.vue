@@ -46,11 +46,11 @@
 								@click="instance.download()" :disabled="!vueData.DSHocSinh.length > 0">
 							</v-btn>
 							<v-btn color="" @click="onLuuDiem()"
-								:disabled="!vueData.DSHocSinh.length > 0 || fn_IsDisabledTinhTrangDiem({ TinhTrang: vueData.MaNhomCotDiemItem.MaNhomDiem, type: 'GV' }).isDisabled">
+								:disabled="!vueData.DSHocSinh.length > 0 || fn_IsDisabledTinhTrangDiem({ TinhTrang: vueData.MaNhomCotDiemItem?.TinhTrang, type: 'GV' })?.isDisabled">
 								Lưu tạm
 							</v-btn>
 							<v-btn color="orange-darken-1" @click="onGuiDiem()"
-								:disabled="!vueData.DSHocSinh.length > 0 || fn_IsDisabledTinhTrangDiem({ TinhTrang: vueData.MaNhomCotDiemItem.MaNhomDiem, type: 'GV' }).isDisabled">
+								:disabled="!vueData.DSHocSinh.length > 0 || fn_IsDisabledTinhTrangDiem({ TinhTrang: vueData.MaNhomCotDiemItem?.TinhTrang, type: 'GV' })?.isDisabled">
 								Gửi điểm
 							</v-btn>
 						</div>

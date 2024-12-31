@@ -25,6 +25,9 @@ const SearchLMSService = {
     GetMonHocByID(params) {
         return CallAPI.get(PREFIX.LMS, "MonHoc_ByLopID_OR_CapID_OR_ByToGiangDayID", "GET", params);  // Subdomain "LMS", methodSufix "Get" và params nhận vào là LopID, CapID,ToGiangDay, NienKhoaID, MonHocID, muốn filter theo cái nào thì truyền vào cái đấy
     },
+    GetMonHocChuaDuocPhanCong(params) {
+        return CallAPI.get(PREFIX.LMS, "LopChuaDuocPhanCong", "GET", params);  // Subdomain "LMS", methodSufix "Get" và params nhận vào là  CapID 
+    },
     GetToBoMonByID(params) {
         return CallAPI.get(PREFIX.LMS, "ToBoMon", "GET", params);  // Subdomain "LMS", methodSufix "Get" và params params nhận vào là  CapID, MonHocID muốn filter theo cái nào thì truyền vào cái đấy
     }, 

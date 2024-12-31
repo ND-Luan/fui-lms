@@ -36,7 +36,7 @@
             <v-stepper-window class="ma-0 mt-4">
                 <v-stepper-window-item v-for="(item, index) in vueData.DSNhomDiem" :key="index" :value="item.ThuTuNhom">
                     <v-card-title class=" d-flex align-center">
-                        <p class="text-primary">Bảng điểm</p>
+                        <p class="text-primary">Bảng điểm <v-chip>{{vueData.MaNhomCotDiemItem?.TenNhomCotDiem_VI}}</v-chip></p>
                         <v-chip class="ml-1" :color="item.MauTinhTrang">
                             {{ item.TenTinhTrang }}
                         </v-chip>
@@ -46,11 +46,11 @@
                                 @click="instance.download()" :disabled="!vueData.DSHocSinh.length > 0">
                             </v-btn>
                             <v-btn color="error" @click="onTuChoiDiem()"
-                                :disabled="!vueData.DSHocSinh.length > 0 || fn_IsDisabledTinhTrangDiem({ TinhTrang: vueData.MaNhomDiemItem.MaNhomDiem, type: 'TT' }).isDisabled">
+                                :disabled="!vueData.DSHocSinh.length > 0 || fn_IsDisabledTinhTrangDiem({ TinhTrang: vueData.MaNhomCotDiemItem.TinhTrang, type: 'TT' })?.isDisabled">
                                 Từ chối
                             </v-btn>
                             <v-btn color="primary" @click="onDuyetDiem()"
-                                :disabled="!vueData.DSHocSinh.length > 0 || fn_IsDisabledTinhTrangDiem({ TinhTrang: vueData.MaNhomDiemItem.MaNhomDiem, type: 'TT' }).isDisabled">
+                                :disabled="!vueData.DSHocSinh.length > 0 || fn_IsDisabledTinhTrangDiem({ TinhTrang: vueData.MaNhomCotDiemItem.TinhTrang, type: 'TT' })?.isDisabled">
                                 Duyệt điểm
                             </v-btn>
                         </div>

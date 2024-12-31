@@ -253,6 +253,14 @@ export default {
                         backGroundColor: null,
                         wrap: true,
                     },
+					{
+                        type: 'text',
+                        title: 'Số Danh Bộ',
+                        name: 'SoDanhBo',
+                        width: 120,
+                        backGroundColor: null,
+                        wrap: true,
+                    },
                     {
                         type: 'text',
                         title: 'Họ tên học sinh',
@@ -286,6 +294,7 @@ export default {
                     dataJexcel.push(obj)
                 }
                 this.dataSource = dataJexcel
+                console.log('this.dataSource ', this.dataSource)
                 this.keyComp++
                 this.DSCotDiem = data
             }
