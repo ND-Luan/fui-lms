@@ -33,7 +33,7 @@
 				<v-row>
 					<v-col cols="3" sm="6" md="3" v-if="!hidetogiangday">
 						<v-select :disabled="DisableToGiangDay" v-model="ToGiangDayItem" label="Chọn Tổ giàng dạy"
-							:items="DSToGiangDay" item-title="ToDayName" item-value="ToGiangDayID" outlined dense
+							:items="DSToGiangDay" item-title="ToDayName" item-value="ToGiangDayID" outlined dense clearable
 							hide-details />
 					</v-col>
 					<v-col cols="4" sm="6" md="4" v-if="!hidemon">
@@ -181,6 +181,7 @@
 		
 			CapItem: {
 				handler(newValue) {
+					
 					if (!newValue) {
 						this.resetCapDependentData()
 						this.updateSessionStorage('Cap', null)
@@ -363,6 +364,14 @@
 			},
 	
 			resetCapDependentData() {
+				
+				if (!this.ToGiangDayItem || !this.CapItem) {
+					this.DSToGiangDay = []
+					this.ToGiangDayItem = null
+					sessionStorage.removeItem("ToGiangDayIDSelected");
+					sessionStorage.removeItem("ToGiangDayNameSelected");
+				}
+			
 				this.DSKhoi = []
 				this.DSLop = []
 				this.DSToGiangDay = []
@@ -370,14 +379,25 @@
 				this.KhoiItem = null
 				this.LopItem = null
 				this.MonHocItem = null
-				this.ToGiangDayItem = null
 				this.DisableKhoi = false
 				this.DisableLop = true
 				this.DisableMon = false
+				sessionStorage.removeItem("CapIDSelected");
+				sessionStorage.removeItem("CapNameSelected");
+				sessionStorage.removeItem("GiaoVienIDSelected");
+				sessionStorage.removeItem("GiaoVienNameSelected");
+				sessionStorage.removeItem("ListKhoiHoc");
+				sessionStorage.removeItem("ListMonHoc");
+				sessionStorage.removeItem("MonHocIDSelected");
+				sessionStorage.removeItem("MonHocNameSelected");
+
+
 	
 				this.getKhoiHocByCapID()
 				this.getMonHoc()
 				this.getToGiangDay()
+				this.getGiaoVien()
+
 			},
 	
 			resetKhoiDependentData() {
@@ -399,6 +419,7 @@
 	
 			async handleCapChange(capId) {
 				this.resetCapDependentData()
+				
 				await Promise.all([
 					this.getKhoiHocByCapID(capId),
 					this.getToGiangDay(capId),
@@ -408,6 +429,7 @@
 	
 			async handleToGiangDayChange(toGiangDayId) {
 				if (!this.CapItem) {
+					
 					const capId = this.DSToGiangDay.find(item => item.ToGiangDayID === toGiangDayId)?.CapID
 					if (capId) {
 						this.CapItem = capId
@@ -415,6 +437,7 @@
 				}
 	
 				if (toGiangDayId && this.CapItem) {
+					
 					this.resetToGiangDayDependentData()
 					await Promise.all([
 						this.getGiaoVien(null, toGiangDayId, this.CapItem),

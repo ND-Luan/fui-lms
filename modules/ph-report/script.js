@@ -1,30 +1,24 @@
 function convertDSHocTapThang() {
-    const data = [
-        {
-            prependAvatar: '',
-            title: 'Tháng 1',
-        },
-        {
-            prependAvatar: '',
-            title: 'Tháng 2',
-        },
-        {
-            prependAvatar: '',
-            title: 'Tháng 3',
-        },
-        {
-            prependAvatar: '',
-            title: 'Tháng 4',
-        },
-        {
-            prependAvatar: '',
-            title: 'Tháng 5',
+    const data = Array.from({ length: 12 }).fill(0).map((_, index) => {
+        return {
+            title: "Tháng " + (index + 1),
+            icon: `/_cdn/lhbs-lms/icon_thang/icon_thang_${index + 1}.png`
         }
-    ]
-    for (var item of data) {
-    }
+    })
     vueData.DSHocTapThang = data
 }
-function handleClick(item) {
+function convertDSHocTapTiengAnh() {
+    const data = Array.from({ length: 5 }).fill(0).map((_, index) => {
+        return {
+            title: "Theme " + (index + 1),
+            icon: "/_cdn/lhbs-lms/icon_tieng_anh/icon_tieng_anh.png"
+        }
+    })
+    vueData.DSHocTapThangTiengAnh = data
+}
+function onSelectedHocSinh(item) {
     console.log(item)
+    vueData.HocSinhSelected = item
+    localStorage.setItem('HocSinhSelected', JSON.stringify(item))
+    vueData.drawer = false
 }

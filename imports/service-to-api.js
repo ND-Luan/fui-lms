@@ -33,3 +33,19 @@ const SearchLMSService = {
     }, 
 
 };
+
+// SearchService - Cung cấp các hàm liên quan đến component tìm kiếm
+const PhanCongLMSService = {
+   
+    GetKhoiHocbyCapHocID(params) {
+        return CallAPI.post(PREFIX.LMS, "KhoiHocByCapHoc", "Get", params);  // Subdomain "LMS", methodSufix "Get" và params { id }
+    },
+    GetLopHocbyKhoiID(params) {
+        return CallAPI.post(PREFIX.LMS, "Lop_Get_ByKhoiID", '', params);  // Subdomain "LMS", methodSufix "Get" và params { id }
+    },
+
+    AddPhanCong(params) {
+        return CallAPI.post(PREFIX.LMS, "GiaoVienLop_Batch", 'Ins', params);  // Subdomain "LMS", methodSufix "Get" và params { id }
+    },
+
+};

@@ -29,10 +29,12 @@ function convertDSHocSinh() {
     // DSCotDiem_ByMaNhomCotDiem = SLCotDiem_OfFirstSTD
     DSCotDiem_ByMaNhomCotDiem = vueData.DSNhomDiem
     const uniqueNhomDiem = [...new Set(DSCotDiem_ByMaNhomCotDiem.sort((a, b) => a.ThuTuNhom - b.ThuTuNhom).map(x => x.MaNhomCotDiem))]
+    console.log(uniqueNhomDiem)
     let newDSCotDiem_ByMaNhomCotDiem = []
     for (var nhomDiem of uniqueNhomDiem) {
         const NhomDiemFilter = DSCotDiem_ByMaNhomCotDiem.filter(x => x.MaNhomCotDiem === nhomDiem)
         NhomDiemFilter.sort((a, b) => a.ThuTuCotDiem - b.ThuTuCotDiem)
+        console.log('=>', NhomDiemFilter)
         newDSCotDiem_ByMaNhomCotDiem.push(NhomDiemFilter)
     }
     newDSCotDiem_ByMaNhomCotDiem = newDSCotDiem_ByMaNhomCotDiem.flat()
@@ -47,7 +49,7 @@ function convertDSHocSinh() {
     }
     vueData.DSNhomDiem = DSNhomDiem
     //Xử lý động cột điểm header jexcel
-    // console.log('newDSCotDiem_ByMaNhomCotDiem', newDSCotDiem_ByMaNhomCotDiem)
+    console.log('newDSCotDiem_ByMaNhomCotDiem', newDSCotDiem_ByMaNhomCotDiem)
     let columnsCotDiem = newDSCotDiem_ByMaNhomCotDiem
         .map((x) => {
             if (x.GiaTriCotDiem === 'number') { // cấu hình header cột điểm có dạng number
@@ -91,9 +93,6 @@ function convertDSHocSinh() {
                 return column
             }
         })
-    console.log(
-        'columnsCotDiem', columnsCotDiem
-    )
     let columnThongTinHocSinh = [
         {
             type: 'text',
@@ -128,9 +127,8 @@ function convertDSHocSinh() {
     //Xử lý data jexcel
     const dataJexcel = []
     let indexRow = 1
-    const sortDSHocSinh = vueData.DSHocSinh.sort((a, b) => a.HocSinhID - b.HocSinhID)
     //xử lý học sinh gắn vô excel
-    for (var hocSinh of sortDSHocSinh) {
+    for (var hocSinh of vueData.DSHocSinh) {
         const arrCotDiemExist = vueData.DSCotDiem.filter((x) => x.HocSinhID === hocSinh.HocSinhID) // Lấy danh sách điểm của học sinh
         if (arrCotDiemExist.length === 0) return
         let obj = {
@@ -149,6 +147,22 @@ function convertDSHocSinh() {
             }
         }
         for (var cotDiemExist of newArr.sort((a, b) => a.ThuTuNhom - b.ThuTuNhom)) {
+                // let giaTri = null
+                // if (cotDiemExist.GiaTriCotDiem === 'number') {
+                //     if (cotDiemExist.KetQuaDanhGia_VI === '' || cotDiemExist.KetQuaDanhGia_VI === null) {
+                //         giaTri = null
+                //     } else {
+                //         giaTri = parseFloat(cotDiemExist?.KetQuaDanhGia_VI)
+                //     }
+                // } else {
+                //     if (cotDiemExist?.KetQuaDanhGia_VI) {
+                //         giaTri = cotDiemExist?.KetQuaDanhGia_VI
+                //     } else {
+                //         giaTri = null
+                //     }
+                // }
+                // //Text
+                // obj[cotDiemExist.MaCotDiem] = _.isNaN(giaTri) ? null : giaTri
             if (cotDiemExist.LoaiCotDiem !== 'Công thức') {
                 let giaTri = null
                 if (cotDiemExist.GiaTriCotDiem === 'number') {
@@ -175,12 +189,14 @@ function convertDSHocSinh() {
             } else if (cotDiemExist.LoaiCotDiem == 'Công thức' && cotDiemExist.GiaTriCotDiem === 'ICO_Star') {
                 //Ngôi sao
                 obj[cotDiemExist.MaCotDiem] = parseFloat(cotDiemExist?.KetQuaDanhGia_VI ?? 0) //`=RATING(${replaceFormula(columnsCotDiem, cotDiemExist.Formula, indexRow)})`
+            } else {
+                obj[cotDiemExist.MaCotDiem] = cotDiemExist?.KetQuaDanhGia_VI ?? ''
             }
         }
         indexRow++
         dataJexcel.push(obj)
     }
-    // console.log('dataJexcel', dataJexcel)
+    console.log('dataJexcel', dataJexcel)
     vueData.DSCotDiem_ByMaNhomCotDiem = DSCotDiem_ByMaNhomCotDiem
     const firstStudent = dataJexcel[0]
     const dsCotDiem = vueData.DSCotDiem.filter(x => x.HocSinhID === firstStudent.HocSinhID)
@@ -188,13 +204,12 @@ function convertDSHocSinh() {
     for (var i = 0; i < dataJexcel.length; i++) {
         for (var j = 0; j < dsCotDiem.length; j++) {
             const cellAdresss = jspreadsheet.helpers.getCellNameFromCoords(j + 3, i) // (j+2) là địa chỉ cột điểm đầu tiên, i là row let
-            // const giaTriCotDiem = vueData.instance[0].getValueFromCoords(j + 3, i)
             if (dsCotDiem[j].HexBackground) {
                 vueData.styleSheet[cellAdresss] = `background-color: ${dsCotDiem[j].HexBackground}`
-                // console.log('giaTriCotDiem', cellAdresss, giaTriCotDiem, dsCotDiem[j].HexBackground)
             }
         }
     }
+    console.log('headers', headers)
     vueData.keyComp++
     vueData.columnHeader = headers
     vueData.DSHocSinh = dataJexcel
