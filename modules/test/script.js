@@ -20,8 +20,8 @@ const fileToBase64 = (file) => {
         reader.onerror = (error) => reject(error);
     });
 };
-const fetchGPTResponse = (message = []) => {
-    return new Promise((resolve) => {
+const  fetchGPTResponse = (message = []) => {
+    let res = new Promise((resolve) => {
         vueData.v_Loading = true
         $.ajax({
             type: 'POST',
@@ -62,6 +62,8 @@ const fetchGPTResponse = (message = []) => {
             },
         })
     })
+    console.log(res)
+    return res
 }
 const sendChartImageToGPT = async (params) => {
     let { chart1, chart2, prompt } = params
@@ -74,7 +76,7 @@ const sendChartImageToGPT = async (params) => {
     // Kết quả là một mảng các đối tượng JSON
     console.log(chartJsons);
     debugger
-    return new Promise((resolve) => {
+    let res=  await new Promise((resolve) => {
         vueData.v_Loading = true
         $.ajax({
             type: 'POST',
@@ -121,6 +123,8 @@ const sendChartImageToGPT = async (params) => {
             },
         })
     })
+    console.log(res)
+    return res
 }
 function renderDSKhoi() {
     const DSKhoi = Array.from({ length: 12 }).map((_, i) => {

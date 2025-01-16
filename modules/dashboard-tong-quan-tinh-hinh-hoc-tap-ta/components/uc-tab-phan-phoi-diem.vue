@@ -1,210 +1,669 @@
 <template>
-	<v-card>
-		<v-card-title class="text-primary">Tìm kiếm</v-card-title>
-		<v-card-text>
-			<v-row>
-				<v-col>
-					<v-select v-model="form.MaNhomCotDiem" label="Chọn nhóm điểm" :items="DSNhomDiem"
-						item-title="TenNhomCotDiem_VI" item-value="MaNhomCotDiem"
-						:loading="isLoadingMaNhomCotDiem"></v-select>
-				</v-col>
-				<v-col>
-					<v-select v-model="form.MaCotDiem" label="Chọn cột điểm" :items="DSCotDiem"
-						item-title="TenCotDiem_VI" item-value="MaCotDiem" :loading="isLoadingMaCotDiem"></v-select>
-				</v-col>
-				<v-col>
-					<v-btn color="primary" variant="tonal" @click="onLoadChart({
-						NienKhoa: 2024,
-						KhoiID: form.KhoiID,
-						MonHocID: form.MonHocItem.MonHocID,
-						MaCotDiem: form.MaCotDiem
-					})">Tìm kiếm</v-btn>
-				</v-col>
-			</v-row>
-		</v-card-text>
-		<v-divider></v-divider>
-		<v-card-title class="text-primary">Biểu đồ phân phối điểm</v-card-title>
+	<v-card class="pa-4" style="background-color: #f9f9f9;">
+		<v-card>
+			<v-card-title class="text-primary">Chọn</v-card-title>
+			<v-card-text>
+
+				<v-row>
+					<v-col>
+						<v-select v-model="form.MaNhomCotDiem" label="Chọn nhóm điểm" :items="DSNhomDiem"
+							item-title="TenNhomCotDiem_VI" item-value="MaNhomCotDiem"
+							:loading="isLoadingMaNhomCotDiem"></v-select>
+					</v-col>
+					<v-col>
+						<v-select v-model="form.MaCotDiem" label="Chọn cột điểm" :items="DSCotDiem"
+							item-title="TenCotDiem_VI" item-value="MaCotDiem" :loading="isLoadingMaCotDiem"></v-select>
+					</v-col>
+					<v-col>
+						<v-btn color="primary" variant="tonal" @click="onLoadChart({
+							NienKhoa: 2024,
+							KhoiID: form.KhoiID,
+							MonHocID: form.MonHocItem.MonHocID,
+							MaCotDiem: form.MaCotDiem
+						})">Xem biểu đồ</v-btn>
+					</v-col>
+				</v-row>
+			</v-card-text>
+		</v-card>
+		<v-divider class="my-4"></v-divider>
 		<v-row>
-			<v-col>
-				<v-card :flat="false"><uc-chart-apex :options="ChartHistogram" /></v-card>
+			<v-col :cols="6">
+				<v-card :flat="false">
+					<v-card-title class="text-primary">Biểu đồ phân phối điểm theo khối</v-card-title>
+					<v-card-text>
+						<uc-chart-apex :options="ChartHistogram" />
+					</v-card-text>
+				</v-card>
+			</v-col>
+			<v-col :cols="6">
+				<v-row>
+					<v-col cols="12">
+						<v-card :flat="false">
+							<v-card-title class="text-primary">Biểu đồ phân phối điểm theo khối (Box
+								Plot)</v-card-title>
+							<v-card-text>
+								<uc-chart-apex :options="ChartBoxPlot" />
+							</v-card-text>
+						</v-card>
+					</v-col>
+					<v-col cols="12">
+						<v-card :flat="false">
+							<v-card-text>
+								<uc-chart-apex :options="ChartLine_AllLop" />
+							</v-card-text>
+						</v-card>
+					</v-col>
+				</v-row>
+			</v-col>
+
+			<v-col :cols="12">
+				<v-card :flat="false">
+					<v-card-title class="text-primary">Phân phối điểm theo lớp</v-card-title>
+					<v-card-text>
+						<v-row>
+							<v-col cols="4" v-for="(chart, index) in List_Lop_DataChart_Histogram" :key="index">
+								<uc-chart-apex :options="chart" />
+							</v-col>
+						</v-row>
+					</v-card-text>
+				</v-card>
 			</v-col>
 		</v-row>
 	</v-card>
 </template>
 
 <script>
-	export default {
-		props: {
-			capid: {
-				type: Number,
-				required: true
-			},
-			khoiid: {},
-			monhocid: {
-				type: Number,
-				required: true
-			}
+export default {
+	props: {
+		capid: {
+			type: Number,
+			required: true
 		},
-		data() {
-			return {
-				form: {
-					KhoiID: this.khoiid,
-					MonHocItem: {
-						MonHocID: this.monhocid
-					},
-					MaNhomCotDiem: null,
-					MaCotDiem: null,
+		khoiid: {},
+		monhocid: {
+			type: Number,
+			required: true
+		}
+	},
+	data() {
+		return {
+			_,
+			form: {
+				KhoiID: this.khoiid,
+				MonHocItem: {
+					MonHocID: this.monhocid
 				},
-				DSMonHoc: [],
-				DSNhomDiem: [],
-				DSCotDiem: [],
-				isLoadingMaNhomCotDiem: false,
-				isLoadingMaCotDiem: false,
-				DataChartHistogram_API: [],
-				DataChartHistogram_Khoi_API: [],
-				ChartHistogram: {
-					id: "chart-historgram",
-					chart: {
-						type: "line",
-						height: 350
-					},
-					series: [],
-					xaxis: {
-						categories: []
-					},
-					yaxis: {},
-					series: [],
-					options: {
-						plotOptions: {
-							bar: {
-								columnWidth: "100%",
-								endingShape: "flat"
-							}
+				MaNhomCotDiem: null,
+				MaCotDiem: null,
+			},
+			DSMonHoc: [],
+			DSNhomDiem: [],
+			DSCotDiem: [],
+			isLoadingMaNhomCotDiem: false,
+			isLoadingMaCotDiem: false,
+			DataChartHistogram_API: [],
+			DataChartHistogram_Khoi_API: [],
+			ChartHistogram: {
+				id: "chart-historgram",
+				chart: {
+					type: "line",
+					height: 350
+				},
+				series: [],
+				xaxis: {
+					categories: []
+				},
+				yaxis: {},
+				series: [],
+				options: {
+					plotOptions: {
+						bar: {
+							columnWidth: "100%",
+							endingShape: "flat"
 						}
 					}
 				}
-			}
-		},
-		async mounted() {
-			if (!this.form.KhoiID) return
-	
-			this.isLoadingMaNhomCotDiem = true
-			this.isLoadingMaCotDiem = true
-	
-			const MaNhomCotDiem = localStorage.getItem('MaNhomCotDiem_TA_C2')
-			const MaCotDiem = localStorage.getItem('MaCotDiem_TA_C2')
-	
-			if (MaNhomCotDiem && MaCotDiem) {
-				await this.onLoadDSMaNhomCotDiem(this.form.KhoiID)
-					.then(() => {
-						this.form.MaNhomCotDiem = MaNhomCotDiem
-					})
-					.finally(() => this.isLoadingMaNhomCotDiem = false)
-	
-				await this.onLoadDSMaCotDiem(MaNhomCotDiem, this.form.MonHocItem.TemplateBangDiemID)
-					.then(() => {
-						this.form.MaCotDiem = MaCotDiem
-					})
-					.finally(() => this.isLoadingMaCotDiem = false)
-				await this.onLoadChart({
-					NienKhoa: 2024,
-					KhoiID: this.form.KhoiID,
-					MonHocID: this.form.MonHocItem.MonHocID,
-					MaCotDiem: MaCotDiem
-				})
-			}
-		},
-		computed: {},
-		watch: {
-			khoiid: function (KhoiID) {
-				this.form.KhoiID = KhoiID
 			},
-			'form.KhoiID': function (khoiID) {
-				if (khoiID) {
-					this.onLoadDSMaNhomCotDiem(khoiID)
-				}
-			},
-			'form.MaNhomCotDiem': function (MaNhomCotDiem_new, MaNhomCotDiem_old) {
-				if (MaNhomCotDiem_new !== null && MaNhomCotDiem_old !== null) {
-					localStorage.setItem('MaNhomCotDiem_TA_C2', MaNhomCotDiem_new)
-					this.onLoadDSMaCotDiem(MaNhomCotDiem_new, this.form.MonHocItem.TemplateBangDiemID)
-						.then(() => {
-							const isValid = this.DSCotDiem.some(item => item.MaCotDiem === this.form.MaCotDiem);
-							if (!isValid) {
-								this.form.MaCotDiem = null; // Hoặc gán giá trị mặc định
-							}
-						});
-				}
-			},
-			'form.MaCotDiem': function (MaCotDiem) {
-				if (MaCotDiem !== null) {
-					localStorage.setItem('MaCotDiem_TA_C2', MaCotDiem)
-				}
-			}
-		},
-		methods: {
-			onLoadDSMaNhomCotDiem(KhoiID) {
-				return new Promise(resolve => {
-					const promise = () => {
-						return new Promise(resolve => {
-							ajaxCALL('lms/MonHoc_GetByKhoiID',
-								{
-									KhoiID: KhoiID
-								},
-								res => {
-									const monHocTiengAnh = res.data.find(x => x.MonHocID === this.form.MonHocItem.MonHocID)
-									this.form.MonHocItem = monHocTiengAnh
-									resolve()
-								}
-							)
-						})
+			ChartBoxPlot: {
+				id: "chart-boxplot",
+				series: [],
+				chart: {
+					type: "boxPlot",
+					height: 350
+				},
+				title: {
+					text: "",
+					align: "left"
+				},
+				plotOptions: {
+					bar: {
+						horizontal: true,
+						barHeight: "40%"
+					},
+					boxPlot: {
+						colors: {
+							upper: "#B6C454",
+							lower: "#EDBFB7"
+						}
 					}
-					promise().then(() => {
-						ajaxCALL('lms/NhomCauTrucDiem_Get_ByTemplateBangDiemID',
+				},
+				stroke: {
+					colors: [
+						"#333"
+					]
+				}
+			},
+			ChartLine_AllLop: {
+				id: "chart-line",
+				series: [],
+				chart: {
+					height: 350,
+					type: "line",
+					zoom: {
+						"enabled": false
+					}
+				},
+				grid: {
+					row: {
+						colors: [
+							"#f3f3f3",
+							"transparent"
+						],
+						opacity: 0.5
+					}
+				},
+				dataLabels: {
+					enabled: false
+				},
+				stroke: {
+					curve: "straight"
+				},
+				xaxis: {
+					categories: []
+				}
+			},
+			List_Lop_DataChart_Histogram: [],
+			Chart_TongDiemTheoKhoi: {
+				"id": "chart-line-tong-diem-theo-khoi",
+				"series": [],
+				"chart": {
+					"height": 350,
+					"type": "line",
+					"zoom": {
+						"enabled": false
+					}
+				},
+				"grid": {
+					"row": {
+						"colors": [
+							"#f3f3f3",
+							"transparent"
+						],
+						"opacity": 0.5
+					}
+				},
+				"dataLabels": {
+					"enabled": false
+				},
+				"stroke": {
+					"curve": "straight"
+				},
+				"xaxis": {
+					"categories": []
+				}
+			}
+		}
+	},
+	async mounted() {
+		if (!this.form.KhoiID) return
+
+		this.isLoadingMaNhomCotDiem = true
+		this.isLoadingMaCotDiem = true
+
+		const MaNhomCotDiem = localStorage.getItem('MaNhomCotDiem_TA_C2')
+		const MaCotDiem = localStorage.getItem('MaCotDiem_TA_C2')
+
+		if (MaNhomCotDiem && MaCotDiem) {
+			await this.onLoadDSMaNhomCotDiem(this.form.KhoiID)
+				.then(() => this.form.MaNhomCotDiem = MaNhomCotDiem)
+				.finally(() => this.isLoadingMaNhomCotDiem = false)
+			await this.onLoadDSMaCotDiem(MaNhomCotDiem, this.form.MonHocItem.TemplateBangDiemID)
+				.then(() => this.form.MaCotDiem = MaCotDiem)
+				.finally(() => this.isLoadingMaCotDiem = false)
+			await this.onLoadChart({
+				NienKhoa: 2024,
+				KhoiID: this.form.KhoiID,
+				MonHocID: this.form.MonHocItem.MonHocID,
+				MaCotDiem: MaCotDiem
+			})
+		}
+	},
+	computed: {},
+	watch: {
+		khoiid: function (KhoiID) {
+			this.form.KhoiID = KhoiID
+		},
+		'form.KhoiID': function (khoiID) {
+			if (khoiID) {
+				this.onLoadDSMaNhomCotDiem(khoiID)
+			}
+		},
+		'form.MaNhomCotDiem': function (MaNhomCotDiem_new, MaNhomCotDiem_old) {
+			if (MaNhomCotDiem_new !== null && MaNhomCotDiem_old !== null) {
+				localStorage.setItem('MaNhomCotDiem_TA_C2', MaNhomCotDiem_new)
+				this.onLoadDSMaCotDiem(MaNhomCotDiem_new, this.form.MonHocItem.TemplateBangDiemID)
+					.then(() => {
+						const isValid = this.DSCotDiem.some(item => item.MaCotDiem === this.form.MaCotDiem);
+						if (!isValid) {
+							this.form.MaCotDiem = null; // Hoặc gán giá trị mặc định
+						}
+					});
+			}
+		},
+		'form.MaCotDiem': function (MaCotDiem) {
+			if (MaCotDiem !== null) {
+				localStorage.setItem('MaCotDiem_TA_C2', MaCotDiem)
+			}
+		}
+	},
+	methods: {
+		onLoadDSMaNhomCotDiem(KhoiID) {
+			return new Promise(resolve => {
+				const promise = () => {
+					return new Promise(resolve => {
+						ajaxCALL('lms/MonHoc_GetByKhoiID',
 							{
-								TemplateBangDiemID: this.form.MonHocItem.TemplateBangDiemID
+								KhoiID: KhoiID
 							},
 							res => {
-								this.DSNhomDiem = res.data
+								const monHocTiengAnh = res.data.find(x => x.MonHocID === this.form.MonHocItem.MonHocID)
+								this.form.MonHocItem = monHocTiengAnh
 								resolve()
-							})
+							}
+						)
 					})
-				})
-			},
-			onLoadDSMaCotDiem(MaNhomCotDiem, TemplateBangDiemID) {
-				return new Promise(resolve => {
-					ajaxCALL('lms/MaCotDiem_Get_ByMaNhomCotDiem',
+				}
+				promise().then(() => {
+					ajaxCALL('lms/NhomCauTrucDiem_Get_ByTemplateBangDiemID',
 						{
-							TemplateBangDiemID: TemplateBangDiemID,
-							MaNhomCotDiem: MaNhomCotDiem
+							TemplateBangDiemID: this.form.MonHocItem.TemplateBangDiemID
 						},
 						res => {
-							this.DSCotDiem = res.data
+							this.DSNhomDiem = [
+								{
+									"MaNhomCotDiem": "S1_Mid",
+									"TenNhomCotDiem_VI": "Điểm giữa kỳ HK1",
+									"TenNhomCotDiem_EN": "Mid_term Points (Semester 1)",
+									"ThuTuNhom": 5,
+									"Semester": "HK1"
+								},
+								{
+									"MaNhomCotDiem": "S1_Final",
+									"TenNhomCotDiem_VI": "Điểm cuối HK1",
+									"TenNhomCotDiem_EN": "Final_term Points (Semester 1)",
+									"ThuTuNhom": 6,
+									"Semester": "HK1"
+								},
+								{
+									"MaNhomCotDiem": "DiemTB_HK1",
+									"TenNhomCotDiem_VI": "Điểm TB HK1",
+									"TenNhomCotDiem_EN": "Average Points (Semester 1)",
+									"ThuTuNhom": 7,
+									"Semester": "HK1"
+								}
+							]//res.data
 							resolve()
-						}
-					)
+						})
 				})
-			},
-			onLoadChart({ NienKhoa, KhoiID, MonHocID, MaCotDiem }) {
-				return new Promise(resolve => {
-					ajaxCALL('lms/DashboardPhanPhoiDiem_Get',
-						{
-							NienKhoa, KhoiID, MonHocID, MaCotDiem
+			})
+		},
+		onLoadDSMaCotDiem(MaNhomCotDiem, TemplateBangDiemID) {
+			return new Promise(resolve => {
+				ajaxCALL('lms/MaCotDiem_Get_ByMaNhomCotDiem',
+					{
+						TemplateBangDiemID: TemplateBangDiemID,
+						MaNhomCotDiem: MaNhomCotDiem
+					},
+					res => {
+						this.DSCotDiem = res.data
+						resolve()
+					}
+				)
+			})
+		},
+		onLoadChart({ NienKhoa, KhoiID, MonHocID, MaCotDiem }) {
+			return new Promise(resolve => {
+				ajaxCALL('lms/DashboardPhanPhoiDiem_Get',
+					{
+						NienKhoa, KhoiID, MonHocID, MaCotDiem
+					},
+					res => {
+						const DataChartHistogram_API = res.data[0]
+						const DataChartHistogram_Khoi_API = res.data[1]
+
+						this.convertChartHistogram(DataChartHistogram_API)
+						this.convertChartBoxPlot(DataChartHistogram_API)
+
+						this.convertChartLineToTalScore_AllLop(DataChartHistogram_API)
+						this.convertChartMultipleLop(DataChartHistogram_API)
+
+						// this.convertChartLineTongDiemTheoKhoi(DataChartHistogram_Khoi_API)
+
+						resolve()
+					}
+				)
+			})
+		},
+		convertChartHistogram(rawData) {
+			let bin_x;
+			// 2. Tạo histogram data với bin cố định
+			const { histogramData, fixedBins, bin_x_data } = this.createHistogramDataWithFixedBins(rawData);
+			// 3. Lấy trung điểm của bin
+			const midPoints = histogramData.map(item => item.midPoint)
+			// 4. Tính toán KDE
+			const kdeData = this.calculateKDE(rawData, midPoints);
+			const histogramDataWithKDE = histogramData.map((item, index) => ({
+				...item,
+				kde: kdeData[index]?.y || 0
+			}));
+			bin_x = bin_x_data
+			this.ChartHistogram = {
+				...this.DataChartHistogram,
+				series: [
+					{
+						name: 'Histogram',
+						type: 'column',
+						data: histogramDataWithKDE.map(item => item.y),
+						borderColor: '#000',
+						borderWidth: 1,
+						backgroundColor: 'rgba(255, 193, 7, 0.7)',
+						yAxis: 0
+					},
+					{
+						name: 'KDE',
+						type: 'line',
+						//data: histogramDataWithKDE.map(item => ({ x: item.x, y: item.kde })),
+						data: histogramDataWithKDE.map(item => item.kde),
+						borderColor: 'red',
+						yAxis: 1,
+						tension: 0.4,
+					}
+				],
+				chart: {
+					height: 500,
+					type: 'line',
+					stacked: false
+				},
+				stroke: {
+					width: [1, 2],
+					curve: 'smooth'
+				},
+				plotOptions: {
+					bar: {
+						columnWidth: '100%'
+					}
+				},
+				xaxis: {
+					categories: bin_x,//histogramDataWithKDE.map(item => item.x),
+					title: {
+						text: 'Tổng (Total) Score',
+						style: {
+							fontSize: '12px',
+							fontWeight: 600
+						}
+					},
+					labels: {
+						hideOverlappingLabels: false, // Hiển thị tất cả nhãn, ngay cả khi chúng bị chồng chéo
+						formatter: function (value) {
+							if (typeof value === 'number') {
+								return value.toFixed(2); // Định dạng thành số thập phân
+							}
+							return value; // Trả lại giá trị nguyên gốc nếu không phải là số
 						},
-						res => {
-							const DataChartHistogram_API = res.data[0]
-							const DataChartHistogram_Khoi_API = res.data[1]
-	
-							this.convertChartHistogram(DataChartHistogram_API)
-							this.convertChartBoxPlot()
-	
-							resolve()
+						style: {
+							fontSize: '10px'
+						},
+						show: true, // Hiển thị nhãn
+					},
+					// tickAmount: 20, // Thử tăng số lượng tick
+					// min: bin_x[0], // Thiết lập giá trị min để đảm bảo hiển thị đầy đủ
+					// max: bin_x[bin_x.length - 1], // Thiết lập giá trị max
+				},
+				yaxis: [
+					{
+						seriesName: 'Histogram',
+						min: 0,
+						title: {
+							text: 'Frequency',
+							style: {
+								color: '#008FFB'
+							}
+						},
+						labels: {
+							formatter: function (value) {
+								return value.toFixed(2);
+							},
+							style: {
+								color: '#008FFB'
+							}
 						}
-					)
-				})
-			},
-			convertChartHistogram(rawData) {
-				let bin_x;
+					},
+					{
+						seriesName: 'KDE',
+						opposite: true,
+						min: 0,
+						title: {
+							text: 'Mật Độ KDE',
+							style: {
+								color: '#FF4560'
+							}
+						},
+						labels: {
+							formatter: function (value) {
+								return value.toFixed(2);
+							},
+							style: {
+								color: '#FF4560'
+							}
+						}
+					}
+				],
+				tooltip: {
+					shared: true,
+					intersect: false
+				},
+				legend: {
+					show: true,
+					position: 'top'
+				},
+				grid: {
+					show: true,
+					borderColor: '#90A4AE',
+					strokeDashArray: 4,
+					xaxis: {
+						lines: {
+							show: true,
+						}
+					},
+					yaxis: {
+						lines: {
+							show: true,
+						}
+					},
+				},
+				title: {
+					text: 'Distribution of Tổng (Total) Scores',
+					align: 'center'
+				}
+			}
+		},
+		convertChartBoxPlot(rawData) {
+			const data = rawData.map(x => x.Diem)
+			const stats = this.calculateBoxplotStats(data);
+			this.ChartBoxPlot = {
+				...this.ChartBoxPlot,
+				series: [{
+					data: [{
+						x: '',
+						y: [stats.min, stats.q1, stats.median, stats.q3, stats.max],
+						goals: stats.outliers.map(outlier => ({
+							name: 'Điểm Ngoại Lai',
+							value: outlier,
+							strokeColor: '#FF4560',
+							strokeWidth: 10,
+							strokeHeight: 0,
+							strokeLineCap: 'round',
+						}))
+					}]
+				}],
+				chart: {
+					type: 'boxPlot',
+					height: 150,
+					toolbar: { show: true }
+				},
+				title: {
+					text: 'Phân Phối Điểm',
+					align: 'center'
+				},
+				plotOptions: {
+					bar: { horizontal: true },
+					boxPlot: {
+						horizontal: true,
+						colors: {
+							upper: '#2E93fA',
+							lower: '#66DA26'
+						}
+					}
+				},
+				xaxis: {
+					title: { text: 'Điểm Số' },
+					min: 0,
+					max: 10,
+					tickAmount: 10,
+					decimalsInFloat: 1
+				},
+				tooltip: {
+					shared: false,
+					intersect: true
+				}
+			};
+		},
+		convertChartLineToTalScore_AllLop(_rawData) {
+			const rawData = _rawData
+			// Xử lý dữ liệu thống kê
+			const stats = this.processData(rawData, 'TenLop');
+			const classes = Object.keys(stats);
+			// Chuẩn bị dữ liệu cho biểu đồ
+			const seriesData = [
+				{
+					name: 'Trung bình (Mean)',
+					type: 'line',
+					data: classes.map(lop => stats[lop].mean)
+				},
+				{
+					name: 'Trung vị (Median)',
+					type: 'line',
+					data: classes.map(lop => stats[lop].median)
+				},
+				{
+					name: 'Độ lệch chuẩn (Std Dev)',
+					type: 'line',
+					data: classes.map(lop => stats[lop].standardDeviation)
+				}
+			]
+			this.ChartLine_AllLop = {
+				...this.ChartLine_AllLop,
+				series: seriesData,
+				chart: {
+					height: 350,
+					type: 'line',
+					zoom: {
+						enabled: true
+					},
+					toolbar: {
+						show: true
+					}
+				},
+				dataLabels: {
+					enabled: true,
+					style: {
+						fontSize: '10px'
+					}
+				},
+				stroke: {
+					curve: 'smooth',
+					width: [3, 3, 3]
+				},
+				title: {
+					text: 'Mean, Median, and Standard Deviation of Total Scores by Class',
+					align: 'center'
+				},
+				grid: {
+					row: {
+						colors: ['#f3f3f3', 'transparent'],
+						opacity: 0.5
+					},
+				},
+				xaxis: {
+					categories: classes,
+					title: {
+						text: 'Class'
+					}
+				},
+				yaxis: {
+					title: {
+						text: 'Scores'
+					},
+					labels: {
+						formatter: function (value) {
+							return value ? value.toFixed(2) : (value ?? 0);
+						}
+					}
+				},
+				legend: {
+					position: 'top',
+					horizontalAlign: 'center'
+				},
+				colors: ['#008FFB', '#00E396', '#FEB019'],
+				tooltip: {
+					shared: true,
+					intersect: false,
+					y: {
+						formatter: function (value) {
+							return value.toFixed(2);
+						}
+					}
+				}
+			}
+		},
+		convertChartMultipleLop(rawData) {
+			this.List_Lop_DataChart_Histogram = []
+			const chart = {
+				"id": "chart-histogram",
+				"chart": {
+					"type": "line"
+				},
+				"xaxis": {
+					"categories": []
+				},
+				"yaxis": {},
+				"series": [],
+				"options": {
+					"plotOptions": {
+						"bar": {
+							"columnWidth": "100%",
+							"endingShape": "flat"
+						}
+					}
+				}
+			}
+			const sortData = this.sortTenLop(rawData)
+			const uniqueLopID = [...new Set(sortData.map(x => x.LopID))]
+			for (const lopID of uniqueLopID) {
+				let bin_x
+				const lop = sortData.find(x => x.LopID === lopID)
+				// 1. Lấy dữ liệu điểm từ API
+				const rawData = sortData.filter(x => x.LopID === lopID);
 				// 2. Tạo histogram data với bin cố định
 				const { histogramData, fixedBins, bin_x_data } = this.createHistogramDataWithFixedBins(rawData);
 				// 3. Lấy trung điểm của bin
@@ -216,8 +675,9 @@
 					kde: kdeData[index]?.y || 0
 				}));
 				bin_x = bin_x_data
-				this.ChartHistogram = {
-					...this.DataChartHistogram,
+				this.List_Lop_DataChart_Histogram.push({
+					...chart,
+					id: `chart-histogram-${lopID}`,
 					series: [
 						{
 							name: 'Histogram',
@@ -265,9 +725,9 @@
 							hideOverlappingLabels: false, // Hiển thị tất cả nhãn, ngay cả khi chúng bị chồng chéo
 							formatter: function (value) {
 								if (typeof value === 'number') {
-									return value.toFixed(2); // Định dạng thành số thập phân
+									return value.toFixed(2);  // Định dạng thành số thập phân
 								}
-								return value; // Trả lại giá trị nguyên gốc nếu không phải là số
+								return value;  // Trả lại giá trị nguyên gốc nếu không phải là số
 							},
 							style: {
 								fontSize: '10px'
@@ -341,92 +801,138 @@
 						},
 					},
 					title: {
-						text: 'Distribution of Tổng (Total) Scores',
+						text: `Distribution of Tổng (Total) Scores - ${lop.TenLop}`,
 						align: 'center'
 					}
-				}
-			},
-			convertChartBoxPlot() {
-	
-			},
-			//Tính toán
-			calculateKDE(data, xValues) {
-				// 1. Trích xuất điểm dữ liệu từ trường "Diem"
-				const points = data.map(item => item.Diem);
-				// 2. Tính toán các tham số thống kê
-				const n = points.length;
-				const mean = points.reduce((a, b) => a + b, 0) / n;
-				const variance = points.reduce((sum, x) => sum + Math.pow(x - mean, 2), 0) / (n - 1);
-				const std = Math.sqrt(variance);
-				// 3. Bandwidth theo Scott's rule
-				const bandwidth = 1.06 * std * Math.pow(n, -1 / 5); // Scott
-				//const bandwidth = 0.3 * std * Math.pow(n, -1 / 3); //giai thuat ban đầu Silverman
-				// Hàm Gaussian kernel
-				const gaussianKernel = (u) => (1 / Math.sqrt(2 * Math.PI)) * Math.exp(-0.5 * u * u);
-				// 5. Tính mật độ KDE cho từng điểm x trong xValues
-				const kdeData = xValues.map(x => {
-					let density = 0;
-					for (const point of points) {
-						const u = (x - point) / bandwidth;
-						density += gaussianKernel(u);
-					}
-					density /= (n * bandwidth);
-					return {
-						x: x,
-						y: Number(density.toFixed(2))
-					};
 				});
-				return kdeData;
-			},
-			linspace(start, end, steps) {
-				const result = [];
-				const step = (end - start) / (steps - 1);
-				for (let i = 0; i < steps; i++) { result.push(start + step * i); } return result;
-			},
-			createHistogramDataWithFixedBins(data) {
-				const points = data.map(item => item.Diem);
-				const min = Math.min(...points);
-				const max = Math.max(...points);
-				let numBins = 15;//max - min;
-				const bins = this.linspace(min, max, numBins + 1)
-				// console.log(bins)
-				// bin_x = bins;
-				const counts = Array(numBins).fill(0)
-				for (const value of points) {
-					for (let i = 0; i < numBins; i++) { if (value >= bins[i] && value < bins[i + 1]) { counts[i]++; break; } }
-				}
-				console.log(counts)
-				let binWidth;
-				if (bins.length > 1) {
-					binWidth = bins[1] - bins[0];
-				}
-				else {
-					binWidth = 1
-				}
-				const density = counts.map(count => count / (points.length * binWidth));
-				const histogramData = bins.slice(0, -1).map((binStart, index) => ({
-					x: binStart,
-					binStart: binStart.toFixed(2),
-					binEnd: bins[index + 1],
-					y: counts[index],
-					midPoint: (binStart + bins[index + 1]) / 2,
-					label: `${binStart.toFixed(2)}`
-				}));
-				//Add last element if it is equal to max
-				if (bins[bins.length - 1] === 10) {
-					histogramData.push({
-						x: 10, // Use 10 for x coordinate
-						binStart: 10,
-						binEnd: 10,
-						y: 0,
-						midPoint: 10,
-						label: `10`
-					})
-				}
-				// console.log(histogramData);
-				// console.log(bin_x);
-				return { histogramData, fixedBins: bins, bin_x_data: bins };
 			}
 		},
-	}
+		// convertChartLineTongDiemTheoKhoi(_rawData) {
+		// 	const chart = {
+		// 		"id": "chart-line-tong-diem-theo-khoi",
+		// 		"series": [],
+		// 		"chart": {
+		// 			"height": 350,
+		// 			"type": "line",
+		// 			"zoom": {
+		// 				"enabled": false
+		// 			}
+		// 		},
+		// 		"grid": {
+		// 			"row": {
+		// 				"colors": [
+		// 					"#f3f3f3",
+		// 					"transparent"
+		// 				],
+		// 				"opacity": 0.5
+		// 			}
+		// 		},
+		// 		"dataLabels": {
+		// 			"enabled": false
+		// 		},
+		// 		"stroke": {
+		// 			"curve": "straight"
+		// 		},
+		// 		"xaxis": {
+		// 			"categories": []
+		// 		}
+		// 	}
+		// 	const rawData = _rawData
+		// 	const stats = this.processData(rawData);
+		// 	const classes = Object.keys(stats);
+		// 	// Chuẩn bị dữ liệu cho biểu đồ
+		// 	const seriesData = [
+		// 		{
+		// 			name: 'Trung bình (Mean)',
+		// 			type: 'line',
+		// 			data: classes.map(lop => stats[lop].mean)
+		// 		},
+		// 		{
+		// 			name: 'Trung vị (Median)',
+		// 			type: 'line',
+		// 			data: classes.map(lop => stats[lop].median)
+		// 		},
+		// 		{
+		// 			name: 'Độ lệch chuẩn (Std Dev)',
+		// 			type: 'line',
+		// 			data: classes.map(lop => stats[lop].standardDeviation)
+		// 		}
+		// 	];
+		// 	this.Chart_TongDiemTheoKhoi = {
+		// 		...chart,
+		// 		series: seriesData,
+		// 		chart: {
+		// 			height: 450,
+		// 			type: 'line',
+		// 			zoom: {
+		// 				enabled: true
+		// 			},
+		// 			toolbar: {
+		// 				show: true
+		// 			}
+		// 		},
+		// 		dataLabels: {
+		// 			enabled: true,
+		// 			style: {
+		// 				fontSize: '10px'
+		// 			}
+		// 		},
+		// 		stroke: {
+		// 			curve: 'smooth',
+		// 			width: [3, 3, 3]
+		// 		},
+		// 		title: {
+		// 			text: 'Mean, Median, and Standard Deviation of Total Scores (Listening, Language, Reading, Writing, Speaking) by Grade',
+		// 			align: 'center'
+		// 		},
+		// 		grid: {
+		// 			row: {
+		// 				colors: ['#f3f3f3', 'transparent'],
+		// 				opacity: 0.5
+		// 			},
+		// 		},
+		// 		xaxis: {
+		// 			categories: classes,
+		// 			title: {
+		// 				text: 'Grade'
+		// 			}
+		// 		},
+		// 		yaxis: {
+		// 			title: {
+		// 				text: 'Scores'
+		// 			},
+		// 			labels: {
+		// 				formatter: function (value) {
+		// 					return value ? value.toFixed(2) : (value ?? 0);
+		// 				}
+		// 			}
+		// 		},
+		// 		legend: {
+		// 			position: 'top',
+		// 			horizontalAlign: 'center'
+		// 		},
+		// 		colors: ['#008FFB', '#00E396', '#FEB019'],
+		// 		tooltip: {
+		// 			shared: true,
+		// 			intersect: false,
+		// 			y: {
+		// 				formatter: function (value) {
+		// 					return value.toFixed(2);
+		// 				}
+		// 			}
+		// 		}
+		// 	}
+		// },
+		//Tính toán
+		calculateKDE,
+		linspace,
+		createHistogramDataWithFixedBins,
+		calculateBoxplotStats,
+		processData,
+		calculateMean,
+		calculateMedian,
+		calculateStandardDeviation,
+		sortTenLop,
+	},
+}
 </script>

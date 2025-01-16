@@ -1,1 +1,158 @@
-{"data":[{"tab":0,"itemTabs":[{"title":"Phân phối điểm","value":0},{"title":"Kỹ năng","value":1},{"title":"Chủ đề","value":2},{"title":"So sánh điểm trung bình giữa kỳ và cuối kỳ 1","value":3},{"title":"Sự thay đổi điểm tổng giữa kỳ và cuối kỳ 1 của một học sinh","value":4},{"title":"Tỷ lệ học sinh đạt và chưa đạt GK1","value":5}],"CapID":2,"MonHocID":46,"KhoiID":null,"DSKhoi":[]},{"CALL":[{"EXE":"vueData.renderDSKhoi = renderDSKhoi"},{"EXE":"vueData.DSKhoi = renderDSKhoi().filter(x=> x.CapID === 2)"},{"EXE":"vueData.KhoiID = localStorage.getItem('KhoiID_TA_C2') ? parseInt(localStorage.getItem('KhoiID_TA_C2')) : null"}]}],"watch":{"KhoiID":{"IF":"vueData.KhoiID > 0","THEN":[{"EXE":"localStorage.setItem('KhoiID_TA_C2', KhoiID)"}]}},"controls":[{"prop":"fluid","rows":[{"prop":"","cols":[{"el":"v-card","attr":{"style":"border-radius: 0"},"innerHTML":[{"el":"v-toolbar","attr":{"class":"pl-4","color":"primary"},"innerHTML":[{"el":"v-toolbar-title","innerHTML":"Tổng quan điểm Tiếng Anh - C2"},{"el":"v-spacer"},{"el":"v-select","attr":{"v-model":"KhoiID",":items":"DSKhoi","item-title":"title","item-value":"value","bg-color":"white","hide-details":false,"placeholder":"Chọn khối","solo":true,"class":"mr-4","style":"max-width: 200px"}},{"el":"template","attr":{"v-slot:extension":""},"innerHTML":"<v-tabs v-model='tab' align-tabs='center' selected-class='bg-white text-primary'><v-tab  v-for='(item, key) in itemTabs' :key='key' :text='item.title' :value='item.value'></v-tab></v-tabs>"}]},{"el":"v-tabs-window","attr":{"v-model":"tab"},"innerHTML":[{"el":"v-tabs-window-item","attr":{":value":0},"innerHTML":"<uc-tab-phan-phoi-diem :khoiid='KhoiID' :capID='CapID' :monhocid='MonHocID'/>"},{"el":"v-tabs-window-item","attr":{":value":1},"innerHTML":"<uc-tab-ky-nang :khoiID='KhoiID' :capID='CapID' :monhocid='MonHocID'/>"},{"el":"v-tabs-window-item","attr":{":value":2},"innerHTML":"<uc-tab-chu-de :khoiID='KhoiID' :capID='CapID' :monhocid='MonHocID'/>"},{"el":"v-tabs-window-item","attr":{":value":3},"innerHTML":"<uc-tab-diem-trung-binh :khoiID='KhoiID' :capID='CapID' :monhocid='MonHocID'/>"},{"el":"v-tabs-window-item","attr":{":value":4},"innerHTML":"<uc-tab-diem-tong :khoiID='KhoiID' :capID='CapID' :monhocid='MonHocID'/>"},{"el":"v-tabs-window-item","attr":{":value":5},"innerHTML":"<uc-tab-ty-le-hoc-sinh :khoiID='KhoiID' :capID='CapID' :monhocid='MonHocID'/>"}]}]}]}]}],"set":{}}
+{
+    "data": [
+        {
+            "tab": 3,
+            "itemTabs": [
+                {
+                    "title": "Phân phối điểm",
+                    "value": 0
+                },
+                {
+                    "title": "Kỹ năng",
+                    "value": 1
+                },
+                {
+                    "title": "Chủ đề",
+                    "value": 2
+                },
+                {
+                    "title": "Tương quan điểm giữa kỳ và cuối kỳ",
+                    "value": 3
+                },
+                {
+                    "title": "Sự thay đổi điểm tổng giữa kỳ và cuối kỳ 1 của một học sinh",
+                    "value": 4
+                }
+            ],
+            "CapID": 2,
+            "MonHocID": 46,
+            "KhoiID": null,
+            "DSKhoi": []
+        },
+        {
+            "CALL": [
+                {
+                    "EXE": "vueData.renderDSKhoi = renderDSKhoi"
+                },
+                {
+                    "EXE": "vueData.DSKhoi = renderDSKhoi().filter(x=> x.CapID === 2)"
+                },
+                {
+                    "EXE": "vueData.KhoiID = localStorage.getItem('KhoiID_TA_C2') ? parseInt(localStorage.getItem('KhoiID_TA_C2')) : null"
+                }
+            ]
+        }
+    ],
+    "watch": {
+        "KhoiID": {
+            "IF": "vueData.KhoiID > 0",
+            "THEN": [
+                {
+                    "EXE": "localStorage.setItem('KhoiID_TA_C2', KhoiID)"
+                }
+            ]
+        }
+    },
+    "controls": [
+        {
+            "prop": "fluid",
+            "rows": [
+                {
+                    "prop": "",
+                    "cols": [
+                        {
+                            "el": "v-card",
+                            "attr": {
+                                "style": "border-radius: 0"
+                            },
+                            "innerHTML": [
+                                {
+                                    "el": "v-toolbar",
+                                    "attr": {
+                                        "class": "pl-4",
+                                        "color": "primary"
+                                    },
+                                    "innerHTML": [
+                                        {
+                                            "el": "v-toolbar-title",
+                                            "innerHTML": "Tổng quan điểm Tiếng Anh - C2"
+                                        },
+                                        {
+                                            "el": "v-spacer"
+                                        },
+                                        {
+                                            "el": "v-select",
+                                            "attr": {
+                                                "v-model": "KhoiID",
+                                                ":items": "DSKhoi",
+                                                "item-title": "title",
+                                                "item-value": "value",
+                                                "bg-color": "white",
+                                                "hide-details": false,
+                                                "placeholder": "Chọn khối",
+                                                "solo": true,
+                                                "class": "mr-4",
+                                                "style": "max-width: 200px"
+                                            }
+                                        },
+                                        {
+                                            "el": "template",
+                                            "attr": {
+                                                "v-slot:extension": ""
+                                            },
+                                            "innerHTML": "<v-tabs v-model='tab' align-tabs='center' selected-class='bg-white text-primary'><v-tab  v-for='(item, key) in itemTabs' :key='key' :text='item.title' :value='item.value'></v-tab></v-tabs>"
+                                        }
+                                    ]
+                                },
+                                {
+                                    "el": "v-tabs-window",
+                                    "attr": {
+                                        "v-model": "tab"
+                                    },
+                                    "innerHTML": [
+                                        {
+                                            "el": "v-tabs-window-item",
+                                            "attr": {
+                                                ":value": 0
+                                            },
+                                            "innerHTML": "<uc-tab-phan-phoi-diem :khoiid='KhoiID' :capID='CapID' :monhocid='MonHocID'/>"
+                                        },
+                                        {
+                                            "el": "v-tabs-window-item",
+                                            "attr": {
+                                                ":value": 1
+                                            },
+                                            "innerHTML": "<uc-tab-ky-nang :khoiID='KhoiID' :capID='CapID' :monhocid='MonHocID'/>"
+                                        },
+                                        {
+                                            "el": "v-tabs-window-item",
+                                            "attr": {
+                                                ":value": 2
+                                            },
+                                            "innerHTML": "<uc-tab-chu-de :khoiID='KhoiID' :capID='CapID' :monhocid='MonHocID'/>"
+                                        },
+                                        {
+                                            "el": "v-tabs-window-item",
+                                            "attr": {
+                                                ":value": 3
+                                            },
+                                            "innerHTML": "<uc-tab-diem-trung-binh :khoiID='KhoiID' :capID='CapID' :monhocid='MonHocID'/>"
+                                        },
+                                        {
+                                            "el": "v-tabs-window-item",
+                                            "attr": {
+                                                ":value": 4
+                                            },
+                                            "innerHTML": "<uc-tab-diem-tong :khoiID='KhoiID' :capID='CapID' :monhocid='MonHocID'/>"
+                                        }
+                                    ]
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ]
+        }
+    ],
+    "set": {}
+}
