@@ -20,29 +20,35 @@
 								<v-col cols="2">
 									<v-list lines="two">
 										<v-card-title class="text-primary font-weight-medium pl-4">Cấp C2</v-card-title>
+										
 										<v-list-item>
+											<p class="text-body">Tổng số học sinh</p>
 											<template v-slot:prepend>
 												<v-btn color="primary" icon="mdi-account-group" variant="text"></v-btn>
 											</template>
-											<v-list-item-title>
+											<v-list-item-title class="font-weight-medium">
 												{{ Tong_Growth_GiuaKy_CuoiKi?.TongSoHocSinh ?? 0 }}
 											</v-list-item-title>
 										</v-list-item>
+										<v-divider inset></v-divider>
 										<v-list-item>
+											<p class="text-body">Số học sinh cao hơn</p>
 											<template v-slot:prepend>
 												<v-btn color="primary" icon="mdi-human-capacity-increase"
 													variant="text"></v-btn>
 											</template>
-											<v-list-item-title>
+											<v-list-item-title class="font-weight-medium">
 												{{ Tong_Growth_GiuaKy_CuoiKi?.SoHocSinhCaoHon ?? 0}}
 											</v-list-item-title>
 										</v-list-item>
+										<v-divider inset></v-divider>
 										<v-list-item>
+											<p class="text-body">Tỷ lệ phần trăm</p>
 											<template v-slot:prepend>
-												<v-btn color="primary" icon="mdi-percent-circle-outline"
+												<v-btn color="primary" icon="mdi-arrow-up-circle-outline"
 													variant="text"></v-btn>
 											</template>
-											<v-list-item-title>
+											<v-list-item-title class="font-weight-medium">
 												{{ Tong_Growth_GiuaKy_CuoiKi?.TiLePhanTram ?? 0 }} %
 											</v-list-item-title>
 										</v-list-item>
@@ -53,66 +59,52 @@
 									<v-row>
 										<v-col v-for="(item, index) in List_Tong_Grade_Growth_GiuaKy_CuoiKi" cols="6">
 											<v-card :flat="false">
-												<v-card-title class="text-primary">Khối {{ item.KhoiID }}</v-card-title>
-												<v-row>
-													<v-col cols="3">
-														<v-list-item>
-															<v-list-item-title>
-																<v-row>
-																	<v-col>
+												<v-card-title class="text-primary">
+													Khối {{ item.KhoiID }}
+													<v-spacer></v-spacer>
+													<v-chip-group>
+														<v-chip prepend-icon="mdi-account-group">{{ item?.TongSoHocSinh ?? 0}}</v-chip>
+														<v-chip prepend-icon="mdi-human-capacity-increase">{{ item?.SoHocSinhCaoHon ?? 0 }}</v-chip>
+														<v-chip prepend-icon="mdi-arrow-up-circle-outline">{{ item?.TiLePhanTram ?? 0 }} %</v-chip>
+													</v-chip-group>
+												</v-card-title>
+												<v-row no-gutters> 
+													<v-col style="height: 200px; overflow:auto">
+														<v-table>
+															<thead>
+																<tr>
+																	<th class="text-right"> 
+																		<v-btn color="primary" icon="mdi-school-outline"variant="text"></v-btn>
+																		Lớp
+																	</th>
+																	<th class="text-right">
 																		<v-btn color="primary" icon="mdi-account-group"
 																			variant="text"></v-btn>
-																		{{ item?.TongSoHocSinh ?? 0}}
-																	</v-col>
-																	<v-col>
+																		Tổng số HS
+																	</th>
+																	<th class="text-right">
 																		<v-btn color="primary"
 																			icon="mdi-human-capacity-increase"
 																			variant="text"></v-btn>
-																		{{ item?.SoHocSinhCaoHon ?? 0 }}
-																	</v-col>
-																	<v-col>
+																		Số HS cao hơn
+																	</th>
+																	<th class="text-right">
 																		<v-btn color="primary"
-																			icon="mdi-percent-circle-outline"
+																			icon="mdi-arrow-up-circle-outline"
 																			variant="text"></v-btn>
-																		{{ item?.TiLePhanTram ?? 0 }} %
-																	</v-col>
-																</v-row>
-															</v-list-item-title>
-														</v-list-item>
-													</v-col>
-													<v-divider vertical></v-divider>
-													<v-col>
-														<v-list-item
-															v-for="(lop, indexLop) in List_Tong_Class_Growth_GiuaKy_CuoiKi.filter(x => x.KhoiID === item.KhoiID)">
-															<v-list-item-title>
-																<v-row>
-																	<v-col
-																		class="d-flex align-center font-weight-medium">
-																		<v-btn color="primary" icon="mdi-school-outline"
-																			variant="text"></v-btn>
-																		{{ lop.TenLop}}
-																	</v-col>
-																	<v-col>
-																		<v-btn color="primary" icon="mdi-account-group"
-																			variant="text"></v-btn>
-																		{{lop.TongSoHocSinh}}
-																	</v-col>
-																	<v-col>
-																		<v-btn color="primary"
-																			icon="mdi-human-capacity-increase"
-																			variant="text"></v-btn>
-																		{{lop.SoHocSinhCaoHon}}
-																	</v-col>
-																	<v-col>
-																		<v-btn color="primary"
-																			icon="mdi-percent-circle-outline"
-																			variant="text"></v-btn>
-																		{{lop.TiLePhanTram}} %
-																	</v-col>
-																</v-row>
-																<v-divider v-if="indexLop !== List_Tong_Class_Growth_GiuaKy_CuoiKi.filter(x => x.KhoiID === item.KhoiID).length - 1"></v-divider>
-															</v-list-item-title>
-														</v-list-item>
+																		Tỷ lệ phần trăm
+																	</th>
+																</tr>
+															</thead>
+															<tbody>
+																<tr v-for="(lop, indexLop) in List_Tong_Class_Growth_GiuaKy_CuoiKi.filter(x => x.KhoiID === item.KhoiID)">
+																	<td class="text-right">{{ lop.TenLop}}</td>
+																	<td class="text-right">{{lop.TongSoHocSinh}}</td>
+																	<td class="text-right"> {{lop.SoHocSinhCaoHon}}</td>
+																	<td class="text-right">{{lop.TiLePhanTram}} %</td>
+																</tr>
+															</tbody>
+														</v-table>
 													</v-col>
 												</v-row>
 											</v-card>

@@ -1,5 +1,5 @@
 <template>
-	<v-card class="pa-4">
+	<v-card class="pa-4" style="background-color: #f9f9f9;">
 		<v-row>
 			<v-col cols="12" class="d-flex justify-end">
 				<v-btn color="primary" variant="tonal" @click="onLoadChart({
@@ -61,16 +61,18 @@
 						}
 					},
 					xaxis: {
-						tickAmount: 10,
+						tickAmount: 20, // Tăng tickAmount để làm rõ các điểm
 						labels: {
 							formatter: function (val) {
-								return parseFloat(val).toFixed(1)
+								return parseFloat(val).toFixed(1);
 							}
 						}
 					},
-					yaxis: {
-						tickAmount: 7
-					}
+					stroke: {
+						curve: 'smooth', // Làm mịn đường
+						width: 2, // Độ dày đường
+					},
+					
 				},
 				Chart_GVNN: {
 					series: [],
@@ -83,16 +85,18 @@
 						}
 					},
 					xaxis: {
-						tickAmount: 10,
+						tickAmount: 20, // Tăng tickAmount để làm rõ các điểm
 						labels: {
 							formatter: function (val) {
-								return parseFloat(val).toFixed(1)
+								return parseFloat(val).toFixed(1);
 							}
 						}
 					},
-					yaxis: {
-						tickAmount: 7
-					}
+					stroke: {
+						curve: 'smooth', // Làm mịn đường
+						width: 2, // Độ dày đường
+					},
+					
 				}
 			}
 		},
@@ -145,10 +149,7 @@
 								markers: {
 									size: [6, 0]
 								},
-								tooltip: {
-									shared: false,
-									intersect: true,
-								},
+								
 							}
 							this.Chart_GVVN = {
 								...this.Chart_GVVN,
@@ -174,16 +175,40 @@
 								markers: {
 									size: [6, 0]
 								},
-								tooltip: {
-									shared: false,
-									intersect: true,
-								},
+								
 							}
 						}
 					)
 				})
 			},
-			calculateLinearRegression
+			// calculateLinearRegression,
+			calculateLinearRegression(xData, yData) {
+				const n = xData.length;
+				let sumX = 0, sumY = 0, sumXY = 0, sumXX = 0;
+
+				for (let i = 0; i < n; i++) {
+					sumX += xData[i];
+					sumY += yData[i];
+					sumXY += xData[i] * yData[i];
+					sumXX += xData[i] * xData[i];
+				}
+
+				const slope = (n * sumXY - sumX * sumY) / (n * sumXX - sumX * sumX);
+				const intercept = (sumY - slope * sumX) / n;
+
+				// Tăng số điểm và làm mịn
+				const minX = Math.min(...xData);
+				const maxX = Math.max(...xData);
+				const step = (maxX - minX) / 500; // Tăng lên 500 điểm
+
+				const regressionLine = [];
+				for (let x = minX; x <= maxX; x += step) {
+					const y = slope * x + intercept;
+					regressionLine.push({ x, y });
+				}
+
+				return { slope, intercept, regressionLine };
+			}
 		},
 	}
 </script>

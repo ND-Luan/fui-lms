@@ -204,11 +204,20 @@
 			'form.KhoiID': function (KhoiID) {
 				if (KhoiID) {
 					this.onLoadDSLop(KhoiID)
+					.then(() => {
+						const isValid = this.DSLop.some(item => item.LopID === this.form.LopID);
+						if (!isValid) {
+							this.form.LopID = null; // Hoặc gán giá trị mặc định
+						}
+					});
 				}
 			},
 			'form.LopID': function (LopID) {
 				if (LopID) {
 					this.onLoadDSHocSinh(LopID)
+				}else{
+					this.form.HocSinhID = null
+					this.DSHocSinh = []
 				}
 			}
 		},

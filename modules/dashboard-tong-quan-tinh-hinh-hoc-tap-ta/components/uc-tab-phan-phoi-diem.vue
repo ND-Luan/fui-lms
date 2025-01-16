@@ -10,10 +10,10 @@
 							item-title="TenNhomCotDiem_VI" item-value="MaNhomCotDiem"
 							:loading="isLoadingMaNhomCotDiem"></v-select>
 					</v-col>
-					<v-col>
+					<!-- <v-col>
 						<v-select v-model="form.MaCotDiem" label="Chọn cột điểm" :items="DSCotDiem"
 							item-title="TenCotDiem_VI" item-value="MaCotDiem" :loading="isLoadingMaCotDiem"></v-select>
-					</v-col>
+					</v-col> -->
 					<v-col>
 						<v-btn color="primary" variant="tonal" @click="onLoadChart({
 							NienKhoa: 2024,
@@ -325,7 +325,28 @@ export default {
 						MaNhomCotDiem: MaNhomCotDiem
 					},
 					res => {
-						this.DSCotDiem = res.data
+						this.DSCotDiem =  [{
+							"MaNhomCotDiem": "S1_Mid",
+							"TenNhomCotDiem_VI": "Điểm giữa kỳ HK1",
+							"TenCotDiem_VI": "Tổng",
+							"MaCotDiem": "S1_Mid_Total_Point",
+							"ThuTuCotDiem": 11
+						},
+						{
+							"MaNhomCotDiem": "S1_Final",
+							"TenNhomCotDiem_VI": "Điểm cuối HK1",
+							"TenCotDiem_VI": "Tổng",
+							"MaCotDiem": "S1_Final_Total_Point",
+							"ThuTuCotDiem": 11
+						},
+						{
+							"MaNhomCotDiem": "DiemTB_HK1",
+							"TenNhomCotDiem_VI": "Điểm TB HK1",
+							"TenCotDiem_VI": "Điểm TB HK1",
+							"MaCotDiem": "DiemTB_HK1",
+							"ThuTuCotDiem": 1
+						}]
+						//res.data
 						resolve()
 					}
 				)
@@ -333,9 +354,10 @@ export default {
 		},
 		onLoadChart({ NienKhoa, KhoiID, MonHocID, MaCotDiem }) {
 			return new Promise(resolve => {
+				const objMaCotDiem = this.DSCotDiem.find(x=> x.MaNhomCotDiem === this.form.MaNhomCotDiem)
 				ajaxCALL('lms/DashboardPhanPhoiDiem_Get',
 					{
-						NienKhoa, KhoiID, MonHocID, MaCotDiem
+						NienKhoa, KhoiID, MonHocID, MaCotDiem: objMaCotDiem?.MaCotDiem ?? ''
 					},
 					res => {
 						const DataChartHistogram_API = res.data[0]

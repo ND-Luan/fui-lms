@@ -7,6 +7,8 @@
 					<v-col>
 						<v-select v-model="form.MaNhomCotDiem" label="Chọn nhóm điểm" :items="DSNhomDiem"
 							item-title="TenNhomCotDiem_VI" item-value="MaNhomCotDiem"
+							multiple
+							chips
 							:loading="isLoadingMaNhomCotDiem"></v-select>
 					</v-col>
 					<v-col>
@@ -234,7 +236,8 @@ export default {
 						NienKhoa,
 						CapID,
 						MonHocID,
-						MaNhomDiem
+						MaNhomDiem: MaNhomDiem.join(','),
+						Is_KyNang: true
 					},
 					res => {
 						const DataChartHistogram_Khoi_API = res.data
@@ -249,26 +252,52 @@ export default {
 			})
 		},
 		convertChartLineTongDiem_KyNang_TheoKhoi(rawData) {
+			const stats_GK = this.processData(rawData.filter(x=> x.MaNhomCotDiem === 'S1_Mid'), 'TenLop');
+			const classes_GK = Object.keys(stats_GK);
+
+			const stats_CK = this.processData(rawData.filter(x=> x.MaNhomCotDiem === 'S1_Final'), 'TenLop');
+			const classes_CK = Object.keys(stats_CK);
+			
 			const stats = this.processData(rawData, 'TenLop');
 			const classes = Object.keys(stats);
 			// Chuẩn bị dữ liệu cho biểu đồ
-			const seriesData = [
-				{
-					name: 'Trung bình (Mean)',
+			let seriesData = []
+			if(Object.keys(stats_GK).length > 0){
+				seriesData.push({
+					name: 'Trung bình (Mean) - GK1',
 					type: 'line',
-					data: classes.map(lop => stats[lop].mean)
-				},
-				{
-					name: 'Trung vị (Median)',
+					data: classes_GK.map(lop => stats_GK[lop].mean)
+				})
+				seriesData.push({
+					name: 'Trung vị (Median) - GK1',
 					type: 'line',
-					data: classes.map(lop => stats[lop].median)
-				},
-				{
-					name: 'Độ lệch chuẩn (Std Dev)',
+					data: classes_GK.map(lop => stats_GK[lop].median)
+				})
+				seriesData.push({
+					name: 'Độ lệch chuẩn (Std Dev) - GK1',
 					type: 'line',
-					data: classes.map(lop => stats[lop].standardDeviation)
-				}
-			];
+					data: classes_GK.map(lop => stats_GK[lop].standardDeviation)
+				})
+			}
+
+			if(Object.keys(stats_CK).length> 0){
+				seriesData.push({
+					name: 'Trung bình (Mean) - CK1',
+					type: 'line',
+					data: classes_CK.map(lop => stats_CK[lop].mean)
+				})
+				seriesData.push({
+					name: 'Trung vị (Median) - CK1',
+					type: 'line',
+					data: classes_CK.map(lop => stats_CK[lop].median)
+				})
+				seriesData.push({
+					name: 'Độ lệch chuẩn (Std Dev) - CK1',
+					type: 'line',
+					data: classes_CK.map(lop => stats_CK[lop].standardDeviation)
+				})
+			}
+			 
 			this.Chart_TongDiem_KyNang_TheoKhoi = {
 				...this.Chart_TongDiem_KyNang_TheoKhoi,
 				series: seriesData,
@@ -322,13 +351,13 @@ export default {
 					position: 'top',
 					horizontalAlign: 'center'
 				},
-				colors: ['#008FFB', '#00E396', '#FEB019'],
+				colors: ['#008FFB', '#00E396', '#FEB019', '#E91E63', '#66DA26', '#546E7A'],
 				tooltip: {
 					shared: true,
 					intersect: false,
 					y: {
 						formatter: function (value) {
-							return value.toFixed(2);
+							return value ? value.toFixed(2): 0;
 						}
 					}
 				}
@@ -367,31 +396,76 @@ export default {
 			}
 			const uniqueKhoiID = [... new Set(_rawData.map(x => x.KhoiID))]
 			for (const khoiID of uniqueKhoiID) {
-				const rawData = _rawData.filter(x => x.KhoiID === this.form.KhoiID)
+				// const rawData = _rawData.filter(x => x.KhoiID === this.form.KhoiID)
 				const khoiObj = _rawData.find(x => x.KhoiID === khoiID)
 
-				const stats = this.processData(rawData, 'TenCotDiem_EN');
+				// const stats = this.processData(rawData, 'TenCotDiem_EN');
+				// const classes = Object.keys(stats);
+
+				// // Chuẩn bị dữ liệu cho biểu đồ
+				// const seriesData = [
+				// 	{
+				// 		name: 'Trung bình (Mean)',
+				// 		type: 'line',
+				// 		data: classes.map(lop => stats[lop].mean)
+				// 	},
+				// 	{
+				// 		name: 'Trung vị (Median)',
+				// 		type: 'line',
+				// 		data: classes.map(lop => stats[lop].median)
+				// 	},
+				// 	{
+				// 		name: 'Độ lệch chuẩn (Std Dev)',
+				// 		type: 'line',
+				// 		data: classes.map(lop => stats[lop].standardDeviation)
+				// 	}
+				// ];
+
+				const stats_GK = this.processData(_rawData.filter(x=> x.MaNhomCotDiem === 'S1_Mid' && x.KhoiID === this.form.KhoiID), 'TenCotDiem_EN');
+				const classes_GK = Object.keys(stats_GK);
+
+				const stats_CK = this.processData(_rawData.filter(x=> x.MaNhomCotDiem === 'S1_Final' && x.KhoiID === this.form.KhoiID), 'TenCotDiem_EN');
+				const classes_CK = Object.keys(stats_CK);
+			
+				const stats = this.processData(_rawData, 'TenCotDiem_EN');
 				const classes = Object.keys(stats);
 
-				// Chuẩn bị dữ liệu cho biểu đồ
-				const seriesData = [
-					{
-						name: 'Trung bình (Mean)',
+				let seriesData = []
+				if(Object.keys(stats_GK).length > 0){
+					seriesData.push({
+						name: 'Trung bình (Mean) - GK1',
 						type: 'line',
-						data: classes.map(lop => stats[lop].mean)
-					},
-					{
-						name: 'Trung vị (Median)',
+						data: classes_GK.map(lop => stats_GK[lop].mean)
+					})
+					seriesData.push({
+						name: 'Trung vị (Median) - GK1',
 						type: 'line',
-						data: classes.map(lop => stats[lop].median)
-					},
-					{
-						name: 'Độ lệch chuẩn (Std Dev)',
+						data: classes_GK.map(lop => stats_GK[lop].median)
+					})
+					seriesData.push({
+						name: 'Độ lệch chuẩn (Std Dev) - GK1',
 						type: 'line',
-						data: classes.map(lop => stats[lop].standardDeviation)
-					}
-				];
+						data: classes_GK.map(lop => stats_GK[lop].standardDeviation)
+					})
+				}
 
+				if(Object.keys(stats_CK).length> 0){
+					seriesData.push({
+						name: 'Trung bình (Mean) - CK1',
+						type: 'line',
+						data: classes_CK.map(lop => stats_CK[lop].mean)
+					})
+					seriesData.push({
+						name: 'Trung vị (Median) - CK1',
+						type: 'line',
+						data: classes_CK.map(lop => stats_CK[lop].median)
+					})
+					seriesData.push({
+						name: 'Độ lệch chuẩn (Std Dev) - CK1',
+						type: 'line',
+						data: classes_CK.map(lop => stats_CK[lop].standardDeviation)
+					})
+				}
 				this.List_Chart_KyNang_TheoKhoi.push({
 					...chart,
 					"id": "chart-line-statistic-" + khoiID,
@@ -446,7 +520,7 @@ export default {
 						position: 'top',
 						horizontalAlign: 'center'
 					},
-					colors: ['#008FFB', '#00E396', '#FEB019'],
+					colors: ['#008FFB', '#00E396', '#FEB019', '#E91E63', '#66DA26', '#546E7A'],
 					tooltip: {
 						shared: true,
 						intersect: false,
@@ -505,109 +579,395 @@ export default {
 			const dataWriting = _rawData.filter(x => x.TenCotDiem_EN === 'Writing')
 			const dataSpeaking = _rawData.filter(x => x.TenCotDiem_EN === 'Speaking')
 
-			console.log('dataListening', dataListening)
-
 			const sortDataListening = this.sortTenLop(dataListening);
 			const sortDataLanguage = this.sortTenLop(dataLanguage)
 			const sortDataReading = this.sortTenLop(dataReading)
 			const sortDataWriting = this.sortTenLop(dataWriting)
 			const sortDataSpeaking = this.sortTenLop(dataSpeaking)
 
-			console.log('sortDataListening', sortDataListening)
+			const stats_Listening_GK = this.processData(sortDataListening.filter(x=> x.MaNhomCotDiem === 'S1_Mid'), 'TenLop');
+			const stats_Language_GK = this.processData(sortDataLanguage.filter(x=> x.MaNhomCotDiem === 'S1_Mid'), 'TenLop');
+			const stats_Reading_GK = this.processData(sortDataReading.filter(x=> x.MaNhomCotDiem === 'S1_Mid'), 'TenLop');
+			const stats_Writing_GK = this.processData(sortDataWriting.filter(x=> x.MaNhomCotDiem === 'S1_Mid'), 'TenLop');
+			const stats_Speaking_GK = this.processData(sortDataSpeaking.filter(x=> x.MaNhomCotDiem === 'S1_Mid'), 'TenLop');
 
-			const stats_Listening = this.processData(sortDataListening, 'TenLop');
-			const stats_Language = this.processData(sortDataLanguage, 'TenLop');
-			const stats_Reading = this.processData(sortDataReading, 'TenLop');
-			const stats_Writing = this.processData(sortDataWriting, 'TenLop');
-			const stats_Speaking = this.processData(sortDataSpeaking, 'TenLop');
+			const stats_Listening_CK = this.processData(sortDataListening.filter(x=> x.MaNhomCotDiem === 'S1_Final'), 'TenLop');
+			const stats_Language_CK = this.processData(sortDataLanguage.filter(x=> x.MaNhomCotDiem === 'S1_Final'), 'TenLop');
+			const stats_Reading_CK = this.processData(sortDataReading.filter(x=> x.MaNhomCotDiem === 'S1_Final'), 'TenLop');
+			const stats_Writing_CK = this.processData(sortDataWriting.filter(x=> x.MaNhomCotDiem === 'S1_Final'), 'TenLop');
+			const stats_Speaking_CK = this.processData(sortDataSpeaking.filter(x=> x.MaNhomCotDiem === 'S1_Final'), 'TenLop');
 
-			const classes = Object.keys(stats_Listening); //Lấy 1 stats là đủ lớp
-			console.log('stats_Listening', stats_Listening)
-			const seriesData_Listening = [
-				{
-					name: 'Trung bình (Mean)',
+			const classes_Listening_GK = Object.keys(stats_Listening_GK); 
+			const classes_Language_GK = Object.keys(stats_Language_GK); 
+			const classes_Reading_GK = Object.keys(stats_Reading_GK); 
+			const classes_Writing_GK = Object.keys(stats_Writing_GK); 
+			const classes_Speaking_GK = Object.keys(stats_Speaking_GK); 
+
+			const classes_Listening_CK = Object.keys(stats_Listening_CK); 
+			const classes_Language_CK = Object.keys(stats_Language_CK); 
+			const classes_Reading_CK = Object.keys(stats_Reading_CK); 
+			const classes_Writing_CK = Object.keys(stats_Writing_CK); 
+			const classes_Speaking_CK = Object.keys(stats_Speaking_CK); 
+
+			const stats = this.processData(_rawData, 'TenLop')
+			const classes = Object.keys(stats); //Lấy 1 stats là đủ lớp
+			
+			let seriesData_Listening = []
+			let seriesData_Language = []
+			let seriesData_Reading = []
+			let seriesData_Writing = []
+			let seriesData_Speaking = []
+
+			//Listening
+			if(Object.keys(stats_Listening_GK).length > 0){
+				seriesData_Listening.push({
+					name: 'Trung bình (Mean) - GK1',
 					type: 'line',
-					data: classes.map(lop => stats_Listening[lop].mean)
-				},
-				{
-					name: 'Trung vị (Median)',
+					data: classes_Listening_GK.map(lop => stats_Listening_GK[lop].mean)
+				})
+				seriesData_Listening.push({
+					name: 'Trung vị (Median) - GK1',
 					type: 'line',
-					data: classes.map(lop => stats_Listening[lop].median)
-				},
-				{
-					name: 'Độ lệch chuẩn (Std Dev)',
+					data: classes_Listening_GK.map(lop => stats_Listening_GK[lop].median)
+				},)
+				seriesData_Listening.push({
+					name: 'Độ lệch chuẩn (Std Dev) - GK1',
 					type: 'line',
-					data: classes.map(lop => stats_Listening[lop].standardDeviation)
-				}
-			];
-			const seriesData_Language = [
-				{
-					name: 'Trung bình (Mean)',
+					data: classes_Listening_GK.map(lop => stats_Listening_GK[lop].standardDeviation)
+				})
+			}
+			if(Object.keys(stats_Listening_CK).length > 0){
+				seriesData_Listening.push({
+					name: 'Trung bình (Mean) - CK1',
 					type: 'line',
-					data: classes.map(lop => stats_Language[lop].mean)
-				},
-				{
-					name: 'Trung vị (Median)',
+					data: classes_Listening_CK.map(lop => stats_Listening_CK[lop].mean)
+				})
+				seriesData_Listening.push({
+					name: 'Trung vị (Median) - CK1',
 					type: 'line',
-					data: classes.map(lop => stats_Language[lop].median)
-				},
-				{
-					name: 'Độ lệch chuẩn (Std Dev)',
+					data: classes_Listening_CK.map(lop => stats_Listening_CK[lop].median)
+				})
+				seriesData_Listening.push({
+					name: 'Độ lệch chuẩn (Std Dev) - CK1',
 					type: 'line',
-					data: classes.map(lop => stats_Language[lop].standardDeviation)
-				}
-			];
-			const seriesData_Reading = [
-				{
-					name: 'Trung bình (Mean)',
+					data: classes_Listening_CK.map(lop => stats_Listening_CK[lop].standardDeviation)
+				})
+			}
+			//Language
+			if(Object.keys(classes_Language_GK).length > 0){
+				seriesData_Language.push({
+					name: 'Trung bình (Mean) - GK1',
 					type: 'line',
-					data: classes.map(lop => stats_Reading[lop].mean)
-				},
-				{
-					name: 'Trung vị (Median)',
+					data: classes_Language_GK.map(lop => stats_Language_GK[lop].mean)
+				})
+				seriesData_Language.push({
+					name: 'Trung vị (Median) - GK1',
 					type: 'line',
-					data: classes.map(lop => stats_Reading[lop].median)
-				},
-				{
-					name: 'Độ lệch chuẩn (Std Dev)',
+					data: classes_Language_GK.map(lop => stats_Language_GK[lop].median)
+				})
+				seriesData_Language.push({
+					name: 'Độ lệch chuẩn (Std Dev) - GK1',
 					type: 'line',
-					data: classes.map(lop => stats_Reading[lop].standardDeviation)
-				}
-			];
-			const seriesData_Writing = [
-				{
-					name: 'Trung bình (Mean)',
+					data: classes_Language_GK.map(lop => stats_Language_GK[lop].standardDeviation)
+				})
+			}
+			if(Object.keys(classes_Language_CK).length > 0){
+				seriesData_Language.push({
+					name: 'Trung bình (Mean) - CK1',
 					type: 'line',
-					data: classes.map(lop => stats_Writing[lop].mean)
-				},
-				{
-					name: 'Trung vị (Median)',
+					data: classes_Language_CK.map(lop => stats_Language_CK[lop].mean)
+				})
+				seriesData_Language.push({
+					name: 'Trung vị (Median) - CK1',
 					type: 'line',
-					data: classes.map(lop => stats_Writing[lop].median)
-				},
-				{
-					name: 'Độ lệch chuẩn (Std Dev)',
+					data: classes_Language_CK.map(lop => stats_Language_CK[lop].median)
+				})
+				seriesData_Language.push({
+					name: 'Độ lệch chuẩn (Std Dev) - CK1',
 					type: 'line',
-					data: classes.map(lop => stats_Writing[lop].standardDeviation)
-				}
-			];
-			const seriesData_Speaking = [
-				{
-					name: 'Trung bình (Mean)',
+					data: classes_Language_CK.map(lop => stats_Language_CK[lop].standardDeviation)
+				})
+			}
+			//Reading
+			if(Object.keys(classes_Reading_GK).length > 0) {
+				seriesData_Reading.push(
+					{
+					name: 'Trung bình (Mean) - GK1',
 					type: 'line',
-					data: classes.map(lop => stats_Speaking[lop].mean)
-				},
-				{
-					name: 'Trung vị (Median)',
+					data: classes_Reading_GK.map(lop => stats_Reading_GK[lop].mean)
+				})
+				seriesData_Reading.push({
+					name: 'Trung vị (Median) - GK1',
 					type: 'line',
-					data: classes.map(lop => stats_Speaking[lop].median)
-				},
-				{
-					name: 'Độ lệch chuẩn (Std Dev)',
+					data: classes_Reading_GK.map(lop => stats_Reading_GK[lop].median)
+				})
+				seriesData_Reading.push({
+					name: 'Độ lệch chuẩn (Std Dev) - GK1',
 					type: 'line',
-					data: classes.map(lop => stats_Speaking[lop].standardDeviation)
-				}
-			];
+					data: classes_Reading_GK.map(lop => stats_Reading_GK[lop].standardDeviation)
+				})
+			}
+			if(Object.keys(classes_Reading_CK).length > 0){
+				seriesData_Reading.push(
+					{
+					name: 'Trung bình (Mean) - CK1',
+					type: 'line',
+					data: classes_Reading_CK.map(lop => stats_Reading_CK[lop].mean)
+				})
+				seriesData_Reading.push({
+					name: 'Trung vị (Median) - CK1',
+					type: 'line',
+					data: classes_Reading_CK.map(lop => stats_Reading_CK[lop].median)
+				})
+				seriesData_Reading.push({
+					name: 'Độ lệch chuẩn (Std Dev) - CK1',
+					type: 'line',
+					data: classes_Reading_CK.map(lop => stats_Reading_CK[lop].standardDeviation)
+				})
+			}
+			//Writing
+			if(Object.keys(classes_Writing_GK).length > 0){
+				seriesData_Writing.push({
+					name: 'Trung bình (Mean) - GK1',
+					type: 'line',
+					data: classes_Writing_GK.map(lop => stats_Writing_GK[lop].mean)
+				})
+				seriesData_Writing.push({
+					name: 'Trung vị (Median) - GK1',
+					type: 'line',
+					data: classes_Writing_GK.map(lop => stats_Writing_GK[lop].median)
+				})
+				seriesData_Writing.push({
+					name: 'Độ lệch chuẩn (Std Dev) - GK1',
+					type: 'line',
+					data: classes_Writing_GK.map(lop => stats_Writing_GK[lop].standardDeviation)
+				})
+			}
+			if(Object.keys(classes_Writing_CK).length > 0){
+				seriesData_Writing.push({
+					name: 'Trung bình (Mean) - CK1',
+					type: 'line',
+					data: classes_Writing_CK.map(lop => stats_Writing_CK[lop].mean)
+				})
+				seriesData_Writing.push({
+					name: 'Trung vị (Median) - CK1',
+					type: 'line',
+					data: classes_Writing_CK.map(lop => stats_Writing_CK[lop].median)
+				})
+				seriesData_Writing.push({
+					name: 'Độ lệch chuẩn (Std Dev) - CK1',
+					type: 'line',
+					data: classes_Writing_CK.map(lop => stats_Writing_CK[lop].standardDeviation)
+				})
+			}
+			//Speaking
+			if(Object.keys(classes_Speaking_GK).length > 0){
+				seriesData_Speaking.push({
+					name: 'Trung bình (Mean) - GK1',
+					type: 'line',
+					data: classes_Speaking_GK.map(lop => stats_Speaking_GK[lop].mean)
+				})
+				seriesData_Speaking.push({
+					name: 'Trung vị (Median) - GK1',
+					type: 'line',
+					data: classes_Speaking_GK.map(lop => stats_Speaking_GK[lop].median)
+				})
+				seriesData_Speaking.push({
+					name: 'Độ lệch chuẩn (Std Dev) - GK1',
+					type: 'line',
+					data: classes_Speaking_GK.map(lop => stats_Speaking_GK[lop].standardDeviation)
+				})
+			}
+			if(Object.keys(classes_Speaking_CK).length > 0){
+				seriesData_Speaking.push({
+					name: 'Trung bình (Mean) - CK1',
+					type: 'line',
+					data: classes_Speaking_CK.map(lop => stats_Speaking_CK[lop].mean)
+				})
+				seriesData_Speaking.push({
+					name: 'Trung vị (Median) - CK1',
+					type: 'line',
+					data: classes_Speaking_CK.map(lop => stats_Speaking_CK[lop].median)
+				})
+				seriesData_Speaking.push({
+					name: 'Độ lệch chuẩn (Std Dev) - CK1',
+					type: 'line',
+					data: classes_Speaking_CK.map(lop => stats_Speaking_CK[lop].standardDeviation)
+				})
+			}
+
+
+			// const seriesData_Listening_GK = [
+			// 	{
+			// 		name: 'Trung bình (Mean)',
+			// 		type: 'line',
+			// 		data: classes.map(lop => stats_Listening[lop].mean)
+			// 	},
+			// 	{
+			// 		name: 'Trung vị (Median)',
+			// 		type: 'line',
+			// 		data: classes.map(lop => stats_Listening[lop].median)
+			// 	},
+			// 	{
+			// 		name: 'Độ lệch chuẩn (Std Dev)',
+			// 		type: 'line',
+			// 		data: classes.map(lop => stats_Listening[lop].standardDeviation)
+			// 	}
+			// ];
+			// const seriesData_Language_GK = [
+			// 	{
+			// 		name: 'Trung bình (Mean)',
+			// 		type: 'line',
+			// 		data: classes.map(lop => stats_Language[lop].mean)
+			// 	},
+			// 	{
+			// 		name: 'Trung vị (Median)',
+			// 		type: 'line',
+			// 		data: classes.map(lop => stats_Language[lop].median)
+			// 	},
+			// 	{
+			// 		name: 'Độ lệch chuẩn (Std Dev)',
+			// 		type: 'line',
+			// 		data: classes.map(lop => stats_Language[lop].standardDeviation)
+			// 	}
+			// ];
+			// const seriesData_Reading_GK = [
+			// 	{
+			// 		name: 'Trung bình (Mean)',
+			// 		type: 'line',
+			// 		data: classes.map(lop => stats_Reading[lop].mean)
+			// 	},
+			// 	{
+			// 		name: 'Trung vị (Median)',
+			// 		type: 'line',
+			// 		data: classes.map(lop => stats_Reading[lop].median)
+			// 	},
+			// 	{
+			// 		name: 'Độ lệch chuẩn (Std Dev)',
+			// 		type: 'line',
+			// 		data: classes.map(lop => stats_Reading[lop].standardDeviation)
+			// 	}
+			// ];
+			// const seriesData_Writing_GK = [
+			// 	{
+			// 		name: 'Trung bình (Mean)',
+			// 		type: 'line',
+			// 		data: classes.map(lop => stats_Writing[lop].mean)
+			// 	},
+			// 	{
+			// 		name: 'Trung vị (Median)',
+			// 		type: 'line',
+			// 		data: classes.map(lop => stats_Writing[lop].median)
+			// 	},
+			// 	{
+			// 		name: 'Độ lệch chuẩn (Std Dev)',
+			// 		type: 'line',
+			// 		data: classes.map(lop => stats_Writing[lop].standardDeviation)
+			// 	}
+			// ];
+			// const seriesData_Speaking_GK = [
+			// 	{
+			// 		name: 'Trung bình (Mean)',
+			// 		type: 'line',
+			// 		data: classes.map(lop => stats_Speaking[lop].mean)
+			// 	},
+			// 	{
+			// 		name: 'Trung vị (Median)',
+			// 		type: 'line',
+			// 		data: classes.map(lop => stats_Speaking[lop].median)
+			// 	},
+			// 	{
+			// 		name: 'Độ lệch chuẩn (Std Dev)',
+			// 		type: 'line',
+			// 		data: classes.map(lop => stats_Speaking[lop].standardDeviation)
+			// 	}
+			// ];
+
+			// const seriesData_Listening_CK = [
+			// 	{
+			// 		name: 'Trung bình (Mean)',
+			// 		type: 'line',
+			// 		data: classes.map(lop => stats_Listening[lop].mean)
+			// 	},
+			// 	{
+			// 		name: 'Trung vị (Median)',
+			// 		type: 'line',
+			// 		data: classes.map(lop => stats_Listening[lop].median)
+			// 	},
+			// 	{
+			// 		name: 'Độ lệch chuẩn (Std Dev)',
+			// 		type: 'line',
+			// 		data: classes.map(lop => stats_Listening[lop].standardDeviation)
+			// 	}
+			// ];
+			// const seriesData_Language_CK = [
+			// 	{
+			// 		name: 'Trung bình (Mean)',
+			// 		type: 'line',
+			// 		data: classes.map(lop => stats_Language[lop].mean)
+			// 	},
+			// 	{
+			// 		name: 'Trung vị (Median)',
+			// 		type: 'line',
+			// 		data: classes.map(lop => stats_Language[lop].median)
+			// 	},
+			// 	{
+			// 		name: 'Độ lệch chuẩn (Std Dev)',
+			// 		type: 'line',
+			// 		data: classes.map(lop => stats_Language[lop].standardDeviation)
+			// 	}
+			// ];
+			// const seriesData_Reading_CK = [
+			// 	{
+			// 		name: 'Trung bình (Mean)',
+			// 		type: 'line',
+			// 		data: classes.map(lop => stats_Reading[lop].mean)
+			// 	},
+			// 	{
+			// 		name: 'Trung vị (Median)',
+			// 		type: 'line',
+			// 		data: classes.map(lop => stats_Reading[lop].median)
+			// 	},
+			// 	{
+			// 		name: 'Độ lệch chuẩn (Std Dev)',
+			// 		type: 'line',
+			// 		data: classes.map(lop => stats_Reading[lop].standardDeviation)
+			// 	}
+			// ];
+			// const seriesData_Writing_CK = [
+			// 	{
+			// 		name: 'Trung bình (Mean)',
+			// 		type: 'line',
+			// 		data: classes.map(lop => stats_Writing[lop].mean)
+			// 	},
+			// 	{
+			// 		name: 'Trung vị (Median)',
+			// 		type: 'line',
+			// 		data: classes.map(lop => stats_Writing[lop].median)
+			// 	},
+			// 	{
+			// 		name: 'Độ lệch chuẩn (Std Dev)',
+			// 		type: 'line',
+			// 		data: classes.map(lop => stats_Writing[lop].standardDeviation)
+			// 	}
+			// ];
+			// const seriesData_Speaking_CK = [
+			// 	{
+			// 		name: 'Trung bình (Mean)',
+			// 		type: 'line',
+			// 		data: classes.map(lop => stats_Speaking[lop].mean)
+			// 	},
+			// 	{
+			// 		name: 'Trung vị (Median)',
+			// 		type: 'line',
+			// 		data: classes.map(lop => stats_Speaking[lop].median)
+			// 	},
+			// 	{
+			// 		name: 'Độ lệch chuẩn (Std Dev)',
+			// 		type: 'line',
+			// 		data: classes.map(lop => stats_Speaking[lop].standardDeviation)
+			// 	}
+			// ];
 
 			const option = {
 				chart: {
@@ -660,7 +1020,7 @@ export default {
 					position: 'top',
 					horizontalAlign: 'center'
 				},
-				colors: ['#008FFB', '#00E396', '#FEB019'],
+				colors: ['#008FFB', '#00E396', '#FEB019', '#E91E63', '#66DA26', '#546E7A'],
 				tooltip: {
 					shared: true,
 					intersect: false,

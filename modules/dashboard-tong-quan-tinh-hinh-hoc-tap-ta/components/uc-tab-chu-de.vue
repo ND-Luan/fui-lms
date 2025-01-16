@@ -203,7 +203,8 @@ export default {
 						NienKhoa,
 						CapID,
 						MonHocID,
-						MaNhomDiem
+						MaNhomDiem,
+						Is_KyNang: false
 					},
 					res => {
 						const DataChartHistogram_Khoi_API = res.data
