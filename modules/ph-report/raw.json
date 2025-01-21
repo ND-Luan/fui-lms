@@ -1,1 +1,317 @@
-{"data":[{"DSHocTapThang":[],"DSHocTapThangTiengAnh":[],"bottomNavigation":0,"HocSinhSelected":"JSON.parse(localStorage.getItem('HocSinhSelected'))"},{"getDSHocSinh":{"API":"student/Calen_GetInfoStudentByPhuHuynhID","OUT":"DSHocSinh","CALLBACK":[{"EXE":"DSHocSinh.push({StudentID: '123',HoTen: '123',TenLop: '11B',Khoi: 11,HinhThucHoc: 'SN',MaDonVi: 1})"},{"IF":"vueData.HocSinhSelected === null","THEN":{"EXE":"vueData.HocSinhSelected = vueData.DSHocSinh[0]; localStorage.setItem('HocSinhSelected', JSON.stringify(vueData.DSHocSinh[0]));"}}]}},{"CALL":"getDSHocSinh"},{"EXE":"vueData.onSelectedHocSinh  = onSelectedHocSinh"},{"EXE":"convertDSHocTapThang()"},{"EXE":"convertDSHocTapTiengAnh()"}],"watch":{"HocSinhSelected":{"EXE":"console.log(HocSinhSelected)"}},"controls":[{"prop":"fluid grid-list-md style='padding:0'","rows":[{"prop":"","cols":[{"el":"v-app-bar","attr":{":elevation":"2","color":"teal-darken-4","image":"https://picsum.photos/1920/1080?random"},"innerHTML":[{"el":"template","attr":{"v-slot:image":"","innerHTML":"<v-img gradient='to top right, rgba(19,84,122,.8), rgba(128,208,199,.8)' ></v-img>"}},{"el":"template","attr":{"v-slot:append":"","innerHTML":[{"el":"div","attr":{"class":"d-flex flex-column justify-center"},"innerHTML":[{"el":"v-switch","attr":{"class":"switch-center","hide-details":"auto"}},{"el":"p","attr":{"class":"text-caption"},"innerHTML":"Tiếng Anh"}]}]}},{"el":"v-app-bar-title","innerHTML":"Báo cáo kết quả học tập"}],"w":12},{"el":"div","attr":{"class":"px-4 d-flex align-center justify-space-between"},"innerHTML":[{"el":"p","attr":{"class":"font-weight-medium"},"innerHTML":"Chọn học sinh"},{"el":"v-btn","attr":{"icon":"","variant":"elevated","v-on:click":"() => drawer = true"},"innerHTML":[{"el":"v-img","attr":{"src":"/_cdn/lhbs-lms/hoc_sinh.png","width":"30","height":"30"}}]}],"w":12},{"el":"v-card","innerHTML":[{"el":"v-list-item","attr":{":title":"HocSinhSelected?.HoTen",":subtitle":"'Lớp ' + HocSinhSelected?.TenLop + ' - ' + HocSinhSelected?.StudentID "},"innerHTML":[{"el":"template","attr":{"v-slot:prepend":"item"},"innerHTML":"<v-avatar > <v-img :src='v_Set.urlAvatarHocSinh + HocSinhSelected?.StudentID' contain/> </v-avatar>"}]}]},{"el":"div","attr":{"class":"fpScrollbar","style":"height: calc(100dvh - 256px); overflow: auto !important"},"innerHTML":[{"el":"uc-thang","attr":{"v-if":"bottomNavigation === 0"}},{"el":"uc-tieng-anh","attr":{"v-if":"bottomNavigation === 1"}},{"el":"uc-hoc-ky","attr":{"v-if":"bottomNavigation === 2"}},{"el":"uc-cai-dat","attr":{"v-if":"bottomNavigation === 3"}}],"w":12},{"el":"v-layout","attr":{"class":"overflow-visible","style":"height: 56px"},"innerHTML":[{"el":"v-bottom-navigation","attr":{"v-model":"bottomNavigation","color":"primary",":mandatory":true,":grow":true},"innerHTML":[{"el":"v-btn","attr":{},"innerHTML":[{"el":"v-icon","innerHTML":"mdi-text-box-outline"},{"el":"p","innerHTML":"Tháng"}]},{"el":"v-btn","attr":{},"innerHTML":[{"el":"v-icon","innerHTML":"mdi-text-box-outline"},{"el":"p","innerHTML":"Tiếng Anh"}]},{"el":"v-btn","attr":{},"innerHTML":[{"el":"v-icon","innerHTML":"mdi-text-box-outline"},{"el":"p","innerHTML":"Học kỳ"}]}]}],"w":12},{"el":"v-navigation-drawer","attr":{"v-model":"drawer",":location":"$vuetify.display.mobile ? 'bottom' : undefined",":temporary":true},"innerHTML":[{"el":"v-list","innerHTML":[{"el":"v-list-subheader","innerHTML":"Danh sách học sinh"},{"el":"v-list-item","attr":{"v-for":"hocSinh in DSHocSinh",":key":"hocSinh.StudentID",":title":"hocSinh.HoTen",":subtitle":"'Lớp ' + hocSinh.TenLop + ' - ' + hocSinh.StudentID "},"innerHTML":[{"el":"template","attr":{"v-slot:prepend":""},"innerHTML":"<v-avatar > <v-img :src='v_Set.urlAvatarHocSinh + hocSinh.StudentID' contain/> </v-avatar>"},{"el":"template","attr":{"v-slot:append":""},"innerHTML":"<v-btn icon='mdi-arrow-right' color='primary' variant='tonal' size='small' @click='() => onSelectedHocSinh(hocSinh)'></v-btn>"}]}]}]}]}]}],"set":{"menu":false}}
+{
+    "data": [
+        {
+            "DSHocTapThang": [],
+            "DSHocTapThangTiengAnh": [],
+            "bottomNavigation": "localStorage.getItem('tabBottomNavigation') ? parseInt(localStorage.getItem('tabBottomNavigation')) : 0",
+            "HocSinhSelected": "JSON.parse(localStorage.getItem('HocSinhSelected'))"
+        },
+        {
+            "getDSHocSinh": {
+                "API": "student/Calen_GetInfoStudentByPhuHuynhID",
+                "OUT": "DSHocSinh",
+                "CALLBACK": [
+                    {
+                        "EXE": "DSHocSinh.push({StudentID: '123',HoTen: '123',TenLop: '11B',Khoi: 11,HinhThucHoc: 'SN',MaDonVi: 1})"
+                    },
+                    {
+                        "IF": "vueData.HocSinhSelected === null",
+                        "THEN": {
+                            "EXE": "vueData.HocSinhSelected = vueData.DSHocSinh[0]; localStorage.setItem('HocSinhSelected', JSON.stringify(vueData.DSHocSinh[0]));"
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "CALL": "getDSHocSinh"
+        },
+        {
+            "EXE": "vueData.onSelectedHocSinh  = onSelectedHocSinh"
+        },
+        {
+            "EXE": "convertDSHocTapThang()"
+        },
+        {
+            "EXE": "convertDSHocTapTiengAnh()"
+        }
+    ],
+    "watch": {
+        "HocSinhSelected": {
+            "EXE": "console.log(HocSinhSelected)"
+        },
+        "bottomNavigation": {
+            "CALL": [
+                {
+                    "EXE": "setUrlTab()"
+                },
+                {
+                    "EXE": "localStorage.setItem('tabBottomNavigation', bottomNavigation)"
+                }
+            ]
+        }
+    },
+    "controls": [
+        {
+            "prop": "fluid grid-list-md style='padding:0'",
+            "rows": [
+                {
+                    "prop": "",
+                    "cols": [
+                        {
+                            "el": "v-app-bar",
+                            "attr": {
+                                ":elevation": "2",
+                                "color": "teal-darken-4",
+                                "image": "https://picsum.photos/1920/1080?random"
+                            },
+                            "innerHTML": [
+                                {
+                                    "el": "template",
+                                    "attr": {
+                                        "v-slot:image": "",
+                                        "innerHTML": "<v-img gradient='to top right, rgba(19,84,122,.8), rgba(128,208,199,.8)' ></v-img>"
+                                    }
+                                },
+                                {
+                                    "el": "template",
+                                    "attr": {
+                                        "v-slot:append": "",
+                                        "innerHTML": [
+                                            {
+                                                "el": "div",
+                                                "attr": {
+                                                    "class": "d-flex flex-column justify-center"
+                                                },
+                                                "innerHTML": [
+                                                    {
+                                                        "el": "v-switch",
+                                                        "attr": {
+                                                            "class": "switch-center",
+                                                            "hide-details": "auto"
+                                                        }
+                                                    },
+                                                    {
+                                                        "el": "p",
+                                                        "attr": {
+                                                            "class": "text-caption"
+                                                        },
+                                                        "innerHTML": "Tiếng Anh"
+                                                    }
+                                                ]
+                                            }
+                                        ]
+                                    }
+                                },
+                                {
+                                    "el": "v-app-bar-title",
+                                    "innerHTML": "Báo cáo kết quả học tập"
+                                }
+                            ],
+                            "w": 12
+                        },
+                        {
+                            "el": "div",
+                            "attr": {
+                                "class": "px-4 d-flex align-center justify-space-between"
+                            },
+                            "innerHTML": [
+                                {
+                                    "el": "p",
+                                    "attr": {
+                                        "class": "font-weight-medium"
+                                    },
+                                    "innerHTML": "Chọn học sinh"
+                                },
+                                {
+                                    "el": "v-btn",
+                                    "attr": {
+                                        "icon": "",
+                                        "variant": "elevated",
+                                        "v-on:click": "() => drawer = true"
+                                    },
+                                    "innerHTML": [
+                                        {
+                                            "el": "v-img",
+                                            "attr": {
+                                                "src": "/_cdn/lhbs-lms/hoc_sinh.png",
+                                                "width": "30",
+                                                "height": "30"
+                                            }
+                                        }
+                                    ]
+                                }
+                            ],
+                            "w": 12
+                        },
+                        {
+                            "el": "v-card",
+                            "innerHTML": [
+                                {
+                                    "el": "v-list-item",
+                                    "attr": {
+                                        ":title": "HocSinhSelected?.HoTen",
+                                        ":subtitle": "'Lớp ' + HocSinhSelected?.TenLop + ' - ' + HocSinhSelected?.StudentID "
+                                    },
+                                    "innerHTML": [
+                                        {
+                                            "el": "template",
+                                            "attr": {
+                                                "v-slot:prepend": "item"
+                                            },
+                                            "innerHTML": "<v-avatar > <v-img :src='v_Set.urlAvatarHocSinh + HocSinhSelected?.StudentID' contain/> </v-avatar>"
+                                        }
+                                    ]
+                                }
+                            ]
+                        },
+                        {
+                            "el": "div",
+                            "attr": {
+                                "class": "fpScrollbar",
+                                "style": "height: calc(100dvh - 256px); overflow: auto !important"
+                            },
+                            "innerHTML": [
+                                {
+                                    "el": "uc-thang",
+                                    "attr": {
+                                        "v-if": "bottomNavigation === 0"
+                                    }
+                                },
+                                {
+                                    "el": "uc-tieng-anh",
+                                    "attr": {
+                                        "v-if": "bottomNavigation === 1"
+                                    }
+                                },
+                                {
+                                    "el": "uc-hoc-ky",
+                                    "attr": {
+                                        "v-if": "bottomNavigation === 2"
+                                    }
+                                },
+                                {
+                                    "el": "uc-cai-dat",
+                                    "attr": {
+                                        "v-if": "bottomNavigation === 3"
+                                    }
+                                }
+                            ],
+                            "w": 12
+                        },
+                        {
+                            "el": "v-layout",
+                            "attr": {
+                                "class": "overflow-visible",
+                                "style": "height: 56px"
+                            },
+                            "innerHTML": [
+                                {
+                                    "el": "v-bottom-navigation",
+                                    "attr": {
+                                        "v-model": "bottomNavigation",
+                                        "color": "primary",
+                                        ":mandatory": true,
+                                        ":grow": true
+                                    },
+                                    "innerHTML": [
+                                        {
+                                            "el": "v-btn",
+                                            "attr": {},
+                                            "innerHTML": [
+                                                {
+                                                    "el": "v-icon",
+                                                    "innerHTML": "mdi-text-box-outline"
+                                                },
+                                                {
+                                                    "el": "p",
+                                                    "innerHTML": "Tháng"
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            "el": "v-btn",
+                                            "attr": {},
+                                            "innerHTML": [
+                                                {
+                                                    "el": "v-icon",
+                                                    "innerHTML": "mdi-text-box-outline"
+                                                },
+                                                {
+                                                    "el": "p",
+                                                    "innerHTML": "Tiếng Anh"
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            "el": "v-btn",
+                                            "attr": {},
+                                            "innerHTML": [
+                                                {
+                                                    "el": "v-icon",
+                                                    "innerHTML": "mdi-text-box-outline"
+                                                },
+                                                {
+                                                    "el": "p",
+                                                    "innerHTML": "Học kỳ"
+                                                }
+                                            ]
+                                        }
+                                    ]
+                                }
+                            ],
+                            "w": 12
+                        },
+                        {
+                            "el": "v-navigation-drawer",
+                            "attr": {
+                                "v-model": "drawer",
+                                ":location": "$vuetify.display.mobile ? 'bottom' : undefined",
+                                ":temporary": true
+                            },
+                            "innerHTML": [
+                                {
+                                    "el": "v-list",
+                                    "innerHTML": [
+                                        {
+                                            "el": "v-list-subheader",
+                                            "innerHTML": "Danh sách học sinh"
+                                        },
+                                        {
+                                            "el": "v-list-item",
+                                            "attr": {
+                                                "v-for": "hocSinh in DSHocSinh",
+                                                ":key": "hocSinh.StudentID",
+                                                ":title": "hocSinh.HoTen",
+                                                ":subtitle": "'Lớp ' + hocSinh.TenLop + ' - ' + hocSinh.StudentID "
+                                            },
+                                            "innerHTML": [
+                                                {
+                                                    "el": "template",
+                                                    "attr": {
+                                                        "v-slot:prepend": ""
+                                                    },
+                                                    "innerHTML": "<v-avatar > <v-img :src='v_Set.urlAvatarHocSinh + hocSinh.StudentID' contain/> </v-avatar>"
+                                                },
+                                                {
+                                                    "el": "template",
+                                                    "attr": {
+                                                        "v-slot:append": ""
+                                                    },
+                                                    "innerHTML": "<v-btn icon='mdi-arrow-right' color='primary' variant='tonal' size='small' @click='() => onSelectedHocSinh(hocSinh)'></v-btn>"
+                                                }
+                                            ]
+                                        }
+                                    ]
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ]
+        }
+    ],
+    "set": {
+        "menu": false
+    }
+}

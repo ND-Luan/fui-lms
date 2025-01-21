@@ -31,3 +31,9 @@ function onSelectedHocSinh(item) {
     localStorage.setItem('HocSinhSelected', JSON.stringify(item))
     vueData.drawer = false
 }
+
+function setUrlTab() {
+    let url = new URL(window.location.href);
+    url.searchParams.set('tab', vueData.bottomNavigation); // Thêm tham số
+    history.pushState(null, '', url); // Cập nhật URL
+}

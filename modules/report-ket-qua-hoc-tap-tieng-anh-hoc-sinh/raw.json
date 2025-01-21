@@ -1,1 +1,133 @@
-{"data":[{"isShow":true}],"watch":{},"controls":[{"prop":"","rows":[{"prop":"","cols":[{"el":"v-dialog","attr":{"v-model":"isShow","fullscreen":true},"innerHTML":[{"el":"v-card","innerHTML":[{"el":"v-card-text","innerHTML":[{"el":"div","attr":{"v-for":"item in 20"},"innerHTML":"{{item}}"},{"el":"v-text-field"}]}]}]}]}]}],"set":{"menu":false}}
+{
+    "data": [
+        {
+            "HocSinhID": "parseInt(hsid ?? 0)",
+            "MaNhomCotDiem": "mnd",
+            "DSCotDiem": [],
+            "HocSinhDetail": null,
+            "tabBottomNavigation": "localStorage.getItem('tabBottomNavigation') ?? 0"
+        },
+        {
+            "API": "lms/HocSinh_Detail_GetBy_HocSinhID",
+            "IN": {
+                "HocSinhID": "vueData.HocSinhID"
+            },
+            "OUT": "HocSinhDetail"
+        },
+        {
+            "API": "lms/PH_TA_CotDiem_Get_By_HocSinhID_MaNhomCotDiem",
+            "IN": {
+                "HocSinhID": "vueData.HocSinhID",
+                "MaNhomCotDiem": "vueData.MaNhomCotDiem"
+            },
+            "OUT": "DSCotDiem"
+        },
+        {
+            "EXE": "vueData.redirect = redirect"
+        }
+    ],
+    "watch": {},
+    "controls": [
+        {
+            "prop": "fluid",
+            "rows": [
+                {
+                    "prop": " class='v-row--no-gutters'",
+                    "cols": [
+                        {
+                            "el": "v-toolbar",
+                            "attr": {
+                                "color": "primary"
+                            },
+                            "innerHTML": [
+                                {
+                                    "el": "v-btn",
+                                    "attr": {
+                                        "v-on:click": "redirect('/ph-report?tab=' + tabBottomNavigation)",
+                                        "icon": "mdi-arrow-left"
+                                    }
+                                },
+                                {
+                                    "el": "v-toolbar-title",
+                                    "innerHTML": "Báo cáo kết quả học tập tiếng anh"
+                                }
+                            ]
+                        },
+                        {
+                            "el": "v-list",
+                            "innerHTML": [
+                                {
+                                    "el": "v-card",
+                                    "innerHTML": [
+                                        {
+                                            "el": "v-list-item",
+                                            "attr": {
+                                                ":title": "HocSinhDetail?.HoTen",
+                                                ":subtitle": "'Lớp ' + HocSinhDetail?.TenLop + ' - ' + HocSinhDetail?.HocSinhID "
+                                            },
+                                            "innerHTML": [
+                                                {
+                                                    "el": "template",
+                                                    "attr": {
+                                                        "v-slot:prepend": "item"
+                                                    },
+                                                    "innerHTML": "<v-avatar > <v-img :src='v_Set.urlAvatarHocSinh + HocSinhDetail?.HocSinhID' contain/> </v-avatar>"
+                                                }
+                                            ]
+                                        }
+                                    ]
+                                },
+                                {
+                                    "el": "v-divider",
+                                    "attr": {
+                                        "class": "mt-4"
+                                    }
+                                },
+                                {
+                                    "el": "v-card",
+                                    "innerHTML": [
+                                        {
+                                            "el": "v-card-title",
+                                            "attr": {
+                                                "class": "text-primary"
+                                            },
+                                            "innerHTML": "{{DSCotDiem[0]?.TenNhomCotDiem_VI}}"
+                                        }
+                                    ]
+                                },
+                                {
+                                    "el": "v-list-subheader",
+                                    "innerHTML": "Danh sách điểm"
+                                },
+                                {
+                                    "el": "div",
+                                    "attr": {
+                                        "v-for": "(cotDiem, index) in DSCotDiem"
+                                    },
+                                    "innerHTML": [
+                                        {
+                                            "el": "item-cot-diem",
+                                            "attr": {
+                                                ":item": "cotDiem"
+                                            }
+                                        },
+                                        {
+                                            "el": "v-divider",
+                                            "attr": {
+                                                "v-if": "index !== DSCotDiem.length - 1",
+                                                ":inset": true
+                                            }
+                                        }
+                                    ]
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ]
+        }
+    ],
+    "set": {
+        "menu": false
+    }
+}
