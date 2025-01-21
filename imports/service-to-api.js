@@ -40,12 +40,18 @@ const PhanCongLMSService = {
     GetKhoiHocbyCapHocID(params) {
         return CallAPI.post(PREFIX.LMS, "KhoiHocByCapHoc", "Get", params);  // Subdomain "LMS", methodSufix "Get" và params { id }
     },
+     GetAllGiaoVienLop(params) {
+        return CallAPI.post(PREFIX.LMS, "GiaoVienLopAll", "Get", params);  // Subdomain "LMS", methodSufix "Get" và params { id }
+    },
     GetLopHocbyKhoiID(params) {
         return CallAPI.post(PREFIX.LMS, "Lop_Get_ByKhoiID", '', params);  // Subdomain "LMS", methodSufix "Get" và params { id }
     },
 
     AddPhanCong(params) {
         return CallAPI.post(PREFIX.LMS, "GiaoVienLop_Batch", 'Ins', params);  // Subdomain "LMS", methodSufix "Get" và params { id }
+    },
+    DelPhanCong(params) {
+        return CallAPI.post(PREFIX.LMS, "GiaoVienLop", 'Del', params);  // Subdomain "LMS", methodSufix "Get" và params { id }
     },
 
 };

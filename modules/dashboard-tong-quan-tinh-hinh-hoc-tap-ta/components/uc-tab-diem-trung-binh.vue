@@ -5,7 +5,7 @@
 				<v-col cols="12">
 					<v-card :flat="false">
 						<v-card-title class="text-primary d-flex align-center">
-							Điểm phát triển giữa kì so với cuối kì
+							Điểm tiến bộ cuối kì so với giữa kì
 							<v-spacer></v-spacer>
 							<v-btn color="primary" variant="tonal" @click="
 								onLoadChart3({
@@ -24,7 +24,7 @@
 										<v-list-item>
 											<p class="text-body">Tổng số học sinh</p>
 											<template v-slot:prepend>
-												<v-btn color="primary" icon="mdi-account-group" variant="text"></v-btn>
+												<v-btn color="red" icon="mdi-account-group" variant="text"></v-btn>
 											</template>
 											<v-list-item-title class="font-weight-medium">
 												{{ Tong_Growth_GiuaKy_CuoiKi?.TongSoHocSinh ?? 0 }}
@@ -34,7 +34,7 @@
 										<v-list-item>
 											<p class="text-body">Số học sinh cao hơn</p>
 											<template v-slot:prepend>
-												<v-btn color="primary" icon="mdi-human-capacity-increase"
+												<v-btn color="orange" icon="mdi-human-capacity-increase"
 													variant="text"></v-btn>
 											</template>
 											<v-list-item-title class="font-weight-medium">
@@ -45,7 +45,7 @@
 										<v-list-item>
 											<p class="text-body">Tỷ lệ phần trăm</p>
 											<template v-slot:prepend>
-												<v-btn color="primary" icon="mdi-arrow-up-circle-outline"
+												<v-btn color="light-green" icon="mdi-arrow-up-circle-outline"
 													variant="text"></v-btn>
 											</template>
 											<v-list-item-title class="font-weight-medium">
@@ -62,11 +62,11 @@
 												<v-card-title class="text-primary">
 													Khối {{ item.KhoiID }}
 													<v-spacer></v-spacer>
-													<v-chip-group>
-														<v-chip prepend-icon="mdi-account-group">{{ item?.TongSoHocSinh ?? 0}}</v-chip>
-														<v-chip prepend-icon="mdi-human-capacity-increase">{{ item?.SoHocSinhCaoHon ?? 0 }}</v-chip>
-														<v-chip prepend-icon="mdi-arrow-up-circle-outline">{{ item?.TiLePhanTram ?? 0 }} %</v-chip>
-													</v-chip-group>
+													<div class="d-flex ga-2">
+														<v-chip color="red" prepend-icon="mdi-account-group">{{ item?.TongSoHocSinh ?? 0}}</v-chip>
+														<v-chip color="orange" prepend-icon="mdi-human-capacity-increase">{{ item?.SoHocSinhCaoHon ?? 0 }}</v-chip>
+														<v-chip color="light-green" prepend-icon="mdi-arrow-up-circle-outline">{{ item?.TiLePhanTram ?? 0 }} %</v-chip>
+													</div>
 												</v-card-title>
 												<v-row no-gutters> 
 													<v-col style="height: 200px; overflow:auto">
@@ -78,21 +78,21 @@
 																		Lớp
 																	</th>
 																	<th class="text-right">
-																		<v-btn color="primary" icon="mdi-account-group"
+																		<v-btn color="red" icon="mdi-account-group"
 																			variant="text"></v-btn>
-																		Tổng số HS
+																		Số HS
 																	</th>
 																	<th class="text-right">
-																		<v-btn color="primary"
+																		<v-btn color="orange"
 																			icon="mdi-human-capacity-increase"
 																			variant="text"></v-btn>
-																		Số HS cao hơn
+																		CK1 > GK1
 																	</th>
 																	<th class="text-right">
-																		<v-btn color="primary"
+																		<v-btn color="light-green"
 																			icon="mdi-arrow-up-circle-outline"
 																			variant="text"></v-btn>
-																		Tỷ lệ phần trăm
+																		%
 																	</th>
 																</tr>
 															</thead>

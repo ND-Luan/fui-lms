@@ -123,6 +123,10 @@
 		mounted() { },
 		computed: {},
 		watch: {},
-		methods: {},
+		methods: {
+			onExpandMonHocGroup(){
+				
+			}
+		},
 	}
 </script>

@@ -1,15 +1,58 @@
-
-function formatPhanCong(phanCong) {
+function formatPhanCong(dsGiaoVien, phanCongMoi) {
+    // Duyệt qua từng phân công
+    phanCongMoi.forEach(phanCong => {
+        // Tìm giáo viên tương ứng
+        let giaoVien = dsGiaoVien.find(gv => gv.GiaoVienID === phanCong.GiaoVienID);
+        if (giaoVien) {
+            // Kiểm tra điều kiện không thêm nếu các trường là null
+            if (
+                phanCong.LopID === null ||
+                phanCong.MonHocID === null ||
+                phanCong.GVLopID === null
+            ) {
+                return; // Bỏ qua phân công này
+            }
+            // Kiểm tra xem phân công đã tồn tại chưa
+            let phanCongTonTai = giaoVien.PhanCong && giaoVien.PhanCong.some(mon =>
+                mon.MonHocID === phanCong.MonHocID &&
+                mon.LopID === phanCong.LopID
+            );
+            // Chỉ tạo mảng và thêm khi phân công chưa tồn tại
+            if (!phanCongTonTai) {
+                // Nếu PhanCong là null, tạo mới mảng
+                if (giaoVien.PhanCong === null) {
+                    giaoVien.PhanCong = [];
+                }
+                giaoVien.PhanCong.push({
+                    GVLopID: phanCong.GVLopID,
+                    VaiTro: phanCong.VaiTro,
+                    LopID: phanCong.LopID,
+                    TenLop: phanCong.TenLop,
+                    MonHocID: phanCong.MonHocID,
+                    TenMonDuLieuNganh: phanCong.TenMonDuLieuNganh
+                });
+                // Cập nhật MonHocDisplayName
+                giaoVien.MonHocDisplayName = [...new Set(giaoVien.PhanCong.map(mon => mon.TenMonDuLieuNganh))].join(', ');
+            }
+        }
+    });
+    return dsGiaoVien;
+}
+async function getPhanCong() {
     debugger
-    return phanCong.map(pc => `${pc.MonHoc}: ${pc.Lop}`).join('; ');
+    let PhanCongData = await PhanCongLMSService.GetAllGiaoVienLop().catch(error => console.error(error))
+    PhanCongData = PhanCongData.Result
+    console.log( PhanCongData)
+    vueData.DSGiaoVien2 = formatPhanCong(vueData.DSGiaoVien,PhanCongData)
 }
 function getColorBySubject(subject) {
-    // const colorMap = {
-    //     'Toán': 'primary',
-    //     'Lý': 'success',
-    //     'Hóa': 'error',
-    //     'Sinh': 'warning'
-    // };
+    debugger
+    const colorMap = {
+        'Toán': 'primary',
+        'Lý': 'success',
+        'Hóa': 'error',
+        'Sinh': 'warning'
+    };
     return vueData.colorMap[subject] || 'grey';
 }
 function groupedData(data) {
@@ -27,7 +70,7 @@ let dataFilter = dataWithSubjects.reduce((acc, curr) => {
     // Chỉ thêm khi MonHocID hoặc MonHocName không phải null
       if (curr.MonHocID != null && curr.MonHocName != null) {
       existing.MonHocDisplayName += `, ${curr.MonHocName}`;
-      existing.MonArr.push({
+      existing.PhanCong.push({
         MonHocID: curr.MonHocID,
         MonHocName: curr.MonHocName,
       });
@@ -38,7 +81,7 @@ let dataFilter = dataWithSubjects.reduce((acc, curr) => {
         GiaoVienID: curr.GiaoVienID,
         HoTenGV: curr.HoTenGV,
         MonHocDisplayName: curr.MonHocName,
-        MonArr:
+        PhanCong:
             curr.MonHocID != null && curr.MonHocName != null
                 ? [{ MonHocID: curr.MonHocID, MonHocName: curr.MonHocName}]
             : [],

@@ -102,11 +102,11 @@ export default {
 						const TongDiem = res.data
 						const series = [
 							{
-								label: "Điểm giữa kì 1",
+								name: "Điểm giữa kì 1",
 								data: TongDiem.map(x => x.DiemGK1)
 							},
 							{
-								label: "Điểm cuối kì 1",
+								name: "Điểm cuối kì 1",
 								data: TongDiem.map(x => x.DiemCK1)
 							}
 						]

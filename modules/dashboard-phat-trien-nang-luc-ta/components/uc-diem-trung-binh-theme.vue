@@ -27,6 +27,17 @@
 							Xem biểu đồ
 						</v-btn>
 					</v-col>
+					<v-col>
+						<v-btn color="primary" variant="tonal" @click="onLoadChart({
+								  	HocKy: form.HocKy,
+								  	HocSinhID: form.HocSinhID,
+								  	KhoiID: khoiid,
+								  	LopID: form.LopID,
+								  	MonHocID: monhocid
+								  })">
+							Phân Tích Bằng AI
+						</v-btn>
+					</v-col>
 				</v-row>
 			</v-card-text>
 		</v-card>
@@ -204,141 +215,217 @@
 			'form.KhoiID': function (KhoiID) {
 				if (KhoiID) {
 					this.onLoadDSLop(KhoiID)
-					.then(() => {
-						const isValid = this.DSLop.some(item => item.LopID === this.form.LopID);
-						if (!isValid) {
-							this.form.LopID = null; // Hoặc gán giá trị mặc định
-						}
-					});
+						.then(() => {
+							const isValid = this.DSLop.some(item => item.LopID === this.form.LopID);
+							if (!isValid) {
+								this.form.LopID = null; // Hoặc gán giá trị mặc định
+							}
+						});
 				}
 			},
 			'form.LopID': function (LopID) {
 				if (LopID) {
 					this.onLoadDSHocSinh(LopID)
-				}else{
+				} else {
 					this.form.HocSinhID = null
 					this.DSHocSinh = []
 				}
 			}
 		},
 		methods: {
-			onLoadDSLop(KhoiID) {
-				return new Promise(resolve => {
-					ajaxCALL('lms/Lop_Get_ByKhoiID',
-						{
-							KhoiID: KhoiID
-						},
-						res => {
-							this.DSLop = res.data
-							resolve()
-						}
-					)
-				})
+			getJsonImg(canvasId) {
+				// Lấy đối tượng biểu đồ từ ID canvas
+				const chartInstance = Chart.getChart(canvasId); // canvasId là ID của canvas mà bạn muốn lấy dữ liệu
+				// Kiểm tra nếu không có biểu đồ với canvasId
+				if (!chartInstance) {
+					console.error("Biểu đồ không tồn tại với canvasId:", canvasId);
+					return null;
+				}
+				// Lấy dữ liệu biểu đồ từ đối tượng chartInstance
+				const chartData = chartInstance.data;
+				// Chuyển dữ liệu thành JSON và trả về
+				return JSON.stringify(chartData, null, 2);
 			},
-			onLoadDSHocSinh(LopID) {
-				return new Promise(resolve => {
-					ajaxCALL('lms/HocSinhLop_Get_ByLopID',
-						{
-							LopID: LopID
-						},
-						res => {
-							this.DSHocSinh = res.data
-							resolve()
+			async sendChartImageToGPT(params) {
+				let { chart1, chart2, prompt } = params
+				let promptSend = vueData.PromptGPT[prompt]
+				const charts = Object.entries(params).filter(([key]) => key.startsWith("chart"));
+				// Sinh ra các biến JSON tương ứng
+				const chartJsons = charts.map(([key, value]) => ({
+					[key + "Json"]: getJsonImg(value) // Gọi hàm `getJsonImg` với dữ liệu tương ứng
+				}));
+				// Kết quả là một mảng các đối tượng JSON
+				console.log(chartJsons);
+				debugger
+				let res = await new Promise((resolve) => {
+					vueData.v_Loading = true
+					$.ajax({
+						type: 'POST',
+						headers: {
+							// key 1:sk- proj - uOP0INFuaRxPjJz1r65ytuCbOGPoGOvWu9mATwQvQrnHrP5LGOgZiHT2MNUU6rp8WE6xTPJXPoT3BlbkFJ9XgQgUyGsr3XOsBto1WlHQWw5bXVEolFF6_1Ht6NK44rPkm2UQwJD32UodOncXOc9uKMwF1bUA
+					// key 2: sk - proj - v3qYrBAmYotum9Dt0jqmeIkQeQUT52rVZqPxkE3i0g -tvwrTKb3rLgc1mQUWaXsgrtYGIpnotUT3BlbkFJFSvDGL37PWBIeYPjFXH3BW0Hw_dZsiGE6qmr3j0pCKlQiT - 2Vt4rPOZVEFAuwF0cP3NU0Oq3MA
+					authorization: `Bearer ${'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'}`,
+					},
+					url: 'https://api.openai.com/v1/chat/completions',
+					contentType: 'application/json; charset=utf-8',
+					dataType: 'json',
+					crossDomain: true,
+					data: JSON.stringify({
+						model: "gpt-4o-mini", // Hoặc "gpt-4" nếu bạn sử dụng GPT-4
+						messages: [
+							{ role: "system", content: "You are a data visualization expert." },
+							{ role: "system", content: promptSend },
+							{ role: "user", content: JSON.stringify({ chartData: chartJsons }) },
+						],
+						temperature: 1, // Điều chỉnh theo nhu cầu
+					}),
+					success: function (d) {
+						response = {
+							IsSuccess: true,
+							Message: null,
+							Result: d.data
 						}
-					)
-				})
-			},
-			onLoadChart({
-				HocKy,
-				HocSinhID,
-				KhoiID,
-				LopID,
-				MonHocID
-			}) {
-				return new Promise(resolve => {
-					ajaxCALL('lms/DashboardDiemTrungBinhTheoTheme_Get',
-						{
-							HocKy,
-							HocSinhID,
-							KhoiID,
-							LopID,
-							MonHocID
-						},
-						res => {
-							const DataChart_DiemTrungBinhTheme_API = res.data[0]
-							const DataChart_KyNangTheme_API = res.data[1]
-	
-							this.Chart_DiemTrungBinh = {
-								...this.Chart_DiemTrungBinh,
-								series: [
-									{
-										name: "Điểm",
-										data: DataChart_DiemTrungBinhTheme_API.map(x => parseFloat(x.KetQuaDanhGia_VI)),
-									}
-								],
-								xaxis: {
-									categories: DataChart_DiemTrungBinhTheme_API.map(x => x.MaCotDiem),
-								}
-							}
-	
-	
-							const kyNang = DataChart_KyNangTheme_API.filter(x => x.MaNhomCotDiem === 'S1_Mid' || x.MaNhomCotDiem === 'S1_Final')
-							const labelsKyNang = [...new Set(kyNang.map(x => x.TenCotDiem_EN))]
-							const theme = DataChart_KyNangTheme_API.filter(x => x.MaNhomCotDiem !== 'S1_Mid' && x.MaNhomCotDiem !== 'S1_Final')
-							const labelsTheme = [...new Set(theme.map(x => x.TenCotDiem_EN))]
-							const datasetsTheme_1 = theme.filter(x => x.MaNhomCotDiem === "Theme_1").map(x => x.KetQuaDanhGia_VI)
-							const datasetsTheme_2 = theme.filter(x => x.MaNhomCotDiem === "Theme_2").map(x => x.KetQuaDanhGia_VI)
-							const datasetsTheme_3 = theme.filter(x => x.MaNhomCotDiem === "Theme_3").map(x => x.KetQuaDanhGia_VI)
-							const datasetsTheme_4 = theme.filter(x => x.MaNhomCotDiem === "Theme_4").map(x => x.KetQuaDanhGia_VI)
-							const chartTheme = {
-								...this.Chart_Theme,
-								series: [
-									{
-										name: "Theme 1",
-										data: datasetsTheme_1
-									},
-									{
-										name: "Theme 2",
-										data: datasetsTheme_2
-									},
-									{
-										name: "Theme 3",
-										data: datasetsTheme_3
-									},
-									{
-										name: "Theme 4",
-										data: datasetsTheme_4
-									}
-								],
-								xaxis: {
-									categories: labelsTheme
-								}
-							}
-							const chartKyNang = {
-								...this.Chart_KyNang,
-								series: [{
-									name: "Điểm giữa kì",
-									data: kyNang.filter(x => x.MaNhomCotDiem === 'S1_Mid').map(x => x.KetQuaDanhGia_VI)
-								},
-								{
-									name: "Điểm cuối kì",
-									data: kyNang.filter(x => x.MaNhomCotDiem === 'S1_Final').map(x => x.KetQuaDanhGia_VI)
-								}],
-								xaxis: {
-									categories: labelsKyNang
-								}
-							}
-							const DataChart_KyNang = {
-								Theme: chartTheme,
-								KyNang: chartKyNang
-							}
-							this.Chart_Theme = DataChart_KyNang.Theme
-							this.Chart_KyNang = DataChart_KyNang.KyNang
-	
+						resolve(response)
+					},
+					error: function (xhr, ajaxOptions, thrownError) {
+						Toast.error({
+							title: 'Thông báo',
+							text: xhr?.responseJSON?.Message,
 						})
+						response = {
+							IsSuccess: false,
+							Message: xhr.responseJSON?.Message,
+							Result: null
+						}
+						resolve(response)
+					},
+					complete: function (data) {
+						vueData.v_Loading = false
+					},
+					})
+		})
+		console.log(res)
+					return res
+	},
+	
+	onLoadDSLop(KhoiID) {
+		return new Promise(resolve => {
+			ajaxCALL('lms/Lop_Get_ByKhoiID',
+				{
+					KhoiID: KhoiID
+				},
+				res => {
+					this.DSLop = res.data
+					resolve()
+				}
+			)
+		})
+	},
+	onLoadDSHocSinh(LopID) {
+		return new Promise(resolve => {
+			ajaxCALL('lms/HocSinhLop_Get_ByLopID',
+				{
+					LopID: LopID
+				},
+				res => {
+					this.DSHocSinh = res.data
+					resolve()
+				}
+			)
+		})
+	},
+	onLoadChart({
+		HocKy,
+		HocSinhID,
+		KhoiID,
+		LopID,
+		MonHocID
+	}) {
+		return new Promise(resolve => {
+			ajaxCALL('lms/DashboardDiemTrungBinhTheoTheme_Get',
+				{
+					HocKy,
+					HocSinhID,
+					KhoiID,
+					LopID,
+					MonHocID
+				},
+				res => {
+					const DataChart_DiemTrungBinhTheme_API = res.data[0]
+					const DataChart_KyNangTheme_API = res.data[1]
+	
+					this.Chart_DiemTrungBinh = {
+						...this.Chart_DiemTrungBinh,
+						series: [
+							{
+								name: "Điểm",
+								data: DataChart_DiemTrungBinhTheme_API.map(x => parseFloat(x.KetQuaDanhGia_VI)),
+							}
+						],
+						xaxis: {
+							categories: DataChart_DiemTrungBinhTheme_API.map(x => x.MaCotDiem),
+						}
+					}
+	
+	
+					const kyNang = DataChart_KyNangTheme_API.filter(x => x.MaNhomCotDiem === 'S1_Mid' || x.MaNhomCotDiem === 'S1_Final')
+					const labelsKyNang = [...new Set(kyNang.map(x => x.TenCotDiem_EN))]
+					const theme = DataChart_KyNangTheme_API.filter(x => x.MaNhomCotDiem !== 'S1_Mid' && x.MaNhomCotDiem !== 'S1_Final')
+					const labelsTheme = [...new Set(theme.map(x => x.TenCotDiem_EN))]
+					const datasetsTheme_1 = theme.filter(x => x.MaNhomCotDiem === "Theme_1").map(x => x.KetQuaDanhGia_VI)
+					const datasetsTheme_2 = theme.filter(x => x.MaNhomCotDiem === "Theme_2").map(x => x.KetQuaDanhGia_VI)
+					const datasetsTheme_3 = theme.filter(x => x.MaNhomCotDiem === "Theme_3").map(x => x.KetQuaDanhGia_VI)
+					const datasetsTheme_4 = theme.filter(x => x.MaNhomCotDiem === "Theme_4").map(x => x.KetQuaDanhGia_VI)
+					const chartTheme = {
+						...this.Chart_Theme,
+						series: [
+							{
+								name: "Theme 1",
+								data: datasetsTheme_1
+							},
+							{
+								name: "Theme 2",
+								data: datasetsTheme_2
+							},
+							{
+								name: "Theme 3",
+								data: datasetsTheme_3
+							},
+							{
+								name: "Theme 4",
+								data: datasetsTheme_4
+							}
+						],
+						xaxis: {
+							categories: labelsTheme
+						}
+					}
+					const chartKyNang = {
+						...this.Chart_KyNang,
+						series: [{
+							name: "Điểm giữa kì",
+							data: kyNang.filter(x => x.MaNhomCotDiem === 'S1_Mid').map(x => x.KetQuaDanhGia_VI)
+						},
+						{
+							name: "Điểm cuối kì",
+							data: kyNang.filter(x => x.MaNhomCotDiem === 'S1_Final').map(x => x.KetQuaDanhGia_VI)
+						}],
+						xaxis: {
+							categories: labelsKyNang
+						}
+					}
+					const DataChart_KyNang = {
+						Theme: chartTheme,
+						KyNang: chartKyNang
+					}
+					this.Chart_Theme = DataChart_KyNang.Theme
+					this.Chart_KyNang = DataChart_KyNang.KyNang
+	
 				})
-			},
-			calculateLinearRegression
-		}
-	}
+		})
+	},
+	calculateLinearRegression
+		
+				}
+			}
 </script>

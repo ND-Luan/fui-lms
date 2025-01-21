@@ -1,1 +1,1 @@
-{"data":[],"watch":{},"controls":[{"prop":"","rows":[{"prop":"","cols":[{"el":"div","innerHTML":"Tính năng đang được phát triển..."}]}]}],"set":{"menu":false}}
+{"data":[{"isShow":true}],"watch":{},"controls":[{"prop":"","rows":[{"prop":"","cols":[{"el":"v-dialog","attr":{"v-model":"isShow","fullscreen":true},"innerHTML":[{"el":"v-card","innerHTML":[{"el":"v-card-text","innerHTML":[{"el":"div","attr":{"v-for":"item in 20"},"innerHTML":"{{item}}"},{"el":"v-text-field"}]}]}]}]}]}],"set":{"menu":false}}
