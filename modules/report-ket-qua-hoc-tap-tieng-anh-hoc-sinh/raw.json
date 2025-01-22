@@ -5,7 +5,8 @@
             "MaNhomCotDiem": "mnd",
             "DSCotDiem": [],
             "HocSinhDetail": null,
-            "tabBottomNavigation": "localStorage.getItem('tabBottomNavigation') ?? 0"
+            "tabBottomNavigation": "localStorage.getItem('tabBottomNavigation') ?? 0",
+            "IsLoading": true
         },
         {
             "API": "lms/HocSinh_Detail_GetBy_HocSinhID",
@@ -20,10 +21,12 @@
                 "HocSinhID": "vueData.HocSinhID",
                 "MaNhomCotDiem": "vueData.MaNhomCotDiem"
             },
-            "OUT": "DSCotDiem"
-        },
-        {
-            "EXE": "vueData.redirect = redirect"
+            "OUT": "DSCotDiem",
+            "CALLBACK": [
+                {
+                    "IsLoading": false
+                }
+            ]
         }
     ],
     "watch": {},
@@ -35,88 +38,99 @@
                     "prop": " class='v-row--no-gutters'",
                     "cols": [
                         {
-                            "el": "v-toolbar",
+                            "el": "v-skeleton-loader",
                             "attr": {
-                                "color": "primary"
-                            },
-                            "innerHTML": [
-                                {
-                                    "el": "v-btn",
-                                    "attr": {
-                                        "v-on:click": "redirect('/ph-report?tab=' + tabBottomNavigation)",
-                                        "icon": "mdi-arrow-left"
-                                    }
-                                },
-                                {
-                                    "el": "v-toolbar-title",
-                                    "innerHTML": "Báo cáo kết quả học tập tiếng anh"
-                                }
-                            ]
+                                "v-if": "IsLoading",
+                                "type": "list-item-avatar"
+                            }
                         },
                         {
-                            "el": "v-list",
+                            "el": "v-skeleton-loader",
+                            "attr": {
+                                "v-if": "IsLoading",
+                                "type": "heading"
+                            }
+                        },
+                        {
+                            "el": "v-skeleton-loader",
+                            "attr": {
+                                "v-if": "IsLoading",
+                                "v-for": "item in 4",
+                                "type": "list-item-three-line"
+                            }
+                        },
+                        {
+                            "el": "v-fade-transition",
                             "innerHTML": [
                                 {
-                                    "el": "v-card",
-                                    "innerHTML": [
-                                        {
-                                            "el": "v-list-item",
-                                            "attr": {
-                                                ":title": "HocSinhDetail?.HoTen",
-                                                ":subtitle": "'Lớp ' + HocSinhDetail?.TenLop + ' - ' + HocSinhDetail?.HocSinhID "
-                                            },
-                                            "innerHTML": [
-                                                {
-                                                    "el": "template",
-                                                    "attr": {
-                                                        "v-slot:prepend": "item"
-                                                    },
-                                                    "innerHTML": "<v-avatar > <v-img :src='v_Set.urlAvatarHocSinh + HocSinhDetail?.HocSinhID' contain/> </v-avatar>"
-                                                }
-                                            ]
-                                        }
-                                    ]
-                                },
-                                {
-                                    "el": "v-divider",
+                                    "el": "v-list",
                                     "attr": {
-                                        "class": "mt-4"
-                                    }
-                                },
-                                {
-                                    "el": "v-card",
-                                    "innerHTML": [
-                                        {
-                                            "el": "v-card-title",
-                                            "attr": {
-                                                "class": "text-primary"
-                                            },
-                                            "innerHTML": "{{DSCotDiem[0]?.TenNhomCotDiem_VI}}"
-                                        }
-                                    ]
-                                },
-                                {
-                                    "el": "v-list-subheader",
-                                    "innerHTML": "Danh sách điểm"
-                                },
-                                {
-                                    "el": "div",
-                                    "attr": {
-                                        "v-for": "(cotDiem, index) in DSCotDiem"
+                                        "v-if": "!IsLoading"
                                     },
                                     "innerHTML": [
                                         {
-                                            "el": "item-cot-diem",
-                                            "attr": {
-                                                ":item": "cotDiem"
-                                            }
+                                            "el": "v-card",
+                                            "innerHTML": [
+                                                {
+                                                    "el": "v-list-item",
+                                                    "attr": {
+                                                        ":title": "HocSinhDetail?.HoTen",
+                                                        ":subtitle": "'Lớp ' + HocSinhDetail?.TenLop + ' - ' + HocSinhDetail?.HocSinhID "
+                                                    },
+                                                    "innerHTML": [
+                                                        {
+                                                            "el": "template",
+                                                            "attr": {
+                                                                "v-slot:prepend": "item"
+                                                            },
+                                                            "innerHTML": "<v-avatar > <v-img :src='v_Set.urlAvatarHocSinh + HocSinhDetail?.HocSinhID' contain/> </v-avatar>"
+                                                        }
+                                                    ]
+                                                }
+                                            ]
                                         },
                                         {
                                             "el": "v-divider",
                                             "attr": {
-                                                "v-if": "index !== DSCotDiem.length - 1",
-                                                ":inset": true
+                                                "class": "mt-4"
                                             }
+                                        },
+                                        {
+                                            "el": "v-card",
+                                            "innerHTML": [
+                                                {
+                                                    "el": "v-card-title",
+                                                    "attr": {
+                                                        "class": "text-primary"
+                                                    },
+                                                    "innerHTML": "{{DSCotDiem[0]?.TenNhomCotDiem_VI}}"
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            "el": "v-list-subheader",
+                                            "innerHTML": "Danh sách điểm"
+                                        },
+                                        {
+                                            "el": "div",
+                                            "attr": {
+                                                "v-for": "(cotDiem, index) in DSCotDiem"
+                                            },
+                                            "innerHTML": [
+                                                {
+                                                    "el": "item-cot-diem",
+                                                    "attr": {
+                                                        ":item": "cotDiem"
+                                                    }
+                                                },
+                                                {
+                                                    "el": "v-divider",
+                                                    "attr": {
+                                                        "v-if": "index !== DSCotDiem.length - 1",
+                                                        ":inset": true
+                                                    }
+                                                }
+                                            ]
                                         }
                                     ]
                                 }

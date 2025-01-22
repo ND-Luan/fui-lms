@@ -32,21 +32,14 @@ function formatPhanCong(dsGiaoVien, phanCongMoi) {
                     TenMonDuLieuNganh: phanCong.TenMonDuLieuNganh
                 });
                 // Cập nhật MonHocDisplayName
-                giaoVien.MonHocDisplayName = [...new Set(giaoVien.PhanCong.map(mon => mon.TenMonDuLieuNganh))].join(', ');
+                giaoVien.MonHocDisplayName = [...new Set(giaoVien.PhanCong.map(mon => mon.TenMonDuLieuNganh))];
             }
         }
     });
+    vueData.DSGiaoVien2 = dsGiaoVien;
     return dsGiaoVien;
 }
-async function getPhanCong() {
-    debugger
-    let PhanCongData = await PhanCongLMSService.GetAllGiaoVienLop().catch(error => console.error(error))
-    PhanCongData = PhanCongData.Result
-    console.log( PhanCongData)
-    vueData.DSGiaoVien2 = formatPhanCong(vueData.DSGiaoVien,PhanCongData)
-}
 function getColorBySubject(subject) {
-    debugger
     const colorMap = {
         'Toán': 'primary',
         'Lý': 'success',
@@ -282,13 +275,40 @@ function add() {
     // Cập nhật DSGiaoVien2
     vueData.DSGiaoVien = updatedDSGiaoVien2;
     // Log kết quả
-    // this.save(data)
+    // Cách sử dụng
+    this.save(data)
+        .then(response => {
+            // Xử lý kết quả thành công
+            console.log(response);
+        })
+        .catch(error => {
+            // Xử lý lỗi
+            console.error(error);
+        });
 }
-async function save(paramsSave) {
+function save(paramsSave) {
+    return new Promise((resolve, reject) => {
+        try {
+            const params = JSON.stringify(paramsSave);
+            const payload = {
+                PhanCongInput: params,
+            };
+            PhanCongLMSService.AddPhanCong(payload)
+                .then(response => {
+                    resolve(response);
+                })
+                .catch(error => {
+                    reject(error);
+                });
+        } catch (error) {
+            reject(error);
+        }
+    });
+}
+async function deletePhanCong(id) {
     debugger
-    const params = JSON.stringify(paramsSave);
     const payload = {
-        PhanCongInput: params,
+        id: id,
     };
-    await PhanCongLMSService.AddPhanCong(payload)
+    await PhanCongLMSService.DelPhanCong(payload)
 }

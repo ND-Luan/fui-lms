@@ -4,7 +4,8 @@
             "DSHocTapThang": [],
             "DSHocTapThangTiengAnh": [],
             "bottomNavigation": "localStorage.getItem('tabBottomNavigation') ? parseInt(localStorage.getItem('tabBottomNavigation')) : 0",
-            "HocSinhSelected": "JSON.parse(localStorage.getItem('HocSinhSelected'))"
+            "HocSinhSelected": "JSON.parse(localStorage.getItem('HocSinhSelected'))",
+            "IsLoadingStudent": true
         },
         {
             "getDSHocSinh": {
@@ -19,6 +20,9 @@
                         "THEN": {
                             "EXE": "vueData.HocSinhSelected = vueData.DSHocSinh[0]; localStorage.setItem('HocSinhSelected', JSON.stringify(vueData.DSHocSinh[0]));"
                         }
+                    },
+                    {
+                        "IsLoadingStudent": false
                     }
                 ]
             }
@@ -145,21 +149,36 @@
                             "w": 12
                         },
                         {
-                            "el": "v-card",
+                            "el": "v-skeleton-loader",
+                            "attr": {
+                                "v-if": "IsLoadingStudent",
+                                "type": "list-item-avatar-two-line"
+                            }
+                        },
+                        {
+                            "el": "v-fade-transition",
                             "innerHTML": [
                                 {
-                                    "el": "v-list-item",
+                                    "el": "v-card",
                                     "attr": {
-                                        ":title": "HocSinhSelected?.HoTen",
-                                        ":subtitle": "'Lớp ' + HocSinhSelected?.TenLop + ' - ' + HocSinhSelected?.StudentID "
+                                        "v-if": "!IsLoadingStudent"
                                     },
                                     "innerHTML": [
                                         {
-                                            "el": "template",
+                                            "el": "v-list-item",
                                             "attr": {
-                                                "v-slot:prepend": "item"
+                                                ":title": "HocSinhSelected?.HoTen",
+                                                ":subtitle": "'Lớp ' + HocSinhSelected?.TenLop + ' - ' + HocSinhSelected?.StudentID "
                                             },
-                                            "innerHTML": "<v-avatar > <v-img :src='v_Set.urlAvatarHocSinh + HocSinhSelected?.StudentID' contain/> </v-avatar>"
+                                            "innerHTML": [
+                                                {
+                                                    "el": "template",
+                                                    "attr": {
+                                                        "v-slot:prepend": "item"
+                                                    },
+                                                    "innerHTML": "<v-avatar > <v-img :src='v_Set.urlAvatarHocSinh + HocSinhSelected?.StudentID' contain/> </v-avatar>"
+                                                }
+                                            ]
                                         }
                                     ]
                                 }
@@ -173,28 +192,37 @@
                             },
                             "innerHTML": [
                                 {
-                                    "el": "uc-thang",
-                                    "attr": {
-                                        "v-if": "bottomNavigation === 0"
-                                    }
+                                    "el": "keep-alive",
+                                    "innerHTML": [
+                                        {
+                                            "el": "uc-thang",
+                                            "attr": {
+                                                "v-if": "bottomNavigation === 0"
+                                            }
+                                        }
+                                    ]
                                 },
                                 {
-                                    "el": "uc-tieng-anh",
-                                    "attr": {
-                                        "v-if": "bottomNavigation === 1"
-                                    }
+                                    "el": "keep-alive",
+                                    "innerHTML": [
+                                        {
+                                            "el": "uc-tieng-anh",
+                                            "attr": {
+                                                "v-if": "bottomNavigation === 1"
+                                            }
+                                        }
+                                    ]
                                 },
                                 {
-                                    "el": "uc-hoc-ky",
-                                    "attr": {
-                                        "v-if": "bottomNavigation === 2"
-                                    }
-                                },
-                                {
-                                    "el": "uc-cai-dat",
-                                    "attr": {
-                                        "v-if": "bottomNavigation === 3"
-                                    }
+                                    "el": "keep-alive",
+                                    "innerHTML": [
+                                        {
+                                            "el": "uc-hoc-ky",
+                                            "attr": {
+                                                "v-if": "bottomNavigation === 2"
+                                            }
+                                        }
+                                    ]
                                 }
                             ],
                             "w": 12
