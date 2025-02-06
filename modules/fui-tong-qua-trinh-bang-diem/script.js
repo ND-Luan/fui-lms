@@ -1,14 +1,9 @@
 function renderDSKhoi() {
-    const DSKhoi = Array.from({ length: 12 })
-        .fill(0)
-        .map((_, i) => {
-            return {
-                title: `Khối ${i + 1}`,
-                value: i + 1,
-            }
-        })
-    // vueData.KhoiID = DSKhoi[0].value
-    vueData.DSKhoi = DSKhoi
+    vueData.DSKhoi = Array.from({ length: 12 }, (_, i) => {
+        const khoi = i + 1;
+        const capid = khoi <= 5 ? 1 : khoi <= 9 ? 2 : 3;
+        return { title: `Khối ${khoi}`, value: khoi, CapID: capid };
+    }).filter(x => x.CapID === parseInt(vueData.capid));
 }
 function convertDSHocSinh() {
     let headers = []
@@ -150,22 +145,22 @@ function convertDSHocSinh() {
             }
         }
         for (var cotDiemExist of newArr.sort((a, b) => a.ThuTuNhom - b.ThuTuNhom)) {
-                // let giaTri = null
-                // if (cotDiemExist.GiaTriCotDiem === 'number') {
-                //     if (cotDiemExist.KetQuaDanhGia_VI === '' || cotDiemExist.KetQuaDanhGia_VI === null) {
-                //         giaTri = null
-                //     } else {
-                //         giaTri = parseFloat(cotDiemExist?.KetQuaDanhGia_VI)
-                //     }
-                // } else {
-                //     if (cotDiemExist?.KetQuaDanhGia_VI) {
-                //         giaTri = cotDiemExist?.KetQuaDanhGia_VI
-                //     } else {
-                //         giaTri = null
-                //     }
-                // }
-                // //Text
-                // obj[cotDiemExist.MaCotDiem] = _.isNaN(giaTri) ? null : giaTri
+            // let giaTri = null
+            // if (cotDiemExist.GiaTriCotDiem === 'number') {
+            //     if (cotDiemExist.KetQuaDanhGia_VI === '' || cotDiemExist.KetQuaDanhGia_VI === null) {
+            //         giaTri = null
+            //     } else {
+            //         giaTri = parseFloat(cotDiemExist?.KetQuaDanhGia_VI)
+            //     }
+            // } else {
+            //     if (cotDiemExist?.KetQuaDanhGia_VI) {
+            //         giaTri = cotDiemExist?.KetQuaDanhGia_VI
+            //     } else {
+            //         giaTri = null
+            //     }
+            // }
+            // //Text
+            // obj[cotDiemExist.MaCotDiem] = _.isNaN(giaTri) ? null : giaTri
             if (cotDiemExist.LoaiCotDiem !== 'Công thức') {
                 let giaTri = null
                 if (cotDiemExist.GiaTriCotDiem === 'number') {

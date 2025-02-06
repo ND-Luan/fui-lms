@@ -1,13 +1,9 @@
 function renderDSKhoi() {
-    const DSKhoi = Array.from({ length: 12 })
-        .fill(0)
-        .map((_, i) => {
-            return {
-                title: `Khối ${i + 1}`,
-                value: i + 1,
-            }
-        })
-    vueData.DSKhoi = DSKhoi
+    vueData.DSKhoi = Array.from({ length: 12 }, (_, i) => {
+        const khoi = i + 1;
+        const capid = khoi <= 5 ? 1 : khoi <= 9 ? 2 : 3;
+        return { title: `Khối ${khoi}`, value: khoi, CapID: capid };
+    }).filter(x => x.CapID === parseInt(vueData.capid));
 }
 function convertDSHocSinh() {
     let headers = []

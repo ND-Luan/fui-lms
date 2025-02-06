@@ -5,7 +5,8 @@ function renderDSCap() {
             CapID: index + 1
         }
     });
-    vueData.DSCap = DSCap;
+    console.log(123, vueData.capid)
+    vueData.DSCap = DSCap.filter(x => x.CapID === parseInt(vueData.capid));
 }
 function renderDSKhoi() {
     const DSKhoi = Array.from({ length: 12 }).fill(0).map((_, index) => {
