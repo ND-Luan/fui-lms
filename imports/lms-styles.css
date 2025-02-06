@@ -181,3 +181,15 @@
 .v-stepper-item__avatar.v-avatar .v-icon {
     font-size: 1.8rem !important;
 }
+
+.height-excel .jss_content {
+    max-height: calc(100vh - 220px) !important
+}
+
+.jss_worksheet>tbody>tr>td.readonly {
+    color: black !important;
+}
+
+.ql-bubble {
+    border: 1px solid #d1d5db;
+}

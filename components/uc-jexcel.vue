@@ -89,6 +89,14 @@
 			const jExcelObj = jspreadsheet(this.$refs["spreadsheet"], this.jExcelOptions);
 			Object.assign(this, { jExcelObj }); // tucks all methods under jExcelObj object in component instance
 			this.$emit('update:modelValue', jExcelObj)
+	
+			// Đợi JSpreadsheet render xong, sau đó gắn sự kiện cuộn
+			this.$nextTick(() => {
+				const container = this.$refs.spreadsheet.querySelector('.jexcel_container');
+				if (container) {
+					container.addEventListener("scroll", this.handleScroll);
+				}
+			});
 		},
 		computed: {
 			jExcelOptions() {
@@ -126,21 +134,33 @@
 					// onchange: this.abc,
 					onselection: this.onselection,
 					onload: function (worksheet) {
-						const nestedHeaders = worksheet.worksheets[0].options.nestedHeaders[0]
-						if (nestedHeaders) {
-							const elTrNestedHeader = nestedHeaders[0]?.element;
-							const tdElement = elTrNestedHeader.querySelector('td[data-column="0,1,2"]');
-							tdElement.classList.add("jss_freezed");
-						}
+						// const nestedHeaders = worksheet.worksheets[0].element
+						// if (nestedHeaders) {
+						// 	const elTrNestedHeader = nestedHeaders
+						// 	const tdElement = elTrNestedHeader.querySelector('td[data-column="0,1,2"]');
+						// 	tdElement.classList.add("jss_freezed");
+						// }
 					}
 				};
 			}
 		},
 		methods: {
-			abc(instance, cell, x, y, value) {
-				// this.$emit('onChange', { instance, cell, x, y, value })
-				// console.log('{ instance, cell, x, y, value }', { instance, cell, x, y, value });
-				// this.$emit('update:dataSource', this.jExcelObj.getJson())
+			handleScroll(event) {
+				const container = event.target;
+				const scrollLeft = container.scrollLeft;
+	
+				// Lấy tất cả các cell trong các cột cố định
+				const freezeColumns = 3; // Số cột cần cố định
+				for (let i = 0; i < freezeColumns; i++) {
+					const columnCells = container.querySelectorAll(`td[data-x="${i}" ]`);
+					columnCells.forEach(cell => {
+						if (scrollLeft > 0) {
+							cell.classList.add("jss_freezed");
+						} else {
+							cell.classList.remove("jss_freezed");
+						}
+					});
+				}
 			},
 			changed(instance, cell, x, y, value) {
 				this.$emit('onChange', { instance, cell, x, y, value })

@@ -3,6 +3,7 @@ function convertDSHocTapThang() {
     const startYear = 2024; // Năm bắt đầu
     const endMonth = 5; // Tháng kết thúc (tháng 5)
     const endYear = 2025; // Năm kết thúc
+    const monthNames = ["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"];
     const data = [];
     for (let year = startYear; year <= endYear; year++) {
         const monthStart = year === startYear ? startMonth : 1;
@@ -10,7 +11,10 @@ function convertDSHocTapThang() {
         for (let month = monthStart; month <= monthEnd; month++) {
             data.push({
                 title: `Tháng ${month}/${year}`,
-                icon: `/_cdn/lhbs-lms/icon_thang/icon_thang_${month}.png`
+                titleEnglish: `${monthNames[month - 1]} - ${year}`,
+                icon: `/_cdn/lhbs-lms/icon_thang/icon_thang_${month}.png`,
+                month: month,
+                year: year
             });
         }
     }
@@ -26,10 +30,20 @@ function convertDSHocTapTiengAnh() {
     vueData.DSHocTapThangTiengAnh = data
 }
 function onSelectedHocSinh(item) {
-    console.log(item)
-    vueData.HocSinhSelected = item
-    localStorage.setItem('HocSinhSelected', JSON.stringify(item))
-    vueData.drawer = false
+    ajaxCALL('lms/HocSinh_Detail_GetBy_HocSinhID',
+        {
+            HocSinhID: item.StudentID
+        }, data => {
+            vueData.HocSinhSelected = { ...item, ...data }
+            localStorage.setItem('HocSinhSelected', JSON.stringify({ ...item, ...data }))
+            vueData.drawerSelectStudent = false
+            vueData.drawerOnboarding = false
+            const bottomNavigation = vueData.bottomNavigation
+            if (bottomNavigation === 0) vueData.keyComponentUcThang++
+            if (bottomNavigation === 1) vueData.keyComponentUcTiengAnh++
+            if (bottomNavigation === 2) vueData.keyComponentUcHocKy++
+        }
+    )
 }
 function setUrlTab() {
     let url = new URL(window.location.href);

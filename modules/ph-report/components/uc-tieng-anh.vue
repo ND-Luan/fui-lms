@@ -17,44 +17,45 @@
 					</v-list-item>
 					<v-divider v-if="index !== DSNhomDiem.length - 1" inset></v-divider>
 				</div>
+				<uc-empty v-if="DSNhomDiem.length === 0" />
 			</v-list>
 		</v-fade-transition>
 	</div>
 </template>
 
 <script>
-export default {
-	props: [],
-	data() {
-		return {
-			vueData,
-			DSNhomDiem: [],
-			IsLoading: false
-		}
-	},
-	mounted() {
-		this.IsLoading = true
-		ajaxCALL('lms/PH_TA_MaNhomDiem_Get_By_HocSinhID',
-			{
-				HocSinhID: vueData.HocSinhSelected.StudentID
-			},
-			res => {
-				this.DSNhomDiem = res.data
-				this.IsLoading = false
+	export default {
+		props: [],
+		data() {
+			return {
+				vueData,
+				DSNhomDiem: [],
+				IsLoading: false
 			}
-		)
-	},
-	computed: {},
-	watch: {},
-	methods: {
-		onRedirect(nhomDiem) {
-			openWindow({
-				title: "Tiếng anh",
-				url: '/report-ket-qua-hoc-tap-tieng-anh-hoc-sinh?hsid=' + nhomDiem.HocSinhID + '&mnd=' + nhomDiem.MaNhomCotDiem
-			})
 		},
-		openWindow,
-		redirect
-	},
-}
+		mounted() {
+			this.IsLoading = true
+			ajaxCALL('lms/PH_TA_MaNhomDiem_Get_By_HocSinhID',
+				{
+					HocSinhID: vueData.HocSinhSelected.StudentID
+				},
+				res => {
+					this.DSNhomDiem = res.data
+					this.IsLoading = false
+				}
+			)
+		},
+		computed: {},
+		watch: {},
+		methods: {
+			onRedirect(nhomDiem) {
+				openWindow({
+					title: "Tiếng anh",
+					url: '/report-ket-qua-hoc-tap-tieng-anh-hoc-sinh?hsid=' + nhomDiem.HocSinhID + '&mnd=' + nhomDiem.MaNhomCotDiem
+				})
+			},
+			openWindow,
+			redirect
+		},
+	}
 </script>

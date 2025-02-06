@@ -1,5 +1,5 @@
 <template>
-	<uc-jexcel v-if="vueData.DSHocSinh?.length > 0" v-model="vueData.instance" :freezeColumns="2"
+	<uc-jexcel class="height-excel" v-if="vueData.DSHocSinh?.length > 0" v-model="vueData.instance" :freezeColumns="2"
 		v-model:dataSource="vueData.DSHocSinh" :columns="vueData.columnHeader" :updateTable="updateTable"
 		:key="vueData.keyComp" :styleSheet="vueData.styleSheet">
 	</uc-jexcel>

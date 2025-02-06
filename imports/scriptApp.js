@@ -294,7 +294,22 @@ $('document').ready(() => {
                     evaluation: "Evaluation",
                     comment: "Comment",
 
-                    studentList: "Student list"
+                    studentList: "Student list",
+
+                    selectLanguage: "Select Language",
+                    vietNam: "Vietnam",
+                    english: "English",
+                    next: "Next",
+                    back: "Back",
+                    confirm: "Confirm",
+
+                    parent: "Parent",
+
+                    monthList: "Month list",
+                    studentNotFound: "Student not found",
+                    month: "Month",
+                    semester: "Semester"
+
                 }
             },
             vi: {
@@ -313,7 +328,20 @@ $('document').ready(() => {
                     evaluation: "Nội dung đánh giá",
                     comment: "Nhận xét",
 
-                    studentList: "Danh sách học sinh"
+                    studentList: "Danh sách học sinh",
+
+                    selectLanguage: "Chọn ngôn ngữ",
+                    vietNam: "Việt Nam",
+                    english: "Tiếng Anh",
+                    next: "Tiếp tục",
+                    confirm: "Xác nhận",
+
+                    parent: "Phụ huynh",
+
+                    monthList: "Danh sách tháng",
+                    studentNotFound: "Không tìm thấy học sinh",
+                    month: "Tháng",
+                    semester: "Học kỳ"
                 }
             }
         }

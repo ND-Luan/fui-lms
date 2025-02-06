@@ -118,15 +118,111 @@
 						icon: '/_cdn/lhbs-lms/nang_luc_rieng.png',
 					},
 				],
+				DSMonHoc: [],
+				DSMonHoc_ByGroup: [],
+				MonHocGroup_Obj: {},
+				DSNhomDiem: [],
+				MonHocSelected: null,
+				IsLoadingPage: false,
+				IsLoadingDSHocSinh: false,
+				vueData
 			}
 		},
-		mounted() { },
-		computed: {},
-		watch: {},
-		methods: {
-			onExpandMonHocGroup(){
-				
+		async mounted() {
+			for (var hk of this.DSHocKy) {
+				const { DSMonHoc, DSDiem, DSNhomDiem } = await this.loadHocSinhKQHT(hk.code)
+				hk.DSMonHoc = DSMonHoc
+				hk.DSDiem = DSDiem
+				hk.DSNhomDiem = DSNhomDiem
 			}
+		},
+		computed: {},
+		watch: {
+			'$i18n.locale': function () {
+				this.updateDSMonHocGroup();
+			},
+		},
+		methods: {
+			onExpandMonHocGroup() {
+	
+			},
+			loadHocSinhKQHT(code) {
+				return new Promise(async resolve => {
+					ajaxCALL('lms/HocSinh_KQHT',
+						{
+							HocSinhID: vueData.HocSinhSelected.StudentID,
+							LopID: vueData.HocSinhSelected.LopID,
+							Semester: code
+						},
+						res => {
+							const data = res.data
+							const DSMonHoc = data[0]
+							const DSDiem = data[1]
+	
+							const DSNhomDiem = DSDiem.reduce((result, element) => {
+								if (!result[element.TenNhomCotDiem_VI]) {
+									result[element.TenNhomCotDiem_VI] = []
+								}
+								result[element.TenNhomCotDiem_VI].push(element)
+								return result
+							}, [])
+							resolve({ DSMonHoc, DSDiem, DSNhomDiem })
+						}
+					)
+				})
+			},
+			updateDSMonHocGroup() {
+				this.DSMonHocGroup = [
+					{
+						MonHocGroup: 1,
+						Name_VI: this.$t('message.Skill_Knowledge'),
+						Name_EN: '',
+						icon: '/_cdn/lhbs-lms/kienthuc_ki_nang_icon.png',
+					},
+					{
+						MonHocGroup: 2,
+						Name_VI: this.$t('message.Common_Ability'),
+						Name_EN: '',
+						icon: '/_cdn/lhbs-lms/nang_luc_chung_icon.png',
+					},
+					{
+						MonHocGroup: 3,
+						Name_VI: this.$t('message.Quality'),
+						Name_EN: '',
+						icon: '/_cdn/lhbs-lms/pham_chat_icon.png',
+					},
+					{
+						MonHocGroup: 4,
+						Name_VI: this.$t('message.Personal_Ability'),
+						Name_EN: '',
+						icon: '/_cdn/lhbs-lms/nang_luc_rieng.png',
+					},
+				];
+			},
+			randomColor() {
+				const colorList = [
+					'red-lighten-1',
+					'pink-lighten-1',
+					'purple-lighten-2',
+					'purple-lighten-3',
+					'deep-purple-lighten-2',
+					'indigo-lighten-2',
+					'blue-lighten-1',
+					'cyan-darken-1',
+					'teal-lighten-2',
+					'green-lighten-1',
+					'light-green-darken-1',
+					'lime-lighten-2',
+					'amber-lighten-4',
+					'orange-darken-1',
+					'deep-orange-lighten-1',
+					'brown-lighten-2',
+					'blue-grey-lighten-2',
+					'grey-darken-1',
+				]
+				const randomIndex = Math.floor(Math.random() * colorList.length);
+				return colorList[randomIndex];
+			},
 		},
 	}
 </script>

@@ -1,4 +1,44 @@
+
 function formatPhanCong(dsGiaoVien, phanCongMoi) {
+    const dataWithSubjects = dsGiaoVien.map((gv) => ({
+        GiaoVienID: gv.GiaoVienID,
+        HoTenGV: gv.HoTenGV,
+        MonHocID: gv.MonHocID,
+        MonHocName: gv.MonHocName,
+        Color: gv.Color,
+    }));
+    // Gộp theo ID và tạo mảng MON chứa các đối tượng { MonHocID, MonHocName }
+    let dataFilter = dataWithSubjects.reduce((acc, curr) => {
+        let existing = acc.find((item) => item.GiaoVienID === curr.GiaoVienID);
+        if (existing) {
+            debugger
+            // Xử lý môn học
+            if (curr.MonHocID != null && curr.MonHocName != null) {
+                // Nếu chưa tồn tại môn học này
+                if (!existing.MonHocDisplayName.some(mon => mon.tenMonHoc === curr.MonHocName)) {
+                    existing.MonHocDisplayName.push({
+                        tenMonHoc: curr.MonHocName,
+                        Color: curr.Color || 'grey' // Thêm màu nếu có
+                    });
+                }
+            }
+        } else {
+            // Khởi tạo mới giáo viên
+            acc.push({
+                GiaoVienID: curr.GiaoVienID,
+                HoTenGV: curr.HoTenGV,
+                MonHocDisplayName: curr.MonHocName
+                    ? [{
+                        tenMonHoc: curr.MonHocName,
+                        Color: curr.Color || null
+                    }]
+                    : [],
+                PhanCong: []
+            });
+        }
+        return acc;
+    }, []);
+    dsGiaoVien = dataFilter;
     // Duyệt qua từng phân công
     phanCongMoi.forEach(phanCong => {
         // Tìm giáo viên tương ứng
@@ -20,7 +60,7 @@ function formatPhanCong(dsGiaoVien, phanCongMoi) {
             // Chỉ tạo mảng và thêm khi phân công chưa tồn tại
             if (!phanCongTonTai) {
                 // Nếu PhanCong là null, tạo mới mảng
-                if (giaoVien.PhanCong === null) {
+                if (giaoVien.PhanCong === null || giaoVien.PhanCong == undefined) {
                     giaoVien.PhanCong = [];
                 }
                 giaoVien.PhanCong.push({
@@ -29,10 +69,32 @@ function formatPhanCong(dsGiaoVien, phanCongMoi) {
                     LopID: phanCong.LopID,
                     TenLop: phanCong.TenLop,
                     MonHocID: phanCong.MonHocID,
-                    TenMonDuLieuNganh: phanCong.TenMonDuLieuNganh
+                    TenMonDuLieuNganh: phanCong.TenMonDuLieuNganh,
+                    Color: phanCong.Color || 'gray'
                 });
                 // Cập nhật MonHocDisplayName
-                giaoVien.MonHocDisplayName = [...new Set(giaoVien.PhanCong.map(mon => mon.TenMonDuLieuNganh))];
+                // Sử dụng Set để loại bỏ trùng lặp và giữ lại các môn học ban đầu
+                const monHocSet = new Set();
+                const monHocMap = new Map();
+                // Xử lý MonHocDisplayName ban đầu (nếu có)
+                if (giaoVien.MonHocDisplayName) {
+                    giaoVien.MonHocDisplayName.forEach(mon => {
+                        monHocSet.add(mon.tenMonHoc);
+                        monHocMap.set(mon.tenMonHoc, mon.Color);
+                    });
+                }
+                // Thêm các môn học từ PhanCong
+                giaoVien.PhanCong.forEach(mon => {
+                    if (!monHocSet.has(mon.TenMonDuLieuNganh)) {
+                        monHocSet.add(mon.TenMonDuLieuNganh);
+                        monHocMap.set(mon.TenMonDuLieuNganh, mon.Color);
+                    }
+                });
+                // Tạo mảng mới với định dạng mong muốn
+                giaoVien.MonHocDisplayName = Array.from(monHocSet).map(tenMonHoc => ({
+                    tenMonHoc: tenMonHoc,
+                    Color: monHocMap.get(tenMonHoc)
+                }));
             }
         }
     });
@@ -62,11 +124,7 @@ let dataFilter = dataWithSubjects.reduce((acc, curr) => {
   if (existing) {
     // Chỉ thêm khi MonHocID hoặc MonHocName không phải null
       if (curr.MonHocID != null && curr.MonHocName != null) {
-      existing.MonHocDisplayName += `, ${curr.MonHocName}`;
-      existing.PhanCong.push({
-        MonHocID: curr.MonHocID,
-        MonHocName: curr.MonHocName,
-      });
+          existing.MonHocDisplayName += `, ${curr.MonHocName}`;
     }
   } else {
     // Khởi tạo mới với mảng MON
@@ -74,10 +132,7 @@ let dataFilter = dataWithSubjects.reduce((acc, curr) => {
         GiaoVienID: curr.GiaoVienID,
         HoTenGV: curr.HoTenGV,
         MonHocDisplayName: curr.MonHocName,
-        PhanCong:
-            curr.MonHocID != null && curr.MonHocName != null
-                ? [{ MonHocID: curr.MonHocID, MonHocName: curr.MonHocName}]
-            : [],
+        PhanCong:[]
     });
   }
   return acc;
@@ -271,7 +326,6 @@ function add() {
         // Trả về giáo viên gốc nếu không có thay đổi
         return GVItem;
     });
-    debugger
     // Cập nhật DSGiaoVien2
     vueData.DSGiaoVien = updatedDSGiaoVien2;
     // Log kết quả
@@ -279,11 +333,15 @@ function add() {
     this.save(data)
         .then(response => {
             // Xử lý kết quả thành công
-            console.log(response);
+            if (response.IsSuccess)
+            {
+                Vue.$toast.success("Thêm phân công thành công")
+                location.reload()
+            }
         })
         .catch(error => {
             // Xử lý lỗi
-            console.error(error);
+            Vue.$toast.error("Thêm phân công thất bại")
         });
 }
 function save(paramsSave) {
