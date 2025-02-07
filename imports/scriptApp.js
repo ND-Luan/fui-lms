@@ -288,7 +288,7 @@ $('document').ready(() => {
                     semester: "Semester",
                     Skill_Knowledge: 'SKILL - KNOWLEDGE',
                     Common_Ability: 'COMMON ABILITY',
-                    Quality: 'Quality',
+                    Quality: 'QUALITY',
                     Personal_Ability: 'PERSONAL ABILITY',
 
                     evaluation: "Evaluation",
@@ -308,7 +308,12 @@ $('document').ready(() => {
                     monthList: "Month list",
                     studentNotFound: "Student not found",
                     month: "Month",
-                    semester: "Semester"
+                    semester: "Semester",
+
+                    rating: "Rating",
+                    averageScore: "Average score",
+                    comment: "Comment",
+                    commentNotFound: "No comments yet"
 
                 }
             },
@@ -341,11 +346,18 @@ $('document').ready(() => {
                     monthList: "Danh sách tháng",
                     studentNotFound: "Không tìm thấy học sinh",
                     month: "Tháng",
-                    semester: "Học kỳ"
+                    semester: "Học kỳ",
+
+                    rating: "Xếp loại",
+                    averageScore: "Điểm trung bình",
+                    comment: "Nhận xét",
+                    commentNotFound: "Chưa có nhận xét",
+
                 }
             }
         }
     })
     app.use(i18n);
+    console.log('======================')
 })
 

@@ -2,7 +2,7 @@
 	<div>
 		<v-divider></v-divider>
 		<v-list lines="two">
-			<v-list-subheader> {{ $t('message.monthList')}}</v-list-subheader>
+			<v-list-subheader> {{ $t('message.monthList') }}</v-list-subheader>
 			<div v-for="(thang, index) in vueData.DSHocTapThang">
 				<v-list-item :title="IsLanguage ? thang.titleEnglish : thang.title" @click="onRedirect(thang)">
 					<template v-slot:prepend>
@@ -18,25 +18,30 @@
 </template>
 
 <script>
-	export default {
-		props: [],
-		data() {
-			return {
-				vueData,
-				IsLanguage: localStorage.getItem('IsLanguage') ?? false
-			}
+export default {
+	props: [],
+	data() {
+		return {
+			vueData,
+			IsLanguage: localStorage.getItem('IsLanguage') ?? false
+		}
+	},
+	mounted() { },
+	computed: {},
+	watch: {
+		'$i18n.locale': function (locale) {
+			if (locale === 'en') this.IsLanguage = true;
+			else this.IsLanguage = false;
 		},
-		mounted() { },
-		computed: {},
-		watch: {},
-		methods: {
-			onRedirect(thangObj) {
-				openWindow({
-					title: "Kết quả học tập",
-					url: `report-ket-qua-hoc-tap-thang-hoc-sinh?id=${vueData.HocSinhSelected.StudentID}&thang=${thangObj.month}&nam=${thangObj.year}`
-				})
-			},
-			redirect,
+	},
+	methods: {
+		onRedirect(thangObj) {
+			openWindow({
+				title: "Kết quả học tập",
+				url: `report-ket-qua-hoc-tap-thang-hoc-sinh?id=${vueData.HocSinhSelected.StudentID}&thang=${thangObj.month}&nam=${thangObj.year}`
+			})
 		},
-	}
+		redirect,
+	},
+}
 </script>

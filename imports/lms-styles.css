@@ -193,3 +193,7 @@
 .ql-bubble {
     border: 1px solid #d1d5db;
 }
+
+.none-overflow .v-toolbar-title__placeholder {
+    overflow: visible  !important;
+}

@@ -1,5 +1,5 @@
 <template>
-	<v-card>
+	<v-card style="height: 100%;">
 		<v-card-text class="d-flex flex-column ga-4 pb-2">
 			<v-img src="/_cdn/lhbs-lms/lhbs_logo.jpg" height="64" position="left">
 				<template v-slot:placeholder>
@@ -9,7 +9,7 @@
 				</template>
 			</v-img>
 
-			<v-img class="align-self-center" src="/_cdn/lhbs-lms/img_page_ph/img_chon_hs.png" width="400" >
+			<v-img class="align-self-center" src="/_cdn/lhbs-lms/img_page_ph/img_chon_hs.png" width="400">
 				<template v-slot:placeholder>
 					<div class="d-flex align-center justify-center fill-height">
 						<v-progress-circular color="grey-lighten-4" indeterminate></v-progress-circular>
@@ -30,37 +30,40 @@
 					<p class=" mt-2">{{ $t('message.english') }}</p>
 				</v-sheet>
 			</div>
+
+			<v-btn v-if="!isonbroading" block variant="tonal" color="primary"
+				@click="vueData.drawerLanguage = false">Đóng</v-btn>
 		</v-card-text>
 	</v-card>
 </template>
 
 <script>
-	export default {
-		props: [],
-		data() {
-			const { useI18n } = VueI18n
-			const { t } = useI18n()
-	
-			const IsLanguage = JSON.parse(localStorage.getItem('IsLanguage')) ?? false
-			this.$i18n.locale = IsLanguage ? "en" : "vi"
-			return {
-				IsLanguage
-			}
+export default {
+	props: {
+		onchangelanguage: {
+			type: Function,
 		},
-		watch: {
-			IsLanguage: function (IsLanguage) {
-				if (IsLanguage) {
-					this.$i18n.locale = 'en';
-				} else {
-					this.$i18n.locale = 'vi';
-				}
-				localStorage.setItem('IsLanguage', IsLanguage)
-			}
-		},
-		methods: {
-			onActive(isLanguage) {
-				this.IsLanguage = isLanguage
-			}
-		},
-	}
+		isonbroading: { type: Boolean, default: true }
+	},
+	data() {
+		const IsLanguage = JSON.parse(localStorage.getItem('IsLanguage')) ?? false
+		this.$i18n.locale = IsLanguage ? "en" : "vi"
+
+		this.$emit('onchangelanguage', IsLanguage)
+		return { IsLanguage, vueData }
+	},
+	watch: {
+		IsLanguage: function (IsLanguage) {
+			if (IsLanguage) this.$i18n.locale = 'en';
+			else this.$i18n.locale = 'vi';
+			localStorage.setItem('IsLanguage', IsLanguage)
+			this.$emit('onchangelanguage', IsLanguage)
+		}
+	},
+	methods: {
+		onActive(isLanguage) {
+			this.IsLanguage = isLanguage
+		}
+	},
+}
 </script>
