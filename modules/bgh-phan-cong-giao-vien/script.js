@@ -11,7 +11,6 @@ function formatPhanCong(dsGiaoVien, phanCongMoi) {
     let dataFilter = dataWithSubjects.reduce((acc, curr) => {
         let existing = acc.find((item) => item.GiaoVienID === curr.GiaoVienID);
         if (existing) {
-            debugger
             // Xử lý môn học
             if (curr.MonHocID != null && curr.MonHocName != null) {
                 // Nếu chưa tồn tại môn học này
@@ -33,7 +32,8 @@ function formatPhanCong(dsGiaoVien, phanCongMoi) {
                         Color: curr.Color || null
                     }]
                     : [],
-                PhanCong: []
+                PhanCong: [],
+                VaiTro: []
             });
         }
         return acc;
@@ -62,6 +62,7 @@ function formatPhanCong(dsGiaoVien, phanCongMoi) {
                 // Nếu PhanCong là null, tạo mới mảng
                 if (giaoVien.PhanCong === null || giaoVien.PhanCong == undefined) {
                     giaoVien.PhanCong = [];
+                    giaoVien.VaiTro = [];
                 }
                 giaoVien.PhanCong.push({
                     GVLopID: phanCong.GVLopID,
@@ -70,7 +71,8 @@ function formatPhanCong(dsGiaoVien, phanCongMoi) {
                     TenLop: phanCong.TenLop,
                     MonHocID: phanCong.MonHocID,
                     TenMonDuLieuNganh: phanCong.TenMonDuLieuNganh,
-                    Color: phanCong.Color || 'gray'
+                    Color: phanCong.Color || 'gray',
+                    VaiTro: phanCong.VaiTro
                 });
                 // Cập nhật MonHocDisplayName
                 // Sử dụng Set để loại bỏ trùng lặp và giữ lại các môn học ban đầu
@@ -96,91 +98,49 @@ function formatPhanCong(dsGiaoVien, phanCongMoi) {
                     Color: monHocMap.get(tenMonHoc)
                 }));
             }
+            // Đảm bảo giaoVien.VaiTro là một mảng
+            // Chuyển phanCong.VaiTro thành mảng nếu chưa phải mảng và loại bỏ trùng lặp
+            // Định nghĩa ánh xạ vai trò từ số sang tên tương ứng
+            const mappingVaiTro = {
+                1: "Giáo viên chủ nhiệm",
+                2: "Khối trưởng",
+                3: "Giáo viên bộ môn"
+            };
+            // Màu sắc tương ứng cho từng vai trò
+            const mappingColor = {
+                "Giáo viên chủ nhiệm": "blue",
+                "Khối trưởng": "green",
+                "Giáo viên bộ môn": "orange"
+            };
+            // Đảm bảo phanCong.VaiTro là mảng và loại bỏ trùng lặp
+            const vaiTroPhanCong = Array.isArray(phanCong.VaiTro)
+                ? [...new Set(phanCong.VaiTro)]
+                : [phanCong.VaiTro];
+            // Chuyển đổi vai trò số thành chuỗi theo mappingVaiTro
+            const vaiTroPhanCongChuyenDoi = vaiTroPhanCong.map(vaiTro =>
+                mappingVaiTro[vaiTro] || vaiTro // Nếu không có trong mapping, giữ nguyên giá trị gốc
+            );
+            // Hợp nhất VaiTro cũ và mới rồi loại bỏ trùng lặp
+            const uniqueVaiTro = [...new Set([
+                ...giaoVien.VaiTro.map(item => mappingVaiTro[item.VaiTro] || item.VaiTro), // Chuyển đổi nếu là số
+                ...vaiTroPhanCongChuyenDoi
+            ])];
+            // Gán lại giaoVien.VaiTro với danh sách không trùng lặp, đồng thời thêm màu sắc
+            giaoVien.VaiTro = uniqueVaiTro.map(vaiTro => ({
+                VaiTro: vaiTro,
+                color: mappingColor[vaiTro] || "gray" // Nếu không có màu, dùng mặc định "gray"
+            }));
+            console.log(giaoVien.VaiTro);
         }
     });
     vueData.DSGiaoVien2 = dsGiaoVien;
     return dsGiaoVien;
 }
-function getColorBySubject(subject) {
-    const colorMap = {
-        'Toán': 'primary',
-        'Lý': 'success',
-        'Hóa': 'error',
-        'Sinh': 'warning'
-    };
-    return vueData.colorMap[subject] || 'grey';
-}
-function groupedData(data) {
-    // Ánh xạ MonHocID sang tên môn học và nhóm lại
-   const dataWithSubjects = data.map((gv) => ({
-        GiaoVienID: gv.GiaoVienID,
-        HoTenGV: gv.HoTenGV,
-        MonHocID: gv.MonHocID,
-        MonHocName: gv.MonHocName,
-        }));
-// Gộp theo ID và tạo mảng MON chứa các đối tượng { MonHocID, MonHocName }
-let dataFilter = dataWithSubjects.reduce((acc, curr) => {
-    const existing = acc.find((item) => item.GiaoVienID === curr.GiaoVienID);
-  if (existing) {
-    // Chỉ thêm khi MonHocID hoặc MonHocName không phải null
-      if (curr.MonHocID != null && curr.MonHocName != null) {
-          existing.MonHocDisplayName += `, ${curr.MonHocName}`;
-    }
-  } else {
-    // Khởi tạo mới với mảng MON
-    acc.push({
-        GiaoVienID: curr.GiaoVienID,
-        HoTenGV: curr.HoTenGV,
-        MonHocDisplayName: curr.MonHocName,
-        PhanCong:[]
-    });
-  }
-  return acc;
-}, []);
-    vueData.DSGiaoVien = dataFilter
-}
-// function groupedData(data) {
-//     let dataresult = data.reduce(function (acc, curr) {
-//         debugger
-//     const existing = acc.find(function (item) {
-//       return item.id === curr.id;
-//     });
-//     if (existing) {
-//       existing.subjects += `, ${curr.subject}`;
-//     } else {
-//         acc.push({ GiaoVien: curr.GiaoVienID, HoTenGV: curr.HoTenGV, subjects: curr.subject });
-//     }
-//     return acc;
-//     }, []);
-//     debugger
-//     vueData.DSGiaoVien2 = dataresult
-// }
 function handleDataSelected(sessionData) {
     console.log("sessionData", sessionData)
 };
-function itemProps(item) {
-    return {
-        title: item.name,
-        subtitle: item.department,
-    }
-};
-function handleSelectionChange(newItems) {
-    // Find the items added
-    const added = newItems.filter(item => !this.addedItems.includes(item));
-    // Find the items removed
-    const removed = this.addedItems.filter(item => !newItems.includes(item));
-    // Add new items to the list
-    this.addedItems.push(...added);
-    // Remove items that were unchecked
-    this.addedItems = this.addedItems.filter(item => !removed.includes(item));
-}
-function removeItem(item) {
-    // Remove the item from the added list
-    this.addedItems = this.addedItems.filter(i => i !== item);
-    // Update the combobox selection
-    this.selectedItems = this.selectedItems.filter(i => i !== item);
-}
 function addToGroup(VaiTro = null, Khoi = null, Lop = null, GiaoVien = null, MonHoc = null) {
+    debugger
     if (!GiaoVien) {
         console.warn("GiaoVien is required");
         return;
@@ -193,7 +153,7 @@ function addToGroup(VaiTro = null, Khoi = null, Lop = null, GiaoVien = null, Mon
         // Nếu giáo viên chưa tồn tại, thêm mới
         teacherGroup = {
             GiaoVien: GiaoVien,
-            VaiTro: VaiTro || "Unknown Role",
+            VaiTro: VaiTro || "",
             Khoi: [],
         };
         vueData.phanCongLopItemSelected.push(teacherGroup);
@@ -364,7 +324,6 @@ function save(paramsSave) {
     });
 }
 async function deletePhanCong(id) {
-    debugger
     const payload = {
         id: id,
     };
