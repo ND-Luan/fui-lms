@@ -1,0 +1,103 @@
+{
+    "data": [
+        {
+            "LopID": "lopid",
+            "Lop_NhanXetThangID": "lop_nxtid",
+            "columns": [
+                {
+                    "type": "text",
+                    "title": "Mã học sinh",
+                    "name": "HocSinhID",
+                    "width": 120,
+                    "backGroundColor": null,
+                    "wrap": true
+                },
+                {
+                    "type": "text",
+                    "title": "Số Danh Bộ",
+                    "name": "SoDanhBo",
+                    "width": 120,
+                    "backGroundColor": null,
+                    "wrap": true
+                },
+                {
+                    "type": "text",
+                    "title": "Họ tên học sinh",
+                    "name": "HoTen",
+                    "width": 300,
+                    "backGroundColor": null,
+                    "wrap": true
+                },
+                {
+                    "type": "text",
+                    "title": "Nội dung năng lực",
+                    "name": "NoiDungNangLuc_HTML",
+                    "width": 300,
+                    "backGroundColor": null,
+                    "wrap": true
+                },
+                {
+                    "type": "text",
+                    "title": "Nội dung kiến thức",
+                    "name": "NoiDungKienThuc_HTML",
+                    "width": 300,
+                    "backGroundColor": null,
+                    "wrap": true
+                },
+                {
+                    "type": "text",
+                    "title": "Nội dung hoạt động khác",
+                    "name": "NoiDungHoatDongKhac_HTML",
+                    "width": 300,
+                    "backGroundColor": null,
+                    "wrap": true
+                }
+            ],
+            "dataSource": [
+                [
+                    "123",
+                    "123"
+                ]
+            ]
+        },
+        {
+            "API": "lms/NhanXetThang_Template_Get",
+            "IN": {
+                "LopID": "vueData.LopID",
+                "Lop_NhanXetThangID": "vueData.Lop_NhanXetThangID"
+            },
+            "OUT": "dataSource_API",
+            "CALLBACK": {
+                "EXE": "convertHocSinh()"
+            }
+        }
+    ],
+    "watch": {},
+    "controls": [
+        {
+            "prop": "fluid",
+            "rows": [
+                {
+                    "prop": "",
+                    "cols": [
+                        {
+                            "el": "uc-jexcel",
+                            "attr": {
+                                "v-model:dataSource": "dataSource_API",
+                                ":columns": "columns",
+                                ":minDimensions": [
+                                    10,
+                                    10
+                                ],
+                                ":search": true
+                            }
+                        }
+                    ]
+                }
+            ]
+        }
+    ],
+    "set": {
+        "menu": false
+    }
+}

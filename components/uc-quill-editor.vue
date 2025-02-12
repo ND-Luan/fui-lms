@@ -1,14 +1,13 @@
 <template>
     <div>
-        {{ content }}
-        <quill-editor refs="quill" v-model:content="content"></quill-editor>
+        <quill-editor ref="quill" v-model:content="content" content-type="html" v-bind="$attrs"></quill-editor>
     </div>
 </template>
 <script>
 export default {
     props: {
         modelValue: {
-            type: Object,
+            type: String,
         }
     },
     components: {
@@ -16,9 +15,16 @@ export default {
     },
     data() {
         return {
-            content: [{ "insert": "12312312321\n" }]
+            content: this.modelValue
+        }
+    },
+    watch: {
+        modelValue: function (content) {
+            this.content = content;
+        },
+        content: function (content) {
+            this.$emit('update:modelValue', content);
         }
     }
-
 }
 </script>
