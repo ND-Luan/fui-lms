@@ -206,6 +206,7 @@ function transformDataFromPhanCongLopItemSelected(phanCongLopItemSelected, addit
         Khoi.forEach((khoi) => {
             const { KhoiID, items } = khoi;
             if (!items || !Array.isArray(items)) return;
+            let hasValidLop = false; // Đánh dấu nếu có lớp hợp lệ để tránh tạo bản ghi trùng
             items.forEach((item) => {
                 const { Lop, MonHoc } = item;
                 if (!Lop || !Array.isArray(Lop)) return;
@@ -231,9 +232,30 @@ function transformDataFromPhanCongLopItemSelected(phanCongLopItemSelected, addit
                         };
                         result.push(entry);
                         uniqueEntries.add(uniqueKey);
+                        hasValidLop = true;
                     }
                 });
             });
+            debugger
+            // Nếu VaiTro = 2 (Khối trưởng) và chưa có lớp nào, vẫn thêm một bản ghi với MonHocID = 0 và LopID = 0
+            if (VaiTro == (2) && !hasValidLop) {
+                const uniqueKey = `${GiaoVienID}-${KhoiID}-0-0-null`;
+                if (!uniqueEntries.has(uniqueKey)) {
+                    result.push({
+                        GiaoVienID: GiaoVienID,
+                        KhoiID: KhoiID,
+                        LopID: 0,
+                        MonHocID: 0,
+                        MaDonVi: null, // Không có MaDonVi cụ thể
+                        Enable: true,
+                        VaiTro: VaiTro || [],
+                        NienKhoa: additionalInfo.NienKhoa || null,
+                        ToGiangDayID: additionalInfo.ToGiangDayID || null,
+                        GhiChu: additionalInfo.GhiChu || "Vai trò khối trưởng",
+                    });
+                    uniqueEntries.add(uniqueKey);
+                }
+            }
         });
     });
     return result;
@@ -325,7 +347,18 @@ function save(paramsSave) {
 }
 async function deletePhanCong(id) {
     const payload = {
-        id: id,
+        GVLopID: id,
     };
-    await PhanCongLMSService.DelPhanCong(payload)
+    await PhanCongLMSService.DelPhanCong(payload).then(response => {
+        debugger
+        // Xử lý kết quả thành công
+        if (response.IsSuccess) {
+            Vue.$toast.success("Xóa thành công")
+            location.reload()
+        }
+    })
+        .catch(error => {
+            // Xử lý lỗi
+            Vue.$toast.error("Xóa thất bại")
+        });
 }

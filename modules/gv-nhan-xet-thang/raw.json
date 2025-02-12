@@ -72,6 +72,45 @@
                     "width": 500
                 },
                 {
+                    "key": "NoiDungNangLuc",
+                    "el": "div",
+                    "align": "center",
+                    "innerHTML": [
+                     
+                        {
+                            "el": "quill-editor",
+                            "attr": {
+                                ":id": "item.HocSinhID+'_NoiDungNangLuc_Delta'",
+                                ":key":"item.HocSinhID+'_NoiDungNangLuc_Delta'",
+                                "v-model:content": "item.NoiDungNangLuc_Delta",
+                                ":spellcheck": "false"
+                            }
+                        }
+                    ],
+                    "title": "Nội dung năng lực",
+                    "value": "NoiDungNangLuc",
+                    "width": 500
+                },
+                {
+                    "key": "NoiDungHoatDongKhac",
+                    "el": "div",
+                    "align": "center",
+                    "innerHTML": [
+                        {
+                            "el": "quill-editor",
+                            "attr": {
+                                ":id": "item.HocSinhID+'_NoiDungHoatDongKhac_Delta'",
+                                ":key":"item.HocSinhID+'_NoiDungHoatDongKhac_Delta'",
+                                "v-model:content": "item.NoiDungHoatDongKhac_Delta",
+                                ":spellcheck": "false"
+                            }
+                        }
+                    ],
+                    "title": "Nội dung hoạt động khác",
+                    "value": "NoiDungHoatDongKhac",
+                    "width": 500
+                },
+                {
                     "key": "v_btn",
                     "el": "v-btn",
                     "attr": {

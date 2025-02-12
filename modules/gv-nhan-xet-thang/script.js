@@ -21,13 +21,11 @@ function processDataBeforePostAPI() {
     }
     vueData.JSON_NhanXetThang = newData
 }
-
 function convertDeltaToHtml(delta) {
     var cfg = {};
     var converter = new QuillDeltaToHtmlConverter(delta.ops, cfg);
     return converter.convert();
 }
-
 function onLuuTamByHocSinhID(item) {
     var html_KienThuc = null
     var html_NangLuc = null
@@ -49,7 +47,6 @@ function onLuuTamByHocSinhID(item) {
         CALL('NhanXetThang_Get')
     })
 }
-
 function convertItems() {
     // vueData.items = vueData.items.splice(0, 1).map(item => ({
     //     ...item,
@@ -65,5 +62,4 @@ function convertItems() {
     // vueData.items[0].NoiDungKienThuc_Delta = { "ops": [{ "insert": "Võ trương như anh\n" }] }
     // vueData.items[0].NoiDungNangLuc_Delta = { "ops": [{ "insert": "Võ trương như anh\n" }] }
     // vueData.items[0].NoiDungHoatDongKhac_Delta = { "ops": [{ "insert": "Võ trương như anh\n" }] }
-
 }
