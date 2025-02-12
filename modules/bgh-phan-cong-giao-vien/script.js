@@ -1,5 +1,6 @@
 
 function formatPhanCong(dsGiaoVien, phanCongMoi) {
+    debugger
     const dataWithSubjects = dsGiaoVien.map((gv) => ({
         GiaoVienID: gv.GiaoVienID,
         HoTenGV: gv.HoTenGV,
@@ -46,8 +47,6 @@ function formatPhanCong(dsGiaoVien, phanCongMoi) {
         if (giaoVien) {
             // Kiểm tra điều kiện không thêm nếu các trường là null
             if (
-                phanCong.LopID === null ||
-                phanCong.MonHocID === null ||
                 phanCong.GVLopID === null
             ) {
                 return; // Bỏ qua phân công này
@@ -71,7 +70,7 @@ function formatPhanCong(dsGiaoVien, phanCongMoi) {
                     TenLop: phanCong.TenLop,
                     MonHocID: phanCong.MonHocID,
                     TenMonDuLieuNganh: phanCong.TenMonDuLieuNganh,
-                    Color: phanCong.Color || 'gray',
+                    Color: phanCong.Color,
                     VaiTro: phanCong.VaiTro
                 });
                 // Cập nhật MonHocDisplayName
@@ -86,10 +85,21 @@ function formatPhanCong(dsGiaoVien, phanCongMoi) {
                     });
                 }
                 // Thêm các môn học từ PhanCong
+                if (giaoVien.MonHocDisplayName) {
+                    giaoVien.MonHocDisplayName.forEach(mon => {
+                        if (mon.tenMonHoc) {
+                            monHocSet.add(mon.tenMonHoc);
+                            monHocMap.set(mon.tenMonHoc, mon.Color);
+                        }
+                    });
+                }
+                // Thêm các môn học từ PhanCong
                 giaoVien.PhanCong.forEach(mon => {
-                    if (!monHocSet.has(mon.TenMonDuLieuNganh)) {
-                        monHocSet.add(mon.TenMonDuLieuNganh);
-                        monHocMap.set(mon.TenMonDuLieuNganh, mon.Color);
+                    if (mon.TenMonDuLieuNganh) {
+                        if (!monHocSet.has(mon.TenMonDuLieuNganh)) {
+                            monHocSet.add(mon.TenMonDuLieuNganh);
+                            monHocMap.set(mon.TenMonDuLieuNganh, mon.Color);
+                        }
                     }
                 });
                 // Tạo mảng mới với định dạng mong muốn
@@ -102,13 +112,13 @@ function formatPhanCong(dsGiaoVien, phanCongMoi) {
             // Chuyển phanCong.VaiTro thành mảng nếu chưa phải mảng và loại bỏ trùng lặp
             // Định nghĩa ánh xạ vai trò từ số sang tên tương ứng
             const mappingVaiTro = {
-                1: "Giáo viên chủ nhiệm",
+                1: "Giáo viên lớp",
                 2: "Khối trưởng",
                 3: "Giáo viên bộ môn"
             };
             // Màu sắc tương ứng cho từng vai trò
             const mappingColor = {
-                "Giáo viên chủ nhiệm": "blue",
+                "Giáo viên lớp": "blue",
                 "Khối trưởng": "green",
                 "Giáo viên bộ môn": "orange"
             };
@@ -130,6 +140,7 @@ function formatPhanCong(dsGiaoVien, phanCongMoi) {
                 VaiTro: vaiTro,
                 color: mappingColor[vaiTro] || "gray" // Nếu không có màu, dùng mặc định "gray"
             }));
+            debugger
             console.log(giaoVien.VaiTro);
         }
     });
@@ -144,6 +155,14 @@ function addToGroup(VaiTro = null, Khoi = null, Lop = null, GiaoVien = null, Mon
     if (!GiaoVien) {
         console.warn("GiaoVien is required");
         return;
+    }
+    if (VaiTro == 2 || VaiTro == 1)
+    {
+        MonHoc = null
+        if (VaiTro == 2)
+        {
+            Lop =[]
+        }
     }
     // Tìm giáo viên trong danh sách
     let teacherGroup = vueData.phanCongLopItemSelected.find(
@@ -191,13 +210,14 @@ function addToGroup(VaiTro = null, Khoi = null, Lop = null, GiaoVien = null, Mon
                 // Nếu lớp chưa tồn tại, thêm mới
                 khoiGroup.items.push({
                     Lop: Lop,
-                    MonHoc: MonHoc || "Unknown Subject",
+                    MonHoc: MonHoc || 0,
                 });
             }
         });
     }
 }
 function transformDataFromPhanCongLopItemSelected(phanCongLopItemSelected, additionalInfo = {}) {
+    debugger
     const result = [];
     const uniqueEntries = new Set();
     phanCongLopItemSelected.forEach((teacher) => {
@@ -246,7 +266,7 @@ function transformDataFromPhanCongLopItemSelected(phanCongLopItemSelected, addit
                         KhoiID: KhoiID,
                         LopID: 0,
                         MonHocID: 0,
-                        MaDonVi: null, // Không có MaDonVi cụ thể
+                        MaDonVi: 1, // Không có MaDonVi cụ thể
                         Enable: true,
                         VaiTro: VaiTro || [],
                         NienKhoa: additionalInfo.NienKhoa || null,

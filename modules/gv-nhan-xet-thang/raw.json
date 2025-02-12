@@ -76,12 +76,11 @@
                     "el": "div",
                     "align": "center",
                     "innerHTML": [
-                     
                         {
                             "el": "quill-editor",
                             "attr": {
                                 ":id": "item.HocSinhID+'_NoiDungNangLuc_Delta'",
-                                ":key":"item.HocSinhID+'_NoiDungNangLuc_Delta'",
+                                ":key": "item.HocSinhID+'_NoiDungNangLuc_Delta'",
                                 "v-model:content": "item.NoiDungNangLuc_Delta",
                                 ":spellcheck": "false"
                             }
@@ -100,7 +99,7 @@
                             "el": "quill-editor",
                             "attr": {
                                 ":id": "item.HocSinhID+'_NoiDungHoatDongKhac_Delta'",
-                                ":key":"item.HocSinhID+'_NoiDungHoatDongKhac_Delta'",
+                                ":key": "item.HocSinhID+'_NoiDungHoatDongKhac_Delta'",
                                 "v-model:content": "item.NoiDungHoatDongKhac_Delta",
                                 ":spellcheck": "false"
                             }
@@ -190,6 +189,9 @@
                     "prop": "",
                     "cols": [
                         {
+                            "el": "uc-quill-editor"
+                        },
+                        {
                             "el": "v-card",
                             "innerHTML": [
                                 {
@@ -267,10 +269,6 @@
                                     ]
                                 }
                             ]
-                        },
-                        {
-                            "el": "div",
-                            "innerHTML": "{{items[0]}}"
                         },
                         {
                             "el": "div",
