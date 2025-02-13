@@ -3,6 +3,7 @@
         {
             "LopID": "lopid",
             "Lop_NhanXetThangID": "lop_nxtid",
+            "JSON_NhanXetThang": [],
             "columns": [
                 {
                     "type": "text",
@@ -30,16 +31,16 @@
                 },
                 {
                     "type": "text",
-                    "title": "Nội dung năng lực",
-                    "name": "NoiDungNangLuc_HTML",
+                    "title": "Nội dung kiến thức",
+                    "name": "NoiDungKienThuc_HTML",
                     "width": 300,
                     "backGroundColor": null,
                     "wrap": true
                 },
                 {
                     "type": "text",
-                    "title": "Nội dung kiến thức",
-                    "name": "NoiDungKienThuc_HTML",
+                    "title": "Nội dung năng lực",
+                    "name": "NoiDungNangLuc_HTML",
                     "width": 300,
                     "backGroundColor": null,
                     "wrap": true
@@ -53,12 +54,7 @@
                     "wrap": true
                 }
             ],
-            "dataSource": [
-                [
-                    "123",
-                    "123"
-                ]
-            ]
+            "dataSource": []
         },
         {
             "API": "lms/NhanXetThang_Template_Get",
@@ -81,16 +77,43 @@
                     "prop": "",
                     "cols": [
                         {
+                            "el": "div",
+                            "innerHTML": [
+                                {
+                                    "el": "f-button",
+                                    "attr": {
+                                        "class": "float-right",
+                                        "label": "Lưu",
+                                        "color": "primary",
+                                        "variant": "elevated",
+                                        ":action": {
+                                            "CALL": [
+                                                {
+                                                    "EXE": "convertHocSinhToAPI()"
+                                                },
+                                                {
+                                                    "API": "lms/NhanXetThang_Import",
+                                                    "IN": {
+                                                        "JSON_NhanXetThang": "vueData.JSON_NhanXetThang"
+                                                    },
+                                                    "MESS": "Import nhận xét tháng thành công"
+                                                }
+                                            ]
+                                        }
+                                    }
+                                }
+                            ],
+                            "w": 12
+                        },
+                        {
                             "el": "uc-jexcel",
                             "attr": {
-                                "v-model:dataSource": "dataSource_API",
+                                "v-if": "dataSource.length > 0",
+                                "v-model:data-source": "dataSource",
                                 ":columns": "columns",
-                                ":minDimensions": [
-                                    10,
-                                    10
-                                ],
                                 ":search": true
-                            }
+                            },
+                            "w": 12
                         }
                     ]
                 }

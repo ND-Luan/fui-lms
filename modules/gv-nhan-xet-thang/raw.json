@@ -300,45 +300,6 @@
                                         {
                                             "el": "f-button",
                                             "attr": {
-                                                "label": "Lưu tạm",
-                                                ":disabled": "items.length === 0",
-                                                "color": "primary",
-                                                "variant": "tonal",
-                                                ":action": [
-                                                    {
-                                                        "EXE": "processDataBeforePostAPI()"
-                                                    },
-                                                    {
-                                                        "API": "lms/NhanXetThang_Ins",
-                                                        "IN": {
-                                                            "JSON_NhanXetThang": "vueData.JSON_NhanXetThang"
-                                                        },
-                                                        "MESS": "Cập nhật nhận xét tháng thành công",
-                                                        "CALLBACK": [
-                                                            {
-                                                                "API": "lms/NhanXetThang_Upd_TinhTrang",
-                                                                "IN": {
-                                                                    "TinhTrang": 1,
-                                                                    "Lop_NhanXetThangID": "vueData.ThangObj.Lop_NhanXetThangID"
-                                                                },
-                                                                "MESS": "Lưu tạm thành công",
-                                                                "CALLBACK": [
-                                                                    {
-                                                                        "CALL": "NhanXetThang_Lop_Get"
-                                                                    },
-                                                                    {
-                                                                        "CALL": "NhanXetThang_Get"
-                                                                    }
-                                                                ]
-                                                            }
-                                                        ]
-                                                    }
-                                                ]
-                                            }
-                                        },
-                                        {
-                                            "el": "f-button",
-                                            "attr": {
                                                 "label": "Gửi tổ trưởng",
                                                 ":disabled": "items.length === 0",
                                                 "color": "primary",

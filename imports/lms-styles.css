@@ -194,6 +194,10 @@
     border: 1px solid #d1d5db;
 }
 
+.ql-tooltip {
+    z-index: 1;
+}
+
 .none-overflow .v-toolbar-title__placeholder {
-    overflow: visible  !important;
+    overflow: visible !important;
 }

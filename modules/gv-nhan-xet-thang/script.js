@@ -24,4 +24,4 @@ function onLuuTamByHocSinhID(item) {
         Vue.$toast.success('Lưu tạm ' + item.HoTen + ' thành công học sinh ', { position: 'top' })
         CALL('NhanXetThang_Get')
     })
-} 
+}

@@ -19,165 +19,152 @@
 
 </template>
 <script>
-	export default {
-		emits: ['onChange', 'update:modelValue', 'update:dataSource'],
-		props: {
-			modelValue: {},
-			dataSource: {
-				type: Array,
-				default: []
-			},
-			columns: {
-				type: Array,
-				default: []
-			},
-			nestedHeaders: {
-				type: Array,
-				default: []
-			},
-			tableWidth: {
-				type: String,
-				default: "100%"
-			},
-			tableHeight: {
-				type: String,
-				default: "100%"
-			},
-			minDimensions: {
-				type: Array,
-				default: [0, 0]
-			},
-			freezeColumns: {
-				type: Number,
-				default: 1
-			},
-			exportExcel: {
-				type: Boolean,
-				default: false
-			},
-			updateTable: {
-				type: Function,
-			},
-			styleExcel: {
-				type: String
-			},
-			styleSheet: {
-				type: Object,
+export default {
+	emits: ['onChange', 'update:modelValue', 'update:dataSource', 'update:minDimensions'],
+	props: {
+		modelValue: {},
+		dataSource: {
+			type: Array,
+			default: []
+		},
+		columns: {
+			type: Array,
+			default: []
+		},
+		nestedHeaders: {
+			type: Array,
+			default: []
+		},
+		tableWidth: {
+			type: String,
+			default: "100%"
+		},
+		tableHeight: {
+			type: String,
+			default: "100%"
+		},
+		minDimensions: {
+			type: Array,
+			default: [0, 0]
+		},
+		freezeColumns: {
+			type: Number,
+			default: 1
+		},
+		exportExcel: {
+			type: Boolean,
+			default: false
+		},
+		updateTable: {
+			type: Function,
+		},
+		styleExcel: {
+			type: String
+		},
+		styleSheet: {
+			type: Object,
+		}
+	},
+	data() {
+		return {
+			isOpen: false,
+		}
+	},
+	watch: {
+		exportExcel: function (val) {
+			if (val) {
+				this.ExportExcel()
 			}
 		},
-		data() {
+		isSubmit: function (val) {
+			if (val) {
+				this.onSubmit()
+			}
+		},
+		styleSheet: function (val) {
+			console.log('styleSheet', val)
+		}
+	},
+	mounted: function () {
+		const jExcelObj = jspreadsheet(this.$refs["spreadsheet"], this.jExcelOptions);
+		Object.assign(this, { jExcelObj }); // tucks all methods under jExcelObj object in component instance
+		this.$emit('update:modelValue', jExcelObj)
+
+		// Đợi JSpreadsheet render xong, sau đó gắn sự kiện cuộn
+		this.$nextTick(() => {
+			const container = this.$refs.spreadsheet.querySelector('.jexcel_container');
+			if (container) {
+				container.addEventListener("scroll", this.handleScroll);
+			}
+		});
+	},
+	computed: {
+		jExcelOptions() {
 			return {
-				isOpen: false,
-			}
-		},
-		watch: {
-			exportExcel: function (val) {
-				if (val) {
-					this.ExportExcel()
-				}
-			},
-			isSubmit: function (val) {
-				if (val) {
-					this.onSubmit()
-				}
-			},
-			styleSheet: function (val) {
-				console.log('styleSheet', val)
-			}
-		},
-		mounted: function () {
-			const jExcelObj = jspreadsheet(this.$refs["spreadsheet"], this.jExcelOptions);
-			Object.assign(this, { jExcelObj }); // tucks all methods under jExcelObj object in component instance
-			this.$emit('update:modelValue', jExcelObj)
-	
-			// Đợi JSpreadsheet render xong, sau đó gắn sự kiện cuộn
-			this.$nextTick(() => {
-				const container = this.$refs.spreadsheet.querySelector('.jexcel_container');
-				if (container) {
-					container.addEventListener("scroll", this.handleScroll);
-				}
-			});
-		},
-		computed: {
-			jExcelOptions() {
-	
-				const $this = this
-				return {
-					worksheets: [
-						{
-							data: this.dataSource,
-							columns: this.columns,
-							rowResize: true,
-							columnDrag: true,
-							nestedHeaders: this.nestedHeaders,
-							minDimensions: this.minDimensions,
-							tableWidth: this.tableWidth,
-							tableOverflow: true,
-							tableHeight: this.tableHeight,
-							lazyLoading: true,
-							freezeColumns: this.freezeColumns,
-							columnSorting: false,
-							contextMenu: false,
-							stripHTML: false,
-							onchange: this.changed,
-							onselection: this.onselection,
-							onload: this.onload,
-							wordWrap: true,
-							freezeColumns: 3,
-							style: this.styleSheet,
-							updateTable: (instance, cell, col, row, val, label, cellName) => {
-								console.log('123')
-							}, // this.updateTable(instance, cell, col, row, val, label, cellName),
-						}
-					],
-	
-					// onchange: this.abc,
-					onselection: this.onselection,
-					onload: function (worksheet) {
-						// const nestedHeaders = worksheet.worksheets[0].element
-						// if (nestedHeaders) {
-						// 	const elTrNestedHeader = nestedHeaders
-						// 	const tdElement = elTrNestedHeader.querySelector('td[data-column="0,1,2"]');
-						// 	tdElement.classList.add("jss_freezed");
-						// }
+				worksheets: [
+					{
+						data: this.dataSource,
+						columns: this.columns,
+						rowResize: true,
+						columnDrag: true,
+						nestedHeaders: this.nestedHeaders,
+						minDimensions: this.minDimensions,
+						tableWidth: this.tableWidth,
+						tableOverflow: true,
+						tableHeight: this.tableHeight,
+						lazyLoading: true,
+						freezeColumns: this.freezeColumns,
+						columnSorting: false,
+						contextMenu: false,
+						stripHTML: false,
+						onchange: this.changed,
+						onselection: this.onselection,
+						onload: this.onload,
+						wordWrap: true,
+						freezeColumns: 3,
+						style: this.styleSheet,
+						updateTable: (instance, cell, col, row, val, label, cellName) => {
+						}, // this.updateTable(instance, cell, col, row, val, label, cellName),
 					}
-				};
+				],
+				onselection: this.onselection,
+			};
+		}
+	},
+	methods: {
+		handleScroll(event) {
+			const container = event.target;
+			const scrollLeft = container.scrollLeft;
+
+			// Lấy tất cả các cell trong các cột cố định
+			const freezeColumns = 3; // Số cột cần cố định
+			for (let i = 0; i < freezeColumns; i++) {
+				const columnCells = container.querySelectorAll(`td[data-x="${i}" ]`);
+				columnCells.forEach(cell => {
+					if (scrollLeft > 0) {
+						cell.classList.add("jss_freezed");
+					} else {
+						cell.classList.remove("jss_freezed");
+					}
+				});
 			}
 		},
-		methods: {
-			handleScroll(event) {
-				const container = event.target;
-				const scrollLeft = container.scrollLeft;
-	
-				// Lấy tất cả các cell trong các cột cố định
-				const freezeColumns = 3; // Số cột cần cố định
-				for (let i = 0; i < freezeColumns; i++) {
-					const columnCells = container.querySelectorAll(`td[data-x="${i}" ]`);
-					columnCells.forEach(cell => {
-						if (scrollLeft > 0) {
-							cell.classList.add("jss_freezed");
-						} else {
-							cell.classList.remove("jss_freezed");
-						}
-					});
-				}
-			},
-			changed(instance, cell, x, y, value) {
-				this.$emit('onChange', { instance, cell, x, y, value })
-				// console.log('{ instance, cell, x, y, value }', { instance, cell, x, y, value });
-				this.$emit('update:dataSource', this.jExcelObj.getJson())
-			},
-			onselection(instance, x1, y1, x2, y2, origin) {
-				//v5
-				// console.log(this.jExcelObj[0].getValueFromCoords(x1, y1))
-				// let cellName = jspreadsheet.helpers
-				// console.log(cellName)
-			},
-			onload() {
-				// this.$nextTick(() => {
-				//     this.jExcelObj.setHeight(0, 45)
-				// })
-			}
+		changed(instance, cell, x, y, value) {
+			this.$emit('onChange', { instance, cell, x, y, value })
+			// console.log('{ instance, cell, x, y, value }', { instance, cell, x, y, value });
+			this.$emit('update:dataSource', this.jExcelObj.getJson())
+		},
+		onselection(instance, x1, y1, x2, y2, origin) {
+			//v5
+			// console.log(this.jExcelObj[0].getValueFromCoords(x1, y1))
+			// let cellName = jspreadsheet.helpers
+			// console.log(cellName)
+		},
+		onload() {
+			// this.$nextTick(() => {
+			//     this.jExcelObj.setHeight(0, 45)
+			// })
 		}
 	}
+}
 </script>

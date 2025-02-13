@@ -1,6 +1,7 @@
 
 function formatPhanCong(dsGiaoVien, phanCongMoi) {
-    debugger
+    debugger;
+    // Lấy thông tin giáo viên và môn học từ dsGiaoVien ban đầu
     const dataWithSubjects = dsGiaoVien.map((gv) => ({
         GiaoVienID: gv.GiaoVienID,
         HoTenGV: gv.HoTenGV,
@@ -8,22 +9,19 @@ function formatPhanCong(dsGiaoVien, phanCongMoi) {
         MonHocName: gv.MonHocName,
         Color: gv.Color,
     }));
-    // Gộp theo ID và tạo mảng MON chứa các đối tượng { MonHocID, MonHocName }
+    // Nhóm giáo viên theo GiaoVienID và tạo mảng MonHocDisplayName chứa thông tin môn học
     let dataFilter = dataWithSubjects.reduce((acc, curr) => {
         let existing = acc.find((item) => item.GiaoVienID === curr.GiaoVienID);
         if (existing) {
-            // Xử lý môn học
             if (curr.MonHocID != null && curr.MonHocName != null) {
-                // Nếu chưa tồn tại môn học này
                 if (!existing.MonHocDisplayName.some(mon => mon.tenMonHoc === curr.MonHocName)) {
                     existing.MonHocDisplayName.push({
                         tenMonHoc: curr.MonHocName,
-                        Color: curr.Color || 'grey' // Thêm màu nếu có
+                        Color: curr.Color || 'grey'
                     });
                 }
             }
         } else {
-            // Khởi tạo mới giáo viên
             acc.push({
                 GiaoVienID: curr.GiaoVienID,
                 HoTenGV: curr.HoTenGV,
@@ -40,51 +38,78 @@ function formatPhanCong(dsGiaoVien, phanCongMoi) {
         return acc;
     }, []);
     dsGiaoVien = dataFilter;
-    // Duyệt qua từng phân công
+    // Duyệt qua từng phân công từ phanCongMoi
     phanCongMoi.forEach(phanCong => {
-        // Tìm giáo viên tương ứng
+        // Tìm giáo viên tương ứng theo GiaoVienID
         let giaoVien = dsGiaoVien.find(gv => gv.GiaoVienID === phanCong.GiaoVienID);
         if (giaoVien) {
-            // Kiểm tra điều kiện không thêm nếu các trường là null
-            if (
-                phanCong.GVLopID === null
-            ) {
-                return; // Bỏ qua phân công này
+            // Nếu GVLopID là null thì không xử lý phân công này
+            if (phanCong.GVLopID === null) {
+                return;
             }
-            // Kiểm tra xem phân công đã tồn tại chưa
+            // Kiểm tra xem phân công đã tồn tại chưa dựa trên MonHocID và LopID
             let phanCongTonTai = giaoVien.PhanCong && giaoVien.PhanCong.some(mon =>
                 mon.MonHocID === phanCong.MonHocID &&
                 mon.LopID === phanCong.LopID
             );
-            // Chỉ tạo mảng và thêm khi phân công chưa tồn tại
             if (!phanCongTonTai) {
-                // Nếu PhanCong là null, tạo mới mảng
-                if (giaoVien.PhanCong === null || giaoVien.PhanCong == undefined) {
+                // Nếu mảng PhanCong hoặc VaiTro của giáo viên chưa khởi tạo thì khởi tạo
+                if (giaoVien.PhanCong === null || giaoVien.PhanCong === undefined) {
                     giaoVien.PhanCong = [];
                     giaoVien.VaiTro = [];
                 }
+                // --- Mapping vai trò ---
+                const mappingVaiTro = {
+                    1: "Giáo viên lớp",
+                    2: "Khối trưởng",
+                    3: "Giáo viên bộ môn"
+                };
+                const mappingColor = {
+                    "Giáo viên lớp": "blue",
+                    "Khối trưởng": "green",
+                    "Giáo viên bộ môn": "orange"
+                };
+                // Đảm bảo phanCong.VaiTro là mảng và loại bỏ trùng lặp (nếu có)
+                const vaiTroPhanCong = Array.isArray(phanCong.VaiTro)
+                    ? [...new Set(phanCong.VaiTro)]
+                    : [phanCong.VaiTro];
+                // Chuyển đổi vai trò từ số sang tên (theo mapping)
+                const vaiTroPhanCongChuyenDoi = vaiTroPhanCong.map(vaiTro =>
+                    mappingVaiTro[vaiTro] || vaiTro
+                );
+                // --- Tính chuỗi hiển thị (Display) và màu hiển thị (DisplayColor) ---
+                // Quy tắc:
+                // - Nếu có vai trò "Giáo viên bộ môn": Display = "<TenMonDuLieuNganh>:<TenLop>"
+                // - Nếu có vai trò "Giáo viên lớp": Display = "Giáo viên lớp:<TenLop>"
+                // - Nếu có vai trò "Khối trưởng": Display = "Khối trưởng:khoi"
+                let displayText = "";
+                let displayColor = "gray"; // Màu mặc định
+                if (vaiTroPhanCongChuyenDoi.includes("Giáo viên bộ môn")) {
+                    displayText = `${phanCong.TenMonDuLieuNganh}:${phanCong.TenLop}`;
+                    displayColor = mappingColor["Giáo viên bộ môn"];
+                } else if (vaiTroPhanCongChuyenDoi.includes("Giáo viên lớp")) {
+                    displayText = `Giáo viên lớp:${phanCong.TenLop}`;
+                    displayColor = mappingColor["Giáo viên lớp"];
+                } else if (vaiTroPhanCongChuyenDoi.includes("Khối trưởng")) {
+                    displayText = `Khối trưởng: ${phanCong.TenKhoiHoc}`;
+                    displayColor = mappingColor["Khối trưởng"];
+                }
+                // Thêm phân công vào mảng PhanCong của giáo viên
                 giaoVien.PhanCong.push({
                     GVLopID: phanCong.GVLopID,
+                    // Giữ nguyên VaiTro gốc của phanCong (có thể là số) nếu cần,
+                    // bên dưới chúng ta cập nhật danh sách VaiTro tổng quát riêng.
                     VaiTro: phanCong.VaiTro,
                     LopID: phanCong.LopID,
                     TenLop: phanCong.TenLop,
                     MonHocID: phanCong.MonHocID,
                     TenMonDuLieuNganh: phanCong.TenMonDuLieuNganh,
-                    Color: phanCong.Color,
-                    VaiTro: phanCong.VaiTro
+                    Color: phanCong.Color ?? displayColor,
+                    Display: displayText,       // Chuỗi hiển thị theo vai trò
                 });
-                // Cập nhật MonHocDisplayName
-                // Sử dụng Set để loại bỏ trùng lặp và giữ lại các môn học ban đầu
+                // Cập nhật danh sách MonHocDisplayName của giáo viên
                 const monHocSet = new Set();
                 const monHocMap = new Map();
-                // Xử lý MonHocDisplayName ban đầu (nếu có)
-                if (giaoVien.MonHocDisplayName) {
-                    giaoVien.MonHocDisplayName.forEach(mon => {
-                        monHocSet.add(mon.tenMonHoc);
-                        monHocMap.set(mon.tenMonHoc, mon.Color);
-                    });
-                }
-                // Thêm các môn học từ PhanCong
                 if (giaoVien.MonHocDisplayName) {
                     giaoVien.MonHocDisplayName.forEach(mon => {
                         if (mon.tenMonHoc) {
@@ -93,54 +118,42 @@ function formatPhanCong(dsGiaoVien, phanCongMoi) {
                         }
                     });
                 }
-                // Thêm các môn học từ PhanCong
                 giaoVien.PhanCong.forEach(mon => {
                     if (mon.TenMonDuLieuNganh) {
-                        if (!monHocSet.has(mon.TenMonDuLieuNganh)) {
-                            monHocSet.add(mon.TenMonDuLieuNganh);
-                            monHocMap.set(mon.TenMonDuLieuNganh, mon.Color);
-                        }
+                        monHocSet.add(mon.TenMonDuLieuNganh);
+                        monHocMap.set(mon.TenMonDuLieuNganh, mon.Color);
                     }
                 });
-                // Tạo mảng mới với định dạng mong muốn
                 giaoVien.MonHocDisplayName = Array.from(monHocSet).map(tenMonHoc => ({
                     tenMonHoc: tenMonHoc,
                     Color: monHocMap.get(tenMonHoc)
                 }));
             }
-            // Đảm bảo giaoVien.VaiTro là một mảng
-            // Chuyển phanCong.VaiTro thành mảng nếu chưa phải mảng và loại bỏ trùng lặp
-            // Định nghĩa ánh xạ vai trò từ số sang tên tương ứng
+            // Cập nhật danh sách VaiTro tổng quát của giáo viên (hợp nhất từ các phân công)
             const mappingVaiTro = {
                 1: "Giáo viên lớp",
                 2: "Khối trưởng",
                 3: "Giáo viên bộ môn"
             };
-            // Màu sắc tương ứng cho từng vai trò
             const mappingColor = {
                 "Giáo viên lớp": "blue",
                 "Khối trưởng": "green",
                 "Giáo viên bộ môn": "orange"
             };
-            // Đảm bảo phanCong.VaiTro là mảng và loại bỏ trùng lặp
             const vaiTroPhanCong = Array.isArray(phanCong.VaiTro)
                 ? [...new Set(phanCong.VaiTro)]
                 : [phanCong.VaiTro];
-            // Chuyển đổi vai trò số thành chuỗi theo mappingVaiTro
             const vaiTroPhanCongChuyenDoi = vaiTroPhanCong.map(vaiTro =>
-                mappingVaiTro[vaiTro] || vaiTro // Nếu không có trong mapping, giữ nguyên giá trị gốc
+                mappingVaiTro[vaiTro] || vaiTro
             );
-            // Hợp nhất VaiTro cũ và mới rồi loại bỏ trùng lặp
             const uniqueVaiTro = [...new Set([
-                ...giaoVien.VaiTro.map(item => mappingVaiTro[item.VaiTro] || item.VaiTro), // Chuyển đổi nếu là số
+                ...giaoVien.VaiTro.map(item => mappingVaiTro[item.VaiTro] || item.VaiTro),
                 ...vaiTroPhanCongChuyenDoi
             ])];
-            // Gán lại giaoVien.VaiTro với danh sách không trùng lặp, đồng thời thêm màu sắc
             giaoVien.VaiTro = uniqueVaiTro.map(vaiTro => ({
                 VaiTro: vaiTro,
-                color: mappingColor[vaiTro] || "gray" // Nếu không có màu, dùng mặc định "gray"
+                color: mappingColor[vaiTro] || "gray"
             }));
-            debugger
             console.log(giaoVien.VaiTro);
         }
     });
