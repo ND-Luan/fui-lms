@@ -181,7 +181,8 @@ function getTextTinhTrangDiem(TinhTrang) {
 }
 
 function fn_IsDisabledTinhTrangDiem({ TinhTrang, type }) {
-    if (!TinhTrang) return
+    if (TinhTrang === null) return
+    console.log(TinhTrang, type)
     const arrStatusGV = [0, 1, 2, 3, 4]
     const obj = {
         isDisabled: false,
@@ -195,6 +196,8 @@ function fn_IsDisabledTinhTrangDiem({ TinhTrang, type }) {
             }
         }
     } else {
+        console.log(TinhTrang)
+        //Tình trang 2: Gửi tổ trưởng
         if (TinhTrang === 2) obj.isDisabled = false
         else obj.isDisabled = true
     }
@@ -207,7 +210,7 @@ function fn_IsDisabledTinhTrangDiem({ TinhTrang, type }) {
 function calculateColumnWidth(text) {
     const charWidth = 15; // Kích thước trung bình mỗi ký tự
     return text.length * charWidth;
-} 
+}
 
 function getColumnAddress(columns, columnName) {
     const columnMap = {};
