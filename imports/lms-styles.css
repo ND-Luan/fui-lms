@@ -172,6 +172,10 @@
     justify-content: center;
 }
 
+.checkbox-center .v-selection-control {
+    justify-content: center;
+}
+
 .v-stepper-item__avatar.v-avatar {
     width: 36px !important;
     height: 36px !important;

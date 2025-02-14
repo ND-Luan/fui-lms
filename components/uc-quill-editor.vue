@@ -1,7 +1,6 @@
 <template>
     <!-- Container cho Quill Editor -->
-    <div :ref="'quillContainer_' + uniqueId" v-bind="$attrs">
-    </div>
+    <div :ref="'quillContainer_' + uniqueId" v-bind="$attrs" class="fpScrollbar " style="height: 250px"></div>
 </template>
 
 <script>
@@ -10,6 +9,10 @@ export default {
         modelValue: {
             type: String,
             default: ''
+        },
+        readOnly: {
+            type: Boolean,
+            default: false
         }
     },
     data() {
@@ -25,17 +28,16 @@ export default {
     methods: {
         // Phương thức khởi tạo Quill Editor
         initializeEditor() {
-
             this.quill = Vue.markRaw(new Quill(this.$refs['quillContainer_' + this.uniqueId], {
                 theme: 'bubble', // Sử dụng theme 'bubble'
                 modules: {
                     toolbar: this.toolbar
-                }
+                },
+                readOnly: this.readOnly
             }));
 
             // Xử lý sự kiện 'text-change' của Quill
             this.quill.on('text-change', () => {
-                console.log('change')
                 const content = this.quill.root.innerHTML;
                 this.$emit('update:modelValue', content); // Phát sự kiện để cập nhật modelValue
             });

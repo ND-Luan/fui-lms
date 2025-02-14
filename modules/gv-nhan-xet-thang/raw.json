@@ -7,23 +7,23 @@
             "DSLop": [],
             "DSKhoi": [],
             "items": [],
-            "headers": [
+            "headers_INIT": [
                 {
                     "title": "Mã học sinh",
                     "value": "HocSinhID",
-                    "width": 100
+                    "minWidth": 100
                 },
                 {
                     "title": "Số danh bộ",
                     "value": "SoDanhBo",
                     "align": "center",
-                    "width": 150
+                    "minWidth": 150
                 },
                 {
                     "key": "ho_ten",
                     "el": "div",
                     "title": "Họ tên",
-                    "width": 350,
+                    "minWidth": 350,
                     "innerHTML": [
                         {
                             "el": "span",
@@ -58,7 +58,7 @@
                                 ":key": "'NoiDungKienThuc_HTML_' + item.HocSinhID",
                                 "v-model": "item.NoiDungKienThuc_HTML",
                                 ":spellcheck": "false"
-                            } 
+                            }
                         }
                     ],
                     "title": "Nội dung kiến thức",
@@ -113,7 +113,35 @@
                 }
             ],
             "ThangObj": null,
-            "LopID": null
+            "LopID": null,
+            "columnReject": {
+                "key": "reject",
+                "title": "Từ chối",
+                "value": "reject",
+                "el": "div",
+                "width": 200,
+                "align": "center",
+                "innerHTML": [
+                    {
+                        "el": "v-checkbox",
+                        "attr": {
+                            "v-model": "item.Is_Reject",
+                            "class": "checkbox-center",
+                            "label": "Từ chối",
+                            "color": "error",
+                            "hide-details": "true"
+                        }
+                    },
+                    {
+                        "el": "v-textarea",
+                        "attr": {
+                            "v-if": "item.Is_Reject && item.ReasonReject?.length > 0",
+                            "v-model": "item.ReasonReject"
+                        }
+                    }
+                ]
+            },
+            "headers": []
         },
         {
             "Lop_Get_By_CapID": {
@@ -137,8 +165,7 @@
             "NhanXetThang_Get": {
                 "API": "lms/NhanXetThang_Get",
                 "IN": {
-                    "Thang": "vueData.ThangObj.Thang",
-                    "Nam": "vueData.ThangObj.Nam",
+                    "Lop_NhanXetThangID": "vueData.ThangObj.Lop_NhanXetThangID",
                     "LopID": "vueData.LopID"
                 },
                 "OUT": "items",
@@ -154,6 +181,9 @@
         },
         {
             "EXE": "vueData.onLuuTamByHocSinhID = onLuuTamByHocSinhID"
+        },
+        {
+            "EXE": "vueData.renderLabelTable = renderLabelTable"
         }
     ],
     "watch": {
@@ -179,10 +209,16 @@
             "IF": "vueData.ThangObj !== null",
             "THEN": [
                 {
+                    "EXE": "const result = fn_IsDisabledTinhTrangDiem({ TinhTrang: vueData.ThangObj.TinhTrang, type: 'GV' }); const { isDisabled } = result || {}; vueData.TinhTrang = isDisabled ?? false;"
+                },
+                {
                     "CALL": "NhanXetThang_Get"
                 },
                 {
                     "EXE": "localStorage.setItem('Thang_C1_NXT', JSON.stringify(vueData.ThangObj))"
+                },
+                {
+                    "EXE": "renderHeaderTable()"
                 }
             ]
         }
@@ -286,7 +322,7 @@
                                     "el": "f-button",
                                     "attr": {
                                         "label": "Import dữ liệu từ Excel",
-                                        ":disabled": "items.length === 0",
+                                        ":disabled": "items.length === 0 ||  TinhTrang",
                                         "color": "success",
                                         "variant": "elevated",
                                         "target": "dialog",
@@ -304,33 +340,38 @@
                                             "el": "f-button",
                                             "attr": {
                                                 "label": "Gửi tổ trưởng",
-                                                ":disabled": "items.length === 0",
+                                                ":disabled": "items.length === 0 || TinhTrang",
                                                 "color": "primary",
                                                 "variant": "elevated",
                                                 ":action": [
                                                     {
-                                                        "EXE": "processDataBeforePostAPI()"
-                                                    },
-                                                    {
-                                                        "API": "lms/NhanXetThang_Ins",
-                                                        "IN": {
-                                                            "JSON_NhanXetThang": "vueData.JSON_NhanXetThang"
-                                                        },
-                                                        "MESS": "Cập nhật nhận xét tháng thành công",
-                                                        "CALLBACK": [
+                                                        "COFIRM": "Xác nhận gửi tổ trưởng",
+                                                        "CALL": [
                                                             {
-                                                                "API": "lms/NhanXetThang_Upd_TinhTrang",
+                                                                "EXE": "processDataBeforePostAPI()"
+                                                            },
+                                                            {
+                                                                "API": "lms/NhanXetThang_Ins",
                                                                 "IN": {
-                                                                    "TinhTrang": 2,
-                                                                    "Lop_NhanXetThangID": "vueData.ThangObj.Lop_NhanXetThangID"
+                                                                    "JSON_NhanXetThang": "vueData.JSON_NhanXetThang"
                                                                 },
-                                                                "MESS": "Gửi tổ trưởng thành công",
+                                                                "MESS": "Cập nhật nhận xét tháng thành công",
                                                                 "CALLBACK": [
                                                                     {
-                                                                        "CALL": "NhanXetThang_Lop_Get"
-                                                                    },
-                                                                    {
-                                                                        "CALL": "NhanXetThang_Get"
+                                                                        "API": "lms/NhanXetThang_Upd_TinhTrang",
+                                                                        "IN": {
+                                                                            "TinhTrang": 2,
+                                                                            "Lop_NhanXetThangID": "vueData.ThangObj.Lop_NhanXetThangID"
+                                                                        },
+                                                                        "MESS": "Gửi tổ trưởng thành công",
+                                                                        "CALLBACK": [
+                                                                            {
+                                                                                "CALL": "NhanXetThang_Lop_Get"
+                                                                            },
+                                                                            {
+                                                                                "CALL": "NhanXetThang_Get"
+                                                                            }
+                                                                        ]
                                                                     }
                                                                 ]
                                                             }
@@ -360,10 +401,9 @@
                             "el": "f-table",
                             "attr": {
                                 ":key": "keyTable",
-                                ":label": "'Nhận xét tháng cấp ' + CapID",
+                                ":label": "renderLabelTable()",
                                 ":items": "items",
-                                ":headers": "headers",
-                                "style":"max-sheight: calc(100vh - 250px);"
+                                ":headers": "headers"
                             },
                             "w": 12
                         }

@@ -189,65 +189,26 @@ function fn_IsDisabledTinhTrangDiem({ TinhTrang, type }) {
     if (type === 'GV') {
         if (arrStatusGV.indexOf(TinhTrang) >= 0) {
             if (TinhTrang == 0 || TinhTrang == 1 || TinhTrang == 3) {
-                console.log('Hiển thị')
                 obj.isDisabled = false
             } else {
-                console.log('Không Hiển thị')
                 obj.isDisabled = true
             }
         }
     } else {
-        if (TinhTrang === 2) {
-            obj.isDisabled = false
-        } else {
-            obj.isDisabled = true
-        }
+        if (TinhTrang === 2) obj.isDisabled = false
+        else obj.isDisabled = true
     }
     return obj
 }
 
+
+//------------------ SỬ DỤNG CHO CHART  ------------------------///
 // Tính chiều rộng dựa trên số lượng ký tự
 function calculateColumnWidth(text) {
     const charWidth = 15; // Kích thước trung bình mỗi ký tự
     return text.length * charWidth;
-}
+} 
 
-// function getColumnAddress(columns, columnName) {
-//     const columnMap = {};
-//     columns.forEach((column, index) => {
-//         let columnAddress = '';
-//         let tempIndex = index;
-
-//         // Chuyển số thứ tự thành tên cột dạng Excel (A, B, ..., Z, AA, AB, ...)
-//         while (tempIndex >= 0) {
-//             columnAddress = String.fromCharCode((tempIndex % 26) + 65) + columnAddress;
-//             tempIndex = Math.floor(tempIndex / 26) - 1;
-//         }
-
-//         columnMap[column.name] = columnAddress;
-//     });
-
-//     return columnMap[columnName] || columnName; // Trả về địa chỉ cột nếu có, nếu không giữ nguyên tên cột
-// }
-
-// function replaceFormula(columns, formula, indexRow) {
-//     return formula.replace(/\b\w+_\w+\b/g, (match) => {
-//         try {
-//             // Lấy địa chỉ cột từ tên cột
-//             const columnAddress = getColumnAddress(columns, match);
-//             console.log(columnAddress);
-//             // Trả về địa chỉ cột + số dòng
-//             return `${columnAddress}${indexRow}`;
-//         } catch (error) {
-//             // Nếu có lỗi, trả về nguyên mẫu (match) mà không thay thế
-//             console.error(`Error processing column ${match}:`, error);
-//             return match;  // Trả về tên cột nếu có lỗi
-//         }
-//     });
-// }
-
-
-// Hàm để chuyển tên cột thành địa chỉ cột trong Excel
 function getColumnAddress(columns, columnName) {
     const columnMap = {};
     columns.forEach((column, index) => {
@@ -306,7 +267,6 @@ function renderDSKhoi() {
     });
     return DSKhoi;
 }
-
 
 function calculateKDE(data, xValues) {
     // 1. Trích xuất điểm dữ liệu từ trường "Diem"
