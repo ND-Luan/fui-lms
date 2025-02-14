@@ -36,11 +36,14 @@ function convertToHTML(text) {
 function initColumn() {
     for (var column of vueData.columns) {
         column.render = function (cell, value, x, y, instance, options) {
-            var tempDiv = document.createElement('div');
-            tempDiv.innerHTML = value;
-            // Thêm DOM vào ô
-            cell.innerHTML = '';
-            cell.appendChild(tempDiv.firstChild); // Gắn DOM vào ô
+            if (cell.innerHTML !== '') {
+                console.log(cell, value)
+                var tempDiv = document.createElement('div');
+                tempDiv.innerHTML = value;
+                // Thêm DOM vào ô
+                cell.innerHTML = '';
+                cell.appendChild(tempDiv.firstChild); // Gắn DOM vào ô
+            }
         }
     }
 }

@@ -27,7 +27,7 @@
                 "OUT": "DSHocSinh",
                 "CALLBACK": [
                     {
-                        "EXE": "vueData.DSHocSinh.push({'StudentID': '20100024','HoTen': 'Trần Bảo Hân','TenLop': '05G','Khoi': 5,'HinhThucHoc': 'SN','MaDonVi': 1})"
+                        "EXE": "vueData.DSHocSinh.push({'StudentID': '21000026','HoTen': 'Võ Trương Như Anh','TenLop': '01A','Khoi': 1,'HinhThucHoc': 'SN','MaDonVi': 1})"
                     },
                     {
                         "EXE": "vueData.DSHocSinh.push({'StudentID': '19100146','HoTen': 'Đào Bảo An','TenLop': '06A','Khoi': 6,'HinhThucHoc': 'SN','MaDonVi': 1})"
@@ -42,16 +42,23 @@
                         "IsLoadingStudent": false
                     }
                 ]
+            },
+            "getDSThang": {
+                "API": "lms/NhanXetThang_Lop_Get",
+                "IN": {
+                    "LopID": "vueData.HocSinhSelected.LopID"
+                },
+                "OUT": "DSHocTapThang"
             }
         },
         {
             "CALL": "getDSHocSinh"
         },
         {
-            "EXE": "vueData.onSelectedHocSinh  = onSelectedHocSinh"
+            "CALL": "getDSThang"
         },
         {
-            "EXE": "convertDSHocTapThang()"
+            "EXE": "vueData.onSelectedHocSinh  = onSelectedHocSinh"
         },
         {
             "EXE": "convertDSHocTapTiengAnh()"
@@ -67,7 +74,7 @@
                     "EXE": "localStorage.setItem('tabBottomNavigation', bottomNavigation)"
                 }
             ]
-        } 
+        }
     },
     "controls": [
         {

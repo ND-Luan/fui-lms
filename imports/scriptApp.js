@@ -313,8 +313,10 @@ $('document').ready(() => {
                     rating: "Rating",
                     averageScore: "Average score",
                     comment: "Comment",
-                    commentNotFound: "No comments yet"
+                    commentNotFound: "No comments yet",
 
+                    announced: "Announced",
+                    notYetAnnounced: "Not yet announced"
                 }
             },
             vi: {
@@ -353,11 +355,12 @@ $('document').ready(() => {
                     comment: "Nhận xét",
                     commentNotFound: "Chưa có nhận xét",
 
+                    announced: "Đã công bố",
+                    notYetAnnounced: "Chưa công bố"
                 }
             }
         }
     })
     app.use(i18n);
-    console.log('======================')
 })
 
