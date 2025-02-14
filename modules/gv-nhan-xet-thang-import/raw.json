@@ -35,7 +35,8 @@
                     "name": "NoiDungKienThuc_HTML",
                     "width": 300,
                     "backGroundColor": null,
-                    "wrap": true
+                    "wrap": true,
+                    "render": "vueData.xxx"
                 },
                 {
                     "type": "text",
@@ -55,6 +56,9 @@
                 }
             ],
             "dataSource": []
+        },
+        {
+            "EXE": "initColumn()"
         },
         {
             "API": "lms/NhanXetThang_Template_Get",

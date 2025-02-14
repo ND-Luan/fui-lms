@@ -58,7 +58,7 @@
                                 ":key": "'NoiDungKienThuc_HTML_' + item.HocSinhID",
                                 "v-model": "item.NoiDungKienThuc_HTML",
                                 ":spellcheck": "false"
-                            } 
+                            }
                         }
                     ],
                     "title": "Nội dung kiến thức",
@@ -100,17 +100,7 @@
                     "title": "Nội dung hoạt động khác",
                     "value": "NoiDungHoatDongKhac",
                     "width": 500
-                },
-                {
-                    "key": "v_btn",
-                    "el": "v-btn",
-                    "attr": {
-                        "color": "primary",
-                        "variant": "tonal",
-                        "v-on:click": "() => vueData.onLuuTamByHocSinhID(item)"
-                    },
-                    "innerHTML": "Lưu tạm"
-                }
+                } 
             ],
             "ThangObj": null,
             "LopID": null
@@ -283,16 +273,11 @@
                             },
                             "innerHTML": [
                                 {
-                                    "el": "f-button",
+                                    "el": "p",
                                     "attr": {
-                                        "label": "Import dữ liệu từ Excel",
-                                        ":disabled": "items.length === 0",
-                                        "color": "success",
-                                        "variant": "elevated",
-                                        "target": "dialog",
-                                        "title": "Import dữ liệu từ Excel",
-                                        ":url": "'/gv-nhan-xet-thang-import?lopid='+ LopID + '&lop_nxtid=' + ThangObj?.Lop_NhanXetThangID"
-                                    }
+                                        "class": "text-title"
+                                    },
+                                    "innerHTML": "Tổng số học sinh: <v-chip color='primary' class='font-weight-medium'>{{items.length}}</v-chip>"
                                 },
                                 {
                                     "el": "div",
@@ -303,7 +288,46 @@
                                         {
                                             "el": "f-button",
                                             "attr": {
-                                                "label": "Gửi tổ trưởng",
+                                                "label": "Từ chối",
+                                                ":disabled": "items.length === 0",
+                                                "color": "error",
+                                                "variant": "elevated",
+                                                ":action": [
+                                                    {
+                                                        "EXE": "processDataBeforePostAPI()"
+                                                    },
+                                                    {
+                                                        "API": "lms/NhanXetThang_Ins",
+                                                        "IN": {
+                                                            "JSON_NhanXetThang": "vueData.JSON_NhanXetThang"
+                                                        },
+                                                        "MESS": "Cập nhật nhận xét tháng thành công",
+                                                        "CALLBACK": [
+                                                            {
+                                                                "API": "lms/NhanXetThang_Upd_TinhTrang",
+                                                                "IN": {
+                                                                    "TinhTrang": 2,
+                                                                    "Lop_NhanXetThangID": "vueData.ThangObj.Lop_NhanXetThangID"
+                                                                },
+                                                                "MESS": "Gửi tổ trưởng thành công",
+                                                                "CALLBACK": [
+                                                                    {
+                                                                        "CALL": "NhanXetThang_Lop_Get"
+                                                                    },
+                                                                    {
+                                                                        "CALL": "NhanXetThang_Get"
+                                                                    }
+                                                                ]
+                                                            }
+                                                        ]
+                                                    }
+                                                ]
+                                            }
+                                        },
+                                        {
+                                            "el": "f-button",
+                                            "attr": {
+                                                "label": "Duyệt",
                                                 ":disabled": "items.length === 0",
                                                 "color": "primary",
                                                 "variant": "elevated",
@@ -345,25 +369,13 @@
                             "w": 12
                         },
                         {
-                            "el": "div",
-                            "innerHTML": [
-                                {
-                                    "el": "p",
-                                    "attr": {
-                                        "class": "text-title"
-                                    },
-                                    "innerHTML": "Tổng số học sinh: <v-chip color='primary' class='font-weight-medium'>{{items.length}}</v-chip>"
-                                }
-                            ]
-                        },
-                        {
                             "el": "f-table",
                             "attr": {
                                 ":key": "keyTable",
-                                ":label": "'Nhận xét tháng cấp ' + CapID",
+                                ":label": "'Duyệt nhận xét tháng cấp ' + CapID",
                                 ":items": "items",
                                 ":headers": "headers",
-                                "style":"max-sheight: calc(100vh - 250px);"
+                                "style": "max-sheight: calc(100vh - 250px);"
                             },
                             "w": 12
                         }

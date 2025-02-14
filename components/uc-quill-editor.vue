@@ -1,11 +1,6 @@
 <template>
-    <div>
-        {{ modelValue }}
-        <div ref="quillContainer">
-            <p>Hello World!</p>
-            <p>Some initial <strong>bold</strong> text</p>
-            <p><br /></p>
-        </div>
+    <!-- Container cho Quill Editor -->
+    <div :ref="'quillContainer_' + uniqueId" v-bind="$attrs">
     </div>
 </template>
 
@@ -19,35 +14,40 @@ export default {
     },
     data() {
         return {
-            quill: null
-        }
+            quill: null, // Biến lưu trữ instance của Quill
+            uniqueId: _.uniqueId(), // Tạo unique id cho Quill Editor
+            toolbar: ['bold', 'italic', 'underline'] // Thanh công cụ
+        };
     },
     mounted() {
-        this.buildEditor()
-    },
-    watch: {
-        modelValue: function (newValue) {
-            console.log('newValue', newValue)
-            if (this.quill && this.quill.root.innerHTML !== newValue) {
-                this.quill.root.innerHTML = newValue
-            }
-        }
+        this.initializeEditor(); // Khởi tạo Quill Editor khi component được gắn vào DOM
     },
     methods: {
-        buildEditor() {
-            this.quill = new Quill(this.$refs.quillContainer, {
-                theme: 'bubble',
+        // Phương thức khởi tạo Quill Editor
+        initializeEditor() {
+
+            this.quill = Vue.markRaw(new Quill(this.$refs['quillContainer_' + this.uniqueId], {
+                theme: 'bubble', // Sử dụng theme 'bubble'
                 modules: {
-                    toolbar: ['bold', 'italic', 'underline']
+                    toolbar: this.toolbar
                 }
-            });
+            }));
 
+            // Xử lý sự kiện 'text-change' của Quill
             this.quill.on('text-change', () => {
-                this.$emit('update:modelValue', this.quill.root.innerHTML)
+                console.log('change')
+                const content = this.quill.root.innerHTML;
+                this.$emit('update:modelValue', content); // Phát sự kiện để cập nhật modelValue
             });
 
-            // Gán nội dung ban đầu
-            this.quill.root.innerHTML = this.modelValue
+            this.quill.root.innerHTML = '';
+            this.quill.clipboard.dangerouslyPasteHTML(0, this.modelValue);
+        }
+    },
+    beforeDestroy() {
+        // Hủy bỏ instance của Quill khi component bị hủy
+        if (this.quill) {
+            this.quill = null;
         }
     }
 }
