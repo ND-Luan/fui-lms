@@ -20,7 +20,6 @@ function onLuuTamByHocSinhID(item) {
         CALL('NhanXetThang_Get')
     })
 }
-
 const renderLabelTable = () => {
     let label = `Nhận xét tháng <span class="text-red"> cấp ${vueData.CapID}</span> `
     const lop = vueData.DSLop.find(x => x.LopID === vueData.LopID)
@@ -31,4 +30,4 @@ const renderLabelTable = () => {
         label += ` - <span class="text-red">${vueData.ThangObj?.Thang_HienThi ?? ""} <span class="text-${vueData.ThangObj.MauTinhTrang}"> • ${vueData.ThangObj?.TenTinhTrang ?? ""} </span> </span>`
     }
     return label
-}  
+}
