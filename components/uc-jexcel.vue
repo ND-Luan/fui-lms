@@ -63,6 +63,9 @@ export default {
 		},
 		styleSheet: {
 			type: Object,
+		},
+		comments: {
+			type: Object
 		}
 	},
 	data() {
@@ -122,6 +125,8 @@ export default {
 						onload: this.onload,
 						wordWrap: true,
 						freezeColumns: 3,
+						allowComments: true,
+						comments: this.comments,
 						style: this.styleSheet,
 						updateTable: (instance, cell, col, row, val, label, cellName) => {
 						}, // this.updateTable(instance, cell, col, row, val, label, cellName),

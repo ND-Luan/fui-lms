@@ -31,7 +31,8 @@ function renderDSKhoi() {
 function renderDSHocSinh() {
     const eduBotHocSinhLop = []
     let items = []
-    const currentDSHocSinhLop_LMS = vueData.DSHocSinhLop_LMS.filter(x => x.LopID === vueData.LopItem.LopID)
+    const currentDSHocSinhLop_LMS = vueData.DSHocSinhLop_LMS.filter(x => x.LopID == vueData.LopItem.LopID)
+    console.log('currentDSHocSinhLop_LMS',currentDSHocSinhLop_LMS)
     for (var hsl of currentDSHocSinhLop_LMS) {
         const hs = vueData.DSHocSinh_LMS.find(x => x.HocSinhID === hsl.HocSinhID)
         if (hs) {
@@ -39,6 +40,7 @@ function renderDSHocSinh() {
         }
     }
     const uniqueHocSinhID = [...new Set(eduBotHocSinhLop.map(x => x.HocSinhID))]
+    console.log('uniqueHocSinhID',uniqueHocSinhID)
     for (var id of uniqueHocSinhID) {
         let obj = {}
         const hocSinh = vueData.DSHocSinhLop.find(x => x.HocSinhID === id)
@@ -89,5 +91,6 @@ function renderDSHocSinh() {
             HoTen: x.Ho + ' ' + x.Ten,
         }
     })
+   
     vueData.items = items
 }

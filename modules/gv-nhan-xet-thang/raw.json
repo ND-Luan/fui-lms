@@ -9,15 +9,23 @@
             "items": [],
             "headers_INIT": [
                 {
+                    "el": "div",
                     "title": "Mã học sinh",
                     "value": "HocSinhID",
+                    "innerHTML": [
+                        {
+                            "el": "t-button",
+                            "attr": {
+                                ":title": "item.HocSinhID",
+                                "url": "'/report-ket-qua-hoc-tap-thang-hoc-sinh?id=' + item.HocSinhID + '&lop_nxtid=' + vueData.ThangObj.Lop_NhanXetThangID"
+                            }
+                        },
+                        {
+                            "el": "p",
+                            "innerHTML": "SDB: {{item.SoDanhBo}}"
+                        }
+                    ],
                     "minWidth": 100
-                },
-                {
-                    "title": "Số danh bộ",
-                    "value": "SoDanhBo",
-                    "align": "center",
-                    "minWidth": 150
                 },
                 {
                     "key": "ho_ten",

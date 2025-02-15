@@ -414,7 +414,8 @@
                                 "icon": "",
                                 "v-on:click": "IsShowDialogComment = true"
                             },
-                            "innerHTML": "<v-img src='/_cdn/lhbs-lms/img_page_ph/icon_ph_comment.png' width='50'/>"
+                            "innerHTML": "<v-img src='/_cdn/lhbs-lms/img_page_ph/icon_ph_comment.png' width='50'/>",
+                            "w": 12
                         },
                         {
                             "el": "f-dialog",
@@ -462,7 +463,8 @@
                                         }
                                     }
                                 ]
-                            }
+                            },
+                            "w": 12
                         }
                     ]
                 }

@@ -24,21 +24,44 @@ function onLuuTamByHocSinhID(item) {
 function renderHeaderTable() {
     const columns = [
         {
-            "title": "Mã học sinh",
-            "value": "HocSinhID",
-            "minWidth": 100
-        },
-        {
-            "title": "Số danh bộ",
-            "value": "SoDanhBo",
-            "align": "center",
-            "minWidth": 150
+            "key": "combine_hsid_sdb",
+            "el": "div",
+            "title": "Mã học sinh / SDB",
+            "innerHTML": [
+                {
+                    "el": "div",
+                    "innerHTML": [
+                        {
+                            el: "div",
+                            innerHTML: [
+                                { el: "span", innerHTML: "{{item.HocSinhID}}" },
+                                {
+                                    "el": "t-button",
+                                    "attr": {
+                                        ":title": "item.HocSinhID + ' - ' + item.HoTen",
+                                        ":url": "'/report-ket-qua-hoc-tap-thang-hoc-sinh?id=' + item.HocSinhID + '&lop_nxtid=' + vueData.ThangObj.Lop_NhanXetThangID",
+                                        "icon": "mdi-arrow-right"
+                                    }
+                                }
+                            ]
+                        },
+                        {
+                            "el": "p",
+                            "innerHTML": "SDB: <b>{{item.SoDanhBo}}</b>"
+                        }
+                    ]
+                },
+
+            ],
+            "minWidth": 150,
+            "width": 150,
         },
         {
             "key": "ho_ten",
             "el": "div",
             "title": "Họ tên",
-            "minWidth": 350,
+            "minWidth": 240,
+            "width": 240,
             "innerHTML": [
                 {
                     "el": "span",

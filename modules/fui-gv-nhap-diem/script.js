@@ -126,16 +126,33 @@ function convertDSHocSinh() {
     const firstStudent = dataJexcel[0]
     const dsCotDiem = vueData.DSCotDiem.filter(x => x.HocSinhID === firstStudent.HocSinhID)
     vueData.styleSheet = {}
+    vueData.comments = {}
     for (var i = 0; i < dataJexcel.length; i++) {
         for (var j = 0; j < dsCotDiem.length; j++) {
-            const cellAdresss = jspreadsheet.helpers.getCellNameFromCoords(j + 3, i) // (j+2) là địa chỉ cột điểm đầu tiên, i là row let
-            // const giaTriCotDiem = vueData.instance[0].getValueFromCoords(j + 3, i)
+            const cellAdresss = jspreadsheet.helpers.getCellNameFromCoords(j + 3, i) // (j+3) là địa chỉ cột điểm đầu tiên, i là row let
             if (dsCotDiem[j].HexBackground) {
-                vueData.styleSheet[cellAdresss] = `background-color: ${dsCotDiem[j].HexBackground}`
-                // console.log('giaTriCotDiem', cellAdresss, giaTriCotDiem, dsCotDiem[j].HexBackground)
+                vueData.styleSheet[cellAdresss] = `background-color: ${dsCotDiem[j].HexBackground ?? 'unset'}`
             }
         }
     }
+    console.log('dsCotDiem', dsCotDiem)
+    console.log('dataJexcel', dataJexcel)
+    for (var i = 0; i < dataJexcel.length; i++) {
+        console.log('dataJexcel', dataJexcel[i])
+        for (var j = 0; j < dsCotDiem.length; j++) {
+            const cellAdresss = jspreadsheet.helpers.getCellNameFromCoords(j + 3, i) // (j+3) là địa chỉ cột điểm đầu tiên, i là row let
+            const obj = vueData.DSCotDiem.find(x => {
+                return x.HocSinhID === dataJexcel[i].HocSinhID && x.MaCotDiem === dsCotDiem[j].MaCotDiem && x.Is_Comment
+            }
+            )
+            if (obj) {
+                console.log(i, dsCotDiem[j])
+                vueData.styleSheet[cellAdresss] = 'color: red;'
+                vueData.comments[cellAdresss] = 'THIS COMMENT'
+            }
+        }
+    }
+
     vueData.keyComp++
     vueData.columnHeader = headers
     vueData.DSHocSinh = dataJexcel
@@ -213,7 +230,8 @@ function onLuuDiem() {
         Vue.$toast.error('Cột điểm chỉ cho phép nhập thang điểm 10!', { position: 'top' })
         return
     }
-    //Insert xong cập nhật tình trạng
+
+    // //Insert xong cập nhật tình trạng
     CALL("insKQHT_MonHocLop")
     vueData.keyComp++
 }

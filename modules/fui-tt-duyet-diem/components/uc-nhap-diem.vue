@@ -1,7 +1,7 @@
 <template>
 	<uc-jexcel v-if="vueData.DSHocSinh?.length > 0" v-model="vueData.instance" :freezeColumns="2"
 		v-model:dataSource="vueData.DSHocSinh" :columns="vueData.columnHeader" :updateTable="updateTable"
-		:key="vueData.keyComp" >
+		:comments="vueData.comments" :styleSheet="vueData.styleSheet" :key="vueData.keyComp">
 	</uc-jexcel>
 	<div v-else>
 		<uc-empty />
