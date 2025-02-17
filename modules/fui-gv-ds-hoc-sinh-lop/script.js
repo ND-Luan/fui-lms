@@ -91,6 +91,5 @@ function renderDSHocSinh() {
             HoTen: x.Ho + ' ' + x.Ten,
         }
     })
-   
     vueData.items = items
 }

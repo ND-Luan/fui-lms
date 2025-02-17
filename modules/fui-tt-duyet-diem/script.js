@@ -10,7 +10,6 @@ function renderDSKhoi() {
     // vueData.KhoiID = DSKhoi[0].value
     vueData.DSKhoi = DSKhoi
 }
-
 function convertDSHocSinh() {
     let headers = []
     let DSCotDiem_ByMaNhomCotDiem = []
@@ -142,7 +141,6 @@ function convertDSHocSinh() {
             }
         }
     }
-
     console.log('dsCotDiem', dsCotDiem)
     console.log('dataJexcel', dataJexcel)
     for (var i = 0; i < dataJexcel.length; i++) {

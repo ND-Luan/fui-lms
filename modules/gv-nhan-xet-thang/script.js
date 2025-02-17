@@ -51,7 +51,6 @@ function renderHeaderTable() {
                         }
                     ]
                 },
-
             ],
             "minWidth": 150,
             "width": 150,

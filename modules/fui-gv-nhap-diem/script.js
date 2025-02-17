@@ -152,7 +152,6 @@ function convertDSHocSinh() {
             }
         }
     }
-
     vueData.keyComp++
     vueData.columnHeader = headers
     vueData.DSHocSinh = dataJexcel
@@ -230,7 +229,6 @@ function onLuuDiem() {
         Vue.$toast.error('Cột điểm chỉ cho phép nhập thang điểm 10!', { position: 'top' })
         return
     }
-
     // //Insert xong cập nhật tình trạng
     CALL("insKQHT_MonHocLop")
     vueData.keyComp++
