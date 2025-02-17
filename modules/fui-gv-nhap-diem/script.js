@@ -161,31 +161,7 @@ function validateSave(typeCell, value, min, max) {
     if ((typeCell === 'number' && value < min) || value > max) return 1
     else return 0
 }
-function fn_IsDisabledTinhTrangDiem({ TinhTrang, type }) {
-    console.log(TinhTrang, type)
-    const arrStatusGV = [0, 1, 2, 3, 4]
-    const obj = {
-        color: getColorTinhTrangDiem(TinhTrang),
-        isDisabled: false,
-        text: getTextTinhTrangDiem(TinhTrang)
-    }
-    if (type === 'GV') {
-        if (arrStatusGV.indexOf(TinhTrang) >= 0) {
-            if (TinhTrang == 0 || TinhTrang == 3) {
-                obj.isDisabled = false
-            } else {
-                obj.isDisabled = true
-            }
-        }
-    } else {
-        if (TinhTrang == 1) {
-            obj.isDisabled = false
-        } else {
-            obj.isDisabled = true
-        }
-    }
-    return obj
-}
+ 
 function onLuuDiem() {
     vueData.dataBeforeInsertToDB = []
     vueData.StatusButton = 'luu'

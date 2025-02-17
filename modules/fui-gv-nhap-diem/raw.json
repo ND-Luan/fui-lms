@@ -110,8 +110,9 @@
                 "IN": {
                     "MonHocLopID": "vueData.MonHocItem.MonHocLopID",
                     "LopID": "vueData.LopItem.LopID",
-                    "TinhTrang": 0,
-                    "MaNhomCotDiem": "vueData.MaNhomCotDiemItem.MaNhomCotDiem"
+                    "TinhTrang": 1,
+                    "MaNhomCotDiem": "vueData.MaNhomCotDiemItem.MaNhomCotDiem",
+                    "IsSendToManager": false
                 }
             }
         },
@@ -121,8 +122,9 @@
                 "IN": {
                     "MonHocLopID": "vueData.MonHocItem.MonHocLopID",
                     "LopID": "vueData.LopItem.LopID",
-                    "TinhTrang": 1,
-                    "MaNhomCotDiem": "vueData.MaNhomCotDiemItem.MaNhomCotDiem"
+                    "TinhTrang": 2,
+                    "MaNhomCotDiem": "vueData.MaNhomCotDiemItem.MaNhomCotDiem",
+                    "IsSendToManager": true
                 }
             }
         },

@@ -137,6 +137,12 @@ function getColorChipLoaiCotDiem(value) {
 
 function getColorChipDiem(value) {
     let colorChip = null
+
+    if (_.isNaN(value)) {
+        colorChip = ''
+        return
+    }
+
     if (value >= 8) {
         colorChip = 'success'
     } else if (value >= 6.5) {
@@ -162,30 +168,31 @@ function getColorChipGiaTriCotDiem(value) {
 
 function getColorTinhTrangDiem(TinhTrang) {
     let color = ''
-    if (TinhTrang === 0) color = ''
-    if (TinhTrang === 1) color = 'primary'
-    if (TinhTrang === 2) color = 'warning'
-    if (TinhTrang === 3) color = 'error'
     if (TinhTrang === 4) color = 'success'
+    else if (TinhTrang === 3) color = 'error'
+    else if (TinhTrang === 2) color = 'warning'
+    else if (TinhTrang === 1) color = 'primary'
+    else if (TinhTrang === 0) color = ''
     return color
 }
 
 function getTextTinhTrangDiem(TinhTrang) {
     let text = ''
-    if (TinhTrang === 0) text = 'Chưa gửi điểm'
-    if (TinhTrang === 1) text = 'Đã gửi điểm'
-    if (TinhTrang === 2) text = 'Đã duyệt điểm'
-    if (TinhTrang === 3) text = 'Từ chối'
     if (TinhTrang === 4) text = 'Đã công bố điểm cho phụ huynh'
+    else if (TinhTrang === 3) text = 'Từ chối'
+    else if (TinhTrang === 2) text = 'Gửi điểm'
+    else if (TinhTrang === 1) text = 'Lưu tạm'
+    else if (TinhTrang === 0) text = 'Chưa gửi điểm'
     return text
 }
 
 function fn_IsDisabledTinhTrangDiem({ TinhTrang, type }) {
     if (TinhTrang === null) return
-    console.log(TinhTrang, type)
     const arrStatusGV = [0, 1, 2, 3, 4]
     const obj = {
+        color: getColorTinhTrangDiem(TinhTrang),
         isDisabled: false,
+        text: getTextTinhTrangDiem(TinhTrang)
     }
     if (type === 'GV') {
         if (arrStatusGV.indexOf(TinhTrang) >= 0) {

@@ -36,10 +36,9 @@
 											</p>
 										</v-card-text>
 										<v-list>
-											<div v-for="(diem, index) in hk.DSDiem.filter((e) => e.MonHocID === MonHocSelected?.MonHocID)"
+											<div v-for="(diem, index) in hk.DSDiem.filter(x => x.MonHocID === monHoc.MonHocID)"
 												:key="index">
-												<v-list-subheader class="text-primary font-weight-medium"
-													v-if="DSDiem.filter((e) => e.MonHocID === MonHocSelected?.MonHocID)[index].TenNhomCotDiem_VI !== DSDiem.filter((e) => e.MonHocID === MonHocSelected?.MonHocID)[index - 1]?.TenNhomCotDiem_VI">
+												<v-list-subheader class="text-primary font-weight-medium">
 													<v-icon size="small" class="mb-1 me-1">mdi-star-four-points</v-icon>
 													{{ diem.TenNhomCotDiem_VI }}
 												</v-list-subheader>
@@ -50,8 +49,11 @@
 													</v-list-item-title>
 													<template v-slot:append>
 														<v-chip
-															:color="getColorChipDiem(parseFloat(diem.KetQuaDanhGia_VI))">{{
-																parseFloat(diem.KetQuaDanhGia_VI) }}</v-chip>
+															:color="getColorChipDiem(parseFloat(diem.KetQuaDanhGia_VI))">
+															{{ lodash.isNaN(parseFloat(diem.KetQuaDanhGia_VI))
+																? 'Chưa có dữ liệu'
+																: parseFloat(diem.KetQuaDanhGia_VI) }}
+														</v-chip>
 													</template>
 												</v-list-item>
 											</div>
@@ -129,6 +131,7 @@ export default {
 			MonHocSelected: null,
 			IsLoadingPage: false,
 			IsLoadingDSHocSinh: false,
+			lodash: _, 
 			vueData
 		}
 	},
@@ -137,6 +140,7 @@ export default {
 			const { DSMonHoc, DSDiem, DSNhomDiem } = await this.loadHocSinhKQHT(hk.code)
 			hk.DSMonHoc = DSMonHoc
 			hk.DSDiem = DSDiem
+			console.log('DSDiem', DSDiem)
 			hk.DSNhomDiem = DSNhomDiem
 		}
 

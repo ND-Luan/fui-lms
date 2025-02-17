@@ -164,48 +164,11 @@ function validateSave(typeCell, value, min, max) {
     else return 0
 }
 function onTuChoiDiem() {
-    const TINH_TRANG = 3
-    const promise = () => {
-        return new Promise(resolve => {
-            CALL("udpKQHT_MonHocLop_TinhTrang", {
-                MonHocLopID: vueData.MonHocItem.MonHocLopID,
-                LopID: vueData.LopItem.LopID,
-                TinhTrang: TINH_TRANG,
-                MaNhomCotDiem: vueData.MaNhomCotDiemItem.MaNhomCotDiem,
-                IsSendToManager: false
-            })
-            CALL("udpKQHT_NhomDiem_TinhTrang", {
-                TinhTrang: TINH_TRANG,
-                NhomDiem_MonHocLopID: vueData.MaNhomCotDiemItem.NhomDiem_MonHocLopID
-            })
-            resolve()
-        })
-    }
-    promise().then(() => {
-        Vue.$toast.success('Từ chối điểm thành công', { postion: 'top' })
-        vueData.keyComp++
-    })
+    vueData.StatusButton = 'tu-choi'
+    // //Insert xong cập nhật tình trạng
+    CALL("insKQHT_MonHocLop")
 }
 function onDuyetDiem() {
-    const TINH_TRANG = 4
-    const promise = () => {
-        return new Promise(resolve => {
-            CALL("udpKQHT_MonHocLop_TinhTrang", {
-                MonHocLopID: vueData.MonHocItem.MonHocLopID,
-                LopID: vueData.LopItem.LopID,
-                TinhTrang: TINH_TRANG,
-                MaNhomCotDiem: vueData.MaNhomCotDiemItem.MaNhomCotDiem,
-                IsSendToManager: true
-            })
-            CALL("udpKQHT_NhomDiem_TinhTrang", {
-                TinhTrang: TINH_TRANG,
-                NhomDiem_MonHocLopID: vueData.MaNhomCotDiemItem.NhomDiem_MonHocLopID
-            })
-            resolve()
-        })
-    }
-    promise().then(() => {
-        Vue.$toast.success('Duyệt điểm thành công', { postion: 'top' })
-        vueData.keyComp++
-    })
+    vueData.StatusButton = 'duyet'
+    CALL("insKQHT_MonHocLop")
 }
