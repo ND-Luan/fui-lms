@@ -323,7 +323,6 @@ function createHistogramDataWithFixedBins(data) {
     for (const value of points) {
         for (let i = 0; i < numBins; i++) { if (value >= bins[i] && value < bins[i + 1]) { counts[i]++; break; } }
     }
-    console.log(counts)
     let binWidth;
     if (bins.length > 1) {
         binWidth = bins[1] - bins[0];

@@ -24,16 +24,15 @@
                     "value": 4
                 }
             ],
-            "CapID": "parseInt(capid)",
-            "MonHocID": null,
+            "CapID": 3,
+            "MonHocID": 76,
             "KhoiID": null,
-            "DSKhoi": []
+            "LopID": null,
+            "DSKhoi": [],
+            "DSLop": []
         },
         {
             "CALL": [
-                {
-                    "EXE": "renderMonHocID()"
-                },
                 {
                     "EXE": "vueData.renderDSKhoi = renderDSKhoi"
                 },

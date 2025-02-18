@@ -120,7 +120,6 @@ function convertChartHistogram() {
                 }
             }
         }
-        console.log(counts)
         let binWidth;
         if (bins.length > 1) {
             binWidth = bins[1] - bins[0];
@@ -466,7 +465,6 @@ function convertChartMultipleLop() {
                     }
                 }
             }
-            console.log(counts)
             let binWidth;
             if (bins.length > 1) {
                 binWidth = bins[1] - bins[0];

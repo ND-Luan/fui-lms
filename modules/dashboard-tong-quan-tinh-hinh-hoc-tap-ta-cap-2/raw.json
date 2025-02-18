@@ -24,8 +24,8 @@
                     "value": 4
                 }
             ],
-            "CapID": "parseInt(capid)",
-            "MonHocID": null,
+            "CapID": 2,
+            "MonHocID": 46,
             "KhoiID": null,
             "DSKhoi": []
         },
