@@ -1,6 +1,6 @@
 
 function formatPhanCong(dsGiaoVien, phanCongMoi) {
-    debugger;
+    ;
     // Lấy thông tin giáo viên và môn học từ dsGiaoVien ban đầu
     const dataWithSubjects = dsGiaoVien.map((gv) => ({
         GiaoVienID: gv.GiaoVienID,
@@ -164,7 +164,6 @@ function handleDataSelected(sessionData) {
     console.log("sessionData", sessionData)
 };
 function addToGroup(VaiTro = null, Khoi = null, Lop = null, GiaoVien = null, MonHoc = null) {
-    debugger
     if (!GiaoVien) {
         console.warn("GiaoVien is required");
         return;
@@ -230,7 +229,6 @@ function addToGroup(VaiTro = null, Khoi = null, Lop = null, GiaoVien = null, Mon
     }
 }
 function transformDataFromPhanCongLopItemSelected(phanCongLopItemSelected, additionalInfo = {}) {
-    debugger
     const result = [];
     const uniqueEntries = new Set();
     phanCongLopItemSelected.forEach((teacher) => {
@@ -269,7 +267,6 @@ function transformDataFromPhanCongLopItemSelected(phanCongLopItemSelected, addit
                     }
                 });
             });
-            debugger
             // Nếu VaiTro = 2 (Khối trưởng) và chưa có lớp nào, vẫn thêm một bản ghi với MonHocID = 0 và LopID = 0
             if (VaiTro == (2) && !hasValidLop) {
                 const uniqueKey = `${GiaoVienID}-${KhoiID}-0-0-null`;
@@ -294,7 +291,6 @@ function transformDataFromPhanCongLopItemSelected(phanCongLopItemSelected, addit
     return result;
 }
 function add() {
-    debugger
     addToGroup(VaiTro = vueData.vaiTroItemSelected, Khoi = vueData.KhoiItem, Lop = vueData.LopItem, GiaoVien = vueData.sessionData.GiaoVienIDSelected, MonHoc = vueData.sessionData.MonHocIDSelected)
     let date = new Date();
         date.getYear()
@@ -385,7 +381,6 @@ async function deletePhanCong(id) {
         GVLopID: id,
     };
     await PhanCongLMSService.DelPhanCong(payload).then(response => {
-        debugger
         // Xử lý kết quả thành công
         if (response.IsSuccess) {
             Vue.$toast.success("Xóa thành công")
