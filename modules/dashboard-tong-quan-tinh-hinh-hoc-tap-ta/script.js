@@ -17,3 +17,13 @@ function renderDSKhoi() {
     });
     return DSKhoi;
 }
+
+function renderMonHocID() {
+    if (vueData.CapID === 1) {
+        vueData.MonHocID = 5
+    } else if (vueData.CapID === 2) {
+        vueData.MonHocID = 46
+    } else if (vueData.CapID === 3) {
+        vueData.MonHocID = 76
+    }
+}

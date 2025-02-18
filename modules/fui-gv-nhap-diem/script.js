@@ -161,7 +161,6 @@ function validateSave(typeCell, value, min, max) {
     if ((typeCell === 'number' && value < min) || value > max) return 1
     else return 0
 }
- 
 function onLuuDiem() {
     vueData.dataBeforeInsertToDB = []
     vueData.StatusButton = 'luu'

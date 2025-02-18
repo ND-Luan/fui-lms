@@ -1,7 +1,7 @@
 {
     "data": [
         {
-            "tab": 3,
+            "tab": 0,
             "itemTabs": [
                 {
                     "title": "Phân phối điểm",
@@ -24,21 +24,24 @@
                     "value": 4
                 }
             ],
-            "CapID": 2,
-            "MonHocID": 46,
+            "CapID": "parseInt(capid)",
+            "MonHocID": null,
             "KhoiID": null,
             "DSKhoi": []
         },
         {
             "CALL": [
                 {
+                    "EXE": "renderMonHocID()"
+                },
+                {
                     "EXE": "vueData.renderDSKhoi = renderDSKhoi"
                 },
                 {
-                    "EXE": "vueData.DSKhoi = renderDSKhoi().filter(x=> x.CapID === 2)"
+                    "EXE": "vueData.DSKhoi = renderDSKhoi().filter(x=> x.CapID == vueData.CapID)"
                 },
                 {
-                    "EXE": "vueData.KhoiID = localStorage.getItem('KhoiID_TA_C2') ? parseInt(localStorage.getItem('KhoiID_TA_C2')) : null"
+                    "EXE": "vueData.KhoiID = localStorage.getItem('KhoiID_TA_C'+ parseInt(vueData.CapID)) ? parseInt(localStorage.getItem('KhoiID_TA_C'+ parseInt(vueData.CapID))) : null"
                 }
             ]
         }
@@ -48,7 +51,7 @@
             "IF": "vueData.KhoiID > 0",
             "THEN": [
                 {
-                    "EXE": "localStorage.setItem('KhoiID_TA_C2', KhoiID)"
+                    "EXE": "localStorage.setItem('KhoiID_TA_C'+ parseInt(vueData.CapID), KhoiID)"
                 }
             ]
         }
@@ -75,7 +78,7 @@
                                     "innerHTML": [
                                         {
                                             "el": "v-toolbar-title",
-                                            "innerHTML": "Tổng quan điểm Tiếng Anh - C2"
+                                            "innerHTML": "Tổng quan điểm Tiếng Anh - C{{CapID}}"
                                         },
                                         {
                                             "el": "v-spacer"
