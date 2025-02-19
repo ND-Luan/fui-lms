@@ -1,0 +1,70 @@
+{
+    "data": [
+        {
+            "headers": [],
+            "items": [],
+            "LopID": null,
+            "DSLop": []
+        }
+    ],
+    "watch": {},
+    "controls": [
+        {
+            "prop": "",
+            "rows": [
+                {
+                    "prop": "",
+                    "cols": [
+                        {
+                            "el": "v-card",
+                            "innerHTML": [
+                                {
+                                    "el": "v-card-title",
+                                    "innerHTML": "Tìm kiếm"
+                                },
+                                {
+                                    "el": "v-card-text",
+                                    "innerHTML": [
+                                        {
+                                            "el": "v-row",
+                                            "innerHTML": [
+                                                {
+                                                    "el": "v-col",
+                                                    "attr": {
+                                                        "cols": 3
+                                                    },
+                                                    "innerHTML": [
+                                                        {
+                                                            "el": "v-select",
+                                                            "attr": {
+                                                                "v-model": "LopID",
+                                                                "label": "Chọn lớp",
+                                                                ":items": "DSLop",
+                                                                "item-title": "TenLop",
+                                                                "item-value": "LopID"
+                                                            }
+                                                        }
+                                                    ]
+                                                }
+                                            ]
+                                        }
+                                    ]
+                                }
+                            ],
+                            "w": 12
+                        },
+                        {
+                            "el": "f-table",
+                            "attr": {
+                                ":headers": "headers",
+                                ":items": "items"
+                            },
+                            "w": 12
+                        }
+                    ]
+                }
+            ]
+        }
+    ],
+    "set": {}
+}

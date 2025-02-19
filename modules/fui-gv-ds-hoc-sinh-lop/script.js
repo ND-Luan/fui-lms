@@ -32,7 +32,7 @@ function renderDSHocSinh() {
     const eduBotHocSinhLop = []
     let items = []
     const currentDSHocSinhLop_LMS = vueData.DSHocSinhLop_LMS.filter(x => x.LopID == vueData.LopItem.LopID)
-    console.log('currentDSHocSinhLop_LMS',currentDSHocSinhLop_LMS)
+    console.log('currentDSHocSinhLop_LMS', currentDSHocSinhLop_LMS)
     for (var hsl of currentDSHocSinhLop_LMS) {
         const hs = vueData.DSHocSinh_LMS.find(x => x.HocSinhID === hsl.HocSinhID)
         if (hs) {
@@ -40,7 +40,7 @@ function renderDSHocSinh() {
         }
     }
     const uniqueHocSinhID = [...new Set(eduBotHocSinhLop.map(x => x.HocSinhID))]
-    console.log('uniqueHocSinhID',uniqueHocSinhID)
+    console.log('uniqueHocSinhID', uniqueHocSinhID)
     for (var id of uniqueHocSinhID) {
         let obj = {}
         const hocSinh = vueData.DSHocSinhLop.find(x => x.HocSinhID === id)
@@ -93,3 +93,34 @@ function renderDSHocSinh() {
     })
     vueData.items = items
 }
+
+function localStorageSetItem(item) {
+    console.log(item);
+    const lop = vueData.DSLop.find(x => x.LopID == item.LopID)
+
+    localStorage.setItem('HocSinhSelected',
+        JSON.stringify({
+            StudentID: item.HocSinhID,
+            HocSinhID: item.HocSinhID,
+            HoTen: item.HoTen,
+            TenLop: lop.TenLop,
+            Khoi: vueData.KhoiItem.KhoiID,
+            HinhThucHoc: item.HinhThucHoc,
+            MaDonVi: item.MaDonVi,
+            NgaySinh: item.NgaySinh,
+            Nu: item.Nu,
+            LopID: item.LopID,
+            HSLopID: item.HSLopID,
+            NienKhoa: 2024,
+            KhoiID: vueData.KhoiItem.KhoiID
+        })
+    )
+    openWindow({
+        title: 'Xem chi tiết',
+        url: '/ph-report',
+        onclose: () => {
+
+        }
+    });
+}
+

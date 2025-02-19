@@ -22,31 +22,16 @@
                 },
                 {
                     "el": "v-btn",
-                    "title": "Tháng",
+                    "title": "Xem chi tiết",
                     "align": "center",
                     "key": "Thang",
                     "value": "",
                     "attr": {
-                        ":href": "'/report-ket-qua-hoc-tap-thang-hoc-sinh?id='+item.HocSinhID",
-                        "target": "_blank",
-                        "variant": "tonal",
-                        "color": "primary"
+                        "title": "Xem chi tiết",
+                        "color": "primary",
+                        "v-on:click": "vueData.localStorageSetItem(item)"
                     },
-                    "innerHTML": "Tháng"
-                },
-                {
-                    "el": "v-btn",
-                    "title": "Học kỳ",
-                    "align": "center",
-                    "value": "",
-                    "key": "HocKy",
-                    "attr": {
-                        ":href": "'/report-ket-qua-hoc-tap-hoc-sinh?id='+item.HocSinhID",
-                        "target": "_blank",
-                        "variant": "tonal",
-                        "color": "primary"
-                    },
-                    "innerHTML": "Học kỳ"
+                    "innerHTML": "Xem chi tiết"
                 },
                 {
                     "el": "v-chip",
@@ -150,7 +135,7 @@
             ]
         },
         {
-            "EXE": "renderDSCap(); renderDSKhoi();"
+            "EXE": "renderDSCap(); renderDSKhoi(); vueData.localStorageSetItem = localStorageSetItem"
         }
     ],
     "watch": {
