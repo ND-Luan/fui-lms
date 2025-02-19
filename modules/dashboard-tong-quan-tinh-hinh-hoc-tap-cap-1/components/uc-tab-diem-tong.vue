@@ -91,7 +91,7 @@ export default {
 		},
 		onLoadChart({ NienKhoa, KhoiID, LopID, MonHocID }) {
 			return new Promise(resolve => {
-				ajaxCALL('lms/DashBoardThayDoiTongDiem_Get',
+				ajaxCALL('lms/DashBoardThayDoiTongDiem_Mon_Get',
 					{
 						NienKhoa,
 						KhoiID,

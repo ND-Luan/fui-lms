@@ -2,7 +2,7 @@
 	<v-card style="background-color: #f9f9f9;">
 		<v-card-text>
 			<v-row>
-				<v-col cols="12">
+				<!-- <v-col cols="12">
 					<v-card :flat="false">
 						<v-card-title class="text-primary d-flex align-center">
 							Điểm tiến bộ cuối kì so với giữa kì
@@ -114,7 +114,7 @@
 							</v-row>
 						</v-card-text>
 					</v-card>
-				</v-col>
+				</v-col> -->
 				<v-col cols="6">
 					<v-card :flat="false">
 						<v-card-title class="text-primary d-flex align-center">
@@ -279,7 +279,7 @@
 		methods: {
 			onLoadChart({ NienKhoa, KhoiID, MonHocID }) {
 				return new Promise(resolve => {
-					ajaxCALL('lms/DashboardDiem_Mean_Get',
+					ajaxCALL('lms/DashboardDiem_Mean_Mon_Get',
 						{
 							NienKhoa,
 							KhoiID,

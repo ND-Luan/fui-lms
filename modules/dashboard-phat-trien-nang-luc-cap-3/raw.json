@@ -6,24 +6,25 @@
                 {
                     "title": "Điểm tự đánh giá bản thân của giáo viên",
                     "value": 0
-                },
-                {
-                    "title": "Điểm trung bình của một học sinh các Theme",
-                    "value": 1
-                },
-                {
-                    "title": "So sánh điểm trung bình của một lớp ở các theme",
-                    "value": 2
-                },
-                {
-                    "title": "Phân tán thể hiện mối quan hệ giữa điểm \"Nghe\" và \"Nói\"",
-                    "value": 3
                 }
             ],
-            "CapID": 1,
-            "MonHocID": 5,
+            "CapID": 3,
+            "MonHocID": null,
             "KhoiID": null,
-            "DSKhoi": []
+            "DSKhoi": [],
+            "DSMonHoc": []
+        },
+        {
+            "MonHoc_GetByKhoiID": {
+                "API": "lms/MonHoc_GetByKhoiID",
+                "IN": {
+                    "KhoiID": "vueData.KhoiID"
+                },
+                "OUT": "DSMonHoc",
+                "CALLBACK": {
+                    "DSMonHoc": "DSMonHoc.filter(x => x.MonHocID !== 76)"
+                }
+            }
         },
         {
             "CALL": [
@@ -35,6 +36,17 @@
                 },
                 {
                     "EXE": "vueData.KhoiID = localStorage.getItem('KhoiID_TA_C'+vueData.CapID) ? parseInt(localStorage.getItem('KhoiID_TA_C'+vueData.CapID)) : null"
+                },
+                {
+                    "EXE": "vueData.MonHocID = localStorage.getItem('MonHocID_Mon_C'+ parseInt(vueData.CapID)) ? parseInt(localStorage.getItem('MonHocID_Mon_C'+ parseInt(vueData.CapID))) : null"
+                },
+                {
+                    "IF": "vueData.KhoiID > 0",
+                    "THEN": [
+                        {
+                            "CALL": "MonHoc_GetByKhoiID"
+                        }
+                    ]
                 }
             ]
         }
@@ -45,6 +57,14 @@
             "THEN": [
                 {
                     "EXE": "localStorage.setItem('KhoiID_TA_C'+vueData.CapID, KhoiID)"
+                }
+            ]
+        },
+        "MonHocID": {
+            "IF": "vueData.MonHocID > 0",
+            "THEN": [
+                {
+                    "EXE": "localStorage.setItem('MonHocID_Mon_C'+ parseInt(vueData.CapID), MonHocID)"
                 }
             ]
         }
@@ -71,7 +91,7 @@
                                     "innerHTML": [
                                         {
                                             "el": "v-toolbar-title",
-                                            "innerHTML": "Tổng quan điểm Tiếng Anh - C{{CapID}}"
+                                            "innerHTML": "Phát triển năng lực - C{{CapID}}"
                                         },
                                         {
                                             "el": "v-spacer"
@@ -86,6 +106,21 @@
                                                 "bg-color": "white",
                                                 "hide-details": false,
                                                 "placeholder": "Chọn khối",
+                                                "solo": true,
+                                                "class": "mr-4",
+                                                "style": "max-width: 200px"
+                                            }
+                                        },
+                                        {
+                                            "el": "v-select",
+                                            "attr": {
+                                                "v-model": "MonHocID",
+                                                ":items": "DSMonHoc",
+                                                "item-title": "MonHocName",
+                                                "item-value": "MonHocID",
+                                                "bg-color": "white",
+                                                "hide-details": false,
+                                                "placeholder": "Chọn môn học",
                                                 "solo": true,
                                                 "class": "mr-4",
                                                 "style": "max-width: 200px"
