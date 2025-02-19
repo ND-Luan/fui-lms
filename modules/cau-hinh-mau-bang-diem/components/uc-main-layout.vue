@@ -68,6 +68,7 @@ export default {
     props: [],
     data() {
         return {
+            vueData,
             searchInput: '',
             isShowModalAddMauBangDiem: false,
             isShowModalEditMauBangDiem: false,

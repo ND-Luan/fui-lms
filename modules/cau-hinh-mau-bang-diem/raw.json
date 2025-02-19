@@ -1,1 +1,22 @@
-{"data":[],"watch":{},"controls":[{"prop":"fluid grid-list-md","rows":[{"prop":"","cols":[{"el":"uc-main-layout","attr":{},"w":24}]}]}],"set":{}}
+{
+    "data": [],
+    "watch": {},
+    "controls": [
+        {
+            "prop": "fluid grid-list-md",
+            "rows": [
+                {
+                    "prop": "",
+                    "cols": [
+                        {
+                            "el": "uc-main-layout",
+                            "attr": {},
+                            "w": 12
+                        }
+                    ]
+                }
+            ]
+        }
+    ],
+    "set": {}
+}
