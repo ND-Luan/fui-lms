@@ -26,8 +26,8 @@
                     "align": "center",
                     "key": "Thang",
                     "value": "",
-                    "attr": {
-                        "title": "Xem chi tiết",
+                    "attr": { 
+                        "variant": "tonal",
                         "color": "primary",
                         "v-on:click": "vueData.localStorageSetItem(item)"
                     },

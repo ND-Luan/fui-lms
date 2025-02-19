@@ -13,7 +13,26 @@
             "bottomNavigation": "localStorage.getItem('tabBottomNavigation') ? parseInt(localStorage.getItem('tabBottomNavigation')) : 0",
             "HocSinhSelected": "localStorage.getItem('HocSinhSelected') ? JSON.parse(localStorage.getItem('HocSinhSelected')) : null",
             "IsLoadingStudent": true,
-            "IsLanguage": "Boolean(localStorage.getItem('IsLanguage')) ?? false"
+            "IsLanguage": "Boolean(localStorage.getItem('IsLanguage')) ?? false",
+            "IsPassRoleParent": true
+        },
+        {
+            "IF": "!vueData.IsPassRoleParent",
+            "THEN": {
+                "CONFIRM": "Bạn không có quyền coi trang phụ huynh",
+                "CALL": [
+                    {
+                        "EXE": "redirect('/')"
+                    }
+                ],
+                "CANCEL": {
+                    "CALL": [
+                        {
+                            "EXE": "redirect('/')"
+                        }
+                    ]
+                }
+            }
         },
         {
             "IF": "!!vueData.HocSinhSelected === false",

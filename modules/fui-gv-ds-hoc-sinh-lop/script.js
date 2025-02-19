@@ -95,9 +95,7 @@ function renderDSHocSinh() {
 }
 
 function localStorageSetItem(item) {
-    console.log(item);
     const lop = vueData.DSLop.find(x => x.LopID == item.LopID)
-
     localStorage.setItem('HocSinhSelected',
         JSON.stringify({
             StudentID: item.HocSinhID,
@@ -115,8 +113,9 @@ function localStorageSetItem(item) {
             KhoiID: vueData.KhoiItem.KhoiID
         })
     )
+    localStorage.setItem('IsPassRoleParent', true)
     openWindow({
-        title: 'Xem chi tiết',
+        title: 'Xem chi tiết học sinh ' + item.HocSinhID + ' - ' + item.HoTen,
         url: '/ph-report',
         onclose: () => {
 
