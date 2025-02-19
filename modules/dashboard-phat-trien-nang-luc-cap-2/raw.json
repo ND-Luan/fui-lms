@@ -1,1 +1,147 @@
-{"data":[],"controls":[]}
+{
+    "data": [
+        {
+            "tab": 0,
+            "itemTabs": [
+                {
+                    "title": "Điểm tự đánh giá bản thân của giáo viên",
+                    "value": 0
+                },
+                {
+                    "title": "Điểm trung bình của một học sinh các Theme",
+                    "value": 1
+                },
+                {
+                    "title": "So sánh điểm trung bình của một lớp ở các theme",
+                    "value": 2
+                },
+                {
+                    "title": "Phân tán thể hiện mối quan hệ giữa điểm \"Nghe\" và \"Nói\"",
+                    "value": 3
+                }
+            ],
+            "CapID": 1,
+            "MonHocID": 5,
+            "KhoiID": null,
+            "DSKhoi": []
+        },
+        {
+            "CALL": [
+                {
+                    "EXE": "vueData.renderDSKhoi = renderDSKhoi"
+                },
+                {
+                    "EXE": "vueData.DSKhoi = renderDSKhoi().filter(x=> x.CapID === parseInt(vueData.CapID))"
+                },
+                {
+                    "EXE": "vueData.KhoiID = localStorage.getItem('KhoiID_TA_C'+vueData.CapID) ? parseInt(localStorage.getItem('KhoiID_TA_C'+vueData.CapID)) : null"
+                }
+            ]
+        }
+    ],
+    "watch": {
+        "KhoiID": {
+            "IF": "vueData.KhoiID > 0",
+            "THEN": [
+                {
+                    "EXE": "localStorage.setItem('KhoiID_TA_C'+vueData.CapID, KhoiID)"
+                }
+            ]
+        }
+    },
+    "controls": [
+        {
+            "prop": "fluid",
+            "rows": [
+                {
+                    "prop": "",
+                    "cols": [
+                        {
+                            "el": "v-card",
+                            "attr": {
+                                "style": "border-radius: 0"
+                            },
+                            "innerHTML": [
+                                {
+                                    "el": "v-toolbar",
+                                    "attr": {
+                                        "class": "pl-4",
+                                        "color": "primary"
+                                    },
+                                    "innerHTML": [
+                                        {
+                                            "el": "v-toolbar-title",
+                                            "innerHTML": "Tổng quan điểm Tiếng Anh - C{{CapID}}"
+                                        },
+                                        {
+                                            "el": "v-spacer"
+                                        },
+                                        {
+                                            "el": "v-select",
+                                            "attr": {
+                                                "v-model": "KhoiID",
+                                                ":items": "DSKhoi",
+                                                "item-title": "title",
+                                                "item-value": "value",
+                                                "bg-color": "white",
+                                                "hide-details": false,
+                                                "placeholder": "Chọn khối",
+                                                "solo": true,
+                                                "class": "mr-4",
+                                                "style": "max-width: 200px"
+                                            }
+                                        },
+                                        {
+                                            "el": "template",
+                                            "attr": {
+                                                "v-slot:extension": ""
+                                            },
+                                            "innerHTML": "<v-tabs v-model='tab' align-tabs='center' selected-class='bg-white text-primary'><v-tab  v-for='(item, key) in itemTabs' :key='key' :text='item.title' :value='item.value'></v-tab></v-tabs>"
+                                        }
+                                    ]
+                                },
+                                {
+                                    "el": "v-tabs-window",
+                                    "attr": {
+                                        "v-model": "tab"
+                                    },
+                                    "innerHTML": [
+                                        {
+                                            "el": "v-tabs-window-item",
+                                            "attr": {
+                                                ":value": 0
+                                            },
+                                            "innerHTML": "<uc-diem-tu-danh-gia-ban-than :khoiid='KhoiID' :capID='CapID' :monhocid='MonHocID'/>"
+                                        },
+                                        {
+                                            "el": "v-tabs-window-item",
+                                            "attr": {
+                                                ":value": 1
+                                            },
+                                            "innerHTML": "<uc-diem-trung-binh-theme :khoiID='KhoiID' :capID='CapID' :monhocid='MonHocID'/>"
+                                        },
+                                        {
+                                            "el": "v-tabs-window-item",
+                                            "attr": {
+                                                ":value": 2
+                                            },
+                                            "innerHTML": "<uc-diem-trung-binh-mot-lop :khoiID='KhoiID' :capID='CapID' :monhocid='MonHocID'/>"
+                                        },
+                                        {
+                                            "el": "v-tabs-window-item",
+                                            "attr": {
+                                                ":value": 3
+                                            },
+                                            "innerHTML": "<uc-phan-tan-the-hien-nghe-noi :khoiID='KhoiID' :capID='CapID' :monhocid='MonHocID'/>"
+                                        }
+                                    ]
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ]
+        }
+    ],
+    "set": {}
+}
