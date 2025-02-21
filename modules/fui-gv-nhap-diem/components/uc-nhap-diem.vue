@@ -1,7 +1,7 @@
 <template>
-	<uc-jexcel class="height-excel" v-if="vueData.DSHocSinh?.length > 0" v-model="vueData.instance" :freezeColumns="2"
-		v-model:dataSource="vueData.DSHocSinh" :columns="vueData.columnHeader" :updateTable="updateTable"
-		:comments="vueData.comments" :key="vueData.keyComp" :styleSheet="vueData.styleSheet">
+	<uc-jexcel class="height-excel" v-if="vueData.DSHocSinh?.length > 0" v-model="vueData.instance"
+		:freeze-columns="vueData.freezeColumns" v-model:dataSource="vueData.DSHocSinh" :columns="vueData.columnHeader"
+		:updateTable="updateTable" :comments="vueData.comments" :key="vueData.keyComp" :styleSheet="vueData.styleSheet">
 	</uc-jexcel>
 	<div v-else>
 		<uc-empty />
@@ -25,10 +25,8 @@ export default {
 			vueData.columnHeader.forEach((x, index) => {
 				if (x.type == 'numeric') {
 					if (col === index) cell.style.textAlign = 'right'
-
 				} else if (x.type == 'text') {
 					if (col === index) cell.style.textAlign = 'left'
-
 				}
 			})
 		},

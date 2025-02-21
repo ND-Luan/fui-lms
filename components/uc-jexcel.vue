@@ -49,7 +49,7 @@ export default {
 		},
 		freezeColumns: {
 			type: Number,
-			default: 1
+			default: 3
 		},
 		exportExcel: {
 			type: Boolean,
@@ -124,7 +124,6 @@ export default {
 						onselection: this.onselection,
 						onload: this.onload,
 						wordWrap: true,
-						freezeColumns: 3,
 						allowComments: true,
 						comments: this.comments,
 						style: this.styleSheet,
@@ -132,6 +131,9 @@ export default {
 						}, // this.updateTable(instance, cell, col, row, val, label, cellName),
 					}
 				],
+				contextMenu: function () {
+					return false;
+				},
 				onselection: this.onselection,
 			};
 		}

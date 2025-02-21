@@ -20,7 +20,7 @@ function convertDSHocSinh() {
             TinhTrang: hs.TinhTrang,
         }
     })
-    let SLCotDiem_OfFirstSTD = vueData.DSCotDiem.filter((item) => item.HocSinhID === vueData.DSHocSinh[0].HocSinhID) // lấy ra các cột điểm của học sinh đầu tiên
+    let SLCotDiem_OfFirstSTD = vueData.DSCotDiem.filter((item) => item.HocSinhID === fn_ProrityTinhTrang(vueData.DSHocSinh).HocSinhID) // lấy ra các cột điểm của học sinh đầu tiên
     DSCotDiem_ByMaNhomCotDiem = SLCotDiem_OfFirstSTD
     //Xử lý động cột điểm header jexcel
     let columnsCotDiem = SLCotDiem_OfFirstSTD
@@ -35,6 +35,7 @@ function convertDSHocSinh() {
                     decimal: '.',
                     mask: '0.00',
                     backGroundColor: x.HexBackground,
+                    // width: x.WidthCSS,
                     wrapText: true,
                     readOnly: x.LoaiCotDiem === 'Công thức' ? true : false,
                 }
@@ -44,9 +45,9 @@ function convertDSHocSinh() {
                     type: 'text',
                     title: x.TenCotDiem_VI,
                     name: x.MaCotDiem,
-                    width: 80,
+                    width: x.WidthCSS,
                     typeValue: x.GiaTriCotDiem,
-                    width: calculateColumnWidth(x.TenCotDiem_VI),
+                    width: x.WidthCSS,
                     backGroundColor: x.HexBackground,
                     wrap: true,
                 }
@@ -56,7 +57,7 @@ function convertDSHocSinh() {
                     type: 'html',
                     title: x.TenCotDiem_VI, // + fn_IsDisabledTinhTrangDiem(x.TinhTrang, 'GV').isDisabled,
                     name: x.MaCotDiem,
-                    width: 120,
+                    width: x.WidthCSS,
                     typeValue: x.GiaTriCotDiem,
                     backGroundColor: x.HexBackground,
                     wrap: true,
@@ -66,6 +67,9 @@ function convertDSHocSinh() {
                 return column
             }
         })
+
+    //Nếu là gửi điểm thì freezecolumn = 4 để thêm cột từ chối
+    vueData.freezeColumns = (vueData.TinhTrang?.TinhTrang === 3) ? 4 : 3
     let columnThongTinHocSinh = [
         {
             type: 'text',
@@ -74,6 +78,7 @@ function convertDSHocSinh() {
             width: 120,
             backGroundColor: null,
             wrap: true,
+            readOnly: true
         },
         {
             type: 'text',
@@ -82,6 +87,7 @@ function convertDSHocSinh() {
             width: 120,
             backGroundColor: null,
             wrap: true,
+            readOnly: true
         },
         {
             type: 'text',
@@ -90,9 +96,22 @@ function convertDSHocSinh() {
             width: 300,
             backGroundColor: null,
             wrap: true,
-            align: "left"
+            align: "left",
+            readOnly: true
         }
     ]
+    if (vueData.TinhTrang?.TinhTrang === 3) {
+        columnThongTinHocSinh.push({
+            type: 'text',
+            title: 'Từ chối',
+            name: 'ReasonReject',
+            width: 300,
+            backGroundColor: null,
+            wrap: true,
+            align: "left",
+            readOnly: vueData.TinhTrang?.TinhTrang === 3
+        })
+    }
     headers = [...columnThongTinHocSinh, ...columnsCotDiem]
     //Xử lý data jexcel
     const dataJexcel = []
@@ -105,6 +124,7 @@ function convertDSHocSinh() {
             HoVaTenHocSinh: arrCotDiemExist[0].Ho + ' ' + arrCotDiemExist[0].Ten,
             SoDanhBo: arrCotDiemExist[0].SoDanhBo,
         }
+        if (arrCotDiemExist[0].ReasonReject) obj.ReasonReject = arrCotDiemExist[0].ReasonReject
         for (var cotDiemExist of arrCotDiemExist) {
             if (cotDiemExist.LoaiCotDiem !== 'Công thức') {
                 //Text
@@ -129,24 +149,21 @@ function convertDSHocSinh() {
     vueData.comments = {}
     for (var i = 0; i < dataJexcel.length; i++) {
         for (var j = 0; j < dsCotDiem.length; j++) {
-            const cellAdresss = jspreadsheet.helpers.getCellNameFromCoords(j + 3, i) // (j+3) là địa chỉ cột điểm đầu tiên, i là row let
+            const cellAdresss = jspreadsheet.helpers.getCellNameFromCoords(j + vueData.freezeColumns, i) // (j+3) là địa chỉ cột điểm đầu tiên, i là row let
             if (dsCotDiem[j].HexBackground) {
                 vueData.styleSheet[cellAdresss] = `background-color: ${dsCotDiem[j].HexBackground ?? 'unset'}`
             }
         }
     }
-    console.log('dsCotDiem', dsCotDiem)
-    console.log('dataJexcel', dataJexcel)
     for (var i = 0; i < dataJexcel.length; i++) {
         console.log('dataJexcel', dataJexcel[i])
         for (var j = 0; j < dsCotDiem.length; j++) {
-            const cellAdresss = jspreadsheet.helpers.getCellNameFromCoords(j + 3, i) // (j+3) là địa chỉ cột điểm đầu tiên, i là row let
+            const cellAdresss = jspreadsheet.helpers.getCellNameFromCoords(j + vueData.freezeColumns, i) // (j+3) là địa chỉ cột điểm đầu tiên, i là row let
             const obj = vueData.DSCotDiem.find(x => {
                 return x.HocSinhID === dataJexcel[i].HocSinhID && x.MaCotDiem === dsCotDiem[j].MaCotDiem && x.Is_Comment
             }
             )
             if (obj) {
-                console.log(i, dsCotDiem[j])
                 vueData.styleSheet[cellAdresss] = 'color: red;'
                 vueData.comments[cellAdresss] = 'THIS COMMENT'
             }
@@ -173,8 +190,8 @@ function onLuuDiem() {
     //B2: Vòng lặp bên trong để lặp các cột điểm của 1 học sinh
     for (let i = 0; i < val.length; i++) {
         for (let j = 0; j < DSCotDiem.length; j++) {
-            const cellAdresss = jspreadsheet.helpers.getCellNameFromCoords(j + 3, i) // (j+3) là địa chỉ cột điểm đầu tiên, i là row
-            let giaTriCotDiem = vueData.instance[0].getValueFromCoords(j + 3, i)
+            const cellAdresss = jspreadsheet.helpers.getCellNameFromCoords(j + vueData.freezeColumns, i) // (j+3) là địa chỉ cột điểm đầu tiên, i là row
+            let giaTriCotDiem = vueData.instance[0].getValueFromCoords(j + vueData.freezeColumns, i)
             let cotDiem_HS = {
                 HocSinhID: val[i].HocSinhID,
                 LopID: vueData.LopItem.LopID,
@@ -199,6 +216,7 @@ function onLuuDiem() {
             vueData.dataBeforeInsertToDB.push(cotDiem_HS)
         }
     }
+    console.log('dataBeforeInsertToDB', vueData.dataBeforeInsertToDB)
     let validIndex = vueData.dataBeforeInsertToDB.findIndex((item) => item.IsError === 1)
     if (validIndex != -1) {
         Vue.$toast.error('Cột điểm chỉ cho phép nhập thang điểm 10!', { position: 'top' })

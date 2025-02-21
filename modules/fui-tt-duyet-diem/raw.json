@@ -20,7 +20,8 @@
             "TinhTrang": null,
             "styleSheet": null,
             "comments": {},
-            "StatusButton": null
+            "StatusButton": null,
+            "freezeColumns": 3
         },
         {
             "getLop": {
@@ -61,15 +62,15 @@
                 "OUT": "DSCotDiem",
                 "CALLBACK": [
                     {
-                        "EXE": "convertDSHocSinh()"
-                    },
-                    {
                         "FUN": "fn_IsDisabledTinhTrangDiem",
                         "IN": {
-                            "TinhTrang": "vueData.DSCotDiem_ByMaNhomCotDiem[0]?.TinhTrang",
+                            "TinhTrang": "fn_ProrityTinhTrang(vueData.DSCotDiem).TinhTrang",
                             "type": "`TT"
                         },
                         "OUT": "TinhTrang"
+                    },
+                    {
+                        "EXE": "convertDSHocSinh()"
                     }
                 ]
             }

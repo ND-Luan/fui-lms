@@ -192,23 +192,28 @@ function fn_IsDisabledTinhTrangDiem({ TinhTrang, type }) {
     const obj = {
         color: getColorTinhTrangDiem(TinhTrang),
         isDisabled: false,
-        text: getTextTinhTrangDiem(TinhTrang)
+        text: getTextTinhTrangDiem(TinhTrang),
+        type: type,
+        TinhTrang: TinhTrang
     }
     if (type === 'GV') {
         if (arrStatusGV.indexOf(TinhTrang) >= 0) {
-            if (TinhTrang == 0 || TinhTrang == 1 || TinhTrang == 3) {
-                obj.isDisabled = false
-            } else {
-                obj.isDisabled = true
-            }
+            if (TinhTrang == 0 || TinhTrang  == 1 || TinhTrang == 3) obj.isDisabled = false
+            else obj.isDisabled = true
+
         }
     } else {
-        console.log(TinhTrang)
         //Tình trang 2: Gửi tổ trưởng
         if (TinhTrang === 2) obj.isDisabled = false
         else obj.isDisabled = true
     }
     return obj
+}
+
+function fn_ProrityTinhTrang(DSHocSinh) {
+    if (DSHocSinh?.length === 0) return
+    const hocSinhTinhTrangCaoNhat = DSHocSinh.reduce((max, hs) => hs.TinhTrang > max.TinhTrang ? hs : max, DSHocSinh[0]);
+    return hocSinhTinhTrangCaoNhat
 }
 
 

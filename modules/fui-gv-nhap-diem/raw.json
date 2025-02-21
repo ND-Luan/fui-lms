@@ -20,7 +20,8 @@
             "TinhTrang": null,
             "styleSheet": null,
             "comments": {},
-            "StatusButton": null
+            "StatusButton": null,
+            "freezeColumns": 3
         },
         {
             "getLop": {
@@ -61,15 +62,15 @@
                 "OUT": "DSCotDiem",
                 "CALLBACK": [
                     {
-                        "EXE": "convertDSHocSinh()"
-                    },
-                    {
                         "FUN": "fn_IsDisabledTinhTrangDiem",
                         "IN": {
-                            "TinhTrang": "vueData.DSCotDiem_ByMaNhomCotDiem[0]?.TinhTrang",
+                            "TinhTrang": "fn_ProrityTinhTrang(vueData.DSCotDiem).TinhTrang",
                             "type": "`GV"
                         },
                         "OUT": "TinhTrang"
+                    },
+                    {
+                        "EXE": "convertDSHocSinh()"
                     }
                 ]
             }
@@ -84,7 +85,6 @@
                     "TemplateBangDiemID": "vueData.MonHocItem.TemplateBangDiemID",
                     "KetQuaObjArr": "JSON.stringify(vueData.dataBeforeInsertToDB)"
                 },
-                "MESS": "Lưu điểm thành công",
                 "CALLBACK": [
                     {
                         "IF": "vueData.StatusButton === 'luu'",
@@ -94,12 +94,6 @@
                         "ELSE": {
                             "CALL": "udpKQHT_MonHocLop_TinhTrang_GuiDiem"
                         }
-                    },
-                    {
-                        "CALL": "getHocSinhBangDiem"
-                    },
-                    {
-                        "dataBeforeInsertToDB": []
                     }
                 ]
             }
@@ -113,18 +107,39 @@
                     "TinhTrang": 1,
                     "MaNhomCotDiem": "vueData.MaNhomCotDiemItem.MaNhomCotDiem",
                     "IsSendToManager": false
-                }
+                },
+                "MESS": "Lưu tạm điểm thành công",
+                "CALLBACK": [
+                    {
+                        "CALL": "getHocSinhBangDiem"
+                    },
+                    {
+                        "dataBeforeInsertToDB": []
+                    }
+                ]
             }
         },
         {
             "udpKQHT_MonHocLop_TinhTrang_GuiDiem": {
-                "API": "lms/KQHT_MonHocLop_TinhTrang_Udp",
-                "IN": {
-                    "MonHocLopID": "vueData.MonHocItem.MonHocLopID",
-                    "LopID": "vueData.LopItem.LopID",
-                    "TinhTrang": 2,
-                    "MaNhomCotDiem": "vueData.MaNhomCotDiemItem.MaNhomCotDiem",
-                    "IsSendToManager": true
+                "CONFIRM": "Xác nhận gửi điểm tới tổ tưởng",
+                "CALL": {
+                    "API": "lms/KQHT_MonHocLop_TinhTrang_Udp",
+                    "IN": {
+                        "MonHocLopID": "vueData.MonHocItem.MonHocLopID",
+                        "LopID": "vueData.LopItem.LopID",
+                        "TinhTrang": 2,
+                        "MaNhomCotDiem": "vueData.MaNhomCotDiemItem.MaNhomCotDiem",
+                        "IsSendToManager": true
+                    },
+                    "MESS": "Gửi điểm thành công",
+                    "CALLBACK": [
+                        {
+                            "CALL": "getHocSinhBangDiem"
+                        },
+                        {
+                            "dataBeforeInsertToDB": []
+                        }
+                    ]
                 }
             }
         },
