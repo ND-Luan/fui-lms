@@ -93,7 +93,6 @@ function renderDSHocSinh() {
     })
     vueData.items = items
 }
-
 function localStorageSetItem(item) {
     const lop = vueData.DSLop.find(x => x.LopID == item.LopID)
     localStorage.setItem('HocSinhSelected',
@@ -118,8 +117,6 @@ function localStorageSetItem(item) {
         title: 'Xem chi tiết học sinh ' + item.HocSinhID + ' - ' + item.HoTen,
         url: '/ph-report',
         onclose: () => {
-
         }
     });
 }
-
