@@ -418,7 +418,6 @@
 			},
 	
 			async handleCapChange(capId) {
-				debugger
 				this.resetCapDependentData()
 				
 				await Promise.all([

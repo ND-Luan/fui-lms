@@ -84,7 +84,7 @@ function renderHeaderTable() {
                 }
             ]
         },
-        {
+        vueData.ThangObj.Is_HienThiPhuHuynh && {
             "key": "NoiDungKienThuc",
             "el": "div",
             "align": "center",
@@ -101,7 +101,7 @@ function renderHeaderTable() {
             "title": "Nội dung kiến thức",
             "value": "NoiDungKienThuc",
         },
-        {
+        vueData.ThangObj.Is_HienThiPhuHuynh && {
             "key": "NoiDungNangLuc",
             "el": "div",
             "align": "center",
@@ -118,7 +118,7 @@ function renderHeaderTable() {
             "title": "Nội dung năng lực",
             "value": "NoiDungNangLuc",
         },
-        {
+        vueData.ThangObj.Is_HienThiPhuHuynh && {
             "key": "NoiDungHoatDongKhac",
             "el": "div",
             "align": "center",
@@ -134,6 +134,23 @@ function renderHeaderTable() {
             ],
             "title": "Nội dung hoạt động khác",
             "value": "NoiDungHoatDongKhac",
+        },
+        !vueData.ThangObj.Is_HienThiPhuHuynh && {
+            "key": "NhanXetCuoiNam",
+            "el": "div",
+            "align": "center",
+            "innerHTML": [
+                {
+                    "el": "uc-quill-editor",
+                    "attr": {
+                        ":key": "'NhanXetCuoiNam_HTML_' + item.HocSinhID",
+                        "v-model": "item.NhanXetCuoiNam_HTML",
+                        ":spellcheck": "false"
+                    }
+                }
+            ],
+            "title": "Nhận xét cuối năm",
+            "value": "NhanXetCuoiNam",
         },
         !vueData.TinhTrang && {
             "key": "v_btn",

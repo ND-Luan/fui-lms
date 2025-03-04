@@ -72,10 +72,8 @@ function convertDSHocSinh() {
                 return column
             }
         })
-
     //Nếu là gửi điểm thì freezecolumn = 4 để thêm cột từ chối
     vueData.freezeColumns = (vueData.TinhTrang?.TinhTrang === 2 || vueData.TinhTrang?.TinhTrang === 3) ? 4 : 3
-
     let columnThongTinHocSinh = [
         {
             type: 'text',
@@ -94,7 +92,6 @@ function convertDSHocSinh() {
             backGroundColor: null,
             wrap: true,
             readOnly: true
-
         },
         {
             type: 'text',
@@ -168,7 +165,7 @@ function convertDSHocSinh() {
             const obj = vueData.DSCotDiem.find(x => x.HocSinhID === dataJexcel[i].HocSinhID && x.MaCotDiem === dsCotDiem[j].MaCotDiem && x.Is_Comment)
             if (obj) {
                 vueData.styleSheet[cellAdresss] = 'color: red;'
-                vueData.comments[cellAdresss] = 'THIS COMMENT'
+                vueData.comments[cellAdresss] = 'Cột điểm do ' + dsCotDiem[j].NhapDiemUser + ' đã nhập'
             }
         }
     }
@@ -183,7 +180,6 @@ function validateSave(typeCell, value, min, max) {
 }
 function onTuChoiDiem() {
     vueData.StatusButton = 'tu-choi'
-
     vueData.dataBeforeInsertToDB = []
     let val = vueData.DSHocSinh
     //val là dữ liệu trên sheet jexcel
@@ -199,7 +195,6 @@ function onTuChoiDiem() {
             if (vueData.TinhTrang?.TinhTrang === 2 || vueData.TinhTrang?.TinhTrang === 3) ReasonReject = vueData.instance[0].getValueFromCoords(vueData.freezeColumns - 1, i)
             const cellAdresss = jspreadsheet.helpers.getCellNameFromCoords(j + vueData.freezeColumns, i) // (j+3) là địa chỉ cột điểm đầu tiên, i là row
             let giaTriCotDiem = vueData.instance[0].getValueFromCoords(j + vueData.freezeColumns, i)
-
             let cotDiem_HS = {
                 HocSinhID: val[i].HocSinhID,
                 LopID: vueData.LopItem.LopID,

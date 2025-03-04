@@ -1,533 +1,411 @@
 <template>
-    <div>
-        <v-dialog v-model="isOpen" max-width="1400">
-            <v-card>
-                <template #title>
-                    <div class="d-flex justify-space-between w-100">
-                        Cập nhật nhóm cột điểm {{ recordNhomCotDiem_Obj.TenNhomCotDiem_VI }}
-                        <v-icon @click="onHandleCloseModal()">mdi-close</v-icon>
-                    </div>
-                </template>
-                <v-card-text>
-                    <!-- <v-row>
-                        <v-col cols="5">
-                            <v-tabs v-model="tab" density="compact">
-                                <v-tab value="bien-he-thong">Biến hệ thống</v-tab>
-                                <v-tab value="ham">Hàm</v-tab>
-                            </v-tabs>
-                            <v-tabs-window v-model="tab">
-                                <v-tabs-window-item value="bien-he-thong"
-                                    style="height: 400px;overflow-y:  auto; scrollbar-width: thin;">
-                                    <v-expansion-panels variant="accordion" class="mt-1" flat>
-                                        <v-expansion-panel v-for="i in 5" :key="i">
-                                            <template #title>
-                                                Phân loại {{ i }}
-                                            </template>
-                                            <template #text>
-                                                <v-list lines="two" density="compact">
-                                                    <v-list-item v-for="n in 3" :key="n">
-                                                        <template #title>
-                                                            <div class=" w-100 d-flex justify-space-between">
-                                                                <span>Biến {{ n }}</span>
-                                                                <v-icon size="18"
-                                                                    @click="onCopy(n)">mdi-content-copy</v-icon>
-                                                            </div>
-                                                        </template>
-                                                        <template #subtitle>
-                                                            <span>Mô tả {{ n }}</span>
-                                                        </template>
-                                                    </v-list-item>
-                                                </v-list>
-                                            </template>
-                                        </v-expansion-panel>
-                                    </v-expansion-panels>
-                                </v-tabs-window-item>
-                                <v-tabs-window-item value="ham"
-                                    style="height: 400px;overflow-y:  auto; scrollbar-width: thin;">
-                                    <v-expansion-panels variant="accordion" class="mt-1" flat>
-                                        <v-expansion-panel v-for="i in 5" :key="i">
-                                            <template #title>
-                                                Phân loại {{ i }}
-                                            </template>
-                                            <template #text>
-                                                <v-list lines="two">
-                                                    <v-list-item v-for="n in 3" :key="n" :title="'Item ' + n"
-                                                        subtitle="Lorem ipsum dolor sit amet consectetur adipisicing elit"></v-list-item>
-                                                </v-list>
-                                            </template>
-                                        </v-expansion-panel>
-
-                                    </v-expansion-panels>
-                                </v-tabs-window-item>
-                            </v-tabs-window>
-                        </v-col>
-
-                        <v-col cols="7">
-                            <v-form>
-                                <v-row>
-                                    <v-col cols="3">
-                                        <v-text-field v-model="recordCotDiem.ThuTuCotDiem"
-                                            label="Thứ tự"></v-text-field>
-                                    </v-col>
-                                    <v-col cols="3">
-                                        <v-select v-model="recordCotDiem.GiaTriCotDiem" label="Giá trị cột điểm"
-                                            :items="DSLoaiDuLieu" item-title="TenLoaiDuLieu" item-value="value"
-                                            variant="outlined" density="compact" />
-                                    </v-col>
-                                    <v-col cols="3">
-                                        <v-select v-model="recordCotDiem.LoaiCotDiem" label="Loại cột điểm"
-                                            :items="DSLoaiCotDiem" item-title="TenLoaiCotDiem" item-value="value"
-                                            variant="outlined" density="compact" />
-                                    </v-col>
-                                    <v-col cols="3">
-                                        <v-select v-model="recordCotDiem.IsVisibleToParents" label="Hiển thị"
-                                            :items="DSHienThi" item-title="TenHienThi" item-value="Id"
-                                            variant="outlined" density="compact" />
-                                    </v-col>
-                                    <v-col cols="6">
-                                        <v-text-field v-model="recordCotDiem.IDHeThong"
-                                            label="ID hệ thống"></v-text-field>
-                                    </v-col>
-                                    <v-col cols="6">
-                                        <v-text-field v-model="recordCotDiem.MaCotDiem"
-                                            label="Mã cột điểm"></v-text-field>
-                                    </v-col>
-                                    <v-col cols="12">
-                                        <v-text-field v-model="recordCotDiem.TenHienThi_VI"
-                                            label="Tên hiển thị"></v-text-field>
-                                    </v-col>
-                                    <v-col cols="12">
-                                        <v-textarea v-model="recordCotDiem.MotaCotDiem_VI" label="Mô tả"
-                                            rows="2"></v-textarea>
-                                    </v-col>
-                                    <v-col cols="12">
-                                        <v-textarea v-model="recordCotDiem.Formula" label="Công thức"
-                                            rows="5"></v-textarea>
-                                    </v-col>
-                                </v-row>
-                            </v-form>
-                        </v-col>
-                    </v-row> -->
-                    <v-row>
-                        <v-col cols="2">
-                            <v-text-field label="Thứ tự nhóm" v-model="recordNhomCotDiem_Obj.ThuTuNhom"></v-text-field>
-                        </v-col>
-                        <v-col cols="2">
-                            <v-text-field label="Mã nhóm cột điểm"
-                                v-model="recordNhomCotDiem_Obj.MaNhomCotDiem"></v-text-field>
-                        </v-col>
-                        <v-col cols="4">
-                            <v-text-field label="Tên nhóm cột điểm (VI)"
-                                v-model="recordNhomCotDiem_Obj.TenNhomCotDiem_VI"></v-text-field>
-                        </v-col>
-                        <v-col cols="4">
-                            <v-text-field label="Tên nhóm cột điểm (EN)"
-                                v-model="recordNhomCotDiem_Obj.TenNhomCotDiem_EN"></v-text-field>
-                        </v-col>
-                    </v-row>
-                    <v-card flat class="mt-3">
-                        <template #title>
-                            <div class="d-flex justify-space-between align-center w-100">
-                                <span>Các cột điểm</span>
-                                <v-btn color="success" @click="onHandleAddCotDiem()"><v-icon> mdi-plus</v-icon>Thêm cột
-                                    điểm</v-btn>
-                            </div>
-                        </template>
-                        <v-data-table-virtual height="500" :headers="headers" :items="DSCotDiem" fixed-header
-                            density="comfortable" hide-default-footer class="mt-2">
-                            <template #item.TenCotDiem="{ item }">
-                                <b>{{ item.TenCotDiem_VI }}<i v-if="item.TenCotDiem_EN !== ''"> - {{
-                                    item.TenCotDiem_EN
-                                        }}</i></b>
-                            </template>
-                            <template #item.LoaiCotDiem="{ item }">
-                                <v-chip label :color="getColorChipLoaiCotDiem(item.LoaiCotDiem)">{{ item.LoaiCotDiem
-                                    }}</v-chip>
-                            </template>
-                            <template #item.GiaTriCotDiem="{ item }">
-                                <v-chip :color="getColorChipGiaTriCotDiem(item.GiaTriCotDiem)"
-                                    v-if="item.GiaTriCotDiem === 'text'">Nhận xét</v-chip>
-                                <v-chip :color="getColorChipGiaTriCotDiem(item.GiaTriCotDiem)"
-                                    v-if="item.GiaTriCotDiem === 'ICO_Star'"><v-icon>mdi-star</v-icon></v-chip>
-                                <v-chip :color="getColorChipGiaTriCotDiem(item.GiaTriCotDiem)"
-                                    v-else-if="item.GiaTriCotDiem === 'number'">Số</v-chip>
-                            </template>
-                            <template v-slot:item.Action="{ item }">
-                                <div class="d-flex">
-                                    <v-icon @click="onHandleEditCotDiem(item)" color="success" small class="mr-2">
-                                        mdi-square-edit-outline
-                                    </v-icon>
-                                    <v-icon @click="onHandleDeleteCotDiem(item)" color="red darken-3" small
-                                        class="mr-2">
-                                        mdi-trash-can-outline
-                                    </v-icon>
-
-                                </div>
-
-                            </template>
-                        </v-data-table-virtual>
-                    </v-card>
-                </v-card-text>
-                <v-card-actions>
-                    <v-spacer></v-spacer>
-                    <v-btn text="Đóng" @click="onHandleCloseModal()"></v-btn>
-                    <v-btn text="Cập nhật" @click="onHandleEdit()" color="green"></v-btn>
-                </v-card-actions>
-            </v-card>
-        </v-dialog>
-
-        <v-dialog v-model="isShowModalAddCotDiem" max-width="400px">
-            <v-card>
-                <template #title>
-                    <div class="d-flex justify-space-between w-100">
-                        Thêm cột điểm
-                        <v-icon @click="onHandleCloseModalAddCotDiem()">mdi-close</v-icon>
-                    </div>
-                </template>
-                <v-card-text>
-                    <v-row>
-                        <v-col cols="12">
-                            <v-text-field v-model="soCotDiem" label="Số cột điểm" variant="outlined"></v-text-field>
-                        </v-col>
-                    </v-row>
-                    <!-- <v-row dense>
-                        <v-col cols="6" v-for="(item, index) in 3">
-                            <v-row dense>
-                                <v-col cols="12">
-                                    <b> Cột điểm {{ index + 1 }}</b>
-                                </v-col>
-                                <v-col cols="2">
-                                    <v-text-field label="Mã CĐ" density="compact"></v-text-field>
-                                </v-col>
-                                <v-col cols="5">
-                                    <v-text-field label="Tên CĐ (VI)" density="compact"></v-text-field>
-                                </v-col>
-                                <v-col cols="5">
-                                    <v-text-field label="Tên CĐ (EN)" density="compact"></v-text-field>
-                                </v-col>
-                                <v-col cols="4">
-                                    <v-text-field label="Loại CĐ" density="compact"></v-text-field>
-                                </v-col>
-                                <v-col cols="4">
-                                    <v-text-field label="Giá trị CĐ" density="compact"></v-text-field>
-                                </v-col>
-                                <v-col cols="4">
-                                    <v-text-field label="ID hệ thống" density="compact"></v-text-field>
-                                </v-col>
-                            </v-row>
-                        </v-col>
-
-                    </v-row> -->
-                </v-card-text>
-                <v-card-actions>
-                    <v-spacer></v-spacer>
-                    <v-btn text="Đóng" @click="onHandleCloseModalAddCotDiem()"></v-btn>
-                    <v-btn text="Xác nhận" color="success" @click="onSubmitSoCotDiem()"></v-btn>
-                </v-card-actions>
-            </v-card>
-        </v-dialog>
-
-        <v-dialog v-model="isShowModalEditCotDiem" max-width="800px">
-            <v-card>
-                <template #title>
-                    <div class="d-flex justify-space-between w-100">
-                        Cập nhật cột điểm {{ titleEditCotDiem }}
-                        <v-icon @click="onHandleCloseModalEditCotDiem()">mdi-close</v-icon>
-                    </div>
-                </template>
-                <v-card-text>
-                    <v-form ref="validForm" v-model="valid">
-                        <v-row>
-                            <v-col cols="4">
-                                <v-text-field label="Thứ tự CĐ" v-model="recordCotDiem.ThuTuCotDiem"
-                                    :rules="rules.ThuTuCotDiem" density="compact">
-                                </v-text-field>
-                            </v-col>
-                            <v-col cols="8">
-
-                            </v-col>
-                            <v-col cols="4">
-                                <v-text-field label="Mã CĐ" v-model="recordCotDiem.MaCotDiem"
-                                    density="compact"></v-text-field>
-                            </v-col>
-                            <v-col cols="4">
-                                <v-text-field label="Tên CĐ (VI)" v-model="recordCotDiem.TenCotDiem_VI"
-                                    density="compact"></v-text-field>
-                            </v-col>
-                            <v-col cols="4">
-                                <v-text-field label="Tên CĐ (EN)" v-model="recordCotDiem.TenCotDiem_EN"
-                                    density="compact"></v-text-field>
-                            </v-col>
-                            <v-col cols="4">
-                                <v-select v-model="recordCotDiem.LoaiCotDiem" label="Loại cột điểm"
-                                    :items="DSLoaiCotDiem" item-title="TenLoaiCotDiem" item-value="value"
-                                    variant="outlined" density="compact" />
-                            </v-col>
-                            <v-col cols="4">
-                                <v-select v-model="recordCotDiem.GiaTriCotDiem" label="Giá trị cột điểm"
-                                    :items="DSLoaiDuLieu" item-title="TenLoaiDuLieu" item-value="value"
-                                    variant="outlined" density="compact" />
-                            </v-col>
-                            <v-col cols="4">
-                                <v-text-field label="ID hệ thống" v-model="recordCotDiem.IDHeThong"
-                                    density="compact"></v-text-field>
-                            </v-col>
-                            <v-col cols="12">
-                                <v-textarea label="Công thức" v-model="recordCotDiem.Formula"
-                                    density="compact"></v-textarea>
-                            </v-col>
-                        </v-row>
-                    </v-form>
-
-                </v-card-text>
-                <v-card-actions>
-                    <v-spacer></v-spacer>
-                    <v-btn text="Đóng" @click="onHandleCloseModalEditCotDiem()"></v-btn>
-                    <v-btn text="Xác nhận" color="success" @click="onSubmitEditCotDiem()"></v-btn>
-                </v-card-actions>
-            </v-card>
-        </v-dialog>
-    </div>
+	<div>
+		<uc-dialog v-model="modelValue.isShowModalEditCauHinhCotDiem" min-width="1400"
+			:title="'Cập nhật nhóm cột điểm '+recordNhomCotDiem.TenNhomCotDiem_VI" @onSubmit="onSubmitNhomCotDiem"
+			doneText="Cập nhật nhóm điểm">
+			<v-row>
+				<v-col cols="2">
+					<v-text-field v-model="recordNhomCotDiem_Obj.ThuTuNhom" label="Thứ tự nhóm"
+						:clearable="false"></v-text-field>
+				</v-col>
+				<v-col cols="2">
+					<v-text-field v-model="recordNhomCotDiem_Obj.MaNhomCotDiem" label="Mã nhóm cột điểm"
+						:clearable="false"></v-text-field>
+				</v-col>
+				<v-col cols="2">
+					<v-text-field v-model="recordNhomCotDiem_Obj.TenNhomCotDiem_VI" label="Tên nhóm cột điểm (VI)"
+						:clearable="false"></v-text-field>
+				</v-col>
+				<v-col cols="2">
+					<v-text-field v-model="recordNhomCotDiem_Obj.TenNhomCotDiem_EN" label="Tên nhóm cột điểm (EN)"
+						:clearable="false"></v-text-field>
+				</v-col>
+				<v-col cols="12">
+					<v-card flat border class="mt-3">
+						<template #title>
+							<div class="d-flex align-center w-100">
+								<span>Các cột điểm</span>
+								<v-spacer></v-spacer>
+								<v-btn color="success" @click="onHandleAddCotDiem">
+									<v-icon> mdi-plus</v-icon>
+									Thêm cột điểm
+								</v-btn>
+								<v-btn class="ml-2" color="primary" @click="onSubmitAllCotDiem">
+									Lưu {{CotDiemSelected.length}} cột điểm
+								</v-btn>
+								<v-btn class="ml-2" color="error" @click="onDeleteAllCotDiem">
+									Xóa tất cả cột điểm
+								</v-btn>
+							</div>
+						</template>
+						<v-data-table-virtual v-model="CotDiemSelected" show-select :item-value="(value) => value"
+							max-height="500" :headers="headers" :items="DSCotDiem" fixed-header density="comfortable"
+							hide-default-footer class="mt-2">
+							<template #item.ThuTuCotDiem="{item}">
+								<v-text-field v-model="item.ThuTuCotDiem" solo :clearable="false"></v-text-field>
+							</template>
+							<template #item.MaCotDiem="{item}">
+								<v-text-field v-model="item.MaCotDiem" solo :clearable="false"></v-text-field>
+							</template>
+							<template #item.TenCotDiem_VI="{ item }">
+								<v-text-field v-model="item.TenCotDiem_VI" solo :clearable="false"></v-text-field>
+							</template>
+							<template #item.TenCotDiem_EN="{ item }">
+								<v-text-field v-model="item.TenCotDiem_EN" solo :clearable="false"></v-text-field>
+							</template>
+							<template #item.LoaiCotDiem="{ item }">
+								<v-select v-model="item.LoaiCotDiem" :items="DSLoaiCotDiem" item-title="TenLoaiCotDiem"
+									item-value="value" solo :clearable="false" />
+							</template>
+							<template #item.GiaTriCotDiem="{ item }">
+								<v-select v-model="item.GiaTriCotDiem" :items="DSLoaiDuLieu" item-title="TenLoaiDuLieu"
+									item-value="value" solo :clearable="false" />
+							</template>
+							<template #item.Formula="{ item }">
+								<v-textarea v-model="item.Formula" :rows="1" solo :clearable="false"
+									hide-details="auto"></v-textarea>
+							</template>
+							<template #item.IDHeThong="{ item }">
+								<v-text-field v-model="item.IDHeThong" solo :clearable="false"></v-text-field>
+							</template>
+							<template #item.WidthCSS="{ item }">
+								<v-text-field v-model="item.WidthCSS" solo :clearable="false"
+									placeholder="Vui lòng nhập số..."></v-text-field>
+							</template>
+							<template #item.IsUserInput="{ item }">
+								<v-select v-model="item.IsUserInput" :items="DSHienThi" item-title="TenHienThi"
+									item-value="Id"></v-select>
+							</template>
+							<template #item.IsVisibleToParents="{ item }">
+								<v-select v-model="item.IsVisibleToParents" :items="DSHienThi" item-title="TenHienThi"
+									item-value="Id">
+								</v-select>
+							</template>
+							<template #item.IsSendToManager="{ item }">
+								<v-select v-model="item.IsSendToManager" :items="DSHienThi" item-title="TenHienThi"
+									item-value="Id">
+								</v-select>
+							</template>
+							<template #item.IsNegativeNumber="{ item }">
+								<v-select v-model="item.IsNegativeNumber" :items="DSHienThi" item-title="TenHienThi"
+									item-value="Id">
+								</v-select>
+							</template>
+							<template v-slot:item.Action="{ item }">
+								<v-icon @click="onHandleDeleteCotDiem(item)" color="red darken-3" small class="mr-2">
+									mdi-trash-can-outline
+								</v-icon>
+							</template>
+						</v-data-table-virtual>
+					</v-card>
+				</v-col>
+			</v-row>
+		</uc-dialog>
+	</div>
 </template>
 
 <script>
-export default {
-    props: ['isOpen', 'recordNhomCotDiem'],
-    emits: ['update:isOpen', 'onFinish'],
-    data() {
-        return {
-            isShowModalAddCotDiem: false,
-            isShowModalEditCotDiem: false,
-            tab: '',
-            recordCotDiem: {},
-            DSLoaiDuLieu: [
-                {
-                    value: 'number',
-                    TenLoaiDuLieu: 'Số'
-                },
-                {
-                    value: 'text',
-                    TenLoaiDuLieu: 'Nhận xét'
-                },
-                {
-                    value: 'ECO_Star',
-                    TenLoaiDuLieu: 'Ngôi sao'
-                }
-            ],
-            DSLoaiCotDiem: [
-                {
-                    value: 'Công thức',
-                    TenLoaiCotDiem: 'Công thức'
-                },
-                {
-                    value: 'Nhập',
-                    TenLoaiCotDiem: 'Nhập liệu'
-                }, {
-                    value: 'Hằng số',
-                    TenLoaiCotDiem: 'Hằng số'
-                },
-                {
-                    value: 'Tự động',
-                    TenLoaiCotDiem: 'Tự động'
-                }
-            ],
-            DSHienThi: [
-                {
-                    Id: 0,
-                    TenHienThi: 'Không'
-                },
-                {
-                    Id: 1,
-                    TenHienThi: 'Có'
-                },
-            ],
-            headers: [
-                {
-                    title: "#",
-                    key: "ThuTuCotDiem",
-                    minWidth: 100,
-                    align: 'center',
-                    sortable: false
-                },
-                {
-                    title: "Mã CĐ",
-                    key: "MaCotDiem",
-                    minWidth: 150,
-                    sortable: false
-                },
-                {
-                    title: 'Tên CĐ',
-                    key: 'TenCotDiem',
-                    sortable: false,
-                    minWidth: 200
-                },
-                {
-                    title: "Loại CĐ",
-                    key: "LoaiCotDiem",
-                    minWidth: 100,
-                    sortable: false
-                },
-                {
-                    title: "Giá trị CĐ",
-                    key: "GiaTriCotDiem",
-                    minWidth: 150,
-                    sortable: false
-                },
-                {
-                    title: "ID hệ thống",
-                    key: "IDHeThong",
-                    minWidth: 150,
-                    sortable: false
-                },
-                {
-                    title: "Công thức",
-                    key: "Formula",
-                    sortable: false,
-                    minWidth: 550,
-                },
-                {
-                    title: '',
-                    key: 'Action',
-                    align: 'center',
-                    sortable: false,
-                    minWidth: 50,
-                    right: 0,
-                    lastFixed: true,
-
-                },
-            ],
-            recordNhomCotDiem_Obj: {},
-            soCotDiem: null,
-            DSCotDiem: [],
-            titleEditCotDiem: '',
-            rules: {
-                ThuTuCotDiem: [
-                    v => !!v || 'Vui lòng nhập thứ tự cột điểm',
-                ],
-            },
-            valid: false
-
-        }
-    },
-    mounted() { },
-    computed: {
-
-    },
-    watch: {
-        isOpen: function (val) {
-            if (val) {
-                // this.loadDSCotDiem()
-            }
-        },
-        isShowModalEditCotDiem: function (val) {
-            if (val) {
-                this.titleEditCotDiem = this.recordCotDiem?.TenCotDiem_VI
-            }
-        },
-        recordNhomCotDiem: function (val) {
-            if (val) {
-                this.loadDSCotDiem()
-            }
-        },
-    },
-    methods: {
-        loadDSCotDiem() {
-            let receiveDSCotDiem = _.cloneDeep(this.recordNhomCotDiem)
-            //Lấy ra những thuộc tính không phải là mảng
-            let objNhomCotDiem = Object.entries(receiveDSCotDiem).reduce((result, [key, value]) => {
-                if (!Array.isArray(receiveDSCotDiem[key])) {
-                    result[key] = value
-                }
-                return result
-            }, {})
-            this.recordNhomCotDiem_Obj = _.cloneDeep(objNhomCotDiem)
-            // Đảm bảo số lượng phần tử không vượt quá mảng nhỏ nhất
-            const minLengthOf_receiveDSCotDiem = this.getMinArrayLength(receiveDSCotDiem)
-            //_.range(minLengthOf_receiveDSCotDiem) để vòng lặp từ 0 đến minLengthOf_receiveDSCotDiem -1
-            let handleDSCotDiem = _.range(minLengthOf_receiveDSCotDiem).map(index => {
-                return {
-                    ...receiveDSCotDiem.MaCotDiem[index],
-                }
-            })
-            this.DSCotDiem = handleDSCotDiem
-        },
-        onHandleCloseModal() {
-            this.$emit('update:isOpen', false)
-        },
-        async onHandleEdit() {
-            const { IsSuccess } = await TemplateBangDiemChiTiet_Service.Upd(params)
-            if (IsSuccess) {
-                Vue.$toast.success('Cập nhật cột điểm thành công!', { position: 'top' })
-                this.$emit('onFinish')
-                this.onHandleCloseModal()
-            }
-        },
-        onCopy(text) {
-            navigator.clipboard.writeText(text)
-            Vue.$toast.info('Đã sao chép ' + text, { position: 'top' })
-        },
-        getMinArrayLength(obj) {
-            // Lọc và lấy các độ dài của các thuộc tính là mảng
-            const lengths = Object.values(obj)
-                .filter(Array.isArray)
-                .map(arr => arr.length);
-            // Nếu có mảng, tìm độ dài nhỏ nhất; ngược lại trả về null
-            return lengths.length > 0 ? Math.min(...lengths) : null;
-        },
-        onHandleAddCotDiem() {
-            this.isShowModalAddCotDiem = true
-        },
-        onHandleEditCotDiem(item) {
-            this.isShowModalEditCotDiem = true
-            this.recordCotDiem = _.cloneDeep(item)
-            console.log('item', item)
-        },
-        onHandleDeleteCotDiem() { },
-        onHandleCloseModalAddCotDiem() {
-            this.isShowModalAddCotDiem = false
-            this.soCotDiem = null
-        },
-        onSubmitSoCotDiem() {
-            for (let i = 0; i < this.soCotDiem; i++) {
-                let obj = {}
-                obj = {
-                    ...this.DSCotDiem[0],
-                    ThuTuCotDiem: null,
-                    MaCotDiem: '',
-                    TenCotDiem_VI: '',
-                    TenCotDiem_EN: '',
-                    LoaiCotDiem: 'Nhập',
-                    GiaTriCotDiem: 'number',
-                    IDHeThong: '',
-                    Formula: ''
-                }
-                this.DSCotDiem.push(obj)
-            }
-            Vue.$toast.success('Thêm cột điểm thành công!', { position: 'top' })
-            this.onHandleCloseModalAddCotDiem()
-        },
-        onHandleCloseModalEditCotDiem() {
-            this.isShowModalEditCotDiem = false
-        },
-        async onSubmitEditCotDiem() {
-            const $this = this
-            this.$refs.validForm.validate()
-            console.log(this.valid)
-            if (!this.valid) return
-            const { IsSuccess } = await TemplateBangDiemChiTiet_Service.Upd({
-                ...$this.recordCotDiem,
-            })
-            if (IsSuccess) {
-                $this.onHandleCloseModalEditCotDiem()
-                // $this.onHandleCloseModal()
-                console.log('ref', this.$refs.validForm)
-                $this.$emit('onFinish', $this.recordNhomCotDiem_Obj.MaNhomCotDiem)
-                Vue.$toast.success('Cập nhật cột điểm thành công!', { position: 'top' })
-            }
-        },
-        getColorChipLoaiCotDiem: getColorChipLoaiCotDiem,
-        getColorChipGiaTriCotDiem: getColorChipGiaTriCotDiem
-    },
-}
+	export default {
+		props: {
+			modelValue: {
+				type: Object
+			},
+			recordNhomCotDiem: {
+				type: Object
+			},
+			recordMauBangDiem: {
+				type: Object
+			},
+		},
+		emits: ["onFinish"],
+		data() {
+			return {
+				isShowModalAddCotDiem: false,
+				isShowModalEditCotDiem: false,
+				recordCotDiem: {},
+				CotDiemSelected: [],
+				DSLoaiDuLieu: [
+					{
+						value: 'number',
+						TenLoaiDuLieu: 'Số'
+					},
+					{
+						value: 'text',
+						TenLoaiDuLieu: 'Nhận xét'
+					},
+					{
+						value: 'ECO_Star',
+						TenLoaiDuLieu: 'Ngôi sao'
+					}
+				],
+				DSLoaiCotDiem: [
+					{
+						value: 'Công thức',
+						TenLoaiCotDiem: 'Công thức'
+					},
+					{
+						value: 'Nhập',
+						TenLoaiCotDiem: 'Nhập liệu'
+					}, {
+						value: 'Hằng số',
+						TenLoaiCotDiem: 'Hằng số'
+					},
+					{
+						value: 'Tự động',
+						TenLoaiCotDiem: 'Tự động'
+					}
+				],
+				DSHienThi: [
+					{
+						Id: false,
+						TenHienThi: 'Không'
+					},
+					{
+						Id: true,
+						TenHienThi: 'Có'
+					},
+				],
+				headers: [
+					{
+						title: "Thứ tự CĐ",
+						key: "ThuTuCotDiem",
+						minWidth: 150,
+						align: 'center',
+						sortable: false
+					},
+					{
+						title: "Mã CĐ",
+						key: "MaCotDiem",
+						minWidth: 250,
+						sortable: false
+					},
+					{
+						title: 'Tên CĐ VI',
+						key: 'TenCotDiem_VI',
+						sortable: false,
+						minWidth: 200
+					},
+					{
+						title: 'Tên CĐ EN',
+						key: 'TenCotDiem_EN',
+						sortable: false,
+						minWidth: 200
+					},
+					{
+						title: "Loại CĐ",
+						key: "LoaiCotDiem",
+						minWidth: 200,
+						sortable: false
+					},
+					{
+						title: "Giá trị CĐ",
+						key: "GiaTriCotDiem",
+						minWidth: 200,
+						sortable: false
+					},
+					{
+						title: "ID hệ thống",
+						key: "IDHeThong",
+						minWidth: 200,
+						sortable: false
+					},
+					{
+						title: "Độ dài CĐ",
+						key: "WidthCSS",
+						minWidth: 200,
+						sortable: false
+					},
+					{
+						title: "Người dùng nhập",
+						key: "IsUserInput",
+						minWidth: 200,
+						sortable: false
+					},
+					{
+						title: "Hiển thị cho phụ huynh",
+						key: "IsVisibleToParents",
+						minWidth: 200,
+						sortable: false
+					},
+					{
+						title: "Gửi cho Manager",
+						key: "IsSendToManager",
+						minWidth: 200,
+						sortable: false
+					},
+					{
+						title: "Số âm",
+						key: "IsNegativeNumber",
+						minWidth: 200,
+						sortable: false
+					},
+					{
+						title: "Công thức",
+						key: "Formula",
+						sortable: false,
+						minWidth: 550,
+					},
+					{
+						title: '',
+						key: 'Action',
+						align: 'center',
+						sortable: false,
+						minWidth: 50,
+						right: 0,
+						lastFixed: true,
+	
+					},
+				],
+				recordNhomCotDiem_Obj: {},
+				soCotDiem: null,
+				DSCotDiem: [],
+				titleEditCotDiem: '',
+				rules: {
+					ThuTuCotDiem: [
+						v => !!v || 'Vui lòng nhập thứ tự cột điểm',
+					],
+				},
+				valid: false
+			}
+		},
+		watch: {
+			isShowModalEditCotDiem: function (val) {
+				if (val) {
+					this.titleEditCotDiem = this.recordCotDiem?.TenCotDiem_VI
+				}
+			},
+			recordNhomCotDiem: function (val) {
+				if (val) {
+					this.recordNhomCotDiem_Obj = _.cloneDeep(this.recordNhomCotDiem)
+					this.loadDSCotDiem()
+				}
+			},
+		},
+		methods: {
+			onHandleCloseModal() {
+				this.$emit('update:isOpen', false)
+			},
+			onHandleAddCotDiem() {
+				let ThuTuCotDiemLonNhat = 1
+				if (this.DSCotDiem.length > 0) {
+					const arrThuTuCotDiem = this.DSCotDiem.map(x => x.ThuTuCotDiem)
+					ThuTuCotDiemLonNhat = Math.max(...arrThuTuCotDiem)
+					ThuTuCotDiemLonNhat += 1
+				}
+	
+				ajaxCALL('lms/TemplateBangDiemChiTiet_By_One_Ins',
+					{
+						TemplateBangDiemID: this.recordMauBangDiem.TemplateBangDiemID,
+						IDHeThong: '',
+						MaCotDiem: null,
+						TenCotDiem_VI: null,
+						TenCotDiem_EN: null,
+						TenHienThi_VI: null,
+						TenHienThi_EN: null,
+						MotaCotDiem_VI: null,
+						MotaCotDiem_EN: null,
+						LoaiCotDiem: 'Nhập',
+						KieuDanhGiaID: 1,
+						GiaTriCotDiem: 'number',
+						LamTronBaoNhieuSo: 2,
+						Formula: null,
+						ThuTuCotDiem: ThuTuCotDiemLonNhat,
+						MaNhomCotDiem: this.recordNhomCotDiem.MaNhomCotDiem,
+						TenNhomCotDiem_VI: this.recordNhomCotDiem.TenNhomCotDiem_VI,
+						TenNhomCotDiem_EN: this.recordNhomCotDiem.TenNhomCotDiem_EN,
+						ThuTuNhom: this.recordNhomCotDiem.ThuTuNhom,
+						IsUserInput: false,
+						IsVisibleToParents: false,
+						IsSendToManager: false,
+						IsNegativeNumber: false,
+						Semester: null,
+					},
+					res => {
+						Vue.$toast.success('Thêm cột điểm thành công!', { position: 'top' })
+						this.loadDSCotDiem()
+					}
+				)
+			},
+			loadDSCotDiem(MaNhomCotDiem) {
+				ajaxCALL('lms/TemplateBangDiemChiTiet_DSCotDiem_Get_By_MaNhomCotDiem',
+					{
+						TemplateBangDiemID: this.recordMauBangDiem.TemplateBangDiemID,
+						MaNhomCotDiem: this.recordNhomCotDiem.MaNhomCotDiem,
+					}, res => {
+						this.DSCotDiem = res.data
+						this.CotDiemSelected = res.data
+					}
+				)
+			},
+			async onSubmitAllCotDiem() {
+				const JSON_CotDiem = this.CotDiemSelected.map(x => {
+					return {
+						...x,
+						TemplateBangDiemID: this.recordMauBangDiem.TemplateBangDiemID,
+						MaNhomCotDiem: this.recordNhomCotDiem.MaNhomCotDiem,
+					}
+				})
+				ajaxCALL('lms/TemplateBangDiemChiTiet_Multiple_Upd',
+					{
+						JSON_CotDiem: JSON_CotDiem
+					},
+					res => {
+						Vue.$toast.success('Lưu danh sách cột điểm thành công!', { position: 'top' })
+						this.loadDSCotDiem()
+					}
+				)
+			},
+			onHandleDeleteCotDiem(record) {
+				const $this = this
+				confirm({
+					title: `Bạn có muốn xóa cột điểm ${record.MaCotDiem}`,
+					action: function () {
+						ajaxCALL('lms/TemplateBangDiemChiTiet_Del', {
+							CotDiemID: record.CotDiemID,
+							TemplateBangDiemID: $this.recordMauBangDiem.TemplateBangDiemID,
+						}, res => {
+							Vue.$toast.success('Xóa cột điểm thành công', { position: 'top' })
+							$this.loadDSCotDiem()
+						})
+					}
+				})
+			},
+			onDeleteAllCotDiem(record) {
+				const $this = this
+				confirm({
+					title: `Bạn có muốn xóa tất cả cột điểm ?`,
+					action: function () {
+						ajaxCALL('lms/TemplateBangDiemChiTiet_DSCotDiem_Del_By_MaNhomCotDiem', {
+							TemplateBangDiemID: $this.recordMauBangDiem.TemplateBangDiemID,
+							MaNhomCotDiem: $this.recordNhomCotDiem.MaNhomCotDiem,
+						}, res => {
+							Vue.$toast.success('Xóa tất cả cột điểm thành công', { position: 'top' })
+							$this.loadDSCotDiem()
+						})
+					}
+				})
+			},
+			onSubmitNhomCotDiem() {
+				const $this = this
+				confirm({
+					title: `Bạn có chắc cập nhật nhóm cột điểm?`,
+					action: function () {
+						ajaxCALL('lms/TemplateBangDiemChiTiet_MaNhomCotDiem_Udp', {
+							TemplateBangDiemID: $this.recordMauBangDiem.TemplateBangDiemID,
+							MaNhomCotDiem: $this.recordNhomCotDiem.MaNhomCotDiem,
+							MaNhomCotDiem_Udp: $this.recordNhomCotDiem_Obj.MaNhomCotDiem,
+							TenNhomCotDiem_VI_Udp: $this.recordNhomCotDiem_Obj.TenNhomCotDiem_VI,
+							TenNhomCotDiem_EN_Udp: $this.recordNhomCotDiem_Obj.TenNhomCotDiem_EN,
+							ThuTuNhom_Udp: $this.recordNhomCotDiem_Obj.ThuTuNhom,
+						}, res => {
+							$this.modelValue.isShowModalEditCauHinhCotDiem = false
+							Vue.$toast.success('Cập nhật nhóm cột điểm thành công', { position: 'top' })
+							$this.loadDSCotDiem()
+						})
+					}
+				})
+			}
+		},
+	}
 </script>
 </script>

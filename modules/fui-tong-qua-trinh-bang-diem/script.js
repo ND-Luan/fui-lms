@@ -53,7 +53,7 @@ function convertDSHocSinh() {
                     title: x.TenCotDiem_VI,
                     name: x.MaCotDiem,
                     typeValue: x.GiaTriCotDiem,
-                    // width: 80,
+                    width: x.WidthCSS,
                     autoWidth: true,
                     decimal: '.',
                     mask: '0.00',
@@ -67,6 +67,7 @@ function convertDSHocSinh() {
                     type: 'text',
                     title: x.TenCotDiem_VI,
                     name: x.MaCotDiem,
+                    width: x.WidthCSS,
                     autoWidth: true,
                     typeValue: x.GiaTriCotDiem,
                     width: this.calculateColumnWidth(x.TenCotDiem_VI),
@@ -80,7 +81,7 @@ function convertDSHocSinh() {
                     type: 'html',
                     title: x.TenCotDiem_VI,
                     name: x.MaCotDiem,
-                    // width: 120,
+                    width: x.WidthCSS,
                     autoWidth: true,
                     typeValue: x.GiaTriCotDiem,
                     backGroundColor: x.HexBackground,
@@ -99,7 +100,7 @@ function convertDSHocSinh() {
             width: 120,
             backGroundColor: null,
             wrap: true,
-            // readOnly: true
+            readOnly: true
         },
         {
             type: 'text',
@@ -108,7 +109,7 @@ function convertDSHocSinh() {
             width: 120,
             backGroundColor: null,
             wrap: true,
-            //  readOnly: true
+            readOnly: true
         },
         {
             type: 'text',
@@ -118,7 +119,7 @@ function convertDSHocSinh() {
             backGroundColor: null,
             wrap: true,
             align: "left",
-            // readOnly: true
+            readOnly: true
         }
     ]
     headers = [...columnThongTinHocSinh, ...columnsCotDiem]
@@ -138,29 +139,10 @@ function convertDSHocSinh() {
         const newArrCotDiemExist = arrCotDiemExist.sort((a, b) => a.ThuTuNhom - b.ThuTuNhom)
         for (var item of vueData.DSNhomDiem_HocSinh) {
             const obj = newArrCotDiemExist.find(x => x.MaCotDiem === item.MaCotDiem)
-            if (obj) {
-                newArr.push(obj)
-            } else {
-                newArr.push({ ...hocSinh, ...item })
-            }
+            if (obj) newArr.push(obj)
+            else newArr.push({ ...hocSinh, ...item })
         }
         for (var cotDiemExist of newArr.sort((a, b) => a.ThuTuNhom - b.ThuTuNhom)) {
-            // let giaTri = null
-            // if (cotDiemExist.GiaTriCotDiem === 'number') {
-            //     if (cotDiemExist.KetQuaDanhGia_VI === '' || cotDiemExist.KetQuaDanhGia_VI === null) {
-            //         giaTri = null
-            //     } else {
-            //         giaTri = parseFloat(cotDiemExist?.KetQuaDanhGia_VI)
-            //     }
-            // } else {
-            //     if (cotDiemExist?.KetQuaDanhGia_VI) {
-            //         giaTri = cotDiemExist?.KetQuaDanhGia_VI
-            //     } else {
-            //         giaTri = null
-            //     }
-            // }
-            // //Text
-            // obj[cotDiemExist.MaCotDiem] = _.isNaN(giaTri) ? null : giaTri
             if (cotDiemExist.LoaiCotDiem !== 'Công thức') {
                 let giaTri = null
                 if (cotDiemExist.GiaTriCotDiem === 'number') {
@@ -194,16 +176,25 @@ function convertDSHocSinh() {
         indexRow++
         dataJexcel.push(obj)
     }
-    console.log('dataJexcel', dataJexcel)
-    vueData.DSCotDiem_ByMaNhomCotDiem = DSCotDiem_ByMaNhomCotDiem
     const firstStudent = dataJexcel[0]
     const dsCotDiem = vueData.DSCotDiem.filter(x => x.HocSinhID === firstStudent.HocSinhID)
     vueData.styleSheet = {}
+    vueData.comments = {}
     for (var i = 0; i < dataJexcel.length; i++) {
         for (var j = 0; j < dsCotDiem.length; j++) {
-            const cellAdresss = jspreadsheet.helpers.getCellNameFromCoords(j + 3, i) // (j+2) là địa chỉ cột điểm đầu tiên, i là row let
+            const cellAdresss = jspreadsheet.helpers.getCellNameFromCoords(j + vueData.freezeColumns, i) // (j+2) là địa chỉ cột điểm đầu tiên, i là row let
             if (dsCotDiem[j].HexBackground) {
-                vueData.styleSheet[cellAdresss] = `background-color: ${dsCotDiem[j].HexBackground}`
+                vueData.styleSheet[cellAdresss] = `background-color: ${dsCotDiem[j].HexBackground ?? 'unset'};`
+            }
+        }
+    }
+    for (var i = 0; i < dataJexcel.length; i++) {
+        for (var j = 0; j < dsCotDiem.length; j++) {
+            const cellAdresss = jspreadsheet.helpers.getCellNameFromCoords(j + vueData.freezeColumns, i) // (j+3) là địa chỉ cột điểm đầu tiên, i là row let
+            const obj = vueData.DSCotDiem.find(x => x.HocSinhID === dataJexcel[i].HocSinhID && x.MaCotDiem === dsCotDiem[j].MaCotDiem && x.Is_Comment)
+            if (obj) {
+                vueData.styleSheet[cellAdresss] = 'color: red;'
+                vueData.comments[cellAdresss] = 'Cột điểm do ' + dsCotDiem[j].NhapDiemUser + ' đã nhập'
             }
         }
     }
@@ -211,6 +202,7 @@ function convertDSHocSinh() {
     vueData.keyComp++
     vueData.columnHeader = headers
     vueData.DSHocSinh = dataJexcel
+    vueData.DSCotDiem_ByMaNhomCotDiem = DSCotDiem_ByMaNhomCotDiem
 }
 function validateSave(typeCell, value, min, max) {
     if ((typeCell === 'number' && value < min) || value > max) return 1

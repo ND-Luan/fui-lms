@@ -27,7 +27,7 @@
 							Xem biểu đồ
 						</v-btn>
 					</v-col>
-					<v-col>
+					<!-- <v-col>
 						<v-btn color="primary" variant="tonal" @click="onLoadChart({
 								  	HocKy: form.HocKy,
 								  	HocSinhID: form.HocSinhID,
@@ -37,7 +37,7 @@
 								  })">
 							Phân Tích Bằng AI
 						</v-btn>
-					</v-col>
+					</v-col> -->
 				</v-row>
 			</v-card-text>
 		</v-card>

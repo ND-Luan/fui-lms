@@ -198,7 +198,7 @@ function fn_IsDisabledTinhTrangDiem({ TinhTrang, type }) {
     }
     if (type === 'GV') {
         if (arrStatusGV.indexOf(TinhTrang) >= 0) {
-            if (TinhTrang == 0 || TinhTrang  == 1 || TinhTrang == 3) obj.isDisabled = false
+            if (TinhTrang == 0 || TinhTrang == 1 || TinhTrang == 3) obj.isDisabled = false
             else obj.isDisabled = true
 
         }
@@ -211,10 +211,15 @@ function fn_IsDisabledTinhTrangDiem({ TinhTrang, type }) {
 }
 
 function fn_ProrityTinhTrang(DSHocSinh) {
-    if (DSHocSinh?.length === 0) return
-    const hocSinhTinhTrangCaoNhat = DSHocSinh.reduce((max, hs) => hs.TinhTrang > max.TinhTrang ? hs : max, DSHocSinh[0]);
-    return hocSinhTinhTrangCaoNhat
+    if (!DSHocSinh?.length) return;
+
+    const priorityOrder = [4, 2, 3, 1, 0]; // Thứ tự ưu tiên
+
+    return DSHocSinh.reduce((max, hs) => {
+        return priorityOrder.indexOf(hs.TinhTrang) < priorityOrder.indexOf(max.TinhTrang) ? hs : max;
+    }, DSHocSinh[0]);
 }
+
 
 
 //------------------ SỬ DỤNG CHO CHART  ------------------------///

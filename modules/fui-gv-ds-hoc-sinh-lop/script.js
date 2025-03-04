@@ -24,7 +24,7 @@ function renderDSKhoi() {
             KhoiID: khoiId,
             CapID: capId
         }
-    });
+    }).filter(x => x.CapID === vueData.CapID);
     vueData.DSKhoi = DSKhoi;
     vueData.DSKhoi_Init = DSKhoi;
 }
@@ -112,6 +112,8 @@ function localStorageSetItem(item) {
             KhoiID: vueData.KhoiItem.KhoiID
         })
     )
+    const bottomNavigation = localStorage.getItem('tabBottomNavigation')
+    if (bottomNavigation === null) localStorage.setItem('tabBottomNavigation', 0)
     localStorage.setItem('IsPassRoleParent', true)
     openWindow({
         title: 'Xem chi tiết học sinh ' + item.HocSinhID + ' - ' + item.HoTen,

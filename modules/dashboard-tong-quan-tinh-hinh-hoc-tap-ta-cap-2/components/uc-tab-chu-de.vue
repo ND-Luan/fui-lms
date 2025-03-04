@@ -39,318 +39,270 @@
 </template>
 
 <script>
-export default {
-	props: {
-		capid: {
-			type: Number,
-			required: true
-		},
-		khoiid: {},
-		monhocid: {
-			type: Number,
-			required: true
-		}
-	},
-	data() {
-		return {
-			_,
-			form: {
-				KhoiID: this.khoiid,
-				MonHocItem: {
-					MonHocID: this.monhocid
-				},
-				MaNhomCotDiem: null,
-				MaCotDiem: null,
+	export default {
+		props: {
+			capid: {
+				type: Number,
+				required: true
 			},
-			DSMonHoc: [],
-			DSNhomDiem: [
-				{
-					TenNhomCotDiem_VI: "Theme 1",
-					MaNhomCotDiem: "Theme_1"
-				},
-				{
-					TenNhomCotDiem_VI: "Theme 2",
-					MaNhomCotDiem: "Theme_2"
-				},
-				{
-					TenNhomCotDiem_VI: "Theme 3",
-					MaNhomCotDiem: "Theme_3"
-				},
-				{
-					TenNhomCotDiem_VI: "Theme 4",
-					MaNhomCotDiem: "Theme_4"
-				}
-				// ,
-				// {
-				// 	TenNhomCotDiem_VI: "Theme 5",
-				// 	MaNhomCotDiem: "Theme_5"
-				// },
-				// {
-				// 	TenNhomCotDiem_VI: "Theme 6",
-				// 	MaNhomCotDiem: "Theme_6"
-				// },
-				// {
-				// 	TenNhomCotDiem_VI: "Theme 8",
-				// 	MaNhomCotDiem: "Theme_8"
-				// },
-
-			],
-			DSCotDiem: [],
-			isLoadingMaNhomCotDiem: false,
-			isLoadingMaCotDiem: false,
-			List_Chart_ChuDe_TheoLop: []
-		}
-	},
-	async mounted() {
-		// if (!this.form.KhoiID) return
-
-		// // this.isLoadingMaNhomCotDiem = true
-		// // this.isLoadingMaCotDiem = true
-
-		// // const MaNhomCotDiem = localStorage.getItem('MaNhomCotDiem_TA_C2')
-		// // const MaCotDiem = localStorage.getItem('MaCotDiem_TA_C2')
-
-		// if (MaNhomCotDiem && MaCotDiem) {
-		// 	// await this.onLoadDSMaNhomCotDiem(this.form.KhoiID)
-		// 	// 	.then(() => this.form.MaNhomCotDiem = MaNhomCotDiem)
-		// 	// 	.finally(() => this.isLoadingMaNhomCotDiem = false)
-		// 	// await this.onLoadDSMaCotDiem(MaNhomCotDiem, this.form.MonHocItem.TemplateBangDiemID)
-		// 	// 	.then(() => this.form.MaCotDiem = MaCotDiem)
-		// 	// 	.finally(() => this.isLoadingMaCotDiem = false)
-		// 	await this.onLoadChart({
-		// 		NienKhoa: 2024,
-		// 		CapID: this.capid,
-		// 		MonHocID: this.form.MonHocItem.MonHocID,
-		// 		MaNhomDiem: MaNhomCotDiem
-		// 	})
-		// }
-	},
-	computed: {},
-	watch: {
-		khoiid: function (KhoiID) {
-			this.form.KhoiID = KhoiID
-		},
-		'form.KhoiID': function (khoiID) {
-			if (khoiID) {
-				// this.onLoadDSMaNhomCotDiem(khoiID)
+			khoiid: {},
+			monhocid: {
+				type: Number,
+				required: true
 			}
 		},
-		'form.MaNhomCotDiem': function (MaNhomCotDiem_new, MaNhomCotDiem_old) {
-			// if (MaNhomCotDiem_new !== null && MaNhomCotDiem_old !== null) {
-			// 	localStorage.setItem('MaNhomCotDiem_TA_C2', MaNhomCotDiem_new)
-			// 	this.onLoadDSMaCotDiem(MaNhomCotDiem_new, this.form.MonHocItem.TemplateBangDiemID)
-			// 		.then(() => {
-			// 			const isValid = this.DSCotDiem.some(item => item.MaCotDiem === this.form.MaCotDiem);
-			// 			if (!isValid) {
-			// 				this.form.MaCotDiem = null; // Hoặc gán giá trị mặc định
-			// 			}
-			// 		});
-			// }
+		data() {
+			return {
+				_,
+				form: {
+					KhoiID: this.khoiid,
+					MonHocItem: {
+						MonHocID: this.monhocid
+					},
+					MaNhomCotDiem: null,
+					MaCotDiem: null,
+				},
+				DSMonHoc: [],
+				DSNhomDiem: [
+					{
+						TenNhomCotDiem_VI: "Theme 1",
+						MaNhomCotDiem: "Theme_1"
+					},
+					{
+						TenNhomCotDiem_VI: "Theme 2",
+						MaNhomCotDiem: "Theme_2"
+					},
+					{
+						TenNhomCotDiem_VI: "Theme 3",
+						MaNhomCotDiem: "Theme_3"
+					},
+					{
+						TenNhomCotDiem_VI: "Theme 4",
+						MaNhomCotDiem: "Theme_4"
+					}
+					// ,
+					// {
+					// 	TenNhomCotDiem_VI: "Theme 5",
+					// 	MaNhomCotDiem: "Theme_5"
+					// },
+					// {
+					// 	TenNhomCotDiem_VI: "Theme 6",
+					// 	MaNhomCotDiem: "Theme_6"
+					// },
+					// {
+					// 	TenNhomCotDiem_VI: "Theme 8",
+					// 	MaNhomCotDiem: "Theme_8"
+					// },
+	
+				],
+				DSCotDiem: [],
+				isLoadingMaNhomCotDiem: false,
+				isLoadingMaCotDiem: false,
+				List_Chart_ChuDe_TheoLop: []
+			}
 		},
-		'form.MaCotDiem': function (MaCotDiem) {
-			// if (MaCotDiem !== null) {
-			// 	localStorage.setItem('MaCotDiem_TA_C2', MaCotDiem)
-			// }
-		}
-	},
-	methods: {
-		onLoadDSMaNhomCotDiem(KhoiID) {
-			return new Promise(resolve => {
-				const promise = () => {
-					return new Promise(resolve => {
-						ajaxCALL('lms/MonHoc_GetByKhoiID',
+		watch: {
+			khoiid: function (KhoiID) {
+				this.form.KhoiID = KhoiID
+			},
+		},
+		methods: {
+			onLoadDSMaNhomCotDiem(KhoiID) {
+				return new Promise(resolve => {
+					const promise = () => {
+						return new Promise(resolve => {
+							ajaxCALL('lms/MonHoc_GetByKhoiID',
+								{
+									KhoiID: KhoiID
+								},
+								res => {
+									const monHocTiengAnh = res.data.find(x => x.MonHocID === this.form.MonHocItem.MonHocID)
+									this.form.MonHocItem = monHocTiengAnh
+									resolve()
+								}
+							)
+						})
+					}
+					promise().then(() => {
+						ajaxCALL('lms/NhomCauTrucDiem_Get_ByTemplateBangDiemID',
 							{
-								KhoiID: KhoiID
+								TemplateBangDiemID: this.form.MonHocItem.TemplateBangDiemID
 							},
 							res => {
-								const monHocTiengAnh = res.data.find(x => x.MonHocID === this.form.MonHocItem.MonHocID)
-								this.form.MonHocItem = monHocTiengAnh
+								this.DSNhomDiem = res.data
 								resolve()
-							}
-						)
+							})
 					})
-				}
-				promise().then(() => {
-					ajaxCALL('lms/NhomCauTrucDiem_Get_ByTemplateBangDiemID',
+				})
+			},
+			onLoadDSMaCotDiem(MaNhomCotDiem, TemplateBangDiemID) {
+				return new Promise(resolve => {
+					ajaxCALL('lms/MaCotDiem_Get_ByMaNhomCotDiem',
 						{
-							TemplateBangDiemID: this.form.MonHocItem.TemplateBangDiemID
+							TemplateBangDiemID: TemplateBangDiemID,
+							MaNhomCotDiem: MaNhomCotDiem
 						},
 						res => {
-							this.DSNhomDiem = res.data
+							this.DSCotDiem = res.data
 							resolve()
-						})
+						}
+					)
 				})
-			})
-		},
-		onLoadDSMaCotDiem(MaNhomCotDiem, TemplateBangDiemID) {
-			return new Promise(resolve => {
-				ajaxCALL('lms/MaCotDiem_Get_ByMaNhomCotDiem',
-					{
-						TemplateBangDiemID: TemplateBangDiemID,
-						MaNhomCotDiem: MaNhomCotDiem
-					},
-					res => {
-						this.DSCotDiem = res.data
-						resolve()
-					}
-				)
-			})
-		},
-		onLoadChart({ NienKhoa, CapID, MonHocID, MaNhomDiem }) {
-			return new Promise(resolve => {
-				ajaxCALL('lms/DashboardDiemKyNang_Get',
-					{
-						NienKhoa,
-						CapID,
-						MonHocID,
-						MaNhomDiem,
-						Is_KyNang: false
-					},
-					res => {
-						const DataChartHistogram_Khoi_API = res.data
-						this.convertChartLineTongDiem_ChuDe_TheoLop(res.data)
-						// this.convertChartLineTongDiem_KyNang_TheoKhoi(DataChartHistogram_Khoi_API)
-
-						// this.convertChartLine_KyNang_TheoKhoi(DataChartHistogram_Khoi_API)
-						// this.convertChartLine_KyNang_TheoLop(DataChartHistogram_Khoi_API)
-						resolve()
-					}
-				)
-			})
-		},
-		convertChartLineTongDiem_ChuDe_TheoLop(_rawData) {
-			this.List_Chart_ChuDe_TheoLop = []
-			const chart = {
-				"id": "chart-line",
-				"series": [],
-				"chart": {
-					"height": 350,
-					"type": "line",
-					"zoom": {
-						"enabled": false
-					}
-				},
-				"grid": {
-					"row": {
-						"colors": [
-							"#f3f3f3",
-							"transparent"
-						],
-						"opacity": 0.5
-					}
-				},
-				"dataLabels": {
-					"enabled": false
-				},
-				"stroke": {
-					"curve": "straight"
-				},
-				"xaxis": {
-					"categories": []
-				}
-			}
-			const sortData = this.sortTenLop(_rawData)
-			const uniqueLopID = [...new Set(sortData.map(x => parseInt(x.LopID)))]
-			for (const lopID of uniqueLopID) {
-				const lop = _rawData.find(x => parseInt(x.LopID) === lopID)
-				const rawData = _rawData.filter(x => parseInt(x.LopID) === lopID);
-
-				const stats = this.processData(rawData, 'TenCotDiem_EN');
-				const classes = Object.keys(stats);
-
-				const seriesData = [
-					{
-						name: 'Trung bình (Mean)',
-						type: 'line',
-						data: classes.map(lop => stats[lop].mean)
-					},
-					{
-						name: 'Trung vị (Median)',
-						type: 'line',
-						data: classes.map(lop => stats[lop].median)
-					},
-					{
-						name: 'Độ lệch chuẩn (Std Dev)',
-						type: 'line',
-						data: classes.map(lop => stats[lop].standardDeviation)
-					}
-				];
-				this.List_Chart_ChuDe_TheoLop.push({
-					...chart,
-					"id": "chart-line-theme-" + lopID,
-					series: seriesData,
-					chart: {
-						height: 450,
-						type: 'line',
-						zoom: {
-							enabled: true
+			},
+			onLoadChart({ NienKhoa, CapID, MonHocID, MaNhomDiem }) {
+				return new Promise(resolve => {
+					ajaxCALL('lms/DashboardDiemKyNang_Get',
+						{
+							NienKhoa,
+							CapID,
+							MonHocID,
+							MaNhomDiem,
+							Is_KyNang: false
 						},
+						res => {
+							const DataChartHistogram_Khoi_API = res.data
+							this.convertChartLineTongDiem_ChuDe_TheoLop(res.data)
+							resolve()
+						}
+					)
+				})
+			},
+			convertChartLineTongDiem_ChuDe_TheoLop(_rawData) {
+				this.List_Chart_ChuDe_TheoLop = []
+				const chart = {
+					"id": "chart-line",
+					"series": [],
+					"chart": {
+						"height": 350,
+						"type": "line",
 						toolbar: {
-							show: true
-						}
-					},
-					dataLabels: {
-						enabled: true,
-						style: {
-							fontSize: '10px'
-						}
-					},
-					stroke: {
-						curve: 'smooth',
-						width: [3, 3, 3]
-					},
-					title: {
-						text: 'Mean, Median, and Standard Deviation of Total Scores by Class ' + lop?.TenLop,
-						align: 'center'
-					},
-					grid: {
-						row: {
-							colors: ['#f3f3f3', 'transparent'],
-							opacity: 0.5
+							show: false
 						},
-					},
-					xaxis: {
-						categories: classes,
-						title: {
-							text: 'Cột điểm'
+						zoom: {
+							enabled: false,
 						}
 					},
-					yaxis: {
-						title: {
-							text: 'Scores'
-						},
-						labels: {
-							formatter: function (value) {
-								return value ? value.toFixed(2) : (value ?? 0);
-							}
+					"grid": {
+						"row": {
+							"colors": [
+								"#f3f3f3",
+								"transparent"
+							],
+							"opacity": 0.5
 						}
 					},
-					legend: {
-						position: 'top',
-						horizontalAlign: 'center'
+					"dataLabels": {
+						"enabled": false
 					},
-					colors: ['#008FFB', '#00E396', '#FEB019'],
-					tooltip: {
-						shared: true,
-						intersect: false,
-						y: {
-							formatter: function (value) {
-								return value.toFixed(2);
-							}
-						}
+					"stroke": {
+						"curve": "straight"
+					},
+					"xaxis": {
+						"categories": []
 					}
-				})
-			}
+				}
+				const sortData = this.sortTenLop(_rawData)
+				const uniqueLopID = [...new Set(sortData.map(x => parseInt(x.LopID)))]
+				for (const lopID of uniqueLopID) {
+					const lop = _rawData.find(x => parseInt(x.LopID) === lopID)
+					const rawData = _rawData.filter(x => parseInt(x.LopID) === lopID);
+	
+					const stats = this.processData(rawData, 'TenCotDiem_EN');
+					const classes = Object.keys(stats);
+	
+					const seriesData = [
+						{
+							name: 'Trung bình (Mean)',
+							type: 'line',
+							data: classes.map(lop => stats[lop].mean)
+						},
+						{
+							name: 'Trung vị (Median)',
+							type: 'line',
+							data: classes.map(lop => stats[lop].median)
+						},
+						{
+							name: 'Độ lệch chuẩn (Std Dev)',
+							type: 'line',
+							data: classes.map(lop => stats[lop].standardDeviation)
+						}
+					];
+					this.List_Chart_ChuDe_TheoLop.push({
+						...chart,
+						"id": "chart-line-theme-" + lopID,
+						series: seriesData,
+						chart: {
+							height: 450,
+							type: 'line',
+							toolbar: {
+								show: false
+							},
+							zoom: {
+								enabled: false,
+							}
+						},
+						dataLabels: {
+							enabled: true,
+							style: {
+								fontSize: '10px'
+							}
+						},
+						stroke: {
+							curve: 'smooth',
+							width: [3, 3, 3]
+						},
+						title: {
+							text: 'Mean, Median, and Standard Deviation of Total Scores by Class ' + lop?.TenLop,
+							align: 'center'
+						},
+						grid: {
+							row: {
+								colors: ['#f3f3f3', 'transparent'],
+								opacity: 0.5
+							},
+						},
+						xaxis: {
+							categories: classes,
+							title: {
+								text: 'Cột điểm'
+							}
+						},
+						yaxis: {
+							title: {
+								text: 'Scores'
+							},
+							labels: {
+								formatter: function (value) {
+									return value ? value.toFixed(2) : (value ?? 0);
+								}
+							}
+						},
+						legend: {
+							position: 'top',
+							horizontalAlign: 'center'
+						},
+						colors: ['#008FFB', '#00E396', '#FEB019'],
+						tooltip: {
+							shared: true,
+							intersect: false,
+							y: {
+								formatter: function (value) {
+									return value.toFixed(2);
+								}
+							}
+						}
+					})
+				}
+			},
+			calculateKDE,
+			linspace,
+			createHistogramDataWithFixedBins,
+			calculateBoxplotStats,
+			processData,
+			calculateMean,
+			calculateMedian,
+			calculateStandardDeviation,
+			sortTenLop,
 		},
-		calculateKDE,
-		linspace,
-		createHistogramDataWithFixedBins,
-		calculateBoxplotStats,
-		processData,
-		calculateMean,
-		calculateMedian,
-		calculateStandardDeviation,
-		sortTenLop,
-	},
-}
+	}
 </script>
