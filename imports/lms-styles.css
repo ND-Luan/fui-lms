@@ -25,6 +25,7 @@
     background: rgb(var(--v-theme-surface));
     right: 0;
     border-left: 1px solid rgba(var(--v-border-color), var(--v-border-opacity));
+    z-index: 10 !important;
 }
 
 .v-table__wrapper {

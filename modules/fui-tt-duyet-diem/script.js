@@ -232,3 +232,20 @@ function onDuyetDiem() {
     vueData.StatusButton = 'duyet'
     CALL("insKQHT_MonHocLop")
 }
+
+function renderDSHocSinh() {
+    console.log('runnnn')
+    const _dsHocSinh = []
+    const dsHocSinhID = [...new Set(vueData.DSHocSinh_API.map(x => x.HocSinhID))]
+    //Khởi tạo danh sách học sinh
+    for (var HocSinhID of dsHocSinhID) {
+        const objHocSinh = vueData.DSHocSinh_API.find(x => x.HocSinhID === HocSinhID)
+        if (objHocSinh) _dsHocSinh.push({
+            ...objHocSinh,
+            DSCotDiem: vueData.DSHocSinh_API.filter(x => x.HocSinhID === HocSinhID)
+        })
+    }
+    console.log('12321321dsHocSinhID', dsHocSinhID);
+    console.log('_dsHocSinh', _dsHocSinh)
+    vueData.DSHocSinh = _dsHocSinh
+}
