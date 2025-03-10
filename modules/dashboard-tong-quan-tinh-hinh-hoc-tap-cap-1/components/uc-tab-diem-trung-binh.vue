@@ -131,7 +131,7 @@
 						</v-card-text>
 					</v-card>
 				</v-col>
-				<v-col cols="6">
+				<!-- <v-col cols="6">
 					<v-card :flat="false">
 						<v-card-title class="text-primary d-flex align-center">
 							Tỉ lệ học sinh đạt và chưa đạt
@@ -147,7 +147,7 @@
 							<uc-chart-apex :options="Chart_TiLe_TheoLop" />
 						</v-card-text>
 					</v-card>
-				</v-col>
+				</v-col> -->
 			</v-row>
 		</v-card-text>
 	</v-card>

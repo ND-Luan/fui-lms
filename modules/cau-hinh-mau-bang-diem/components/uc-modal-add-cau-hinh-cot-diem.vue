@@ -6,6 +6,10 @@
 				<v-col cols="6">
 					<p class="text-title text-primary mb-2 font-weight-medium">Nhóm cột điểm</p>
 					<v-row>
+						<v-col cols="6">
+							<v-select v-model="formData.Semester" label="Học kỳ"
+								:items="['HK1', 'HK2']"></v-select>
+						</v-col>
 						<v-col cols="6"><v-text-field v-model="formData.ThuTuNhom"
 								label="Thứ tự nhóm CĐ"></v-text-field></v-col>
 						<v-col cols="6"><v-text-field v-model="formData.MaNhomCotDiem"
@@ -50,7 +54,7 @@
 				<v-col cols="6">
 					<p class="text-title text-primary mb-2 font-weight-medium">Hiển thị</p>
 					<v-row>
-						<v-col cols="6"><v-select v-model="formData.IsVisibleToParents" label="Hiển thị"
+						<v-col cols="6"><v-select v-model="formData.IsVisibleToParents" label="Hiển thị cho phụ huynh"
 								:items="DSHienThi" item-title="TenHienThi" item-value="value" variant="outlined"
 								density="compact" /></v-col>
 						<!-- <v-col cols="6"><v-select v-model="formData.KieuDanhGiaID" label="Kiểu đánh giá"

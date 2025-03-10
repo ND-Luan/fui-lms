@@ -32,7 +32,7 @@
 			</div>
 
 			<v-btn v-if="!isonbroading" block variant="tonal" color="primary"
-				@click="vueData.drawerLanguage = false">Đóng</v-btn>
+				@click="vueData.drawerLanguage = false">{{$t('message.close')}}</v-btn>
 		</v-card-text>
 	</v-card>
 </template>

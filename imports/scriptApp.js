@@ -279,13 +279,13 @@ $('document').ready(() => {
         messages: {
             en: {
                 message: {
+
                     language: 'English',
                     studyResult: 'STUDY RESULT',
                     selectedStudent: 'Selected student',
                     grade: "Grade",
                     class: "Class",
                     parent: "Parent",
-                    semester: "Semester",
                     Skill_Knowledge: 'SKILL - KNOWLEDGE',
                     Common_Ability: 'COMMON ABILITY',
                     Quality: 'QUALITY',
@@ -302,13 +302,17 @@ $('document').ready(() => {
                     next: "Next",
                     back: "Back",
                     confirm: "Confirm",
+                    close: "Close",
 
                     parent: "Parent",
+
+                    listTheme: "List Theme",
 
                     monthList: "Month list",
                     studentNotFound: "Student not found",
                     month: "Month",
                     semester: "Semester",
+                    selectSemester: "Select Semester",
 
                     rating: "Rating",
                     averageScore: "Average score",
@@ -316,7 +320,7 @@ $('document').ready(() => {
                     commentNotFound: "No comments yet",
 
                     announced: "Announced",
-                    notYetAnnounced: "Not yet announced"
+                    notYetAnnounced: "Not yet announced",
                 }
             },
             vi: {
@@ -327,7 +331,6 @@ $('document').ready(() => {
                     grade: "Khối",
                     class: "Lớp",
                     parent: "Phụ huynh",
-                    semester: "Kỳ thi",
                     Skill_Knowledge: 'KIẾN THỨC - KỸ NĂNG',
                     Common_Ability: 'NĂNG LỰC CHUNG',
                     Quality: 'PHẨM CHẤT',
@@ -342,13 +345,17 @@ $('document').ready(() => {
                     english: "Tiếng Anh",
                     next: "Tiếp tục",
                     confirm: "Xác nhận",
+                    close: "Đóng",
 
                     parent: "Phụ huynh",
+
+                    listTheme: "Danh sách chủ đề",
 
                     monthList: "Danh sách tháng",
                     studentNotFound: "Không tìm thấy học sinh",
                     month: "Tháng",
                     semester: "Học kỳ",
+                    selectSemester: "Chọn học kỳ",
 
                     rating: "Xếp loại",
                     averageScore: "Điểm trung bình",
@@ -356,7 +363,7 @@ $('document').ready(() => {
                     commentNotFound: "Chưa có nhận xét",
 
                     announced: "Đã công bố",
-                    notYetAnnounced: "Chưa công bố"
+                    notYetAnnounced: "Chưa công bố",
                 }
             }
         }

@@ -6,9 +6,9 @@
 		</v-skeleton-loader>
 		<v-fade-transition>
 			<v-list lines="two" v-if="!IsLoading">
-				<v-list-subheader>Danh sách chủ đề</v-list-subheader>
+				<v-list-subheader>{{$t('message.listTheme')}}</v-list-subheader>
 				<div v-for="(nhomDiem, index) in DSNhomDiem">
-					<v-list-item :title="nhomDiem.TenNhomCotDiem_VI" @click="onRedirect(nhomDiem)">
+					<v-list-item :title="renderTextTitle(nhomDiem)" @click="onRedirect(nhomDiem)">
 						<template v-slot:prepend>
 							<v-avatar>
 								<v-img src="/_cdn/lhbs-lms/icon_tieng_anh/icon_tieng_anh.png" :cover="false" />
@@ -30,7 +30,8 @@
 			return {
 				vueData,
 				DSNhomDiem: [],
-				IsLoading: false
+				IsLoading: false,
+				IsLanguage: JSON.parse(localStorage.getItem('IsLanguage'))
 			}
 		},
 		mounted() {
@@ -45,14 +46,25 @@
 				}
 			)
 		},
-		computed: {},
-		watch: {},
+		computed: {
+	
+		},
+		watch: {
+			'$i18n.locale': function (locale) {
+				console.log(locale,)
+				if (locale === 'en') this.IsLanguage = true;
+				else this.IsLanguage = false;
+			},
+		},
 		methods: {
 			onRedirect(nhomDiem) {
 				openWindow({
 					title: "Tiếng anh",
 					url: '/report-ket-qua-hoc-tap-tieng-anh-hoc-sinh?hsid=' + nhomDiem.HocSinhID + '&mnd=' + nhomDiem.MaNhomCotDiem
 				})
+			},
+			renderTextTitle(obj) {
+				return this.IsLanguage ? obj.TenNhomCotDiem_EN : obj.TenNhomCotDiem_VI
 			},
 			openWindow,
 			redirect

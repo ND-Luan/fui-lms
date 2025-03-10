@@ -95,7 +95,7 @@
 									@click="EditFormula(i)" color="success">mdi-square-edit-outline</v-icon>
 							</v-col>
 						</v-row>
-						<uc-dialog v-model='i.isEdit' max-width="500px" @onSubmit="SaveEditFormula(i)">
+						<uc-dialog v-model='i.isEdit' title="Công thức" max-width="500px" @onSubmit="SaveEditFormula(i)" doneText='Cập nhật'>
 							<v-row>
 								<v-col>
 									<v-textarea v-model="formData.Formula"></v-textarea>
@@ -109,28 +109,32 @@
 						:class="index !== 0 ? 'style-row-cot-diem' : ''">
 						<v-tooltip text="Người dùng nhập">
 							<template v-slot:activator="{ props }">
-								<v-chip v-if="i.IsUserInput" color="green" v-bind="props">
+								<v-chip :style="{visibility: i.IsUserInput ? 'unset' : 'hidden'}" color="green"
+									v-bind="props">
 									<v-icon> mdi-account-edit</v-icon>
 								</v-chip>
 							</template>
 						</v-tooltip>
 						<v-tooltip text="Hiển thị cho phụ huynh">
 							<template v-slot:activator="{ props }">
-								<v-chip v-if="i.IsVisibleToParents" color="orange" v-bind="props">
+								<v-chip :style="{visibility: i.IsVisibleToParents ? 'unset' : 'hidden'}" color="orange"
+									v-bind="props">
 									<v-icon> mdi-account-supervisor-circle</v-icon>
 								</v-chip>
 							</template>
 						</v-tooltip>
 						<v-tooltip text="Gửi cho manager">
 							<template v-slot:activator="{ props }">
-								<v-chip v-if="i.IsSendToManager" color="primary" v-bind="props">
+								<v-chip :style="{visibility: i.IsSendToManager ? 'unset' : 'hidden'}" color="primary"
+									v-bind="props">
 									<v-icon> mdi-account-tie</v-icon>
 								</v-chip>
 							</template>
 						</v-tooltip>
 						<v-tooltip text="Cho phép số âm">
 							<template v-slot:activator="{ props }">
-								<v-chip v-if="i.IsNegativeNumber" color="black" v-bind="props">
+								<v-chip :style="{visibility: i.IsNegativeNumber ? 'unset' : 'hidden'}" color="black"
+									v-bind="props">
 									<v-icon>mdi-numeric-negative-1</v-icon>
 								</v-chip>
 							</template>
@@ -194,11 +198,17 @@
 				],
 				headers: [
 					{
+						title: "Học kỳ",
+						value: "Semester",
+						minWidth: 100,
+						align: 'center'
+					},
+					{
 						title: 'Thứ tự nhóm CĐ',
 						key: 'ThuTuNhom',
 						align: 'center',
 						sortable: false,
-						minWidth: 80
+						minWidth: 150
 					},
 					{
 						title: 'Mã nhóm CĐ ',
@@ -298,23 +308,16 @@
 		methods: {
 			async loadDSNhomCotDiem() {
 				this.isLoadingTB = true
-				const response = await TemplateBangDiemChiTiet_Service.Get_ById({
+				ajaxCALL('lms/TemplateBangDiemChiTiet_Get_ByID', {
 					TemplateBangDiemID: this.recordMauBangDiem.TemplateBangDiemID
-				}).finally(() => this.isLoadingTB = false)
-				if (response.IsSuccess) {
-					//Lấy các nhóm cột điểm
-					let groupNhom = response.Result.reduce((rs, item, index) => {
-						if (!rs[item.TenNhomCotDiem_VI]) {
-							rs[item.TenNhomCotDiem_VI] = item.TenNhomCotDiem_VI
-						}
-						return rs
-					}, [])
+				}, res => {
+					let groupNhom = [...new Set(res.data.map(x => x.CotDiemID))]
 					let group = []
 					//Vòng lặp xử lý group các cột điểm có cùng nhóm cột điểm
-					for (let i in groupNhom) {
+					for (let i of groupNhom) {
 						//Tạo obj để render lên table
 						let obj = {}
-						let items = response.Result.filter(item => item.TenNhomCotDiem_VI === i) // filter lấy các cột điểm có cùng mã nhóm
+						let items = res.data.filter(item => item.CotDiemID === i) // filter lấy các cột điểm có cùng mã nhóm
 						obj.ThuTuCotDiem = items
 						obj.HienThi = items
 						obj.MaCotDiem = items
@@ -322,16 +325,19 @@
 						obj.LoaiCotDiem = items
 						obj.GiaTriCotDiem = items
 						obj.IDHeThong = items
-						obj.Formula = items.map(i => { return { ...i, isEdit: false } })
-						obj.TenNhomCotDiem_VI = i
+						obj.Formula = items.map(x => { return { ...x, isEdit: false } })
+						obj.TenNhomCotDiem_VI = items[0]?.TenNhomCotDiem_VI ?? ''
 						obj.TenNhomCotDiem_EN = items[0]?.TenNhomCotDiem_EN ?? ''
 						obj.ThuTuNhom = items[0]?.ThuTuNhom ?? ''
 						obj.MaNhomCotDiem = items[0]?.MaNhomCotDiem ?? ''
 						obj.TemplateBangDiemID = items[0]?.TemplateBangDiemID ?? 0
+						obj.Semester = items[0]?.Semester ?? ''
 						group.push(obj)
 					}
 					this.TBCauHinhCotDiem = group
-				}
+					this.isLoadingTB = false
+					console.log('TBCauHinhCotDiem', this.TBCauHinhCotDiem)
+				})
 			},
 			onOpenModalAddCauHinhCotDiem() {
 				this.action.isShowModalAddCauHinhCotDiem = true

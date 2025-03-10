@@ -101,57 +101,10 @@ export default {
 			List_Chart_ChuDe_TheoLop: []
 		}
 	},
-	async mounted() {
-		// if (!this.form.KhoiID) return
-
-		// // this.isLoadingMaNhomCotDiem = true
-		// // this.isLoadingMaCotDiem = true
-
-		// // const MaNhomCotDiem = localStorage.getItem('MaNhomCotDiem_TA_C2')
-		// // const MaCotDiem = localStorage.getItem('MaCotDiem_TA_C2')
-
-		// if (MaNhomCotDiem && MaCotDiem) {
-		// 	// await this.onLoadDSMaNhomCotDiem(this.form.KhoiID)
-		// 	// 	.then(() => this.form.MaNhomCotDiem = MaNhomCotDiem)
-		// 	// 	.finally(() => this.isLoadingMaNhomCotDiem = false)
-		// 	// await this.onLoadDSMaCotDiem(MaNhomCotDiem, this.form.MonHocItem.TemplateBangDiemID)
-		// 	// 	.then(() => this.form.MaCotDiem = MaCotDiem)
-		// 	// 	.finally(() => this.isLoadingMaCotDiem = false)
-		// 	await this.onLoadChart({
-		// 		NienKhoa: 2024,
-		// 		CapID: this.capid,
-		// 		MonHocID: this.form.MonHocItem.MonHocID,
-		// 		MaNhomDiem: MaNhomCotDiem
-		// 	})
-		// }
-	},
-	computed: {},
 	watch: {
 		khoiid: function (KhoiID) {
 			this.form.KhoiID = KhoiID
 		},
-		'form.KhoiID': function (khoiID) {
-			if (khoiID) {
-				// this.onLoadDSMaNhomCotDiem(khoiID)
-			}
-		},
-		'form.MaNhomCotDiem': function (MaNhomCotDiem_new, MaNhomCotDiem_old) {
-			// if (MaNhomCotDiem_new !== null && MaNhomCotDiem_old !== null) {
-			// 	localStorage.setItem('MaNhomCotDiem_TA_C2', MaNhomCotDiem_new)
-			// 	this.onLoadDSMaCotDiem(MaNhomCotDiem_new, this.form.MonHocItem.TemplateBangDiemID)
-			// 		.then(() => {
-			// 			const isValid = this.DSCotDiem.some(item => item.MaCotDiem === this.form.MaCotDiem);
-			// 			if (!isValid) {
-			// 				this.form.MaCotDiem = null; // Hoặc gán giá trị mặc định
-			// 			}
-			// 		});
-			// }
-		},
-		'form.MaCotDiem': function (MaCotDiem) {
-			// if (MaCotDiem !== null) {
-			// 	localStorage.setItem('MaCotDiem_TA_C2', MaCotDiem)
-			// }
-		}
 	},
 	methods: {
 		onLoadDSMaNhomCotDiem(KhoiID) {
@@ -226,8 +179,11 @@ export default {
 				"chart": {
 					"height": 350,
 					"type": "line",
-					"zoom": {
-						"enabled": false
+					zoom: {
+						enabled: false
+					},
+					toolbar: {
+						show: false
 					}
 				},
 				"grid": {
@@ -283,10 +239,10 @@ export default {
 						height: 450,
 						type: 'line',
 						zoom: {
-							enabled: true
+							enabled: false
 						},
 						toolbar: {
-							show: true
+							show: false
 						}
 					},
 					dataLabels: {

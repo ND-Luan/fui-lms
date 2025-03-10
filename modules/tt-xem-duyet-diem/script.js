@@ -12,10 +12,14 @@ function convertItems() {
             innerHTML: "<v-icon>mdi-check-circle</v-icon>"
         }
     })
-    vueData.headers = [{
+    const newHeader = [{
         "title": "Mẫu bảng điểm",
         "value": "TemplateBangDiemName"
-    }, ...headers]
+    }, ...headers].filter((item, index, self) =>
+        index === self.findIndex(t => t.key === item.key)
+    );
+    console.log(newHeader)
+    vueData.headers = newHeader
     const mergedData = vueData.items.reduce((acc, item) => {
         let existing = acc.find(x => x.TemplateBangDiemID === item.TemplateBangDiemID);
         if (!existing) {
@@ -25,5 +29,6 @@ function convertItems() {
         existing[item.MaNhomCotDiem] = true;
         return acc;
     }, []);
+    console.log('mergedData', mergedData)
     vueData.items = mergedData
 }

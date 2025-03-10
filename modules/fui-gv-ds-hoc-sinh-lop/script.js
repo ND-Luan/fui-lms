@@ -114,6 +114,8 @@ function localStorageSetItem(item) {
     )
     const bottomNavigation = localStorage.getItem('tabBottomNavigation')
     if (bottomNavigation === null) localStorage.setItem('tabBottomNavigation', 0)
+    const Semester = localStorage.getItem('Semester')
+    if (Semester === null) localStorage.setItem('Semester', 1)
     localStorage.setItem('IsPassRoleParent', true)
     openWindow({
         title: 'Xem chi tiết học sinh ' + item.HocSinhID + ' - ' + item.HoTen,

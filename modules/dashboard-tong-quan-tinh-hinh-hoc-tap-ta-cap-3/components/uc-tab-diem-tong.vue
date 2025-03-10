@@ -129,7 +129,6 @@ export default {
 							stroke: {
 								show: true,
 								width: 2,
-								colors: ['transparent']
 							},
 						}
 						resolve()

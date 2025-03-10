@@ -1,9 +1,19 @@
 <template>
 	<div>
-		<uc-dialog v-model="modelValue.isShowModalEditCauHinhCotDiem" min-width="1400"
-			:title="'Cập nhật nhóm cột điểm '+recordNhomCotDiem.TenNhomCotDiem_VI" @onSubmit="onSubmitNhomCotDiem"
+		<uc-dialog v-model="modelValue.isShowModalEditCauHinhCotDiem" min-width="1400" @onSubmit="onSubmitNhomCotDiem"
 			doneText="Cập nhật nhóm điểm">
+			<template #title>
+				<span>Cập nhật nhóm cột điểm <span class="text-red">-
+						{{recordNhomCotDiem.TenNhomCotDiem_VI}}</span></span>
+			</template>
 			<v-row>
+				<v-col cols="12" class="pb-0">
+					<p class="text-title text-primary mb-2 font-weight-medium">Nhóm cột điểm</p>
+				</v-col>
+				<v-col cols="2">
+					<v-select v-model="recordNhomCotDiem_Obj.Semester" label="Học kỳ"
+						:items="['HK1', 'HK2']"></v-select>
+				</v-col>
 				<v-col cols="2">
 					<v-text-field v-model="recordNhomCotDiem_Obj.ThuTuNhom" label="Thứ tự nhóm"
 						:clearable="false"></v-text-field>
@@ -20,10 +30,11 @@
 					<v-text-field v-model="recordNhomCotDiem_Obj.TenNhomCotDiem_EN" label="Tên nhóm cột điểm (EN)"
 						:clearable="false"></v-text-field>
 				</v-col>
+
 				<v-col cols="12">
 					<v-card flat border class="mt-3">
 						<template #title>
-							<div class="d-flex align-center w-100">
+							<div class="d-flex align-center w-100 text-primary">
 								<span>Các cột điểm</span>
 								<v-spacer></v-spacer>
 								<v-btn color="success" @click="onHandleAddCotDiem">
@@ -397,6 +408,7 @@
 							TenNhomCotDiem_VI_Udp: $this.recordNhomCotDiem_Obj.TenNhomCotDiem_VI,
 							TenNhomCotDiem_EN_Udp: $this.recordNhomCotDiem_Obj.TenNhomCotDiem_EN,
 							ThuTuNhom_Udp: $this.recordNhomCotDiem_Obj.ThuTuNhom,
+							Semester_Udp: $this.recordNhomCotDiem_Obj.Semester,
 						}, res => {
 							$this.modelValue.isShowModalEditCauHinhCotDiem = false
 							Vue.$toast.success('Cập nhật nhóm cột điểm thành công', { position: 'top' })
