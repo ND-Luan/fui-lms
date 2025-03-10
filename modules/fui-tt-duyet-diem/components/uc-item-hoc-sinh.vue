@@ -21,6 +21,7 @@
             <v-tabs v-model="tab">
                 <v-tab :value="0" :key="0">Môn học chính khóa</v-tab>
                 <v-tab :value="1" :key="1">Môn học bổ trợ</v-tab>
+                <v-tab :value="2" :key="2">Môn học Tiếng Anh</v-tab>
             </v-tabs>
             <v-tabs-window v-model="tab">
                 <v-tabs-window-item :value="0" :key="0">
@@ -58,6 +59,8 @@
                         </v-data-table>
                     </v-card>
                 </v-tabs-window-item>
+
+                <v-tabs-window-item :value="2" :key="2"></v-tabs-window-item>
             </v-tabs-window>
         </v-col>
     </v-row>
