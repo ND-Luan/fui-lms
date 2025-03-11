@@ -1,14 +1,22 @@
 function renderDSKhoi() {
-    const DSKhoi = Array.from({ length: 12 })
-        .fill(0)
-        .map((_, i) => {
-            return {
-                title: `Khối ${i + 1}`,
-                value: i + 1,
-            }
-        })
-    // vueData.KhoiID = DSKhoi[0].value
-    vueData.DSKhoi = DSKhoi
+    const DSKhoi = Array.from({ length: 12 }).map((_, i) => {
+        const value = i + 1;
+        let CapID;
+        if (value >= 1 && value <= 5) {
+            CapID = 1;
+        } else if (value >= 6 && value <= 9) {
+            CapID = 2;
+        } else if (value >= 10 && value <= 12) {
+            CapID = 3;
+        }
+        return {
+            title: `Khối ${value}`,
+            value,
+            CapID,
+        };
+    });
+    vueData.DSKhoi = DSKhoi.filter((x) => x.CapID === vueData.CapID);
+    return DSKhoi;
 }
 function convertDSHocSinh() {
     let headers = []
@@ -232,7 +240,6 @@ function onDuyetDiem() {
     vueData.StatusButton = 'duyet'
     CALL("insKQHT_MonHocLop")
 }
-
 function renderDSHocSinh() {
     console.log('runnnn')
     const _dsHocSinh = []

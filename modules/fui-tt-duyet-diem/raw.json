@@ -1,6 +1,7 @@
 {
     "data": [
         {
+            "CapID": "parseInt(capid)",
             "instance": null,
             "DSKhoi": [],
             "DSLop": [],
