@@ -6,7 +6,8 @@
 				<v-img :src="urlAvatarHocSinh + hocSinh?.HocSinhID" cover></v-img>
 			</v-avatar>
 			<p class="font-weight-medium">
-				{{ hocSinh?.HoTen }} <uc-gender v-model="hocSinh.Nu" />
+				{{ hocSinh?.HoTen }}
+				<uc-gender v-model="hocSinh.Nu" />
 			</p>
 			<p class="text-body-2">{{ hocSinh.HocSinhID }} • {{ hocSinh?.NgaySinh }}</p>
 			<v-divider class="my-2"></v-divider>
@@ -111,7 +112,7 @@
 									</v-btn>
 									<v-btn color="primary" @click="handleSendManager(getSpecialSubject('TV'))"
 										:disabled="isSubjectDisabled('TV')">
-										Gửi BGH
+										Duyệt điểm
 									</v-btn>
 								</div>
 							</div>
@@ -155,7 +156,7 @@
 									</v-btn>
 									<v-btn color="primary" @click="handleSendManager(getSpecialSubject('Toan'))"
 										:disabled="isSubjectDisabled('Toan')">
-										Gửi BGH
+										Duyệt điểm
 									</v-btn>
 								</div>
 							</div>
@@ -189,7 +190,7 @@
 									Từ chối
 								</v-btn>
 								<v-btn color="primary" @click="handleSendManager(item)"
-									:disabled="item.TinhTrang === 4"> Gửi BGH</v-btn>
+									:disabled="item.TinhTrang === 4"> Duyệt điểm</v-btn>
 							</div>
 						</template>
 					</v-data-table>
@@ -220,7 +221,7 @@
 								</v-btn>
 								<v-btn color="primary" @click="handleSendManager(monHoc)"
 									:disabled="monHoc.TinhTrang === 4">
-									Gửi BGH
+									Duyệt điểm
 								</v-btn>
 							</div>
 						</v-card-title>

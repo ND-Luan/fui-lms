@@ -1,6 +1,5 @@
 
 function formatPhanCong(dsGiaoVien, phanCongMoi) {
-    ;
     // Lấy thông tin giáo viên và môn học từ dsGiaoVien ban đầu
     const dataWithSubjects = dsGiaoVien.map((gv) => ({
         GiaoVienID: gv.GiaoVienID,

@@ -12,6 +12,7 @@ function processDataBeforePostAPI() {
     vueData.JSON_NhanXetThang = newData
 }
 function onLuuTamByHocSinhID(item) {
+    console.log('item', item)
     ajaxCALL('lms/NhanXetThang_Ins_By_NhanXetThangID', {
         ...item,
         LopID: vueData.LopID,
@@ -84,22 +85,109 @@ function renderHeaderTable() {
                 }
             ]
         },
-        vueData.ThangObj.Is_HienThiPhuHuynh && {
-            "key": "NoiDungKienThuc",
+        vueData.CapID === 1 && {
+            "key": "NoiDungToan_HTML",
             "el": "div",
             "align": "center",
             "innerHTML": [
                 {
                     "el": "uc-quill-editor",
                     "attr": {
-                        ":key": "'NoiDungKienThuc_HTML_' + item.HocSinhID",
-                        "v-model": "item.NoiDungKienThuc_HTML",
+                        ":key": "'NoiDungToan_HTML' + item.HocSinhID",
+                        "v-model": "item.NoiDungToan_HTML",
+                        ":spellcheck": "false"
+                    }
+                },
+                {
+                    "el": "v-text-field",
+                    "attr": {
+                        "v-model": "item.SoSao_Toan",
+                        "placeholder": "Nhập điểm...",
+                        "append-inner-icon": "mdi-star-four-points"
+                    }
+                }
+            ],
+            width: 280,
+            "title": "Nhận xét môn Toán",
+            "value": "NoiDungTiengViet_HTML",
+        },
+        vueData.CapID === 1 && {
+            "key": "NoiDungTiengViet_HTML",
+            "el": "div",
+            "align": "center",
+            "innerHTML": [
+                {
+                    "el": "uc-quill-editor",
+                    "attr": {
+                        ":key": "'NoiDungTiengViet_HTML' + item.HocSinhID",
+                        "v-model": "item.NoiDungTiengViet_HTML",
+                        ":spellcheck": "false"
+                    }
+                },
+                {
+                    "el": "v-text-field",
+                    "attr": {
+                        "v-model": "item.SoSao_TiengViet",
+                        "placeholder": "Nhập điểm...",
+                        "append-inner-icon": "mdi-star-four-points"
+                    }
+                }
+            ],
+            width: 280,
+            "title": "Nhận xét môn Tiếng Việt",
+            "value": "NoiDungTiengViet_HTML",
+        },
+        vueData.CapID === 1 && {
+            "key": "NoiDungMonHocKhac_HTML",
+            "el": "div",
+            "align": "center",
+            "innerHTML": [
+                {
+                    "el": "uc-quill-editor",
+                    "attr": {
+                        ":key": "'NoiDungMonHocKhac_HTML' + item.HocSinhID",
+                        "v-model": "item.NoiDungMonHocKhac_HTML",
                         ":spellcheck": "false"
                     }
                 }
             ],
-            "title": "Nội dung kiến thức",
-            "value": "NoiDungKienThuc",
+            width: 280,
+            "title": "Nhận xét môn học khác",
+            "value": "NoiDungMonHocKhac_HTML",
+        },
+        // vueData.ThangObj.Is_HienThiPhuHuynh && {
+        //     "key": "NoiDungKienThuc",
+        //     "el": "div",
+        //     "align": "center",
+        //     "innerHTML": [
+        //         {
+        //             "el": "uc-quill-editor",
+        //             "attr": {
+        //                 ":key": "'NoiDungKienThuc_HTML_' + item.HocSinhID",
+        //                 "v-model": "item.NoiDungKienThuc_HTML",
+        //                 ":spellcheck": "false"
+        //             }
+        //         }
+        //     ], width: 280,
+        //     "title": "Nội dung kiến thức",
+        //     "value": "NoiDungKienThuc",
+        // },
+        vueData.ThangObj.Is_HienThiPhuHuynh && {
+            "key": "NoiDungHoatDongKhac",
+            "el": "div",
+            "align": "center",
+            "innerHTML": [
+                {
+                    "el": "uc-quill-editor",
+                    "attr": {
+                        ":key": "'NoiDungHoatDongKhac_HTML_' + item.HocSinhID",
+                        "v-model": "item.NoiDungHoatDongKhac_HTML",
+                        ":spellcheck": "false"
+                    }
+                }
+            ], width: 280,
+            "title": "Hoạt động giáo dục khác",
+            "value": "NoiDungHoatDongKhac",
         },
         vueData.ThangObj.Is_HienThiPhuHuynh && {
             "key": "NoiDungNangLuc",
@@ -114,26 +202,9 @@ function renderHeaderTable() {
                         ":spellcheck": "false"
                     }
                 }
-            ],
-            "title": "Nội dung năng lực",
+            ], width: 280,
+            "title": "Phẩm chất - năng lực",
             "value": "NoiDungNangLuc",
-        },
-        vueData.ThangObj.Is_HienThiPhuHuynh && {
-            "key": "NoiDungHoatDongKhac",
-            "el": "div",
-            "align": "center",
-            "innerHTML": [
-                {
-                    "el": "uc-quill-editor",
-                    "attr": {
-                        ":key": "'NoiDungHoatDongKhac_HTML_' + item.HocSinhID",
-                        "v-model": "item.NoiDungHoatDongKhac_HTML",
-                        ":spellcheck": "false"
-                    }
-                }
-            ],
-            "title": "Nội dung hoạt động khác",
-            "value": "NoiDungHoatDongKhac",
         },
         !vueData.ThangObj.Is_HienThiPhuHuynh && {
             "key": "NhanXetCuoiNam",
@@ -148,7 +219,7 @@ function renderHeaderTable() {
                         ":spellcheck": "false"
                     }
                 }
-            ],
+            ], width: 280,
             "title": "Nhận xét cuối năm",
             "value": "NhanXetCuoiNam",
         },

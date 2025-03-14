@@ -53,12 +53,12 @@
 	            if (!valid) return
 	
 	            confirm({
-	                title: "Bạn có chắc chắn muốn gửi điểm cho BGH không?",
+	                title: "Bạn có chắc chắn muốn gửi điểm cho Tổ trưởng không?",
 	                action: function () {
 	                    ajaxCALL('lms/KQHT_MonHocLop_TinhTrang_Udp', {
 	                        MonHocLopID: $this.monHocItem.MonHocLopID,
 	                        LopID: vueData.LopItem.LopID,
-	                        TinhTrang: 4,
+	                        TinhTrang: 2,
 	                        MaNhomCotDiem: $this.form.MaNhomCotDiem,
 	                        IsSendToManager: 1
 	                    }, (res) => {

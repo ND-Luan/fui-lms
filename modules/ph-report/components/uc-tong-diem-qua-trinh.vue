@@ -1,5 +1,7 @@
 <template>
-	<div>Tính năng đang được phát triển</div>
+	<div class="pa-4 d-flex justify-center align-center text-caption" style="height: 100%">
+		Tính năng đang được phát triển.
+	</div>
 </template>
 
 <script>

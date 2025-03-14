@@ -1,6 +1,5 @@
 <template>
-	<uc-dialog v-model="modelValue.isShowDialogApprove" title="Gửi Ban Giám Hiệu" doneText="Xác nhận"
-		@onSubmit="onSubmit">
+	<uc-dialog v-model="modelValue.isShowDialogReject" title="Từ chối" doneText="Từ chối" @onSubmit="onSubmit">
 		<v-form ref="form">
 			<v-row>
 				<v-col cols="12">
@@ -9,13 +8,16 @@
 						:rules="[(v) => !!v || 'Bạn chưa chọn nhóm cột điểm']">
 						<template v-slot:item="{ props: itemProps, item }">
 							<v-list-item v-bind="itemProps"
-								:disabled="item.raw.TinhTrang === 3 || item.raw.TinhTrang === 4">
+								:disabled="item.raw.TinhTrang === 5 || item.raw.TinhTrang === 6">
 								<template v-slot:append>
 									<v-chip :color="item.raw.MauTinhTrang">{{ item.raw.TenTinhTrang }}</v-chip>
 								</template>
 							</v-list-item>
 						</template>
 					</v-select>
+				</v-col>
+				<v-col cols="12">
+					<v-textarea v-model="form.ReasonReject" label="Lý do từ chối"></v-textarea>
 				</v-col>
 			</v-row>
 		</v-form>
@@ -41,8 +43,16 @@
 	        return {
 	            form: {
 	                MaNhomCotDiem: null,
+	                ReasonReject: null
 	            },
 	            vueData
+	        }
+	    },
+	    watch: {
+	        'modelValue.isShowDialogReject': function (isShow) {
+	            if (isShow) {
+	                console.log(this.monHocItem);
+	            }
 	        }
 	    },
 	    methods: {
@@ -53,16 +63,17 @@
 	            if (!valid) return
 	
 	            confirm({
-	                title: "Bạn có chắc chắn muốn gửi điểm cho BGH không?",
+	                title: "Bạn có chắc chắn muốn từ chối không?",
 	                action: function () {
 	                    ajaxCALL('lms/KQHT_MonHocLop_TinhTrang_Udp', {
 	                        MonHocLopID: $this.monHocItem.MonHocLopID,
 	                        LopID: vueData.LopItem.LopID,
-	                        TinhTrang: 4,
+	                        TinhTrang: 5,
 	                        MaNhomCotDiem: $this.form.MaNhomCotDiem,
-	                        IsSendToManager: 1
+	                        IsSendToManager: 0,
+							ReasonReject_TT: $this.form.ReasonReject
 	                    }, (res) => {
-	                        $this.modelValue.isShowDialogApprove = false
+	                        $this.modelValue.isShowDialogReject = false
 	                        $this.$emit('onFinishDialog')
 	                    })
 	                }

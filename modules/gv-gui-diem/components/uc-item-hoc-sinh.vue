@@ -105,13 +105,9 @@
 
 								<!-- Phần nút thao tác -->
 								<div class="d-flex ga-2">
-									<v-btn color="error" @click="handleReject(getSpecialSubject('TV'))"
-										:disabled="isSubjectDisabled('TV')">
-										Từ chối
-									</v-btn>
 									<v-btn color="primary" @click="handleSendManager(getSpecialSubject('TV'))"
 										:disabled="isSubjectDisabled('TV')">
-										Gửi BGH
+										Gửi điểm
 									</v-btn>
 								</div>
 							</div>
@@ -149,13 +145,9 @@
 
 								<!-- Phần nút thao tác -->
 								<div class="d-flex ga-2">
-									<v-btn color="error" @click="handleReject(getSpecialSubject('Toan'))"
-										:disabled="isSubjectDisabled('Toan')">
-										Từ chối
-									</v-btn>
 									<v-btn color="primary" @click="handleSendManager(getSpecialSubject('Toan'))"
 										:disabled="isSubjectDisabled('Toan')">
-										Gửi BGH
+										Gửi điểm
 									</v-btn>
 								</div>
 							</div>
@@ -185,11 +177,8 @@
 						</template>
 						<template #item.actions="{ item }">
 							<div class="d-flex ga-2">
-								<v-btn color="error" @click="handleReject(item)" :disabled="item.TinhTrang === 4">
-									Từ chối
-								</v-btn>
 								<v-btn color="primary" @click="handleSendManager(item)"
-									:disabled="item.TinhTrang === 4"> Gửi BGH</v-btn>
+									:disabled="item.TinhTrang === 4"> Gửi điểm</v-btn>
 							</div>
 						</template>
 					</v-data-table>
@@ -215,12 +204,9 @@
 								</div>
 							</div>
 							<div class="d-flex ga-2">
-								<v-btn color="error" @click="handleReject(monHoc)" :disabled="monHoc.TinhTrang === 4">
-									Từ chối
-								</v-btn>
 								<v-btn color="primary" @click="handleSendManager(monHoc)"
 									:disabled="monHoc.TinhTrang === 4">
-									Gửi BGH
+									Gửi điểm
 								</v-btn>
 							</div>
 						</v-card-title>

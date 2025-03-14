@@ -1,56 +1,55 @@
 <template>
-	<div>
-		<v-divider></v-divider>
-		<v-list lines="two">
-			<v-list-subheader> {{ $t('message.monthList') }}</v-list-subheader>
-			<div v-for="(thang, index) in vueData.DSHocTapThang">
-				<v-list-item :title="renderTextTitle(thang)" @click="onRedirect(thang)">
-					<template v-slot:prepend>
-						<v-avatar>
-							<v-img :src="thang.IconUrl" :cover="false" />
-						</v-avatar>
-					</template>
-					<template v-slot:append>
-						<v-chip v-if="thang.TinhTrang === 4" :color="thang.MauTinhTrang">{{ $t('message.announced')
-							}}</v-chip>
-						<v-chip v-else>{{ $t('message.notYetAnnounced') }}</v-chip>
-					</template>
-				</v-list-item>
-				<v-divider inset v-if="index !== vueData.DSHocTapThang.length - 1"></v-divider>
-			</div>
-		</v-list>
-	</div>
+	<v-divider></v-divider>
+	<v-list lines="two" style="height: 100%">
+		<v-list-subheader> {{ $t('message.monthList') }}</v-list-subheader>
+		<div v-for="(thang, index) in vueData.DSHocTapThang">
+			<v-list-item :title="renderTextTitle(thang)" @click="onRedirect(thang)">
+				<template v-slot:prepend>
+					<v-avatar>
+						<v-img :src="thang.IconUrl" :cover="false" />
+					</v-avatar>
+				</template>
+				<template v-slot:append>
+					<v-chip v-if="thang.TinhTrang === 4" :color="thang.MauTinhTrang">
+						{{ $t('message.announced') }}</v-chip>
+					<v-chip v-else>{{ $t('message.notYetAnnounced') }}</v-chip>
+				</template>
+			</v-list-item>
+			<v-divider inset v-if="index !== vueData.DSHocTapThang.length - 1"></v-divider>
+		</div>
+		<uc-empty v-if="vueData.DSHocTapThang.length === 0" class="d-flex justify-center align-center " style="height: calc(100vh - 317px)" />
+	</v-list>
 </template>
 
 <script>
-export default {
-	props: [],
-	data() {
-		return {
-			vueData,
-			IsLanguage: JSON.parse(localStorage.getItem('IsLanguage'))
-		}
-	},
-	mounted() { },
-	computed: {},
-	watch: {
-		'$i18n.locale': function (locale) {
-			console.log(locale,)
-			if (locale === 'en') this.IsLanguage = true;
-			else this.IsLanguage = false;
+	export default {
+		props: [],
+		data() {
+			return {
+				vueData,
+				IsLanguage: JSON.parse(localStorage.getItem('IsLanguage'))
+			}
 		},
-	},
-	methods: {
-		onRedirect(thangObj) {
-			openWindow({
-				title: "Kết quả học tập",
-				url: `report-ket-qua-hoc-tap-thang-hoc-sinh?id=${vueData.HocSinhSelected.StudentID}&lop_nxtid=${thangObj.Lop_NhanXetThangID}`
-			})
+		mounted() { },
+		computed: {},
+		watch: {
+			'$i18n.locale': function (locale) {
+				console.log(locale,)
+				if (locale === 'en') this.IsLanguage = true;
+				else this.IsLanguage = false;
+			},
 		},
-		renderTextTitle(thang) {
-			return this.IsLanguage ? thang.Thang_HienThi_EN : thang.Thang_HienThi_VI
+		methods: {
+			onRedirect(thangObj) {
+				openWindow({
+					title: "Kết quả học tập",
+					url: `report-ket-qua-hoc-tap-thang-hoc-sinh?id=${vueData.HocSinhSelected.StudentID}&lop_nxtid=${thangObj.Lop_NhanXetThangID}`
+				})
+			},
+			renderTextTitle(thang) {
+				return this.IsLanguage ? thang.Thang_HienThi_EN : thang.Thang_HienThi_VI
+			},
+			redirect,
 		},
-		redirect,
-	},
-}
+	}
 </script>

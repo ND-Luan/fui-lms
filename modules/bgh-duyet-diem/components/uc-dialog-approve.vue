@@ -1,5 +1,5 @@
 <template>
-	<uc-dialog v-model="modelValue.isShowDialogApprove" title="Gửi Ban Giám Hiệu" doneText="Xác nhận"
+	<uc-dialog v-model="modelValue.isShowDialogApprove" title="Công bố phụ huynh" doneText="Xác nhận"
 		@onSubmit="onSubmit">
 		<v-form ref="form">
 			<v-row>
@@ -9,7 +9,7 @@
 						:rules="[(v) => !!v || 'Bạn chưa chọn nhóm cột điểm']">
 						<template v-slot:item="{ props: itemProps, item }">
 							<v-list-item v-bind="itemProps"
-								:disabled="item.raw.TinhTrang === 3 || item.raw.TinhTrang === 4">
+								:disabled="item.raw.TinhTrang === 5 || item.raw.TinhTrang === 6">
 								<template v-slot:append>
 									<v-chip :color="item.raw.MauTinhTrang">{{ item.raw.TenTinhTrang }}</v-chip>
 								</template>
@@ -58,9 +58,9 @@
 	                    ajaxCALL('lms/KQHT_MonHocLop_TinhTrang_Udp', {
 	                        MonHocLopID: $this.monHocItem.MonHocLopID,
 	                        LopID: vueData.LopItem.LopID,
-	                        TinhTrang: 4,
+	                        TinhTrang: 6,
 	                        MaNhomCotDiem: $this.form.MaNhomCotDiem,
-	                        IsSendToManager: 1
+	                        IsSendToManager: 0
 	                    }, (res) => {
 	                        $this.modelValue.isShowDialogApprove = false
 	                        $this.$emit('onFinishDialog')

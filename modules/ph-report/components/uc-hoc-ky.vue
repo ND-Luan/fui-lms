@@ -1,57 +1,63 @@
 <template>
 	<div>
 		<v-divider></v-divider>
-		<v-list>
-			<v-list-subheader> {{ $t('message.semester') }}</v-list-subheader>
-			<div class="d-flex flex-column ga-4 mb-16">
-				<v-card>
-					<v-card-title class="d-flex ">
-						<img src="/_cdn/lhbs-lms/icon_hk.png" height="30" />
-						<p class="ml-4"> {{$t('message.semester')}} {{HocKy}}</p>
-					</v-card-title>
-					<v-divider></v-divider>
-					<v-expansion-panels flat multiple>
-						<v-expansion-panel v-for="(monHocGroup, index) in DSMonHocGroup" :key="index">
-							<v-expansion-panel-title expand-icon="mdi-menu-down">
-								<div class="d-flex align-center ga-4">
-									<v-img :src="monHocGroup.icon" height="30" width="30"></v-img>
-									<p>{{ monHocGroup.Name_VI }}</p>
-								</div>
-								<div></div>
-							</v-expansion-panel-title>
-							<v-expansion-panel-text>
-								<div class="pa-4 d-flex flex-column ga-4">
-									<v-card :color="monHoc.Color" v-for="monHoc in DSMonHoc_NhomDiem">
-										<v-card-text>
-											<p class="font-weight-medium">{{ monHoc.MonHocName }}</p>
-										</v-card-text>
-										<v-list>
-											<div v-for="nhomDiem of monHoc.DSNhomDiem" :key="nhomDiem">
-												<v-list-subheader class="text-primary font-weight-medium">
-													<v-icon size="small" class="mb-1 me-1">mdi-star-four-points</v-icon>
-													{{IsLanguage ? nhomDiem.TenNhomCotDiem_EN :
-													nhomDiem.TenNhomCotDiem_VI }}
-												</v-list-subheader>
-												<v-list-item v-for="diem in nhomDiem.DSDiem" class="no">
-													<v-list-item-title class="text-body-2">
-														<v-icon size="x-large">mdi-star-four-points-small</v-icon>
-														{{IsLanguage ? diem.TenCotDiem_EN : diem.TenCotDiem_VI }}
-													</v-list-item-title>
-													<v-list-item-subtitle
-														v-if="['NhanXet', 'MucDoDanhGia'].some(keyword => diem.MaCotDiem.includes(keyword))"
-														style="-webkit-line-clamp: unset">
+		<v-list style="overflow: auto; height: calc(100dvh - 257px);">
+			<v-card>
+				<v-card-title class="d-flex ">
+					<img src="/_cdn/lhbs-lms/icon_hk.png" height="30" />
+					<p class="ml-4"> {{$t('message.semester')}} {{HocKy}}</p>
+				</v-card-title>
+				<v-divider></v-divider>
+				<v-expansion-panels flat multiple>
+					<v-expansion-panel v-for="(monHocGroup, index) in DSMonHocGroup" :key="index">
+						<v-expansion-panel-title expand-icon="mdi-menu-down">
+							<div class="d-flex align-center ga-4">
+								<v-img :src="monHocGroup.icon" height="30" width="30"></v-img>
+								<p>{{ monHocGroup.Name_VI }}</p>
+							</div>
+							<div></div>
+						</v-expansion-panel-title>
+						<v-expansion-panel-text>
+							<div class="pa-4 d-flex flex-column ga-4">
+								<v-card :color="monHoc.Color"
+									v-for="monHoc in DSMonHoc_NhomDiem.filter(x=> x.MonHocGroup === monHocGroup.MonHocGroup)">
+									<v-card-text>
+										<p class="font-weight-medium">{{ monHoc.MonHocName }}</p>
+									</v-card-text>
+									<v-list>
+										<div v-for="nhomDiem of monHoc.DSNhomDiem" :key="nhomDiem">
+											<v-list-subheader class="text-primary font-weight-medium">
+												<v-icon size="small" class="mb-1 me-1">mdi-star-four-points</v-icon>
+												{{IsLanguage ? nhomDiem.TenNhomCotDiem_EN :
+												nhomDiem.TenNhomCotDiem_VI }}
+											</v-list-subheader>
+											<v-list-item v-for="diem in nhomDiem.DSDiem">
+												<v-list-item-title class="text-body-2">
+													<v-icon size="x-large">mdi-star-four-points-small</v-icon>
+													{{IsLanguage ? diem.TenCotDiem_EN : diem.TenCotDiem_VI }}
+												</v-list-item-title>
+												<v-list-item-subtitle
+													v-if="['NhanXet'].some(keyword => diem.MaCotDiem.includes(keyword))"
+													style="-webkit-line-clamp: unset">
+													{{diem.KetQuaDanhGia_VI}}
+												</v-list-item-subtitle>
+												<template v-slot:append v-if="!diem.MaCotDiem.includes('MucDoDanhGia')">
+													<v-chip
+														v-if="diem.GiaTriCotDiem === 'number' && diem.KetQuaDanhGia_VI !== null"
+														:color="getColorChipDiem(parseFloat(diem.KetQuaDanhGia_VI))">
+														{{parseFloat(diem.KetQuaDanhGia_VI)}}
+													</v-chip>
+												</template>
+												<template v-slot:append v-if="diem.MaCotDiem.includes('MucDoDanhGia')">
+													<v-chip color="success"
+														v-if="['MucDoDanhGia'].some(keyword => diem.MaCotDiem.includes(keyword))">
 														{{diem.KetQuaDanhGia_VI}}
-													</v-list-item-subtitle>
-													<template v-slot:append>
-														<v-chip
-															v-if="diem.GiaTriCotDiem === 'number' && diem.KetQuaDanhGia_VI !== null"
-															:color="getColorChipDiem(parseFloat(diem.KetQuaDanhGia_VI))">
-															{{parseFloat(diem.KetQuaDanhGia_VI)}}
-														</v-chip>
-													</template>
-												</v-list-item>
-											</div>
-											<!-- <v-divider class="mx-auto w-50 mt-2"></v-divider>
+													</v-chip>
+												</template>
+											</v-list-item>
+										</div>
+										<uc-empty v-if="monHoc.DSNhomDiem.length === 0" />
+										<!-- <v-divider class="mx-auto w-50 mt-2"></v-divider>
 											<v-list-item>
 												<v-list-item-title class="text-body-2 font-weight-medium text-primary">
 													<v-icon size="small" class="mb-1">mdi-lead-pencil</v-icon>
@@ -61,14 +67,13 @@
 													{{ $t('message.commentNotFound') }}
 												</v-list-item-subtitle>
 											</v-list-item> -->
-										</v-list>
-									</v-card>
-								</div>
-							</v-expansion-panel-text>
-						</v-expansion-panel>
-					</v-expansion-panels>
-				</v-card>
-			</div>
+									</v-list>
+								</v-card>
+							</div>
+						</v-expansion-panel-text>
+					</v-expansion-panel>
+				</v-expansion-panels>
+			</v-card>
 		</v-list>
 	</div>
 </template>
@@ -129,7 +134,7 @@
 				lodash: _,
 				vueData,
 				HocKy: localStorage.getItem('Semester') ?? 'HK1',
-				IsLanguage: localStorage.getItem('IsLanguage') ?? false
+				IsLanguage: localStorage.getItem('IsLanguage') ? JSON.parse(localStorage.getItem('IsLanguage')) : fasle
 			}
 		},
 		async mounted() {
