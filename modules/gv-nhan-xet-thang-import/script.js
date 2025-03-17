@@ -1,26 +1,50 @@
 function convertHocSinh() {
     // Chuyển đổi danh sách object thành mảng hai chiều
-    const tableData = vueData.dataSource_API.map((s) => [s.HocSinhID, s.SoDanhBo, s.HoTen, s.NoiDungKienThuc_HTML, s.NoiDungNangLuc_HTML, s.NoiDungHoatDongKhac_HTML])
+    const tableData = vueData.dataSource_API.map((s) => {
+        const DiemToan = null
+        const NhanXetToan_HTML = null
+        const DiemTiengViet = null
+        const NhanXetTiengViet_HTML = null
+        const NhanXetMonHocKhac_HTML = null
+        const HoatDongGiaoDucKhac_HTML = null
+        const PhamChatNangLuc_HTML = null
+        return [
+            s.HocSinhID,
+            s.SoDanhBo,
+            s.HoTen,
+            DiemToan,
+            NhanXetToan_HTML,
+            DiemTiengViet,
+            NhanXetTiengViet_HTML,
+            NhanXetMonHocKhac_HTML,
+            HoatDongGiaoDucKhac_HTML,
+            PhamChatNangLuc_HTML,
+        ]
+    }
+    )
     vueData.dataSource = tableData
 }
 function convertHocSinhToAPI() {
     vueData.JSON_NhanXetThang = []
     const tableData = vueData.dataSource.map((s) => {
-        const hsl = vueData.dataSource_API.find(h => h.HocSinhID === s[0])
+        const hsl = vueData.dataSource_API.find(h => h.HocSinhID == s[0])
         return {
             HocSinhID: s[0],
             SoDanhBo: s[1],
             HoTen: s[2],
-            NoiDungKienThuc_HTML: convertToHTML(s[3]),
-            NoiDungNangLuc_HTML: convertToHTML(s[4]),
-            NoiDungHoatDongKhac_HTML: convertToHTML(s[5]),
+            DiemToan: s[3] || null,
+            NhanXetToan_HTML: s[4] || null,
+            DiemTiengViet: s[5] || null,
+            NhanXetTiengViet_HTML: s[6] || null,
+            NhanXetMonHocKhac_HTML: s[7] || null,
+            HoatDongGiaoDucKhac_HTML: s[8] || null,
+            PhamChatNangLuc_HTML: s[9] || null,
             LopID: vueData.LopID,
             Lop_NhanXetThangID: vueData.Lop_NhanXetThangID,
             HSLopID: hsl.HSLopID
         }
     })
     vueData.JSON_NhanXetThang = tableData
-    console.log('vueData.JSON_NhanXetThang', vueData.JSON_NhanXetThang)
 }
 function convertToHTML(text) {
     // Thay thế ký tự xuống dòng đôi (\n\n) bằng <br>
@@ -37,7 +61,6 @@ function initColumn() {
     for (var column of vueData.columns) {
         column.render = function (cell, value, x, y, instance, options) {
             if (cell.innerHTML !== '') {
-                console.log(cell, value)
                 var tempDiv = document.createElement('div');
                 tempDiv.innerHTML = value;
                 // Thêm DOM vào ô

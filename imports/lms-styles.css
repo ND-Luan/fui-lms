@@ -206,3 +206,11 @@
 .none-overflow .v-toolbar-title__placeholder {
     overflow: visible !important;
 }
+
+.v-text-field__suffix {
+    padding-left: 8px;
+}
+
+.v-text-field input {
+    padding-inline: 8px;
+}
