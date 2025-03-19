@@ -251,8 +251,8 @@ function renderDSHocSinh() {
             title: maCotDiemExist.TenCotDiem_VI,
             value: maCotDiemExist.MaCotDiem,
             align: "center",
-            width: maCotDiemExist.WidthCSS ?? 100,
-            maxWidth: maCotDiemExist.WidthCSS ?? 100
+            width: maCotDiemExist.WidthCSS || 300,
+            // maxWidth: maCotDiemExist.WidthCSS || 300
         })
     }
     const infoStudentHeader = [
@@ -414,7 +414,7 @@ function isDisabledButtonTuChoi(item) {
     let flag = true
     if (vueData.VaiTro === EnumVaiTro.GVCN) {
         if (item.TinhTrang === EnumTinhTrang.GVBM_GuiDiem) flag = false
-        // if (item.TinhTrang === 3) flag = true
+        if (item.TinhTrang === EnumTinhTrang.TT_TuChoi) flag = false
         // if (item.TinhTrang === 4) flag = false
     } else if (vueData.VaiTro === EnumVaiTro.GVBM) {
         // if (item.TinhTrang === 2) flag = true
@@ -426,6 +426,7 @@ function isDisabledButtonGuiDiem(item) {
     let flag = true
     if (vueData.VaiTro === EnumVaiTro.GVCN) {
         if (item.TinhTrang === EnumTinhTrang.GVBM_GuiDiem) flag = false
+        if (item.TinhTrang === EnumTinhTrang.TT_TuChoi) flag = false
         // if (item.TinhTrang === 3) flag = true
         // if (item.TinhTrang === 4) flag = false
     } else if (vueData.VaiTro === EnumVaiTro.GVBM) {
