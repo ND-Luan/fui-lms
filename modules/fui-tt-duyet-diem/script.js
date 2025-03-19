@@ -241,7 +241,6 @@ function onDuyetDiem() {
     CALL("insKQHT_MonHocLop")
 }
 function renderDSHocSinh() {
-    console.log('runnnn')
     const _dsHocSinh = []
     const dsHocSinhID = [...new Set(vueData.DSHocSinh_API.map(x => x.HocSinhID))]
     //Khởi tạo danh sách học sinh
@@ -255,4 +254,6 @@ function renderDSHocSinh() {
     console.log('12321321dsHocSinhID', dsHocSinhID);
     console.log('_dsHocSinh', _dsHocSinh)
     vueData.DSHocSinh = _dsHocSinh
+}
+function onReject() {
 }
