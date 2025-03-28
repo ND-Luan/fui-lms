@@ -216,7 +216,7 @@ function renderHeaderTable() {
                     }
                 }
             ], width: 280,
-            "title": "Phẩm chất - năng lực",
+            "title": "Phẩm chất - Năng lực",
             "value": "PhamChatNangLuc_HTML",
         },
         !vueData.ThangObj.Is_HienThiPhuHuynh && {
@@ -263,4 +263,11 @@ const renderLabelTable = () => {
         label += ` - <span class="text-red">${vueData.ThangObj?.Thang_HienThi ?? ""} <span class="text-${vueData.ThangObj.MauTinhTrang}"> • ${vueData.ThangObj?.TenTinhTrang ?? ""} </span> </span>`
     }
     return label
+}
+const renderTextDSHocSinhDaLuu = () => {
+    let count = 0
+    for (var item of vueData.items) {
+        if (item.NhanXetThangID > 0) count++
+    }
+    return count
 }

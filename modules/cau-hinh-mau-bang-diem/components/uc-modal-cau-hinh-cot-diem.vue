@@ -311,13 +311,13 @@
 				ajaxCALL('lms/TemplateBangDiemChiTiet_Get_ByID', {
 					TemplateBangDiemID: this.recordMauBangDiem.TemplateBangDiemID
 				}, res => {
-					let groupNhom = [...new Set(res.data.map(x => x.CotDiemID))]
+					let groupNhom = [...new Set(res.data.map(x => x.MaNhomCotDiem))]
 					let group = []
 					//Vòng lặp xử lý group các cột điểm có cùng nhóm cột điểm
 					for (let i of groupNhom) {
 						//Tạo obj để render lên table
 						let obj = {}
-						let items = res.data.filter(item => item.CotDiemID === i) // filter lấy các cột điểm có cùng mã nhóm
+						let items = res.data.filter(item => item.MaNhomCotDiem === i) // filter lấy các cột điểm có cùng mã nhóm
 						obj.ThuTuCotDiem = items
 						obj.HienThi = items
 						obj.MaCotDiem = items

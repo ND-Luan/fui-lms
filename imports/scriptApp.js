@@ -279,7 +279,7 @@ $('document').ready(() => {
         messages: {
             en: {
                 message: {
-
+                    nameProject: "Report on learning outcomes",
                     language: 'English',
                     studyResult: 'STUDY RESULT',
                     selectedStudent: 'Selected student',
@@ -316,15 +316,18 @@ $('document').ready(() => {
 
                     rating: "Rating",
                     averageScore: "Average score",
-                    comment: "Comment",
+                    comment: "Advise of parents",
                     commentNotFound: "No comments yet",
 
                     announced: "Announced",
                     notYetAnnounced: "Not yet announced",
+
+                    totalResults: "Total results"
                 }
             },
             vi: {
                 message: {
+                    nameProject: "Báo cáo kết quả học tập",
                     language: 'Tiếng Việt',
                     studyResult: 'KẾT QUẢ HỌC TẬP',
                     selectedStudent: 'Học sinh đang chọn',
@@ -336,7 +339,7 @@ $('document').ready(() => {
                     Quality: 'PHẨM CHẤT',
                     Personal_Ability: 'NĂNG LỰC RIÊNG',
                     evaluation: "Nội dung đánh giá",
-                    comment: "Nhận xét",
+                    comment: "Ý kiến của phụ huynh",
 
                     studentList: "Danh sách học sinh",
 
@@ -359,11 +362,12 @@ $('document').ready(() => {
 
                     rating: "Xếp loại",
                     averageScore: "Điểm trung bình",
-                    comment: "Nhận xét",
                     commentNotFound: "Chưa có nhận xét",
 
                     announced: "Đã công bố",
                     notYetAnnounced: "Chưa công bố",
+
+                    totalResults: "Tổng điểm"
                 }
             }
         }

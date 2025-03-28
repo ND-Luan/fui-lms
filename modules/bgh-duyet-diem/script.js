@@ -253,8 +253,6 @@ function renderDSHocSinh() {
     }
     vueData.DSHocSinh = _dsHocSinh
 }
-
-
 function getTinhTrangCaoNhat(tinhTrangList) {
     return Math.max(...tinhTrangList);
 }
@@ -274,7 +272,6 @@ function fn_TinhTrangHocSinh(ListTinhTrang) {
     if (TinhTrang === 8) { TenTinhTrang = 'BGH duyệt (Công bố phụ huynh)'; MauTinhTrang = 'success' }
     return { TinhTrang, TenTinhTrang, MauTinhTrang }
 }
-
 function isDisabledButton_TuChoi() {
     let flag = true
     if (vueData.DSHocSinh.length > 0) {
@@ -284,7 +281,6 @@ function isDisabledButton_TuChoi() {
     }
     return flag
 }
-
 function isDisabledButton_GuiDiem() {
     let flag = true
     if (vueData.DSHocSinh.length > 0) {
@@ -294,7 +290,6 @@ function isDisabledButton_GuiDiem() {
     }
     return flag
 }
-
 const EnumTinhTrang = {
     ChuaLuu: 0, //: Chưa lưu,
     LuuTam: 1, //: Lưu tạm,

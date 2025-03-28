@@ -23,6 +23,9 @@ function convertDSHocSinh() {
     let SLCotDiem_OfFirstSTD = vueData.DSCotDiem.filter((item) => item.HocSinhID === fn_ProrityTinhTrang(vueData.DSHocSinh).HocSinhID) // lấy ra các cột điểm của học sinh đầu tiên
     DSCotDiem_ByMaNhomCotDiem = SLCotDiem_OfFirstSTD
     //Xử lý động cột điểm header jexcel
+    const arrCotDiemWithAlignCenter = [
+        'MucDoDanhGia',
+    ]
     let columnsCotDiem = SLCotDiem_OfFirstSTD
         .map((x) => {
             if (x.GiaTriCotDiem === 'number') { // cấu hình header cột điểm có dạng number
@@ -50,6 +53,7 @@ function convertDSHocSinh() {
                     width: x.WidthCSS,
                     backGroundColor: x.HexBackground,
                     wrap: true,
+                    align: arrCotDiemWithAlignCenter.some(item => x.MaCotDiem.includes(item)) ? 'center' : 'left',
                 }
                 return column
             } else if (x.GiaTriCotDiem === 'ICO_Star') { // cấu hình header cột điểm có dạng ICO_Star

@@ -1,5 +1,5 @@
 <template>
-	<div class="pa-4 d-flex justify-center align-center text-caption" style="height: 100%">
+	<div class="pa-4 d-flex justify-center align-center text-caption" style="height: calc(100dvh - 248px)">
 		Tính năng đang được phát triển.
 	</div>
 </template>

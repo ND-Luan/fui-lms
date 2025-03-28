@@ -1,13 +1,34 @@
 <template>
-	<v-card border class="ma-2">
-		<p class="pa-2 font-weight-medium text-h6 border-e-sm border-b-sm text-primary" style="width: fit-content;">
-			{{title}}</p>
-		<v-card-text class=" d-flex align-center" :class="content ? ' justify-space-between' : 'justify-center'">
-			<p v-html="content" v-if="content"></p>
-			<uc-empty v-else />
-			<div class="text-center" v-if="star">
-				<p class="mb-2">Sản phẩm <br /> học tập</p>
-				<v-icon v-for="i in Number(star)" color="#fde00d" size="small">mdi-star-four-points</v-icon>
+	<v-card class="custom-card ma-2" elevation="1" :class="{'card-hover': enableHover}">
+		<!-- Card Header -->
+		<div class="card-header">
+			<div class="title-container">
+				<v-icon :color="iconColor" class="title-icon" :icon="icon || 'mdi-text-box'" />
+				<h3 class="title-text">{{ title }}</h3>
+			</div>
+		</div>
+
+		<!-- Card Content -->
+		<v-divider class="divider" />
+
+		<v-card-text class="card-content">
+			<!-- Main Content -->
+			<div class="content-section">
+				<div v-if="content" class="content-text" v-html="content" />
+				<div v-else class="empty-state">
+					<uc-empty />
+				</div>
+			</div>
+
+			<!-- Rating Section -->
+			<div v-if="star" class="rating-section">
+				<div class="rating-badge">
+					<span class="rating-label">Sản phẩm học tập</span>
+					<div class="stars-wrapper">
+						<v-icon v-for="index in Number(star)" :key="index" class="star-icon" icon="mdi-star"
+							:color="starColor" />
+					</div>
+				</div>
 			</div>
 		</v-card-text>
 	</v-card>
@@ -15,23 +36,38 @@
 
 <script>
 	export default {
+	    name: 'CustomCard',
+	
 	    props: {
 	        title: {
-	            type: String
+	            type: String,
+	            default: '',
 	        },
 	        content: {
-	            type: String
+	            type: String,
+	            default: '',
 	        },
 	        star: {
-	            type: Number
-	        }
+	            type: Number,
+	            default: 0,
+	            validator: (value) => value >= 0 && value <= 5,
+	        },
+	        icon: {
+	            type: String,
+	            default: '',
+	        },
+	        iconColor: {
+	            type: String,
+	            default: 'primary',
+	        },
+	        starColor: {
+	            type: String,
+	            default: '#FFD700', // Màu vàng đẹp hơn cho sao
+	        },
+	        enableHover: {
+	            type: Boolean,
+	            default: true,
+	        },
 	    },
-	    data() {
-	        return {}
-	    },
-	    mounted() { },
-	    computed: {},
-	    watch: {},
-	    methods: {},
 	}
 </script>

@@ -1,9 +1,10 @@
 <template>
-	<div>
-		<v-divider></v-divider>
-		<v-skeleton-loader v-if="IsLoading" type="heading"></v-skeleton-loader>
-		<v-skeleton-loader v-if="IsLoading" type="list-item-two-line" v-for="i in 6">
-		</v-skeleton-loader>
+	<v-divider></v-divider>
+	<div style="min-height: 300px; 	height: calc(100dvh - 248px); display: flex; flex-direction: column;">
+		<template v-if="IsLoading">
+			<v-skeleton-loader type="heading"></v-skeleton-loader>
+			<v-skeleton-loader type="list-item-two-line" v-for="i in 6" :key="i"></v-skeleton-loader>
+		</template>
 		<v-fade-transition>
 			<v-list lines="two" v-if="!IsLoading">
 				<v-list-subheader>{{$t('message.listTheme')}}</v-list-subheader>
@@ -27,18 +28,23 @@
 	export default {
 		props: [],
 		data() {
+			const { useI18n } = VueI18n
+			const { t } = useI18n()
 			return {
+				t,
 				vueData,
 				DSNhomDiem: [],
 				IsLoading: false,
-				IsLanguage: JSON.parse(localStorage.getItem('IsLanguage'))
+				IsLanguage: JSON.parse(localStorage.getItem('IsLanguage')),
+				Semester: localStorage.getItem('Semester')
 			}
 		},
 		mounted() {
 			this.IsLoading = true
 			ajaxCALL('lms/PH_TA_MaNhomDiem_Get_By_HocSinhID',
 				{
-					HocSinhID: vueData.HocSinhSelected.StudentID
+					HocSinhID: vueData.HocSinhSelected.StudentID,
+					Semester: 'HK' + this.Semester
 				},
 				res => {
 					this.DSNhomDiem = res.data
@@ -51,16 +57,16 @@
 		},
 		watch: {
 			'$i18n.locale': function (locale) {
-				console.log(locale,)
 				if (locale === 'en') this.IsLanguage = true;
 				else this.IsLanguage = false;
 			},
 		},
 		methods: {
 			onRedirect(nhomDiem) {
+				const language = this.t('message.english')
 				openWindow({
-					title: "Tiếng anh",
-					url: '/report-ket-qua-hoc-tap-tieng-anh-hoc-sinh?hsid=' + nhomDiem.HocSinhID + '&mnd=' + nhomDiem.MaNhomCotDiem
+					title: language,
+					url: `/report-ket-qua-hoc-tap-tieng-anh-hoc-sinh?hsid=${nhomDiem.HocSinhID}&mnd=${nhomDiem.MaNhomCotDiem}`
 				})
 			},
 			renderTextTitle(obj) {

@@ -329,7 +329,7 @@
 						IsVisibleToParents: false,
 						IsSendToManager: false,
 						IsNegativeNumber: false,
-						Semester: null,
+						Semester: this.recordNhomCotDiem.Semester
 					},
 					res => {
 						Vue.$toast.success('Thêm cột điểm thành công!', { position: 'top' })

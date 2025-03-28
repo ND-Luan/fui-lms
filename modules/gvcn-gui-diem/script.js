@@ -244,14 +244,37 @@ function renderDSHocSinh() {
     let headers = []
     const firstStudentID = vueData.DSHocSinh_API[0].HocSinhID
     const arrMaCotDiem_firstStudent = vueData.DSHocSinh_API.filter(x => x.HocSinhID === firstStudentID)
-    const uniqueMaCotDiem = [...new Set(arrMaCotDiem_firstStudent.map(x => x.MaCotDiem))]
+    const ListCotDiemFilter = [
+        'GK_C1_HK1',
+        'GK_C2_HK1',
+        'GK_C3_HK1',
+        'GK_C4_HK1',
+        'GK_C5_HK1',
+        'GK_C6_HK1',
+        'GK_C7_HK1',
+        'GK_C8_HK1',
+        'GK_C9_HK1',
+        'GK_C10_HK1',
+        'CK_C1_HK1',
+        'CK_C2_HK1',
+        'CK_C3_HK1',
+        'CK_C4_HK1',
+        'CK_C5_HK1',
+        'CK_C6_HK1',
+        'CK_C7_HK1',
+        'CK_C8_HK1',
+        'CK_C9_HK1',
+        'CK_C10_HK1'
+    ]
+    const uniqueMaCotDiem = [...new Set(arrMaCotDiem_firstStudent.map(x => x.MaCotDiem))].filter(x => !ListCotDiemFilter.includes(x))
+    console.log('uniqueMaCotDiem', uniqueMaCotDiem)
     for (var maCotDiem of uniqueMaCotDiem) {
         const maCotDiemExist = vueData.DSHocSinh_API.find(x => x.MaCotDiem === maCotDiem)
         headers.push({
             title: maCotDiemExist.TenCotDiem_VI,
             value: maCotDiemExist.MaCotDiem,
-            align: "center",
-            width: maCotDiemExist.WidthCSS || 300,
+            align: maCotDiemExist.GiaTriCotDiem === 'text' ? 'left' : "center",
+            // width: maCotDiemExist.WidthCSS || 300,
             // maxWidth: maCotDiemExist.WidthCSS || 300
         })
     }
@@ -301,7 +324,7 @@ function renderDSHocSinh() {
             (vueData.VaiTro === 1 || vueData.VaiTro === 3) &&
             {
                 el: "v-btn",
-                innerHTML: "Gửi điểm",
+                innerHTML: "{{ vueData.VaiTro === 3 ? 'Gửi điểm' : 'Đồng ý' }}",
                 attr: {
                     color: "primary",
                     ":disabled": "vueData.isDisabledButtonGuiDiem(item)",

@@ -1,7 +1,18 @@
 <template>
 	<div>
 		<v-divider></v-divider>
-		<v-list style="overflow: auto; height: calc(100dvh - 257px);">
+		<v-list class="pt-0" style="overflow: auto; height: calc(100dvh - 248px);">
+			<v-tabs v-model="tab" align-tabs="center" grow>
+				<v-tab :value="hocKy.id" v-for="hocKy in DSHocKy">{{hocKy.name}}</v-tab>
+			</v-tabs>
+
+			<v-tabs-window v-model="tab">
+				<v-tabs-window-item v-for="n in 3" :key="n" :value="n">
+				</v-tabs-window-item>
+			</v-tabs-window>
+
+
+			<!-- đây là 1 học kỳ cố định -->
 			<v-card>
 				<v-card-title class="d-flex ">
 					<img src="/_cdn/lhbs-lms/icon_hk.png" height="30" />
@@ -25,48 +36,46 @@
 										<p class="font-weight-medium">{{ monHoc.MonHocName }}</p>
 									</v-card-text>
 									<v-list>
-										<div v-for="nhomDiem of monHoc.DSNhomDiem" :key="nhomDiem">
-											<v-list-subheader class="text-primary font-weight-medium">
+										<div v-for="(nhomDiem, indexNhomDiem) of monHoc.DSNhomDiem" :key="nhomDiem">
+											<v-list-subheader v-if="nhomDiem.DSDiem.length > 1"
+												class="text-primary font-weight-medium">
 												<v-icon size="small" class="mb-1 me-1">mdi-star-four-points</v-icon>
-												{{IsLanguage ? nhomDiem.TenNhomCotDiem_EN :
-												nhomDiem.TenNhomCotDiem_VI }}
+												{{
+												IsLanguage ? nhomDiem.TenNhomCotDiem_EN : nhomDiem.TenNhomCotDiem_VI
+												}}
 											</v-list-subheader>
-											<v-list-item v-for="diem in nhomDiem.DSDiem">
-												<v-list-item-title class="text-body-2">
-													<v-icon size="x-large">mdi-star-four-points-small</v-icon>
+											<v-list-item v-for="(diem, index) in nhomDiem.DSDiem" :key="index">
+												<v-list-item-title class="text-body-2"
+													:class="nhomDiem.DSDiem.length === 1 ? 'text-primary font-weight-medium' : '' ">
+													<v-icon size="small" class="mb-1 me-1"
+														v-if="nhomDiem.DSDiem.length === 1">mdi-star-four-points</v-icon>
+													<v-icon size="x-large" v-else>mdi-star-four-points-small</v-icon>
 													{{IsLanguage ? diem.TenCotDiem_EN : diem.TenCotDiem_VI }}
 												</v-list-item-title>
 												<v-list-item-subtitle
 													v-if="['NhanXet'].some(keyword => diem.MaCotDiem.includes(keyword))"
-													style="-webkit-line-clamp: unset">
+													class="text-black text-body-2 font-weight-medium"
+													style="-webkit-line-clamp: unset; opacity: 1 !important; line-height: 1.425 !important;">
+													<v-icon class="mr-2" color="orange">mdi-pencil</v-icon>
 													{{diem.KetQuaDanhGia_VI}}
 												</v-list-item-subtitle>
 												<template v-slot:append v-if="!diem.MaCotDiem.includes('MucDoDanhGia')">
-													<v-chip
-														v-if="diem.GiaTriCotDiem === 'number' && diem.KetQuaDanhGia_VI !== null"
-														:color="getColorChipDiem(parseFloat(diem.KetQuaDanhGia_VI))">
+													<v-chip class="bg-primary text-white"
+														v-if="diem.GiaTriCotDiem === 'number' && diem.KetQuaDanhGia_VI !== null">
 														{{parseFloat(diem.KetQuaDanhGia_VI)}}
 													</v-chip>
 												</template>
 												<template v-slot:append v-if="diem.MaCotDiem.includes('MucDoDanhGia')">
-													<v-chip color="success"
+													<v-chip class="bg-primary text-white"
 														v-if="['MucDoDanhGia'].some(keyword => diem.MaCotDiem.includes(keyword))">
 														{{diem.KetQuaDanhGia_VI}}
 													</v-chip>
 												</template>
 											</v-list-item>
+											<v-divider class="my-2"
+												v-if="indexNhomDiem !== monHoc.DSNhomDiem.length - 1"></v-divider>
 										</div>
 										<uc-empty v-if="monHoc.DSNhomDiem.length === 0" />
-										<!-- <v-divider class="mx-auto w-50 mt-2"></v-divider>
-											<v-list-item>
-												<v-list-item-title class="text-body-2 font-weight-medium text-primary">
-													<v-icon size="small" class="mb-1">mdi-lead-pencil</v-icon>
-													{{ $t('message.comment') }}
-												</v-list-item-title>
-												<v-list-item-subtitle class="noLineClamp">
-													{{ $t('message.commentNotFound') }}
-												</v-list-item-subtitle>
-											</v-list-item> -->
 									</v-list>
 								</v-card>
 							</div>
@@ -85,6 +94,7 @@
 			const { useI18n } = VueI18n
 			const { t } = useI18n()
 			return {
+				tab: localStorage.getItem('Semester') ?? 1,
 				DSHocKy: [
 					{
 						id: 1,
@@ -134,7 +144,7 @@
 				lodash: _,
 				vueData,
 				HocKy: localStorage.getItem('Semester') ?? 'HK1',
-				IsLanguage: localStorage.getItem('IsLanguage') ? JSON.parse(localStorage.getItem('IsLanguage')) : fasle
+				IsLanguage: localStorage.getItem('IsLanguage') ? JSON.parse(localStorage.getItem('IsLanguage')) : false
 			}
 		},
 		async mounted() {
@@ -147,6 +157,9 @@
 				else this.IsLanguage = false
 				this.updateDSMonHocGroup();
 			},
+			tab: function (tab) {
+				localStorage.setItem('Semester', tab)
+			}
 		},
 		methods: {
 			loadHocSinhKQHT(code) {
@@ -184,6 +197,7 @@
 									DSNhomDiem
 								};
 							});
+							console.log('DSMonHoc_NhomDiem', DSMonHoc_NhomDiem)
 							resolve(DSMonHoc_NhomDiem)
 						}
 					)

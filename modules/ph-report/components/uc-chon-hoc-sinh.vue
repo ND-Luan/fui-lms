@@ -38,7 +38,8 @@
 		<v-list-subheader>{{ $t('message.studentList') }}</v-list-subheader>
 
 		<div v-for="(hocSinh, index) in DSHocSinh" :key="hocSinh.StudentID">
-			<v-list-item :title="hocSinh.HoTen" :subtitle="'Lớp ' + hocSinh.TenLop + ' - ' + hocSinh.StudentID"
+			<v-list-item :class="vueData.HocSinhSelected.StudentID === hocSinh.StudentID ? 'bg-primary' : ''"
+				:title="hocSinh.HoTen" :subtitle="'Lớp ' + hocSinh.TenLop + ' - ' + hocSinh.StudentID"
 				:disabled="!hocSinh.IsShow">
 				<template v-slot:prepend>
 					<v-avatar>
@@ -46,8 +47,9 @@
 					</v-avatar>
 				</template>
 				<template v-slot:append>
-					<v-btn icon="mdi-arrow-right" color="primary" variant="tonal" size="small"
-						@click="onSelectedHocSinh(hocSinh)"></v-btn>
+					<v-btn icon="mdi-arrow-right"
+						:color="vueData.HocSinhSelected.StudentID === hocSinh.StudentID ? 'white' : 'primary'"
+						variant="tonal" size="small" @click="onSelectedHocSinh(hocSinh)"></v-btn>
 				</template>
 			</v-list-item>
 
@@ -68,7 +70,8 @@
 				urlAvatarPhuHuynh: vueData.v_Set.urlAvatarPhuHuynh,
 				urlAvatarHocSinh: vueData.v_Set.urlAvatarHocSinh,
 				onSelectedHocSinh,
-				SelectedSemester: Semester
+				SelectedSemester: Semester,
+				vueData
 			}
 		},
 		mounted() { },
@@ -77,7 +80,7 @@
 		},
 		watch: {},
 		methods: {
-			onChangeSemester(semester) { 
+			onChangeSemester(semester) {
 				this.SelectedSemester = semester
 				localStorage.setItem('Semester', semester)
 			}
