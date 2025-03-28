@@ -23,69 +23,71 @@ function onLuuTamByHocSinhID(item) {
     })
 }
 function renderHeaderTable() {
-    const columns = [
-        {
-            "key": "combine_hsid_sdb",
-            "el": "div",
-            "title": "Mã học sinh / SDB",
-            "innerHTML": [
-                {
-                    "el": "div",
-                    "innerHTML": [
-                        {
-                            el: "div",
-                            innerHTML: [
-                                { el: "span", innerHTML: "{{item.HocSinhID}}" },
-                                {
-                                    "el": "t-button",
-                                    "attr": {
-                                        ":title": "item.HocSinhID + ' - ' + item.HoTen",
-                                        ":url": "'/report-ket-qua-hoc-tap-thang-hoc-sinh?id=' + item.HocSinhID + '&lop_nxtid=' + vueData.ThangObj.Lop_NhanXetThangID",
-                                        "icon": "mdi-arrow-right"
-                                    }
+    vueData.headers = []
+    let columns = [{
+        "key": "combine_hsid_sdb",
+        "el": "div",
+        "title": "Mã học sinh / SDB",
+        "innerHTML": [
+            {
+                "el": "div",
+                "innerHTML": [
+                    {
+                        el: "div",
+                        innerHTML: [
+                            { el: "span", innerHTML: "{{item.HocSinhID}}" },
+                            {
+                                "el": "t-button",
+                                "attr": {
+                                    ":title": "item.HocSinhID + ' - ' + item.HoTen",
+                                    ":url": "'/report-ket-qua-hoc-tap-thang-hoc-sinh?id=' + item.HocSinhID + '&lop_nxtid=' + vueData.ThangObj.Lop_NhanXetThangID",
+                                    "icon": "mdi-arrow-right"
                                 }
-                            ]
-                        },
-                        {
-                            "el": "p",
-                            "innerHTML": "SDB: <b>{{item.SoDanhBo}}</b>"
-                        }
-                    ]
-                },
-            ],
-            "minWidth": 150,
-            "width": 150,
-        },
-        {
-            "key": "ho_ten",
-            "el": "div",
-            "title": "Họ tên",
-            "minWidth": 240,
-            "width": 240,
-            "innerHTML": [
-                {
-                    "el": "span",
-                    "attr": {
-                        "class": "font-weight-medium"
+                            }
+                        ]
                     },
-                    "innerHTML": "{{item.HoTen}}"
-                },
-                {
-                    "el": "uc-gender",
-                    "attr": {
-                        "v-model": "item.Nu"
+                    {
+                        "el": "p",
+                        "innerHTML": "SDB: <b>{{item.SoDanhBo}}</b>"
                     }
+                ]
+            },
+        ],
+        "minWidth": 150,
+        "width": 150,
+    },
+    {
+        "key": "ho_ten",
+        "el": "div",
+        "title": "Họ tên",
+        "minWidth": 240,
+        "width": 240,
+        "innerHTML": [
+            {
+                "el": "span",
+                "attr": {
+                    "class": "font-weight-medium"
                 },
-                {
-                    "el": "p",
-                    "attr": {
-                        "class": "text-caption"
-                    },
-                    "innerHTML": "{{item.NgaySinh}}"
+                "innerHTML": "{{item.HoTen}}"
+            },
+            {
+                "el": "uc-gender",
+                "attr": {
+                    "v-model": "item.Nu"
                 }
-            ]
-        },
-        vueData.CapID === 1 && {
+            },
+            {
+                "el": "p",
+                "attr": {
+                    "class": "text-caption"
+                },
+                "innerHTML": "{{item.NgaySinh}}"
+            }
+        ]
+    }]
+
+    if (vueData.CapID === 1) {
+        columns.push({
             "key": "NhanXetToan_HTML",
             "el": "div",
             "align": "center",
@@ -116,8 +118,8 @@ function renderHeaderTable() {
             width: 280,
             "title": "Nhận xét môn Toán",
             "value": "NhanXetToan_HTML",
-        },
-        vueData.CapID === 1 && {
+        })
+        columns.push({
             "key": "NhanXetTiengViet_HTML",
             "el": "div",
             "align": "center",
@@ -148,8 +150,8 @@ function renderHeaderTable() {
             width: 280,
             "title": "Nhận xét môn Tiếng Việt",
             "value": "NhanXetTiengViet_HTML",
-        },
-        vueData.CapID === 1 && {
+        })
+        columns.push({
             "key": "NhanXetMonHocKhac_HTML",
             "el": "div",
             "align": "center",
@@ -167,25 +169,8 @@ function renderHeaderTable() {
             width: 280,
             "title": "Nhận xét môn học khác",
             "value": "NhanXetMonHocKhac_HTML",
-        },
-        // vueData.ThangObj.Is_HienThiPhuHuynh && {
-        //     "key": "NoiDungKienThuc",
-        //     "el": "div",
-        //     "align": "center",
-        //     "innerHTML": [
-        //         {
-        //             "el": "uc-quill-editor",
-        //             "attr": {
-        //                 ":key": "'NoiDungKienThuc_HTML_' + item.HocSinhID",
-        //                 "v-model": "item.NoiDungKienThuc_HTML",
-        //                 ":spellcheck": "false"
-        //             }
-        //         }
-        //     ], width: 280,
-        //     "title": "Nội dung kiến thức",
-        //     "value": "NoiDungKienThuc",
-        // },
-        vueData.ThangObj.Is_HienThiPhuHuynh && {
+        })
+        columns.push({
             "key": "HoatDongGiaoDucKhac_HTML",
             "el": "div",
             "align": "center",
@@ -201,8 +186,8 @@ function renderHeaderTable() {
             ], width: 280,
             "title": "Hoạt động giáo dục khác",
             "value": "HoatDongGiaoDucKhac_HTML",
-        },
-        vueData.ThangObj.Is_HienThiPhuHuynh && {
+        })
+        columns.push({
             "key": "PhamChatNangLuc_HTML",
             "el": "div",
             "align": "center",
@@ -218,8 +203,10 @@ function renderHeaderTable() {
             ], width: 280,
             "title": "Phẩm chất - Năng lực",
             "value": "PhamChatNangLuc_HTML",
-        },
-        !vueData.ThangObj.Is_HienThiPhuHuynh && {
+        })
+    }
+    if (vueData.Is_HienThiPhuHuynh) {
+        columns.push({
             "key": "NhanXetCuoiNam",
             "el": "div",
             "align": "center",
@@ -235,18 +222,24 @@ function renderHeaderTable() {
             ], width: 280,
             "title": "Nhận xét cuối năm",
             "value": "NhanXetCuoiNam",
-        },
-        !vueData.TinhTrang && {
+
+        })
+    }
+    console.log('header table', vueData.TinhTrang)
+    if (!vueData.TinhTrang) {
+        columns.push({
             "key": "v_btn",
             "el": "v-btn",
             "attr": {
+
                 "color": "primary",
                 "variant": "tonal",
                 "v-on:click": "() => vueData.onLuuTamByHocSinhID(item)"
             },
             "innerHTML": "Lưu tạm"
-        }
-    ]
+        })
+    }
+
     //Nếu tình trạng = từ chối
     if (vueData.ThangObj.TinhTrang === 3) {
         columns.splice(3, 0, vueData.columnReject)

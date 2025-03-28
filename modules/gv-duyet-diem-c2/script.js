@@ -67,7 +67,6 @@ function convertDSHocSinh() {
                 return column
             }
         })
-
     //Nếu là gửi điểm thì freezecolumn = 4 để thêm cột từ chối
     vueData.freezeColumns = (vueData.TinhTrang?.TinhTrang === 3) ? 4 : 3
     let columnThongTinHocSinh = [
