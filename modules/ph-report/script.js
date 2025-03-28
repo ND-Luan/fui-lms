@@ -1,6 +1,6 @@
 function onSelectedHocSinh(item) {
-    const Semester = localStorage.getItem('Semester')
-    if (!Semester) return Vue.$toast.warning('Vui lòng chọn học kỳ', { position: 'top' })
+    // const Semester = localStorage.getItem('Semester')
+    // if (!Semester) return Vue.$toast.warning('Vui lòng chọn học kỳ', { position: 'top' })
     ajaxCALL('lms/HocSinh_Detail_GetBy_HocSinhID',
         {
             HocSinhID: item.StudentID

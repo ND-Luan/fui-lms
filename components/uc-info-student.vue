@@ -7,7 +7,7 @@
 		<div class="text-caption  ">
 			{{item?.HocSinhID}} * {{item?.NgaySinh}}
 		</div>
-		<v-chip class="text-body-2" :color="item.MauTinhTrang">{{item.TenTinhTrang}}</v-chip>
+		<v-chip v-if="item.TenTinhTrang" class="text-body-2" :color="item.MauTinhTrang">{{item.TenTinhTrang}}</v-chip>
 	</div>
 </template>
 

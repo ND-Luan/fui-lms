@@ -38,7 +38,7 @@
 		<v-list-subheader>{{ $t('message.studentList') }}</v-list-subheader>
 
 		<div v-for="(hocSinh, index) in DSHocSinh" :key="hocSinh.StudentID">
-			<v-list-item :class="vueData.HocSinhSelected.StudentID === hocSinh.StudentID ? 'bg-primary' : ''"
+			<v-list-item :class="vueData.HocSinhSelected?.StudentID === hocSinh.StudentID ? 'bg-primary' : ''"
 				:title="hocSinh.HoTen" :subtitle="'Lớp ' + hocSinh.TenLop + ' - ' + hocSinh.StudentID"
 				:disabled="!hocSinh.IsShow">
 				<template v-slot:prepend>
@@ -48,7 +48,7 @@
 				</template>
 				<template v-slot:append>
 					<v-btn icon="mdi-arrow-right"
-						:color="vueData.HocSinhSelected.StudentID === hocSinh.StudentID ? 'white' : 'primary'"
+						:color="vueData.HocSinhSelected?.StudentID === hocSinh.StudentID ? 'white' : 'primary'"
 						variant="tonal" size="small" @click="onSelectedHocSinh(hocSinh)"></v-btn>
 				</template>
 			</v-list-item>

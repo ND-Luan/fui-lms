@@ -25,3 +25,129 @@ li::before {
     top: -4px;
     font-size: 20px;
 }
+
+.custom-card {
+    border-radius: 12px;
+    transition: all 0.3s ease;
+    background: #ffffff;
+    position: relative;
+    overflow: hidden;
+}
+
+.card-hover:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1) !important;
+}
+
+.card-header {
+    padding: 16px 20px;
+    background: linear-gradient(to right, rgba(var(--v-theme-primary), 0.05), transparent);
+}
+
+.title-container {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.title-icon {
+    opacity: 0.9;
+}
+
+.title-text {
+    margin: 0;
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--v-theme-primary);
+    letter-spacing: 0.3px;
+}
+
+.divider {
+    opacity: 0.08;
+}
+
+.card-content {
+    display: flex;
+    padding: 20px;
+    min-height: 120px;
+    gap: 24px;
+}
+
+.content-section {
+    flex: 1;
+}
+
+.content-text {
+    line-height: 1.6;
+    color: #424242;
+    font-size: 0.95rem;
+}
+
+.content-text ::v-deep(ul) {
+    padding-left: 20px;
+    margin: 8px 0;
+}
+
+.content-text ::v-deep(li) {
+    margin-bottom: 6px;
+}
+
+.empty-state {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+    opacity: 0.7;
+}
+
+.rating-section {
+    display: flex;
+    align-items: flex-start;
+    padding-left: 16px;
+    border-left: 1px dashed rgba(0, 0, 0, 0.1);
+}
+
+.rating-badge {
+    background: rgba(var(--v-theme-primary), 0.05);
+    padding: 12px 16px;
+    border-radius: 8px;
+    text-align: center;
+}
+
+.rating-label {
+    display: block;
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: #666;
+    margin-bottom: 8px;
+    line-height: 1.4;
+}
+
+.stars-wrapper {
+    display: flex;
+    gap: 4px;
+    justify-content: center;
+}
+
+.star-icon {
+    font-size: 18px;
+    filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.1));
+}
+
+@media (max-width: 600px) {
+    .card-content {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .rating-section {
+        border-left: none;
+        border-top: 1px dashed rgba(0, 0, 0, 0.1);
+        padding-left: 0;
+        padding-top: 16px;
+    }
+
+    .rating-badge {
+        width: 100%;
+    }
+}

@@ -11,7 +11,7 @@
 						</v-avatar>
 					</template>
 					<template v-slot:append>
-						<v-chip v-if="thang.TinhTrang === 4" :color="thang.MauTinhTrang">
+						<v-chip v-if="thang.Is_Viewed" :color="thang.MauTinhTrang">
 							{{ $t('message.announced') }}</v-chip>
 						<v-chip v-else>{{ $t('message.notYetAnnounced') }}</v-chip>
 					</template>
@@ -45,7 +45,10 @@
 			onRedirect(thangObj) {
 				openWindow({
 					title: "Kết quả học tập",
-					url: `report-ket-qua-hoc-tap-thang-hoc-sinh?id=${vueData.HocSinhSelected.StudentID}&lop_nxtid=${thangObj.Lop_NhanXetThangID}`
+					url: `report-ket-qua-hoc-tap-thang-hoc-sinh?id=${vueData.HocSinhSelected.StudentID}&lop_nxtid=${thangObj.Lop_NhanXetThangID}`,
+					onclose: {
+						"CALL": "getDSThang"
+					}
 				})
 			},
 			renderTextTitle(thang) {
