@@ -19,24 +19,24 @@
 			class="text-black text-body-2 font-weight-medium"
 			style="-webkit-line-clamp: unset; opacity: 1 !important; line-height: 1.425 !important;">
 			<v-icon class="mr-2" color="orange">mdi-pencil</v-icon>
-			{{item.KetQuaDanhGia_VI}}
+			{{ item.KetQuaDanhGia_VI }}
 		</v-list-item-subtitle>
 	</v-list-item>
 </template>
 
 <script>
-	export default {
-		props: {
-			item: {
-				type: Object
-			}
-		},
-		data() {
-			const IsLanguage = localStorage.getItem('IsLanguage')
-			return {
-				DSCotDiem_Final: ['Total', 'DiemCK', 'DiemGK'],
-				IsLanguage: IsLanguage ? JSON.parse(IsLanguage) : false
-			};
+export default {
+	props: {
+		item: {
+			type: Object
 		}
+	},
+	data() {
+		const IsLanguage = localStorage.getItem('IsLanguage')
+		return {
+			DSCotDiem_Final: ['Total', 'DiemCK', 'DiemGK'],
+			IsLanguage: IsLanguage ? JSON.parse(IsLanguage) : false
+		};
 	}
+}
 </script>

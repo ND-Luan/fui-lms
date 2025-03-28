@@ -319,8 +319,8 @@ $('document').ready(() => {
                     comment: "Advise of parents",
                     commentNotFound: "No comments yet",
 
-                    announced: "Announced",
-                    notYetAnnounced: "Not yet announced",
+                    announced: "Viewed", //"Announced",
+                    notYetAnnounced: "Not yet Viewed",
 
                     totalResults: "Total results"
                 }
@@ -364,8 +364,8 @@ $('document').ready(() => {
                     averageScore: "Điểm trung bình",
                     commentNotFound: "Chưa có nhận xét",
 
-                    announced: "Đã công bố",
-                    notYetAnnounced: "Chưa công bố",
+                    announced: "Đã xem",
+                    notYetAnnounced: "Chưa xem",
 
                     totalResults: "Tổng điểm"
                 }

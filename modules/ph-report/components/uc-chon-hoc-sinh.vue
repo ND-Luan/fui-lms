@@ -12,7 +12,7 @@
 	</v-card-text>
 
 	<v-list lines="two">
-		<v-list-subheader>{{ $t('message.selectSemester') }}</v-list-subheader>
+		<!-- <v-list-subheader>{{ $t('message.selectSemester') }}</v-list-subheader>
 		<div class="d-flex ga-4 justify-center">
 			<v-sheet :color="SelectedSemester == 1 ? 'primary': 'gray'"
 				class="font-weight-medium text-center d-flex justify-center align-center rounded"
@@ -24,7 +24,7 @@
 				style="min-width: 100px; height: 100px" @click="onChangeSemester(2)">
 				{{$t('message.semester')}} 2
 			</v-sheet>
-		</div>
+		</div> -->
 		<v-list-subheader>{{ $t('message.parent') }}</v-list-subheader>
 		<v-list-item :key="user.UserID" :title="user.LastName + ' ' + user.FirstName"
 			:subtitle="user.Phone + ' ' + user.Email">
@@ -59,31 +59,29 @@
 </template>
 
 <script>
-	export default {
-		props: {
-			dshocsinh: { type: Array }
-		},
-		data() {
-			const Semester = localStorage.getItem('Semester')
-			return {
-				user: vueData.user,
-				urlAvatarPhuHuynh: vueData.v_Set.urlAvatarPhuHuynh,
-				urlAvatarHocSinh: vueData.v_Set.urlAvatarHocSinh,
-				onSelectedHocSinh,
-				SelectedSemester: Semester,
-				vueData
-			}
-		},
-		mounted() { },
-		computed: {
-			DSHocSinh: function () { return this.dshocsinh }
-		},
-		watch: {},
-		methods: {
-			onChangeSemester(semester) {
-				this.SelectedSemester = semester
-				localStorage.setItem('Semester', semester)
-			}
-		},
-	}
+export default {
+	props: {
+		dshocsinh: { type: Array }
+	},
+	data() {
+		const Semester = localStorage.getItem('Semester')
+		return {
+			user: vueData.user,
+			urlAvatarPhuHuynh: vueData.v_Set.urlAvatarPhuHuynh,
+			urlAvatarHocSinh: vueData.v_Set.urlAvatarHocSinh,
+			onSelectedHocSinh,
+			SelectedSemester: Semester,
+			vueData
+		}
+	},
+	computed: {
+		DSHocSinh: function () { return this.dshocsinh }
+	},
+	methods: {
+		// onChangeSemester(semester) {
+		// 	this.SelectedSemester = semester
+		// 	localStorage.setItem('Semester', semester)
+		// }
+	},
+}
 </script>
