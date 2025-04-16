@@ -84,14 +84,23 @@ function renderDSHocSinh() {
             UpdateTime: hocSinhLMS.UpdateTime,
         })
     }
-    items = items.map((x, index) => {
+    vueData.items = items.sort((a, b) => {
+        // Ưu tiên sắp xếp theo SoDanhBo (chuyển sang số nếu cần)
+        const soA = isNaN(a.SoDanhBo) ? a.SoDanhBo : parseInt(a.SoDanhBo)
+        const soB = isNaN(b.SoDanhBo) ? b.SoDanhBo : parseInt(b.SoDanhBo)
+        if (soA < soB) return -1
+        if (soA > soB) return 1
+        // Nếu SoDanhBo giống nhau, sắp tiếp theo Tên
+        const tenA = a.Ten?.toLowerCase() || ''
+        const tenB = b.Ten?.toLowerCase() || ''
+        return tenA.localeCompare(tenB)
+    }).map((x, index) => {
         return {
             ...x,
             STT: index + 1,
             HoTen: x.Ho + ' ' + x.Ten,
         }
     })
-    vueData.items = items
 }
 function localStorageSetItem(item) {
     const lop = vueData.DSLop.find(x => x.LopID == item.LopID)

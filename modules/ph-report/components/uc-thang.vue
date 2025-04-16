@@ -32,7 +32,16 @@
 				IsLanguage: JSON.parse(localStorage.getItem('IsLanguage'))
 			}
 		},
-		mounted() { },
+		mounted() {
+			if (!vueData.HocSinhSelected) return
+	
+			ajaxCALL('lms/PH_Thang_NhanXetThang_Lop_Get', {
+				"LopID": vueData.HocSinhSelected.LopID,
+				"HSLopID": vueData.HocSinhSelected.HSLopID
+			}, res => {
+				vueData.DSHocTapThang = res.data
+			})
+		},
 		computed: {},
 		watch: {
 			'$i18n.locale': function (locale) {

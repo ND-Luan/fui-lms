@@ -220,6 +220,21 @@ function fn_ProrityTinhTrang(DSHocSinh) {
     }, DSHocSinh[0]);
 }
 
+function IsCheck_NotRoleParent(user) {
+    console.log(user)
+    if (user.GroupID === 2) {
+        confirm({
+            title: "Bạn không có quyền truy cập",
+            action: function () {
+                redirect('/ph-report')
+            },
+            cancel: function () {
+                redirect('/ph-report')
+            },
+        })
+    }
+}
+
 
 
 //------------------ SỬ DỤNG CHO CHART  ------------------------///
@@ -232,13 +247,15 @@ function calculateColumnWidth(text) {
 function getColumnAddress(columns, columnName) {
     const columnMap = {};
     columns.forEach((column, index) => {
-        const columnAddress = String.fromCharCode(68 + index); // 67 là mã ASCII của 'C'
+        const columnAddress = String.fromCharCode(69 + index); // 67 là mã ASCII của 'C'
         columnMap[column.name] = columnAddress;
-        // console.log(columnMap)
     });
     return columnMap[columnName] || columnName; // Trả về địa chỉ cột nếu có, nếu không giữ nguyên tên cột
 }
 function replaceFormula(columns, formula, indexRow) {
+    // Thay IIF thành IF trước (hoặc sau đều được)
+    formula = formula.replace(/\bIIF\b/g, 'IF');
+
     return formula.replace(/\b\w+_\w+\b/g, (match) => {
         try {
             // Lấy địa chỉ cột từ tên cột

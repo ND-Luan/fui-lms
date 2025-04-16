@@ -6,20 +6,19 @@
 			<v-skeleton-loader type="list-item-two-line" v-for="i in 6" :key="i"></v-skeleton-loader>
 		</template>
 		<v-fade-transition>
-			<v-list lines="two" v-if="!IsLoading">
-				<v-list-subheader>{{$t('message.listTheme')}}</v-list-subheader>
-				<div v-for="(nhomDiem, index) in DSNhomDiem">
-					<v-list-item :title="renderTextTitle(nhomDiem)" @click="onRedirect(nhomDiem)">
+			<v-responsive>
+				<div v-for="(nhomDiem, index) in DSNhomDiem" :key="index" class="cursor-pointer">
+					<v-list-item @click="onRedirect(nhomDiem)">
 						<template v-slot:prepend>
-							<v-avatar>
-								<v-img src="/_cdn/lhbs-lms/icon_tieng_anh/icon_tieng_anh.png" :cover="false" />
+							<v-avatar :rounded="10">
+								<v-img src="/_cdn/lhbs-lms/icon_tieng_anh/education.png" :cover="false" />
 							</v-avatar>
 						</template>
+						<v-list-item-title>{{ renderTextTitle(nhomDiem) }}</v-list-item-title>
 					</v-list-item>
 					<v-divider v-if="index !== DSNhomDiem.length - 1" inset></v-divider>
 				</div>
-				<uc-empty v-if="DSNhomDiem.length === 0" />
-			</v-list>
+			</v-responsive>
 		</v-fade-transition>
 	</div>
 </template>
@@ -34,12 +33,15 @@
 				t,
 				vueData,
 				DSNhomDiem: [],
+				selectedGroup: null,
 				IsLoading: false,
 				IsLanguage: JSON.parse(localStorage.getItem('IsLanguage')),
-				Semester: localStorage.getItem('Semester')
+				Semester: localStorage.getItem('Semester'),
 			}
 		},
 		mounted() {
+			if (!vueData.HocSinhSelected) return
+	
 			this.IsLoading = true
 			ajaxCALL('lms/PH_TA_MaNhomDiem_Get_By_HocSinhID',
 				{
@@ -47,7 +49,18 @@
 					Semester: 'HK' + this.Semester
 				},
 				res => {
-					this.DSNhomDiem = res.data
+					console.log('res', res.data)
+					if (vueData.HocSinhSelected.CapID === 1) {
+						this.DSNhomDiem = res.data
+					} else {
+						const ListMaNhomCotDiem = ['S1_Mid', 'S1_Final', 'S2_Mid', 'S2_Final']
+						this.DSNhomDiem = res.data.filter(x => ListMaNhomCotDiem.includes(x.MaNhomCotDiem)).map(item => {
+							item.TenNhomCotDiem_VI = item.TenNhomCotDiem_VI.replace('Điểm', 'Đánh giá')
+	
+							return item
+						})
+						console.log('this.DSNhomDiem', this.DSNhomDiem)
+					}
 					this.IsLoading = false
 				}
 			)
@@ -66,7 +79,7 @@
 				const language = this.t('message.english')
 				openWindow({
 					title: language,
-					url: `/report-ket-qua-hoc-tap-tieng-anh-hoc-sinh?hsid=${nhomDiem.HocSinhID}&mnd=${nhomDiem.MaNhomCotDiem}`
+					url: `/report-ket-qua-hoc-tap-tieng-anh-hoc-sinh?hsid=${nhomDiem.HocSinhID}&mnd=${nhomDiem.MaNhomCotDiem}&tnd=${nhomDiem.TenNhomCotDiem_VI}`
 				})
 			},
 			renderTextTitle(obj) {

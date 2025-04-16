@@ -293,7 +293,7 @@
 								this.DSNhomDiem = [
 									{
 										"MaNhomCotDiem": "S1_Mid",
-										"TenNhomCotDiem_VI": "Điểm giữa kỳ HK1",
+										"TenNhomCotDiem_VI": "Điểm giữa kì HK1",
 										"TenNhomCotDiem_EN": "Mid_term Points (Semester 1)",
 										"ThuTuNhom": 5,
 										"Semester": "HK1"
@@ -330,7 +330,7 @@
 						res => {
 							this.DSCotDiem = [{
 								"MaNhomCotDiem": "S1_Mid",
-								"TenNhomCotDiem_VI": "Điểm giữa kỳ HK1",
+								"TenNhomCotDiem_VI": "Điểm giữa kì HK1",
 								"TenCotDiem_VI": "Tổng",
 								"MaCotDiem": "S1_Mid_Total_Point",
 							},
@@ -348,7 +348,7 @@
 							},
 							{
 								"MaNhomCotDiem": "S2_Mid",
-								"TenNhomCotDiem_VI": "Điểm giữa kỳ HK2",
+								"TenNhomCotDiem_VI": "Điểm giữa kì HK2",
 								"TenCotDiem_VI": "Tổng",
 								"MaCotDiem": "S2_Mid_Total_Point",
 							},

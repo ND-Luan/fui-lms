@@ -51,11 +51,19 @@
 			},
 			comments: {
 				type: Object
-			}
+			},
+			tableHeader: {
+				type: Boolean,
+				default: true, // mặc định vẫn hiện A,B,C nếu không truyền
+			},
+			tableRowNumber: {
+				type: Boolean,
+				default: true, // mặc định vẫn hiện 1,2,3 nếu không truyền
+			},
 		},
 		data() {
 			return {
-	
+				jExcelObj: null
 			}
 		},
 		watch: {
@@ -70,8 +78,11 @@
 				}
 			},
 			styleSheet: function (val) {
-				console.log('styleSheet', val)
-			}
+				if (this.jExcelObj) {
+					this.jExcelObj.setStyle(val); // Giả sử có một phương thức để cập nhật style
+				}
+			},
+	
 		},
 		mounted: function () {
 			const jExcelObj = jspreadsheet(this.$refs["spreadsheet"], this.jExcelOptions);
@@ -102,21 +113,18 @@
 							tableHeight: this.tableHeight,
 							lazyLoading: true,
 							freezeColumns: this.freezeColumns,
-							columnSorting: false,
+							columnSorting: true,
 							contextMenu: false,
 							stripHTML: false,
-							onchange: this.changed,
-							onselection: this.onselection,
-							onload: this.onload,
 							wordWrap: true,
 							allowComments: true,
 							comments: this.comments,
 							style: this.styleSheet,
-							updateTable: (instance, cell, col, row, val, label, cellName) => {
-							}, // this.updateTable(instance, cell, col, row, val, label, cellName),
 						}
 					],
 					contextMenu: function () { return false; },
+					onchange: this.changed,
+					onload: this.onload,
 					onselection: this.onselection,
 				};
 			}
@@ -147,9 +155,24 @@
 				}
 			},
 			changed(instance, cell, x, y, value) {
-				this.$emit('onChange', { instance, cell, x, y, value })
-				// console.log('{ instance, cell, x, y, value }', { instance, cell, x, y, value });
-				this.$emit('update:dataSource', this.jExcelObj.getJson())
+				// Lấy dữ liệu từ bảng
+				const rawData = this.jExcelObj[0].getData();
+	
+				// Lấy tiêu đề cột (nếu có)
+				const columns = this.columns.map(col => col.name);
+	
+				// Chuyển đổi sang mảng đối tượng
+				const dataObjects = rawData.map(row => {
+					const obj = {};
+					columns.forEach((colName, index) => {
+						obj[colName] = row[index] ?? ''//|| '';
+					});
+					return obj;
+				});
+	
+				console.log(dataObjects);
+				this.$emit('update:dataSource', dataObjects);
+				this.$emit('onChange', { instance, cell, x, y, value, dataObjects });
 			},
 			onselection(instance, x1, y1, x2, y2, origin) {
 				//v5

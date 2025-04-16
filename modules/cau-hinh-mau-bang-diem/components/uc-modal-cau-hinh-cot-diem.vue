@@ -198,7 +198,7 @@
 				],
 				headers: [
 					{
-						title: "Học kỳ",
+						title: "Học kì",
 						value: "Semester",
 						minWidth: 100,
 						align: 'center'

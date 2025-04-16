@@ -1,0 +1,65 @@
+{
+    "data": [],
+    "watch": {},
+    "controls": [
+        {
+            "prop": "fluid grid-list-md",
+            "rows": [
+                {
+                    "prop": "",
+                    "cols": [
+                        {
+                            "el":"div",
+                            "attr":{
+                                "class":"d-flex justify-center h-screen ga-15"
+                            },
+                            "innerHTML":[
+                                {
+                                    "el":"div",
+                                    "innerHTML":[
+                                        {
+                                            "el": "v-img",
+                                            "attr": {
+                                                "height": "300px",
+                                                "width": "300px",
+                                                "src": "/_cdn/lhbs-lms/zalo-group-cap1.png",
+                                                "align": "right"
+                                            }
+                                        },
+                                        {
+                                            "el":"b",
+                                            "innerHTML":"Group Zalo hỗ trợ kỹ thuật cho GV Tiểu học"
+                                        }
+                                    ]
+                                },
+                                {
+                                    "el":"div",
+                                    "innerHTML":[
+                                        {
+                                            "el": "v-img",
+                                            "attr": {
+                                                "src": "/_cdn/lhbs-lms/zalo-group-cap23.png",
+                                                "height": "300px",
+                                                "width": "300px",
+                                                "align": "left"
+                                            }
+                                        },
+                                        {
+                                            "el":"b",
+                                            "innerHTML":"Group Zalo hỗ trợ kỹ thuật cho GV Trung học"
+                                        }
+                                    ]
+                                }
+                                
+                              
+                               
+                            ]
+                        }
+                        
+                    ]
+                }
+            ]
+        }
+    ],
+    "set": {}
+}

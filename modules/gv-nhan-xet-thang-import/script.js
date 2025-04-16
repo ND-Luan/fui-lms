@@ -8,18 +8,32 @@ function convertHocSinh() {
         const NhanXetMonHocKhac_HTML = null
         const HoatDongGiaoDucKhac_HTML = null
         const PhamChatNangLuc_HTML = null
-        return [
+        //C2 - C3
+        const NoiDungKienThuc_HTML = null
+        const NoiDungNangLuc_HTML = null
+        const NoiDungHoatDongKhac_HTML = null
+        let arr = [
             s.HocSinhID,
             s.SoDanhBo,
-            s.HoTen,
+            s.HoTen
+        ]
+        const arrC1 = [
             DiemToan,
             NhanXetToan_HTML,
             DiemTiengViet,
             NhanXetTiengViet_HTML,
             NhanXetMonHocKhac_HTML,
             HoatDongGiaoDucKhac_HTML,
-            PhamChatNangLuc_HTML,
+            PhamChatNangLuc_HTML
         ]
+        const arrC2_C3 = [
+            NoiDungKienThuc_HTML,
+            NoiDungNangLuc_HTML,
+            NoiDungHoatDongKhac_HTML
+        ]
+        if (vueData.dataSource_API[0].CapID === 1) arr = [...arr, ...arrC1]
+        else arr = [...arr, ...arrC2_C3]
+        return arr
     }
     )
     vueData.dataSource = tableData
@@ -28,20 +42,34 @@ function convertHocSinhToAPI() {
     vueData.JSON_NhanXetThang = []
     const tableData = vueData.dataSource.map((s) => {
         const hsl = vueData.dataSource_API.find(h => h.HocSinhID == s[0])
-        return {
-            HocSinhID: s[0],
-            SoDanhBo: s[1],
-            HoTen: s[2],
-            DiemToan: s[3] || null,
-            NhanXetToan_HTML: s[4] || null,
-            DiemTiengViet: s[5] || null,
-            NhanXetTiengViet_HTML: s[6] || null,
-            NhanXetMonHocKhac_HTML: s[7] || null,
-            HoatDongGiaoDucKhac_HTML: s[8] || null,
-            PhamChatNangLuc_HTML: s[9] || null,
-            LopID: vueData.LopID,
-            Lop_NhanXetThangID: vueData.Lop_NhanXetThangID,
-            HSLopID: hsl.HSLopID
+        if (hsl.CapID === 1) {
+            return {
+                HocSinhID: s[0],
+                SoDanhBo: s[1],
+                HoTen: s[2],
+                DiemToan: s[3] || null,
+                NhanXetToan_HTML: s[4] || null,
+                DiemTiengViet: s[5] || null,
+                NhanXetTiengViet_HTML: s[6] || null,
+                NhanXetMonHocKhac_HTML: s[7] || null,
+                HoatDongGiaoDucKhac_HTML: s[8] || null,
+                PhamChatNangLuc_HTML: s[9] || null,
+                LopID: vueData.LopID,
+                Lop_NhanXetThangID: vueData.Lop_NhanXetThangID,
+                HSLopID: hsl.HSLopID
+            }
+        } else {
+            return {
+                HocSinhID: s[0],
+                SoDanhBo: s[1],
+                HoTen: s[2],
+                NoiDungKienThuc_HTML: s[3] || null,
+                NoiDungNangLuc_HTML: s[4] || null,
+                NoiDungHoatDongKhac_HTML: s[5] || null,
+                LopID: vueData.LopID,
+                Lop_NhanXetThangID: vueData.Lop_NhanXetThangID,
+                HSLopID: hsl.HSLopID
+            }
         }
     })
     vueData.JSON_NhanXetThang = tableData
@@ -69,4 +97,153 @@ function initColumn() {
             }
         }
     }
+}
+function renderColumn() {
+    vueData.columns = []
+    let columns = []
+    if (vueData.dataSource_API[0].CapID === 1) {
+        columns = [
+            {
+                "type": "text",
+                "title": "Mã học sinh",
+                "name": "HocSinhID",
+                "width": 120,
+                "backGroundColor": null,
+                "wrap": true
+            },
+            {
+                "type": "text",
+                "title": "Số Danh Bộ",
+                "name": "SoDanhBo",
+                "width": 120,
+                "backGroundColor": null,
+                "wrap": true
+            },
+            {
+                "type": "text",
+                "title": "Họ tên học sinh",
+                "name": "HoTen",
+                "width": 300,
+                "backGroundColor": null,
+                "wrap": true
+            },
+            {
+                "type": "text",
+                "title": "Điểm Toán",
+                "name": "DiemToan",
+                "width": 300,
+                "backGroundColor": null,
+                "wrap": true
+            },
+            {
+                "type": "text",
+                "title": "Nhận xét Toán",
+                "name": "NhanXetToan_HTML",
+                "width": 300,
+                "backGroundColor": null,
+                "wrap": true,
+                align: "left"
+            },
+            {
+                "type": "text",
+                "title": "Điểm Tiếng Việt",
+                "name": "DiemTiengViet",
+                "width": 300,
+                "backGroundColor": null,
+                "wrap": true
+            },
+            {
+                "type": "text",
+                "title": "Nhận xét Tiếng Việt",
+                "name": "NhanXetTiengViet_HTML",
+                "width": 300,
+                "backGroundColor": null,
+                "wrap": true,
+                align: "left"
+            },
+            {
+                "type": "text",
+                "title": "Nhận xét môn học khác",
+                "name": "NhanXetMonHocKhac_HTML",
+                "width": 300,
+                "backGroundColor": null,
+                "wrap": true,
+                align: "left"
+            },
+            {
+                "type": "text",
+                "title": "Hoạt động giáo dục khác",
+                "name": "HoatDongGiaoDucKhac_HTML",
+                "width": 300,
+                "backGroundColor": null,
+                "wrap": true,
+                align: "left"
+            },
+            {
+                "type": "text",
+                "title": "Phẩm chất - Năng lực",
+                "name": "PhamChatNangLuc_HTML",
+                "width": 300,
+                "backGroundColor": null,
+                "wrap": true,
+                align: "left"
+            }
+        ]
+    }
+    else {
+        columns = [
+            {
+                "type": "text",
+                "title": "Mã học sinh",
+                "name": "HocSinhID",
+                "width": 120,
+                "backGroundColor": null,
+                "wrap": true
+            },
+            {
+                "type": "text",
+                "title": "Số Danh Bộ",
+                "name": "SoDanhBo",
+                "width": 120,
+                "backGroundColor": null,
+                "wrap": true
+            },
+            {
+                "type": "text",
+                "title": "Họ tên học sinh",
+                "name": "HoTen",
+                "width": 300,
+                "backGroundColor": null,
+                "wrap": true
+            },
+            {
+                "type": "text",
+                "title": "Nội dung kiến thức",
+                "name": "NoiDungKienThuc_HTML",
+                "width": 300,
+                "backGroundColor": null,
+                "wrap": true,
+                "align": "left"
+            },
+            {
+                "type": "text",
+                "title": "Nội dung năng lực",
+                "name": "NoiDungNangLuc_HTML",
+                "width": 300,
+                "backGroundColor": null,
+                "wrap": true,
+                "align": "left"
+            },
+            {
+                "type": "text",
+                "title": "Nội dung hoạt động khác",
+                "name": "NoiDungHoatDongKhac_HTML",
+                "width": 300,
+                "backGroundColor": null,
+                "wrap": true,
+                "align": "left"
+            }
+        ]
+    }
+    vueData.columns = columns
 }

@@ -1,3 +1,28 @@
 .v-container{
     padding: 0;
 }
+
+.v-col-6-important{
+    flex: 0 0 50% !important;
+    max-width: 50% !important;
+}
+.fs-13{
+    font-size: 13px;
+}
+
+/* CSS giao diện cấp 1 */
+/* Begin */
+    .container-body{
+        /* background-color: #f4f4f4; */
+        height: 100vh;
+        padding: 8px 8px 0px 8px;
+    }
+    .card-custom  {
+        background: #f4f4f400 !important
+    }
+    .row-custom .v-col-12{
+        flex: none;
+        max-width: none !important;
+    }
+
+/* End */

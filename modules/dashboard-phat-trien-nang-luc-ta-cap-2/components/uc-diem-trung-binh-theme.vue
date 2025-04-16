@@ -9,7 +9,7 @@
 							item-value="LopID"></v-select>
 					</v-col>
 					<v-col>
-						<v-select v-model="form.HocKy" label="Chọn học kỳ" :items="DSHocKy" item-title="title"
+						<v-select v-model="form.HocKy" label="Chọn học kì" :items="DSHocKy" item-title="title"
 							item-value="value"></v-select>
 					</v-col>
 					<v-col>
@@ -55,7 +55,7 @@
 			<v-col cols="4">
 				<v-card :flat="false">
 					<v-card-title class="d-flex text-primary">
-						Điểm giữa kì và cuối kì
+						Điểm giữa kì và cuối kì (%)
 					</v-card-title>
 					<v-card-text>
 						<uc-chart-apex :options="Chart_KyNang" />
@@ -121,6 +121,14 @@
 							top: 1
 						}
 					},
+					grid: {
+						padding: {
+							top: 0,
+							right: 20,
+							bottom: 0,
+							left: 20
+						},
+					},
 					title: {
 						//text: 'Radar Chart - Multi Series'
 					},
@@ -150,7 +158,16 @@
 							blur: 1,
 							left: 1,
 							top: 1
-						}
+						},
+	
+					},
+					grid: {
+						padding: {
+							top: 0,
+							right: 20,
+							bottom: 0,
+							left: 20
+						},
 					},
 					title: {
 						//text: 'Radar Chart - Multi Series'
@@ -182,6 +199,14 @@
 							left: 1,
 							top: 1
 						}
+					},
+					grid: {
+					padding: {
+					top: 0,
+					right: 20,
+					bottom: 0,
+					left: 20
+					},
 					},
 					title: {
 						//text: 'Radar Chart - Multi Series'
@@ -263,169 +288,195 @@
 						type: 'POST',
 						headers: {
 							// key 1:sk- proj - uOP0INFuaRxPjJz1r65ytuCbOGPoGOvWu9mATwQvQrnHrP5LGOgZiHT2MNUU6rp8WE6xTPJXPoT3BlbkFJ9XgQgUyGsr3XOsBto1WlHQWw5bXVEolFF6_1Ht6NK44rPkm2UQwJD32UodOncXOc9uKMwF1bUA
-					// key 2: sk - proj - v3qYrBAmYotum9Dt0jqmeIkQeQUT52rVZqPxkE3i0g -tvwrTKb3rLgc1mQUWaXsgrtYGIpnotUT3BlbkFJFSvDGL37PWBIeYPjFXH3BW0Hw_dZsiGE6qmr3j0pCKlQiT - 2Vt4rPOZVEFAuwF0cP3NU0Oq3MA
-					authorization: `Bearer ${'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'}`,
-					},
-					url: 'https://api.openai.com/v1/chat/completions',
-					contentType: 'application/json; charset=utf-8',
-					dataType: 'json',
-					crossDomain: true,
-					data: JSON.stringify({
-						model: "gpt-4o-mini", // Hoặc "gpt-4" nếu bạn sử dụng GPT-4
-						messages: [
-							{ role: "system", content: "You are a data visualization expert." },
-							{ role: "system", content: promptSend },
-							{ role: "user", content: JSON.stringify({ chartData: chartJsons }) },
-						],
-						temperature: 1, // Điều chỉnh theo nhu cầu
-					}),
-					success: function (d) {
-						response = {
-							IsSuccess: true,
-							Message: null,
-							Result: d.data
-						}
-						resolve(response)
-					},
-					error: function (xhr, ajaxOptions, thrownError) {
-						Toast.error({
-							title: 'Thông báo',
-							text: xhr?.responseJSON?.Message,
-						})
-						response = {
-							IsSuccess: false,
-							Message: xhr.responseJSON?.Message,
-							Result: null
-						}
-						resolve(response)
-					},
-					complete: function (data) {
-						vueData.v_Loading = false
-					},
-					})
-		})
-		console.log(res)
-					return res
-	},
-	
-	onLoadDSLop(KhoiID) {
-		return new Promise(resolve => {
-			ajaxCALL('lms/Lop_Get_ByKhoiID',
-				{
-					KhoiID: KhoiID
-				},
-				res => {
-					this.DSLop = res.data
-					resolve()
-				}
-			)
-		})
-	},
-	onLoadDSHocSinh(LopID) {
-		return new Promise(resolve => {
-			ajaxCALL('lms/HocSinhLop_Get_ByLopID',
-				{
-					LopID: LopID
-				},
-				res => {
-					this.DSHocSinh = res.data
-					resolve()
-				}
-			)
-		})
-	},
-	onLoadChart({
-		HocKy,
-		HocSinhID,
-		KhoiID,
-		LopID,
-		MonHocID
-	}) {
-		return new Promise(resolve => {
-			ajaxCALL('lms/DashboardDiemTrungBinhTheoTheme_Get',
-				{
-					HocKy,
-					HocSinhID,
-					KhoiID,
-					LopID,
-					MonHocID
-				},
-				res => {
-					const DataChart_DiemTrungBinhTheme_API = res.data[0]
-					const DataChart_KyNangTheme_API = res.data[1]
-	
-					this.Chart_DiemTrungBinh = {
-						...this.Chart_DiemTrungBinh,
-						series: [
-							{
-								name: "Điểm",
-								data: DataChart_DiemTrungBinhTheme_API.map(x => parseFloat(x.KetQuaDanhGia_VI)),
-							}
-						],
-						xaxis: {
-							categories: DataChart_DiemTrungBinhTheme_API.map(x => x.MaCotDiem),
-						}
-					}
-	
-	
-					const kyNang = DataChart_KyNangTheme_API.filter(x => x.MaNhomCotDiem === 'S1_Mid' || x.MaNhomCotDiem === 'S1_Final')
-					const labelsKyNang = [...new Set(kyNang.map(x => x.TenCotDiem_EN))]
-					const theme = DataChart_KyNangTheme_API.filter(x => x.MaNhomCotDiem !== 'S1_Mid' && x.MaNhomCotDiem !== 'S1_Final')
-					const labelsTheme = [...new Set(theme.map(x => x.TenCotDiem_EN))]
-					const datasetsTheme_1 = theme.filter(x => x.MaNhomCotDiem === "Theme_1").map(x => x.KetQuaDanhGia_VI)
-					const datasetsTheme_2 = theme.filter(x => x.MaNhomCotDiem === "Theme_2").map(x => x.KetQuaDanhGia_VI)
-					const datasetsTheme_3 = theme.filter(x => x.MaNhomCotDiem === "Theme_3").map(x => x.KetQuaDanhGia_VI)
-					const datasetsTheme_4 = theme.filter(x => x.MaNhomCotDiem === "Theme_4").map(x => x.KetQuaDanhGia_VI)
-					const chartTheme = {
-						...this.Chart_Theme,
-						series: [
-							{
-								name: "Theme 1",
-								data: datasetsTheme_1
-							},
-							{
-								name: "Theme 2",
-								data: datasetsTheme_2
-							},
-							{
-								name: "Theme 3",
-								data: datasetsTheme_3
-							},
-							{
-								name: "Theme 4",
-								data: datasetsTheme_4
-							}
-						],
-						xaxis: {
-							categories: labelsTheme
-						}
-					}
-					const chartKyNang = {
-						...this.Chart_KyNang,
-						series: [{
-							name: "Điểm giữa kì",
-							data: kyNang.filter(x => x.MaNhomCotDiem === 'S1_Mid').map(x => x.KetQuaDanhGia_VI)
+							// key 2: sk - proj - v3qYrBAmYotum9Dt0jqmeIkQeQUT52rVZqPxkE3i0g -tvwrTKb3rLgc1mQUWaXsgrtYGIpnotUT3BlbkFJFSvDGL37PWBIeYPjFXH3BW0Hw_dZsiGE6qmr3j0pCKlQiT - 2Vt4rPOZVEFAuwF0cP3NU0Oq3MA
+							authorization: `Bearer ${'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'}`,
 						},
-						{
-							name: "Điểm cuối kì",
-							data: kyNang.filter(x => x.MaNhomCotDiem === 'S1_Final').map(x => x.KetQuaDanhGia_VI)
-						}],
-						xaxis: {
-							categories: labelsKyNang
-						}
-					}
-					const DataChart_KyNang = {
-						Theme: chartTheme,
-						KyNang: chartKyNang
-					}
-					this.Chart_Theme = DataChart_KyNang.Theme
-					this.Chart_KyNang = DataChart_KyNang.KyNang
-	
+						url: 'https://api.openai.com/v1/chat/completions',
+						contentType: 'application/json; charset=utf-8',
+						dataType: 'json',
+						crossDomain: true,
+						data: JSON.stringify({
+							model: "gpt-4o-mini", // Hoặc "gpt-4" nếu bạn sử dụng GPT-4
+							messages: [
+								{ role: "system", content: "You are a data visualization expert." },
+								{ role: "system", content: promptSend },
+								{ role: "user", content: JSON.stringify({ chartData: chartJsons }) },
+							],
+							temperature: 1, // Điều chỉnh theo nhu cầu
+						}),
+						success: function (d) {
+							response = {
+								IsSuccess: true,
+								Message: null,
+								Result: d.data
+							}
+							resolve(response)
+						},
+						error: function (xhr, ajaxOptions, thrownError) {
+							Toast.error({
+								title: 'Thông báo',
+								text: xhr?.responseJSON?.Message,
+							})
+							response = {
+								IsSuccess: false,
+								Message: xhr.responseJSON?.Message,
+								Result: null
+							}
+							resolve(response)
+						},
+						complete: function (data) {
+							vueData.v_Loading = false
+						},
+					})
 				})
-		})
-	},
-	calculateLinearRegression
-		
-				}
-			}
+				console.log(res)
+				return res
+			},
+	
+			onLoadDSLop(KhoiID) {
+				return new Promise(resolve => {
+					ajaxCALL('lms/Lop_Get_ByKhoiID',
+						{
+							KhoiID: KhoiID
+						},
+						res => {
+							this.DSLop = res.data
+							resolve()
+						}
+					)
+				})
+			},
+			onLoadDSHocSinh(LopID) {
+				return new Promise(resolve => {
+					ajaxCALL('lms/HocSinhLop_Get_ByLopID',
+						{
+							LopID: LopID
+						},
+						res => {
+							this.DSHocSinh = res.data
+							resolve()
+						}
+					)
+				})
+			},
+			onLoadChart({
+				HocKy,
+				HocSinhID,
+				KhoiID,
+				LopID,
+				MonHocID
+			}) {
+				return new Promise(resolve => {
+					ajaxCALL('lms/DashboardDiemTrungBinhTheoTheme_Get',
+						{
+							HocKy,
+							HocSinhID,
+							KhoiID,
+							LopID,
+							MonHocID
+						},
+						res => {
+							const DataChart_DiemTrungBinhTheme_API = res.data[0]
+							const DataChart_KyNangTheme_API = res.data[1]
+	
+							this.Chart_DiemTrungBinh = {
+								...this.Chart_DiemTrungBinh,
+								series: [
+									{
+										name: "Điểm",
+										data: DataChart_DiemTrungBinhTheme_API.map(x => parseFloat(x.KetQuaDanhGia_VI)),
+									}
+								],
+								xaxis: {
+									categories: DataChart_DiemTrungBinhTheme_API.map(x => x.MaCotDiem),
+								}
+							}
+	
+	
+							const kyNang = DataChart_KyNangTheme_API.filter(x => x.MaNhomCotDiem === 'S1_Mid' || x.MaNhomCotDiem === 'S1_Final')
+							const labelsKyNang = [...new Set(kyNang.map(x => x.TenCotDiem_EN))]
+							const theme = DataChart_KyNangTheme_API.filter(x => x.MaNhomCotDiem !== 'S1_Mid' && x.MaNhomCotDiem !== 'S1_Final')
+							const labelsTheme = [...new Set(theme.map(x => x.TenCotDiem_EN))]
+							const datasetsTheme_1 = theme.filter(x => x.MaNhomCotDiem === "Theme_1").map(x => x.KetQuaDanhGia_VI)
+							const datasetsTheme_2 = theme.filter(x => x.MaNhomCotDiem === "Theme_2").map(x => x.KetQuaDanhGia_VI)
+							const datasetsTheme_3 = theme.filter(x => x.MaNhomCotDiem === "Theme_3").map(x => x.KetQuaDanhGia_VI)
+							const datasetsTheme_4 = theme.filter(x => x.MaNhomCotDiem === "Theme_4").map(x => x.KetQuaDanhGia_VI)
+							const chartTheme = {
+								...this.Chart_Theme,
+								series: [
+									{
+										name: "Theme 1",
+										data: datasetsTheme_1
+									},
+									{
+										name: "Theme 2",
+										data: datasetsTheme_2
+									},
+									{
+										name: "Theme 3",
+										data: datasetsTheme_3
+									},
+									{
+										name: "Theme 4",
+										data: datasetsTheme_4
+									}
+								],
+								xaxis: {
+									categories: labelsTheme
+								}
+							}
+							const chartKyNang = {
+								...this.Chart_KyNang,
+								series: [{
+									name: "Điểm giữa kì (%)",
+									data: kyNang.filter(x => x.MaNhomCotDiem === 'S1_Mid').map(x => {
+										// Xác định điểm tối đa cho từng kỹ năng
+										let maxScore;
+										switch (x.TenCotDiem_EN.toLowerCase()) {
+											case 'Listening': maxScore = 2; break;
+											case 'Language': maxScore = 2; break;
+											case 'Reading': maxScore = 2; break;
+											case 'Writing': maxScore = 2; break;
+											case 'Speaking': maxScore = 2; break;
+											default:
+												maxScore = 2;
+										}
+										return (parseFloat(x.KetQuaDanhGia_VI) / maxScore) * 100;
+									})
+								},
+								{
+									name: "Điểm cuối kì (%)",
+									data: kyNang.filter(x => x.MaNhomCotDiem === 'S1_Final').map(x => {
+										// Xác định điểm tối đa cho từng kỹ năng
+										let maxScore;
+										switch (x.TenCotDiem_EN.toLowerCase()) {
+											case 'Listening': maxScore = 2; break;
+											case 'Language': maxScore = 2; break;
+											case 'Reading': maxScore = 2; break;
+											case 'Writing': maxScore = 2; break;
+											case 'Speaking': maxScore = 2; break;
+											default:
+												maxScore = 2;
+										}
+										return (parseFloat(x.KetQuaDanhGia_VI) / maxScore) * 100;
+									})
+								}],
+								xaxis: {
+									categories: labelsKyNang
+								}
+							}
+							console.log('chartKyNang', chartKyNang)
+							const DataChart_KyNang = {
+								Theme: chartTheme,
+								KyNang: chartKyNang
+							}
+							this.Chart_Theme = DataChart_KyNang.Theme
+							this.Chart_KyNang = DataChart_KyNang.KyNang
+	
+						})
+				})
+			},
+			calculateLinearRegression
+		}
+	}
 </script>

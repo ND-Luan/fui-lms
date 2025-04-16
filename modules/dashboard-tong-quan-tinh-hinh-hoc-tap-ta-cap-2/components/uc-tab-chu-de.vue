@@ -80,19 +80,23 @@
 						TenNhomCotDiem_VI: "Theme 4",
 						MaNhomCotDiem: "Theme_4"
 					}
-					// ,
-					// {
-					// 	TenNhomCotDiem_VI: "Theme 5",
-					// 	MaNhomCotDiem: "Theme_5"
-					// },
-					// {
-					// 	TenNhomCotDiem_VI: "Theme 6",
-					// 	MaNhomCotDiem: "Theme_6"
-					// },
-					// {
-					// 	TenNhomCotDiem_VI: "Theme 8",
-					// 	MaNhomCotDiem: "Theme_8"
-					// },
+					,
+					{
+						TenNhomCotDiem_VI: "Theme 5",
+						MaNhomCotDiem: "Theme_5"
+					},
+					{
+						TenNhomCotDiem_VI: "Theme 6",
+						MaNhomCotDiem: "Theme_6"
+					},
+					{
+						TenNhomCotDiem_VI: "Theme 7",
+						MaNhomCotDiem: "Theme_7"
+					},
+					{
+						TenNhomCotDiem_VI: "Theme 8",
+						MaNhomCotDiem: "Theme_8"
+					},
 	
 				],
 				DSCotDiem: [],
@@ -150,6 +154,7 @@
 				})
 			},
 			onLoadChart({ NienKhoa, CapID, MonHocID, MaNhomDiem }) {
+				if (!MaNhomDiem) return
 				return new Promise(resolve => {
 					ajaxCALL('lms/DashboardDiemKyNang_Get',
 						{

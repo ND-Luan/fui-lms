@@ -13,7 +13,7 @@
 			<v-col cols="6">
 				<v-card :flat="false">
 					<v-card-title class="d-flex text-primary">
-						Mối quan hệ giữa điểm trung bình và đường hồi quy của GV Việt Nam
+						Mối quan hệ giữa điểm trung bình và đường hồi qui của GV Việt Nam
 
 					</v-card-title>
 					<v-card-text>
@@ -24,7 +24,7 @@
 			<v-col cols="6">
 				<v-card :flat="false">
 					<v-card-title class="d-flex text-primary">
-						Mối quan hệ giữa điểm trung bình và đường hồi quy của GV Nước ngoài
+						Mối quan hệ giữa điểm trung bình và đường hồi qui của GV Nước ngoài
 					</v-card-title>
 					<v-card-text>
 						<uc-chart-apex :options="Chart_GVNN" />

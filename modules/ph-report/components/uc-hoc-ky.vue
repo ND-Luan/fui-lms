@@ -13,85 +13,146 @@
 			<keep-alive>
 				<v-tabs-window v-model="tab">
 					<v-tabs-window-item v-for="hocKy in DSHocKy" :key="hocKy.id" :value="hocKy.id">
-						<v-card>
-							<v-divider></v-divider>
-							<v-expansion-panels flat multiple>
-								<v-expansion-panel v-for="(monHocGroup, index) in DSMonHocGroup" :key="index">
-									<v-expansion-panel-title expand-icon="mdi-menu-down">
-										<div class="d-flex align-center ga-4">
-											<v-img :src="monHocGroup.icon" height="30" width="30"></v-img>
-											<p>{{ monHocGroup.Name_VI }}</p>
-										</div>
-										<div></div>
-									</v-expansion-panel-title>
-									<v-expansion-panel-text>
-										<v-lazy :min-height="100" :options="{ 'threshold': 0.5 }"
-											transition="fade-transition">
-											<div class="pa-4 d-flex flex-column ga-4">
-												<v-card :color="monHoc.Color"
-													v-for="monHoc in DSMonHoc_NhomDiem.filter(x => x.MonHocGroup === monHocGroup.MonHocGroup)">
-													<v-card-text>
-														<p class="font-weight-medium">{{ monHoc.MonHocName }}</p>
-													</v-card-text>
-													<v-list>
-														<div v-for="(nhomDiem, indexNhomDiem) of monHoc.DSNhomDiem"
-															:key="nhomDiem">
-															<v-list-subheader v-if="nhomDiem.DSDiem.length > 1"
-																class="text-primary font-weight-medium">
-																<v-icon size="small"
-																	class="mb-1 me-1">mdi-star-four-points</v-icon>
-																{{
-																	IsLanguage ? nhomDiem.TenNhomCotDiem_EN :
-																		nhomDiem.TenNhomCotDiem_VI
-																}}
-															</v-list-subheader>
-															<v-list-item v-for="(diem, index) in nhomDiem.DSDiem"
-																:key="index">
-																<v-list-item-title class="text-body-2"
-																	:class="nhomDiem.DSDiem.length === 1 ? 'text-primary font-weight-medium' : ''">
-																	<v-icon size="small" class="mb-1 me-1"
-																		v-if="nhomDiem.DSDiem.length === 1">mdi-star-four-points</v-icon>
-																	<v-icon size="x-large"
-																		v-else>mdi-star-four-points-small</v-icon>
-																	{{ IsLanguage ? diem.TenCotDiem_EN :
-																		diem.TenCotDiem_VI
-																	}}
-																</v-list-item-title>
-																<v-list-item-subtitle
-																	v-if="['NhanXet'].some(keyword => diem.MaCotDiem.includes(keyword))"
-																	class="text-black text-body-2 font-weight-medium"
-																	style="-webkit-line-clamp: unset; opacity: 1 !important; line-height: 1.425 !important;">
-																	<v-icon class="mr-2"
-																		color="orange">mdi-pencil</v-icon>
-																	{{ diem.KetQuaDanhGia_VI }}
-																</v-list-item-subtitle>
-																<template v-slot:append
-																	v-if="!diem.MaCotDiem.includes('MucDoDanhGia')">
-																	<v-chip class="bg-primary text-white"
-																		v-if="diem.GiaTriCotDiem === 'number' && diem.KetQuaDanhGia_VI !== null">
-																		{{ parseFloat(diem.KetQuaDanhGia_VI) }}
-																	</v-chip>
-																</template>
-																<template v-slot:append
-																	v-if="diem.MaCotDiem.includes('MucDoDanhGia')">
-																	<v-chip class="bg-primary text-white"
-																		v-if="['MucDoDanhGia'].some(keyword => diem.MaCotDiem.includes(keyword))">
-																		{{ diem.KetQuaDanhGia_VI }}
-																	</v-chip>
-																</template>
-															</v-list-item>
-															<v-divider class="my-2"
-																v-if="indexNhomDiem !== monHoc.DSNhomDiem.length - 1"></v-divider>
-														</div>
-														<uc-empty v-if="monHoc.DSNhomDiem.length === 0" />
-													</v-list>
-												</v-card>
+						<div v-if="vueData.HocSinhSelected.CapID === 1">
+							<v-card>
+								<v-divider></v-divider>
+								<v-expansion-panels flat multiple class="mt-3">
+									<v-expansion-panel v-for="(monHocGroup, index) in DSMonHocGroup" :key="index">
+										<v-expansion-panel-title expand-icon="mdi-menu-down">
+											<div class="d-flex align-center ga-4">
+												<v-img :src="monHocGroup.icon" height="30" width="30"></v-img>
+												<p>{{ monHocGroup.Name_VI }}</p>
 											</div>
-										</v-lazy>
-									</v-expansion-panel-text>
-								</v-expansion-panel>
-							</v-expansion-panels>
-						</v-card>
+										</v-expansion-panel-title>
+										<v-expansion-panel-text>
+											<v-lazy :min-height="100" :options="{ 'threshold': 0.5 }"
+												transition="fade-transition">
+												<div class="pa-4 d-flex flex-column ga-4">
+													<v-card :color="monHoc.Color"
+														v-for="monHoc in DSMonHoc_NhomDiem.filter(x => x.MonHocGroup === monHocGroup.MonHocGroup)">
+														<v-card-text>
+															<p class="font-weight-medium">{{ monHoc.MonHocName }}</p>
+														</v-card-text>
+														<v-list>
+															<div v-for="(nhomDiem, indexNhomDiem) of monHoc.DSNhomDiem"
+																:key="nhomDiem">
+																<v-list-subheader v-if="nhomDiem.DSDiem.length > 1"
+																	class="text-primary font-weight-medium">
+																	<v-icon size="small"
+																		class="mb-1 me-1">mdi-star-four-points</v-icon>
+																	{{
+																		IsLanguage ? nhomDiem.TenNhomCotDiem_EN :
+																			nhomDiem.TenNhomCotDiem_VI
+																	}}
+																</v-list-subheader>
+																<v-list-item v-for="(diem, index) in nhomDiem.DSDiem"
+																	:key="index">
+																	<v-list-item-title class="text-body-2"
+																		:class="nhomDiem.DSDiem.length === 1 ? 'text-primary font-weight-medium' : ''">
+																		<v-icon size="small" class="mb-1 me-1"
+																			v-if="nhomDiem.DSDiem.length === 1">mdi-star-four-points</v-icon>
+																		<v-icon size="x-large"
+																			v-else>mdi-star-four-points-small</v-icon>
+																		{{ IsLanguage ? diem.TenCotDiem_EN :
+																			diem.TenCotDiem_VI
+																		}}
+																	</v-list-item-title>
+																	<v-list-item-subtitle
+																		v-if="['NhanXet'].some(keyword => diem.MaCotDiem.includes(keyword))"
+																		class="text-black text-body-2 font-weight-medium"
+																		style="-webkit-line-clamp: unset; opacity: 1 !important; line-height: 1.425 !important;">
+																		<v-icon class="mr-2"
+																			color="orange">mdi-pencil</v-icon>
+																		{{ diem.KetQuaDanhGia_VI }}
+																	</v-list-item-subtitle>
+																	<template v-slot:append
+																		v-if="!diem.MaCotDiem.includes('MucDoDanhGia')">
+																		<v-chip class="bg-primary text-white"
+																			v-if="diem.GiaTriCotDiem === 'number' && diem.KetQuaDanhGia_VI !== null">
+																			{{ parseFloat(diem.KetQuaDanhGia_VI) }}
+																		</v-chip>
+																	</template>
+																	<template v-slot:append
+																		v-if="diem.MaCotDiem.includes('MucDoDanhGia')">
+																		<v-chip class="bg-primary text-white"
+																			v-if="['MucDoDanhGia'].some(keyword => diem.MaCotDiem.includes(keyword))">
+																			{{ diem.KetQuaDanhGia_VI }}
+																		</v-chip>
+																	</template>
+																</v-list-item>
+																<v-divider class="my-2"
+																	v-if="indexNhomDiem !== monHoc.DSNhomDiem.length - 1"></v-divider>
+															</div>
+															<uc-empty v-if="monHoc.DSNhomDiem.length === 0" />
+														</v-list>
+													</v-card>
+												</div>
+											</v-lazy>
+										</v-expansion-panel-text>
+									</v-expansion-panel>
+								</v-expansion-panels>
+							</v-card>
+						</div>
+						<div v-if="vueData.HocSinhSelected.CapID === 2 || vueData.HocSinhSelected.CapID === 3">
+							<v-lazy :min-height="100" :options="{ 'threshold': 0.5 }" transition="fade-transition">
+								<div class="pa-4 d-flex flex-column ga-4">
+									<v-card :color="monHoc.Color" v-for="monHoc in DSMonHoc_NhomDiem">
+										<v-card-text>
+											<p class="font-weight-medium">{{ monHoc.MonHocName }}</p>
+										</v-card-text>
+										<v-list>
+											<div v-for="(nhomDiem, indexNhomDiem) of monHoc.DSNhomDiem" :key="nhomDiem">
+												<v-list-subheader v-if="nhomDiem.DSDiem.length > 1"
+													class="text-primary font-weight-medium">
+													<v-icon size="small" class="mb-1 me-1">mdi-star-four-points</v-icon>
+													{{
+														IsLanguage ? nhomDiem.TenNhomCotDiem_EN :
+															nhomDiem.TenNhomCotDiem_VI
+													}}
+												</v-list-subheader>
+												<v-list-item v-for="(diem, index) in nhomDiem.DSDiem" :key="index">
+													<v-list-item-title class="text-body-2"
+														:class="nhomDiem.DSDiem.length === 1 ? 'text-primary font-weight-medium' : ''">
+														<v-icon size="small" class="mb-1 me-1"
+															v-if="nhomDiem.DSDiem.length === 1">
+															mdi-star-four-points</v-icon>
+														<v-icon size="x-large"
+															v-else>mdi-star-four-points-small</v-icon>
+														{{ IsLanguage ? diem.TenCotDiem_EN :
+															diem.TenCotDiem_VI
+														}}
+													</v-list-item-title>
+													<v-list-item-subtitle
+														v-if="['NhanXet'].some(keyword => diem.MaCotDiem.includes(keyword))"
+														class="text-black text-body-2 font-weight-medium"
+														style="-webkit-line-clamp: unset; opacity: 1 !important; line-height: 1.425 !important;">
+														<v-icon class="mr-2" color="orange">mdi-pencil</v-icon>
+														{{ diem.KetQuaDanhGia_VI }}
+													</v-list-item-subtitle>
+													<template v-slot:append
+														v-if="!diem.MaCotDiem.includes('MucDoDanhGia')">
+														<v-chip class="bg-primary text-white"
+															v-if="diem.GiaTriCotDiem === 'number' && diem.KetQuaDanhGia_VI !== null">
+															{{ parseFloat(diem.KetQuaDanhGia_VI) }}
+														</v-chip>
+													</template>
+													<template v-slot:append
+														v-if="diem.MaCotDiem.includes('MucDoDanhGia')">
+														<v-chip class="bg-primary text-white"
+															v-if="['MucDoDanhGia'].some(keyword => diem.MaCotDiem.includes(keyword))">
+															{{ diem.KetQuaDanhGia_VI }}
+														</v-chip>
+													</template>
+												</v-list-item>
+												<v-divider class="my-2"
+													v-if="indexNhomDiem !== monHoc.DSNhomDiem.length - 1"></v-divider>
+											</div>
+											<uc-empty v-if="monHoc.DSNhomDiem.length === 0" />
+										</v-list>
+									</v-card>
+								</div>
+							</v-lazy>
+						</div>
 					</v-tabs-window-item>
 				</v-tabs-window>
 			</keep-alive>
@@ -161,6 +222,7 @@ export default {
 	},
 	async mounted() {
 		this.DSMonHoc_NhomDiem = await this.loadHocSinhKQHT('HK' + this.tab)
+		console.log('this.DSMonHoc_NhomDiem', this.DSMonHoc_NhomDiem);
 	},
 	computed: {},
 	watch: {
@@ -169,10 +231,10 @@ export default {
 			else this.IsLanguage = false
 			this.updateDSMonHocGroup();
 		},
-		tab: function (tab) {
+		tab: async function (tab) {
 			console.log(tab)
 			localStorage.setItem('Semester', tab)
-			this.loadHocSinhKQHT('HK' + tab);
+			this.DSMonHoc_NhomDiem = await this.loadHocSinhKQHT('HK' + tab);
 		}
 	},
 	methods: {
@@ -211,6 +273,7 @@ export default {
 								DSNhomDiem
 							};
 						});
+
 						resolve(DSMonHoc_NhomDiem)
 					}
 				)

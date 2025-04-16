@@ -26,12 +26,13 @@ function convertDSHocSinh() {
     const arrCotDiemWithAlignCenter = [
         'MucDoDanhGia',
     ]
+    const ListMonHoc = [5, 46, 76]
     let columnsCotDiem = SLCotDiem_OfFirstSTD
         .map((x) => {
             if (x.GiaTriCotDiem === 'number') { // cấu hình header cột điểm có dạng number
                 let column = {
                     type: 'numeric',
-                    title: x.TenCotDiem_VI,
+                    title: ListMonHoc.includes(vueData.MonHocItem.MonHocID) ? x.TenCotDiem_EN : x.TenCotDiem_VI,
                     name: x.MaCotDiem,
                     typeValue: x.GiaTriCotDiem,
                     autoWidth: true,
@@ -70,15 +71,30 @@ function convertDSHocSinh() {
                 }
                 return column
             }
+            else if (x.GiaTriCotDiem === 'Dropdown_text') { // cấu hình header cột điểm có dạng ICO_Star
+                let column = {
+                    type: 'dropdown',
+                    title: x.TenCotDiem_VI, // + fn_IsDisabledTinhTrangDiem(x.TinhTrang, 'GV').isDisabled,
+                    name: x.MaCotDiem,
+                    width: x.WidthCSS,
+                    typeValue: x.GiaTriCotDiem,
+                    backGroundColor: x.HexBackground,
+                    wrap: true,
+                    align: 'center',
+                    source: ['Done', 'Not Yet'] //x.MaCotDiem === '' ? ['Done', 'Not Yet'] : ['Đ', 'T', 'H']
+                    // readOnly: x.LoaiCotDiem === 'Công thức' ? true : false,
+                }
+                return column
+            }
         })
     //Nếu là gửi điểm thì freezecolumn = 4 để thêm cột từ chối
-    vueData.freezeColumns = (vueData.TinhTrang?.TinhTrang === 3) ? 4 : 3
+    vueData.freezeColumns = ListMonHoc.includes(vueData.MonHocItem.MonHocID) ? 4 : 3
     let columnThongTinHocSinh = [
         {
             type: 'text',
             title: 'Mã học sinh',
             name: 'HocSinhID',
-            width: 120,
+            width: 100,
             backGroundColor: null,
             wrap: true,
             readOnly: true
@@ -87,7 +103,7 @@ function convertDSHocSinh() {
             type: 'text',
             title: 'Số Danh Bộ',
             name: 'SoDanhBo',
-            width: 120,
+            width: 100,
             backGroundColor: null,
             wrap: true,
             readOnly: true
@@ -96,24 +112,36 @@ function convertDSHocSinh() {
             type: 'text',
             title: 'Họ tên học sinh',
             name: 'HoVaTenHocSinh',
-            width: 300,
+            width: 200,
             backGroundColor: null,
             wrap: true,
             align: "left",
             readOnly: true
-        }
+        },
     ]
-    if (vueData.TinhTrang?.TinhTrang === 3) {
+    if (ListMonHoc.includes(vueData.MonHocItem.MonHocID)) {
         columnThongTinHocSinh.push({
             type: 'text',
-            title: 'Từ chối',
-            name: 'ReasonReject',
-            width: 300,
+            title: 'English Name',
+            name: 'EnglishName',
+            width: 100,
             backGroundColor: null,
             wrap: true,
             align: "left",
+            readOnly: true
         })
     }
+    // if (vueData.TinhTrang?.TinhTrang === 3) {
+    //     columnThongTinHocSinh.push({
+    //         type: 'text',
+    //         title: 'Từ chối',
+    //         name: 'ReasonReject',
+    //         width: 300,
+    //         backGroundColor: null,
+    //         wrap: true,
+    //         align: "left",
+    //     })
+    // }
     headers = [...columnThongTinHocSinh, ...columnsCotDiem]
     //Xử lý data jexcel
     const dataJexcel = []
@@ -126,18 +154,20 @@ function convertDSHocSinh() {
             HoVaTenHocSinh: arrCotDiemExist[0].Ho + ' ' + arrCotDiemExist[0].Ten,
             SoDanhBo: arrCotDiemExist[0].SoDanhBo,
         }
+        if (ListMonHoc.includes(vueData.MonHocItem.MonHocID)) obj.EnglishName = arrCotDiemExist[0].EnglishName
         //Xử lý nếu từ chối từ bên Tổ trưởng
-        if (arrCotDiemExist[0].ReasonReject) obj.ReasonReject = arrCotDiemExist[0].ReasonReject
         for (var cotDiemExist of arrCotDiemExist) {
             if (cotDiemExist.LoaiCotDiem !== 'Công thức') {
                 //Text
-                obj[cotDiemExist.MaCotDiem] = cotDiemExist.GiaTriCotDiem === 'number' ? (cotDiemExist.KetQuaDanhGia_VI === '' || cotDiemExist.KetQuaDanhGia_VI === null ? null : parseFloat(cotDiemExist.KetQuaDanhGia_VI)) : cotDiemExist.KetQuaDanhGia_VI
+                obj[cotDiemExist.MaCotDiem] = cotDiemExist.GiaTriCotDiem === 'number' ? (
+                    (cotDiemExist.KetQuaDanhGia_VI === '' || cotDiemExist.KetQuaDanhGia_VI === null) ? null : parseFloat(cotDiemExist.KetQuaDanhGia_VI)
+                ) : cotDiemExist.KetQuaDanhGia_VI
             } else if (cotDiemExist.LoaiCotDiem == 'Công thức' && cotDiemExist.Formula !== null && arrCotDiemExist.length === 1) {
                 //dùng cho formula để hiển thị
                 obj[cotDiemExist.MaCotDiem] = parseFloat(cotDiemExist?.KetQuaDanhGia_VI ?? 0)
             } else if (cotDiemExist.LoaiCotDiem == 'Công thức' && cotDiemExist.GiaTriCotDiem === 'number') {
-                //Công thức
-                obj[cotDiemExist.MaCotDiem] = parseFloat(cotDiemExist.KetQuaDanhGia_VI ?? 0) //'=' + replaceFormula(columnsCotDiem, cotDiemExist.Formula, indexRow)
+                //Công thức // parseFloat(cotDiemExist.KetQuaDanhGia_VI ?? 0) //
+                obj[cotDiemExist.MaCotDiem] = '=' + replaceFormula(columnsCotDiem, cotDiemExist.Formula, indexRow)
             } else if (cotDiemExist.LoaiCotDiem == 'Công thức' && cotDiemExist.GiaTriCotDiem === 'ICO_Star') {
                 //Ngôi sao
                 //obj[cotDiemExist.MaCotDiem] = `=RATING(${replaceFormula(columnsCotDiem, cotDiemExist.Formula.replace(/IIF/g, 'IF'), indexRow)})`
@@ -151,11 +181,16 @@ function convertDSHocSinh() {
     const dsCotDiem = vueData.DSCotDiem.filter(x => x.HocSinhID === firstStudent.HocSinhID)
     vueData.styleSheet = {}
     vueData.comments = {}
+    // console.log('dataJexcel,', dataJexcel)
     for (var i = 0; i < dataJexcel.length; i++) {
         for (var j = 0; j < dsCotDiem.length; j++) {
             const cellAdresss = jspreadsheet.helpers.getCellNameFromCoords(j + vueData.freezeColumns, i) // (j+3) là địa chỉ cột điểm đầu tiên, i là row let
             if (dsCotDiem[j].HexBackground) {
                 vueData.styleSheet[cellAdresss] = `background-color: ${dsCotDiem[j].HexBackground ?? 'unset'}`
+            }
+            const giaTri = dataJexcel[i][dsCotDiem[j].MaCotDiem]
+            if (giaTri === null || giaTri === '') {
+                vueData.styleSheet[cellAdresss] = `background-color : #ffff0052`
             }
         }
     }
@@ -164,9 +199,10 @@ function convertDSHocSinh() {
             const cellAdresss = jspreadsheet.helpers.getCellNameFromCoords(j + vueData.freezeColumns, i) // (j+3) là địa chỉ cột điểm đầu tiên, i là row let
             const obj = vueData.DSCotDiem.find(x => x.HocSinhID === dataJexcel[i].HocSinhID && x.MaCotDiem === dsCotDiem[j].MaCotDiem && x.Is_Comment)
             if (obj) {
-                vueData.styleSheet[cellAdresss] = 'color: red !important;'
+                // vueData.styleSheet[cellAdresss] = 'color: red !important;'
                 vueData.comments[cellAdresss] = 'Cột điểm do ' + dsCotDiem[j].NhapDiemUser + ' đã nhập'
             }
+            // if(obj.)
         }
     }
     vueData.keyComp++
@@ -178,20 +214,30 @@ function validateSave(typeCell, value, min, max) {
     if ((typeCell === 'number' && value < min) || value > max) return 1
     else return 0
 }
+const page = {
+    isError: false,
+    process: processBeforePushAPI
+}
 function onLuuDiem() {
+    page.isError = false
     vueData.StatusButton = 'luu'
     processBeforePushAPI()
-    // //Insert xong cập nhật tình trạng
-    CALL("insKQHT_MonHocLop")
-    vueData.keyComp++
-}
-function onGuiDiem() {
-    vueData.StatusButton = 'gui-diem'
-    processBeforePushAPI()
-    CALL("insKQHT_MonHocLop")
-    vueData.keyComp++
-}
-function onImport() {
+    if (!page.isError) {
+        const dataFilter = vueData.dataBeforeInsertToDB
+            .filter(x =>
+                (x.KQHTID && x.KQHTID > 0) || // Nếu KQHTID tồn tại và lớn hơn 0 thì giữ lại
+                (
+                    x.KetQuaDanhGia_VI != null &&
+                    x.KetQuaDanhGia_VI !== ''
+                    //&& !Number.isNaN(x.KetQuaDanhGia_VI)
+                ) // Hoặc KetQuaDanhGia_VI hợp lệ thì giữ lại
+            );
+        vueData.dataBeforeInsertToDB = dataFilter
+        // Insert xong cập nhật tình trạng
+        CALL("insKQHT_MonHocLop")
+        vueData.keyComp++
+    }
+    console.log('dataBeforeInsertToDB', vueData.dataBeforeInsertToDB)
 }
 function processBeforePushAPI() {
     vueData.dataBeforeInsertToDB = []
@@ -202,20 +248,34 @@ function processBeforePushAPI() {
     //B1: Vòng lặp thứ nhất để lặp các học sinh
     //B2: Vòng lặp bên trong để lặp các cột điểm của 1 học sinh
     for (let i = 0; i < val.length; i++) {
-        let ReasonReject = null
         for (let j = 0; j < DSCotDiem.length; j++) {
-            if (vueData.TinhTrang?.TinhTrang === 2 || vueData.TinhTrang?.TinhTrang === 3) ReasonReject = vueData.instance[0].getValueFromCoords(vueData.freezeColumns - 1, i)
             const cellAdresss = jspreadsheet.helpers.getCellNameFromCoords(j + vueData.freezeColumns, i) // (j+3) là địa chỉ cột điểm đầu tiên, i là row
-            let giaTriCotDiem = vueData.instance[0].getValueFromCoords(j + vueData.freezeColumns, i)
+            let giaTriCotDiem = val[i][DSCotDiem[j].MaCotDiem] //vueData.instance[0].getValueFromCoords(j + vueData.freezeColumns, i)
+            // console.log(val[i].HocSinhID, vueData.instance[0])
+            // console.log(val[i].HocSinhID, val[i][DSCotDiem[j].MaCotDiem], vueData.instance[0].getValueFromCoords(j + vueData.freezeColumns, i))
+            if (DSCotDiem[j].LoaiCotDiem === 'Công thức') {
+                giaTriCotDiem = vueData.instance[0].records[i][j + vueData.freezeColumns]?.element?.innerHTML
+            }
+            if (DSCotDiem[j].GiaTriCotDiem === 'number') {
+                if (giaTriCotDiem === null || giaTriCotDiem === NaN || giaTriCotDiem === '') {
+                    console.log('FIND NULL OR NaN=>', val[i].HocSinhID, DSCotDiem[j].MaCotDiem, giaTriCotDiem)
+                    giaTriCotDiem = ''
+                } else {
+                    console.log('NUMBER =>', val[i].HocSinhID, DSCotDiem[j].MaCotDiem, giaTriCotDiem)
+                    giaTriCotDiem = parseFloat(giaTriCotDiem)
+                }
+            }
+            if (DSCotDiem[j].CotDiemID === 2772) {
+                console.log(val[i].HocSinhID, DSCotDiem[j].MaCotDiem, giaTriCotDiem)
+            }
             let cotDiem_HS = {
                 HocSinhID: val[i].HocSinhID,
                 LopID: vueData.LopItem.LopID,
                 NienKhoa: 2024,
                 CotDiemID: DSCotDiem[j].CotDiemID,
-                KetQuaDanhGia_VI: DSCotDiem[j].GiaTriCotDiem === 'number' ? (giaTriCotDiem === '' || giaTriCotDiem === NaN ? null : parseFloat(giaTriCotDiem)) : giaTriCotDiem,
-                KetQuaDanhGia_EN: DSCotDiem[j].GiaTriCotDiem === 'number' ? (giaTriCotDiem === '' || giaTriCotDiem === NaN ? null : parseFloat(giaTriCotDiem)) : giaTriCotDiem,
-                Is_Reject: !!ReasonReject, //Khi có nội dung = true và ngược lại
-                ReasonReject: ReasonReject,
+                KetQuaDanhGia_VI: giaTriCotDiem,
+                KetQuaDanhGia_EN: giaTriCotDiem,
+                KQHTID: vueData.DSCotDiem.find(x => x.HocSinhID === val[i].HocSinhID && x.MaCotDiem === DSCotDiem[j].MaCotDiem)?.KQHTID ?? 0
             }
             let typeColumn = DSCotDiem[j].GiaTriCotDiem
             let value = cotDiem_HS.KetQuaDanhGia_VI
@@ -225,15 +285,46 @@ function processBeforePushAPI() {
             if (cotDiem_HS.IsError === 1) {
                 vueData.instance[0].setStyle(cellAdresss, 'background-color', 'red')
                 Vue.$toast.error(`Cột điểm chỉ cho phép nhập thang điểm từ ${min} đến ${max}!`, { position: 'top' })
+                page.isError = true
                 return
             }
             cotDiem_HS.KetQuaDanhGia_VI = cotDiem_HS.KetQuaDanhGia_VI === NaN ? null : cotDiem_HS.KetQuaDanhGia_VI
+            if (DSCotDiem[j].CotDiemID === 2772) {
+                console.log(val[i].HocSinhID, DSCotDiem[j].MaCotDiem, giaTriCotDiem, cotDiem_HS)
+            }
             vueData.dataBeforeInsertToDB.push(cotDiem_HS)
         }
     }
     let validIndex = vueData.dataBeforeInsertToDB.findIndex((item) => item.IsError === 1)
     if (validIndex != -1) {
         Vue.$toast.error('Cột điểm chỉ cho phép nhập thang điểm 10!', { position: 'top' })
+        page.isError = true
         return
     }
+}
+const isShowReasonReject = () => {
+    let defaultObj = {
+        disabled: false,
+        NoiDungNhanXet: null
+    }
+    const DSHocSinh_Semester = vueData.DSCotDiem
+    if (DSHocSinh_Semester.length > 0) {
+        const obj = DSHocSinh_Semester.find(x => x.TinhTrang === 3 || x.TinhTrang === 5 || x.TinhTrang === 7)
+        defaultObj.disabled = obj ? true : false
+        defaultObj.NoiDungNhanXet = obj?.NoiDungNhanXet ?? ''
+        defaultObj.TinhTrang = obj?.TinhTrang ?? ''
+    }
+    return defaultObj
+}
+const renderText_Person_Reject = (TinhTrang) => {
+    if (!TinhTrang) return
+    let text = ''
+    if (vueData.CapID === 1) {
+        if (TinhTrang === 3) text = 'Giáo viên chủ nhiệm từ chối'
+        if (TinhTrang === 5) text = 'Tổ trưởng từ chối'
+        if (TinhTrang === 7) text = 'BGH chủ nhiệm từ chối'
+    } else {
+        if (TinhTrang === 3) text = 'BGH từ chối'
+    }
+    return text
 }

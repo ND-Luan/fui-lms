@@ -157,26 +157,6 @@ function convertDSHocSinh() {
     }
     const firstStudent = dataJexcel[0]
     const dsCotDiem = vueData.DSCotDiem.filter(x => x.HocSinhID === firstStudent.HocSinhID)
-    vueData.styleSheet = {}
-    vueData.comments = {}
-    for (var i = 0; i < dataJexcel.length; i++) {
-        for (var j = 0; j < dsCotDiem.length; j++) {
-            const cellAdresss = jspreadsheet.helpers.getCellNameFromCoords(j + vueData.freezeColumns, i) // (j+2) là địa chỉ cột điểm đầu tiên, i là row let
-            if (dsCotDiem[j].HexBackground) {
-                vueData.styleSheet[cellAdresss] = `background-color: ${dsCotDiem[j].HexBackground ?? 'unset'};`
-            }
-        }
-    }
-    for (var i = 0; i < dataJexcel.length; i++) {
-        for (var j = 0; j < dsCotDiem.length; j++) {
-            const cellAdresss = jspreadsheet.helpers.getCellNameFromCoords(j + vueData.freezeColumns, i) // (j+3) là địa chỉ cột điểm đầu tiên, i là row let
-            const obj = vueData.DSCotDiem.find(x => x.HocSinhID === dataJexcel[i].HocSinhID && x.MaCotDiem === dsCotDiem[j].MaCotDiem && x.Is_Comment)
-            if (obj) {
-                vueData.styleSheet[cellAdresss] = 'color: red;'
-                vueData.comments[cellAdresss] = 'Cột điểm do ' + dsCotDiem[j].NhapDiemUser + ' đã nhập'
-            }
-        }
-    }
     vueData.keyComp++
     vueData.columnHeader = headers
     vueData.DSHocSinh = dataJexcel
@@ -276,8 +256,8 @@ function isDisabledButton_TuChoi() {
     let flag = true
     if (vueData.DSHocSinh.length > 0) {
         const TinhTrang = vueData.DSHocSinh[0].TinhTrang
-        if (TinhTrang === EnumTinhTrang.BGH_TuChoi) flag = true
-        if (TinhTrang === EnumTinhTrang.BGH_Duyet) flag = false
+        if (TinhTrang === EnumTinhTrang.TT_TuChoi) flag = true
+        if (TinhTrang === EnumTinhTrang.TT_GuiBGH) flag = false
     }
     return flag
 }
@@ -285,8 +265,8 @@ function isDisabledButton_GuiDiem() {
     let flag = true
     if (vueData.DSHocSinh.length > 0) {
         const TinhTrang = vueData.DSHocSinh[0].TinhTrang
-        if (TinhTrang === EnumTinhTrang.BGH_TuChoi) flag = true
-        if (TinhTrang === EnumTinhTrang.BGH_Duyet) flag = true
+        if (TinhTrang === EnumTinhTrang.TT_TuChoi) flag = true
+        if (TinhTrang === EnumTinhTrang.TT_GuiBGH) flag = true
     }
     return flag
 }
@@ -305,4 +285,30 @@ const EnumVaiTro = {
     GVCN: 1,
     KhoiTruong: 2,
     GVBM: 3,
+}
+const isShowReasonReject = () => {
+    let defaultObj = {
+        disabled: false,
+        NoiDungNhanXet: null
+    }
+    const DSHocSinh_Semester = vueData.DSHocSinh_API.filter(x => x.MaCotDiem.includes(vueData.Semester?.value))
+    if (DSHocSinh_Semester.length > 0) {
+        const obj = DSHocSinh_Semester.find(x => x.TinhTrang === 3)
+        defaultObj.disabled = obj ? true : false
+        defaultObj.NoiDungNhanXet = obj?.NoiDungNhanXet ?? ''
+    }
+    console.log(defaultObj)
+    return defaultObj
+}
+const renderDSMonHoc = () => {
+    const uniqueMonHocID = [...new Set(vueData.DSHocSinh_API.map(x => x.MonHocID))]
+    const DSMonHoc = []
+    for (var MonHocID of uniqueMonHocID) {
+        const obj = vueData.DSHocSinh_API.find(x => x.MonHocID === MonHocID)
+        DSMonHoc.push({
+            TenMonHoc_HienThi: obj.TenMonHoc_HienThi,
+            MonHocLopID: obj.MonHocLopID
+        })
+    }
+    vueData.DSMonHoc = DSMonHoc
 }

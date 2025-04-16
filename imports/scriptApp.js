@@ -322,7 +322,24 @@ $('document').ready(() => {
                     announced: "Viewed", //"Announced",
                     notYetAnnounced: "Not yet Viewed",
 
-                    totalResults: "Total results"
+                    totalResults: "Total results",
+
+                    ProgressBaseEnglish: "Progress-based English proficiency test results",
+
+                    ActivitiesAssessment: "Activities assessment",
+
+                    Notes: "Notes",
+                    NotMeetingRequirements: "Not meeting requirements",
+                    MeetingRequirements: "Meeting requirements",
+                    ExceedingRequirements: "Exceeding requirements",
+                    NotImplementingWithoutSpecificReasons: "Not implementing without specific reasons",
+                    PointsTotalSkill: "Points per skill and total points of skills",
+
+                    Score: "Score",
+                    points: "points",
+                    PathwaysTestResults_C3: "Pathways test results",
+                    IELTSEquivalent: "IELTS Equivalent",
+                    Result:"Study results"
                 }
             },
             vi: {
@@ -347,6 +364,7 @@ $('document').ready(() => {
                     vietNam: "Việt Nam",
                     english: "Tiếng Anh",
                     next: "Tiếp tục",
+                    back: "Trở về",
                     confirm: "Xác nhận",
                     close: "Đóng",
 
@@ -367,7 +385,25 @@ $('document').ready(() => {
                     announced: "Đã xem",
                     notYetAnnounced: "Chưa xem",
 
-                    totalResults: "Tổng điểm"
+                    totalResults: "Tổng điểm",
+
+                    ProgressBaseEnglish: "Kết quả kiểm tra năng lực tiếng Anh theo Lộ trình Cambridge",
+
+                    ActivitiesAssessment: "Kết quả các hoạt động rèn luyện",
+
+                    Notes: "Ghi chú",
+
+                    NotMeetingRequirements: "Chưa đạt yêu cầu",
+                    MeetingRequirements: "Đạt yêu cầu",
+                    ExceedingRequirements: "Vượt yêu cầu",
+                    NotImplementingWithoutSpecificReasons: "Không thực hiện",
+                    PointsTotalSkill: "Điểm mỗi kĩ năng và tổng điểm các kĩ năng",
+
+                    Score: "Điểm",
+                    points: "điểm",
+                    PathwaysTestResults_C3: "Kết quả đánh giá Tiếng Anh Cambridge theo lộ trình",
+                    IELTSEquivalent: "IELTS tương đương",
+                    Result:"Kết quả học tập"
                 }
             }
         }

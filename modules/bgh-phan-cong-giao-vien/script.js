@@ -290,6 +290,7 @@ function transformDataFromPhanCongLopItemSelected(phanCongLopItemSelected, addit
     return result;
 }
 function add() {
+    debugger
     addToGroup(VaiTro = vueData.vaiTroItemSelected, Khoi = vueData.KhoiItem, Lop = vueData.LopItem, GiaoVien = vueData.sessionData.GiaoVienIDSelected, MonHoc = vueData.sessionData.MonHocIDSelected)
     let date = new Date();
         date.getYear()

@@ -9,7 +9,7 @@
 							item-value="LopID"></v-select>
 					</v-col>
 					<v-col>
-						<v-select v-model="form.HocKy" label="Chọn học kỳ" :items="DSHocKy" item-title="title"
+						<v-select v-model="form.HocKy" label="Chọn học kì" :items="DSHocKy" item-title="title"
 							item-value="value"></v-select>
 					</v-col>
 					<v-col>

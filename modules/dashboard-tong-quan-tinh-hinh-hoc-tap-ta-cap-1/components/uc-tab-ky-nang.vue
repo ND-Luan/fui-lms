@@ -28,7 +28,7 @@
 				<v-col>
 					<v-card :flat="false">
 						<v-card-title class="text-primary">
-							Biểu đồ điểm (Listening, Language, Reading, Writing, Speaking) kỹ năng theo cấp
+							Biểu đồ điểm (Listening, Language, Reading, Writing, Speaking) kĩ năng theo cấp
 						</v-card-title>
 						<v-card-text>
 							<uc-chart-apex :options="Chart_TongDiem_KyNang_TheoKhoi" />
@@ -37,7 +37,7 @@
 				</v-col>
 				<v-col cols="12">
 					<v-card :flat="false" style="min-height: 300px;">
-						<v-card-title class="text-primary">Điểm kỹ năng theo khối</v-card-title>
+						<v-card-title class="text-primary">Điểm kĩ năng theo khối</v-card-title>
 						<v-row>
 							<v-col cols="4" v-for="(chart, index) in List_Chart_KyNang_TheoKhoi">
 								<uc-chart-apex :options="chart" :key="index" />
@@ -47,7 +47,7 @@
 				</v-col>
 				<v-col cols="12">
 					<v-card :flat="false" style="min-height: 300px;">
-						<v-card-title class="text-primary">Điểm kỹ năng theo lớp</v-card-title>
+						<v-card-title class="text-primary">Điểm kĩ năng theo lớp</v-card-title>
 						<v-row>
 							<v-col cols="6" v-for="(chart, index) in List_Chart_KyNang_TheoLop">
 								<uc-chart-apex :options="chart" :key="index" />

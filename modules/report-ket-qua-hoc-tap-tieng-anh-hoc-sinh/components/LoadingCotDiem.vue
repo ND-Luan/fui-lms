@@ -1,5 +1,5 @@
 <template>
-    <div style="min-height: 300px; 	height: calc(100dvh - 248px); display: flex; flex-direction: column;">
+    <div style="min-height: 300px; display: flex; flex-direction: column;">
         <template v-if="loading">
             <v-skeleton-loader type="list-item-avatar" />
             <v-skeleton-loader type="heading" />

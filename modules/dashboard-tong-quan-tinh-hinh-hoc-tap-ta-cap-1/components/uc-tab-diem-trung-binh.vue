@@ -19,7 +19,7 @@
 							<v-row>
 								<v-col cols="2">
 									<v-list lines="two">
-										<v-card-title class="text-primary font-weight-medium pl-4">Cấp C2</v-card-title>
+										<v-card-title class="text-primary font-weight-medium pl-4">Cấp C{{vueData.CapID}}</v-card-title>
 										
 										<v-list-item>
 											<p class="text-body">Tổng số học sinh</p>
@@ -43,7 +43,7 @@
 										</v-list-item>
 										<v-divider inset></v-divider>
 										<v-list-item>
-											<p class="text-body">Tỷ lệ phần trăm</p>
+											<p class="text-body">Tỉ lệ phần trăm</p>
 											<template v-slot:prepend>
 												<v-btn color="light-green" icon="mdi-arrow-up-circle-outline"
 													variant="text"></v-btn>
@@ -118,7 +118,7 @@
 				<v-col cols="6">
 					<v-card :flat="false">
 						<v-card-title class="text-primary d-flex align-center">
-							Tương quan điểm giữa kỳ và cuối kỳ
+							Tương quan điểm giữa kì và cuối kì
 							<v-spacer></v-spacer>
 							<v-btn color="primary" variant="tonal" @click="onLoadChart({
 								NienKhoa: 2024,
@@ -234,7 +234,8 @@
 				},
 				Tong_Growth_GiuaKy_CuoiKi: null,
 				List_Tong_Grade_Growth_GiuaKy_CuoiKi: null,
-				List_Tong_Class_Growth_GiuaKy_CuoiKi: null
+				List_Tong_Class_Growth_GiuaKy_CuoiKi: null,
+				vueData
 			}
 		},
 		async mounted() {
@@ -289,15 +290,15 @@
 							const DiemTrungBinh = res.data
 							const series = [
 								{
-									name: "Điểm giữa học kỳ 1",
+									name: "Điểm giữa học kì 1",
 									data: DiemTrungBinh.map(x => x.DiemGiua_HK1)
 								},
 								{
-									name: "Điểm cuối học kỳ 1",
+									name: "Điểm cuối học kì 1",
 									data: DiemTrungBinh.map(x => x.DiemCuoi_HK1)
 								},
 								{
-									name: "Điểm mean (TB) học kỳ 1",
+									name: "Điểm mean (TB) học kì 1",
 									data: DiemTrungBinh.map(x => x.DiemTB_HK1)
 								}
 							]
@@ -348,32 +349,32 @@
 							const categoriesChartTiLe_TheoLops = [...new Set(res.data.map(x => x.TenLop))]
 							const serieChartTiLe_TheoLops = [
 								{
-									name: 'Exceeding Requirements/Vượt yêu cầu - Giữa kỳ',
+									name: 'Exceeding Requirements/Vượt yêu cầu - Giữa kì',
 									group: 'S1_Mid_Total_Conv',
 									data: res.data.filter(x => x.MaCotDiem === 'S1_Mid_Total_Conv' && x.KetQuaDanhGia_VI === 'Exceeding Requirements/Vượt yêu cầu').map(x => x.TyLe)
 								},
 								{
-									name: 'Exceeding Requirements/Vượt yêu cầu - Cuối kỳ',
+									name: 'Exceeding Requirements/Vượt yêu cầu - Cuối kì',
 									group: 'S1_Final_Total_Conv',
 									data: res.data.filter(x => x.MaCotDiem === 'S1_Final_Total_Conv' && x.KetQuaDanhGia_VI === 'Exceeding Requirements/Vượt yêu cầu').map(x => x.TyLe)
 								},
 								{
-									name: 'Meeting Requirements/Đạt yêu cầu - Giữa kỳ',
+									name: 'Meeting Requirements/Đạt yêu cầu - Giữa kì',
 									group: 'S1_Mid_Total_Conv',
 									data: res.data.filter(x => x.MaCotDiem === 'S1_Mid_Total_Conv' && x.KetQuaDanhGia_VI === 'Meeting Requirements/Đạt yêu cầu').map(x => x.TyLe)
 								},
 								{
-									name: 'Meeting Requirements/Đạt yêu cầu - Cuối kỳ',
+									name: 'Meeting Requirements/Đạt yêu cầu - Cuối kì',
 									group: 'S1_Final_Total_Conv',
 									data: res.data.filter(x => x.MaCotDiem === 'S1_Final_Total_Conv' && x.KetQuaDanhGia_VI === 'Meeting Requirements/Đạt yêu cầu').map(x => x.TyLe)
 								},
 								{
-									name: 'Not Meeting Requirements/Chưa đạt - Giữa kỳ',
+									name: 'Not Meeting Requirements/Chưa đạt - Giữa kì',
 									group: 'S1_Mid_Total_Conv',
 									data: res.data.filter(x => x.MaCotDiem === 'S1_Mid_Total_Conv' && x.KetQuaDanhGia_VI === 'Not Meeting Requirements/Chưa đạt').map(x => x.TyLe)
 								},
 								{
-									name: 'Not Meeting Requirements/Chưa đạt - Cuối kỳ',
+									name: 'Not Meeting Requirements/Chưa đạt - Cuối kì',
 									group: 'S1_Final_Total_Conv',
 									data: res.data.filter(x => x.MaCotDiem === 'S1_Final_Total_Conv' && x.KetQuaDanhGia_VI === 'Not Meeting Requirements/Chưa đạt').map(x => x.TyLe)
 								}

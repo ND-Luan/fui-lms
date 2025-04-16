@@ -9,20 +9,7 @@ function onSelectedHocSinh(item) {
             localStorage.setItem('HocSinhSelected', JSON.stringify({ ...item, ...data }))
             vueData.drawerSelectStudent = false
             vueData.drawerOnboarding = false
-            const bottomNavigation = vueData.bottomNavigation
-            if (bottomNavigation === 0) {
-                vueData.keyComponentUcThang++
-                CALL('getDSThang')
-            }
-            if (bottomNavigation === 1) {
-                vueData.keyComponentUcTiengAnh++
-            }
-            if (bottomNavigation === 2) {
-                vueData.keyComponentUcHocKy++
-            }
-            if (bottomNavigation === 3) {
-                vueData.keyComponentUcTongDiemQuaTrinh++
-            }
+            setActiveComponentKey()
         }
     )
 }
@@ -30,4 +17,14 @@ function setUrlTab() {
     let url = new URL(window.location.href);
     url.searchParams.set('tab', vueData.bottomNavigation); // Thêm tham số
     history.pushState(null, '', url); // Cập nhật URL
+}
+function setActiveComponentKey() {
+    const bottomNavigation = vueData.bottomNavigation
+    if (bottomNavigation === 0) {
+        CALL('getDSThang')
+        vueData.keyComponentUcThang++
+    }
+    else if (bottomNavigation === 1) vueData.keyComponentUcTiengAnh++
+    else if (bottomNavigation === 2) vueData.keyComponentUcHocKy++
+    else if (bottomNavigation === 3) vueData.keyComponentUcTongDiemQuaTrinh++
 }

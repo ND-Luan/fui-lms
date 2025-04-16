@@ -27,11 +27,18 @@
 		</div> -->
 		<v-list-subheader>{{ $t('message.parent') }}</v-list-subheader>
 		<v-list-item :key="user.UserID" :title="user.LastName + ' ' + user.FirstName"
-			:subtitle="user.Phone + ' ' + user.Email">
+			:subtitle="user.Phone + ' •  ' + user.Email">
 			<template v-slot:prepend>
 				<v-avatar>
 					<v-img :src="urlAvatarPhuHuynh + user.UserID" contain></v-img>
 				</v-avatar>
+			</template>
+			<template v-slot:append>
+				<div v-if="IsShow_Both_Parent_Teacher" class="d-flex flex-column justify-center align-center">
+					<v-btn @click="redirect('/')" size="small" color='primary'
+						icon=''><v-icon>mdi-arrow-right</v-icon></v-btn>
+					<p class='text-caption'>Chuyển vai trò Giáo Viên</p>
+				</div>
 			</template>
 		</v-list-item>
 
@@ -55,33 +62,46 @@
 
 			<v-divider inset v-if="index !== DSHocSinh.length - 1"></v-divider>
 		</div>
+		<uc-empty v-if="DSHocSinh.length === 0" />
 	</v-list>
 </template>
 
 <script>
-export default {
-	props: {
-		dshocsinh: { type: Array }
-	},
-	data() {
-		const Semester = localStorage.getItem('Semester')
-		return {
-			user: vueData.user,
-			urlAvatarPhuHuynh: vueData.v_Set.urlAvatarPhuHuynh,
-			urlAvatarHocSinh: vueData.v_Set.urlAvatarHocSinh,
-			onSelectedHocSinh,
-			SelectedSemester: Semester,
-			vueData
-		}
-	},
-	computed: {
-		DSHocSinh: function () { return this.dshocsinh }
-	},
-	methods: {
-		// onChangeSemester(semester) {
-		// 	this.SelectedSemester = semester
-		// 	localStorage.setItem('Semester', semester)
-		// }
-	},
-}
+	export default {
+		props: {
+			dshocsinh: { type: Array }
+		},
+		data() {
+			const Semester = localStorage.getItem('Semester')
+			return {
+				user: vueData.user,
+				urlAvatarPhuHuynh: vueData.v_Set.urlAvatarPhuHuynh,
+				urlAvatarHocSinh: vueData.v_Set.urlAvatarHocSinh,
+				onSelectedHocSinh,
+				SelectedSemester: Semester,
+				vueData,
+				IsShow_Both_Parent_Teacher: false
+			}
+		},
+		created() {
+			ajaxCALL('/student/Calen_GetInfoStudentByPhuHuynhID', null, res => {
+				if (res.data.length > 0) {
+					const user = vueData.user
+					if (user.GroupID === 1) {
+						this.IsShow_Both_Parent_Teacher = true
+					}
+				}
+			})
+		},
+		computed: {
+			DSHocSinh: function () { return this.dshocsinh }
+		},
+		methods: {
+			redirect
+			// onChangeSemester(semester) {
+			// 	this.SelectedSemester = semester
+			// 	localStorage.setItem('Semester', semester)
+			// }
+		},
+	}
 </script>

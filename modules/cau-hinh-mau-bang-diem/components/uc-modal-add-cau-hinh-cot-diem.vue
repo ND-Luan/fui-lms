@@ -7,7 +7,7 @@
 					<p class="text-title text-primary mb-2 font-weight-medium">Nhóm cột điểm</p>
 					<v-row>
 						<v-col cols="6">
-							<v-select v-model="formData.Semester" label="Học kỳ"
+							<v-select v-model="formData.Semester" label="Học kì"
 								:items="['HK1', 'HK2']"></v-select>
 						</v-col>
 						<v-col cols="6"><v-text-field v-model="formData.ThuTuNhom"

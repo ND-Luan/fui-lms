@@ -21,7 +21,7 @@
 			<v-row>
 				<v-col cols="12">
 					<v-card :flat="false">
-						<v-card-title class="text-primary">Tỷ lệ học sinh</v-card-title>
+						<v-card-title class="text-primary">Tỉ lệ học sinh</v-card-title>
 						<uc-chart-apex :options="Chart_TiLe_TheoLop" />
 					</v-card>
 				</v-col>
