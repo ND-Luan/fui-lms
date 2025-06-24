@@ -1,1 +1,128 @@
-{"data":[{"headers":[],"items":[],"CapID":"parseInt(capid)"},{"KQHT_TT_Approved_Template_Get":{"API":"lms/KQHT_TT_Approved_Template_Get","IN":{"LopID":"vueData.LopID"},"OUT":"items","CALLBACK":{"EXE":"convertItems()"}}},{"API":"lms/Lop_Get_By_CapID","IN":{"CapID":"vueData.CapID"},"OUT":"DSLop"}],"watch":{"LopID":{"IF":"vueData.LopID !== null","THEN":{"CALL":"KQHT_TT_Approved_Template_Get"}}},"controls":[{"prop":"","rows":[{"prop":"","cols":[{"el":"v-card","attr":{},"innerHTML":[{"el":"v-card-title","attr":{"class":"text-primary"},"innerHTML":"Tìm kiếm"},{"el":"v-card-text","innerHTML":[{"el":"v-row","innerHTML":[{"el":"v-col","innerHTML":[{"el":"v-select","attr":{"v-model":"LopID","label":"Chọn lớp",":items":"DSLop","item-title":"TenLop","item-value":"LopID"}}]},{"el":"v-col","innerHTML":[{"el":"f-button","attr":{"label":"Làm mới","variant":"tonal","color":"primary","action":{"CALL":"KQHT_TT_Approved_Template_Get"}}}]}]}]}],"w":12},{"el":"f-table","attr":{"label":"Các nhóm điểm đã duyệt",":headers":"headers",":items":"items"}}]}]}],"set":{}}
+{
+    "data": [
+        {
+            "headers": [],
+            "items": [],
+            "CapID": "parseInt(capid)",
+            "TitlePage": "getTitlePageByURL(window.location.pathname + window.location.search)"
+        },
+        {
+            "KQHT_TT_Approved_Template_Get": {
+                "API": "lms/KQHT_TT_Approved_Template_Get",
+                "IN": {
+                    "LopID": "vueData.LopID"
+                },
+                "OUT": "items",
+                "CALLBACK": {
+                    "EXE": "convertItems()"
+                }
+            }
+        },
+        {
+            "Lop_Get_By_CapID": {
+                "API": "lms/Lop_Get_By_CapID",
+                "IN": {
+                    "NienKhoa": "vueData.NienKhoa",
+                    "CapID": "vueData.CapID"
+                },
+                "OUT": "DSLop"
+            }
+        }
+    ],
+    "watch": {
+        "NienKhoa": {
+            "IF": "vueData.NienKhoa !== null",
+            "THEN": [
+                {
+                    "CALL": "Lop_Get_By_CapID"
+                }
+            ]
+        },
+        "LopID": {
+            "IF": "vueData.LopID !== null",
+            "THEN": {
+                "CALL": "KQHT_TT_Approved_Template_Get"
+            }
+        }
+    },
+    "controls": [
+        {
+            "prop": "",
+            "rows": [
+                {
+                    "prop": "",
+                    "cols": [
+                        {
+                            "el": "v-card",
+                            "attr": {},
+                            "innerHTML": [
+                                {
+                                    "el": "v-card-title",
+                                    "attr": {
+                                        "class": "text-primary px-0 pt-0"
+                                    },
+                                    "innerHTML": "{{TitlePage}}"
+                                },
+                                {
+                                    "el": "v-card-text",
+                                    "attr": {
+                                        "class": "text-primary pa-0"
+                                    },
+                                    "innerHTML": [
+                                        {
+                                            "el": "v-row",
+                                            "innerHTML": [
+                                                {
+                                                    "el": "v-col",
+                                                    "innerHTML": [
+                                                        {
+                                                            "el": "v-select",
+                                                            "attr": {
+                                                                "v-model": "LopID",
+                                                                "label": "Chọn lớp",
+                                                                ":items": "DSLop",
+                                                                "item-title": "TenLop",
+                                                                "item-value": "LopID"
+                                                            }
+                                                        }
+                                                    ],
+                                                    "w": 3
+                                                },
+                                                {
+                                                    "el": "v-col",
+                                                    "innerHTML": [
+                                                        {
+                                                            "el": "f-button",
+                                                            "attr": {
+                                                                "label": "Làm mới",
+                                                                "variant": "tonal",
+                                                                "color": "primary",
+                                                                "action": {
+                                                                    "CALL": "KQHT_TT_Approved_Template_Get"
+                                                                }
+                                                            }
+                                                        }
+                                                    ]
+                                                }
+                                            ]
+                                        }
+                                    ]
+                                }
+                            ],
+                            "w": 12
+                        },
+                        {
+                            "el": "f-table",
+                            "attr": {
+                                "label": "Các nhóm điểm đã duyệt",
+                                ":headers": "headers",
+                                ":items": "items"
+                            }
+                        }
+                    ]
+                }
+            ]
+        }
+    ],
+    "set": {}
+}

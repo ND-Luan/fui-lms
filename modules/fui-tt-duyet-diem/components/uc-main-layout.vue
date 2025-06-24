@@ -331,7 +331,7 @@ export default {
                     let cotDiem_HS = {
                         HocSinhID: val[i].HocSinhID,
                         LopID: this.LopID,
-                        NienKhoa: 2024,
+                        NienKhoa: vueData.NienKhoa,
                         CotDiemID: DSCotDiem[j].CotDiemID,
                         KetQuaDanhGia_VI: DSCotDiem[j].GiaTriCotDiem === 'number' ? (giaTriCotDiem === '' || giaTriCotDiem === NaN ? null : parseFloat(giaTriCotDiem)) : giaTriCotDiem,
                         KetQuaDanhGia_EN: DSCotDiem[j].GiaTriCotDiem === 'number' ? (giaTriCotDiem === '' || giaTriCotDiem === NaN ? null : parseFloat(giaTriCotDiem)) : giaTriCotDiem,
@@ -386,7 +386,7 @@ export default {
         },
         async onHandleSendTinhTrang(TinhTrang) {
             const { IsSuccess } = await NhapDiem_Service.KQHT_MonHocLop_TinhTrang_Udp({
-                NienKhoa: 2024,
+                NienKhoa: vueData.NienKhoa,
                 MonHocLopID: this.MonHocLopID,
                 LopID: this.LopID,
                 TinhTrang: TinhTrang,

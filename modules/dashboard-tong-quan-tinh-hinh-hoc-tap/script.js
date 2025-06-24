@@ -714,7 +714,7 @@ function convertChartLine() {
             height: 450,
             type: 'line',
             zoom: {
-                enabled: true
+                enabled: false
             },
             toolbar: {
                 show: true
@@ -873,7 +873,7 @@ function convertChartLineTongDiemTheoKhoi() {
             height: 450,
             type: 'line',
             zoom: {
-                enabled: true
+                enabled: false
             },
             toolbar: {
                 show: true
@@ -1071,7 +1071,7 @@ function convertChartStatistic() {
                 height: 450,
                 type: 'line',
                 zoom: {
-                    enabled: true
+                    enabled: false
                 },
                 toolbar: {
                     show: true
@@ -1380,7 +1380,7 @@ function convertChartStatistic_KyNang() {
             height: 450,
             type: 'line',
             zoom: {
-                enabled: true
+                enabled: false
             },
             toolbar: {
                 show: true
@@ -1610,7 +1610,7 @@ function convertChartStatistic_Theme() {
                 height: 450,
                 type: 'line',
                 zoom: {
-                    enabled: true
+                    enabled: false
                 },
                 toolbar: {
                     show: true

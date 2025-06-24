@@ -1,0 +1,89 @@
+/* === CSS cho trang kham-pha === */
+
+/* --- Bố cục chung --- */
+.khampha-page-wrapper {
+    display: flex;
+    gap: 24px;
+    padding: 16px;
+    background-color: #f4f7f9;
+}
+
+.khampha-sidebar {
+    flex: 0 0 250px; /* Độ rộng cố định */
+    background-color: #fff;
+    border-radius: 12px;
+    padding: 16px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+}
+
+.khampha-main-content {
+    flex-grow: 1;
+}
+
+/* --- Bộ lọc (Filter) --- */
+.filter-card {
+    background-color: #fff;
+    border-radius: 12px;
+    padding: 16px 24px;
+    margin-bottom: 24px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+}
+
+.filter-group-title {
+    font-weight: 600;
+    color: #555;
+    margin-right: 16px;
+    font-size: 0.9rem;
+    min-width: 60px;
+}
+
+/* Style cho v-chip-group để trông giống tab hơn */
+.v-chip-group .v-chip {
+    border-radius: 8px !important;
+    background-color: #eef2f6 !important;
+    color: #555 !important;
+    font-weight: 500 !important;
+    transition: all 0.2s ease !important;
+}
+
+.v-chip-group .v-chip--selected {
+    background-color: #007bff !important;
+    color: #fff !important;
+    box-shadow: 0 4px 8px rgba(0, 123, 255, 0.2);
+}
+
+/* --- Menu Sidebar bên trái --- */
+.sidebar-menu-title {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #333;
+    padding: 8px;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+}
+.sidebar-menu-title .v-icon {
+    margin-right: 12px;
+    color: #007bff;
+}
+
+.sidebar-menu .v-list-item {
+    border-radius: 8px;
+    margin-bottom: 4px;
+    padding-left: 36px !important; /* Thụt vào so với title */
+}
+.sidebar-menu .v-list-item--active {
+    background-color: #e7f3ff;
+    color: #007bff;
+    font-weight: 500;
+}
+
+/* --- Tiêu đề nội dung chính --- */
+.content-header {
+    margin-bottom: 16px;
+}
+.content-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #212529;
+}

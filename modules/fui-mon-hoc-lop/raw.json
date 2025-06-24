@@ -1,1 +1,342 @@
-{"data":[{"EXE":"IsCheck_NotRoleParent(vueData.user)"},{"items":[],"headers":[{"title":"Tên lớp","value":"TenLop"},{"title":"Tên mẫu bảng điểm","value":"TemplateBangDiemName"},{"title":"Tên mẫu bảng điểm report","value":"TemplateBangDiemName_Report"},{"title":"Tên mẫu bảng điểm PDF","value":"TemplateBangDiemName_PDF"},{"title":"Thao tác","value":"ctrl-update","key":"ctrl-update"}],"DSMonHoc":[],"MonHocItem":null,"DSMonHocLop":[],"DSCap":[],"CapItem":null,"DSLop":[],"LopID":null,"DSTemplate":[],"TemplateBangDiemID":null,"DSKhoi":[],"DSKhoi_Init":[],"KhoiID":null},{"getLop":{"API":"lms/Lop_Select","OUT":"DSLop"},"getTemplateBangDiem":{"API":"lms/TemplateBangDiem_Get","IN":{"TemplateBangDiemID":0},"OUT":"DSTemplate"},"getMonHoc":{"API":"lms/MonHoc_Get_ByCapID","IN":{"CapID":"vueData.CapItem?.CapID"},"OUT":"DSMonHoc"},"getCap":{"API":"lms/CapHoc_Get","OUT":"DSCap"},"getMonHocLop":{"API":"lms/MonHocLop_Select_By_MonHocID","IN":{"MonHocID":"vueData.MonHocItem.MonHocID"},"OUT":"DSMonHocLop","CALLBACK":{"items":"DSMonHocLop.filter(x =>  x.KhoiID === vueData.KhoiID)"}}},{"CALL":"getTemplateBangDiem"},{"CALL":"getLop"},{"CALL":"getCap"},{"EXE":"vueData.DSKhoi_Init = renderDSKhoi(); vueData.DSKhoi = renderDSKhoi()"}],"watch":{"CapItem":{"IF":"vueData.CapItem?.CapID > 0","THEN":[{"MonHocItem":null,"items":[]},{"EXE":"vueData.DSKhoi = vueData.DSKhoi_Init.filter(x=> x.CapID === vueData.CapItem.CapID)"}]},"KhoiID":{"IF":"vueData.KhoiID > 0","THEN":[{"items":[],"MonHocItem":null},{"CALL":"getMonHoc"}]},"MonHocItem":{"IF":"vueData.MonHocItem?.MonHocID > 0","THEN":{"CALL":"getMonHocLop"}}},"controls":[{"prop":"fluid ","rows":[{"prop":"","cols":[{"el":"v-card","attr":{},"w":12,"innerHTML":[{"el":"v-card-title","attr":{"class":"text-primary"},"innerHTML":"Tìm kiếm"},{"el":"v-card-text","innerHTML":[{"el":"v-row","innerHTML":[{"el":"v-col","attr":{"cols":3},"innerHTML":[{"el":"v-select","attr":{"v-model":"CapItem","label":"Chọn cấp học",":items":"DSCap","item-title":"TenCapHoc","item-value":"CapID",":return-object":true}}]},{"el":"v-col","attr":{"cols":3},"innerHTML":[{"el":"v-select","attr":{"v-model":"KhoiID","label":"Chọn khối",":items":"DSKhoi","item-title":"title","item-value":"value"}}]},{"el":"v-col","attr":{"cols":3},"innerHTML":[{"el":"v-select","attr":{"v-model":"MonHocItem","label":"Chọn môn học",":items":"DSMonHoc","item-title":"MonHocName","item-value":"MonHocID",":return-object":true}}]},{"el":"v-col","attr":{"cols":3},"innerHTML":[{"el":"f-button","attr":{"label":"Làm mới","color":"primary",":action":"getMonHocLop"}}]}]}]}]}]},{"prop":"","cols":[{"el":"f-table","attr":{"label":"Môn học lớp",":items":"items",":headers":"headers",":update-form":[{"el":"v-autocomplete","attr":{"v-model":"LopID","label":"Chọn lớp",":items":"vueData.DSLop","item-title":"TenLop","item-value":"LopID",":readonly":"dMode === 'edit'",":clearable":"dMode === 'new'"},"w":12},{"el":"v-autocomplete","attr":{"v-model":"TemplateBangDiemID","label":"Chọn mẫu bảng điểm",":items":"vueData.DSTemplate","item-title":"TemplateBangDiemName","item-value":"TemplateBangDiemID"}},{"el":"v-autocomplete","attr":{"v-model":"TemplateReportHTML","label":"Chọn mẫu bảng điểm Report",":items":"vueData.DSTemplate","item-title":"TemplateBangDiemName","item-value":"TemplateBangDiemID"}},{"el":"v-autocomplete","attr":{"v-model":"TemplateReportPDF","label":"Chọn mẫu bảng điểm PDF",":items":"vueData.DSTemplate","item-title":"TemplateBangDiemName","item-value":"TemplateBangDiemID"}}],":update-api":{"default-item":{},"new":{"API":"lms/MonHocLop_Ins","IN":{"MonHocID":"vueData.MonHocItem.MonHocID","LopID":"item.LopID","TemplateBangDiemID":"item.TemplateBangDiemID","TemplateReportHTML":"item.TemplateReportHTML","TemplateReportPDF":"item.TemplateReportPDF"},"MESS":"Thêm môn học lớp thành công","CALLBACK":{"CALL":"getMonHocLop"}},"edit":{"API":"lms/MonHocLop_Udp","IN":{"MonHocLopID":"item.MonHocLopID","TemplateBangDiemID":"item.TemplateBangDiemID","TemplateReportHTML":"item.TemplateReportHTML","TemplateReportPDF":"item.TemplateReportPDF"},"MESS":"Cập nhật môn học lớp thành công","CALLBACK":{"CALL":"getMonHocLop"}},"delete":{"API":"lms/MonHocLop_Del","IN":{"MonHocLopID":"item.MonHocLopID"},"MESS":"Xóa môn học lớp thành công","CALLBACK":{"CALL":"getMonHocLop"}}}},"w":12}]}]}],"set":{}}
+{
+    "data": [
+        {
+            "EXE": "IsCheck_NotRoleParent(vueData.user)"
+        },
+        {
+            "items": [],
+            "headers": [
+                {
+                    "title": "Tên lớp",
+                    "value": "TenLop"
+                },
+                {
+                    "title": "Tên mẫu bảng điểm",
+                    "value": "TemplateBangDiemName"
+                },
+                {
+                    "title": "Tên mẫu bảng điểm report",
+                    "value": "TemplateBangDiemName_Report"
+                },
+                {
+                    "title": "Tên mẫu bảng điểm PDF",
+                    "value": "TemplateBangDiemName_PDF"
+                },
+                {
+                    "title": "Thao tác",
+                    "value": "ctrl-update",
+                    "key": "ctrl-update"
+                }
+            ],
+            "TitlePage": "getTitlePageByURL(window.location.pathname + window.location.search)",
+            "DSMonHoc": [],
+            "MonHocItem": null,
+            "DSMonHocLop": [],
+            "DSCap": [],
+            "CapItem": null,
+            "DSLop": [],
+            "LopID": null,
+            "DSTemplate": [],
+            "TemplateBangDiemID": null,
+            "DSKhoi": [],
+            "DSKhoi_Init": [],
+            "KhoiID": null
+        },
+        {
+            "getLop": {
+                "API": "lms/Lop_Select",
+                "IN": {
+                    "NienKhoa": "vueData.NienKhoa"
+                },
+                "OUT": "DSLop"
+            },
+            "getTemplateBangDiem": {
+                "API": "lms/TemplateBangDiem_Get",
+                "IN": {
+                    "NienKhoa": "vueData.NienKhoa",
+                    "TemplateBangDiemID": 0
+                },
+                "OUT": "DSTemplate"
+            },
+            "getMonHoc": {
+                "API": "lms/MonHoc_Get_ByCapID",
+                "IN": {
+                    "CapID": "vueData.CapItem?.CapID"
+                },
+                "OUT": "DSMonHoc"
+            },
+            "getCap": {
+                "API": "lms/CapHoc_Get",
+                "OUT": "DSCap"
+            },
+            "getMonHocLop": {
+                "API": "lms/MonHocLop_Select_By_MonHocID",
+                "IN": {
+                    "MonHocID": "vueData.MonHocItem.MonHocID"
+                },
+                "OUT": "DSMonHocLop",
+                "CALLBACK": {
+                    "items": "DSMonHocLop.filter(x =>  x.KhoiID === vueData.KhoiID)"
+                }
+            }
+        },
+        {
+            "CALL": "getTemplateBangDiem"
+        },
+        {
+            "CALL": "getCap"
+        },
+        {
+            "EXE": "vueData.DSKhoi_Init = renderDSKhoi(); vueData.DSKhoi = renderDSKhoi()"
+        }
+    ],
+    "watch": {
+        "NienKhoa": {
+            "IF": "vueData.NienKhoa !== null",
+            "THEN": [
+                {
+                    "CALL": "getLop"
+                }
+            ]
+        },
+        "CapItem": {
+            "IF": "vueData.CapItem?.CapID > 0",
+            "THEN": [
+                {
+                    "MonHocItem": null,
+                    "items": []
+                },
+                {
+                    "EXE": "vueData.DSKhoi = vueData.DSKhoi_Init.filter(x=> x.CapID === vueData.CapItem.CapID)"
+                }
+            ]
+        },
+        "KhoiID": {
+            "IF": "vueData.KhoiID > 0",
+            "THEN": [
+                {
+                    "items": [],
+                    "MonHocItem": null
+                },
+                {
+                    "CALL": "getMonHoc"
+                }
+            ]
+        },
+        "MonHocItem": {
+            "IF": "vueData.MonHocItem?.MonHocID > 0",
+            "THEN": {
+                "CALL": "getMonHocLop"
+            }
+        }
+    },
+    "controls": [
+        {
+            "prop": "fluid ",
+            "rows": [
+                {
+                    "prop": "",
+                    "cols": [
+                        {
+                            "el": "v-card",
+                            "attr": {},
+                            "w": 12,
+                            "innerHTML": [
+                                {
+                                    "el": "v-card-title",
+                                    "attr": {
+                                        "class": "text-primary px-0 pt-0"
+                                    },
+                                    "innerHTML": "{{TitlePage}}"
+                                },
+                                {
+                                    "el": "v-card-text",
+                                    "innerHTML": [
+                                        {
+                                            "el": "v-row",
+                                            "innerHTML": [
+                                                {
+                                                    "el": "v-col",
+                                                    "attr": {
+                                                        "cols": 3
+                                                    },
+                                                    "innerHTML": [
+                                                        {
+                                                            "el": "v-select",
+                                                            "attr": {
+                                                                "v-model": "CapItem",
+                                                                "label": "Chọn cấp học",
+                                                                ":items": "DSCap",
+                                                                "item-title": "TenCapHoc",
+                                                                "item-value": "CapID",
+                                                                ":return-object": true
+                                                            }
+                                                        }
+                                                    ]
+                                                },
+                                                {
+                                                    "el": "v-col",
+                                                    "attr": {
+                                                        "cols": 3
+                                                    },
+                                                    "innerHTML": [
+                                                        {
+                                                            "el": "v-select",
+                                                            "attr": {
+                                                                "v-model": "KhoiID",
+                                                                "label": "Chọn khối",
+                                                                ":items": "DSKhoi",
+                                                                "item-title": "title",
+                                                                "item-value": "value"
+                                                            }
+                                                        }
+                                                    ]
+                                                },
+                                                {
+                                                    "el": "v-col",
+                                                    "attr": {
+                                                        "cols": 3
+                                                    },
+                                                    "innerHTML": [
+                                                        {
+                                                            "el": "v-select",
+                                                            "attr": {
+                                                                "v-model": "MonHocItem",
+                                                                "label": "Chọn môn học",
+                                                                ":items": "DSMonHoc",
+                                                                "item-title": "MonHocName",
+                                                                "item-value": "MonHocID",
+                                                                ":return-object": true
+                                                            }
+                                                        }
+                                                    ]
+                                                },
+                                                {
+                                                    "el": "v-col",
+                                                    "attr": {
+                                                        "cols": 3
+                                                    },
+                                                    "innerHTML": [
+                                                        {
+                                                            "el": "f-button",
+                                                            "attr": {
+                                                                "label": "Làm mới",
+                                                                "color": "primary",
+                                                                "variant": "outlined",
+                                                                ":action": "getMonHocLop"
+                                                            }
+                                                        }
+                                                    ]
+                                                }
+                                            ]
+                                        }
+                                    ]
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "prop": "",
+                    "cols": [
+                        {
+                            "el": "f-table",
+                            "attr": {
+                                "label": "Môn học lớp",
+                                ":items": "items",
+                                ":headers": "headers",
+                                ":update-form": [
+                                    {
+                                        "el": "v-autocomplete",
+                                        "attr": {
+                                            "v-model": "LopID",
+                                            "label": "Chọn lớp",
+                                            ":items": "vueData.DSLop",
+                                            "item-title": "TenLop",
+                                            "item-value": "LopID",
+                                            ":readonly": "dMode === 'edit'",
+                                            ":clearable": "dMode === 'new'"
+                                        },
+                                        "w": 12
+                                    },
+                                    {
+                                        "el": "v-autocomplete",
+                                        "attr": {
+                                            "v-model": "TemplateBangDiemID",
+                                            "label": "Chọn mẫu bảng điểm",
+                                            ":items": "vueData.DSTemplate",
+                                            "item-title": "TemplateBangDiemName",
+                                            "item-value": "TemplateBangDiemID"
+                                        }
+                                    },
+                                    {
+                                        "el": "v-autocomplete",
+                                        "attr": {
+                                            "v-model": "TemplateReportHTML",
+                                            "label": "Chọn mẫu bảng điểm Report",
+                                            ":items": "vueData.DSTemplate",
+                                            "item-title": "TemplateBangDiemName",
+                                            "item-value": "TemplateBangDiemID"
+                                        }
+                                    },
+                                    {
+                                        "el": "v-autocomplete",
+                                        "attr": {
+                                            "v-model": "TemplateReportPDF",
+                                            "label": "Chọn mẫu bảng điểm PDF",
+                                            ":items": "vueData.DSTemplate",
+                                            "item-title": "TemplateBangDiemName",
+                                            "item-value": "TemplateBangDiemID"
+                                        }
+                                    }
+                                ],
+                                ":update-api": {
+                                    "default-item": {},
+                                    "new": {
+                                        "API": "lms/MonHocLop_Ins",
+                                        "IN": {
+                                            "MonHocID": "vueData.MonHocItem.MonHocID",
+                                            "LopID": "item.LopID",
+                                            "TemplateBangDiemID": "item.TemplateBangDiemID",
+                                            "TemplateReportHTML": "item.TemplateReportHTML",
+                                            "TemplateReportPDF": "item.TemplateReportPDF"
+                                        },
+                                        "MESS": "Thêm môn học lớp thành công",
+                                        "CALLBACK": {
+                                            "CALL": "getMonHocLop"
+                                        }
+                                    },
+                                    "edit": {
+                                        "API": "lms/MonHocLop_Udp",
+                                        "IN": {
+                                            "MonHocLopID": "item.MonHocLopID",
+                                            "TemplateBangDiemID": "item.TemplateBangDiemID",
+                                            "TemplateReportHTML": "item.TemplateReportHTML",
+                                            "TemplateReportPDF": "item.TemplateReportPDF"
+                                        },
+                                        "MESS": "Cập nhật môn học lớp thành công",
+                                        "CALLBACK": {
+                                            "CALL": "getMonHocLop"
+                                        }
+                                    },
+                                    "delete": {
+                                        "API": "lms/MonHocLop_Del",
+                                        "IN": {
+                                            "MonHocLopID": "item.MonHocLopID"
+                                        },
+                                        "MESS": "Xóa môn học lớp thành công",
+                                        "CALLBACK": {
+                                            "CALL": "getMonHocLop"
+                                        }
+                                    }
+                                }
+                            },
+                            "w": 12
+                        }
+                    ]
+                }
+            ]
+        }
+    ],
+    "set": {}
+}

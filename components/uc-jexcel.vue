@@ -5,9 +5,10 @@
 </template>
 <script>
 	export default {
-		emits: ['onChange', 'update:modelValue', 'update:dataSource', 'update:minDimensions'],
+		emits: ['onChange', 'update:modelValue', 'update:dataSource', 'update:minDimensions', 'rowData', 'addressCell'],
 		props: {
 			modelValue: {},
+	
 			dataSource: {
 				type: Array,
 				default: []
@@ -19,6 +20,12 @@
 			nestedHeaders: {
 				type: Array,
 				default: []
+			},
+			pagination: {
+				type: Number,
+			},
+			search: {
+				type: Boolean
 			},
 			tableWidth: {
 				type: String,
@@ -60,6 +67,10 @@
 				type: Boolean,
 				default: true, // mặc định vẫn hiện 1,2,3 nếu không truyền
 			},
+			filters: {
+				type: Boolean,
+				default: false, // mặc định vẫn hiện 1,2,3 nếu không truyền
+			},
 		},
 		data() {
 			return {
@@ -99,33 +110,42 @@
 		},
 		computed: {
 			jExcelOptions() {
+				//Nếu sử dụng pagination thì off đi lazyLoading
+				let isLazyLoading = true
+				if (this.pagination) isLazyLoading = false
+				const worksheets = [
+					{
+						data: this.dataSource,
+						columns: this.columns,
+						rowResize: true,
+						columnDrag: true,
+						nestedHeaders: this.nestedHeaders,
+						minDimensions: this.minDimensions,
+						tableWidth: this.tableWidth,
+						tableOverflow: true,
+						tableHeight: this.tableHeight,
+						lazyLoading: isLazyLoading,
+						freezeColumns: this.freezeColumns,
+						columnSorting: true,
+						contextMenu: false,
+						stripHTML: false,
+						wordWrap: true,
+						allowComments: true,
+						comments: this.comments,
+						style: this.styleSheet,
+						filters: this.filters,
+						search: this.search,
+						pagination: this.pagination,
+						paginationOptions: [10, 25, 50, 100],
+					}
+				]
 				return {
-					worksheets: [
-						{
-							data: this.dataSource,
-							columns: this.columns,
-							rowResize: true,
-							columnDrag: true,
-							nestedHeaders: this.nestedHeaders,
-							minDimensions: this.minDimensions,
-							tableWidth: this.tableWidth,
-							tableOverflow: true,
-							tableHeight: this.tableHeight,
-							lazyLoading: true,
-							freezeColumns: this.freezeColumns,
-							columnSorting: true,
-							contextMenu: false,
-							stripHTML: false,
-							wordWrap: true,
-							allowComments: true,
-							comments: this.comments,
-							style: this.styleSheet,
-						}
-					],
+					worksheets: worksheets,
 					contextMenu: function () { return false; },
 					onchange: this.changed,
 					onload: this.onload,
 					onselection: this.onselection,
+	
 				};
 			}
 		},
@@ -169,10 +189,14 @@
 					});
 					return obj;
 				});
-	
+				console.log(`Ô (${x}, ${y}) đã thay đổi thành: ${value}`);
+				const rowData = instance.getRowData(y);
+				console.log('rowData', rowData)
 				console.log(dataObjects);
 				this.$emit('update:dataSource', dataObjects);
 				this.$emit('onChange', { instance, cell, x, y, value, dataObjects });
+				this.$emit('rowData', rowData);
+				this.$emit('addressCell', [x, y])
 			},
 			onselection(instance, x1, y1, x2, y2, origin) {
 				//v5

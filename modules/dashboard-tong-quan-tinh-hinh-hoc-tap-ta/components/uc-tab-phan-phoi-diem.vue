@@ -16,7 +16,7 @@
 					</v-col> -->
 					<v-col>
 						<v-btn color="primary" variant="tonal" @click="onLoadChart({
-							NienKhoa: 2024,
+							NienKhoa: vueData.NienKhoa,
 							KhoiID: form.KhoiID,
 							MonHocID: form.MonHocItem.MonHocID,
 							MaCotDiem: form.MaCotDiem
@@ -82,6 +82,7 @@ export default {
 	},
 	data() {
 		return {
+			vueData,
 			selectedLopID: [],
 			_,
 			form: {
@@ -233,7 +234,7 @@ export default {
 			.then(() => this.form.MaCotDiem = MaCotDiem)
 			.finally(() => this.isLoadingMaCotDiem = false)
 		await this.onLoadChart({
-			NienKhoa: 2024,
+			NienKhoa: vueData.NienKhoa,
 			KhoiID: this.form.KhoiID,
 			MonHocID: this.form.MonHocItem.MonHocID,
 			MaCotDiem: MaCotDiem
@@ -274,6 +275,7 @@ export default {
 					return new Promise(resolve => {
 						ajaxCALL('lms/MonHoc_GetByKhoiID',
 							{
+								NienKhoa: vueData.NienKhoa,
 								KhoiID: KhoiID
 							},
 							res => {

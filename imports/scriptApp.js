@@ -266,6 +266,9 @@ vueData.v_Set.themeStyle = {
         },
         VExpansionPanels: {
             variant: 'accordion'
+        },
+        VButton: {
+            variant:"outlined"
         }
     }
 }
@@ -339,7 +342,17 @@ $('document').ready(() => {
                     points: "points",
                     PathwaysTestResults_C3: "Pathways test results",
                     IELTSEquivalent: "IELTS Equivalent",
-                    Result:"Study results"
+                    Result: "Periodic test results",
+
+                    midSesemter: "Mid Sesemter",
+                    finalSesemter: "Final Sesemter",
+
+                    allYear: "All Year",
+                    AveragePoints: "Average Points",
+                    MidtermPoints: "Mid-term Points",
+                    FinalPoints: "Final Points",
+                    RegularTest: "Regular Test",
+                    TotalPoints: "Total points"
                 }
             },
             vi: {
@@ -386,13 +399,9 @@ $('document').ready(() => {
                     notYetAnnounced: "Chưa xem",
 
                     totalResults: "Tổng điểm",
-
                     ProgressBaseEnglish: "Kết quả kiểm tra năng lực tiếng Anh theo Lộ trình Cambridge",
-
                     ActivitiesAssessment: "Kết quả các hoạt động rèn luyện",
-
                     Notes: "Ghi chú",
-
                     NotMeetingRequirements: "Chưa đạt yêu cầu",
                     MeetingRequirements: "Đạt yêu cầu",
                     ExceedingRequirements: "Vượt yêu cầu",
@@ -402,8 +411,16 @@ $('document').ready(() => {
                     Score: "Điểm",
                     points: "điểm",
                     PathwaysTestResults_C3: "Kết quả đánh giá Tiếng Anh Cambridge theo lộ trình",
-                    IELTSEquivalent: "IELTS tương đương",
-                    Result:"Kết quả học tập"
+                    IELTSEquivalent: "Quy đổi điểm IELTS",
+                    Result: "Kết quả kiểm tra định kì",
+                    midSesemter: "Giữa kì",
+                    finalSesemter: "Cuối kì",
+                    allYear: "Cả năm",
+                    AveragePoints: "Điểm TB",
+                    MidtermPoints: "Điểm GK",
+                    FinalPoints: "Điểm cuối kì",
+                    RegularTest: "Điểm Thường xuyên",
+                    TotalPoints: "Điểm tổng"
                 }
             }
         }

@@ -1,38 +1,10 @@
-function renderDSCap() {
-    const DSCap = Array.from({ length: 3 }).fill(0).map((_, index) => {
-        return {
-            TenCap: "Cấp " + (index + 1),
-            CapID: index + 1
-        }
-    });
-    console.log(123, vueData.capid)
-    vueData.DSCap = DSCap.filter(x => x.CapID === parseInt(vueData.capid));
-}
-function renderDSKhoi() {
-    const DSKhoi = Array.from({ length: 12 }).fill(0).map((_, index) => {
-        const khoiId = index + 1;
-        let capId = 0;
-        if (khoiId >= 1 && khoiId <= 5) {
-            capId = 1;
-        } else if (khoiId >= 6 && khoiId <= 9) {
-            capId = 2;
-        } else if (khoiId >= 10 && khoiId <= 12) {
-            capId = 3;
-        }
-        return {
-            TenKhoi: "Khối " + khoiId,
-            KhoiID: khoiId,
-            CapID: capId
-        }
-    }).filter(x => x.CapID === vueData.CapID);
-    vueData.DSKhoi = DSKhoi;
-    vueData.DSKhoi_Init = DSKhoi;
-}
 function renderDSHocSinh() {
     const eduBotHocSinhLop = []
     let items = []
     const currentDSHocSinhLop_LMS = vueData.DSHocSinhLop_LMS.filter(x => x.LopID == vueData.LopItem.LopID)
-    console.log('currentDSHocSinhLop_LMS', currentDSHocSinhLop_LMS)
+    let distinctClassFromEdubot = [...new Set(vueData.DSHocSinhLop_LMS.map(x => x.LopID))]
+    console.log('distinctClassFromEdubot', distinctClassFromEdubot)
+    console.log('vueData.LopItem.LopID', vueData.LopItem.LopID)
     for (var hsl of currentDSHocSinhLop_LMS) {
         const hs = vueData.DSHocSinh_LMS.find(x => x.HocSinhID === hsl.HocSinhID)
         if (hs) {
@@ -84,6 +56,7 @@ function renderDSHocSinh() {
             UpdateTime: hocSinhLMS.UpdateTime,
         })
     }
+    console.log(items)
     vueData.items = items.sort((a, b) => {
         // Ưu tiên sắp xếp theo SoDanhBo (chuyển sang số nếu cần)
         const soA = isNaN(a.SoDanhBo) ? a.SoDanhBo : parseInt(a.SoDanhBo)
@@ -117,8 +90,9 @@ function localStorageSetItem(item) {
             Nu: item.Nu,
             LopID: item.LopID,
             HSLopID: item.HSLopID,
-            NienKhoa: 2024,
-            KhoiID: vueData.KhoiItem.KhoiID
+            NienKhoa: vueData.NienKhoa,
+            KhoiID: vueData.KhoiItem.KhoiID,
+            CapID: vueData.CapID,
         })
     )
     const bottomNavigation = localStorage.getItem('tabBottomNavigation')
@@ -127,9 +101,8 @@ function localStorageSetItem(item) {
     if (Semester === null) localStorage.setItem('Semester', 1)
     localStorage.setItem('IsPassRoleParent', true)
     openWindow({
-        title: 'Xem chi tiết học sinh ' + item.HocSinhID + ' - ' + item.HoTen,
-        url: '/ph-report',
-        onclose: () => {
-        }
-    });
+        title: 'Xem chi tiết ' + item.HoTen,
+        url: '/ph-report'
+    })
 }
+vueData.TitlePage = getTitlePageByURL(window.location.pathname + window.location.search)

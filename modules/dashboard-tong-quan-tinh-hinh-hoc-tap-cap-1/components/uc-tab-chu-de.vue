@@ -6,12 +6,12 @@
 				<v-row>
 					<v-col>
 						<v-select v-model="form.MaNhomCotDiem" label="Chọn nhóm điểm" :items="DSNhomDiem"
-							item-title="TenNhomCotDiem_VI" item-value="MaNhomCotDiem"
-							:loading="isLoadingMaNhomCotDiem"></v-select>
+							item-title="TenNhomCotDiem_VI" item-value="MaNhomCotDiem" :loading="isLoadingMaNhomCotDiem">
+						</v-select>
 					</v-col>
 					<v-col>
 						<v-btn color="primary" variant="tonal" @click="onLoadChart({
-							NienKhoa: 2024,
+							NienKhoa: vueData.NienKhoa,
 							CapID: capid,
 							MonHocID: form.MonHocItem.MonHocID,
 							MaNhomDiem: form.MaNhomCotDiem
@@ -98,7 +98,8 @@ export default {
 			DSCotDiem: [],
 			isLoadingMaNhomCotDiem: false,
 			isLoadingMaCotDiem: false,
-			List_Chart_ChuDe_TheoLop: []
+			List_Chart_ChuDe_TheoLop: [],
+			vueData
 		}
 	},
 	async mounted() {
@@ -160,6 +161,7 @@ export default {
 					return new Promise(resolve => {
 						ajaxCALL('lms/MonHoc_GetByKhoiID',
 							{
+								NienKhoa: vueData.NienKhoa,
 								KhoiID: KhoiID
 							},
 							res => {
@@ -283,7 +285,7 @@ export default {
 						height: 450,
 						type: 'line',
 						zoom: {
-							enabled: true
+							enabled: false
 						},
 						toolbar: {
 							show: true

@@ -1,0 +1,8 @@
+.v-col-4-important {
+    flex: 0 0 33% !important;
+    max-width: 33% !important;
+}
+.v-col-8-important {
+    flex: 0 0 67% !important;
+    max-width: 67% !important;
+}

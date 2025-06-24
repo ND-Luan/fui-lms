@@ -3,7 +3,7 @@ async function fn_Save() {
         // Sử dụng await để đợi hàm promise hoàn tất
         const data = await new Promise(resolve => {
             ajaxCALL(
-                `psmark1/LMS_GetDanhGiaHocSinh?LopID=${item.LopID}&KyDanhGia=${vueData.KyDanhGia}&NamHoc=2024`,
+                `psmark1/LMS_GetDanhGiaHocSinh?LopID=${item.LopID}&KyDanhGia=${vueData.KyDanhGia}&NamHoc=${vueData.NienKhoa}`,
                 null,
                 res => {
                     resolve(res.data);
@@ -20,5 +20,27 @@ async function fn_Save() {
             // Uncomment this line if you want to send data
             ajaxCALL('lms/MonHocLop_C1_Ins', { JSON_DiemHocSinh: mapData_LopID_MonHocCode });
         }
+    }
+}
+async function fn_Save_Lop(item) {
+    // Sử dụng await để đợi hàm promise hoàn tất
+    const data = await new Promise(resolve => {
+        ajaxCALL(
+            `psmark1/LMS_GetDanhGiaHocSinh?LopID=${item.LopID}&KyDanhGia=${vueData.KyDanhGia}&NamHoc=${vueData.NienKhoa}`,
+            null,
+            res => {
+                resolve(res.data);
+            }
+        );
+    });
+    // Xử lý dữ liệu sau khi hoàn tất
+    if (data.length > 0) {
+        const mapData_LopID_MonHocCode = data.map(x => ({
+            ...x,
+            LopID: item.LopID,
+            KyDanhGia: vueData.KyDanhGia
+        }));
+        // Uncomment this line if you want to send data
+        ajaxCALL('lms/MonHocLop_C1_Ins', { JSON_DiemHocSinh: mapData_LopID_MonHocCode });
     }
 }

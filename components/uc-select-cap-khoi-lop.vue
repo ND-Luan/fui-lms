@@ -13,35 +13,35 @@
 			<v-card-text>
 				<v-row>
 					<v-col cols="3" sm="6" md="3" v-if="!hidenienkhoa">
-						<v-select :disabled="DisableNienKhoa" :items="schoolYears" label="Chọn niên khóa"
+						<v-autocomplete :disabled="DisableNienKhoa" :items="schoolYears" label="Chọn niên khóa"
 							item-title="text" item-value="value" v-model="selectedSchoolYear"
 							dense clearable hide-details="auto" />
 					</v-col>
 					<v-col cols="3" sm="6" md="3" v-if="!hidecap">
-						<v-select v-model="CapItem" label="Chọn cấp học" :items="DSCap" item-title="TenCapHoc"
+						<v-autocomplete v-model="CapItem" label="Chọn cấp học" :items="DSCap" item-title="TenCapHoc"
 							item-value="CapID" outlined dense clearable hide-details />
 					</v-col>
 					<v-col cols="3" sm="6" md="3" v-if="!hidekhoi">
-						<v-select :disabled="DisableKhoi" v-model="KhoiItem" label="Chọn khối" :items="DSKhoi"
+						<v-autocomplete :disabled="DisableKhoi" v-model="KhoiItem" label="Chọn khối" :items="DSKhoi"
 							item-title="TenKhoiHoc" item-value="KhoiID" outlined dense clearable hide-details />
 					</v-col>
 					<v-col cols="3" sm="6" md="3" v-if="!hidelop">
-						<v-select :disabled="DisableLop" v-model="LopItem" label="Chọn lớp" :items="DSLop"
+						<v-autocomplete :disabled="DisableLop" v-model="LopItem" label="Chọn lớp" :items="DSLop"
 							item-title="TenLop" item-value="LopID" outlined dense clearable hide-details />
 					</v-col>
 				</v-row>
 				<v-row>
 					<v-col cols="3" sm="6" md="3" v-if="!hidetogiangday">
-						<v-select :disabled="DisableToGiangDay" v-model="ToGiangDayItem" label="Chọn Tổ giàng dạy"
+						<v-autocomplete :disabled="DisableToGiangDay" v-model="ToGiangDayItem" label="Chọn Tổ giàng dạy"
 							:items="DSToGiangDay" item-title="ToDayName" item-value="ToGiangDayID" outlined dense clearable
 							hide-details />
 					</v-col>
 					<v-col cols="4" sm="6" md="4" v-if="!hidemon">
-						<v-select :disabled="DisableMon" v-model="MonHocItem" label="Chọn môn học" :items="DSMonHoc"
+						<v-autocomplete :disabled="DisableMon" v-model="MonHocItem" label="Chọn môn học" :items="DSMonHoc"
 							item-title="MonHocName" item-value="MonHocID" outlined dense hide-details />
 					</v-col>
 					<v-col cols="4" sm="6" md="4" v-if="!hidegiaovien">
-						<v-select :disabled="DisableGiaoVien" v-model="GiaoVienItem" label="Chọn giáo viên"
+						<v-autocomplete :disabled="DisableGiaoVien" v-model="GiaoVienItem" label="Chọn giáo viên"
 							:items="DSGiaoVien" item-title="HoTenGV" item-value="GiaoVienID" outlined dense
 							hide-details />
 					</v-col>
@@ -261,6 +261,7 @@
 					} else {
 						sessionStorage.removeItem('NienKhoaSelected')
 					}
+					this.emitSessionData()
 				},
 				immediate: true
 			},
@@ -336,7 +337,7 @@
 				this.emitSessionData()
 			},
 	
-			emitSessionData() {
+			async emitSessionData() {
 				const sessionData = {}
 				for (let i = 0; i < sessionStorage.length; i++) {
 					const key = sessionStorage.key(i)
@@ -347,7 +348,8 @@
 						sessionData[key] = value
 					}
 				}
-				this.$emit('session-data-changed', sessionData)
+				console.log("event-change")
+				await this.$emit('session-data-changed', sessionData)
 			},
 	
 			// ... rest of the methods remain the same ...

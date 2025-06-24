@@ -1,1 +1,96 @@
-{"data":[{"EXE":"IsCheck_NotRoleParent(vueData.user)"},{"LopID":"lopid","Lop_NhanXetThangID":"lop_nxtid","JSON_NhanXetThang":[],"columns":[],"dataSource":[]},{"EXE":"initColumn()"},{"API":"lms/HocSinhLop_Get_ByLopID","IN":{"LopID":"vueData.LopID"},"OUT":"dataSource_API","CALLBACK":{"EXE":"renderColumn(); convertHocSinh()"}}],"watch":{},"controls":[{"prop":"fluid","rows":[{"prop":"","cols":[{"el":"div","innerHTML":[{"el":"f-button","attr":{"class":"float-right","label":"Import dữ liệu","color":"primary","variant":"elevated",":action":{"CALL":[{"EXE":"convertHocSinhToAPI()"},{"CONFIRM":"Xác nhận import dữ liệu. Lưu ý khi import sẽ đè dữ liệu cũ","API":"lms/NhanXetThang_Import","IN":{"JSON_NhanXetThang":"vueData.JSON_NhanXetThang"},"MESS":"Import nhận xét tháng thành công","CALLBACK":{"API":"lms/NhanXetThang_Upd_TinhTrang","IN":{"TinhTrang":1,"Lop_NhanXetThangID":"vueData.Lop_NhanXetThangID"}}}]}}}],"w":12},{"el":"uc-jexcel","attr":{"v-if":"dataSource.length > 0","v-model:data-source":"dataSource",":columns":"columns",":search":true,"styleSheet":"height: calc(100vh - 200px)"},"w":12}]}]}],"set":{"menu":false}}
+{
+    "data": [
+        {
+            "EXE": "IsCheck_NotRoleParent(vueData.user)"
+        },
+        {
+            "LopID": "lopid",
+            "Lop_NhanXetThangID": "lop_nxtid",
+            "JSON_NhanXetThang": [],
+            "columns": [],
+            "dataSource": []
+        },
+        {
+            "EXE": "initColumn()"
+        },
+        {
+            "API": "lms/HocSinhLop_Get_ByLopID",
+            "IN": {
+                "LopID": "vueData.LopID"
+            },
+            "OUT": "dataSource_API",
+            "CALLBACK": {
+                "EXE": "renderColumn(); convertHocSinh()"
+            }
+        }
+    ],
+    "watch": {},
+    "controls": [
+        {
+            "prop": "fluid",
+            "rows": [
+                {
+                    "prop": "",
+                    "cols": [
+                        {
+                            "el": "div",
+                            "innerHTML": [
+                                {
+                                    "el": "f-button",
+                                    "attr": {
+                                        "class": "float-right",
+                                        "label": "Import dữ liệu",
+                                        "color": "primary",
+                                        "variant": "elevated",
+                                        ":action": {
+                                            "CALL": [
+                                                {
+                                                    "EXE": "convertHocSinhToAPI()"
+                                                },
+                                                {
+                                                    "CONFIRM": "Xác nhận import dữ liệu. Lưu ý khi import sẽ đè dữ liệu cũ",
+                                                    "API": "lms/NhanXetThang_Import",
+                                                    "IN": {
+                                                        "JSON_NhanXetThang": "vueData.JSON_NhanXetThang"
+                                                    },
+                                                    "MESS": "Import nhận xét tháng thành công",
+                                                    "CALLBACK": [
+                                                        {
+                                                            "API": "lms/NhanXetThang_Upd_TinhTrang",
+                                                            "IN": {
+                                                                "TinhTrang": 1,
+                                                                "Lop_NhanXetThangID": "vueData.Lop_NhanXetThangID"
+                                                            }
+                                                        },
+                                                        {
+                                                            "EXE": "localStorage.setItem('IsImportNXT', true)"
+                                                        }
+                                                    ]
+                                                }
+                                            ]
+                                        }
+                                    }
+                                }
+                            ],
+                            "w": 12
+                        },
+                        {
+                            "el": "uc-jexcel",
+                            "attr": {
+                                "v-if": "dataSource.length > 0",
+                                "v-model:data-source": "dataSource",
+                                ":columns": "columns",
+                                ":search": true,
+                                "styleSheet": "height: calc(100vh - 200px)"
+                            },
+                            "w": 12
+                        }
+                    ]
+                }
+            ]
+        }
+    ],
+    "set": {
+        "menu": false
+    }
+}

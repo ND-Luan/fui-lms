@@ -118,6 +118,7 @@ function onApprove(item) {
             title: "Bạn đang là giáo viên chủ nhiệm. Xác nhận gửi điểm học sinh cho Tổ trưởng",
             action() {
                 ajaxCALL('lms/KQHT_MonHocLop_TinhTrang_Udp', {
+                    NienKhoa: vueData.NienKhoa,
                     MonHocLopID: vueData.MonHocItem.MonHocLopID,
                     LopID: vueData.LopItem.LopID,
                     TinhTrang: 4,
@@ -134,6 +135,7 @@ function onApprove(item) {
             title: "Bạn đang là giáo viên bộ môn. Xác nhận gửi điểm học sinh cho giáo viên chủ nhiệm",
             action() {
                 ajaxCALL('lms/KQHT_MonHocLop_TinhTrang_Udp', {
+                    NienKhoa: vueData.NienKhoa,
                     MonHocLopID: vueData.MonHocItem.MonHocLopID,
                     LopID: vueData.LopItem.LopID,
                     TinhTrang: 2,
@@ -232,6 +234,7 @@ const onGuiDiem = () => {
         title: `Xác nhận - Giáo viên bộ môn gửi điểm cho ${vueData.DSHocSinh[0].TinhTrang === 5 ? 'Tổ trưởng' : 'Giáo viên chủ nhiệm'}`,
         action: function () {
             ajaxCALL('lms/KQHT_MonHocLop_TinhTrang_Udp', {
+                "NienKhoa": vueData.NienKhoa,
                 "MonHocLopID": vueData.MonHocItem.MonHocLopID,
                 "LopID": vueData.LopItem.LopID,
                 "TinhTrang": 2,

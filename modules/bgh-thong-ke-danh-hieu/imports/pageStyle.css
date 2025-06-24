@@ -1,0 +1,24 @@
+table th+th {
+    border-left: thin solid rgb(224, 224, 224);
+    
+}
+table th{
+    border-top: thin solid rgb(224, 224, 224)
+}
+table td+td {
+    border-left: thin solid rgb(224, 224, 224)
+}
+.card-border{
+    border: thin solid rgb(224, 224, 224)
+}
+
+table th{
+    border: thin solid rgb(224, 224, 224)
+}
+.table-bordered{
+    border: thin solid rgb(224, 224, 224) !important
+}
+
+.v-container{
+    padding: 0;
+}

@@ -1,5 +1,5 @@
 <template>
-	<div style="height: calc(100dvh - 248px)">
+	<div style="height: calc(100dvh - 220px)">
 		<v-divider></v-divider>
 		<v-list lines="two" style="height: 100%">
 			<v-list-subheader> {{ $t('message.monthList') }}</v-list-subheader>
@@ -53,7 +53,7 @@
 		methods: {
 			onRedirect(thangObj) {
 				openWindow({
-					title: "Kết quả học tập",
+					title: "Thông báo tháng",
 					url: `report-ket-qua-hoc-tap-thang-hoc-sinh?id=${vueData.HocSinhSelected.StudentID}&lop_nxtid=${thangObj.Lop_NhanXetThangID}`,
 					onclose: {
 						"CALL": "getDSThang"

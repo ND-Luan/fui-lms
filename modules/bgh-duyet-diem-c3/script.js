@@ -40,7 +40,7 @@ function convertDSHocSinh() {
                     backGroundColor: x.HexBackground,
                     width: x.WidthCSS,
                     wrapText: true,
-                    readOnly: x.LoaiCotDiem === 'Công thức' ? true : false,
+                    readOnly: true,
                 }
                 return column
             } else if (x.GiaTriCotDiem === 'text') { // cấu hình header cột điểm có dạng text
@@ -54,6 +54,7 @@ function convertDSHocSinh() {
                     backGroundColor: x.HexBackground,
                     wrap: true,
                     align: arrCotDiemWithAlignCenter.some(item => x.MaCotDiem.includes(item)) ? 'center' : 'left',
+                    readOnly: true,
                 }
                 return column
             } else if (x.GiaTriCotDiem === 'ICO_Star') { // cấu hình header cột điểm có dạng ICO_Star
@@ -66,6 +67,7 @@ function convertDSHocSinh() {
                     backGroundColor: x.HexBackground,
                     wrap: true,
                     align: 'center',
+                    readOnly: true,
                     // readOnly: x.LoaiCotDiem === 'Công thức' ? true : false,
                 }
                 return column
@@ -78,7 +80,7 @@ function convertDSHocSinh() {
             type: 'text',
             title: 'Mã học sinh',
             name: 'HocSinhID',
-            width: 120,
+            width: 100,
             backGroundColor: null,
             wrap: true,
             readOnly: true
@@ -87,7 +89,7 @@ function convertDSHocSinh() {
             type: 'text',
             title: 'Số Danh Bộ',
             name: 'SoDanhBo',
-            width: 120,
+            width: 100,
             backGroundColor: null,
             wrap: true,
             readOnly: true
@@ -96,12 +98,12 @@ function convertDSHocSinh() {
             type: 'text',
             title: 'Họ tên học sinh',
             name: 'HoVaTenHocSinh',
-            width: 300,
+            width: 200,
             backGroundColor: null,
             wrap: true,
             align: "left",
             readOnly: true
-        }
+        },
     ]
     // if (vueData.TinhTrang?.TinhTrang === 3) {
     //     columnThongTinHocSinh.push({
@@ -208,7 +210,7 @@ function processBeforePushAPI() {
             let cotDiem_HS = {
                 HocSinhID: val[i].HocSinhID,
                 LopID: vueData.LopItem.LopID,
-                NienKhoa: 2024,
+                NienKhoa: vueData.NienKhoa,
                 CotDiemID: DSCotDiem[j].CotDiemID,
                 KetQuaDanhGia_VI: DSCotDiem[j].GiaTriCotDiem === 'number' ? (giaTriCotDiem === '' || giaTriCotDiem === NaN ? null : parseFloat(giaTriCotDiem)) : giaTriCotDiem,
                 KetQuaDanhGia_EN: DSCotDiem[j].GiaTriCotDiem === 'number' ? (giaTriCotDiem === '' || giaTriCotDiem === NaN ? null : parseFloat(giaTriCotDiem)) : giaTriCotDiem,

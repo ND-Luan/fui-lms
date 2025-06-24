@@ -186,7 +186,7 @@ function onTuChoiDiem() {
             let cotDiem_HS = {
                 HocSinhID: val[i].HocSinhID,
                 LopID: vueData.LopItem.LopID,
-                NienKhoa: 2024,
+                NienKhoa: vueData.NienKhoa,
                 CotDiemID: DSCotDiem[j].CotDiemID,
                 KetQuaDanhGia_VI: DSCotDiem[j].GiaTriCotDiem === 'number' ? (giaTriCotDiem === '' || giaTriCotDiem === NaN ? null : parseFloat(giaTriCotDiem)) : giaTriCotDiem,
                 KetQuaDanhGia_EN: DSCotDiem[j].GiaTriCotDiem === 'number' ? (giaTriCotDiem === '' || giaTriCotDiem === NaN ? null : parseFloat(giaTriCotDiem)) : giaTriCotDiem,
@@ -213,12 +213,9 @@ function onTuChoiDiem() {
         Vue.$toast.error('Cột điểm chỉ cho phép nhập thang điểm 10!', { position: 'top' })
         return
     }
-    // //Insert xong cập nhật tình trạng
-    CALL("insKQHT_MonHocLop")
 }
 function onDuyetDiem() {
     vueData.StatusButton = 'duyet'
-    CALL("insKQHT_MonHocLop")
 }
 function renderDSHocSinh() {
     const _dsHocSinh = []

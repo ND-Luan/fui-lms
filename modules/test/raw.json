@@ -1,1 +1,941 @@
-{"data":[{"rawData":""},{"GPTResponse":{"id":"chatcmpl-Apslh2OTM0SnDI18aJFnX6ZIyvj8U","object":"chat.completion","created":1736928621,"model":"gpt-4o-mini-2024-07-18","choices":[{"index":0,"message":{"role":"assistant","content":"```html\n<table border=\"1\" cellpadding=\"5\" cellspacing=\"0\" style=\"width:100%; border-collapse:collapse;\">\n    <thead>\n        <tr>\n            <th>Khía Cạnh</th>\n            <th>Biểu Đồ 1</th>\n            <th>Biểu Đồ 2</th>\n        </tr>\n    </thead>\n    <tbody>\n        <tr>\n            <td>Thống Kê Dữ Liệu</td>\n            <td>\n                - Điểm dao động từ 77 đến 95.<br>\n                - Giá trị Y liên quan thay đổi từ 6.55 đến 9.3.<br>\n                - Phân bố chủ yếu xung quanh điểm Y = 7.5.<br>\n            </td>\n            <td>\n                - Điểm dao động từ 77 đến 94.<br>\n                - Giá trị Y tương tự phân bố nhưng cao hơn với giá trị tối đa là 9.04.<br>\n                - Thông tin phân bố đồng đều xung quanh giá trị trung bình cao hơn.\n            </td>\n        </tr>\n        <tr>\n            <td>Đường Hồi Quy</td>\n            <td>\n                - Đường hồi quy cho thấy xu hướng tăng nhẹ từ trái sang phải.<br>\n                - Giá trị Y trải dài từ 7.6 đến 8.08 với giá trị cao tại X = 91.<br>\n            </td>\n            <td>\n                - Đường hồi quy phản ánh một xu hướng tương tự nhưng với mức độ ổn định hơn. \n                - Giá trị Y dao động từ 7.83 đến 7.85, cho thấy một xu hướng giảm nhẹ.\n            </td>\n        </tr>\n        <tr>\n            <td>Phân Bố Điểm</td>\n            <td>\n                - Điểm X thống kê có độ phân tán lớn với số lượng điểm Daub là 23.\n                - Tập trung nhiều xung quanh các giá trị X = 82, 90, 87.\n            </td>\n            <td>\n                - Điểm X cũng có số lượng điểm tương tự 23, nhưng sự tập trung dày đặc hơn ở X = 88, 85.\n                - Thống kê đưa ra sự phân tán tốt hơn ở các giá trị thấp hơn.\n            </td>\n        </tr>\n        <tr>\n            <td>Xu Hướng</td>\n            <td>\n                - Xu hướng chung cho thấy sự thay đổi nhẹ trong điểm số nhưng vẫn xuất hiện đoạn tăng vọt ở các giá trị cao.\n            </td>\n            <td>\n                - Xu hướng tổng thể cho thấy sự ổn định hơn, với ít biến động trong giá trị Y tại các điểm X nhất định.\n            </td>\n        </tr>\n        <tr>\n            <td>Đánh Giá Chung</td>\n            <td>\n                - Biểu đồ 1 cho thấy một bức tranh rõ hơn về sự biến động và phân bố của điểm số.\n                - Sự tập trung quanh trung bình 7.5 và đường hồi quy cung cấp một giả định về tính nhất quán của dữ liệu.\n            </td>\n            <td>\n                - Biểu đồ 2 cho thấy sự ổn định hơn với đường hồi quy phản ánh tình hình hiện tại tốt hơn.\n                - Sự phân bố đều và ổn định cho thấy một cách dự đoán tốt hơn về điểm số tương lai.\n            </td>\n        </tr>\n    </tbody>\n</table>\n```\n\nBạn chỉ cần sao chép mã HTML trên và dán vào trang web của bạn để hiển thị bảng phân tích và so sánh hai biểu đồ.","refusal":null},"logprobs":null,"finish_reason":"stop"}],"usage":{"prompt_tokens":3354,"completion_tokens":785,"total_tokens":4139,"prompt_tokens_details":{"cached_tokens":0,"audio_tokens":0},"completion_tokens_details":{"reasoning_tokens":0,"audio_tokens":0,"accepted_prediction_tokens":0,"rejected_prediction_tokens":0}},"service_tier":"default","system_fingerprint":"fp_72ed7ab54c"}},{"options":{"responsive":true},"optionBar":{"scales":{"y":{"display":true,"min":0,"max":10,"beginAtZero":false,"ticks":{"beginAtZero":false}}},"maintainAspectRatio":false},"optionRadar":{"r":{"min":0,"max":10,"beginAtZero":true},"maintainAspectRatio":false},"optionRadar_KyNang":{"r":{"min":0,"max":3,"beginAtZero":true},"maintainAspectRatio":false},"optionsScatter":{"responsive":true},"optionsScatter_GVNN":{"responsive":true,"maintainAspectRatio":false,"plugins":{"title":{"display":true,"text":"Mối Quan Hệ Giữa Điểm Trung Bình và Đường hồi quy của GV Nước Ngoài"}}},"optionsScatter_GVVN":{"responsive":true,"maintainAspectRatio":false,"plugins":{"title":{"display":true,"text":"Mối Quan Hệ Giữa Điểm Trung Bình và Đường hồi quy của GV Việt Nam"}}},"Chart1_KhoiID":null,"Chart1_LopID":null,"Chart1_MonHocID":null,"Chart1_HocKy":null,"Chart1_HocSinhID":null,"DataChart1":{"DSKhoi":[],"DSLop":[],"DSMonHoc":[],"DSHocSinh":[],"DiemTrungBinh":{"labels":[],"datasets":[]}},"Chart2_KhoiID":null,"Chart2_LopID":null,"Chart2_MonHocID":null,"Chart2_HocKy":null,"DataChart2":{"DSKhoi":[],"DSLop":[],"DSMonHoc":[],"DiemTrungBinh":{"labels":[],"datasets":[]}},"DataChart3":{"DiemNgheNoi":{"datasets":[{"label":"Điểm tương quan nghe và nói","data":[{"x":6,"y":5},{"x":6,"y":6},{"x":6,"y":7},{"x":7,"y":8},{"x":8,"y":9},{"x":8,"y":10}]}]}},"IMG_base":"https://cdn.fui.vn/filedata/lhbs-lms/gpt_temp/rwc9evyj.png","ChartScatterGV_CapID":null,"ChartScatterGV_MonHocID":null,"DataChartGV":{"DSMonHoc":[],"VN":{"labels":[],"datasets":[]},"NN":{"labels":[],"datasets":[]}},"DataChart_KyNang":{"DSKhoi":[],"DSLop":[],"DSMonHoc":[],"Theme":{},"KyNang":{}}},{"PromptGPT":{"promptChart1":"Hãy phân tích và so sánh và nhận xét những biểu đồ được cung cấp 1 cách chuyên sâu,mô tả nhận xét biểu đồ như 1 chuyên gia.Định dạng phản hồi dưới dạng bảng HTML. Trả về chỉ mã HTML, không cần giải thích hay thêm bất kỳ nội dung nào ngoài đoạn mã HTML.","promptChart2":"Hãy phân tích và so sánh hai biểu đồ được cung cấp.Định dạng phản hồi dưới dạng bảng HTML.Đảm bảo cấu trúc bảng như sau:- Tiêu đề của mỗi bảng là tên của biểu đồ.- Cột đầu tiên: Hạng mục(Dữ liệu điểm, Đường hồi quy, Hình thức). - Cột thứ hai: Nội dung mô tả so sánh và phân tích giữa 2 biểu đồ.Hãy trả về kết quả với mã HTML đầy đủ để tôi có thể sao chép và dán vào trang web.","promptChart3":"Hãy phân tích và so sánh hai biểu đồ được cung cấp.Định dạng phản hồi dưới dạng bảng HTML.Đảm bảo cấu trúc bảng như sau:- Tiêu đề của mỗi bảng là tên của biểu đồ.- Cột đầu tiên: Hạng mục(Dữ liệu điểm, Đường hồi quy, Hình thức).- Cột thứ hai: Nội dung mô tả so sánh và phân tích giữa 2 biểu đồ.Hãy trả về kết quả với mã HTML đầy đủ để tôi có thể sao chép và dán vào trang web.","promptChart4":"Hãy phân tích và so sánh hai biểu đồ được cung cấp.Định dạng phản hồi dưới dạng bảng HTML.Đảm bảo cấu trúc bảng như sau:- Tiêu đề của mỗi bảng là tên của biểu đồ.- Cột đầu tiên: Hạng mục(Dữ liệu điểm, Đường hồi quy, Hình thức).- Cột thứ hai: Nội dung mô tả so sánh và phân tích giữa 2 biểu đồ.Hãy trả về kết quả với mã HTML đầy đủ để tôi có thể sao chép và dán vào trang web."}},{"CALL":[{"EXE":"vueData.renderDSKhoi = renderDSKhoi"},{"EXE":"vueData.DataChart1.DSKhoi = renderDSKhoi()"},{"EXE":"vueData.DataChart2.DSKhoi = renderDSKhoi()"},{"EXE":"vueData.DataChart_KyNang.DSKhoi = renderDSKhoi()"}]}],"watch":{"ChartScatterGV_CapID":{"IF":"ChartScatterGV_CapID > 0","THEN":[{"ChartScatterGV_MonHocID":null,"DataChartGV.DSMonHoc":[]},{"API":"lms/MonHoc_Get_ByCapID","IN":{"CapID":"ChartScatterGV_CapID"},"OUT":"DSMonHoc","CALLBACK":{"DataChartGV.DSMonHoc":"DSMonHoc"}}]},"Chart1_KhoiID":{"IF":"Chart1_KhoiID > 0","THEN":[{},{"API":"lms/Lop_Get_ByKhoiID","IN":{"KhoiID":"Chart1_KhoiID"},"OUT":"DSLop","CALLBACK":{"DataChart1.DSLop":"DSLop"}}]},"Chart1_LopID":{"IF":"Chart1_LopID !== null","THEN":[{},{"API":"lms/MonHoc_Get_ByLopID","IN":{"LopID":"Chart1_LopID"},"OUT":"DSMonHoc","CALLBACK":{"DataChart1.DSMonHoc":"DSMonHoc"}},{"API":"lms/HocSinhLop_Get_ByLopID","IN":{"LopID":"Chart1_LopID"},"OUT":"DSHocSinh","CALLBACK":{"DataChart1.DSHocSinh":"DSHocSinh"}}]},"Chart2_KhoiID":{"IF":"Chart2_KhoiID > 0","THEN":[{},{"API":"lms/Lop_Get_ByKhoiID","IN":{"KhoiID":"Chart2_KhoiID"},"OUT":"DSLop","CALLBACK":{"DataChart2.DSLop":"DSLop"}}]},"Chart2_LopID":{"IF":"Chart2_LopID !== null","THEN":[{},{"API":"lms/MonHoc_Get_ByLopID","IN":{"LopID":"Chart2_LopID"},"OUT":"DSMonHoc","CALLBACK":{"DataChart2.DSMonHoc":"DSMonHoc"}}]}},"controls":[{"prop":"fluid","rows":[{"prop":"","cols":[{"el":"v-card","innerHTML":[{"el":"v-card-title","attr":{"class":"text-primary"},"innerHTML":"Điểm tự đánh giá bản thân của giáo viên"},{"el":"div","innerHTML":[{"el":"v-row","innerHTML":[{"el":"v-col","innerHTML":[{"el":"v-select","attr":{"v-model":"ChartScatterGV_CapID","label":"Chọn cấp",":items":[{"title":"Cấp 1","value":1},{"title":"Cấp 2","value":2},{"title":"Cấp 3","value":3}],"item-title":"title","item-value":"value",":rules":[]}}]},{"el":"v-col","innerHTML":[{"el":"v-select","attr":{"v-model":"ChartScatterGV_MonHocID","label":"Chọn môn học",":items":"DataChartGV.DSMonHoc","item-title":"MonHocName","item-value":"MonHocID",":rules":[]}}]},{"el":"v-col","innerHTML":[{"el":"f-button","attr":{"label":"Tìm kiếm","color":"primary",":action":[{"API":"lms/Dashboard_NangLuc_GiangVien_DiemTrungBinh","IN":{"NienKhoa":2024,"CapID":"ChartScatterGV_CapID","MonHocID":"ChartScatterGV_MonHocID"},"OUT":"DataChartGV_API","CALLBACK":[{"EXE":"convertChartScatterGV()"}]}]}}]},{"el":"v-col","innerHTML":[{"el":"f-button","attr":{"label":"Phân Tích Bằng GPT","color":"primary",":action":[{"CALL":[{"params":{"chart1":"chart1","chart2":"chart2","prompt":"promptChart1"}},{"EXE":"rawData =sendChartImageToGPT(params).choices[0].message.content"}]}]}}]},{"el":"v-col","innerHTML":[{"el":"div","attr":{"class":"text-center pa-4"},"innerHTML":[{"el":"v-btn","attr":{"v-on:click":"dialog1 = true"},"innerHTML":"Xem Phân Tích"},{"el":"v-dialog","width":"auto","attr":{"v-model":"dialog1"},"innerHTML":[{"el":"v-card","attr":{"max-width":"250","prepend-icon":"mdi-update","title":"Phân Tích"},"innerHTML":[{"el":"div","attr":{"class":"pa-2","v-html":"rawData"}}]}]}]}]}]}],"attr":{}},{"el":"v-card-text","innerHTML":[{"el":"v-row","innerHTML":[{"el":"v-col","attr":{"cols":6},"innerHTML":[{"el":"uc-chart","attr":{"id":"chart1","type":"scatter",":data":"DataChartGV.VN",":options":"optionsScatter_GVVN"}}]},{"el":"v-col","attr":{"cols":6,"style":"height: 500px"},"innerHTML":[{"el":"uc-chart","attr":{"id":"chart2","type":"scatter",":data":"DataChartGV.NN",":options":"optionsScatter_GVNN"}}]}]}],"attr":{}}],"w":12,"attr":{}},{"el":"v-card","innerHTML":[{"el":"v-card-title","attr":{"class":"text-primary"},"innerHTML":"Điểm trung bình của một học sinh các Theme"},{"el":"v-card-text","innerHTML":[{"el":"v-row","innerHTML":[{"el":"v-col","innerHTML":[{"el":"v-select","attr":{"v-model":"Chart1_KhoiID","label":"Chọn khối",":items":"DataChart1.DSKhoi","item-title":"title","item-value":"value",":rules":[]}}]},{"el":"v-col","innerHTML":[{"el":"v-select","attr":{"v-model":"Chart1_LopID","label":"Chọn lớp",":items":"DataChart1.DSLop","item-title":"TenLop","item-value":"LopID",":rules":[]}}]},{"el":"v-col","innerHTML":[{"el":"v-select","attr":{"v-model":"Chart1_MonHocID","label":"Chọn môn học",":items":"DataChart1.DSMonHoc","item-title":"MonHocName","item-value":"MonHocID",":rules":[]}}]},{"el":"v-col","innerHTML":[{"el":"v-select","attr":{"v-model":"Chart1_HocKy","label":"Chọn học kỳ",":items":[{"title":"HK1","value":"HK1"},{"title":"HK2","value":"HK2"}],"item-title":"title","item-value":"value",":rules":[]}}]},{"el":"v-col","innerHTML":[{"el":"v-select","attr":{"v-model":"Chart1_HocSinhID","label":"Chọn học sinh",":items":"DataChart1.DSHocSinh","item-title":"HoTen","item-value":"HocSinhID",":rules":[]}}]},{"el":"v-col","innerHTML":[{"el":"f-button","attr":{"label":"Tìm kiếm","color":"primary",":action":[{"API":"lms/DashboardDiemTrungBinhTheoTheme_Get","IN":{"HocKy":"Chart1_HocKy","KhoiID":"Chart1_KhoiID","LopID":"Chart1_LopID","MonHocID":"Chart1_MonHocID","HocSinhID":"Chart1_HocSinhID"},"OUT":"DataChart_DiemTrungBinhTheme_RES_API","CALLBACK":[{"DataChart_DiemTrungBinhTheme_API":"vueData.DataChart_DiemTrungBinhTheme_RES_API[0]","DataChart_KyNangTheme_API":"vueData.DataChart_DiemTrungBinhTheme_RES_API[1]"},{"EXE":"convertChartDiemTrungBinhTheme()"},{"EXE":"convertChartDiemKyNang()"}]}]}}]},{"el":"v-col","innerHTML":[{"el":"f-button","attr":{"label":"Phân Tích Bằng GPT","color":"primary",":action":[{"CALL":[{"xxxxx":{"chart1":"chart1","chart2":"chart2","prompt":"promptChart1"}},{"EXE":"sendChartImageToGPT(xxxxx)"}]}]}}]}]}]},{"el":"v-card-text","attr":{"style":"height: 500px"},"innerHTML":[{"el":"v-row","innerHTML":[{"el":"v-col","innerHTML":[{"el":"uc-chart","attr":{"type":"radar",":data":"DataChart1.DiemTrungBinh",":options":"optionRadar"}}]},{"el":"v-col","innerHTML":[{"el":"uc-chart","attr":{"type":"radar",":data":"DataChart_KyNang.KyNang",":options":"optionRadar_KyNang"}}]},{"el":"v-col","innerHTML":[{"el":"uc-chart","attr":{"type":"radar",":data":"DataChart_KyNang.Theme",":options":"optionRadar"}}]}]}]}],"w":12,"attr":{}},{"el":"v-card","innerHTML":[{"el":"v-card-title","attr":{"class":"text-primary"},"innerHTML":"So sánh điểm trung bình của một lớp ở các theme"},{"el":"v-card-text","innerHTML":[{"el":"v-row","innerHTML":[{"el":"v-col","innerHTML":[{"el":"v-select","attr":{"v-model":"Chart2_KhoiID","label":"Chọn khối",":items":"DataChart2.DSKhoi","item-title":"title","item-value":"value",":rules":[]}}]},{"el":"v-col","innerHTML":[{"el":"v-select","attr":{"v-model":"Chart2_LopID","label":"Chọn lớp",":items":"DataChart2.DSLop","item-title":"TenLop","item-value":"LopID",":rules":[]}}]},{"el":"v-col","innerHTML":[{"el":"v-select","attr":{"v-model":"Chart2_MonHocID","label":"Chọn môn học",":items":"DataChart2.DSMonHoc","item-title":"MonHocName","item-value":"MonHocID",":rules":[]}}]},{"el":"v-col","innerHTML":[{"el":"v-select","attr":{"v-model":"Chart2_HocKy","label":"Chọn học kỳ",":items":[{"title":"HK1","value":"HK1"},{"title":"HK2","value":"HK2"}],"item-title":"title","item-value":"value",":rules":[]}}]},{"el":"v-col","innerHTML":[{"el":"f-button","attr":{"label":"Tìm kiếm","color":"primary",":action":[{"API":"lms/DashboardDiemTrungBinhTheoThemeVaLop_Get","IN":{"HocKy":"Chart2_HocKy","KhoiID":"Chart2_KhoiID","LopID":"Chart2_LopID","MonHocID":"Chart2_MonHocID"},"OUT":"DataChart_DiemTrungBinhTheme_Lop_API","CALLBACK":[{"EXE":"convertChartDiemTrungBinh_Lop_Theme()"}]}]}}]}]}]},{"el":"v-card-text","attr":{"style":"height: 500px"},"innerHTML":[{"el":"uc-chart","attr":{"type":"bar",":data":"DataChart2.DiemTrungBinh",":options":"optionBar"}}]}],"w":12},{"el":"v-card","innerHTML":[{"el":"v-card-title","attr":{"class":"text-primary"},"innerHTML":"Phân tán thể hiện mối quan hệ giữa điểm \"Nghe\" và \"Nói\""},{"el":"v-card-text","attr":{},"innerHTML":[{"el":"uc-chart","attr":{"type":"scatter",":data":"DataChart3.DiemNgheNoi",":options":"optionsScatter"}}]}]},{"el":"div","attr":{"v-html":"rawData"}}]}]}],"set":{}}
+{
+    "data": [
+        {
+            "rawData": ""
+        },
+        {
+            "GPTResponse": {
+                "id": "chatcmpl-Apslh2OTM0SnDI18aJFnX6ZIyvj8U",
+                "object": "chat.completion",
+                "created": 1736928621,
+                "model": "gpt-4o-mini-2024-07-18",
+                "choices": [
+                    {
+                        "index": 0,
+                        "message": {
+                            "role": "assistant",
+                            "content": "```html\n<table border=\"1\" cellpadding=\"5\" cellspacing=\"0\" style=\"width:100%; border-collapse:collapse;\">\n    <thead>\n        <tr>\n            <th>Khía Cạnh</th>\n            <th>Biểu Đồ 1</th>\n            <th>Biểu Đồ 2</th>\n        </tr>\n    </thead>\n    <tbody>\n        <tr>\n            <td>Thống Kê Dữ Liệu</td>\n            <td>\n                - Điểm dao động từ 77 đến 95.<br>\n                - Giá trị Y liên quan thay đổi từ 6.55 đến 9.3.<br>\n                - Phân bố chủ yếu xung quanh điểm Y = 7.5.<br>\n            </td>\n            <td>\n                - Điểm dao động từ 77 đến 94.<br>\n                - Giá trị Y tương tự phân bố nhưng cao hơn với giá trị tối đa là 9.04.<br>\n                - Thông tin phân bố đồng đều xung quanh giá trị trung bình cao hơn.\n            </td>\n        </tr>\n        <tr>\n            <td>Đường Hồi Quy</td>\n            <td>\n                - Đường hồi quy cho thấy xu hướng tăng nhẹ từ trái sang phải.<br>\n                - Giá trị Y trải dài từ 7.6 đến 8.08 với giá trị cao tại X = 91.<br>\n            </td>\n            <td>\n                - Đường hồi quy phản ánh một xu hướng tương tự nhưng với mức độ ổn định hơn. \n                - Giá trị Y dao động từ 7.83 đến 7.85, cho thấy một xu hướng giảm nhẹ.\n            </td>\n        </tr>\n        <tr>\n            <td>Phân Bố Điểm</td>\n            <td>\n                - Điểm X thống kê có độ phân tán lớn với số lượng điểm Daub là 23.\n                - Tập trung nhiều xung quanh các giá trị X = 82, 90, 87.\n            </td>\n            <td>\n                - Điểm X cũng có số lượng điểm tương tự 23, nhưng sự tập trung dày đặc hơn ở X = 88, 85.\n                - Thống kê đưa ra sự phân tán tốt hơn ở các giá trị thấp hơn.\n            </td>\n        </tr>\n        <tr>\n            <td>Xu Hướng</td>\n            <td>\n                - Xu hướng chung cho thấy sự thay đổi nhẹ trong điểm số nhưng vẫn xuất hiện đoạn tăng vọt ở các giá trị cao.\n            </td>\n            <td>\n                - Xu hướng tổng thể cho thấy sự ổn định hơn, với ít biến động trong giá trị Y tại các điểm X nhất định.\n            </td>\n        </tr>\n        <tr>\n            <td>Đánh Giá Chung</td>\n            <td>\n                - Biểu đồ 1 cho thấy một bức tranh rõ hơn về sự biến động và phân bố của điểm số.\n                - Sự tập trung quanh trung bình 7.5 và đường hồi quy cung cấp một giả định về tính nhất quán của dữ liệu.\n            </td>\n            <td>\n                - Biểu đồ 2 cho thấy sự ổn định hơn với đường hồi quy phản ánh tình hình hiện tại tốt hơn.\n                - Sự phân bố đều và ổn định cho thấy một cách dự đoán tốt hơn về điểm số tương lai.\n            </td>\n        </tr>\n    </tbody>\n</table>\n```\n\nBạn chỉ cần sao chép mã HTML trên và dán vào trang web của bạn để hiển thị bảng phân tích và so sánh hai biểu đồ.",
+                            "refusal": null
+                        },
+                        "logprobs": null,
+                        "finish_reason": "stop"
+                    }
+                ],
+                "usage": {
+                    "prompt_tokens": 3354,
+                    "completion_tokens": 785,
+                    "total_tokens": 4139,
+                    "prompt_tokens_details": {
+                        "cached_tokens": 0,
+                        "audio_tokens": 0
+                    },
+                    "completion_tokens_details": {
+                        "reasoning_tokens": 0,
+                        "audio_tokens": 0,
+                        "accepted_prediction_tokens": 0,
+                        "rejected_prediction_tokens": 0
+                    }
+                },
+                "service_tier": "default",
+                "system_fingerprint": "fp_72ed7ab54c"
+            }
+        },
+        {
+            "options": {
+                "responsive": true
+            },
+            "optionBar": {
+                "scales": {
+                    "y": {
+                        "display": true,
+                        "min": 0,
+                        "max": 10,
+                        "beginAtZero": false,
+                        "ticks": {
+                            "beginAtZero": false
+                        }
+                    }
+                },
+                "maintainAspectRatio": false
+            },
+            "optionRadar": {
+                "r": {
+                    "min": 0,
+                    "max": 10,
+                    "beginAtZero": true
+                },
+                "maintainAspectRatio": false
+            },
+            "optionRadar_KyNang": {
+                "r": {
+                    "min": 0,
+                    "max": 3,
+                    "beginAtZero": true
+                },
+                "maintainAspectRatio": false
+            },
+            "optionsScatter": {
+                "responsive": true
+            },
+            "optionsScatter_GVNN": {
+                "responsive": true,
+                "maintainAspectRatio": false,
+                "plugins": {
+                    "title": {
+                        "display": true,
+                        "text": "Mối Quan Hệ Giữa Điểm Trung Bình và Đường hồi quy của GV Nước Ngoài"
+                    }
+                }
+            },
+            "optionsScatter_GVVN": {
+                "responsive": true,
+                "maintainAspectRatio": false,
+                "plugins": {
+                    "title": {
+                        "display": true,
+                        "text": "Mối Quan Hệ Giữa Điểm Trung Bình và Đường hồi quy của GV Việt Nam"
+                    }
+                }
+            },
+            "Chart1_KhoiID": null,
+            "Chart1_LopID": null,
+            "Chart1_MonHocID": null,
+            "Chart1_HocKy": null,
+            "Chart1_HocSinhID": null,
+            "DataChart1": {
+                "DSKhoi": [],
+                "DSLop": [],
+                "DSMonHoc": [],
+                "DSHocSinh": [],
+                "DiemTrungBinh": {
+                    "labels": [],
+                    "datasets": []
+                }
+            },
+            "Chart2_KhoiID": null,
+            "Chart2_LopID": null,
+            "Chart2_MonHocID": null,
+            "Chart2_HocKy": null,
+            "DataChart2": {
+                "DSKhoi": [],
+                "DSLop": [],
+                "DSMonHoc": [],
+                "DiemTrungBinh": {
+                    "labels": [],
+                    "datasets": []
+                }
+            },
+            "DataChart3": {
+                "DiemNgheNoi": {
+                    "datasets": [
+                        {
+                            "label": "Điểm tương quan nghe và nói",
+                            "data": [
+                                {
+                                    "x": 6,
+                                    "y": 5
+                                },
+                                {
+                                    "x": 6,
+                                    "y": 6
+                                },
+                                {
+                                    "x": 6,
+                                    "y": 7
+                                },
+                                {
+                                    "x": 7,
+                                    "y": 8
+                                },
+                                {
+                                    "x": 8,
+                                    "y": 9
+                                },
+                                {
+                                    "x": 8,
+                                    "y": 10
+                                }
+                            ]
+                        }
+                    ]
+                }
+            },
+            "IMG_base": "https://cdn.fui.vn/filedata/lhbs-lms/gpt_temp/rwc9evyj.png",
+            "ChartScatterGV_CapID": null,
+            "ChartScatterGV_MonHocID": null,
+            "DataChartGV": {
+                "DSMonHoc": [],
+                "VN": {
+                    "labels": [],
+                    "datasets": []
+                },
+                "NN": {
+                    "labels": [],
+                    "datasets": []
+                }
+            },
+            "DataChart_KyNang": {
+                "DSKhoi": [],
+                "DSLop": [],
+                "DSMonHoc": [],
+                "Theme": {},
+                "KyNang": {}
+            }
+        },
+        {
+            "PromptGPT": {
+                "promptChart1": "Hãy phân tích và so sánh và nhận xét những biểu đồ được cung cấp 1 cách chuyên sâu,mô tả nhận xét biểu đồ như 1 chuyên gia.Định dạng phản hồi dưới dạng bảng HTML. Trả về chỉ mã HTML, không cần giải thích hay thêm bất kỳ nội dung nào ngoài đoạn mã HTML.",
+                "promptChart2": "Hãy phân tích và so sánh hai biểu đồ được cung cấp.Định dạng phản hồi dưới dạng bảng HTML.Đảm bảo cấu trúc bảng như sau:- Tiêu đề của mỗi bảng là tên của biểu đồ.- Cột đầu tiên: Hạng mục(Dữ liệu điểm, Đường hồi quy, Hình thức). - Cột thứ hai: Nội dung mô tả so sánh và phân tích giữa 2 biểu đồ.Hãy trả về kết quả với mã HTML đầy đủ để tôi có thể sao chép và dán vào trang web.",
+                "promptChart3": "Hãy phân tích và so sánh hai biểu đồ được cung cấp.Định dạng phản hồi dưới dạng bảng HTML.Đảm bảo cấu trúc bảng như sau:- Tiêu đề của mỗi bảng là tên của biểu đồ.- Cột đầu tiên: Hạng mục(Dữ liệu điểm, Đường hồi quy, Hình thức).- Cột thứ hai: Nội dung mô tả so sánh và phân tích giữa 2 biểu đồ.Hãy trả về kết quả với mã HTML đầy đủ để tôi có thể sao chép và dán vào trang web.",
+                "promptChart4": "Hãy phân tích và so sánh hai biểu đồ được cung cấp.Định dạng phản hồi dưới dạng bảng HTML.Đảm bảo cấu trúc bảng như sau:- Tiêu đề của mỗi bảng là tên của biểu đồ.- Cột đầu tiên: Hạng mục(Dữ liệu điểm, Đường hồi quy, Hình thức).- Cột thứ hai: Nội dung mô tả so sánh và phân tích giữa 2 biểu đồ.Hãy trả về kết quả với mã HTML đầy đủ để tôi có thể sao chép và dán vào trang web."
+            }
+        },
+        {
+            "CALL": [
+                {
+                    "EXE": "vueData.renderDSKhoi = renderDSKhoi"
+                },
+                {
+                    "EXE": "vueData.DataChart1.DSKhoi = renderDSKhoi()"
+                },
+                {
+                    "EXE": "vueData.DataChart2.DSKhoi = renderDSKhoi()"
+                },
+                {
+                    "EXE": "vueData.DataChart_KyNang.DSKhoi = renderDSKhoi()"
+                }
+            ]
+        }
+    ],
+    "watch": {
+        "ChartScatterGV_CapID": {
+            "IF": "ChartScatterGV_CapID > 0",
+            "THEN": [
+                {
+                    "ChartScatterGV_MonHocID": null,
+                    "DataChartGV.DSMonHoc": []
+                },
+                {
+                    "API": "lms/MonHoc_Get_ByCapID",
+                    "IN": {
+                        "CapID": "ChartScatterGV_CapID"
+                    },
+                    "OUT": "DSMonHoc",
+                    "CALLBACK": {
+                        "DataChartGV.DSMonHoc": "DSMonHoc"
+                    }
+                }
+            ]
+        },
+        "Chart1_KhoiID": {
+            "IF": "Chart1_KhoiID > 0",
+            "THEN": [
+                {},
+                {
+                    "API": "lms/Lop_Get_ByKhoiID",
+                    "IN": {
+                        "NienKhoa": "vueData.NienKhoa",
+                        "KhoiID": "Chart1_KhoiID"
+                    },
+                    "OUT": "DSLop",
+                    "CALLBACK": {
+                        "DataChart1.DSLop": "DSLop"
+                    }
+                }
+            ]
+        },
+        "Chart1_LopID": {
+            "IF": "Chart1_LopID !== null",
+            "THEN": [
+                {},
+                {
+                    "API": "lms/MonHoc_Get_ByLopID",
+                    "IN": {
+                        "LopID": "Chart1_LopID"
+                    },
+                    "OUT": "DSMonHoc",
+                    "CALLBACK": {
+                        "DataChart1.DSMonHoc": "DSMonHoc"
+                    }
+                },
+                {
+                    "API": "lms/HocSinhLop_Get_ByLopID",
+                    "IN": {
+                        "LopID": "Chart1_LopID"
+                    },
+                    "OUT": "DSHocSinh",
+                    "CALLBACK": {
+                        "DataChart1.DSHocSinh": "DSHocSinh"
+                    }
+                }
+            ]
+        },
+        "Chart2_KhoiID": {
+            "IF": "Chart2_KhoiID > 0",
+            "THEN": [
+                {},
+                {
+                    "API": "lms/Lop_Get_ByKhoiID",
+                    "IN": {
+                        "NienKhoa": "vueData.NienKhoa",
+                        "KhoiID": "Chart2_KhoiID"
+                    },
+                    "OUT": "DSLop",
+                    "CALLBACK": {
+                        "DataChart2.DSLop": "DSLop"
+                    }
+                }
+            ]
+        },
+        "Chart2_LopID": {
+            "IF": "Chart2_LopID !== null",
+            "THEN": [
+                {},
+                {
+                    "API": "lms/MonHoc_Get_ByLopID",
+                    "IN": {
+                        "LopID": "Chart2_LopID"
+                    },
+                    "OUT": "DSMonHoc",
+                    "CALLBACK": {
+                        "DataChart2.DSMonHoc": "DSMonHoc"
+                    }
+                }
+            ]
+        }
+    },
+    "controls": [
+        {
+            "prop": "fluid",
+            "rows": [
+                {
+                    "prop": "",
+                    "cols": [
+                        {
+                            "el": "v-card",
+                            "innerHTML": [
+                                {
+                                    "el": "v-card-title",
+                                    "attr": {
+                                        "class": "text-primary"
+                                    },
+                                    "innerHTML": "Điểm tự đánh giá bản thân của giáo viên"
+                                },
+                                {
+                                    "el": "div",
+                                    "innerHTML": [
+                                        {
+                                            "el": "v-row",
+                                            "innerHTML": [
+                                                {
+                                                    "el": "v-col",
+                                                    "innerHTML": [
+                                                        {
+                                                            "el": "v-select",
+                                                            "attr": {
+                                                                "v-model": "ChartScatterGV_CapID",
+                                                                "label": "Chọn cấp",
+                                                                ":items": [
+                                                                    {
+                                                                        "title": "Cấp 1",
+                                                                        "value": 1
+                                                                    },
+                                                                    {
+                                                                        "title": "Cấp 2",
+                                                                        "value": 2
+                                                                    },
+                                                                    {
+                                                                        "title": "Cấp 3",
+                                                                        "value": 3
+                                                                    }
+                                                                ],
+                                                                "item-title": "title",
+                                                                "item-value": "value",
+                                                                ":rules": []
+                                                            }
+                                                        }
+                                                    ]
+                                                },
+                                                {
+                                                    "el": "v-col",
+                                                    "innerHTML": [
+                                                        {
+                                                            "el": "v-select",
+                                                            "attr": {
+                                                                "v-model": "ChartScatterGV_MonHocID",
+                                                                "label": "Chọn môn học",
+                                                                ":items": "DataChartGV.DSMonHoc",
+                                                                "item-title": "MonHocName",
+                                                                "item-value": "MonHocID",
+                                                                ":rules": []
+                                                            }
+                                                        }
+                                                    ]
+                                                },
+                                                {
+                                                    "el": "v-col",
+                                                    "innerHTML": [
+                                                        {
+                                                            "el": "f-button",
+                                                            "attr": {
+                                                                "label": "Tìm kiếm",
+                                                                "color": "primary",
+                                                                ":action": [
+                                                                    {
+                                                                        "API": "lms/Dashboard_NangLuc_GiangVien_DiemTrungBinh",
+                                                                        "IN": {
+                                                                            "NienKhoa": 2024,
+                                                                            "CapID": "ChartScatterGV_CapID",
+                                                                            "MonHocID": "ChartScatterGV_MonHocID"
+                                                                        },
+                                                                        "OUT": "DataChartGV_API",
+                                                                        "CALLBACK": [
+                                                                            {
+                                                                                "EXE": "convertChartScatterGV()"
+                                                                            }
+                                                                        ]
+                                                                    }
+                                                                ]
+                                                            }
+                                                        }
+                                                    ]
+                                                },
+                                                {
+                                                    "el": "v-col",
+                                                    "innerHTML": [
+                                                        {
+                                                            "el": "f-button",
+                                                            "attr": {
+                                                                "label": "Phân Tích Bằng GPT",
+                                                                "color": "primary",
+                                                                ":action": [
+                                                                    {
+                                                                        "CALL": [
+                                                                            {
+                                                                                "params": {
+                                                                                    "chart1": "chart1",
+                                                                                    "chart2": "chart2",
+                                                                                    "prompt": "promptChart1"
+                                                                                }
+                                                                            },
+                                                                            {
+                                                                                "EXE": "rawData =sendChartImageToGPT(params).choices[0].message.content"
+                                                                            }
+                                                                        ]
+                                                                    }
+                                                                ]
+                                                            }
+                                                        }
+                                                    ]
+                                                },
+                                                {
+                                                    "el": "v-col",
+                                                    "innerHTML": [
+                                                        {
+                                                            "el": "div",
+                                                            "attr": {
+                                                                "class": "text-center pa-4"
+                                                            },
+                                                            "innerHTML": [
+                                                                {
+                                                                    "el": "v-btn",
+                                                                    "attr": {
+                                                                        "v-on:click": "dialog1 = true"
+                                                                    },
+                                                                    "innerHTML": "Xem Phân Tích"
+                                                                },
+                                                                {
+                                                                    "el": "v-dialog",
+                                                                    "width": "auto",
+                                                                    "attr": {
+                                                                        "v-model": "dialog1"
+                                                                    },
+                                                                    "innerHTML": [
+                                                                        {
+                                                                            "el": "v-card",
+                                                                            "attr": {
+                                                                                "max-width": "250",
+                                                                                "prepend-icon": "mdi-update",
+                                                                                "title": "Phân Tích"
+                                                                            },
+                                                                            "innerHTML": [
+                                                                                {
+                                                                                    "el": "div",
+                                                                                    "attr": {
+                                                                                        "class": "pa-2",
+                                                                                        "v-html": "rawData"
+                                                                                    }
+                                                                                }
+                                                                            ]
+                                                                        }
+                                                                    ]
+                                                                }
+                                                            ]
+                                                        }
+                                                    ]
+                                                }
+                                            ]
+                                        }
+                                    ],
+                                    "attr": {}
+                                },
+                                {
+                                    "el": "v-card-text",
+                                    "innerHTML": [
+                                        {
+                                            "el": "v-row",
+                                            "innerHTML": [
+                                                {
+                                                    "el": "v-col",
+                                                    "attr": {
+                                                        "cols": 6
+                                                    },
+                                                    "innerHTML": [
+                                                        {
+                                                            "el": "uc-chart",
+                                                            "attr": {
+                                                                "id": "chart1",
+                                                                "type": "scatter",
+                                                                ":data": "DataChartGV.VN",
+                                                                ":options": "optionsScatter_GVVN"
+                                                            }
+                                                        }
+                                                    ]
+                                                },
+                                                {
+                                                    "el": "v-col",
+                                                    "attr": {
+                                                        "cols": 6,
+                                                        "style": "height: 500px"
+                                                    },
+                                                    "innerHTML": [
+                                                        {
+                                                            "el": "uc-chart",
+                                                            "attr": {
+                                                                "id": "chart2",
+                                                                "type": "scatter",
+                                                                ":data": "DataChartGV.NN",
+                                                                ":options": "optionsScatter_GVNN"
+                                                            }
+                                                        }
+                                                    ]
+                                                }
+                                            ]
+                                        }
+                                    ],
+                                    "attr": {}
+                                }
+                            ],
+                            "w": 12,
+                            "attr": {}
+                        },
+                        {
+                            "el": "v-card",
+                            "innerHTML": [
+                                {
+                                    "el": "v-card-title",
+                                    "attr": {
+                                        "class": "text-primary"
+                                    },
+                                    "innerHTML": "Điểm trung bình của một học sinh các Theme"
+                                },
+                                {
+                                    "el": "v-card-text",
+                                    "innerHTML": [
+                                        {
+                                            "el": "v-row",
+                                            "innerHTML": [
+                                                {
+                                                    "el": "v-col",
+                                                    "innerHTML": [
+                                                        {
+                                                            "el": "v-select",
+                                                            "attr": {
+                                                                "v-model": "Chart1_KhoiID",
+                                                                "label": "Chọn khối",
+                                                                ":items": "DataChart1.DSKhoi",
+                                                                "item-title": "title",
+                                                                "item-value": "value",
+                                                                ":rules": []
+                                                            }
+                                                        }
+                                                    ]
+                                                },
+                                                {
+                                                    "el": "v-col",
+                                                    "innerHTML": [
+                                                        {
+                                                            "el": "v-select",
+                                                            "attr": {
+                                                                "v-model": "Chart1_LopID",
+                                                                "label": "Chọn lớp",
+                                                                ":items": "DataChart1.DSLop",
+                                                                "item-title": "TenLop",
+                                                                "item-value": "LopID",
+                                                                ":rules": []
+                                                            }
+                                                        }
+                                                    ]
+                                                },
+                                                {
+                                                    "el": "v-col",
+                                                    "innerHTML": [
+                                                        {
+                                                            "el": "v-select",
+                                                            "attr": {
+                                                                "v-model": "Chart1_MonHocID",
+                                                                "label": "Chọn môn học",
+                                                                ":items": "DataChart1.DSMonHoc",
+                                                                "item-title": "MonHocName",
+                                                                "item-value": "MonHocID",
+                                                                ":rules": []
+                                                            }
+                                                        }
+                                                    ]
+                                                },
+                                                {
+                                                    "el": "v-col",
+                                                    "innerHTML": [
+                                                        {
+                                                            "el": "v-select",
+                                                            "attr": {
+                                                                "v-model": "Chart1_HocKy",
+                                                                "label": "Chọn học kỳ",
+                                                                ":items": [
+                                                                    {
+                                                                        "title": "HK1",
+                                                                        "value": "HK1"
+                                                                    },
+                                                                    {
+                                                                        "title": "HK2",
+                                                                        "value": "HK2"
+                                                                    }
+                                                                ],
+                                                                "item-title": "title",
+                                                                "item-value": "value",
+                                                                ":rules": []
+                                                            }
+                                                        }
+                                                    ]
+                                                },
+                                                {
+                                                    "el": "v-col",
+                                                    "innerHTML": [
+                                                        {
+                                                            "el": "v-select",
+                                                            "attr": {
+                                                                "v-model": "Chart1_HocSinhID",
+                                                                "label": "Chọn học sinh",
+                                                                ":items": "DataChart1.DSHocSinh",
+                                                                "item-title": "HoTen",
+                                                                "item-value": "HocSinhID",
+                                                                ":rules": []
+                                                            }
+                                                        }
+                                                    ]
+                                                },
+                                                {
+                                                    "el": "v-col",
+                                                    "innerHTML": [
+                                                        {
+                                                            "el": "f-button",
+                                                            "attr": {
+                                                                "label": "Tìm kiếm",
+                                                                "color": "primary",
+                                                                ":action": [
+                                                                    {
+                                                                        "API": "lms/DashboardDiemTrungBinhTheoTheme_Get",
+                                                                        "IN": {
+                                                                            "HocKy": "Chart1_HocKy",
+                                                                            "KhoiID": "Chart1_KhoiID",
+                                                                            "LopID": "Chart1_LopID",
+                                                                            "MonHocID": "Chart1_MonHocID",
+                                                                            "HocSinhID": "Chart1_HocSinhID"
+                                                                        },
+                                                                        "OUT": "DataChart_DiemTrungBinhTheme_RES_API",
+                                                                        "CALLBACK": [
+                                                                            {
+                                                                                "DataChart_DiemTrungBinhTheme_API": "vueData.DataChart_DiemTrungBinhTheme_RES_API[0]",
+                                                                                "DataChart_KyNangTheme_API": "vueData.DataChart_DiemTrungBinhTheme_RES_API[1]"
+                                                                            },
+                                                                            {
+                                                                                "EXE": "convertChartDiemTrungBinhTheme()"
+                                                                            },
+                                                                            {
+                                                                                "EXE": "convertChartDiemKyNang()"
+                                                                            }
+                                                                        ]
+                                                                    }
+                                                                ]
+                                                            }
+                                                        }
+                                                    ]
+                                                },
+                                                {
+                                                    "el": "v-col",
+                                                    "innerHTML": [
+                                                        {
+                                                            "el": "f-button",
+                                                            "attr": {
+                                                                "label": "Phân Tích Bằng GPT",
+                                                                "color": "primary",
+                                                                ":action": [
+                                                                    {
+                                                                        "CALL": [
+                                                                            {
+                                                                                "xxxxx": {
+                                                                                    "chart1": "chart1",
+                                                                                    "chart2": "chart2",
+                                                                                    "prompt": "promptChart1"
+                                                                                }
+                                                                            },
+                                                                            {
+                                                                                "EXE": "sendChartImageToGPT(xxxxx)"
+                                                                            }
+                                                                        ]
+                                                                    }
+                                                                ]
+                                                            }
+                                                        }
+                                                    ]
+                                                }
+                                            ]
+                                        }
+                                    ]
+                                },
+                                {
+                                    "el": "v-card-text",
+                                    "attr": {
+                                        "style": "height: 500px"
+                                    },
+                                    "innerHTML": [
+                                        {
+                                            "el": "v-row",
+                                            "innerHTML": [
+                                                {
+                                                    "el": "v-col",
+                                                    "innerHTML": [
+                                                        {
+                                                            "el": "uc-chart",
+                                                            "attr": {
+                                                                "type": "radar",
+                                                                ":data": "DataChart1.DiemTrungBinh",
+                                                                ":options": "optionRadar"
+                                                            }
+                                                        }
+                                                    ]
+                                                },
+                                                {
+                                                    "el": "v-col",
+                                                    "innerHTML": [
+                                                        {
+                                                            "el": "uc-chart",
+                                                            "attr": {
+                                                                "type": "radar",
+                                                                ":data": "DataChart_KyNang.KyNang",
+                                                                ":options": "optionRadar_KyNang"
+                                                            }
+                                                        }
+                                                    ]
+                                                },
+                                                {
+                                                    "el": "v-col",
+                                                    "innerHTML": [
+                                                        {
+                                                            "el": "uc-chart",
+                                                            "attr": {
+                                                                "type": "radar",
+                                                                ":data": "DataChart_KyNang.Theme",
+                                                                ":options": "optionRadar"
+                                                            }
+                                                        }
+                                                    ]
+                                                }
+                                            ]
+                                        }
+                                    ]
+                                }
+                            ],
+                            "w": 12,
+                            "attr": {}
+                        },
+                        {
+                            "el": "v-card",
+                            "innerHTML": [
+                                {
+                                    "el": "v-card-title",
+                                    "attr": {
+                                        "class": "text-primary"
+                                    },
+                                    "innerHTML": "So sánh điểm trung bình của một lớp ở các theme"
+                                },
+                                {
+                                    "el": "v-card-text",
+                                    "innerHTML": [
+                                        {
+                                            "el": "v-row",
+                                            "innerHTML": [
+                                                {
+                                                    "el": "v-col",
+                                                    "innerHTML": [
+                                                        {
+                                                            "el": "v-select",
+                                                            "attr": {
+                                                                "v-model": "Chart2_KhoiID",
+                                                                "label": "Chọn khối",
+                                                                ":items": "DataChart2.DSKhoi",
+                                                                "item-title": "title",
+                                                                "item-value": "value",
+                                                                ":rules": []
+                                                            }
+                                                        }
+                                                    ]
+                                                },
+                                                {
+                                                    "el": "v-col",
+                                                    "innerHTML": [
+                                                        {
+                                                            "el": "v-select",
+                                                            "attr": {
+                                                                "v-model": "Chart2_LopID",
+                                                                "label": "Chọn lớp",
+                                                                ":items": "DataChart2.DSLop",
+                                                                "item-title": "TenLop",
+                                                                "item-value": "LopID",
+                                                                ":rules": []
+                                                            }
+                                                        }
+                                                    ]
+                                                },
+                                                {
+                                                    "el": "v-col",
+                                                    "innerHTML": [
+                                                        {
+                                                            "el": "v-select",
+                                                            "attr": {
+                                                                "v-model": "Chart2_MonHocID",
+                                                                "label": "Chọn môn học",
+                                                                ":items": "DataChart2.DSMonHoc",
+                                                                "item-title": "MonHocName",
+                                                                "item-value": "MonHocID",
+                                                                ":rules": []
+                                                            }
+                                                        }
+                                                    ]
+                                                },
+                                                {
+                                                    "el": "v-col",
+                                                    "innerHTML": [
+                                                        {
+                                                            "el": "v-select",
+                                                            "attr": {
+                                                                "v-model": "Chart2_HocKy",
+                                                                "label": "Chọn học kỳ",
+                                                                ":items": [
+                                                                    {
+                                                                        "title": "HK1",
+                                                                        "value": "HK1"
+                                                                    },
+                                                                    {
+                                                                        "title": "HK2",
+                                                                        "value": "HK2"
+                                                                    }
+                                                                ],
+                                                                "item-title": "title",
+                                                                "item-value": "value",
+                                                                ":rules": []
+                                                            }
+                                                        }
+                                                    ]
+                                                },
+                                                {
+                                                    "el": "v-col",
+                                                    "innerHTML": [
+                                                        {
+                                                            "el": "f-button",
+                                                            "attr": {
+                                                                "label": "Tìm kiếm",
+                                                                "color": "primary",
+                                                                ":action": [
+                                                                    {
+                                                                        "API": "lms/DashboardDiemTrungBinhTheoThemeVaLop_Get",
+                                                                        "IN": {
+                                                                            "HocKy": "Chart2_HocKy",
+                                                                            "KhoiID": "Chart2_KhoiID",
+                                                                            "LopID": "Chart2_LopID",
+                                                                            "MonHocID": "Chart2_MonHocID"
+                                                                        },
+                                                                        "OUT": "DataChart_DiemTrungBinhTheme_Lop_API",
+                                                                        "CALLBACK": [
+                                                                            {
+                                                                                "EXE": "convertChartDiemTrungBinh_Lop_Theme()"
+                                                                            }
+                                                                        ]
+                                                                    }
+                                                                ]
+                                                            }
+                                                        }
+                                                    ]
+                                                }
+                                            ]
+                                        }
+                                    ]
+                                },
+                                {
+                                    "el": "v-card-text",
+                                    "attr": {
+                                        "style": "height: 500px"
+                                    },
+                                    "innerHTML": [
+                                        {
+                                            "el": "uc-chart",
+                                            "attr": {
+                                                "type": "bar",
+                                                ":data": "DataChart2.DiemTrungBinh",
+                                                ":options": "optionBar"
+                                            }
+                                        }
+                                    ]
+                                }
+                            ],
+                            "w": 12
+                        },
+                        {
+                            "el": "v-card",
+                            "innerHTML": [
+                                {
+                                    "el": "v-card-title",
+                                    "attr": {
+                                        "class": "text-primary"
+                                    },
+                                    "innerHTML": "Phân tán thể hiện mối quan hệ giữa điểm \"Nghe\" và \"Nói\""
+                                },
+                                {
+                                    "el": "v-card-text",
+                                    "attr": {},
+                                    "innerHTML": [
+                                        {
+                                            "el": "uc-chart",
+                                            "attr": {
+                                                "type": "scatter",
+                                                ":data": "DataChart3.DiemNgheNoi",
+                                                ":options": "optionsScatter"
+                                            }
+                                        }
+                                    ]
+                                }
+                            ]
+                        },
+                        {
+                            "el": "div",
+                            "attr": {
+                                "v-html": "rawData"
+                            }
+                        }
+                    ]
+                }
+            ]
+        }
+    ],
+    "set": {}
+}

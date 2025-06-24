@@ -24,16 +24,13 @@ function convertDSHocSinh() {
     // DSCotDiem_ByMaNhomCotDiem = SLCotDiem_OfFirstSTD
     DSCotDiem_ByMaNhomCotDiem = vueData.DSNhomDiem
     const uniqueNhomDiem = [...new Set(DSCotDiem_ByMaNhomCotDiem.sort((a, b) => a.ThuTuNhom - b.ThuTuNhom).map(x => x.MaNhomCotDiem))]
-    console.log(uniqueNhomDiem)
     let newDSCotDiem_ByMaNhomCotDiem = []
     for (var nhomDiem of uniqueNhomDiem) {
         const NhomDiemFilter = DSCotDiem_ByMaNhomCotDiem.filter(x => x.MaNhomCotDiem === nhomDiem)
         NhomDiemFilter.sort((a, b) => a.ThuTuCotDiem - b.ThuTuCotDiem)
-        console.log('=>', NhomDiemFilter)
         newDSCotDiem_ByMaNhomCotDiem.push(NhomDiemFilter)
     }
     newDSCotDiem_ByMaNhomCotDiem = newDSCotDiem_ByMaNhomCotDiem.flat()
-    // console.log('newDSCotDiem_ByMaNhomCotDiem', newDSCotDiem_ByMaNhomCotDiem)
     const DSNhomDiem = []
     for (var nhomDiem of uniqueNhomDiem) {
         const DSNhomDiemFilter = newDSCotDiem_ByMaNhomCotDiem.filter(x => x.MaNhomCotDiem === nhomDiem)
@@ -44,7 +41,6 @@ function convertDSHocSinh() {
     }
     vueData.DSNhomDiem = DSNhomDiem
     //Xử lý động cột điểm header jexcel
-    console.log('newDSCotDiem_ByMaNhomCotDiem', newDSCotDiem_ByMaNhomCotDiem)
     let columnsCotDiem = newDSCotDiem_ByMaNhomCotDiem
         .map((x) => {
             if (x.GiaTriCotDiem === 'number') { // cấu hình header cột điểm có dạng number
@@ -198,7 +194,6 @@ function convertDSHocSinh() {
             }
         }
     }
-    console.log('headers', headers)
     vueData.keyComp++
     vueData.columnHeader = headers
     vueData.DSHocSinh = dataJexcel

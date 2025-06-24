@@ -11,7 +11,7 @@
 					</v-col>
 					<v-col>
 						<v-btn color="primary" variant="tonal" @click="onLoadChart({
-							NienKhoa: 2024,
+							NienKhoa: vueData.NienKhoa,
 							CapID: capid,
 							MonHocID: form.MonHocItem.MonHocID,
 							MaNhomDiem: form.MaNhomCotDiem
@@ -53,6 +53,7 @@ export default {
 	},
 	data() {
 		return {
+			vueData,
 			_,
 			form: {
 				KhoiID: this.khoiid,
@@ -160,6 +161,7 @@ export default {
 					return new Promise(resolve => {
 						ajaxCALL('lms/MonHoc_GetByKhoiID',
 							{
+								NienKhoa: vueData.NienKhoa,
 								KhoiID: KhoiID
 							},
 							res => {
@@ -283,7 +285,7 @@ export default {
 						height: 450,
 						type: 'line',
 						zoom: {
-							enabled: true
+							enabled: false
 						},
 						toolbar: {
 							show: true

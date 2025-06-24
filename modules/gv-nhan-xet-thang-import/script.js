@@ -41,15 +41,17 @@ function convertHocSinh() {
 function convertHocSinhToAPI() {
     vueData.JSON_NhanXetThang = []
     const tableData = vueData.dataSource.map((s) => {
-        const hsl = vueData.dataSource_API.find(h => h.HocSinhID == s[0])
+        const hsl = vueData.dataSource_API.find(h => h.HocSinhID == s.HocSinhID)
+        console.log('vueData.dataSource', vueData.dataSource);
+        console.log('vueData.dataSource_API', vueData.dataSource_API);
         if (hsl.CapID === 1) {
             return {
                 HocSinhID: s[0],
                 SoDanhBo: s[1],
                 HoTen: s[2],
-                DiemToan: s[3] || null,
+                DiemToan: s[3] || 0,
                 NhanXetToan_HTML: s[4] || null,
-                DiemTiengViet: s[5] || null,
+                DiemTiengViet: s[5] || 0,
                 NhanXetTiengViet_HTML: s[6] || null,
                 NhanXetMonHocKhac_HTML: s[7] || null,
                 HoatDongGiaoDucKhac_HTML: s[8] || null,
@@ -60,15 +62,17 @@ function convertHocSinhToAPI() {
             }
         } else {
             return {
-                HocSinhID: s[0],
-                SoDanhBo: s[1],
-                HoTen: s[2],
-                NoiDungKienThuc_HTML: s[3] || null,
-                NoiDungNangLuc_HTML: s[4] || null,
-                NoiDungHoatDongKhac_HTML: s[5] || null,
+                HocSinhID: s.HocSinhID,
+                SoDanhBo: s.SoDanhBo,
+                HoTen: s.HoTen,
+                NoiDungKienThuc_HTML: s.NoiDungKienThuc_HTML || null,
+                NoiDungNangLuc_HTML: s.NoiDungNangLuc_HTML || null,
+                NoiDungHoatDongKhac_HTML: s.NoiDungHoatDongKhac_HTML || null,
                 LopID: vueData.LopID,
                 Lop_NhanXetThangID: vueData.Lop_NhanXetThangID,
-                HSLopID: hsl.HSLopID
+                HSLopID: hsl.HSLopID,
+                DiemToan: 0,
+                DiemTiengViet: 0,
             }
         }
     })

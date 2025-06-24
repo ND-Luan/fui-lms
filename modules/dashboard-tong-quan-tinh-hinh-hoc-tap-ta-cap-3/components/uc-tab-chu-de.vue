@@ -1,17 +1,16 @@
 <template>
 	<v-card class="pa-4" style="background-color: #f9f9f9;">
 		<v-card>
-			<v-card-title class="text-primary">Chọn</v-card-title>
 			<v-card-text>
 				<v-row>
-					<v-col>
+					<v-col cols="6" md="2">
 						<v-select v-model="form.MaNhomCotDiem" label="Chọn nhóm điểm" :items="DSNhomDiem"
 							item-title="TenNhomCotDiem_VI" item-value="MaNhomCotDiem"
 							:loading="isLoadingMaNhomCotDiem"></v-select>
 					</v-col>
-					<v-col>
+					<v-col cols="6" md="2">
 						<v-btn color="primary" variant="tonal" @click="onLoadChart({
-							NienKhoa: 2024,
+							NienKhoa: vueData.NienKhoa,
 							CapID: capid,
 							MonHocID: form.MonHocItem.MonHocID,
 							MaNhomDiem: form.MaNhomCotDiem
@@ -53,6 +52,7 @@ export default {
 	},
 	data() {
 		return {
+			vueData,
 			_,
 			form: {
 				KhoiID: this.khoiid,
@@ -80,19 +80,23 @@ export default {
 					TenNhomCotDiem_VI: "Theme 4",
 					MaNhomCotDiem: "Theme_4"
 				}
-				// ,
-				// {
-				// 	TenNhomCotDiem_VI: "Theme 5",
-				// 	MaNhomCotDiem: "Theme_5"
-				// },
-				// {
-				// 	TenNhomCotDiem_VI: "Theme 6",
-				// 	MaNhomCotDiem: "Theme_6"
-				// },
-				// {
-				// 	TenNhomCotDiem_VI: "Theme 8",
-				// 	MaNhomCotDiem: "Theme_8"
-				// },
+				,
+				{
+					TenNhomCotDiem_VI: "Theme 5",
+					MaNhomCotDiem: "Theme_5"
+				},
+				{
+					TenNhomCotDiem_VI: "Theme 6",
+					MaNhomCotDiem: "Theme_6"
+				},
+				{
+					TenNhomCotDiem_VI: "Theme 7",
+					MaNhomCotDiem: "Theme_7"
+				},
+				{
+					TenNhomCotDiem_VI: "Theme 8",
+					MaNhomCotDiem: "Theme_8"
+				},
 
 			],
 			DSCotDiem: [],
@@ -108,11 +112,13 @@ export default {
 	},
 	methods: {
 		onLoadDSMaNhomCotDiem(KhoiID) {
+			debugger
 			return new Promise(resolve => {
 				const promise = () => {
 					return new Promise(resolve => {
 						ajaxCALL('lms/MonHoc_GetByKhoiID',
 							{
+								NienKhoa: vueData.NienKhoa,
 								KhoiID: KhoiID
 							},
 							res => {
@@ -161,7 +167,7 @@ export default {
 					},
 					res => {
 						const DataChartHistogram_Khoi_API = res.data
-						this.convertChartLineTongDiem_ChuDe_TheoLop(res.data)
+						this.convertChartLineTongDiem_ChuDe_TheoLop(DataChartHistogram_Khoi_API)
 						// this.convertChartLineTongDiem_KyNang_TheoKhoi(DataChartHistogram_Khoi_API)
 
 						// this.convertChartLine_KyNang_TheoKhoi(DataChartHistogram_Khoi_API)
@@ -172,6 +178,7 @@ export default {
 			})
 		},
 		convertChartLineTongDiem_ChuDe_TheoLop(_rawData) {
+
 			this.List_Chart_ChuDe_TheoLop = []
 			const chart = {
 				"id": "chart-line",
@@ -206,10 +213,10 @@ export default {
 				}
 			}
 			const sortData = this.sortTenLop(_rawData)
-			const uniqueLopID = [...new Set(sortData.map(x => parseInt(x.LopID)))]
+			const uniqueLopID = _.uniq(sortData.map(x => (x.LopID)));
 			for (const lopID of uniqueLopID) {
-				const lop = _rawData.find(x => parseInt(x.LopID) === lopID)
-				const rawData = _rawData.filter(x => parseInt(x.LopID) === lopID);
+				const lop = _rawData.find(x => (x.LopID) === lopID)
+				const rawData = _rawData.filter(x => (x.LopID) === lopID);
 
 				const stats = this.processData(rawData, 'TenCotDiem_EN');
 				const classes = Object.keys(stats);

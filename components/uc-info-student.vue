@@ -3,9 +3,9 @@
 		<v-avatar size="80">
 			<v-img :src="urlAvatarHocSinh + item?.HocSinhID" />
 		</v-avatar>
-		<p class="font-weight-medium  ">{{item?.HoTen }}</p>
+		<p class="font-weight-medium  ">{{item.SoDanhBo}} • {{item?.HoTen }}</p>
 		<div class="text-caption  ">
-			{{item?.HocSinhID}} * {{item?.NgaySinh}}
+			{{item?.HocSinhID}} • {{item?.NgaySinh}}
 		</div>
 		<v-chip v-if="item.TenTinhTrang" class="text-body-2" :color="item.MauTinhTrang">{{item.TenTinhTrang}}</v-chip>
 	</div>

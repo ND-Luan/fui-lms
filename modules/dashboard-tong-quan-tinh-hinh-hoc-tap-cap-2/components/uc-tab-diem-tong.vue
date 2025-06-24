@@ -1,6 +1,5 @@
 <template>
 	<v-card>
-		<v-card-title class="text-primary">Chọn</v-card-title>
 		<v-card-text>
 			<v-row>
 				<v-col>
@@ -9,7 +8,7 @@
 				</v-col>
 				<v-col>
 					<v-btn color="primary" variant="tonal" @click="onLoadChart({
-						NienKhoa: 2024,
+						NienKhoa: vueData.NienKhoa,
 						KhoiID: khoiid,
 						LopID: form.LopID,
 						MonHocID: monhocid
@@ -38,6 +37,7 @@ export default {
 	},
 	data() {
 		return {
+			vueData,
 			form: {
 				KhoiID: this.khoiid,
 				LopID: null,
@@ -80,6 +80,7 @@ export default {
 			return new Promise(resolve => {
 				ajaxCALL('lms/Lop_Get_ByKhoiID',
 					{
+						NienKhoa: vueData.NienKhoa,
 						KhoiID: KhoiID
 					},
 					res => {

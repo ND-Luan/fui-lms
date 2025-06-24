@@ -209,7 +209,7 @@ const apiUtil = {
             })
         })
     },
- 
+
 
     // Edubot: (url, params = null) => {
     //     return new Promise((resolve, reject) => {
@@ -280,23 +280,23 @@ const apiUtil = {
         })
     },
 }
-const  CallAPI ={
-    
-     // Các phương thức HTTP cụ thể
+const CallAPI = {
+
+    // Các phương thức HTTP cụ thể
     get(prefix, url, METHOD, params = null) {
-        let urlCall = METHOD!= '' ?`${prefix}${url}_${METHOD}` :`${prefix}${url}`
-        return AJAX( urlCall, params);
+        let urlCall = METHOD != '' ? `${prefix}${url}_${METHOD}` : `${prefix}${url}`
+        return AJAX(urlCall, params);
     },
     post(prefix, url, METHOD, params = null) {
-        let urlCall = METHOD!= ''?`${prefix}${url}_${METHOD}` :`${prefix}${url}`
+        let urlCall = METHOD != '' ? `${prefix}${url}_${METHOD}` : `${prefix}${url}`
         return AJAX(urlCall, params);
     },
     put(prefix, url, METHOD, params = null) {
-        let urlCall = METHOD!= ''?`${prefix}${url}_${METHOD}` :`${prefix}${url}`
+        let urlCall = METHOD != '' ? `${prefix}${url}_${METHOD}` : `${prefix}${url}`
         return AJAX(urlCall, params);
     },
     patch(prefix, url, METHOD, params = null) {
-        let urlCall = METHOD!= ''?`${prefix}${url}_${METHOD}` :`${prefix}${url}`
+        let urlCall = METHOD != '' ? `${prefix}${url}_${METHOD}` : `${prefix}${url}`
         return AJAX(urlCall, params);
     }
 
@@ -552,6 +552,7 @@ const GiaoVien_Service = {
         }
     },
     GiaoVienLop_Ins: async (params) => {
+        //NienKhoa: int
         // KhoiID: Int
         // LopID: Int
         // GiaoVienID: Int
@@ -566,6 +567,7 @@ const GiaoVien_Service = {
         }
     },
     GiaoVienLop_Upd: async (params) => {
+        //NienKhoa: int
         // GVLopID: Int
         // KhoiID: Int
         // LopID: Int

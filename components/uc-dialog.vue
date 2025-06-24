@@ -18,8 +18,8 @@
 				<slot></slot>
 			</v-card-text>
 			<v-card-actions>
-				<v-btn text @click="onClose" prepend-icon="mdi-close" variant="plain">{{ closeText }}</v-btn>
-				<v-btn v-if="isShowDoneBtn" text color="primary" variant="elevated" prepend-icon="mdi-content-save"
+				<!-- <v-btn text @click="onClose" prepend-icon="mdi-close" variant="plain">{{ closeText }}</v-btn> -->
+				<v-btn v-if="isShowDoneBtn" text color="primary" variant="outlined" prepend-icon="mdi-content-save"
 					@click="handleSubmit">
 					{{ doneText }}
 				</v-btn>

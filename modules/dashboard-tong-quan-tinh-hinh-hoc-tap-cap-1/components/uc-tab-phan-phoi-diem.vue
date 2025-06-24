@@ -1,21 +1,20 @@
 <template>
-	<v-card class="pa-4" style="background-color: #f9f9f9;">
+	<v-card class="pa-4" style="
+		background-color: #f9f9f9;
+	    overflow: auto;
+    	height: calc(100dvh - 124px);
+	">
 		<v-card>
-			<v-card-title class="text-primary">Chọn</v-card-title>
-			<v-card-text> 
+			<v-card-text>
 				<v-row>
-					<v-col>
+					<v-col cols="12" md="2">
 						<v-select v-model="form.MaNhomCotDiem" label="Chọn nhóm điểm" :items="DSNhomDiem"
 							item-title="TenNhomCotDiem_VI" item-value="MaNhomCotDiem"
 							:loading="isLoadingMaNhomCotDiem"></v-select>
 					</v-col>
-					<v-col>
-						<v-select v-model="form.MaCotDiem" label="Chọn cột điểm" :items="DSCotDiem"
-							item-title="TenCotDiem_VI" item-value="MaCotDiem" :loading="isLoadingMaCotDiem"></v-select>
-					</v-col>
-					<v-col>
+					<v-col cols="12" md="2">
 						<v-btn color="primary" variant="tonal" @click="onLoadChart({
-							NienKhoa: 2024,
+							NienKhoa: vueData.NienKhoa,
 							KhoiID: form.KhoiID,
 							MonHocID: form.MonHocItem.MonHocID,
 							MaCotDiem: form.MaCotDiem
@@ -53,7 +52,7 @@
 					</v-card-title>
 					<v-card-text>
 						<v-row>
-							<v-col cols="4"
+							<v-col cols="12"
 								v-for="(chart, index) in List_Lop_DataChart_Histogram.filter(x => selectedLopID.indexOf(x.LopID) >= 0)"
 								:key="index">
 								<uc-chart-apex :options="chart" />
@@ -80,6 +79,7 @@ export default {
 	},
 	data() {
 		return {
+			vueData,
 			selectedLopID: [],
 			_,
 			form: {
@@ -215,7 +215,9 @@ export default {
 		}
 	},
 	async mounted() {
-		if (!this.form.KhoiID && !this.form.MonHocItem.MonHocID) return
+		CALL("MonHoc_GetByKhoiID")
+		if (!this.form.KhoiID) return
+		if (!this.form.MonHocItem.MonHocID) return
 		console.log(this.form)
 
 		this.isLoadingMaNhomCotDiem = true
@@ -237,7 +239,7 @@ export default {
 			})
 			.finally(() => this.isLoadingMaCotDiem = false)
 		await this.onLoadChart({
-			NienKhoa: 2024,
+			NienKhoa: vueData.NienKhoa,
 			KhoiID: this.form.KhoiID,
 			MonHocID: this.form.MonHocItem.MonHocID,
 			MaCotDiem: MaCotDiem
@@ -264,7 +266,6 @@ export default {
 		},
 		'form.MaNhomCotDiem': function (MaNhomCotDiem_new) {
 			if (MaNhomCotDiem_new !== null) {
-				console.log('INNNN')
 				localStorage.setItem('MaNhomCotDiem_Mon_C' + vueData.CapID, MaNhomCotDiem_new)
 				this.onLoadDSMaCotDiem(MaNhomCotDiem_new, this.form.MonHocItem.TemplateBangDiemID)
 					.then(() => {
@@ -289,6 +290,7 @@ export default {
 					return new Promise(resolve => {
 						ajaxCALL('lms/MonHoc_GetByKhoiID',
 							{
+								NienKhoa: vueData.NienKhoa,
 								KhoiID: KhoiID
 							},
 							res => {

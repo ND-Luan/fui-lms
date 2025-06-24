@@ -208,7 +208,7 @@ function processBeforePushAPI() {
             let cotDiem_HS = {
                 HocSinhID: val[i].HocSinhID,
                 LopID: vueData.LopItem.LopID,
-                NienKhoa: 2024,
+                NienKhoa: vueData.NienKhoa,
                 CotDiemID: DSCotDiem[j].CotDiemID,
                 KetQuaDanhGia_VI: DSCotDiem[j].GiaTriCotDiem === 'number' ? (giaTriCotDiem === '' || giaTriCotDiem === NaN ? null : parseFloat(giaTriCotDiem)) : giaTriCotDiem,
                 KetQuaDanhGia_EN: DSCotDiem[j].GiaTriCotDiem === 'number' ? (giaTriCotDiem === '' || giaTriCotDiem === NaN ? null : parseFloat(giaTriCotDiem)) : giaTriCotDiem,

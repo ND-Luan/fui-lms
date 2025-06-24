@@ -21,7 +21,7 @@
                 <v-card-actions>
                     <v-spacer></v-spacer>
                     <v-btn text="Đóng" @click="onHandleCloseModal()"></v-btn>
-                    <v-btn color="success" text="Sao chép" @click="onHandleAdd()"></v-btn>
+                    <v-btn color="success" variant="outlined" text="Sao chép" @click="onHandleAdd()"></v-btn>
                 </v-card-actions>
             </v-card>
         </v-dialog>

@@ -1,10 +1,10 @@
 <template>
-	<v-card class="custom-card ma-2" elevation="1" :class="{'card-hover': enableHover}">
+	<v-card size="small" class="custom-card ma-2" elevation="1" :class="{'card-hover': enableHover}">
 		<!-- Card Header -->
 		<div class="card-header">
 			<div class="title-container">
 				<v-icon :color="iconColor" class="title-icon" :icon="icon || 'mdi-text-box'" />
-				<h3 class="title-text">{{ title }}</h3>
+				<h3 class="title-text text-body-2">{{ title }}</h3>
 			</div>
 		</div>
 
@@ -14,7 +14,7 @@
 		<v-card-text class="card-content">
 			<!-- Main Content -->
 			<div class="content-section">
-				<div v-if="content" class="content-text" v-html="content" />
+				<div v-if="content" class="content-text" v-html="formattedText" />
 				<div v-else class="empty-state">
 					<uc-empty />
 				</div>
@@ -36,38 +36,43 @@
 
 <script>
 	export default {
-	    name: 'CustomCard',
+		name: 'CustomCard',
 	
-	    props: {
-	        title: {
-	            type: String,
-	            default: '',
-	        },
-	        content: {
-	            type: String,
-	            default: '',
-	        },
-	        star: {
-	            type: Number,
-	            default: 0,
-	            validator: (value) => value >= 0 && value <= 5,
-	        },
-	        icon: {
-	            type: String,
-	            default: '',
-	        },
-	        iconColor: {
-	            type: String,
-	            default: 'primary',
-	        },
-	        starColor: {
-	            type: String,
-	            default: '#FFD700', // Màu vàng đẹp hơn cho sao
-	        },
-	        enableHover: {
-	            type: Boolean,
-	            default: true,
-	        },
-	    },
+		props: {
+			title: {
+				type: String,
+				default: '',
+			},
+			content: {
+				type: String,
+				default: '',
+			},
+			star: {
+				type: Number,
+				default: 0,
+				validator: (value) => value >= 0 && value <= 5,
+			},
+			icon: {
+				type: String,
+				default: '',
+			},
+			iconColor: {
+				type: String,
+				default: '#ffffff',
+			},
+			starColor: {
+				type: String,
+				default: '#FFD700', // Màu vàng đẹp hơn cho sao
+			},
+			enableHover: {
+				type: Boolean,
+				default: true,
+			},
+		},
+		computed: {
+			formattedText() {
+				return this.content.replace(/\n/g, '<br>');
+			}
+		}
 	}
 </script>

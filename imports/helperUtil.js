@@ -115,6 +115,13 @@ const Toast = {
             position: 'top',
             duration: 3000
         })
+    },
+    warning: ({ type = 'warning', title = null, text = '', icon = 'mdi-alert-circle-outline' }) => {
+        Vue.$toast.open({
+            message: domMessage(type, title, text, icon),
+            position: 'top',
+            duration: 3000
+        })
     }
 }
 
@@ -244,22 +251,52 @@ function calculateColumnWidth(text) {
     return text.length * charWidth;
 }
 
-function getColumnAddress(columns, columnName) {
+function getColumnAddress(columns, columnName, numberCols) {
+    let char = 68
+    if (numberCols === 4) char = 69
+    console.log('numberCols', numberCols);
     const columnMap = {};
     columns.forEach((column, index) => {
-        const columnAddress = String.fromCharCode(69 + index); // 67 là mã ASCII của 'C'
+        const columnAddress = String.fromCharCode(char + index); // 67 là mã ASCII của 'C'
         columnMap[column.name] = columnAddress;
     });
     return columnMap[columnName] || columnName; // Trả về địa chỉ cột nếu có, nếu không giữ nguyên tên cột
 }
-function replaceFormula(columns, formula, indexRow) {
+function replaceFormula(columns, formula, indexRow, numberCols) {
     // Thay IIF thành IF trước (hoặc sau đều được)
     formula = formula.replace(/\bIIF\b/g, 'IF');
 
     return formula.replace(/\b\w+_\w+\b/g, (match) => {
         try {
             // Lấy địa chỉ cột từ tên cột
-            const columnAddress = getColumnAddress(columns, match);
+            const columnAddress = getColumnAddress(columns, match, numberCols);
+            // Trả về địa chỉ cột + số dòng
+            return `${columnAddress}${indexRow}`;
+        } catch (error) {
+            // Nếu có lỗi, trả về nguyên mẫu (match) mà không thay thế
+            console.error(`Error processing column ${match}:`, error);
+            return match;  // Trả về tên cột nếu có lỗi
+        }
+    });
+}
+
+function getColumnAddressTH(columns, columnName) {
+    let char = 68
+    const columnMap = {};
+    columns.forEach((column, index) => {
+        const columnAddress = String.fromCharCode(char + index); // 67 là mã ASCII của 'C'
+        columnMap[column.name] = columnAddress;
+    });
+    return columnMap[columnName] || columnName; // Trả về địa chỉ cột nếu có, nếu không giữ nguyên tên cột
+}
+function replaceFormulaTH(columns, formula, indexRow) {
+    // Thay IIF thành IF trước (hoặc sau đều được)
+    formula = formula.replace(/\bIIF\b/g, 'IF');
+
+    return formula.replace(/\b\w+_\w+\b/g, (match) => {
+        try {
+            // Lấy địa chỉ cột từ tên cột
+            const columnAddress = getColumnAddressTH(columns, match);
             // Trả về địa chỉ cột + số dòng
             return `${columnAddress}${indexRow}`;
         } catch (error) {
@@ -314,10 +351,14 @@ function calculateKDE(data, xValues) {
     const variance = points.reduce((sum, x) => sum + Math.pow(x - mean, 2), 0) / (n - 1);
     const std = Math.sqrt(variance);
     // 3. Bandwidth theo Scott's rule
-    const bandwidth = 1.06 * std * Math.pow(n, -1 / 5); // Scott
+    //const bandwidth = 1.06 * std * Math.pow(n, -1 / 5); // Scott
     //const bandwidth = 0.3 * std * Math.pow(n, -1 / 3); //giai thuat ban đầu Silverman
+    //const bandwidth = 0.8 * std;  //Anh Tâm thử để cho kde mượt hơn , ban đầu dùng Scott
+    const bandwidth = Math.max(1.2 * std, 0.5);
     // Hàm Gaussian kernel
     const gaussianKernel = (u) => (1 / Math.sqrt(2 * Math.PI)) * Math.exp(-0.5 * u * u);
+    //const epanechnikovKernel = (u) => Math.abs(u) <= 1 ? 0.75 * (1 - u * u) : 0;
+
     // 5. Tính mật độ KDE cho từng điểm x trong xValues
     const kdeData = xValues.map(x => {
         let density = 0;
@@ -338,7 +379,7 @@ function linspace(start, end, steps) {
     const step = (end - start) / (steps - 1);
     for (let i = 0; i < steps; i++) { result.push(start + step * i); } return result;
 }
-function createHistogramDataWithFixedBins(data) {
+function createHistogramDataWithFixedBins_OLD(data) {
     const points = data.map(item => item.Diem);
     const min = Math.min(...points);
     const max = Math.max(...points);
@@ -381,6 +422,50 @@ function createHistogramDataWithFixedBins(data) {
     // console.log(bin_x);
     return { histogramData, fixedBins: bins, bin_x_data: bins };
 }
+
+function createHistogramDataWithFixedBins(data) {
+    const points = data.map(item => item.Diem);
+
+    const min = 0;
+    const max = 10;
+    const binWidth = 0.5;
+
+    // Tạo bins cố định: [0, 0.5, 1.0, ..., 10.0]
+    const bins = [];
+    for (let i = min; i <= max; i += binWidth) {
+        bins.push(parseFloat(i.toFixed(2)));
+    }
+
+    const numBins = bins.length - 1;
+    const counts = Array(numBins).fill(0);
+
+    for (const value of points) {
+        for (let i = 0; i < numBins; i++) {
+            if (value >= bins[i] && value < bins[i + 1]) {
+                counts[i]++;
+                break;
+            }
+        }
+        // Trường hợp đặc biệt nếu value = 10 thì cho vào bin cuối cùng
+        if (value === max) {
+            counts[numBins - 1]++;
+        }
+    }
+
+    const density = counts.map(count => count / (points.length * binWidth));
+
+    const histogramData = bins.slice(0, -1).map((binStart, index) => ({
+        x: binStart,
+        binStart: binStart.toFixed(2),
+        binEnd: bins[index + 1],
+        y: counts[index],
+        midPoint: (binStart + bins[index + 1]) / 2,
+        label: `${binStart.toFixed(2)}–${bins[index + 1].toFixed(2)}`
+    }));
+
+    return { histogramData, fixedBins: bins, bin_x_data: bins };
+}
+
 function calculateBoxplotStats(arr) {
     const sortedData = [...arr].sort((a, b) => a - b);
     const n = sortedData.length;
@@ -452,6 +537,7 @@ function calculateStandardDeviation(scores) {
     return Number(Math.sqrt(variance).toFixed(2));
 }
 function sortTenLop(data) {
+
     const rawData = _.cloneDeep(data)
     return rawData.sort((a, b) => {
         const parseTenLop = (lop) => {
@@ -494,4 +580,24 @@ function calculateLinearRegression(xData, yData) {
             y: slope * x + intercept
         }))
     };
+}
+
+
+function renderText(capid) {
+
+    return "Cấp " + capid
+}
+
+function getTitlePageByURL(url) {
+    let text = ""
+    let parentMenu = $projectData.menuLeft
+    for (let i = 0; i < parentMenu.length; i++) {
+        let childMenu = parentMenu[i].submenu
+        let objFindMenu = childMenu.find(item => item.url.includes(url))
+        if (objFindMenu) {
+            text = objFindMenu.name
+            break
+        }
+    }
+    return text
 }

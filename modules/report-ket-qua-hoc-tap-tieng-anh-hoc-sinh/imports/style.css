@@ -9,7 +9,10 @@
 .fs-13{
     font-size: 13px;
 }
-
+.v-chip-custom{
+    border: 2px  solid !important;
+    flex: 0 0 auto;
+}
 /* CSS giao diện cấp 1 */
 /* Begin */
     .container-body{
@@ -26,3 +29,9 @@
     }
 
 /* End */
+
+.apexcharts-xaxis-label {
+    font-size: 13px;
+    font-weight: 600;
+    fill: black
+}

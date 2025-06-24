@@ -4,43 +4,30 @@
             <div>
                 Thêm mới
                 <v-chip v-if="KhoiID" class="ml-1" color="primary">{{ renderTextKhoi(KhoiID) }}</v-chip>
-                <v-chip v-if="LopID && NewItem.VaiTro !== 2 && NewItem.VaiTro !== 1" class="ml-1" color="primary"> {{ renderTextLop(LopID) }}</v-chip>
+                <v-chip v-if="LopID && NewItem.VaiTro !== 2 && NewItem.VaiTro !== 1" class="ml-1" color="primary"> {{
+                    renderTextLop(LopID) }}</v-chip>
             </div>
         </template>
 
         <v-form ref="NewItem">
             <v-row>
                 <v-col cols="12">
-                    <v-select v-model="NewItem.MaDonVi" label="Chọn đơn vị" :items="DSDonVi" item-title="TenDonVi" item-value="MaDonVi" outlined dense hide-details></v-select>
+                    <v-select v-model="NewItem.MaDonVi" label="Chọn đơn vị" :items="DSDonVi" item-title="TenDonVi"
+                        item-value="MaDonVi" outlined dense hide-details></v-select>
                 </v-col>
                 <v-col cols="12">
-                    <v-select v-model="NewItem.VaiTro" label="Chọn vai trò" :items="DSVaiTro" item-title="TenVaiTro" item-value="VaiTro" outlined dense hide-details></v-select>
+                    <v-select v-model="NewItem.VaiTro" label="Chọn vai trò" :items="DSVaiTro" item-title="TenVaiTro"
+                        item-value="VaiTro" outlined dense hide-details></v-select>
                 </v-col>
                 <v-col :cols="NewItem.VaiTro !== 2 && NewItem.VaiTro !== 1 ? 6 : 12">
-                    <v-autocomplete
-                        v-model="NewItem.GiaoVienID"
-                        label="Chọn giáo viên"
-                        :items="DSGiaoVien"
-                        :item-title="renderTextGiangVien"
-                        item-value="GiaoVienID"
-                        outlined
-                        dense
-                        hide-details="auto"
-                        :rules="[(v) => !!v || 'Bạn chưa chọn giáo viên']"
-                    ></v-autocomplete>
+                    <v-autocomplete v-model="NewItem.GiaoVienID" label="Chọn giáo viên" :items="DSGiaoVien"
+                        :item-title="renderTextGiangVien" item-value="GiaoVienID" outlined dense hide-details="auto"
+                        :rules="[(v) => !!v || 'Bạn chưa chọn giáo viên']"></v-autocomplete>
                 </v-col>
                 <v-col cols="6" v-if="NewItem.VaiTro !== 2 && NewItem.VaiTro !== 1">
-                    <v-select
-                        v-model="NewItem.MonHocID"
-                        label="Chọn môn học"
-                        :items="DSMonHoc"
-                        item-title="MonHocName"
-                        item-value="MonHocID"
-                        outlined
-                        dense
-                        hide-details="auto"
-                        :rules="[(v) => !!v || 'Bạn chưa chọn môn học']"
-                    >
+                    <v-select v-model="NewItem.MonHocID" label="Chọn môn học" :items="DSMonHoc" item-title="MonHocName"
+                        item-value="MonHocID" outlined dense hide-details="auto"
+                        :rules="[(v) => !!v || 'Bạn chưa chọn môn học']">
                     </v-select>
                 </v-col>
             </v-row>
@@ -53,6 +40,7 @@ export default {
     props: ['modelValue', 'dskhoi', 'dslop', 'KhoiID', 'LopID', 'dsvaitro', 'dsgiaovien', 'dsmonhoc', 'onSubmitDialog', 'dsdonvi'],
     data() {
         return {
+            vueData,
             VaiTro: null,
             NewItem: {
                 KhoiID: null,
@@ -101,6 +89,7 @@ export default {
             console.log('form.validate()', form.validate())
             if (form.validate()) {
                 const param = {
+                    NienKhoa: vueData.NienKhoa,
                     KhoiID: this.KhoiID,
                     LopID: lopID,
                     GiaoVienID: this.NewItem.GiaoVienID,

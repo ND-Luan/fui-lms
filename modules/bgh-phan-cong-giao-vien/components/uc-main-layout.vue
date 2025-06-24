@@ -5,13 +5,16 @@
             <v-card-text>
                 <v-row>
                     <v-col cols="1">
-                        <v-select v-model="CapID" label="Chọn cấp" :items="DSCap" :item-title="'TenCap'" item-value="MaCap" outlined dense hide-details></v-select>
+                        <v-select v-model="CapID" label="Chọn cấp" :items="DSCap" :item-title="'TenCap'"
+                            item-value="MaCap" outlined dense hide-details></v-select>
                     </v-col>
                     <v-col cols="1">
-                        <v-select v-model="KhoiID" label="Chọn khối" :items="DSKhoi" :item-title="'TenKhoi'" item-value="KhoiID" outlined dense hide-details></v-select>
+                        <v-select v-model="KhoiID" label="Chọn khối" :items="DSKhoi" :item-title="'TenKhoi'"
+                            item-value="KhoiID" outlined dense hide-details></v-select>
                     </v-col>
                     <v-col cols="1">
-                        <v-select v-model="LopID" label="Chọn lớp" :items="DSLop" item-title="TenLop" item-value="LopID" outlined dense hide-details></v-select>
+                        <v-select v-model="LopID" label="Chọn lớp" :items="DSLop" item-title="TenLop" item-value="LopID"
+                            outlined dense hide-details></v-select>
                     </v-col>
                     <!-- <v-col cols="1">
 						<v-btn @click="onSearch" color="primary">Tìm kiếm</v-btn>
@@ -29,13 +32,15 @@
                 <v-spacer></v-spacer>
                 <v-spacer></v-spacer>
                 <!-- :style="{width: WIDTH_TEXT_FIELD_SEARCH + 'px'}" -->
-                <v-text-field v-model="Search" label="Tìm kiếm" prepend-inner-icon="mdi-magnify" single-line dense hide-details></v-text-field>
+                <v-text-field v-model="Search" label="Tìm kiếm" prepend-inner-icon="mdi-magnify" single-line dense
+                    hide-details></v-text-field>
                 <v-btn class="ml-4" @click="actions.IsNewDialog = true" icon outlined color="primary">
                     <v-icon> mdi-plus</v-icon>
                 </v-btn>
             </v-card-title>
 
-            <v-data-table :items="filterDS" :headers="columns" item-key="GVLopID" :footer-props="{ itemsPerPageOptions: [] }" hide-default-footer :search="Search">
+            <v-data-table :items="filterDS" :headers="columns" item-key="GVLopID"
+                :footer-props="{ itemsPerPageOptions: [] }" hide-default-footer :search="Search">
                 <template v-slot:item.VaiTro="{ item }">
                     <span class="text-black-">
                         <!-- :color="renderGiaoVien(item)" -->
@@ -50,31 +55,12 @@
             </v-data-table>
         </v-card>
 
-        <uc-new-model
-            v-model="actions"
-            :dskhoi="DSKhoi"
-            :dslop="DSLop"
-            :KhoiID="KhoiID"
-            :LopID="LopID"
-            :dsvaitro="DSVaiTro"
-            :dsgiaovien="DSGiaoVien"
-            :dsmonhoc="DSMonHoc"
-            :dsdonvi="DSDonVi"
-            @onSubmitDialog="getGiaoVienLop_Get_ByLopID"
-        />
-        <uc-edit-model
-            v-model="actions"
-            :EditData="EditData"
-            :dskhoi="DSKhoi"
-            :dslop="DSLop"
-            :KhoiID="KhoiID"
-            :LopID="LopID"
-            :dsvaitro="DSVaiTro"
-            :dsgiaovien="DSGiaoVien"
-            :dsmonhoc="DSMonHoc"
-            :dsdonvi="DSDonVi"
-            @onSubmitDialog="getGiaoVienLop_Get_ByLopID"
-        />
+        <uc-new-model v-model="actions" :dskhoi="DSKhoi" :dslop="DSLop" :KhoiID="KhoiID" :LopID="LopID"
+            :dsvaitro="DSVaiTro" :dsgiaovien="DSGiaoVien" :dsmonhoc="DSMonHoc" :dsdonvi="DSDonVi"
+            @onSubmitDialog="getGiaoVienLop_Get_ByLopID" />
+        <uc-edit-model v-model="actions" :EditData="EditData" :dskhoi="DSKhoi" :dslop="DSLop" :KhoiID="KhoiID"
+            :LopID="LopID" :dsvaitro="DSVaiTro" :dsgiaovien="DSGiaoVien" :dsmonhoc="DSMonHoc" :dsdonvi="DSDonVi"
+            @onSubmitDialog="getGiaoVienLop_Get_ByLopID" />
     </div>
 </template>
 
@@ -176,6 +162,7 @@ export default {
             DSPhanCongGiaoVien: [],
             Search: '',
             IsAuth: true,
+            vueData
         }
     },
     mounted() {
@@ -204,7 +191,7 @@ export default {
             let khoiData
             switch (val) {
                 case 1:
-                    ;(khoiData = [
+                    ; (khoiData = [
                         { TenKhoi: 'Khối 1', KhoiID: '1' },
                         { TenKhoi: 'Khối 2', KhoiID: '2' },
                         { TenKhoi: 'Khối 3', KhoiID: '3' },
@@ -214,7 +201,7 @@ export default {
                         ($this.DSKhoi = khoiData)
                     break
                 case 2:
-                    ;(khoiData = [
+                    ; (khoiData = [
                         { TenKhoi: 'Khối 6', KhoiID: '6' },
                         { TenKhoi: 'Khối 7', KhoiID: '7' },
                         { TenKhoi: 'Khối 8', KhoiID: '8' },
@@ -223,7 +210,7 @@ export default {
                         ($this.DSKhoi = khoiData)
                     break
                 case 3:
-                    ;(khoiData = [
+                    ; (khoiData = [
                         { TenKhoi: 'Khối 10', KhoiID: '10' },
                         { TenKhoi: 'Khối 11', KhoiID: '11' },
                         { TenKhoi: 'Khối 12', KhoiID: '12' },
@@ -231,7 +218,7 @@ export default {
                         ($this.DSKhoi = khoiData)
                     break
                 default:
-                    ;(khoiData = [
+                    ; (khoiData = [
                         { TenKhoi: 'Khối 1', KhoiID: '1' },
                         { TenKhoi: 'Khối 2', KhoiID: '2' },
                         { TenKhoi: 'Khối 3', KhoiID: '3' },
@@ -260,7 +247,7 @@ export default {
                 const param = {
                     KhoiID: this.KhoiID,
                     //NIENKHOA.CURRENT
-                    NienKhoa: currentYear,
+                    NienKhoa: vueData.NienKhoa || currentYear,
                 }
 
                 const res = await NhapDiem_Service.Lop_Get_ByKhoiID(param)

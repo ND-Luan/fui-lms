@@ -60,7 +60,7 @@
 					{
 						title: "Nội dung đánh giá",
 						value: "TenMonHoc_HienThi",
-						minWidth: 400,
+						minWidth: 200,
 						left: true,
 						fixed: true
 					}

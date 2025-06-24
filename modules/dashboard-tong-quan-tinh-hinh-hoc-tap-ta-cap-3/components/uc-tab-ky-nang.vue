@@ -1,19 +1,16 @@
 <template>
 	<v-card class="pa-4" style="background-color: #f9f9f9;">
 		<v-card>
-			<v-card-title class="text-primary">Chọn</v-card-title>
 			<v-card-text>
 				<v-row>
-					<v-col>
+					<v-col cols="8" md="3">
 						<v-select v-model="form.MaNhomCotDiem" label="Chọn nhóm điểm" :items="DSNhomDiem"
 							item-title="TenNhomCotDiem_VI" item-value="MaNhomCotDiem"
-							multiple
-							chips
 							:loading="isLoadingMaNhomCotDiem"></v-select>
 					</v-col>
-					<v-col>
+					<v-col cols="4" md="2">
 						<v-btn color="primary" variant="tonal" @click="onLoadChart({
-							NienKhoa: 2024,
+							NienKhoa: vueData.NienKhoa,
 							CapID: capid,
 							MonHocID: form.MonHocItem.MonHocID,
 							MaNhomDiem: form.MaNhomCotDiem
@@ -75,6 +72,7 @@ export default {
 	},
 	data() {
 		return {
+			vueData,
 			_,
 			form: {
 				KhoiID: this.khoiid,
@@ -174,46 +172,35 @@ export default {
 	methods: {
 		onLoadDSMaNhomCotDiem(KhoiID) {
 			return new Promise(resolve => {
-				const promise = () => {
-					return new Promise(resolve => {
-						ajaxCALL('lms/MonHoc_GetByKhoiID',
-							{
-								KhoiID: KhoiID
-							},
-							res => {
-								const monHocTiengAnh = res.data.find(x => x.MonHocID === this.form.MonHocItem.MonHocID)
-								this.form.MonHocItem = monHocTiengAnh
-								resolve()
-							}
-						)
-					})
-				}
-				promise().then(() => {
-					ajaxCALL('lms/NhomCauTrucDiem_Get_ByTemplateBangDiemID',
-						{
-							TemplateBangDiemID: this.form.MonHocItem.TemplateBangDiemID
-						},
-						res => {
-							this.DSNhomDiem = [
-								{
-									"MaNhomCotDiem": "S1_Mid",
-									"TenNhomCotDiem_VI": "Điểm giữa kì HK1",
-									"TenNhomCotDiem_EN": "Mid_term Points (Semester 1)",
-									"ThuTuNhom": 5,
-									"Semester": "HK1"
-								},
-								{
-									"MaNhomCotDiem": "S1_Final",
-									"TenNhomCotDiem_VI": "Điểm cuối HK1",
-									"TenNhomCotDiem_EN": "Final_term Points (Semester 1)",
-									"ThuTuNhom": 6,
-									"Semester": "HK1"
+				ajaxCALL('lms/MonHoc_GetByKhoiID',
+					{
+						NienKhoa: vueData.NienKhoa,
+						KhoiID: KhoiID
+					},
+					res => {
+						const monHocTiengAnh = res.data.find(x => x.MonHocID === this.monhocid);
+						this.form.MonHocItem = monHocTiengAnh;
+						console.log(this.form.MonHocItem);
+
+						// Sau khi lấy MonHoc xong, mới gọi ajax thứ 2
+						ajaxCALL('lms/NhomCauTrucDiem_Get_ByTemplateBangDiemID',
+							{ TemplateBangDiemID: this.form.MonHocItem.TemplateBangDiemID },
+							res2 => {
+								this.DSNhomDiem = res2.data.filter(x => {
+									const ten = (x.TenNhomCotDiem_VI ?? "").toLowerCase();
+									const isValid = !ten.includes('ielts') && !ten.includes('ta2') && (ten.includes('giữa hk') || ten.includes('cuối hk'));
+									return isValid;
 								}
-							]//res.data
-							resolve()
-						})
-				})
-			})
+
+
+
+								);
+								resolve(); // Resolve sau khi ajax thứ 2 thành công
+							}
+						);
+					}
+				);
+			});
 		},
 		onLoadDSMaCotDiem(MaNhomCotDiem, TemplateBangDiemID) {
 			return new Promise(resolve => {
@@ -236,7 +223,7 @@ export default {
 						NienKhoa,
 						CapID,
 						MonHocID,
-						MaNhomDiem: MaNhomDiem.join(','),
+						MaNhomDiem: MaNhomDiem,
 						Is_KyNang: true
 					},
 					res => {
@@ -252,52 +239,97 @@ export default {
 			})
 		},
 		convertChartLineTongDiem_KyNang_TheoKhoi(rawData) {
-			const stats_GK = this.processData(rawData.filter(x=> x.MaNhomCotDiem === 'S1_Mid'), 'TenLop');
-			const classes_GK = Object.keys(stats_GK);
+			const stats_GK1 = this.processData(rawData.filter(x => x.MaNhomCotDiem === 'S1_Mid'), 'TenLop');
+			const classes_GK1 = Object.keys(stats_GK1);
 
-			const stats_CK = this.processData(rawData.filter(x=> x.MaNhomCotDiem === 'S1_Final'), 'TenLop');
-			const classes_CK = Object.keys(stats_CK);
-			
+
+			const stats_CK1 = this.processData(rawData.filter(x => x.MaNhomCotDiem === 'S1_Final'), 'TenLop');
+			const classes_CK1 = Object.keys(stats_CK1);
+
+			const stats_GK2 = this.processData(rawData.filter(x => x.MaNhomCotDiem === 'S2_Mid'), 'TenLop');
+			const classes_GK2 = Object.keys(stats_GK2);
+
+			const stats_CK2 = this.processData(rawData.filter(x => x.MaNhomCotDiem === 'S2_Final'), 'TenLop');
+			const classes_CK2 = Object.keys(stats_CK2);
 			const stats = this.processData(rawData, 'TenLop');
+
 			const classes = Object.keys(stats);
 			// Chuẩn bị dữ liệu cho biểu đồ
 			let seriesData = []
-			if(Object.keys(stats_GK).length > 0){
+			if (Object.keys(stats_GK1).length > 0) {
 				seriesData.push({
 					name: 'Trung bình (Mean) - GK1',
 					type: 'line',
-					data: classes_GK.map(lop => stats_GK[lop].mean)
+					data: classes_GK1.map(lop => stats_GK1[lop].mean)
 				})
 				seriesData.push({
 					name: 'Trung vị (Median) - GK1',
 					type: 'line',
-					data: classes_GK.map(lop => stats_GK[lop].median)
+					data: classes_GK1.map(lop => stats_GK1[lop].median)
 				})
 				seriesData.push({
 					name: 'Độ lệch chuẩn (Std Dev) - GK1',
 					type: 'line',
-					data: classes_GK.map(lop => stats_GK[lop].standardDeviation)
+					data: classes_GK1.map(lop => stats_GK1[lop].standardDeviation)
 				})
 			}
 
-			if(Object.keys(stats_CK).length> 0){
+			if (Object.keys(stats_CK1).length > 0) {
 				seriesData.push({
 					name: 'Trung bình (Mean) - CK1',
 					type: 'line',
-					data: classes_CK.map(lop => stats_CK[lop].mean)
+					data: classes_CK1.map(lop => stats_CK1[lop].mean)
 				})
 				seriesData.push({
 					name: 'Trung vị (Median) - CK1',
 					type: 'line',
-					data: classes_CK.map(lop => stats_CK[lop].median)
+					data: classes_CK1.map(lop => stats_CK1[lop].median)
 				})
 				seriesData.push({
 					name: 'Độ lệch chuẩn (Std Dev) - CK1',
 					type: 'line',
-					data: classes_CK.map(lop => stats_CK[lop].standardDeviation)
+					data: classes_CK1.map(lop => stats_CK1[lop].standardDeviation)
 				})
 			}
-			 
+
+			if (Object.keys(stats_GK2).length > 0) {
+				seriesData.push({
+					name: 'Trung bình (Mean) - GK2',
+					type: 'line',
+					data: classes_GK2.map(lop => stats_GK2[lop].mean)
+				})
+				seriesData.push({
+					name: 'Trung vị (Median) - GK2',
+					type: 'line',
+					data: classes_GK2.map(lop => stats_GK2[lop].median)
+				})
+				seriesData.push({
+					name: 'Độ lệch chuẩn (Std Dev) - GK2',
+					type: 'line',
+					data: classes_GK2.map(lop => stats_GK2[lop].standardDeviation)
+				})
+			}
+
+
+
+			if (Object.keys(stats_CK2).length > 0) {
+				seriesData.push({
+					name: 'Trung bình (Mean) - CK2',
+					type: 'line',
+					data: classes_CK2.map(lop => stats_CK2[lop].mean)
+				})
+				seriesData.push({
+					name: 'Trung vị (Median) - CK2',
+					type: 'line',
+					data: classes_CK2.map(lop => stats_CK2[lop].median)
+				})
+				seriesData.push({
+					name: 'Độ lệch chuẩn (Std Dev) - CK2',
+					type: 'line',
+					data: classes_CK2.map(lop => stats_CK2[lop].standardDeviation)
+				})
+			}
+
 			this.Chart_TongDiem_KyNang_TheoKhoi = {
 				...this.Chart_TongDiem_KyNang_TheoKhoi,
 				series: seriesData,
@@ -305,10 +337,10 @@ export default {
 					height: 450,
 					type: 'line',
 					zoom: {
-						enabled: true
+						enabled: false
 					},
 					toolbar: {
-						show: true
+						show: false
 					}
 				},
 				dataLabels: {
@@ -357,7 +389,7 @@ export default {
 					intersect: false,
 					y: {
 						formatter: function (value) {
-							return value ? value.toFixed(2): 0;
+							return value ? value.toFixed(2) : 0;
 						}
 					}
 				}
@@ -421,49 +453,95 @@ export default {
 				// 	}
 				// ];
 
-				const stats_GK = this.processData(_rawData.filter(x=> x.MaNhomCotDiem === 'S1_Mid' && x.KhoiID === this.form.KhoiID), 'TenCotDiem_EN');
-				const classes_GK = Object.keys(stats_GK);
+				const stats_GK1 = this.processData(_rawData.filter(x => x.MaNhomCotDiem === 'S1_Mid' && x.KhoiID == khoiID), 'TenCotDiem_EN');
+				const classes_GK1 = Object.keys(stats_GK1);
 
-				const stats_CK = this.processData(_rawData.filter(x=> x.MaNhomCotDiem === 'S1_Final' && x.KhoiID === this.form.KhoiID), 'TenCotDiem_EN');
-				const classes_CK = Object.keys(stats_CK);
-			
+
+				const stats_CK1 = this.processData(_rawData.filter(x => x.MaNhomCotDiem === 'S1_Final' && x.KhoiID == khoiID), 'TenCotDiem_EN');
+				const classes_CK1 = Object.keys(stats_CK1);
+
+				const stats_GK2 = this.processData(_rawData.filter(x => x.MaNhomCotDiem === 'S2_Mid' && x.KhoiID == khoiID), 'TenCotDiem_EN');
+				const classes_GK2 = Object.keys(stats_GK2);
+
+				const stats_CK2 = this.processData(_rawData.filter(x => x.MaNhomCotDiem === 'S2_Final' && x.KhoiID == khoiID), 'TenCotDiem_EN');
+				const classes_CK2 = Object.keys(stats_CK2);
 				const stats = this.processData(_rawData, 'TenCotDiem_EN');
-				const classes = Object.keys(stats);
 
+				const classes = Object.keys(stats);
+				// Chuẩn bị dữ liệu cho biểu đồ
 				let seriesData = []
-				if(Object.keys(stats_GK).length > 0){
+				if (Object.keys(stats_GK1).length > 0) {
 					seriesData.push({
 						name: 'Trung bình (Mean) - GK1',
 						type: 'line',
-						data: classes_GK.map(lop => stats_GK[lop].mean)
+						data: classes_GK1.map(lop => stats_GK1[lop].mean)
 					})
 					seriesData.push({
 						name: 'Trung vị (Median) - GK1',
 						type: 'line',
-						data: classes_GK.map(lop => stats_GK[lop].median)
+						data: classes_GK1.map(lop => stats_GK1[lop].median)
 					})
 					seriesData.push({
 						name: 'Độ lệch chuẩn (Std Dev) - GK1',
 						type: 'line',
-						data: classes_GK.map(lop => stats_GK[lop].standardDeviation)
+						data: classes_GK1.map(lop => stats_GK1[lop].standardDeviation)
 					})
+
 				}
 
-				if(Object.keys(stats_CK).length> 0){
+				if (Object.keys(stats_CK1).length > 0) {
 					seriesData.push({
 						name: 'Trung bình (Mean) - CK1',
 						type: 'line',
-						data: classes_CK.map(lop => stats_CK[lop].mean)
+						data: classes_CK1.map(lop => stats_CK1[lop].mean)
 					})
 					seriesData.push({
 						name: 'Trung vị (Median) - CK1',
 						type: 'line',
-						data: classes_CK.map(lop => stats_CK[lop].median)
+						data: classes_CK1.map(lop => stats_CK1[lop].median)
 					})
 					seriesData.push({
 						name: 'Độ lệch chuẩn (Std Dev) - CK1',
 						type: 'line',
-						data: classes_CK.map(lop => stats_CK[lop].standardDeviation)
+						data: classes_CK1.map(lop => stats_CK1[lop].standardDeviation)
+					})
+				}
+
+				if (Object.keys(stats_GK2).length > 0) {
+					seriesData.push({
+						name: 'Trung bình (Mean) - GK2',
+						type: 'line',
+						data: classes_GK2.map(lop => stats_GK2[lop].mean)
+					})
+					seriesData.push({
+						name: 'Trung vị (Median) - GK2',
+						type: 'line',
+						data: classes_GK2.map(lop => stats_GK2[lop].median)
+					})
+					seriesData.push({
+						name: 'Độ lệch chuẩn (Std Dev) - GK2',
+						type: 'line',
+						data: classes_GK2.map(lop => stats_GK2[lop].standardDeviation)
+					})
+				}
+
+
+
+				if (Object.keys(stats_CK2).length > 0) {
+					seriesData.push({
+						name: 'Trung bình (Mean) - CK2',
+						type: 'line',
+						data: classes_CK2.map(lop => stats_CK2[lop].mean)
+					})
+					seriesData.push({
+						name: 'Trung vị (Median) - CK2',
+						type: 'line',
+						data: classes_CK2.map(lop => stats_CK2[lop].median)
+					})
+					seriesData.push({
+						name: 'Độ lệch chuẩn (Std Dev) - CK2',
+						type: 'line',
+						data: classes_CK2.map(lop => stats_CK2[lop].standardDeviation)
 					})
 				}
 				this.List_Chart_KyNang_TheoKhoi.push({
@@ -474,10 +552,10 @@ export default {
 						height: 450,
 						type: 'line',
 						zoom: {
-							enabled: true
+							enabled: false
 						},
 						toolbar: {
-							show: true
+							show: false
 						}
 					},
 					dataLabels: {
@@ -551,6 +629,9 @@ export default {
 					"type": "line",
 					"zoom": {
 						"enabled": false
+					},
+					toolbar: {
+						show: false
 					}
 				},
 				"grid": {
@@ -585,217 +666,423 @@ export default {
 			const sortDataWriting = this.sortTenLop(dataWriting)
 			const sortDataSpeaking = this.sortTenLop(dataSpeaking)
 
-			const stats_Listening_GK = this.processData(sortDataListening.filter(x=> x.MaNhomCotDiem === 'S1_Mid'), 'TenLop');
-			const stats_Language_GK = this.processData(sortDataLanguage.filter(x=> x.MaNhomCotDiem === 'S1_Mid'), 'TenLop');
-			const stats_Reading_GK = this.processData(sortDataReading.filter(x=> x.MaNhomCotDiem === 'S1_Mid'), 'TenLop');
-			const stats_Writing_GK = this.processData(sortDataWriting.filter(x=> x.MaNhomCotDiem === 'S1_Mid'), 'TenLop');
-			const stats_Speaking_GK = this.processData(sortDataSpeaking.filter(x=> x.MaNhomCotDiem === 'S1_Mid'), 'TenLop');
+			const stats_Listening_GK1 = this.processData(sortDataListening.filter(x => x.MaNhomCotDiem === 'S1_Mid'), 'TenLop');
+			const stats_Language_GK1 = this.processData(sortDataLanguage.filter(x => x.MaNhomCotDiem === 'S1_Mid'), 'TenLop');
+			const stats_Reading_GK1 = this.processData(sortDataReading.filter(x => x.MaNhomCotDiem === 'S1_Mid'), 'TenLop');
+			const stats_Writing_GK1 = this.processData(sortDataWriting.filter(x => x.MaNhomCotDiem === 'S1_Mid'), 'TenLop');
+			const stats_Speaking_GK1 = this.processData(sortDataSpeaking.filter(x => x.MaNhomCotDiem === 'S1_Mid'), 'TenLop');
 
-			const stats_Listening_CK = this.processData(sortDataListening.filter(x=> x.MaNhomCotDiem === 'S1_Final'), 'TenLop');
-			const stats_Language_CK = this.processData(sortDataLanguage.filter(x=> x.MaNhomCotDiem === 'S1_Final'), 'TenLop');
-			const stats_Reading_CK = this.processData(sortDataReading.filter(x=> x.MaNhomCotDiem === 'S1_Final'), 'TenLop');
-			const stats_Writing_CK = this.processData(sortDataWriting.filter(x=> x.MaNhomCotDiem === 'S1_Final'), 'TenLop');
-			const stats_Speaking_CK = this.processData(sortDataSpeaking.filter(x=> x.MaNhomCotDiem === 'S1_Final'), 'TenLop');
+			const stats_Listening_CK1 = this.processData(sortDataListening.filter(x => x.MaNhomCotDiem === 'S1_Final'), 'TenLop');
+			const stats_Language_CK1 = this.processData(sortDataLanguage.filter(x => x.MaNhomCotDiem === 'S1_Final'), 'TenLop');
+			const stats_Reading_CK1 = this.processData(sortDataReading.filter(x => x.MaNhomCotDiem === 'S1_Final'), 'TenLop');
+			const stats_Writing_CK1 = this.processData(sortDataWriting.filter(x => x.MaNhomCotDiem === 'S1_Final'), 'TenLop');
+			const stats_Speaking_CK1 = this.processData(sortDataSpeaking.filter(x => x.MaNhomCotDiem === 'S1_Final'), 'TenLop');
 
-			const classes_Listening_GK = Object.keys(stats_Listening_GK); 
-			const classes_Language_GK = Object.keys(stats_Language_GK); 
-			const classes_Reading_GK = Object.keys(stats_Reading_GK); 
-			const classes_Writing_GK = Object.keys(stats_Writing_GK); 
-			const classes_Speaking_GK = Object.keys(stats_Speaking_GK); 
+			const stats_Listening_GK2 = this.processData(sortDataListening.filter(x => x.MaNhomCotDiem === 'S2_Mid'), 'TenLop');
+			const stats_Language_GK2 = this.processData(sortDataLanguage.filter(x => x.MaNhomCotDiem === 'S2_Mid'), 'TenLop');
+			const stats_Reading_GK2 = this.processData(sortDataReading.filter(x => x.MaNhomCotDiem === 'S2_Mid'), 'TenLop');
+			const stats_Writing_GK2 = this.processData(sortDataWriting.filter(x => x.MaNhomCotDiem === 'S2_Mid'), 'TenLop');
+			const stats_Speaking_GK2 = this.processData(sortDataSpeaking.filter(x => x.MaNhomCotDiem === 'S2_Mid'), 'TenLop');
 
-			const classes_Listening_CK = Object.keys(stats_Listening_CK); 
-			const classes_Language_CK = Object.keys(stats_Language_CK); 
-			const classes_Reading_CK = Object.keys(stats_Reading_CK); 
-			const classes_Writing_CK = Object.keys(stats_Writing_CK); 
-			const classes_Speaking_CK = Object.keys(stats_Speaking_CK); 
+			const stats_Listening_CK2 = this.processData(sortDataListening.filter(x => x.MaNhomCotDiem === 'S2_Final'), 'TenLop');
+			const stats_Language_CK2 = this.processData(sortDataLanguage.filter(x => x.MaNhomCotDiem === 'S2_Final'), 'TenLop');
+			const stats_Reading_CK2 = this.processData(sortDataReading.filter(x => x.MaNhomCotDiem === 'S2_Final'), 'TenLop');
+			const stats_Writing_CK2 = this.processData(sortDataWriting.filter(x => x.MaNhomCotDiem === 'S2_Final'), 'TenLop');
+			const stats_Speaking_CK2 = this.processData(sortDataSpeaking.filter(x => x.MaNhomCotDiem === 'S2_Final'), 'TenLop');
+
+			const classes_Listening_GK1 = Object.keys(stats_Listening_GK1);
+			const classes_Language_GK1 = Object.keys(stats_Language_GK1);
+			const classes_Reading_GK1 = Object.keys(stats_Reading_GK1);
+			const classes_Writing_GK1 = Object.keys(stats_Writing_GK1);
+			const classes_Speaking_GK1 = Object.keys(stats_Speaking_GK1);
+
+			const classes_Listening_CK1 = Object.keys(stats_Listening_CK1);
+			const classes_Language_CK1 = Object.keys(stats_Language_CK1);
+			const classes_Reading_CK1 = Object.keys(stats_Reading_CK1);
+			const classes_Writing_CK1 = Object.keys(stats_Writing_CK1);
+			const classes_Speaking_CK1 = Object.keys(stats_Speaking_CK1);
+
+			const classes_Listening_GK2 = Object.keys(stats_Listening_GK2);
+			const classes_Language_GK2 = Object.keys(stats_Language_GK2);
+			const classes_Reading_GK2 = Object.keys(stats_Reading_GK2);
+			const classes_Writing_GK2 = Object.keys(stats_Writing_GK2);
+			const classes_Speaking_GK2 = Object.keys(stats_Speaking_GK2);
+
+			const classes_Listening_CK2 = Object.keys(stats_Listening_CK2);
+			const classes_Language_CK2 = Object.keys(stats_Language_CK2);
+			const classes_Reading_CK2 = Object.keys(stats_Reading_CK2);
+			const classes_Writing_CK2 = Object.keys(stats_Writing_CK2);
+			const classes_Speaking_CK2 = Object.keys(stats_Speaking_CK2);
 
 			const stats = this.processData(_rawData, 'TenLop')
 			const classes = Object.keys(stats); //Lấy 1 stats là đủ lớp
-			
+
 			let seriesData_Listening = []
 			let seriesData_Language = []
 			let seriesData_Reading = []
 			let seriesData_Writing = []
 			let seriesData_Speaking = []
-
+			console.log('stats_Speaking_GK1', stats_Speaking_GK1)
 			//Listening
-			if(Object.keys(stats_Listening_GK).length > 0){
+			if (Object.keys(stats_Listening_GK1).length > 0) {
 				seriesData_Listening.push({
 					name: 'Trung bình (Mean) - GK1',
 					type: 'line',
-					data: classes_Listening_GK.map(lop => stats_Listening_GK[lop].mean)
+					data: classes_Listening_GK1.map(lop => stats_Listening_GK1[lop].mean)
 				})
 				seriesData_Listening.push({
 					name: 'Trung vị (Median) - GK1',
 					type: 'line',
-					data: classes_Listening_GK.map(lop => stats_Listening_GK[lop].median)
-				},)
+					data: classes_Listening_GK1.map(lop => stats_Listening_GK1[lop].median)
+				})
 				seriesData_Listening.push({
 					name: 'Độ lệch chuẩn (Std Dev) - GK1',
 					type: 'line',
-					data: classes_Listening_GK.map(lop => stats_Listening_GK[lop].standardDeviation)
+					data: classes_Listening_GK1.map(lop => stats_Listening_GK1[lop].standardDeviation)
 				})
 			}
-			if(Object.keys(stats_Listening_CK).length > 0){
+			if (Object.keys(stats_Listening_CK1).length > 0) {
 				seriesData_Listening.push({
 					name: 'Trung bình (Mean) - CK1',
 					type: 'line',
-					data: classes_Listening_CK.map(lop => stats_Listening_CK[lop].mean)
+					data: classes_Listening_CK1.map(lop => stats_Listening_CK1[lop].mean)
 				})
 				seriesData_Listening.push({
 					name: 'Trung vị (Median) - CK1',
 					type: 'line',
-					data: classes_Listening_CK.map(lop => stats_Listening_CK[lop].median)
+					data: classes_Listening_CK1.map(lop => stats_Listening_CK1[lop].median)
 				})
 				seriesData_Listening.push({
 					name: 'Độ lệch chuẩn (Std Dev) - CK1',
 					type: 'line',
-					data: classes_Listening_CK.map(lop => stats_Listening_CK[lop].standardDeviation)
+					data: classes_Listening_CK1.map(lop => stats_Listening_CK1[lop].standardDeviation)
 				})
 			}
 			//Language
-			if(Object.keys(classes_Language_GK).length > 0){
+			if (Object.keys(classes_Language_GK1).length > 0) {
 				seriesData_Language.push({
 					name: 'Trung bình (Mean) - GK1',
 					type: 'line',
-					data: classes_Language_GK.map(lop => stats_Language_GK[lop].mean)
+					data: classes_Language_GK1.map(lop => stats_Language_GK1[lop].mean)
 				})
 				seriesData_Language.push({
 					name: 'Trung vị (Median) - GK1',
 					type: 'line',
-					data: classes_Language_GK.map(lop => stats_Language_GK[lop].median)
+					data: classes_Language_GK1.map(lop => stats_Language_GK1[lop].median)
 				})
 				seriesData_Language.push({
 					name: 'Độ lệch chuẩn (Std Dev) - GK1',
 					type: 'line',
-					data: classes_Language_GK.map(lop => stats_Language_GK[lop].standardDeviation)
+					data: classes_Language_GK1.map(lop => stats_Language_GK1[lop].standardDeviation)
 				})
 			}
-			if(Object.keys(classes_Language_CK).length > 0){
+			if (Object.keys(classes_Language_CK1).length > 0) {
 				seriesData_Language.push({
 					name: 'Trung bình (Mean) - CK1',
 					type: 'line',
-					data: classes_Language_CK.map(lop => stats_Language_CK[lop].mean)
+					data: classes_Language_CK1.map(lop => stats_Language_CK1[lop].mean)
 				})
 				seriesData_Language.push({
 					name: 'Trung vị (Median) - CK1',
 					type: 'line',
-					data: classes_Language_CK.map(lop => stats_Language_CK[lop].median)
+					data: classes_Language_CK1.map(lop => stats_Language_CK1[lop].median)
 				})
 				seriesData_Language.push({
 					name: 'Độ lệch chuẩn (Std Dev) - CK1',
 					type: 'line',
-					data: classes_Language_CK.map(lop => stats_Language_CK[lop].standardDeviation)
+					data: classes_Language_CK1.map(lop => stats_Language_CK1[lop].standardDeviation)
 				})
 			}
 			//Reading
-			if(Object.keys(classes_Reading_GK).length > 0) {
+			if (Object.keys(classes_Reading_GK1).length > 0) {
 				seriesData_Reading.push(
 					{
-					name: 'Trung bình (Mean) - GK1',
-					type: 'line',
-					data: classes_Reading_GK.map(lop => stats_Reading_GK[lop].mean)
-				})
+						name: 'Trung bình (Mean) - GK1',
+						type: 'line',
+						data: classes_Reading_GK1.map(lop => stats_Reading_GK1[lop].mean)
+					})
 				seriesData_Reading.push({
 					name: 'Trung vị (Median) - GK1',
 					type: 'line',
-					data: classes_Reading_GK.map(lop => stats_Reading_GK[lop].median)
+					data: classes_Reading_GK1.map(lop => stats_Reading_GK1[lop].median)
 				})
 				seriesData_Reading.push({
 					name: 'Độ lệch chuẩn (Std Dev) - GK1',
 					type: 'line',
-					data: classes_Reading_GK.map(lop => stats_Reading_GK[lop].standardDeviation)
+					data: classes_Reading_GK1.map(lop => stats_Reading_GK1[lop].standardDeviation)
 				})
 			}
-			if(Object.keys(classes_Reading_CK).length > 0){
+			if (Object.keys(classes_Reading_CK1).length > 0) {
 				seriesData_Reading.push(
 					{
-					name: 'Trung bình (Mean) - CK1',
-					type: 'line',
-					data: classes_Reading_CK.map(lop => stats_Reading_CK[lop].mean)
-				})
+						name: 'Trung bình (Mean) - CK1',
+						type: 'line',
+						data: classes_Reading_CK1.map(lop => stats_Reading_CK1[lop].mean)
+					})
 				seriesData_Reading.push({
 					name: 'Trung vị (Median) - CK1',
 					type: 'line',
-					data: classes_Reading_CK.map(lop => stats_Reading_CK[lop].median)
+					data: classes_Reading_CK1.map(lop => stats_Reading_CK1[lop].median)
 				})
 				seriesData_Reading.push({
 					name: 'Độ lệch chuẩn (Std Dev) - CK1',
 					type: 'line',
-					data: classes_Reading_CK.map(lop => stats_Reading_CK[lop].standardDeviation)
+					data: classes_Reading_CK1.map(lop => stats_Reading_CK1[lop].standardDeviation)
 				})
 			}
 			//Writing
-			if(Object.keys(classes_Writing_GK).length > 0){
+			if (Object.keys(classes_Writing_GK1).length > 0) {
 				seriesData_Writing.push({
 					name: 'Trung bình (Mean) - GK1',
 					type: 'line',
-					data: classes_Writing_GK.map(lop => stats_Writing_GK[lop].mean)
+					data: classes_Writing_GK1.map(lop => stats_Writing_GK1[lop].mean)
 				})
 				seriesData_Writing.push({
 					name: 'Trung vị (Median) - GK1',
 					type: 'line',
-					data: classes_Writing_GK.map(lop => stats_Writing_GK[lop].median)
+					data: classes_Writing_GK1.map(lop => stats_Writing_GK1[lop].median)
 				})
 				seriesData_Writing.push({
 					name: 'Độ lệch chuẩn (Std Dev) - GK1',
 					type: 'line',
-					data: classes_Writing_GK.map(lop => stats_Writing_GK[lop].standardDeviation)
+					data: classes_Writing_GK1.map(lop => stats_Writing_GK1[lop].standardDeviation)
 				})
 			}
-			if(Object.keys(classes_Writing_CK).length > 0){
+			if (Object.keys(classes_Writing_CK1).length > 0) {
 				seriesData_Writing.push({
 					name: 'Trung bình (Mean) - CK1',
 					type: 'line',
-					data: classes_Writing_CK.map(lop => stats_Writing_CK[lop].mean)
+					data: classes_Writing_CK1.map(lop => stats_Writing_CK1[lop].mean)
 				})
 				seriesData_Writing.push({
 					name: 'Trung vị (Median) - CK1',
 					type: 'line',
-					data: classes_Writing_CK.map(lop => stats_Writing_CK[lop].median)
+					data: classes_Writing_CK1.map(lop => stats_Writing_CK1[lop].median)
 				})
 				seriesData_Writing.push({
 					name: 'Độ lệch chuẩn (Std Dev) - CK1',
 					type: 'line',
-					data: classes_Writing_CK.map(lop => stats_Writing_CK[lop].standardDeviation)
-				})
-			}
-			//Speaking
-			if(Object.keys(classes_Speaking_GK).length > 0){
-				seriesData_Speaking.push({
-					name: 'Trung bình (Mean) - GK1',
-					type: 'line',
-					data: classes_Speaking_GK.map(lop => stats_Speaking_GK[lop].mean)
-				})
-				seriesData_Speaking.push({
-					name: 'Trung vị (Median) - GK1',
-					type: 'line',
-					data: classes_Speaking_GK.map(lop => stats_Speaking_GK[lop].median)
-				})
-				seriesData_Speaking.push({
-					name: 'Độ lệch chuẩn (Std Dev) - GK1',
-					type: 'line',
-					data: classes_Speaking_GK.map(lop => stats_Speaking_GK[lop].standardDeviation)
-				})
-			}
-			if(Object.keys(classes_Speaking_CK).length > 0){
-				seriesData_Speaking.push({
-					name: 'Trung bình (Mean) - CK1',
-					type: 'line',
-					data: classes_Speaking_CK.map(lop => stats_Speaking_CK[lop].mean)
-				})
-				seriesData_Speaking.push({
-					name: 'Trung vị (Median) - CK1',
-					type: 'line',
-					data: classes_Speaking_CK.map(lop => stats_Speaking_CK[lop].median)
-				})
-				seriesData_Speaking.push({
-					name: 'Độ lệch chuẩn (Std Dev) - CK1',
-					type: 'line',
-					data: classes_Speaking_CK.map(lop => stats_Speaking_CK[lop].standardDeviation)
+					data: classes_Writing_CK1.map(lop => stats_Writing_CK1[lop].standardDeviation)
 				})
 			}
 
+			//Speaking
+			if (Object.keys(classes_Speaking_GK1).length > 0) {
+				seriesData_Speaking.push({
+					name: 'Trung bình (Mean) - GK1',
+					type: 'line',
+					data: classes_Speaking_GK1.map(lop => stats_Speaking_GK1[lop].mean)
+				})
+				seriesData_Speaking.push({
+					name: 'Trung vị (Median) - GK1',
+					type: 'line',
+					data: classes_Speaking_GK1.map(lop => stats_Speaking_GK1[lop].median)
+				})
+				seriesData_Speaking.push({
+					name: 'Độ lệch chuẩn (Std Dev) - GK1',
+					type: 'line',
+					data: classes_Speaking_GK1.map(lop => stats_Speaking_GK1[lop].standardDeviation)
+				})
+			}
+			if (Object.keys(classes_Speaking_CK1).length > 0) {
+				seriesData_Speaking.push({
+					name: 'Trung bình (Mean) - CK1',
+					type: 'line',
+					data: classes_Speaking_CK1.map(lop => stats_Speaking_CK1[lop].mean)
+				})
+				seriesData_Speaking.push({
+					name: 'Trung vị (Median) - CK1',
+					type: 'line',
+					data: classes_Speaking_CK1.map(lop => stats_Speaking_CK1[lop].median)
+				})
+				seriesData_Speaking.push({
+					name: 'Độ lệch chuẩn (Std Dev) - CK1',
+					type: 'line',
+					data: classes_Speaking_CK1.map(lop => stats_Speaking_CK1[lop].standardDeviation)
+				})
+			}
+
+
+			//HocKy2
+
+			//Listening
+			if (Object.keys(stats_Listening_GK2).length > 0) {
+				seriesData_Listening.push({
+					name: 'Trung bình (Mean) - GK2',
+					type: 'line',
+					data: classes_Listening_GK2.map(lop => stats_Listening_GK2[lop].mean)
+				})
+				seriesData_Listening.push({
+					name: 'Trung vị (Median) - GK2',
+					type: 'line',
+					data: classes_Listening_GK2.map(lop => stats_Listening_GK2[lop].median)
+				})
+				seriesData_Listening.push({
+					name: 'Độ lệch chuẩn (Std Dev) - GK2',
+					type: 'line',
+					data: classes_Listening_GK2.map(lop => stats_Listening_GK2[lop].standardDeviation)
+				})
+			}
+			if (Object.keys(stats_Listening_CK2).length > 0) {
+				seriesData_Listening.push({
+					name: 'Trung bình (Mean) - CK2',
+					type: 'line',
+					data: classes_Listening_CK2.map(lop => stats_Listening_CK2[lop].mean)
+				})
+				seriesData_Listening.push({
+					name: 'Trung vị (Median) - CK2',
+					type: 'line',
+					data: classes_Listening_CK2.map(lop => stats_Listening_CK2[lop].median)
+				})
+				seriesData_Listening.push({
+					name: 'Độ lệch chuẩn (Std Dev) - CK2',
+					type: 'line',
+					data: classes_Listening_CK2.map(lop => stats_Listening_CK2[lop].standardDeviation)
+				})
+			}
+			//Language
+			if (Object.keys(classes_Language_GK2).length > 0) {
+				seriesData_Language.push({
+					name: 'Trung bình (Mean) - GK2',
+					type: 'line',
+					data: classes_Language_GK2.map(lop => stats_Language_GK2[lop].mean)
+				})
+				seriesData_Language.push({
+					name: 'Trung vị (Median) - GK2',
+					type: 'line',
+					data: classes_Language_GK2.map(lop => stats_Language_GK2[lop].median)
+				})
+				seriesData_Language.push({
+					name: 'Độ lệch chuẩn (Std Dev) - GK2',
+					type: 'line',
+					data: classes_Language_GK2.map(lop => stats_Language_GK2[lop].standardDeviation)
+				})
+			}
+			if (Object.keys(classes_Language_CK2).length > 0) {
+				seriesData_Language.push({
+					name: 'Trung bình (Mean) - CK2',
+					type: 'line',
+					data: classes_Language_CK2.map(lop => stats_Language_CK2[lop].mean)
+				})
+				seriesData_Language.push({
+					name: 'Trung vị (Median) - CK2',
+					type: 'line',
+					data: classes_Language_CK2.map(lop => stats_Language_CK2[lop].median)
+				})
+				seriesData_Language.push({
+					name: 'Độ lệch chuẩn (Std Dev) - CK2',
+					type: 'line',
+					data: classes_Language_CK2.map(lop => stats_Language_CK2[lop].standardDeviation)
+				})
+			}
+			//Reading
+			if (Object.keys(classes_Reading_GK2).length > 0) {
+				seriesData_Reading.push(
+					{
+						name: 'Trung bình (Mean) - GK2',
+						type: 'line',
+						data: classes_Reading_GK2.map(lop => stats_Reading_GK2[lop].mean)
+					})
+				seriesData_Reading.push({
+					name: 'Trung vị (Median) - GK2',
+					type: 'line',
+					data: classes_Reading_GK2.map(lop => stats_Reading_GK2[lop].median)
+				})
+				seriesData_Reading.push({
+					name: 'Độ lệch chuẩn (Std Dev) - GK2',
+					type: 'line',
+					data: classes_Reading_GK2.map(lop => stats_Reading_GK2[lop].standardDeviation)
+				})
+			}
+			if (Object.keys(classes_Reading_CK2).length > 0) {
+				seriesData_Reading.push(
+					{
+						name: 'Trung bình (Mean) - CK2',
+						type: 'line',
+						data: classes_Reading_CK2.map(lop => stats_Reading_CK2[lop].mean)
+					})
+				seriesData_Reading.push({
+					name: 'Trung vị (Median) - CK2',
+					type: 'line',
+					data: classes_Reading_CK2.map(lop => stats_Reading_CK2[lop].median)
+				})
+				seriesData_Reading.push({
+					name: 'Độ lệch chuẩn (Std Dev) - CK2',
+					type: 'line',
+					data: classes_Reading_CK2.map(lop => stats_Reading_CK2[lop].standardDeviation)
+				})
+			}
+			//Writing
+			if (Object.keys(classes_Writing_GK2).length > 0) {
+				seriesData_Writing.push({
+					name: 'Trung bình (Mean) - GK2',
+					type: 'line',
+					data: classes_Writing_GK2.map(lop => stats_Writing_GK2[lop].mean)
+				})
+				seriesData_Writing.push({
+					name: 'Trung vị (Median) - GK2',
+					type: 'line',
+					data: classes_Writing_GK2.map(lop => stats_Writing_GK2[lop].median)
+				})
+				seriesData_Writing.push({
+					name: 'Độ lệch chuẩn (Std Dev) - GK2',
+					type: 'line',
+					data: classes_Writing_GK2.map(lop => stats_Writing_GK2[lop].standardDeviation)
+				})
+			}
+			if (Object.keys(classes_Writing_CK2).length > 0) {
+				seriesData_Writing.push({
+					name: 'Trung bình (Mean) - CK2',
+					type: 'line',
+					data: classes_Writing_CK2.map(lop => stats_Writing_CK2[lop].mean)
+				})
+				seriesData_Writing.push({
+					name: 'Trung vị (Median) - CK2',
+					type: 'line',
+					data: classes_Writing_CK2.map(lop => stats_Writing_CK2[lop].median)
+				})
+				seriesData_Writing.push({
+					name: 'Độ lệch chuẩn (Std Dev) - CK2',
+					type: 'line',
+					data: classes_Writing_CK2.map(lop => stats_Writing_CK2[lop].standardDeviation)
+				})
+			}
+			console.log('classes_Speaking_GK2', typeof stats_Speaking_GK1)
+			//Speaking
+			if (Object.keys(classes_Speaking_GK2).length > 0) {
+				seriesData_Speaking.push({
+					name: 'Trung bình (Mean) - GK2',
+					type: 'line',
+					data: classes_Speaking_GK2.map(lop => stats_Speaking_GK2[lop].mean)
+				})
+				seriesData_Speaking.push({
+					name: 'Trung vị (Median) - GK2',
+					type: 'line',
+					data: classes_Speaking_GK2.map(lop => stats_Speaking_GK2[lop].median)
+				})
+				seriesData_Speaking.push({
+					name: 'Độ lệch chuẩn (Std Dev) - GK2',
+					type: 'line',
+					data: classes_Speaking_GK2.map(lop => stats_Speaking_GK2[lop].standardDeviation)
+				})
+			}
+			if (Object.keys(classes_Speaking_CK2).length > 0) {
+				seriesData_Speaking.push({
+					name: 'Trung bình (Mean) - CK2',
+					type: 'line',
+					data: classes_Speaking_CK2.map(lop => stats_Speaking_CK2[lop].mean)
+				})
+				seriesData_Speaking.push({
+					name: 'Trung vị (Median) - CK2',
+					type: 'line',
+					data: classes_Speaking_CK2.map(lop => stats_Speaking_CK2[lop].median)
+				})
+				seriesData_Speaking.push({
+					name: 'Độ lệch chuẩn (Std Dev) - CK2',
+					type: 'line',
+					data: classes_Speaking_CK2.map(lop => stats_Speaking_CK2[lop].standardDeviation)
+				})
+			}
 
 			// const seriesData_Listening_GK = [
 			// 	{
@@ -974,10 +1261,10 @@ export default {
 					height: 450,
 					type: 'line',
 					zoom: {
-						enabled: true
+						enabled: false
 					},
 					toolbar: {
-						show: true
+						show: false
 					}
 				},
 				dataLabels: {

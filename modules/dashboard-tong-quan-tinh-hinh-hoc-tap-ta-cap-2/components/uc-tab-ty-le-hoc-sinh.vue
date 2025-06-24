@@ -1,6 +1,5 @@
 <template>
 	<v-card>
-		<v-card-title class="text-primary">Chọn</v-card-title>
 		<v-card-text>
 			<v-row>
 				<v-col>
@@ -9,7 +8,7 @@
 				</v-col>
 				<v-col>
 					<v-btn color="primary" variant="tonal" @click="onLoadChart({
-						NienKhoa: 2024,
+						NienKhoa: vueData.NienKhoa,
 						KhoiID: form.KhoiID,
 						LopID: form.LopID,
 					})">Xem biểu đồ</v-btn>
@@ -45,6 +44,7 @@ export default {
 	},
 	data() {
 		return {
+			vueData,
 			_,
 			form: {
 				KhoiID: this.khoiid,
@@ -70,7 +70,7 @@ export default {
 						"show": true
 					},
 					"zoom": {
-						"enabled": true
+						"enabled": false
 					}
 				},
 				"xaxis": {
@@ -117,7 +117,7 @@ export default {
 				.then(() => this.form.LopID = LopID)
 				.finally(() => this.isLoadingLop = false)
 			await this.onLoadChart({
-				NienKhoa: 2024,
+				NienKhoa: vueData.NienKhoa,
 				KhoiID: this.form.KhoiID,
 				LopID: this.form.LopID,
 			})
@@ -164,6 +164,7 @@ export default {
 					return new Promise(resolve => {
 						ajaxCALL('lms/MonHoc_GetByKhoiID',
 							{
+								NienKhoa: vueData.NienKhoa,
 								KhoiID: KhoiID
 							},
 							res => {
@@ -204,6 +205,7 @@ export default {
 			return new Promise(resolve => {
 				ajaxCALL('lms/Lop_Get_ByKhoiID',
 					{
+						NienKhoa: vueData.NienKhoa,
 						KhoiID: KhoiID
 					},
 					res => {

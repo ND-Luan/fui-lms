@@ -14,11 +14,11 @@
 					</v-col>
 					<v-col>
 						<v-btn color="primary" variant="tonal" @click="onLoadChart({
-			  	HocKy: form.HocKy,
-			  	KhoiID: khoiid,
-			  	LopID: form.LopID,
-			  	MonHocID: monhocid
-			  })">
+							HocKy: form.HocKy,
+							KhoiID: khoiid,
+							LopID: form.LopID,
+							MonHocID: monhocid
+						})">
 							Xem biểu đồ
 						</v-btn>
 					</v-col>
@@ -41,143 +41,145 @@
 </template>
 
 <script>
-	export default {
-		props: {
-			capid: {
-				type: Number,
-				required: true
-			},
-			khoiid: {},
-			monhocid: {
-				type: Number,
-				required: true
-			}
+export default {
+	props: {
+		capid: {
+			type: Number,
+			required: true
 		},
-		data() {
-			return {
-				form: {
-					KhoiID: null,
-					LopID: null,
-					HocKy: null,
+		khoiid: {},
+		monhocid: {
+			type: Number,
+			required: true
+		}
+	},
+	data() {
+		return {
+			vueData,
+			form: {
+				KhoiID: null,
+				LopID: null,
+				HocKy: null,
+			},
+			DSHocKy: [
+				{
+					"title": "HK1",
+					"value": "HK1"
 				},
-				DSHocKy: [
-					{
-						"title": "HK1",
-						"value": "HK1"
-					},
-					{
-						"title": "HK2",
-						"value": "HK2"
+				{
+					"title": "HK2",
+					"value": "HK2"
+				}
+			],
+			DSLop: [],
+			DSHocSinh: [],
+			Chart_DiemTrungBinh_Lop: {
+				series: [],
+				chart: {
+					height: 400,
+					type: 'bar',
+				},
+				plotOptions: {
+					bar: {
+						borderRadius: 10,
+						dataLabels: {
+							position: 'top', // top, center, bottom
+						},
 					}
-				],
-				DSLop: [],
-				DSHocSinh: [],
-				Chart_DiemTrungBinh_Lop: {
-					series: [],
-					chart: {
-						height: 400,
-						type: 'bar',
-					},
-					plotOptions: {
-						bar: {
-							borderRadius: 10,
-							dataLabels: {
-								position: 'top', // top, center, bottom
-							},
+				},
+				dataLabels: {
+					enabled: false,
+				},
+				xaxis: {
+					categories: [],
+					tooltip: {
+						enabled: true,
+					}
+				},
+				yaxis: {
+					labels: {
+						formatter: function (val) {
+							return val.toFixed(2);
 						}
-					},
-					dataLabels: {
-						enabled: false,
-					},
-					xaxis: {
-						categories: [],
-						tooltip: {
-							enabled: true,
-						}
-					},
-					yaxis: {
-						labels: {
-							formatter: function (val) {
-								return val.toFixed(2);
-							}
-						}
-	
-					},
-					title: {
-						floating: true,
-						offsetY: 330,
-						align: 'center',
-						style: {
-							color: '#444'
-						}
+					}
+
+				},
+				title: {
+					floating: true,
+					offsetY: 330,
+					align: 'center',
+					style: {
+						color: '#444'
 					}
 				}
 			}
+		}
+	},
+	mounted() {
+		this.onLoadDSLop(this.khoiid)
+	},
+	computed: {},
+	watch: {
+		khoiid: function (KhoiID) {
+			this.form.KhoiID = KhoiID
 		},
-		mounted() {
-			this.onLoadDSLop(this.khoiid)
-		},
-		computed: {},
-		watch: {
-			khoiid: function (KhoiID) {
-				this.form.KhoiID = KhoiID
-			},
-			'form.KhoiID': function (KhoiID) {
-				if (KhoiID) {
-					this.onLoadDSLop(KhoiID)
+		'form.KhoiID': function (KhoiID) {
+			if (KhoiID) {
+				this.onLoadDSLop(KhoiID)
 					.then(() => {
 						const isValid = this.DSLop.some(item => item.LopID === this.form.LopID);
 						if (!isValid) {
 							this.form.LopID = null; // Hoặc gán giá trị mặc định
 						}
 					});
-				}
 			}
-		},
-		methods: {
-			onLoadDSLop(KhoiID) {
-				return new Promise(resolve => {
-					ajaxCALL('lms/Lop_Get_ByKhoiID',
-						{
-							KhoiID: KhoiID
-						},
-						res => {
-							this.DSLop = res.data
-							resolve()
-						}
-					)
-				})
-			},
-			onLoadChart({
-				HocKy,
-				KhoiID,
-				LopID,
-				MonHocID
-			}) {
-				return new Promise(resolve => {
-					ajaxCALL('lms/DashboardDiemTrungBinhTheoThemeVaLop_Get',
-						{
-							HocKy,
-							KhoiID,
-							LopID,
-							MonHocID
-						},
-						res => {
-							const DataChart_DiemTrungBinhTheme_Lop_API = res.data
-							this.Chart_DiemTrungBinh_Lop = {
-								...this.Chart_DiemTrungBinh_Lop,
-								series: [{
-									label: "Điểm",
-									data: DataChart_DiemTrungBinhTheme_Lop_API.map(x => parseFloat(x.DiemTrungBinhLop)),
-								}],
-								xaxis: {
-									categories: DataChart_DiemTrungBinhTheme_Lop_API.map(x => x.MaCotDiem)
-								}
-							}
-						})
-				})
-			},
-			calculateLinearRegression
 		}
+	},
+	methods: {
+		onLoadDSLop(KhoiID) {
+			return new Promise(resolve => {
+				ajaxCALL('lms/Lop_Get_ByKhoiID',
+					{
+						NienKhoa: vueData.NienKhoa,
+						KhoiID: KhoiID
+					},
+					res => {
+						this.DSLop = res.data
+						resolve()
+					}
+				)
+			})
+		},
+		onLoadChart({
+			HocKy,
+			KhoiID,
+			LopID,
+			MonHocID
+		}) {
+			return new Promise(resolve => {
+				ajaxCALL('lms/DashboardDiemTrungBinhTheoThemeVaLop_Get',
+					{
+						HocKy,
+						KhoiID,
+						LopID,
+						MonHocID
+					},
+					res => {
+						const DataChart_DiemTrungBinhTheme_Lop_API = res.data
+						this.Chart_DiemTrungBinh_Lop = {
+							...this.Chart_DiemTrungBinh_Lop,
+							series: [{
+								label: "Điểm",
+								data: DataChart_DiemTrungBinhTheme_Lop_API.map(x => parseFloat(x.DiemTrungBinhLop)),
+							}],
+							xaxis: {
+								categories: DataChart_DiemTrungBinhTheme_Lop_API.map(x => x.MaCotDiem)
+							}
+						}
+					})
+			})
+		},
+		calculateLinearRegression
 	}
+}
 </script>

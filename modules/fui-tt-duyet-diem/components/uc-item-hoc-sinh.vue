@@ -394,7 +394,7 @@
 						children: columns.map(col => ({
 							title: col.TenCotDiem_VI,
 							value: col.MaCotDiem,
-							minWidth: col.LoaiCotDiem === 'text' ? 500 : 200,
+							minWidth: col.LoaiCotDiem === 'text' ? 500 : 100,
 							align: 'center'
 						}))
 					}

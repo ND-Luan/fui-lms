@@ -28,3 +28,17 @@ function setActiveComponentKey() {
     else if (bottomNavigation === 2) vueData.keyComponentUcHocKy++
     else if (bottomNavigation === 3) vueData.keyComponentUcTongDiemQuaTrinh++
 }
+function HandleWidth(){
+    if (window.innerWidth < 960) {
+        vueData.isLowScreen = true
+    } else {
+        vueData.isLowScreen = false
+    }
+}
+addEventListener('resize', () => {
+    if (window.innerWidth < 960) {
+        vueData.isLowScreen = true
+    } else {
+        vueData.isLowScreen = false
+    }
+})

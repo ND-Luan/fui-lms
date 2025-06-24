@@ -3,6 +3,7 @@
     background-position: center;
     background-color: rgba(255, 255, 255, 0.3);
     background-blend-mode: lighten; */
+    padding: 0;
 }
 
 ol {
@@ -41,8 +42,13 @@ li::before {
 
 .card-header {
     padding: 16px 20px;
-    background: linear-gradient(to right, rgba(var(--v-theme-primary), 0.05), transparent);
+    background: rgb(55, 138, 88);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    border-radius: 10px 10px 0 0;
 }
+
 
 .title-container {
     display: flex;
@@ -57,9 +63,10 @@ li::before {
 .title-text {
     margin: 0;
     font-size: 1.1rem;
-    font-weight: 600;
-    color: var(--v-theme-primary);
+    font-weight: 500;
+    /* color: var(--v-theme-primary); */
     letter-spacing: 0.3px;
+    color: #ffffff;
 }
 
 .divider {
@@ -68,7 +75,7 @@ li::before {
 
 .card-content {
     display: flex;
-    padding: 20px;
+    padding: 15px;
     min-height: 120px;
     gap: 24px;
 }

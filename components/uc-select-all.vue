@@ -2,18 +2,18 @@
 	<div>
 		<v-card>
 			<div class="d-flex align-center">
-			<!-- Cột trái -->
-			<div >
-				<v-card-title class="text-primary">Chọn {{ Title }}</v-card-title>
+				<!-- Cột trái -->
+				<div>
+					<v-card-title class="text-primary">Chọn {{ Title }}</v-card-title>
 
+				</div>
+
+				<!-- Cột phải -->
+				<div class="ml-auto">
+					<v-btn class="text-primary" @click="clearFilter">Xoá bộ lọc {{ Title }}</v-btn>
+
+				</div>
 			</div>
-
-			<!-- Cột phải -->
-			<div class="ml-auto">
-				<v-btn class="text-primary" @click="clearFilter">Xoá bộ lọc {{ Title }}</v-btn>
-
-			</div>
-		</div>
 			<v-card-text>
 				<v-row>
 					<v-col cols="3" sm="6" md="3" v-if="!HideNienKhoa">
@@ -24,19 +24,16 @@
 					</v-col>
 					<v-col cols="3" sm="6" md="3">
 						<v-select v-model="CapItem" label="Chọn cấp" :items="DSCap" :item-title="'TenCapHoc'"
-							item-value="CapID" outlined dense
-							clearable
-							hide-details></v-select>
+							item-value="CapID" outlined dense clearable hide-details></v-select>
 					</v-col>
 					<v-col cols="3" sm="6" md="3" v-if="!HideKhoi">
 						<v-select :disabled=DisableKhoi v-model="KhoiItem" label="Chọn khối" :items="DSKhoi"
-							:item-title="'TenKhoiHoc'" item-value="KhoiID" outlined dense
-							clearable hide-details></v-select>
+							:item-title="'TenKhoiHoc'" item-value="KhoiID" outlined dense clearable
+							hide-details></v-select>
 					</v-col>
 					<v-col cols="3" sm="6" md="3" v-if="!HideLop">
 						<v-select :disabled=DisableLop v-model="LopItem" label="Chọn lớp" :items="DSLop"
-							item-title="TenLop" item-value="LopID" outlined dense
-							clearable hide-details></v-select>
+							item-title="TenLop" item-value="LopID" outlined dense clearable hide-details></v-select>
 					</v-col>
 
 
@@ -205,7 +202,7 @@ export default {
 		},
 	},
 	methods: {
-        generateSchoolYears() {
+		generateSchoolYears() {
 			const schoolYears = [];
 			for (let i = this.pastYears; i >= -this.futureYears; i--) {
 				const year = this.yearNow - i;
@@ -224,27 +221,27 @@ export default {
 		},
 		async clearFilter() {
 
-			this.CapItem= null,
-			this.KhoiItem= null,
-			this.LopItem= null,
-			this.MonItem= null,
-			this.ToGiangDayItem= null,
-			this.GiaoVienItem= null,
-			this.DSCap= [],
-			this.DSKhoi= [],
-			this.DSLop= [],
-			this.DSMonHoc= [],
-			this.DSGiaoVien= [],
-			this.DSNienKhoa= [],
-			this.DSToGiangDay= [],
-			this.CapID= null,
-			this.KhoiID= null,
-			this.LopID= null,
-			this.MonHocID= null,
-			this.GiaoVienID= null,
-			this.selectedSchoolYear=  new Date().getFullYear(),
+			this.CapItem = null,
+				this.KhoiItem = null,
+				this.LopItem = null,
+				this.MonItem = null,
+				this.ToGiangDayItem = null,
+				this.GiaoVienItem = null,
+				this.DSCap = [],
+				this.DSKhoi = [],
+				this.DSLop = [],
+				this.DSMonHoc = [],
+				this.DSGiaoVien = [],
+				this.DSNienKhoa = [],
+				this.DSToGiangDay = [],
+				this.CapID = null,
+				this.KhoiID = null,
+				this.LopID = null,
+				this.MonHocID = null,
+				this.GiaoVienID = null,
+				this.selectedSchoolYear = new Date().getFullYear(),
 
-			this.resetDataStorage()
+				this.resetDataStorage()
 			this.getCap() //Lấy cấp học
 			this.getGiaoVien() //Lấy GiaoVien
 			this.getToGiangDay()
@@ -271,11 +268,9 @@ export default {
 					CapID: id
 				}
 				const res = await SearchLMSService.GetKhoiHocbyCapHocID(params)
-
 				if (res) {
 					this.DSKhoi = res?.Result
 					sessionStorage.setItem('ListKhoiHoc', JSON.stringify(this.DSKhoi));
-
 					resolve()
 				} else {
 					resolve(null) // Trả về mảng rỗng nếu không có dữ liệu
@@ -320,13 +315,13 @@ export default {
 
 				// Xử lý kết quả trả về
 				if (res) {
-					this.DSGiaoVien = res?.Result!== 'command completed' ? res?.Result: [];
-					
-					this.DSGiaoVien =_.uniqBy(this.DSGiaoVien, 'GiaoVienID');
-					
-					
+					this.DSGiaoVien = res?.Result !== 'command completed' ? res?.Result : [];
 
-					
+					this.DSGiaoVien = _.uniqBy(this.DSGiaoVien, 'GiaoVienID');
+
+
+
+
 					sessionStorage.setItem('ListGiaoVien', JSON.stringify(this.DSGiaoVien));
 					resolve();
 				} else {
@@ -395,7 +390,7 @@ export default {
 		resetDataStorage() {
 			sessionStorage.clear();
 		}
-    }
-		
+	}
+
 }
 </script>

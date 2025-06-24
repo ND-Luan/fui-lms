@@ -445,4 +445,3 @@
 	    },
 	}
 </script>
-</script>

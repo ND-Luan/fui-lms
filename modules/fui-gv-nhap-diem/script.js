@@ -1,10 +1,3 @@
-function renderDSKhoi() {
-    vueData.DSKhoi = Array.from({ length: 12 }, (_, i) => {
-        const khoi = i + 1;
-        const capid = khoi <= 5 ? 1 : khoi <= 9 ? 2 : 3;
-        return { title: `Khối ${khoi}`, value: khoi, CapID: capid };
-    }).filter(x => x.CapID === parseInt(vueData.capid));
-}
 function convertDSHocSinh() {
     let headers = []
     let DSCotDiem_ByMaNhomCotDiem = []
@@ -22,6 +15,7 @@ function convertDSHocSinh() {
     })
     let SLCotDiem_OfFirstSTD = vueData.DSCotDiem.filter((item) => item.HocSinhID === fn_ProrityTinhTrang(vueData.DSHocSinh).HocSinhID) // lấy ra các cột điểm của học sinh đầu tiên
     DSCotDiem_ByMaNhomCotDiem = SLCotDiem_OfFirstSTD
+    console.log('DSCotDiem_ByMaNhomCotDiem', DSCotDiem_ByMaNhomCotDiem)
     //Xử lý động cột điểm header jexcel
     const arrCotDiemWithAlignCenter = [
         'MucDoDanhGia',
@@ -37,7 +31,7 @@ function convertDSHocSinh() {
                     typeValue: x.GiaTriCotDiem,
                     autoWidth: true,
                     decimal: '.',
-                    mask: '0.00',
+                    // mask: '0.0',
                     backGroundColor: x.HexBackground,
                     width: x.WidthCSS,
                     wrapText: true,
@@ -55,6 +49,7 @@ function convertDSHocSinh() {
                     backGroundColor: x.HexBackground,
                     wrap: true,
                     align: arrCotDiemWithAlignCenter.some(item => x.MaCotDiem.includes(item)) ? 'center' : 'left',
+                    readOnly: x.LoaiCotDiem === 'Công thức' ? true : false,
                 }
                 return column
             } else if (x.GiaTriCotDiem === 'ICO_Star') { // cấu hình header cột điểm có dạng ICO_Star
@@ -131,17 +126,6 @@ function convertDSHocSinh() {
             readOnly: true
         })
     }
-    // if (vueData.TinhTrang?.TinhTrang === 3) {
-    //     columnThongTinHocSinh.push({
-    //         type: 'text',
-    //         title: 'Từ chối',
-    //         name: 'ReasonReject',
-    //         width: 300,
-    //         backGroundColor: null,
-    //         wrap: true,
-    //         align: "left",
-    //     })
-    // }
     headers = [...columnThongTinHocSinh, ...columnsCotDiem]
     //Xử lý data jexcel
     const dataJexcel = []
@@ -162,13 +146,21 @@ function convertDSHocSinh() {
                 obj[cotDiemExist.MaCotDiem] = cotDiemExist.GiaTriCotDiem === 'number' ? (
                     (cotDiemExist.KetQuaDanhGia_VI === '' || cotDiemExist.KetQuaDanhGia_VI === null) ? null : parseFloat(cotDiemExist.KetQuaDanhGia_VI)
                 ) : cotDiemExist.KetQuaDanhGia_VI
+                //Set default giá trị nếu cột điểm Mức độ đánhg giá null hoặc rỗng
+                if (cotDiemExist.MaCotDiem.includes('MucDoDanhGia') && cotDiemExist.KQHTID === 0) {
+                    if (obj[cotDiemExist.MaCotDiem] === null || obj[cotDiemExist.MaCotDiem] === '') obj[cotDiemExist.MaCotDiem] = 'T'
+                }
             } else if (cotDiemExist.LoaiCotDiem == 'Công thức' && cotDiemExist.Formula !== null && arrCotDiemExist.length === 1) {
                 //dùng cho formula để hiển thị
                 obj[cotDiemExist.MaCotDiem] = parseFloat(cotDiemExist?.KetQuaDanhGia_VI ?? 0)
             } else if (cotDiemExist.LoaiCotDiem == 'Công thức' && cotDiemExist.GiaTriCotDiem === 'number') {
                 //Công thức // parseFloat(cotDiemExist.KetQuaDanhGia_VI ?? 0) //
-                obj[cotDiemExist.MaCotDiem] = '=' + replaceFormula(columnsCotDiem, cotDiemExist.Formula, indexRow)
-            } else if (cotDiemExist.LoaiCotDiem == 'Công thức' && cotDiemExist.GiaTriCotDiem === 'ICO_Star') {
+                obj[cotDiemExist.MaCotDiem] = '=' + replaceFormula(columnsCotDiem, cotDiemExist.Formula, indexRow, vueData.freezeColumns)
+            } else if (cotDiemExist.LoaiCotDiem == 'Công thức' && cotDiemExist.GiaTriCotDiem === 'text') {
+                //Công thức // parseFloat(cotDiemExist.KetQuaDanhGia_VI ?? 0) //
+                obj[cotDiemExist.MaCotDiem] = '=' + replaceFormula(columnsCotDiem, cotDiemExist.Formula, indexRow, vueData.freezeColumns)
+            }
+            else if (cotDiemExist.LoaiCotDiem == 'Công thức' && cotDiemExist.GiaTriCotDiem === 'ICO_Star') {
                 //Ngôi sao
                 //obj[cotDiemExist.MaCotDiem] = `=RATING(${replaceFormula(columnsCotDiem, cotDiemExist.Formula.replace(/IIF/g, 'IF'), indexRow)})`
                 obj[cotDiemExist.MaCotDiem] = parseFloat(cotDiemExist.KetQuaDanhGia_VI ?? 0)
@@ -210,6 +202,124 @@ function convertDSHocSinh() {
     vueData.DSHocSinh = dataJexcel
     vueData.DSCotDiem_ByMaNhomCotDiem = DSCotDiem_ByMaNhomCotDiem
 }
+// function convertDSHocSinh() {
+//     const ListMonHoc = [5, 46, 76];
+//     const isSpecialMonHoc = ListMonHoc.includes(vueData.MonHocItem.MonHocID);
+//     const arrCotDiemWithAlignCenter = ['MucDoDanhGia'];
+//     const uniqueHocSinhIDs = [...new Set(vueData.DSCotDiem.map(x => x.HocSinhID))];
+//     vueData.DSHocSinh = uniqueHocSinhIDs.map(id => {
+//         const hs = vueData.DSCotDiem.find(y => y.HocSinhID === id);
+//         return {
+//             Ho: hs.Ho,
+//             HocSinhID: hs.HocSinhID,
+//             NgaySinh: hs.NgaySinh,
+//             Nu: hs.Nu,
+//             SoDanhBo: hs.SoDanhBo,
+//             Ten: hs.Ten,
+//             TinhTrang: hs.TinhTrang,
+//         };
+//     });
+//     const firstStudent = fn_ProrityTinhTrang(vueData.DSHocSinh);
+//     const SLCotDiem_OfFirstSTD = vueData.DSCotDiem.filter(item => item.HocSinhID === firstStudent.HocSinhID);
+//     const DSCotDiem_ByMaNhomCotDiem = SLCotDiem_OfFirstSTD;
+//     const columnsCotDiem = SLCotDiem_OfFirstSTD.map(x => {
+//         const baseColumn = {
+//             title: isSpecialMonHoc ? x.TenCotDiem_EN : x.TenCotDiem_VI,
+//             name: x.MaCotDiem,
+//             typeValue: x.GiaTriCotDiem,
+//             backGroundColor: x.HexBackground,
+//             width: x.WidthCSS,
+//             wrap: true,
+//             readOnly: x.LoaiCotDiem === 'Công thức',
+//         };
+//         switch (x.GiaTriCotDiem) {
+//             case 'number':
+//                 return { ...baseColumn, type: 'numeric', decimal: '.' };
+//             case 'text':
+//                 return {
+//                     ...baseColumn,
+//                     type: 'text',
+//                     align: arrCotDiemWithAlignCenter.some(item => x.MaCotDiem.includes(item)) ? 'center' : 'left'
+//                 };
+//             case 'ICO_Star':
+//                 return { ...baseColumn, type: 'html', align: 'center' };
+//             case 'Dropdown_text':
+//                 return { ...baseColumn, type: 'dropdown', align: 'center', source: ['Done', 'Not Yet'] };
+//             default:
+//                 return null;
+//         }
+//     }).filter(Boolean);
+//     vueData.freezeColumns = isSpecialMonHoc ? 4 : 3;
+//     const columnThongTinHocSinh = [
+//         { type: 'text', title: 'Mã học sinh', name: 'HocSinhID', width: 100, wrap: true, readOnly: true },
+//         { type: 'text', title: 'Số Danh Bộ', name: 'SoDanhBo', width: 100, wrap: true, readOnly: true },
+//         { type: 'text', title: 'Họ tên học sinh', name: 'HoVaTenHocSinh', width: 200, wrap: true, readOnly: true, align: 'left' },
+//     ];
+//     if (isSpecialMonHoc) {
+//         columnThongTinHocSinh.push({
+//             type: 'text',
+//             title: 'English Name',
+//             name: 'EnglishName',
+//             width: 100,
+//             wrap: true,
+//             align: 'left',
+//             readOnly: true
+//         });
+//     }
+//     const headers = [...columnThongTinHocSinh, ...columnsCotDiem];
+//     const dataJexcel = vueData.DSHocSinh.map((hocSinh, index) => {
+//         const arrCotDiem = vueData.DSCotDiem.filter(x => x.HocSinhID === hocSinh.HocSinhID);
+//         if (!arrCotDiem.length) return;
+//         const row = {
+//             HocSinhID: hocSinh.HocSinhID,
+//             HoVaTenHocSinh: hocSinh.Ho + ' ' + hocSinh.Ten,
+//             SoDanhBo: hocSinh.SoDanhBo
+//         };
+//         if (isSpecialMonHoc) row.EnglishName = arrCotDiem[0].EnglishName;
+//         arrCotDiem.forEach(cot => {
+//             const val = cot.KetQuaDanhGia_VI;
+//             const ma = cot.MaCotDiem;
+//             if (cot.LoaiCotDiem !== 'Công thức') {
+//                 row[ma] = cot.GiaTriCotDiem === 'number'
+//                     ? (val === '' || val == null ? null : parseFloat(val))
+//                     : val;
+//                 if (ma.includes('MucDoDanhGia') && cot.KQHTID === 0 && !row[ma]) {
+//                     row[ma] = 'T';
+//                 }
+//             } else if (cot.Formula !== null) {
+//                 if (cot.GiaTriCotDiem === 'ICO_Star') {
+//                     row[ma] = parseFloat(val ?? 0);
+//                 } else {
+//                     row[ma] = '=' + replaceFormula(columnsCotDiem, cot.Formula, index + 1, vueData.freezeColumns);
+//                 }
+//             }
+//         });
+//         return row;
+//     }).filter(Boolean);
+//     const dsCotDiem = DSCotDiem_ByMaNhomCotDiem;
+//     vueData.styleSheet = {};
+//     vueData.comments = {};
+//     dataJexcel.forEach((row, i) => {
+//         dsCotDiem.forEach((col, j) => {
+//             const cell = jspreadsheet.helpers.getCellNameFromCoords(j + vueData.freezeColumns, i);
+//             const value = row[col.MaCotDiem];
+//             const style = col.HexBackground ?? null;
+//             if (style) {
+//                 vueData.styleSheet[cell] = `background-color: ${style}`;
+//             }
+//             if (value === null || value === '') {
+//                 vueData.styleSheet[cell] = 'background-color: #ffff0052';
+//             }
+//             if (col.Is_Comment && vueData.DSCotDiem.find(x => x.HocSinhID === row.HocSinhID && x.MaCotDiem === col.MaCotDiem)) {
+//                 vueData.comments[cell] = `Cột điểm do ${col.NhapDiemUser} đã nhập`;
+//             }
+//         });
+//     });
+//     vueData.keyComp++;
+//     vueData.columnHeader = headers;
+//     vueData.DSHocSinh = dataJexcel;
+//     vueData.DSCotDiem_ByMaNhomCotDiem = DSCotDiem_ByMaNhomCotDiem;
+// }
 function validateSave(typeCell, value, min, max) {
     if ((typeCell === 'number' && value < min) || value > max) return 1
     else return 0
@@ -228,16 +338,16 @@ function onLuuDiem() {
                 (x.KQHTID && x.KQHTID > 0) || // Nếu KQHTID tồn tại và lớn hơn 0 thì giữ lại
                 (
                     x.KetQuaDanhGia_VI != null &&
-                    x.KetQuaDanhGia_VI !== ''
-                    //&& !Number.isNaN(x.KetQuaDanhGia_VI)
+                    x.KetQuaDanhGia_VI !== '' &&
+                    !Number.isNaN(x.KetQuaDanhGia_VI)
                 ) // Hoặc KetQuaDanhGia_VI hợp lệ thì giữ lại
             );
-        vueData.dataBeforeInsertToDB = dataFilter
+        vueData.dataBeforeInsertToDB = dataFilter.filter(x => !Number.isNaN(x.KetQuaDanhGia_VI)) //Filter thêm lần nữa khi có Công thức ko có tính được 'Error: #VALUE!'
+        console.log('dataFilter', vueData.dataBeforeInsertToDB)
         // Insert xong cập nhật tình trạng
         CALL("insKQHT_MonHocLop")
         vueData.keyComp++
     }
-    console.log('dataBeforeInsertToDB', vueData.dataBeforeInsertToDB)
 }
 function processBeforePushAPI() {
     vueData.dataBeforeInsertToDB = []
@@ -271,7 +381,7 @@ function processBeforePushAPI() {
             let cotDiem_HS = {
                 HocSinhID: val[i].HocSinhID,
                 LopID: vueData.LopItem.LopID,
-                NienKhoa: 2024,
+                NienKhoa: vueData.NienKhoa,
                 CotDiemID: DSCotDiem[j].CotDiemID,
                 KetQuaDanhGia_VI: giaTriCotDiem,
                 KetQuaDanhGia_EN: giaTriCotDiem,

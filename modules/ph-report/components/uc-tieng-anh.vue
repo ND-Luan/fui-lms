@@ -1,6 +1,6 @@
 <template>
 	<v-divider></v-divider>
-	<div style="min-height: 300px; 	height: calc(100dvh - 248px); display: flex; flex-direction: column;">
+	<div style="min-height: calc(100dvh - 248px);display: flex; flex-direction: column;">
 		<template v-if="IsLoading">
 			<v-skeleton-loader type="heading"></v-skeleton-loader>
 			<v-skeleton-loader type="list-item-two-line" v-for="i in 6" :key="i"></v-skeleton-loader>
@@ -20,6 +20,7 @@
 				</div>
 			</v-responsive>
 		</v-fade-transition>
+		<uc-chartTA2-HocSinh v-if="vueData.HocSinhSelected.CapID == 3"/>
 	</div>
 </template>
 

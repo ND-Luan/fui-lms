@@ -95,7 +95,8 @@
 									@click="EditFormula(i)" color="success">mdi-square-edit-outline</v-icon>
 							</v-col>
 						</v-row>
-						<uc-dialog v-model='i.isEdit' title="Công thức" max-width="500px" @onSubmit="SaveEditFormula(i)" doneText='Cập nhật'>
+						<uc-dialog v-model='i.isEdit' title="Công thức" max-width="500px" @onSubmit="SaveEditFormula(i)"
+							doneText='Cập nhật'>
 							<v-row>
 								<v-col>
 									<v-textarea v-model="formData.Formula"></v-textarea>
@@ -177,233 +178,234 @@
 
 <script>
 	export default {
-		props: {
-			recordMauBangDiem: {
-				type: Object
-			}
-		},
-		data() {
-			return {
-				vueData,
-				search: '',
-				action: {
-					isShowModalAddCauHinhCotDiem: false,
-					isShowModalEditCauHinhCotDiem: false,
-				},
-				isLoadingTB: false,
-				groupBy: [
-					{
-						key: 'TenNhomCotDiem_VI',
-					},
-				],
-				headers: [
-					{
-						title: "Học kì",
-						value: "Semester",
-						minWidth: 100,
-						align: 'center'
-					},
-					{
-						title: 'Thứ tự nhóm CĐ',
-						key: 'ThuTuNhom',
-						align: 'center',
-						sortable: false,
-						minWidth: 150
-					},
-					{
-						title: 'Mã nhóm CĐ ',
-						key: 'MaNhomCotDiem',
-						sortable: false,
-						minWidth: 250
-					},
-					{
-						title: 'Tên nhóm CĐ',
-						key: 'TenNhom',
-						sortable: false,
-						minWidth: 300
-					},
-					{
-						title: 'Hiển thị',
-						key: 'HienThi',
-						align: 'center',
-						sortable: false,
-						minWidth: 100
-					},
-					{
-						title: 'Thứ tự CĐ',
-						key: 'ThuTuCotDiem',
-						align: 'center',
-						sortable: false,
-						minWidth: 80
-					},
-					{
-						title: 'Mã CĐ',
-						key: 'MaCotDiem',
-						minWidth: 120,
-						sortable: false
-					},
-					{
-						title: 'Tên CĐ',
-						key: 'TenCotDiem',
-						sortable: false,
-						minWidth: 500
-					},
-					{
-						title: 'Loại CĐ',
-						key: 'LoaiCotDiem',
-						align: 'center',
-						sortable: false
-					},
-					{
-						title: 'Giá trị CĐ',
-						key: 'GiaTriCotDiem',
-						align: 'center',
-						sortable: false,
-						minWidth: 100
-					},
-					{
-						title: 'ID hệ thống',
-						key: 'IDHeThong',
-						sortable: false,
-						minWidth: 150
+	    props: {
+	        recordMauBangDiem: {
+	            type: Object
+	        }
+	    },
+	    data() {
+	        return {
+	            vueData,
+	            search: '',
+	            action: {
+	                isShowModalAddCauHinhCotDiem: false,
+	                isShowModalEditCauHinhCotDiem: false,
+	            },
+	            isLoadingTB: false,
+	            groupBy: [
+	                {
+	                    key: 'TenNhomCotDiem_VI',
+	                },
+	            ],
+	            headers: [
+	                {
+	                    title: "Học kì",
+	                    value: "Semester",
+	                    minWidth: 100,
+	                    align: 'center'
+	                },
+	                {
+	                    title: 'Thứ tự nhóm CĐ',
+	                    key: 'ThuTuNhom',
+	                    align: 'center',
+	                    sortable: false,
+	                    minWidth: 150
+	                },
+	                {
+	                    title: 'Mã nhóm CĐ ',
+	                    key: 'MaNhomCotDiem',
+	                    sortable: false,
+	                    minWidth: 250,
+	                    fixed: true
+	                },
+	                {
+	                    title: 'Tên nhóm CĐ',
+	                    key: 'TenNhom',
+	                    sortable: false,
+	                    minWidth: 300
+	                },
+	                {
+	                    title: 'Hiển thị',
+	                    key: 'HienThi',
+	                    align: 'center',
+	                    sortable: false,
+	                    minWidth: 100
+	                },
+	                {
+	                    title: 'Thứ tự CĐ',
+	                    key: 'ThuTuCotDiem',
+	                    align: 'center',
+	                    sortable: false,
+	                    minWidth: 80
+	                },
+	                {
+	                    title: 'Mã CĐ',
+	                    key: 'MaCotDiem',
+	                    minWidth: 120,
+	                    sortable: false
+	                },
+	                {
+	                    title: 'Tên CĐ',
+	                    key: 'TenCotDiem',
+	                    sortable: false,
+	                    minWidth: 500
+	                },
+	                {
+	                    title: 'Loại CĐ',
+	                    key: 'LoaiCotDiem',
+	                    align: 'center',
+	                    sortable: false
+	                },
+	                {
+	                    title: 'Giá trị CĐ',
+	                    key: 'GiaTriCotDiem',
+	                    align: 'center',
+	                    sortable: false,
+	                    minWidth: 100
+	                },
+	                {
+	                    title: 'ID hệ thống',
+	                    key: 'IDHeThong',
+	                    sortable: false,
+	                    minWidth: 150
 	
-					},
-					{
-						title: 'Công thức',
-						key: 'Formula',
-						sortable: false,
-						minWidth: 800
-					},
-					{
-						title: '',
-						key: 'Action',
-						align: 'center',
-						sortable: false,
-						minWidth: 50,
-						right: 0,
-						lastFixed: true,
-					},
-				],
-				TBCauHinhCotDiem: [],
-				CotDiemSelected: [],
-				recordNhomCotDiem: {},
-				formData: {
-					Formula: ''
-				},
-			}
-		},
-		mounted() { },
-		computed: {},
-		watch: {
-			'vueData.isShowModalCHCotDiem': function (isShow) {
-				if (isShow) {
-					this.TBCauHinhCotDiem = Object.assign([], [])
-					this.loadDSNhomCotDiem()
-				}
-			},
-			'action.isShowModalEditCauHinhCotDiem': function (isShow) {
-				if (!isShow) this.loadDSNhomCotDiem()
-			},
-		},
-		methods: {
-			async loadDSNhomCotDiem() {
-				this.isLoadingTB = true
-				ajaxCALL('lms/TemplateBangDiemChiTiet_Get_ByID', {
-					TemplateBangDiemID: this.recordMauBangDiem.TemplateBangDiemID
-				}, res => {
-					let groupNhom = [...new Set(res.data.map(x => x.MaNhomCotDiem))]
-					let group = []
-					//Vòng lặp xử lý group các cột điểm có cùng nhóm cột điểm
-					for (let i of groupNhom) {
-						//Tạo obj để render lên table
-						let obj = {}
-						let items = res.data.filter(item => item.MaNhomCotDiem === i) // filter lấy các cột điểm có cùng mã nhóm
-						obj.ThuTuCotDiem = items
-						obj.HienThi = items
-						obj.MaCotDiem = items
-						obj.TenCotDiem = items
-						obj.LoaiCotDiem = items
-						obj.GiaTriCotDiem = items
-						obj.IDHeThong = items
-						obj.Formula = items.map(x => { return { ...x, isEdit: false } })
-						obj.TenNhomCotDiem_VI = items[0]?.TenNhomCotDiem_VI ?? ''
-						obj.TenNhomCotDiem_EN = items[0]?.TenNhomCotDiem_EN ?? ''
-						obj.ThuTuNhom = items[0]?.ThuTuNhom ?? ''
-						obj.MaNhomCotDiem = items[0]?.MaNhomCotDiem ?? ''
-						obj.TemplateBangDiemID = items[0]?.TemplateBangDiemID ?? 0
-						obj.Semester = items[0]?.Semester ?? ''
-						group.push(obj)
-					}
-					this.TBCauHinhCotDiem = group
-					this.isLoadingTB = false
-					console.log('TBCauHinhCotDiem', this.TBCauHinhCotDiem)
-				})
-			},
-			onOpenModalAddCauHinhCotDiem() {
-				this.action.isShowModalAddCauHinhCotDiem = true
-			},
-			onOpenModalEditCauHinhCotDiem(record) {
-				this.recordNhomCotDiem = _.cloneDeep(record)
-				this.action.isShowModalEditCauHinhCotDiem = true
-			},
-			onHandleDeleteCauHinhCotDiem(record) {
-				const $this = this
-				confirm({
-					title: `Bạn có chắc muốn xóa nhóm cột điểm ${record.TenNhomCotDiem_VI}?`,
-					action: async function () {
-						ajaxCALL('lms/TemplateBangDiemChiTiet_Del_By_MaNhomCotDiem', {
-							TemplateBangDiemID: $this.recordMauBangDiem.TemplateBangDiemID,
-							MaNhomCotDiem: record.MaNhomCotDiem
-						}, res => {
-							Vue.$toast.success('Xóa cột điểm thành công!', { position: 'top' })
-							$this.loadDSNhomCotDiem()
-						})
-					}
-				})
-			},
-			EditFormula(item) {
-				this.formData = _.cloneDeep(item)
-				item.isEdit = true
-			},
-			CloseEditFormula(item) {
-				item.isEdit = false
-			},
-			async SaveEditFormula(item) {
-				ajaxCALL('lms/TemplateBangDiemChiTiet_Upd', {
-					...this.formData,
-					Formula: this.formData.Formula,
-				}, res => {
-					Vue.$toast.success(`Cập nhật công thức cho cột điểm ${item.TenCotDiem_VI} thành công`, { position: 'top' })
-					this.loadDSNhomCotDiem()
-					item.isEdit = false
-				})
-			},
-			async onHandleReloadDSCotDiem(value) {
-				await this.loadDSNhomCotDiem()
-				this.recordNhomCotDiem = this.TBCauHinhCotDiem.find(item => item.MaNhomCotDiem === value)
-			},
-			onDeleteCotDiemSelected() {
-				const $this = this
-				const JSON_MaNhomCotDiem = this.CotDiemSelected.map(x => {
-					return {
-						TemplateBangDiemID: this.recordMauBangDiem.TemplateBangDiemID,
-						MaNhomCotDiem: x.MaNhomCotDiem
-					}
-				})
-				confirm({
-					title: "Xóa các mã nhóm điểm đã chọn",
-					action: async function () {
-						ajaxCALL('lms/TemplateBangDiemChiTiet_DSNhomDiem_Del_By_MaNhomDiem', {
-							JSON_MaNhomCotDiem: JSON_MaNhomCotDiem
-						}, res => {
-							Vue.$toast.success('Xóa tất cả các mã nhóm điểm đã chọn thành công', { position: 'top' })
-							$this.loadDSNhomCotDiem()
-						})
-					}
-				})
-			},
-			getColorChipLoaiCotDiem,
-			getColorChipGiaTriCotDiem
-		},
+	                },
+	                {
+	                    title: 'Công thức',
+	                    key: 'Formula',
+	                    sortable: false,
+	                    minWidth: 800
+	                },
+	                {
+	                    title: '',
+	                    key: 'Action',
+	                    align: 'center',
+	                    sortable: false,
+	                    minWidth: 50,
+	                    right: 0,
+	                    lastFixed: true,
+	                },
+	            ],
+	            TBCauHinhCotDiem: [],
+	            CotDiemSelected: [],
+	            recordNhomCotDiem: {},
+	            formData: {
+	                Formula: ''
+	            },
+	        }
+	    },
+	    mounted() { },
+	    computed: {},
+	    watch: {
+	        'vueData.isShowModalCHCotDiem': function (isShow) {
+	            if (isShow) {
+	                this.TBCauHinhCotDiem = Object.assign([], [])
+	                this.loadDSNhomCotDiem()
+	            }
+	        },
+	        'action.isShowModalEditCauHinhCotDiem': function (isShow) {
+	            if (!isShow) this.loadDSNhomCotDiem()
+	        },
+	    },
+	    methods: {
+	        async loadDSNhomCotDiem() {
+	            this.isLoadingTB = true
+	            ajaxCALL('lms/TemplateBangDiemChiTiet_Get_ByID', {
+	                TemplateBangDiemID: this.recordMauBangDiem.TemplateBangDiemID
+	            }, res => {
+	                let groupNhom = [...new Set(res.data.map(x => x.MaNhomCotDiem))]
+	                let group = []
+	                //Vòng lặp xử lý group các cột điểm có cùng nhóm cột điểm
+	                for (let i of groupNhom) {
+	                    //Tạo obj để render lên table
+	                    let obj = {}
+	                    let items = res.data.filter(item => item.MaNhomCotDiem === i) // filter lấy các cột điểm có cùng mã nhóm
+	                    obj.ThuTuCotDiem = items
+	                    obj.HienThi = items
+	                    obj.MaCotDiem = items
+	                    obj.TenCotDiem = items
+	                    obj.LoaiCotDiem = items
+	                    obj.GiaTriCotDiem = items
+	                    obj.IDHeThong = items
+	                    obj.Formula = items.map(x => { return { ...x, isEdit: false } })
+	                    obj.TenNhomCotDiem_VI = items[0]?.TenNhomCotDiem_VI ?? ''
+	                    obj.TenNhomCotDiem_EN = items[0]?.TenNhomCotDiem_EN ?? ''
+	                    obj.ThuTuNhom = items[0]?.ThuTuNhom ?? ''
+	                    obj.MaNhomCotDiem = items[0]?.MaNhomCotDiem ?? ''
+	                    obj.TemplateBangDiemID = items[0]?.TemplateBangDiemID ?? 0
+	                    obj.Semester = items[0]?.Semester ?? ''
+	                    group.push(obj)
+	                }
+	                this.TBCauHinhCotDiem = group
+	                this.isLoadingTB = false
+	                console.log('TBCauHinhCotDiem', this.TBCauHinhCotDiem)
+	            })
+	        },
+	        onOpenModalAddCauHinhCotDiem() {
+	            this.action.isShowModalAddCauHinhCotDiem = true
+	        },
+	        onOpenModalEditCauHinhCotDiem(record) {
+	            this.recordNhomCotDiem = _.cloneDeep(record)
+	            this.action.isShowModalEditCauHinhCotDiem = true
+	        },
+	        onHandleDeleteCauHinhCotDiem(record) {
+	            const $this = this
+	            confirm({
+	                title: `Bạn có chắc muốn xóa nhóm cột điểm ${record.TenNhomCotDiem_VI}?`,
+	                action: async function () {
+	                    ajaxCALL('lms/TemplateBangDiemChiTiet_Del_By_MaNhomCotDiem', {
+	                        TemplateBangDiemID: $this.recordMauBangDiem.TemplateBangDiemID,
+	                        MaNhomCotDiem: record.MaNhomCotDiem
+	                    }, res => {
+	                        Vue.$toast.success('Xóa cột điểm thành công!', { position: 'top' })
+	                        $this.loadDSNhomCotDiem()
+	                    })
+	                }
+	            })
+	        },
+	        EditFormula(item) {
+	            this.formData = _.cloneDeep(item)
+	            item.isEdit = true
+	        },
+	        CloseEditFormula(item) {
+	            item.isEdit = false
+	        },
+	        async SaveEditFormula(item) {
+	            ajaxCALL('lms/TemplateBangDiemChiTiet_Upd', {
+	                ...this.formData,
+	                Formula: this.formData.Formula,
+	            }, res => {
+	                Vue.$toast.success(`Cập nhật công thức cho cột điểm ${item.TenCotDiem_VI} thành công`, { position: 'top' })
+	                this.loadDSNhomCotDiem()
+	                item.isEdit = false
+	            })
+	        },
+	        async onHandleReloadDSCotDiem(value) {
+	            await this.loadDSNhomCotDiem()
+	            this.recordNhomCotDiem = this.TBCauHinhCotDiem.find(item => item.MaNhomCotDiem === value)
+	        },
+	        onDeleteCotDiemSelected() {
+	            const $this = this
+	            const JSON_MaNhomCotDiem = this.CotDiemSelected.map(x => {
+	                return {
+	                    TemplateBangDiemID: this.recordMauBangDiem.TemplateBangDiemID,
+	                    MaNhomCotDiem: x.MaNhomCotDiem
+	                }
+	            })
+	            confirm({
+	                title: "Xóa các mã nhóm điểm đã chọn",
+	                action: async function () {
+	                    ajaxCALL('lms/TemplateBangDiemChiTiet_DSNhomDiem_Del_By_MaNhomDiem', {
+	                        JSON_MaNhomCotDiem: JSON_MaNhomCotDiem
+	                    }, res => {
+	                        Vue.$toast.success('Xóa tất cả các mã nhóm điểm đã chọn thành công', { position: 'top' })
+	                        $this.loadDSNhomCotDiem()
+	                    })
+	                }
+	            })
+	        },
+	        getColorChipLoaiCotDiem,
+	        getColorChipGiaTriCotDiem
+	    },
 	}
 </script>

@@ -6,3 +6,7 @@
 .v-table>.v-table__wrapper>table>thead>tr>th {
     padding: 0 8px !important;
 }
+.custom-height-uc-quill-editor {
+    height: fit-content !important;
+    min-height: 155px !important;
+}

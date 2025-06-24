@@ -11,6 +11,7 @@
 		mounted() {},
 		computed: {},
 		watch: {},
-		methods: {},
+		methods: {
+		},
 	}
 </script>

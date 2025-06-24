@@ -98,57 +98,94 @@ function processColor(arr, arrColor) {
     });
 }
 function init() {
-    vueData.processColor = this.processColor
-    vueData.activities = vueData.processColor(vueData.activities, vueData.defColor)
+    // vueData.processColor = this.processColor
+    // vueData.activities = vueData.processColor(vueData.activities, vueData.defColor)
     vueData.handleData = this.handleData
     // vueData.initdefColorResult = initdefColorResult
 }
 function handleData() {
+    if (vueData.DSCotDiem[0].length <= 0) {
+        console.log('CotDiem rỗng')
+        return
+    } else if (vueData.DSCotDiem[1].length <= 0) {
+          console.log('Theme rỗng')
+        return
+    }
     //Bước 1: Xử lý gộp điểm point và convert
     let mergedData = vueData.DSCotDiem[0].map(item => {
-        let isResultCB = (item.MaCotDiem.includes('_TA2') || item.MaCotDiem.includes('_IELTS')) ? 1 : 0
+        let isResultCB = item.MaCotDiem.includes('_TA2') ? 1 : 0
         return { ...item, isResultCB: isResultCB }
     })
+      console.log('mergedData11111', mergedData)
     let dataResult = mergedData.filter(item => item.isResultCB === 0)
     let mergeDataResult = MergedDataResult(dataResult)
     let dataResultCB = mergedData.filter(item => item.isResultCB === 1)
     let mergeDataResultCB = MergedDataResult(dataResultCB)
-    mergedData = [...mergeDataResult, ...mergeDataResultCB]
-    console.log('mergedData', mergedData)
-    // Bước 2: Xử lý gắn điểm ielts
-    mergedData = mergedData.map(d => {
-        if (d.isResultCB == 0) return { ...d }
-        let objIelts = vueData.DSCotDiem[0].find(obj => (obj.MaCotDiem.includes('_IELTS') && obj.MaCotDiem.includes(d.TenCotDiem_EN)) || obj.MaCotDiem.includes('_IELTS_Band'))
-        if (!objIelts) return { ...d }
-        return { ...d, ielts: objIelts.KetQuaDanhGia_VI ?? '-' }
-    })
+    let dataIELTS = vueData.DSCotDiem[0].filter(item => item.MaCotDiem.includes('_IELTS'))
+    mergedData = [...mergeDataResult, ...mergeDataResultCB,...dataIELTS]
+    console.log('Data 3 loại điểm', mergedData)
     //Bước 3: Xử lý dữ liệu màu sắc, icon và filter attr trước khi render
     const handleDataScore = mergedData.map(item => {
         let data = {
             label: item.TenCotDiem_VI,
             name: item.TenCotDiem_VI,
-            percent: ((parseFloat(item.KetQuaDanhGia_VI) / parseFloat(item.DiemMax)) * 100).toFixed(1),
-            status: vueData.t('message.NotMeetingRequirements'),
-            score: item.KetQuaDanhGia_VI,
+            percent: item.KetQuaDanhGia_VI && item.DiemMax ? (((parseFloat(item.KetQuaDanhGia_VI) / parseFloat(item.DiemMax)) * 100).toFixed(2)) : '- ',
+            score: item.KetQuaDanhGia_VI ?? null,
             scoreMax: item.DiemMax,
             icon: "mdi mdi-account-school-outline",
-            color: 'red',
-            bgcolor: 'red-lighten-5',
             label_EN: item.TenCotDiem_EN,
             MaCotDiem: item.MaCotDiem,
             ielts: item.ielts,
             TenNhomCotDiem_EN: item.TenNhomCotDiem_EN,
             TenNhomCotDiem_VI: item.TenNhomCotDiem_VI,
-            isResultCB: item.isResultCB
+            isResultCB: item.isResultCB,
+            KetQuaDanhGia_VI: item.KetQuaDanhGia_VI,
+            colorKQHT: 'purple-lighten-1',
+            bgcolorKQHT: 'purple-lighten-5',
+            Label_IELTS_VI: item.Label_IELTS_VI,
+            Label_IELTS_EN: item.Label_IELTS_EN
         }
-        if (item.Convert_KetQuaDanhGia_VI?.includes('Đạt yêu cầu')) {
-            data.status = vueData.t('message.MeetingRequirements')
-            data.color = 'yellow-darken-3'
-            data.bgcolor = 'yellow-lighten-4'
-        } else if (item.Convert_KetQuaDanhGia_VI?.includes('Exceeding')) {
+        if (data.percent > 100) {
+            data.percent = 100
+        } else if (data.percent < 0) {
+            data.percent = 0
+        }
+        let ketQuaDanhGia = item.Convert_KetQuaDanhGia_VI?.split('/')[0].trim().toLowerCase()
+        // if (item.Convert_KetQuaDanhGia_VI?.includes('Đạt yêu cầu') || item.Convert_KetQuaDanhGia_VI?.includes('Meeting Requirements')) {
+        //      data.status= vueData.t('message.MeetingRequirements')
+        //     data.color= 'yellow-darken-3'
+        //     data.bgcolor= 'yellow-lighten-4'
+        // }
+        // else if (item.Convert_KetQuaDanhGia_VI?.includes('Not meeting requirements') || item.Convert_KetQuaDanhGia_VI?.includes('Chưa đạt')) {
+        //     data.status = vueData.t('message.NotMeetingRequirements')
+        //     data.color = 'red'
+        //     data.bgcolor = 'red-lighten-5'
+        // } else if (item.Convert_KetQuaDanhGia_VI?.includes('Exceeding')) {
+        //     data.status = vueData.t('message.ExceedingRequirements')
+        //     data.color = 'green'
+        //     data.bgcolor = 'green-lighten-5'
+        // } else if (item.Convert_KetQuaDanhGia_VI == null || item.Convert_KetQuaDanhGia_VI == '') {
+        //     data.status = '-'
+        //     data.color = 'grey'
+        //     data.bgcolor = 'grey-lighten-5'
+        // }
+        if (ketQuaDanhGia == 'meeting requirements') {
+             data.status= vueData.t('message.MeetingRequirements')
+            data.color= 'yellow-darken-3'
+            data.bgcolor= 'yellow-lighten-4'
+        }
+        else if (ketQuaDanhGia == 'not meeting requirements') {
+            data.status = vueData.t('message.NotMeetingRequirements')
+            data.color = 'red'
+            data.bgcolor = 'red-lighten-5'
+        } else if (ketQuaDanhGia == 'exceeding requirements') {
             data.status = vueData.t('message.ExceedingRequirements')
             data.color = 'green'
             data.bgcolor = 'green-lighten-5'
+        } else if (ketQuaDanhGia == null || ketQuaDanhGia == '') {
+            data.status = '-'
+            data.color = 'green'
+            data.bgcolor = 'grey-lighten-5'
         }
         let objIcon = libIconCotDiem.find(obj => item.TenCotDiem_EN.includes(obj.name))
         if (objIcon) {
@@ -156,6 +193,103 @@ function handleData() {
         }
         return data
     })
+    //Xử lý điểm overal
+    let percentTotal = 0
+    let countMark = 0
+    //OVERAL cấp 2
+    if (vueData.HocSinhDetail.CapID == 2) {
+        let handleDataScoreExceptLanguage = handleDataScore.filter(item => item.label_EN != 'Language')
+        for (let i = 0; i < handleDataScoreExceptLanguage.length - 1; i++) {
+            percentTotal += parseFloat(handleDataScoreExceptLanguage[i].percent)
+            countMark = i + 1
+        }
+        handleDataScore[handleDataScore.length - 1].percent = (percentTotal / countMark).toFixed(2)
+        console.log(percentTotal, countMark, handleDataScore)
+        const handleDataTheme = vueData.DSCotDiem[1].filter(item => !(item.MaCotDiem.includes('_TST') || item.MaCotDiem.includes('_BNS_VNM') || item.MaCotDiem.includes('_BNS_EXP') )).map(item => {
+            let data = {
+                label: item.TenCotDiem_VI,
+                name: item.TenCotDiem_VI,
+                percent: ((parseFloat(item.KetQuaDanhGia_VI) / parseFloat(item.DiemMax)) * 100).toFixed(1),
+                status: item.Convert_KetQuaDanhGia_VI,
+                score: item.KetQuaDanhGia_VI ?? null,
+                scoreMax: item.DiemMax,
+                icon: "mdi mdi-account-school-outline",
+                color: 'red',
+                bgcolor: 'red-lighten-5',
+                MaNhomCotDiem: item.MaNhomCotDiem,
+                label_EN: item.TenCotDiem_EN,
+                MaCotDiem:item.MaCotDiem
+            }
+            if (data.score >= 4 && data.score <= 7) {
+                data.color = 'yellow-darken-3'
+                data.bgcolor = 'yellow-lighten-4'
+            } else if (data.score >= 8 && data.score <= 9) {
+                data.color = 'blue'
+                data.bgcolor = 'blue-lighten-4'
+            } else if (data.score > 9) {
+                data.color = 'green'
+                data.bgcolor = 'green-lighten-5'
+            }
+            let objIcon = libIconActivities.find(obj => item.TenCotDiem_EN.includes(obj.name))
+            if (objIcon) {
+                data.icon = objIcon.icon
+            }
+            if (data.percent > 100) {
+                data.percent = 100
+            } else if (data.percent < 0) {
+                data.percent = 0
+            }
+            return data
+        })
+        vueData.activities = handleDataTheme
+        console.log(' activities ', handleDataTheme)
+    }
+    //OVERAL cấp 3
+    else{
+        let handleDataScoreExceptLanguage = handleDataScore.filter(item => item.MaCotDiem.includes('_TA2_'))
+        for (let i = 0; i < handleDataScoreExceptLanguage.length - 1; i++) {
+            percentTotal += parseFloat(handleDataScoreExceptLanguage[i].percent)
+            countMark = i + 1
+        }
+        handleDataScore[handleDataScore.length - 1].percent = (percentTotal / countMark).toFixed(2)
+        if(handleDataScore[handleDataScore.length - 1].percent == 'NaN' ){
+            handleDataScore[handleDataScore.length - 1].percent = '-'
+        }
+        console.log(percentTotal, countMark, handleDataScore)
+        const handleDataTheme = vueData.DSCotDiem[1].filter(item => !(item.MaCotDiem.includes('_TST') || item.MaCotDiem.includes('_BNS_VNM') || item.MaCotDiem.includes('_BNS_EXP'))).map(item => {
+            let data = {
+                label: item.TenCotDiem_VI,
+                name: item.TenCotDiem_VI,
+                percent: ((parseFloat(item.KetQuaDanhGia_VI) / parseFloat(item.DiemMax)) * 100).toFixed(1),
+                status: item.Convert_KetQuaDanhGia_VI,
+                score: item.KetQuaDanhGia_VI ?? null,
+                scoreMax: item.DiemMax,
+                icon: "mdi mdi-account-school-outline",
+                color: 'red',
+                bgcolor: 'red-lighten-5',
+                MaNhomCotDiem: item.MaNhomCotDiem,
+                label_EN: item.TenCotDiem_EN,
+                MaCotDiem: item.MaCotDiem
+            }
+            if (data.score >= 5 && data.score < 8) {
+                data.color = 'yellow-darken-3'
+                data.bgcolor = 'yellow-lighten-4'
+            }  else if (data.score >= 8) {
+                data.color = 'green'
+                data.bgcolor = 'green-lighten-5'
+            } else if (data.score < 1){
+                data.color = 'grey'
+                data.bgcolor = 'grey-lighten-5'
+            }
+            let objIcon = libIconActivities.find(obj => item.TenCotDiem_EN.includes(obj.name))
+            if (objIcon) {
+                data.icon = objIcon.icon
+            }
+            return data
+        })
+        vueData.activities = handleDataTheme
+        console.log(' activities ', handleDataTheme)
+    }
     vueData.skills = handleDataScore
     //Xử lý tiêu đề Activities
     const uniqueTheme = [...new Set(vueData.DSCotDiem[1].map(x => x.MaNhomCotDiem))]
@@ -168,36 +302,65 @@ function handleData() {
         return data
     })
     vueData.DSThemeNumber = newTheme
-    const handleDataTheme = vueData.DSCotDiem[1].filter(item => !(item.MaCotDiem.includes('_TST') || item.MaCotDiem.includes('_BNS_VNM') || item.MaCotDiem.includes('_BNS_EXP') || item.MaCotDiem.includes('_Total'))).map(item => {
-        let data = {
-            label: item.TenCotDiem_VI,
-            name: item.TenCotDiem_VI,
-            percent: ((parseFloat(item.KetQuaDanhGia_VI) / parseFloat(item.DiemMax)) * 100).toFixed(1),
-            status: item.Convert_KetQuaDanhGia_VI,
-            score: item.KetQuaDanhGia_VI,
-            scoreMax: item.DiemMax,
-            icon: "mdi mdi-account-school-outline",
-            color: 'red',
-            bgcolor: 'red-lighten-5',
-            MaNhomCotDiem: item.MaNhomCotDiem,
-            label_EN: item.TenCotDiem_EN,
-        }
-        if (data.percent < 80 && data.percent >= 50) {
-            data.color = 'yellow-darken-3'
-            data.bgcolor = 'yellow-lighten-4'
-        } else if (data.percent >= 80) {
-            data.color = 'green'
-            data.bgcolor = 'green-lighten-5'
-        }
-        let objIcon = libIconActivities.find(obj => item.TenCotDiem_EN.includes(obj.name))
-        if (objIcon) {
-            data.icon = objIcon.icon
-        }
-        return data
-    })
-    vueData.activities = handleDataTheme
-    console.log(' activities ', handleDataTheme)
+    if (vueData.HocSinhDetail.CapID == 2) {
+        let color = [
+            // {
+            //     "status": vueData.t('message.NotImplementingWithoutSpecificReasons'),
+            //     "des": `0-3 ${vueData.t('message.points')}`,
+            //     "color": "grey",
+            //     "bgcolor": "grey-lighten-5"
+            // },
+            {
+                "status": vueData.t('message.NotImplementingWithoutSpecificReasons'),
+                "des": `0-3 ${vueData.t('message.points')}`,
+                "color": "red",
+                "bgcolor": "red-lighten-5"
+            },
+            {
+                "status": vueData.t('message.NotMeetingRequirements'),
+                "des": `4-7 ${vueData.t('message.points')}`,
+                "color": "yellow-darken-3",
+                "bgcolor": "yellow-lighten-4"
+            },
+            {
+                "status": vueData.t('message.MeetingRequirements'),
+                "des": `8-9 ${vueData.t('message.points')}`,
+                "color": "blue",
+                "bgcolor": "blue-lighten-4"
+            },
+            {
+                "status": vueData.t('message.ExceedingRequirements'),
+                "des": `10 ${vueData.t('message.points')}`,
+                "color": "green",
+                "bgcolor": "green-lighten-5"
+            },
+        ]
+        vueData.defColorActivities = color
+    } else if (vueData.HocSinhDetail.CapID == 3) {
+        let color = [
+            {
+                "status": vueData.t('message.NotMeetingRequirements'),
+                "des": `1 - 4.9 ${vueData.t('message.points')}`,
+                "color": "red",
+                "bgcolor": "red-lighten-5"
+            },
+            {
+                "status": vueData.t('message.MeetingRequirements'),
+                "des": `5 - 7.9 ${vueData.t('message.points')}`,
+                "color": "yellow-darken-3",
+                "bgcolor": "yellow-lighten-4"
+            },
+            {
+                "status": vueData.t('message.ExceedingRequirements'),
+                "des": `8.0 - 10 ${vueData.t('message.points')}`,
+                "color": "green",
+                "bgcolor": "green-lighten-5"
+            },
+        ]
+        vueData.defColorActivities = color
+    }
 }
+//render cái mô tả kết quả học tập
 function initdefColorResult() {
     vueData.defColorResult = [
         {
@@ -220,33 +383,8 @@ function initdefColorResult() {
         }
     ]
 }
+//render cái mô tả các hoạt động theme
 function initdefColorActivities() {
-    vueData.defColorActivities = [
-        {
-            "status": vueData.t('message.NotImplementingWithoutSpecificReasons'),
-            "des": `0-3 ${vueData.t('message.points')}`,
-            "color": "grey",
-            "bgcolor": "grey-lighten-5"
-        },
-        {
-            "status": vueData.t('message.NotMeetingRequirements'),
-            "des": `4-7 ${vueData.t('message.points')}`,
-            "color": "red",
-            "bgcolor": "red-lighten-5"
-        },
-        {
-            "status": vueData.t('message.MeetingRequirements'),
-            "des": `8-9 ${vueData.t('message.points')}`,
-            "color": "yellow-darken-3",
-            "bgcolor": "yellow-lighten-4"
-        },
-        {
-            "status": vueData.t('message.ExceedingRequirements'),
-            "des": `10 ${vueData.t('message.points')}`,
-            "color": "green",
-            "bgcolor": "green-lighten-5"
-        },
-    ]
 }
 function MergedDataResult(arr) {
     let data = arr.reduce((acc, item) => {

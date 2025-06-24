@@ -153,26 +153,21 @@ function formatPhanCong(dsGiaoVien, phanCongMoi) {
                 VaiTro: vaiTro,
                 color: mappingColor[vaiTro] || "gray"
             }));
-            console.log(giaoVien.VaiTro);
         }
     });
     vueData.DSGiaoVien2 = dsGiaoVien;
     return dsGiaoVien;
 }
 function handleDataSelected(sessionData) {
-    console.log("sessionData", sessionData)
 };
 function addToGroup(VaiTro = null, Khoi = null, Lop = null, GiaoVien = null, MonHoc = null) {
     if (!GiaoVien) {
-        console.warn("GiaoVien is required");
         return;
     }
-    if (VaiTro == 2 || VaiTro == 1)
-    {
+    if (VaiTro == 2 || VaiTro == 1) {
         MonHoc = null
-        if (VaiTro == 2)
-        {
-            Lop =[]
+        if (VaiTro == 2) {
+            Lop = []
         }
     }
     // Tìm giáo viên trong danh sách
@@ -190,7 +185,6 @@ function addToGroup(VaiTro = null, Khoi = null, Lop = null, GiaoVien = null, Mon
     }
     // Kiểm tra khối
     if (!Khoi || !Khoi.KhoiID) {
-        console.warn("Khoi or KhoiID is missing");
         return;
     }
     const { KhoiID, TenKhoiHoc } = Khoi;
@@ -211,7 +205,6 @@ function addToGroup(VaiTro = null, Khoi = null, Lop = null, GiaoVien = null, Mon
         Lop.forEach((itemLop) => {
             const isClassInBlock = itemLop.KhoiID === KhoiID;
             if (!isClassInBlock) {
-                console.warn(`Lớp ${Lop.TenLop} không thuộc khối ${TenKhoiHoc}`);
                 return;
             }
             const existingClass = khoiGroup.items.find((item) =>
@@ -293,7 +286,7 @@ function add() {
     debugger
     addToGroup(VaiTro = vueData.vaiTroItemSelected, Khoi = vueData.KhoiItem, Lop = vueData.LopItem, GiaoVien = vueData.sessionData.GiaoVienIDSelected, MonHoc = vueData.sessionData.MonHocIDSelected)
     let date = new Date();
-        date.getYear()
+    date.getYear()
     let additionalInfo = {}; // Khởi tạo object rỗng
     additionalInfo.NienKhoa = vueData.sessionData?.NienKhoaSelected
         ?? `${currentYear}`;
@@ -346,8 +339,7 @@ function add() {
     this.save(data)
         .then(response => {
             // Xử lý kết quả thành công
-            if (response.IsSuccess)
-            {
+            if (response.IsSuccess) {
                 Vue.$toast.success("Thêm phân công thành công")
                 location.reload()
             }

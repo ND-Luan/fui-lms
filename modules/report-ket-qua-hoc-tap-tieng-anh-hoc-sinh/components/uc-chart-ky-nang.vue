@@ -10,8 +10,9 @@ export default {
 			Chart_KyNang: {
 				series: [{
 					name: 'Series 1',
-					data: vueData.skills.filter(item => vueData.HocSinhDetail.CapID == 2 ? true : item.isResultCB == 1).filter(x => vueData.HocSinhDetail.CapID == 2 ? true :(x.label !== 'Tổng') ).map(item => item.score),
-				}],
+					data: [...vueData.skills.filter(item => vueData.HocSinhDetail.CapID == 2 ? true : item.isResultCB == 1).filter(x => x.label != 'Ngôn ngữ').map(item => vueData.HocSinhDetail.CapID == 2 ? item.percent+'%' : item.score)],
+				}
+			],
 				toolbar: {
 					show: false, // Ẩn toàn bộ toolbar
 				},
@@ -52,10 +53,11 @@ export default {
 					}
 				},
 				yaxis: {
-					//	stepSize: 20
+					//	stepSize: 20,
+					max: vueData.HocSinhDetail.CapID == 2 ? 100 : undefined
 				},
 				xaxis: {
-					categories: vueData.skills.filter(item => vueData.HocSinhDetail.CapID == 2 ? true : item.isResultCB == 1).map(item => vueData.IsLanguage ? item.label_EN : item.label).filter(x => vueData.HocSinhDetail.CapID == 2 ? true :(x.label !== 'Tổng') ),
+					categories: vueData.skills.filter(item => vueData.HocSinhDetail.CapID == 2 ? true : item.isResultCB == 1).filter(x => vueData.HocSinhDetail.CapID == 2 ? (x.label != 'Ngôn ngữ') :(x.label !== 'Tổng') ).map(item => vueData.IsLanguage ? item.label_EN : item.label),
 				},
 				dataLabels: {
 					enabled: true,

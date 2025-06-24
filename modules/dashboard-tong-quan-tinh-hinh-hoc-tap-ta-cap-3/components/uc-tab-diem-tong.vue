@@ -1,15 +1,18 @@
 <template>
 	<v-card>
-		<v-card-title class="text-primary">Chọn</v-card-title>
 		<v-card-text>
-			<v-row>
-				<v-col>
+			<v-row dense>
+				<v-col cols="6" md="3" sm="6">
 					<v-select v-model="form.LopID" label="Chọn lớp" :items="DSLop" item-title="TenLop"
 						item-value="LopID" :loading="isLoadingLop"></v-select>
 				</v-col>
-				<v-col>
+				<v-col cols="6" md="3" sm="6">
+					<v-select v-model="HocKiValue" :items="DSHocKi" item-title="name" item-value="value"
+						label="Chọn học kì"></v-select>
+				</v-col>
+				<v-col cols="12" md="3" sm="12">
 					<v-btn color="primary" variant="tonal" @click="onLoadChart({
-						NienKhoa: 2024,
+						NienKhoa: vueData.NienKhoa,
 						KhoiID: khoiid,
 						LopID: form.LopID,
 						MonHocID: monhocid
@@ -38,6 +41,18 @@ export default {
 	},
 	data() {
 		return {
+			vueData,
+			HocKiValue: 1,
+			DSHocKi: [
+				{
+					name: "Học kì 1",
+					value: 1
+				},
+				{
+					name: "Học kì 2",
+					value: 2
+				}
+			],
 			form: {
 				KhoiID: this.khoiid,
 				LopID: null,
@@ -73,17 +88,37 @@ export default {
 					});
 			}
 		},
-
+		"form.LopID": function (val) {
+			if (val && this.HocKiValue) {
+				this.onLoadChart({
+					NienKhoa: vueData.NienKhoa,
+					KhoiID: this.khoiid,
+					LopID: val,
+					MonHocID: this.monhocid
+				})
+			}
+		},
+		HocKiValue: function (val) {
+			if (val) {
+				this.onLoadChart({
+					NienKhoa: vueData.NienKhoa,
+					KhoiID: this.khoiid,
+					LopID: val,
+					MonHocID: this.monhocid
+				})
+			}
+		}
 	},
 	methods: {
 		onLoadDSLop(KhoiID) {
 			return new Promise(resolve => {
 				ajaxCALL('lms/Lop_Get_ByKhoiID',
 					{
+						NienKhoa: vueData.NienKhoa,
 						KhoiID: KhoiID
 					},
 					res => {
-						this.DSLop = res.data
+						this.DSLop = res.data.filter(item => item.TenLop.includes('AV'))
 						resolve()
 					}
 				)
@@ -96,17 +131,18 @@ export default {
 						NienKhoa,
 						KhoiID,
 						LopID,
-						MonHocID
+						MonHocID,
+						HocKy: this.HocKiValue
 					},
 					res => {
 						const TongDiem = res.data
 						const series = [
 							{
-								name: "Điểm giữa kì 1",
+								name: "Điểm giữa kì " + this.HocKiValue,
 								data: TongDiem.map(x => x.DiemGK1)
 							},
 							{
-								name: "Điểm cuối kì 1",
+								name: "Điểm cuối kì " + this.HocKiValue,
 								data: TongDiem.map(x => x.DiemCK1)
 							}
 						]
