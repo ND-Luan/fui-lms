@@ -79,6 +79,7 @@
 					case 'QUIZ_DRAG_DROP_CATEGORIZE': return 'mdi-drag';
 					case 'QUIZ_FILL_IN_BLANK': return 'mdi-form-textbox';
 					case 'QUIZ_CONNECTION': return 'mdi-lan-connect';
+					case 'QUIZ_COMPOSITE' : return 'mdi-format-list-checks';
 					default: return 'mdi-bookmark-outline';
 				}
 			},

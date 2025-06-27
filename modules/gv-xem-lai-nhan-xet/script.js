@@ -40,7 +40,6 @@ function renderHeaderTable() {
     ]
     if (!vueData.ThangObj?.Is_HienThiPhuHuynh) {
         const lop = vueData.DSLop.find(x => x.LopID === vueData.LopID)
-        console.log(lop)
         const DSKhoi_CanLoai = [1, 2, 3, 4, 6, 7, 8, 9, 10, 11, 12]
         columns.push({
             "align": "center",
@@ -164,7 +163,7 @@ function renderHeaderTable() {
         //     "value": "NhanXetCuoiNam",
         // })
     }
-    if ((vueData.CapID === 1) && vueData.ThangObj.Is_HienThiPhuHuynh) {
+    if ((vueData.CapID === 1) && vueData.ThangObj?.Is_HienThiPhuHuynh) {
         if (vueData.isLowScreen) {
             columns.push({
                 "key": "Nhanxet",
@@ -526,7 +525,7 @@ function renderHeaderTable() {
             })
         }
     }
-    if ((vueData.CapID == 2 || vueData.CapID === 3) && vueData.ThangObj.Is_HienThiPhuHuynh) {
+    if ((vueData.CapID == 2 || vueData.CapID === 3) && vueData.ThangObj?.Is_HienThiPhuHuynh) {
         columns.push({
             "key": "NhanXet",
             "el": "div",

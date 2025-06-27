@@ -122,9 +122,8 @@
 							</v-skeleton-loader>
 
 							<uc-editable-treeview-v2 v-else :nodes="treeNoiDung"
-								:hoc-lieu-id="selectedHocLieu.HocLieuID" @update="onTreeUpdate"
-								@add-new="addNewChildNode" @edit="editNode" @delete="deleteNode" :key="treeKey"
-								class="tree-view" />
+								:hoc-lieu-id="selectedHocLieu.HocLieuID" :key="treeKey" @update="onTreeUpdate"
+								@add-new="onAddNewChild" @edit="onEditItem" @delete="onDeleteNode" />
 
 							<div v-if="!isLoadingTree && treeNoiDung.length === 0" class="empty-tree">
 								<v-icon size="64" color="grey-lighten-2">mdi-file-tree-outline</v-icon>
@@ -148,190 +147,223 @@
 
 <script>
 	export default {
-	    name: 'uc-soan-hoc-lieu-view',
-	    props: ['khoiIdProp', 'monHocIdProp'],
-	    data() {
-	        return {
-	            selectedBoSach: 'Kết nối tri thức',
-	            DSHocLieu: [],
-	            selectedHocLieu: null,
-	            treeNoiDung: [],
-	            isLoadingTree: false,
-	            treeKey: 0,
-	            // THÊM: State để quản lý dialog
-	            isDialogOpen: false,
-	            editingItem: null
-	        }
-	    },
-	    mounted() {
-	        this.fetchHocLieu();
-	    },
-	    methods: {
-	        fetchHocLieu() {
-	            ajaxCALL('lms/FP_HocLieu_GetByLopMon', {
-	                KhoiID: this.khoiIdProp,
-	                MonHocID: this.monHocIdProp
-	            }, (res) => {
-	                if (res && res.data) {
-	                    this.DSHocLieu = res.data;
-	                }
-	            });
-	        },
-	        async selectHocLieu(sach) {
-	            this.selectedHocLieu = sach;
-	            this.isLoadingTree = true;
-	            await this.fetchTreeNoiDung();
-	            this.isLoadingTree = false;
-	            console.log("Cây đã được xây dựng xong:", this.treeNoiDung);
-	        },
-	        fetchTreeNoiDung() {
-	            return new Promise((resolve, reject) => {
-	                if (!this.selectedHocLieu) {
-	                    return reject("Chưa chọn học liệu");
-	                }
-	                ajaxCALL('lms/FP_NoiDung_GetTreeByHocLieu', { HocLieuID: this.selectedHocLieu.HocLieuID }, (res) => {
-	                    if (res && res.data && res.data.length > 1) {
-	                        const flatList = res.data[1] || [];
-	                        this.buildTree(flatList);
-	                        this.treeKey += 1;
-	                        resolve();
-	                    } else {
-	                        this.treeNoiDung = [];
-	                        reject("Dữ liệu API không hợp lệ");
-	                    }
-	                });
-	            });
-	        },
-	        // HÀM MỚI: Mở dialog
-	        onOpenDialog(itemToEdit = null) {
-	            if (!this.selectedHocLieu) {
-	                Vue.$toast.warning("Vui lòng chọn một cuốn sách trước.");
-	                return;
-	            }
+		name: 'uc-soan-hoc-lieu-view',
+		props: ['khoiIdProp', 'monHocIdProp'],
+		data() {
+			return {
+				selectedBoSach: 'Kết nối tri thức',
+				DSHocLieu: [],
+				selectedHocLieu: null,
+				treeNoiDung: [],
+				isLoadingTree: false,
+				treeKey: 0,
+				// THÊM: State để quản lý dialog
+				isDialogOpen: false,
+				editingItem: null
+			}
+		},
+		mounted() {
+			this.fetchHocLieu();
+		},
+		methods: {
+			fetchHocLieu() {
+				ajaxCALL('lms/FP_HocLieu_GetByLopMon', {
+					KhoiID: this.khoiIdProp,
+					MonHocID: this.monHocIdProp
+				}, (res) => {
+					if (res && res.data) {
+						this.DSHocLieu = res.data;
+					}
+				});
+			},
+			async selectHocLieu(sach) {
+				this.selectedHocLieu = sach;
+				this.isLoadingTree = true;
+				await this.fetchTreeNoiDung();
+				this.isLoadingTree = false;
+				console.log("Cây đã được xây dựng xong:", this.treeNoiDung);
+			},
+			fetchTreeNoiDung() {
+				return new Promise((resolve, reject) => {
+					if (!this.selectedHocLieu) {
+						return reject("Chưa chọn học liệu");
+					}
+					ajaxCALL('lms/FP_NoiDung_GetTreeByHocLieu', { HocLieuID: this.selectedHocLieu.HocLieuID }, (res) => {
+						if (res && res.data && res.data.length > 1) {
+							const flatList = res.data[1] || [];
+							this.buildTree(flatList);
+							this.treeKey += 1;
+							resolve();
+						} else {
+							this.treeNoiDung = [];
+							reject("Dữ liệu API không hợp lệ");
+						}
+					});
+				});
+			},
+			// HÀM MỚI: Mở dialog
+			onOpenDialog(itemToEdit = null) {
+				if (!this.selectedHocLieu) {
+					Vue.$toast.warning("Vui lòng chọn một cuốn sách trước.");
+					return;
+				}
 	
-	            if (itemToEdit) {
-	                // Trường hợp Sửa hoặc Thêm con
-	                // Nếu là thêm con, itemToEdit là node cha
-	                if (itemToEdit.parent) {
-	                    this.editingItem = {
-	                        HocLieuID: this.selectedHocLieu.HocLieuID,
-	                        ParentID: itemToEdit.parent.NoiDungID,
-	                        LoaiNoiDung: 'BAI', // Mặc định
-	                        ThuTu: itemToEdit.parent.children ? itemToEdit.parent.children.length : 0
-	                    };
-	                } else { // Trường hợp sửa
-	                    this.editingItem = itemToEdit;
-	                }
-	            } else {
-	                // Trường hợp Thêm mục gốc
-	                this.editingItem = {
-	                    HocLieuID: this.selectedHocLieu.HocLieuID,
-	                    ParentID: null,
-	                    LoaiNoiDung: 'CHUONG',
-	                    ThuTu: this.treeNoiDung.length
-	                };
-	            }
-	            this.isDialogOpen = true;
-	        },
+				if (itemToEdit) {
+					// Trường hợp Sửa hoặc Thêm con
+					// Nếu là thêm con, itemToEdit là node cha
+					if (itemToEdit.parent) {
+						this.editingItem = {
+							HocLieuID: this.selectedHocLieu.HocLieuID,
+							ParentID: itemToEdit.parent.NoiDungID,
+							LoaiNoiDung: 'BAI', // Mặc định
+							ThuTu: itemToEdit.parent.children ? itemToEdit.parent.children.length : 0
+						};
+					} else { // Trường hợp sửa
+						this.editingItem = itemToEdit;
+					}
+				} else {
+					// Trường hợp Thêm mục gốc
+					this.editingItem = {
+						HocLieuID: this.selectedHocLieu.HocLieuID,
+						ParentID: null,
+						LoaiNoiDung: 'CHUONG',
+						ThuTu: this.treeNoiDung.length
+					};
+				}
+				this.isDialogOpen = true;
+			},
+			// HÀM MỚI: Chỉ để mở dialog khi SỬA
+			onEditItem(itemToEdit) {
+				if (!itemToEdit) return;
+				console.log("Chỉnh sửa node:", itemToEdit);
+				this.editingItem = itemToEdit; // Gán item cần sửa
+				this.isDialogOpen = true;
+			},
 	
-	        // HÀM MỚI: Xử lý sự kiện save từ dialog
-	        onSaveItem(item) {
-	            console.log("Dữ liệu nhận từ dialog để lưu:", item);
-	            ajaxCALL('lms/FP_NoiDung_Save', item, (res) => {
-	                if (res.data && res.data[0]) {
-	                    Vue.$toast.success("Đã lưu thành công!");
-	                    this.fetchTreeNoiDung(); // Tải lại cây để cập nhật
-	                } else {
-	                    Vue.$toast.error("Lưu thất bại!");
-	                }
-	            });
-	        },
+			// HÀM MỚI: Chỉ để mở dialog khi THÊM MỤC GỐC
+			onAddNewRoot() {
+				if (!this.selectedHocLieu) return;
+				console.log("Thêm mục gốc mới...");
+				this.editingItem = {
+					HocLieuID: this.selectedHocLieu.HocLieuID,
+					ParentID: null,
+					LoaiNoiDung: 'CHUONG',
+					ThuTu: this.treeNoiDung.length
+				};
+				this.isDialogOpen = true;
+			},
 	
-	        // HÀM MỚI: Xử lý sự kiện delete từ cây
-	        onDeleteNode(node) {
-	            CONFIRM(`Bạn có chắc chắn muốn xóa mục "${node.TenNoiDung}" và tất cả các mục con của nó?`, () => {
-	                ajaxCALL('lms/FP_NoiDung_Delete', { NoiDungID: node.NoiDungID }, (res) => {
-	                    Vue.$toast.success("Đã xóa thành công!");
-	                    this.fetchTreeNoiDung();
-	                });
-	            });
-	        },
-	        buildTree(flatList) {
-	            if (!flatList || flatList.length === 0) { this.treeNoiDung = []; return; }
-	            const nodeMap = {};
-	            const roots = [];
-	            flatList.forEach(item => { nodeMap[item.NoiDungID] = { ...item, children: [] }; });
-	            Object.values(nodeMap).forEach(node => {
-	                if (node.ParentID && nodeMap[node.ParentID]) {
-	                    nodeMap[node.ParentID].children.push(node);
-	                } else { roots.push(node); }
-	            });
-	            const sortNodes = (nodes) => {
-	                if (!nodes) return;
-	                nodes.sort((a, b) => (a.ThuTu || 0) - (b.ThuTu || 0));
-	                nodes.forEach(node => { if (node.children.length > 0) sortNodes(node.children); });
-	            };
-	            sortNodes(roots);
-	            this.treeNoiDung = roots;
-	        },
-	        addNewRootNode() {
-	            console.log("Thêm mục gốc mới...");
-                this.onOpenDialog();
-	        },
-	        onTreeUpdate(newTree) {
-	            console.log("Cấu trúc cây mới:", newTree);
-	            this.treeNoiDung = newTree; // Fix: sử dụng newTree thay vì newNodes
+			// HÀM MỚI: Chỉ để mở dialog khi THÊM MỤC CON
+			onAddNewChild(parentNode) {
+				if (!parentNode) return;
+				console.log("Thêm node con cho:", parentNode);
+				this.editingItem = {
+					HocLieuID: this.selectedHocLieu.HocLieuID,
+					ParentID: parentNode.NoiDungID,
+					LoaiNoiDung: 'BAI',
+					ThuTu: parentNode.children ? parentNode.children.length : 0
+				};
+				this.isDialogOpen = true;
+			},
 	
-	            const dataToUpdate = [];
-	            const flatten = (nodes, parentId) => {
-	                nodes.forEach((node, index) => {
-	                    dataToUpdate.push({
-	                        id: node.NoiDungID,
-	                        order: index,
-	                        parent: parentId
-	                    });
-	                    if (node.children && node.children.length > 0) {
-	                        flatten(node.children, node.NoiDungID);
-	                    }
-	                });
-	            };
-	            flatten(newTree, null);
+			// HÀM MỚI: Xử lý sự kiện save từ dialog
+			onSaveItem(item) {
+				console.log("Dữ liệu nhận từ dialog để lưu:", item);
+				ajaxCALL('lms/FP_NoiDung_Save', item, (res) => {
+					if (res.data && res.data[0]) {
+						Vue.$toast.success("Đã lưu thành công!");
+						this.fetchTreeNoiDung(); // Tải lại cây để cập nhật
+					} else {
+						Vue.$toast.error("Lưu thất bại!");
+					}
+				});
+			},
 	
-	            console.log("Dữ liệu gửi lên API UpdateTreeStructure:", JSON.stringify(dataToUpdate));
-	            ajaxCALL('lms/FP_NoiDung_UpdateTreeStructure', { JsonData: JSON.stringify(dataToUpdate) }, (res) => {
-	                // Vue.$toast.success("Đã cập nhật cấu trúc cây!");
-	                console.log("Cập nhật thành công!");
-	            });
-	        },
-	        getTreeStats() {
-	            const countNodes = (nodes) => nodes.reduce((count, node) => count + 1 + (node.children ? countNodes(node.children) : 0), 0);
-	            return countNodes(this.treeNoiDung);
-	        },
-	        scrollToSidebar() {
-	            const sidebar = document.querySelector('.sidebar');
-	            if (sidebar) sidebar.scrollIntoView({ behavior: 'smooth' });
-	        },
-	        collapseAll() {
-	            console.log("Thu gọn tất cả");
-	        },
-	        expandAll() {
-	            console.log("Mở rộng tất cả");
-	        },
-	        addNewChildNode(node) {
-	            console.log("Thêm node con cho:", node);
-                this.onOpenDialog(node);
-	        },
-	        editNode(node) {
-	            console.log("Chỉnh sửa node:", node);
-                this.onOpenDialog(node);
-	        },
-	        deleteNode(node) {
-	            console.log("Xóa node:", node);
-                this.onOpenDialog(node);
-	        }
+			// HÀM MỚI: Xử lý sự kiện delete từ cây
+			onDeleteNode(node) {
+				CONFIRM(`Bạn có chắc chắn muốn xóa mục "${node.TenNoiDung}" và tất cả các mục con của nó?`, () => {
+					ajaxCALL('lms/FP_NoiDung_Delete', { NoiDungID: node.NoiDungID }, (res) => {
+						Vue.$toast.success("Đã xóa thành công!");
+						this.fetchTreeNoiDung();
+					});
+				});
+			},
+			buildTree(flatList) {
+				if (!flatList || flatList.length === 0) { this.treeNoiDung = []; return; }
+				const nodeMap = {};
+				const roots = [];
+				flatList.forEach(item => { nodeMap[item.NoiDungID] = { ...item, children: [] }; });
+				Object.values(nodeMap).forEach(node => {
+					if (node.ParentID && nodeMap[node.ParentID]) {
+						nodeMap[node.ParentID].children.push(node);
+					} else { roots.push(node); }
+				});
+				const sortNodes = (nodes) => {
+					if (!nodes) return;
+					nodes.sort((a, b) => (a.ThuTu || 0) - (b.ThuTu || 0));
+					nodes.forEach(node => { if (node.children.length > 0) sortNodes(node.children); });
+				};
+				sortNodes(roots);
+				this.treeNoiDung = roots;
+			},
+			addNewRootNode() {
+				console.log("Thêm mục gốc mới...");
+				this.onOpenDialog();
+			},
+			onTreeUpdate(newTree) {
+				console.log("Cấu trúc cây mới:", newTree);
+				this.treeNoiDung = newTree; // Fix: sử dụng newTree thay vì newNodes
+	
+				const dataToUpdate = [];
+				const flatten = (nodes, parentId) => {
+					nodes.forEach((node, index) => {
+						dataToUpdate.push({
+							id: node.NoiDungID,
+							order: index,
+							parent: parentId
+						});
+						if (node.children && node.children.length > 0) {
+							flatten(node.children, node.NoiDungID);
+						}
+					});
+				};
+				flatten(newTree, null);
+	
+				console.log("Dữ liệu gửi lên API UpdateTreeStructure:", JSON.stringify(dataToUpdate));
+				ajaxCALL('lms/FP_NoiDung_UpdateTreeStructure', { JsonData: JSON.stringify(dataToUpdate) }, (res) => {
+					// Vue.$toast.success("Đã cập nhật cấu trúc cây!");
+					console.log("Cập nhật thành công!");
+				});
+			},
+			getTreeStats() {
+				const countNodes = (nodes) => nodes.reduce((count, node) => count + 1 + (node.children ? countNodes(node.children) : 0), 0);
+				return countNodes(this.treeNoiDung);
+			},
+			scrollToSidebar() {
+				const sidebar = document.querySelector('.sidebar');
+				if (sidebar) sidebar.scrollIntoView({ behavior: 'smooth' });
+			},
+			collapseAll() {
+				console.log("Thu gọn tất cả");
+			},
+			expandAll() {
+				console.log("Mở rộng tất cả");
+			},
+			addNewChildNode(node) {
+				console.log("Thêm node con cho:", node);
+				this.onOpenDialog(node);
+			},
+			editNode(node) {
+				console.log("Chỉnh sửa node:", node);
+				this.onOpenDialog(node);
+			},
+			deleteNode(node) {
+				console.log("Xóa node:", node);
+				this.onOpenDialog(node);
+			}
 	
 	
-	    }
+		}
 	}
 </script>
 
