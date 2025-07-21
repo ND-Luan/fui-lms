@@ -52,9 +52,10 @@
 		},
 		methods: {
 			onRedirect(thangObj) {
+				console.log('ee')
 				openWindow({
 					title: "Thông báo tháng",
-					url: `report-ket-qua-hoc-tap-thang-hoc-sinh?id=${vueData.HocSinhSelected.StudentID}&lop_nxtid=${thangObj.Lop_NhanXetThangID}`,
+					url: `report-ket-qua-hoc-tap-thang-hoc-sinh?id=${vueData.HocSinhSelected.StudentID}&lop_nxtid=${thangObj.Lop_NhanXetThangID}&nienkhoa=${vueData.NienKhoa}`,
 					onclose: {
 						"CALL": "getDSThang"
 					}

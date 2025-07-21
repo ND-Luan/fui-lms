@@ -12,6 +12,15 @@
 				<span class="node-title">{{ node.TenNoiDung }}</span>
 				<v-spacer></v-spacer>
 				<div class="node-actions">
+					<v-tooltip text="Preview"
+						v-if="node.LoaiNoiDung !== 'CHUONG' &&  node.LoaiNoiDung !== 'BAI'&& node.LoaiNoiDung !== 'NHOM_KY_NANG'">
+						<template v-slot:activator="{ props }">
+							<v-btn v-bind="props" icon size="x-small" variant="text" class="action-btn edit-btn"
+								@click.stop="onRedirect(node)">
+								<v-icon>mdi-eye-arrow-right-outline</v-icon>
+							</v-btn>
+						</template>
+					</v-tooltip>
 					<v-tooltip text="Sửa mục này">
 						<template v-slot:activator="{ props }">
 							<v-btn v-bind="props" icon size="x-small" variant="text" class="action-btn edit-btn"
@@ -41,9 +50,9 @@
 
 			<!-- Gọi đệ quy -->
 			<uc-editable-treeview-v2 v-if="node.children && node.children.length > 0" class="nested-tree"
-				:nodes="node.children" :hoc-lieu-id="hocLieuId" @update="handleChildUpdate(node, $event)"
-				@edit="(n) => $emit('edit', n)" @add-new="(n) => $emit('add-new', n)"
-				@delete="(n) => $emit('delete', n)" />
+				:nodes="node.children" :parent-node="node" :hoc-lieu-id="hocLieuId"
+				@update="handleChildUpdate(node, $event)" @edit="(n) => $emit('edit', n)"
+				@add-new="(n) => $emit('add-new', n)" @delete="(n) => $emit('delete', n)" />
 		</div>
 	</div>
 </template>
@@ -53,7 +62,8 @@
 		name: 'uc-editable-treeview-v2',
 		props: {
 			nodes: { type: Array, required: true },
-			hocLieuId: { type: Number, required: true }
+			hocLieuId: { type: Number, required: true },
+			parentNode: { type: Object, default: null }, // 👈 Thêm parent hiện tại
 		},
 		emits: ['update', 'add-new', 'edit', 'delete'],
 		data() {
@@ -61,9 +71,13 @@
 				draggedIndex: null,
 				dropIndicatorPosition: null,
 				isDragging: false,
+				dragInfo: null,
 			}
 		},
 		methods: {
+			onRedirect(node) {
+				window.open(`/hoc-lieu-view-v2?hoclieuid=${this.hocLieuId}&noidungid=${node.NoiDungID}`)
+			},
 			getIcon(loai) {
 				switch ((loai || '').toUpperCase()) {
 					case 'CHUONG': return 'mdi-folder-outline';
@@ -79,20 +93,27 @@
 					case 'QUIZ_DRAG_DROP_CATEGORIZE': return 'mdi-drag';
 					case 'QUIZ_FILL_IN_BLANK': return 'mdi-form-textbox';
 					case 'QUIZ_CONNECTION': return 'mdi-lan-connect';
-					case 'QUIZ_COMPOSITE' : return 'mdi-format-list-checks';
+					case 'QUIZ_COMPOSITE': return 'mdi-format-list-checks';
+					case 'SLIDE': return 'mdi-notebook-outline';
 					default: return 'mdi-bookmark-outline';
 				}
 			},
 			handleChildUpdate(parentNode, updatedChildren) {
 				const parentInCurrentList = this.nodes.find(n => n.NoiDungID === parentNode.NoiDungID);
-				if (parentInCurrentList) {
-					parentInCurrentList.children = updatedChildren;
-					this.$emit('update', this.nodes);
-				}
+				console.log(parentInCurrentList)
+				// if (parentInCurrentList) {
+				// 	parentInCurrentList.children = updatedChildren;
+				// 	this.$emit('update', this.nodes);
+				// }
 			},
 	
 			onDragStart(index, event) {
 				this.draggedIndex = index;
+				this.dragInfo = {
+					node: this.nodes[index],
+					index,
+					parent: this.parentNode, // 👈 biết đang ở trong cha nào
+				}
 				this.isDragging = true;
 				event.dataTransfer.effectAllowed = 'move';
 				event.dataTransfer.setData('text/plain', index);
@@ -133,7 +154,9 @@
 			},
 	
 			onDrop(event) {
+				console.log('event onDrop...')
 				event.preventDefault();
+				if (!this.dragInfo) return;
 				const draggedIndex = this.draggedIndex;
 	
 				// Tìm vị trí thả dựa trên vị trí của đường kẻ
@@ -146,28 +169,45 @@
 					}
 				}
 	
-				if (draggedIndex === null || draggedIndex === dropIndex) {
-					// Không làm gì nếu thả vào chính nó
+				const { node, index, parent } = this.dragInfo;
+	
+				// 💡 Xóa node khỏi danh sách gốc cũ
+				const oldList = parent?.children || this.nodes;
+				const newList = this.nodes;
+	
+				console.log(oldList, newList, index, dropIndex)
+				if (oldList === newList && index === dropIndex) return; // Không thay đổi gì
+	
+				oldList.splice(index, 1); // Gỡ khỏi nơi cũ
+				newList.splice(dropIndex, 0, node); // Thêm vào nơi mới
+	
+				// ✨ Nếu chuyển từ children → cha: cập nhật parent = null
+				if (parent) {
+					node.ParentID = null;
+					this.$emit('update', this.nodes); // Gửi danh sách gốc đã thay đổi
 				} else {
-					const newNodes = [...this.nodes];
-					const itemToMove = newNodes.splice(draggedIndex, 1)[0];
-	
-					if (draggedIndex < dropIndex) {
-						// Nếu kéo xuống, index thả thực tế bị giảm đi 1
-						newNodes.splice(dropIndex - 1, 0, itemToMove);
-					} else {
-						newNodes.splice(dropIndex, 0, itemToMove);
-					}
-	
-					this.$emit('update', newNodes);
+					// Giữ nguyên parent nếu không thay đổi cấp
+					this.$emit('update', this.nodes);
 				}
+	
+				console.log('this.nodes', this.nodes)
+				// Không làm gì nếu thả vào chính nó
+				// if (draggedIndex === null || draggedIndex === dropIndex) return
+	
+				// const newNodes = [...this.nodes];
+				// const itemToMove = newNodes.splice(draggedIndex, 1)[0];
+	
+				// if (draggedIndex < dropIndex) {
+				// 	// Nếu kéo xuống, index thả thực tế bị giảm đi 1
+				// 	newNodes.splice(dropIndex - 1, 0, itemToMove);
+				// } else {
+				// 	newNodes.splice(dropIndex, 0, itemToMove);
+				// }
+	
+				// this.$emit('update', newNodes);
 	
 				this.onDragEnd(); // Reset trạng thái
 			}
 		}
 	}
 </script>
-
-<style scoped>
-
-</style>

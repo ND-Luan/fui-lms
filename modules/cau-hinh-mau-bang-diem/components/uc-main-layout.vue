@@ -35,7 +35,7 @@
 							<v-list-item @click="onOpenModalCHCotDiem(item)">
 								<v-list-item-title>
 									<v-icon small class="mr-2"> mdi-table-settings </v-icon>
-									Cấu hình cột điểm
+									Cấu hình cột điểmm
 								</v-list-item-title>
 							</v-list-item>
 							<v-list-item @click="onOpenModalCopyCotDiem(item)">
@@ -70,6 +70,7 @@
 	    data() {
 	        return {
 	            vueData,
+				keyComp:0,
 	            searchInput: '',
 	            isShowModalAddMauBangDiem: false,
 	            isShowModalEditMauBangDiem: false,
@@ -122,13 +123,15 @@
 	            })
 	            if (res.IsSuccess) {
 	                this.TBMauBangDiem = res.Result
+					this.recordMauBangDiem={}
+					this.keyComp++
 	            }
 	        },
 	        onOpenModalAddMauBangDiem() {
 	            this.isShowModalAddMauBangDiem = true
 	        },
 	        onOpenModalEditMauBangDiem(record) {
-	            this.recordMauBangDiem = _.cloneDeep(record)
+	            this.recordMauBangDiem = record
 	            this.isShowModalEditMauBangDiem = true
 	        },
 	        onHandleDeleteMauBangDiem(record) {
@@ -147,11 +150,12 @@
 	            })
 	        },
 	        onOpenModalCHCotDiem(record) {
-	            this.recordMauBangDiem = _.cloneDeep(record)
+	            this.recordMauBangDiem = record
 	            this.isShowModalCHCotDiem = true
+				vueData.TemplateBangDiemID = record.TemplateBangDiemID
 	        },
 	        onOpenModalCopyCotDiem(record) {
-	            this.recordMauBangDiem = _.cloneDeep(record)
+	            this.recordMauBangDiem = record
 	            this.isShowModalCopyCotDiem = true
 	        },
 	    },

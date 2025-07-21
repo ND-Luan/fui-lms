@@ -1,0 +1,177 @@
+{
+    "data": [
+        {
+            "nestedHeaders": [
+                [
+                    {
+                        "title": "Lớp"
+                    },
+                    {
+                        "title": "Không đạt (0 <= Điểm < 5)",
+                        "colspan": "3"
+                    },
+                    {
+                        "title": "Đạt (5 <= Điểm < 6.5)",
+                        "colspan": "3"
+                    },
+                    {
+                        "title": "Khá (6.5 <= Điểm < 8)",
+                        "colspan": "3"
+                    },
+                    {
+                        "title": "Tốt (8 <= Điểm <= 60)",
+                        "colspan": "3"
+                    }
+                ],
+                [
+                    {},
+                    {
+                        "title": "Chỉ tiêu"
+                    },
+                    {
+                        "title": "Thực tế"
+                    },
+                    {
+                        "title": "so với chỉ tiêu"
+                    },
+                    {
+                        "title": "Chỉ tiêu"
+                    },
+                    {
+                        "title": "Thực tế"
+                    },
+                    {
+                        "title": "so với chỉ tiêu"
+                    },
+                    {
+                        "title": "Chỉ tiêu"
+                    },
+                    {
+                        "title": "Thực tế"
+                    },
+                    {
+                        "title": "so với chỉ tiêu"
+                    },
+                    {
+                        "title": "Chỉ tiêu"
+                    },
+                    {
+                        "title": "Thực tế"
+                    },
+                    {
+                        "title": "so với chỉ tiêu"
+                    }
+                ]
+            ],
+            "columnHeader": [
+                {
+                    "type": "text",
+                    "title": "",
+                    "name": "TenLop"
+                },
+                {
+                    "title": "",
+                    "name": "KD_CT",
+                    "align": "end",
+                    "type": "numeric",
+                    "mask": "0.00%"
+                },
+                {
+                    "type": "number",
+                    "title": "",
+                    "name": "KD_TT",
+                    "align": "end",
+                    "mask": "0.00%"
+                },
+                {
+                    "type": "number",
+                    "title": "",
+                    "name": "KD_STT",
+                    "align": "end",
+                    "mask": "0.00%"
+                },
+                {
+                    "type": "number",
+                    "title": "",
+                    "name": "D_CT",
+                    "align": "end",
+                    "mask": "0.00%"
+                },
+                {
+                    "type": "number",
+                    "title": "",
+                    "name": "D_TT",
+                    "align": "end",
+                    "mask": "0.00%"
+                },
+                {
+                    "type": "number",
+                    "title": "",
+                    "name": "D_STT",
+                    "align": "end",
+                    "mask": "0.00%"
+                },
+                {
+                    "type": "number",
+                    "title": "",
+                    "name": "K_CT",
+                    "align": "end",
+                    "mask": "0.00%"
+                },
+                {
+                    "type": "number",
+                    "title": "",
+                    "name": "K_TT",
+                    "align": "end",
+                    "mask": "0.00%"
+                },
+                {
+                    "type": "number",
+                    "title": "",
+                    "name": "K_STT",
+                    "align": "end",
+                    "mask": "0.00%"
+                },
+                {
+                    "type": "number",
+                    "title": "",
+                    "name": "T_CT",
+                    "align": "end",
+                    "mask": "0.00%"
+                },
+                {
+                    "type": "number",
+                    "title": "",
+                    "name": "T_TT",
+                    "align": "end",
+                    "mask": "0.00%"
+                },
+                {
+                    "type": "number",
+                    "title": "",
+                    "name": "T_STT",
+                    "align": "end",
+                    "mask": "0.00%"
+                }
+            ],
+            "DSLop": []
+        }
+    ],
+    "watch": {},
+    "controls": [
+        {
+            "prop": "fluid grid-list-md",
+            "rows": [
+                {
+                    "props": "",
+                    "cols": [
+                        {
+                            "el": "uc-main-page"
+                        }
+                    ]
+                }
+            ]
+        }
+    ],
+    "set": {}
+}

@@ -6,7 +6,7 @@
 			<div class="header-content">
 				<div class="header-info">
 					<h2 class="page-title">
-						<v-icon class="title-icon">mdi-book-open-page-variant</v-icon>
+						<v-icon class="title-icon"> mdi-book-open-page-variant</v-icon>
 						Soạn thảo Học liệu
 					</h2>
 					<p class="page-subtitle">Quản lý cấu trúc nội dung và tổ chức bài học</p>
@@ -27,14 +27,19 @@
 				<div class="sidebar-card">
 					<div class="sidebar-header">
 						<v-icon class="sidebar-icon">mdi-library-books</v-icon>
-						<h3 class="sidebar-title">Chọn Học Liệu</h3>
+						<h3 class="sidebar-title">Chọn Học liệu</h3>
 					</div>
 
 					<div class="book-selection">
-						<v-select label="Bộ sách" :items="['Kết nối tri thức', 'Chân trời sáng tạo']"
-							v-model="selectedBoSach" variant="outlined" density="comfortable"
-							prepend-inner-icon="mdi-bookshelf" class="book-selector"></v-select>
+						<v-select label="Bộ sách" :items="DSBoSach" v-model="selectedBoSach" variant="outlined"
+							density="comfortable" prepend-inner-icon="mdi-bookshelf" class="book-selector"
+							item-title="TenBoSach" item-value="BoSachID"></v-select>
 
+						<v-select v-model="selectedKhoi" label="Chọn khối" :items="DSKhoi" item-title="name"
+							item-value="id" />
+
+						<v-select class="my-6" v-model="selectedMon" label="Chọn môn học" :items="DSMonHoc"
+							item-title="MonHocName" item-value="MonHocID" />
 						<div class="book-list-container">
 							<div class="book-list-header">
 								<span class="list-title">Sách trong bộ</span>
@@ -50,7 +55,8 @@
 									</div>
 									<div class="book-info">
 										<h4 class="book-title">{{ sach.TenHocLieu }}</h4>
-										<p class="book-meta">{{ selectedBoSach }}</p>
+										<!-- <p class="book-meta">{{ selectedBoSach }}</p> -->
+										<p class="book-meta">{{ sach.TenBoSach }}</p>
 									</div>
 									<div class="book-status"
 										v-if="selectedHocLieu && selectedHocLieu.HocLieuID === sach.HocLieuID">
@@ -76,7 +82,7 @@
 						<v-icon class="badge-icon">mdi-book-open</v-icon>
 						<div class="badge-content">
 							<h3 class="selected-title">{{ selectedHocLieu.TenHocLieu }}</h3>
-							<p class="selected-meta">{{ selectedBoSach }} • Đang soạn thảo</p>
+							<p class="selected-meta">{{ selectedHocLieu.TenBoSach }} • Đang soạn thảo</p>
 						</div>
 					</div>
 				</div>
@@ -151,7 +157,8 @@
 		props: ['khoiIdProp', 'monHocIdProp'],
 		data() {
 			return {
-				selectedBoSach: 'Kết nối tri thức',
+				vueData,
+				selectedBoSach: null,
 				DSHocLieu: [],
 				selectedHocLieu: null,
 				treeNoiDung: [],
@@ -159,17 +166,65 @@
 				treeKey: 0,
 				// THÊM: State để quản lý dialog
 				isDialogOpen: false,
-				editingItem: null
+				editingItem: null,
+				selectedMon: null,
+				selectedKhoi: null,
+				DSBoSach: [],
+				DSMonHoc: [],
+				DSKhoi: [
+					{ id: 0, name: "Mầm non" },
+					{ id: 1, name: "Khối 1" },
+					{ id: 2, name: "Khối 2" },
+					{ id: 3, name: "Khối 3" },
+					{ id: 4, name: "Khối 4" },
+					{ id: 5, name: "Khối 5" },
+	
+					{ id: 6, name: "Khối 6" },
+					{ id: 7, name: "Khối 7" },
+					{ id: 8, name: "Khối 8" },
+					{ id: 9, name: "Khối 9" },
+	
+					{ id: 10, name: "Khối 10" },
+					{ id: 11, name: "Khối 11" },
+					{ id: 12, name: "Khối 12" },
+				]
 			}
 		},
 		mounted() {
-			this.fetchHocLieu();
+			this.getDSBoSach()
+		},
+		watch: {
+			selectedKhoi: function (selectedKhoi) {
+				this.selectedMon = null
+				this.selectedHocLieu = null
+				this.DSHocLieu = []
+				this.treeNoiDung = []
+				if (selectedKhoi) this.getDSMonHoc()
+			},
+			selectedMon: function (selectedMon) {
+				this.selectedHocLieu = null
+				this.DSHocLieu = []
+				this.treeNoiDung = []
+				if (selectedMon) this.fetchHocLieu()
+			}
 		},
 		methods: {
+			getDSBoSach() {
+				ajaxCALL('lms/FP_BoSach_GetList', null, res => {
+					this.DSBoSach = res.data
+					this.selectedBoSach = res.data[0] ? res.data[0].BoSachID : null
+				})
+			},
+			getDSMonHoc() {
+				ajaxCALL("lms/MonHoc_GetByKhoiID", {
+					KhoiID: this.selectedKhoi,
+					NienKhoa: vueData.NienKhoa
+				}, res => this.DSMonHoc = res.data)
+			},
 			fetchHocLieu() {
 				ajaxCALL('lms/FP_HocLieu_GetByLopMon', {
-					KhoiID: this.khoiIdProp,
-					MonHocID: this.monHocIdProp
+					KhoiID: this.selectedKhoi,
+					MonHocID: this.selectedMon
 				}, (res) => {
 					if (res && res.data) {
 						this.DSHocLieu = res.data;
@@ -177,6 +232,7 @@
 				});
 			},
 			async selectHocLieu(sach) {
+	
 				this.selectedHocLieu = sach;
 				this.isLoadingTree = true;
 				await this.fetchTreeNoiDung();
@@ -214,6 +270,7 @@
 					if (itemToEdit.parent) {
 						this.editingItem = {
 							HocLieuID: this.selectedHocLieu.HocLieuID,
+							TenHocLieu: this.selectedHocLieu.TenHocLieu,
 							ParentID: itemToEdit.parent.NoiDungID,
 							LoaiNoiDung: 'BAI', // Mặc định
 							ThuTu: itemToEdit.parent.children ? itemToEdit.parent.children.length : 0
@@ -225,6 +282,7 @@
 					// Trường hợp Thêm mục gốc
 					this.editingItem = {
 						HocLieuID: this.selectedHocLieu.HocLieuID,
+						TenHocLieu: this.selectedHocLieu.TenHocLieu,
 						ParentID: null,
 						LoaiNoiDung: 'CHUONG',
 						ThuTu: this.treeNoiDung.length
@@ -236,7 +294,7 @@
 			onEditItem(itemToEdit) {
 				if (!itemToEdit) return;
 				console.log("Chỉnh sửa node:", itemToEdit);
-				this.editingItem = itemToEdit; // Gán item cần sửa
+				this.editingItem = { ...itemToEdit, TenHocLieu: this.selectedHocLieu.TenHocLieu }; // Gán item cần sửa
 				this.isDialogOpen = true;
 			},
 	
@@ -246,6 +304,7 @@
 				console.log("Thêm mục gốc mới...");
 				this.editingItem = {
 					HocLieuID: this.selectedHocLieu.HocLieuID,
+					TenHocLieu: this.selectedHocLieu.TenHocLieu,
 					ParentID: null,
 					LoaiNoiDung: 'CHUONG',
 					ThuTu: this.treeNoiDung.length
@@ -259,6 +318,7 @@
 				console.log("Thêm node con cho:", parentNode);
 				this.editingItem = {
 					HocLieuID: this.selectedHocLieu.HocLieuID,
+					TenHocLieu: this.selectedHocLieu.TenHocLieu,
 					ParentID: parentNode.NoiDungID,
 					LoaiNoiDung: 'BAI',
 					ThuTu: parentNode.children ? parentNode.children.length : 0
@@ -269,6 +329,7 @@
 			// HÀM MỚI: Xử lý sự kiện save từ dialog
 			onSaveItem(item) {
 				console.log("Dữ liệu nhận từ dialog để lưu:", item);
+				item.ParentID = item.ParentID ?? 0
 				ajaxCALL('lms/FP_NoiDung_Save', item, (res) => {
 					if (res.data && res.data[0]) {
 						Vue.$toast.success("Đã lưu thành công!");
@@ -281,11 +342,14 @@
 	
 			// HÀM MỚI: Xử lý sự kiện delete từ cây
 			onDeleteNode(node) {
-				CONFIRM(`Bạn có chắc chắn muốn xóa mục "${node.TenNoiDung}" và tất cả các mục con của nó?`, () => {
-					ajaxCALL('lms/FP_NoiDung_Delete', { NoiDungID: node.NoiDungID }, (res) => {
-						Vue.$toast.success("Đã xóa thành công!");
-						this.fetchTreeNoiDung();
-					});
+				confirm({
+					title: `Bạn có chắc chắn muốn xóa mục "${node.TenNoiDung}" và tất cả các mục con của nó?`,
+					action: () => {
+						ajaxCALL('lms/FP_NoiDung_Delete', { NoiDungID: node.NoiDungID }, (res) => {
+							Vue.$toast.success("Đã xóa thành công!");
+							this.fetchTreeNoiDung();
+						});
+					}
 				});
 			},
 			buildTree(flatList) {

@@ -89,6 +89,7 @@ export default {
     },
     data() {
         return {
+			vueData,
             NoiDungDanhGia: [
                 {
                     TieuDe: "Học tập:",
@@ -139,7 +140,8 @@ export default {
         loadHocSinhDetail(HocSinhID) {
             return new Promise(async resolve => {
                 const response = await hocSinhLopService.HocSinh_Detail_GetBy_HocSinhID({
-                    HocSinhID: HocSinhID
+                    HocSinhID: HocSinhID,
+					NienKhoa: vueData.NienKhoa
                 })
                 if (response.IsSuccess) {
                     this.HocSinhDetail = response.Result

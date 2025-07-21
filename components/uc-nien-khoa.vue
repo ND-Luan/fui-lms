@@ -55,6 +55,7 @@
 				return Vue.mergeProps(menu, tooltip)
 			},
 			async NienKhoa_Get() {
+				let NienKhoaBefore= vueData.NienKhoa
 				this.isLoading = true
 				let res = await new Promise((resolve, reject) => {
 					ajaxCALL('lms/NienKhoa_Get', {}, res => {

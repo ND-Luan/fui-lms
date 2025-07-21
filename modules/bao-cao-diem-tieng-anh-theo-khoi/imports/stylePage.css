@@ -1,0 +1,6 @@
+.hide-headers thead tr:nth-child(3){
+    display: none;
+}
+.jss_worksheet{
+    width: 100%;
+}

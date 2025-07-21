@@ -264,9 +264,11 @@ export default {
 	},
 	methods: {
 		onSelectedHocSinh() {
+			if(!vueData.NienKhoa) return
 			ajaxCALL('lms/HocSinh_Detail_GetBy_HocSinhID',
 				{
-					HocSinhID: vueData.HocSinhSelected.HocSinhID
+					HocSinhID: vueData.HocSinhSelected.HocSinhID,
+					NienKhoa: vueData.NienKhoa
 				}, data => {
 					this.HocSinhSelected = data
 				}

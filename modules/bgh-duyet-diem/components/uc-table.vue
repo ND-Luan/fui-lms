@@ -67,7 +67,7 @@
 				]
 	
 				const Semester = vueData.Semester
-				const getKi = Semester.value.split('_')[0]
+				const getKi = Semester?.value.split('_')[0]
 				const uniqueMaCotDiemHeaders = [...new Set(DSCotDiem.map(x => x.MaCotDiem))]
 				const listMaCotDiem = ['MucDoDanhGia', 'NhanXet', 'Diem'];
 	
@@ -95,7 +95,6 @@
 				const DSCotDiem = hocSinh.DSCotDiem
 				const items = []
 				const uniqueMonHocID = [...new Set(DSCotDiem.map(x => x.MonHocID))]
-				console.log(vueData.Semester.value)
 				for (var MonHocID of uniqueMonHocID) {
 					const obj = {}
 					const objMonHoc = DSCotDiem.find(x => x.MonHocID === MonHocID)

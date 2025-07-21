@@ -21,3 +21,6 @@ function groupHocLieu() {
     // Chuyển object đã nhóm thành một mảng để v-for có thể lặp qua
     vueData.DSHocLieu_DaNhom = Object.values(grouped);
 }
+function initDSKhoi() {
+    vueData.DSKhoi = vueData.DSKhoi_Init.filter(x => x.CapID === vueData.selectedCap)
+}

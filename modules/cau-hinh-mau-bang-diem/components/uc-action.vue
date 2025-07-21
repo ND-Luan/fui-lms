@@ -58,6 +58,7 @@
 	        onOpenModalCHCotDiem(record) {
 	            vueData.recordMauBangDiem = _.cloneDeep(record)
 	            vueData.isShowModalCHCotDiem = true
+				vueData.TemplateBangDiemID = record.TemplateBangDiemID
 	        },
 	        onOpenModalCopyCotDiem(record) {
 	            vueData.recordMauBangDiem = _.cloneDeep(record)

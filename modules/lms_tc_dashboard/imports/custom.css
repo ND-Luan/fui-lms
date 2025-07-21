@@ -1,0 +1,65 @@
+/* ===== LHBS TEACHER DASHBOARD - SUBTLE ENHANCEMENTS ONLY ===== */
+
+.teacher-dashboard {
+  --lhbs-primary: #1565C0;
+  --lhbs-hover: rgba(21, 101, 192, 0.06);
+  --lhbs-shadow: rgba(21, 101, 192, 0.15);
+}
+
+/* Stats Cards - Chỉ thêm hover effect, KHÔNG đổi màu gốc */
+.teacher-dashboard .v-card[color]:hover {
+  transform: translateY(-2px);
+  transition: transform 0.3s ease;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+}
+
+/* Content Cards - Thêm hover nhẹ */
+.teacher-dashboard .v-card:not([color]):hover {
+  transform: translateY(-1px);
+  transition: transform 0.2s ease;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+/* List Items - Hover effect tinh tế */
+.teacher-dashboard .v-list-item:hover {
+  background-color: var(--lhbs-hover) !important;
+  transition: background-color 0.2s ease;
+}
+
+/* Activity Avatar - Ring animation nhẹ */
+.teacher-dashboard .v-avatar {
+  position: relative;
+  transition: transform 0.3s ease;
+}
+
+.teacher-dashboard .v-avatar:hover {
+  transform: scale(1.05);
+}
+
+/* Icons trong card title - Màu LHBS */
+.teacher-dashboard .v-card-title .v-icon {
+  color: var(--lhbs-primary) !important;
+}
+
+/* Animation load trang */
+.teacher-dashboard {
+  animation: fadeIn 0.5s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* KHÔNG THAY ĐỔI: */
+/* - Padding gốc của tất cả elements */
+/* - Màu sắc gốc của stats cards */
+/* - Border radius gốc */
+/* - Font sizes */
+/* - Layout spacing */

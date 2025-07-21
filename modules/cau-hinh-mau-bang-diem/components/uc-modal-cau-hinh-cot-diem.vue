@@ -294,7 +294,9 @@
 	            },
 	        }
 	    },
-	    mounted() { },
+	    mounted() {
+			
+		 },
 	    computed: {},
 	    watch: {
 	        'vueData.isShowModalCHCotDiem': function (isShow) {
@@ -311,7 +313,7 @@
 	        async loadDSNhomCotDiem() {
 	            this.isLoadingTB = true
 	            ajaxCALL('lms/TemplateBangDiemChiTiet_Get_ByID', {
-	                TemplateBangDiemID: this.recordMauBangDiem.TemplateBangDiemID
+	                TemplateBangDiemID: vueData.TemplateBangDiemID
 	            }, res => {
 	                let groupNhom = [...new Set(res.data.map(x => x.MaNhomCotDiem))]
 	                let group = []

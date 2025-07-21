@@ -165,17 +165,21 @@ function TongKet_GetDTBMonHocByKhoiLop() {
             })
     }
 }
-async function TongKet_GetDTBMonHocByKhoiLopHangLoat(lopid) {
-    await ajaxCALL(`https://tapi.lhbs.vn/diemc${vueData.CapID}/LMS_GetTongKetDTBMonHocByLop`,
-        {
-            KhoiID: vueData.KhoiID,
-            LopID: lopid,
-            HocKy: vueData.Semester.value,
-            NienKhoa: vueData.NienKhoa
-        }, res => {
-            vueData.dataDiem = res.data
-            initSpread()
-        })
+function TongKet_GetDTBMonHocByKhoiLopHangLoat(lopid) {
+    return new Promise(resolve => {
+        ajaxCALL(`https://tapi.lhbs.vn/diemc${vueData.CapID}/LMS_GetTongKetDTBMonHocByLop`,
+            {
+                KhoiID: vueData.KhoiID,
+                LopID: lopid,
+                HocKy: vueData.Semester.value,
+                NienKhoa: vueData.NienKhoa
+            }, res => {
+                vueData.dataDiem = res.data
+                console.log('lopid', lopid)
+                initSpread()
+                resolve()
+            })
+    })
 }
 function renderDSHocSinh_QLD() {
     const _dsHocSinh = []
@@ -199,7 +203,38 @@ function handleHeaders() {
         console.warn('Không có dữ liệu để tạo header');
         return;
     }
-    let headerDefault = Object.keys(vueData.dataDiem[0])
+    let keys = [];
+    vueData.DSHocSinh.forEach(obj => {
+        Object.keys(obj).forEach(key => {
+            if (!keys.includes(key)) {
+                keys.push(key);
+            }
+        });
+    });
+    console.log('keys', keys)
+    if (vueData.CapID === 2) {
+        keys = [
+            'STT', 'HocSinhID', 'HoTen', 'TenLop', 'NgaySinh',
+            'GDDP', 'HDTN', 'HKTN', 'JA', 'LS-DL',
+            'NT', 'AI', 'toan', 'tin', 'van', 'anh',
+            'gdcd', 'cn', 'td', 'DTB', 'HocLuc', 'KQRenLuyen',
+            'DanhHieu', 'Phep', 'KhongPhep', 'TongBuoiNghi',
+            'UuDiem', 'NhuocDiem', 'DeXuat', 'HocSinhLopID',
+            'NgayKhenThuong_EN', 'NgayKhenThuong_VI', 'SoQuyetDinhKT',
+            'VaoSoKT'
+        ]
+    } else {
+        keys = [
+            "STT", "HocSinhID", "HoTen", "TenLop", "NgaySinh",
+            "GDDP", "GDKT-PL", "gdqp", "HDTN", "JA", "toan", "ly", "hoa",
+            "sinh", "tin", "van", "su", "dia", "anh", "td", "DTB",
+            "HocLuc", "KQRenLuyen", "DanhHieu", "Phep", "KhongPhep",
+            "TongBuoiNghi", "UuDiem", "NhuocDiem", "DeXuat",
+            "HocSinhLopID", "NgayKhenThuong_EN", "NgayKhenThuong_VI",
+            "SoQuyetDinhKT", "VaoSoKT"
+        ]
+    }
+    let headerDefault = keys//Object.keys(vueData.dataDiem)
     headerDefault = [...headerDefault, 'VaoSoKT', 'SoQuyetDinhKT', 'NgayKhenThuong_VI', 'NgayKhenThuong_EN']
     let columnThongTinHocSinh = []
     const columnMapping = {
@@ -259,17 +294,14 @@ function handleData() {
         vueData.DSHocSinh.push(item)
     }
     const flatArrDSKhenThuong = vueData.DSKhenThuong.flat()
-    console.log(1, flatArrDSKhenThuong, vueData.DSHocSinh)
     for (var item of vueData.DSHocSinh) {
         const objHS = flatArrDSKhenThuong.find(x => x.HocSinhID == item.HocSinhID)
-        console.log('objHS', objHS, item)
         item.DanhHieu = objHS?.DanhHieu ?? ''
         item.NgayKhenThuong_EN = objHS?.NgayKhenThuong_EN ?? ''
         item.NgayKhenThuong_VI = objHS?.NgayKhenThuong_VI ?? ''
         item.SoQuyetDinhKT = objHS?.SoQuyetDinhKT ?? ''
         item.VaoSoKT = objHS?.VaoSoKT ?? ''
     }
-    console.log(123, vueData.DSHocSinh)
     vueData.DSHocSinh = vueData.DSHocSinh.sort((a, b) => a.TenLop.localeCompare(b.TenLop));
 }
 async function getDSLop() {
@@ -283,9 +315,17 @@ async function getDSLop() {
         vueData.DSKhenThuong = res.data
     })
     let dslopFilter = vueData.DSLop.filter(item => !item.LopID.includes('N'))
-    for (var item of dslopFilter) {
-        await TongKet_GetDTBMonHocByKhoiLopHangLoat(item.LopID)
+    const promise = () => {
+        return new Promise(async resolve => {
+            for (var item of dslopFilter) {
+                await TongKet_GetDTBMonHocByKhoiLopHangLoat(item.LopID)
+            }
+            resolve()
+        })
     }
+    promise().then(() => {
+        console.log('done')
+    })
 }
 function onSave() {
     confirm({

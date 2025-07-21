@@ -85,7 +85,7 @@ function onHoatDongClick(hoatDong) {
         //     //url: `/bai-giang-view?id=${hoatDong.NoiDungID}`
         //     url: `/bai-giang-view?hoclieuid=${vueData.id}&noidungid=${hoatDong.NoiDungID}`
         // })
-        redirect(`/hoc-lieu-view?hoclieuid=${vueData.id}&noidungid=${hoatDong.NoiDungID}`)
+        redirect(`/hoc-lieu-view-v2?hoclieuid=${vueData.id}&noidungid=${hoatDong.NoiDungID}`)
         // CALL('getNoiDungDetail');
     }
 }

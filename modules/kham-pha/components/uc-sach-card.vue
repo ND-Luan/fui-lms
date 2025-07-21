@@ -1,14 +1,16 @@
 <!-- === uc-sach-card (Sử dụng Vuetify Components) === -->
 <template>
-	<v-card class="sach-card" @click="handleClick" hover height="100%">
+	<v-card :flat="false" class="sach-card" @click="handleClick" hover height="100%">
 		<!-- Sử dụng v-img để hiển thị ảnh, có cả placeholder -->
-		<v-img :src="item.ThumbnailURL" height="160px" cover>
+		<v-img v-if="item.ThumbnailURL" :src="item.ThumbnailURL" height="160px" contain
+			@error="() => item.ThumbnailURL = '/_cdn/lhbs-lms/image_not_found.jpg'">
 			<template v-slot:placeholder>
 				<div class="d-flex align-center justify-center fill-height">
 					<v-progress-circular color="grey-lighten-4" indeterminate></v-progress-circular>
 				</div>
 			</template>
 		</v-img>
+		<v-img v-else src="/_cdn/lhbs-lms/image_not_found.jpg" height="160px" contain />
 
 		<v-card-text class="sach-info">
 			<div class="sach-title">{{ item.TenHocLieu }}</div>
@@ -20,7 +22,7 @@
 		<v-card-actions class="sach-meta">
 			<v-chip color="green" variant="tonal" size="small">
 				<v-icon start icon="mdi-check-circle"></v-icon>
-				Miễn phí
+				{{item.TinhTrang}}
 			</v-chip>
 		</v-card-actions>
 	</v-card>
@@ -28,16 +30,20 @@
 
 <script>
 	export default {
-    name: 'uc-sach-card',
-    props: {
-        item: { type: Object, required: true }
-    },
-    methods: {
-        handleClick() {
-            window.location.href = `/chi-tiet-hoc-lieu?id=${this.item.HocLieuID}`;
-        }
-    }
-}
+		name: 'uc-sach-card',
+		props: {
+			item: { type: Object, required: true }
+		},
+		methods: {
+			handleClick() {
+				redirect(`/chi-tiet-hoc-lieu?id=${this.item.HocLieuID}`)
+				// openWindow({
+				// 	"title": "Chi tiết học liệu",
+				// 	"url": `/chi-tiet-hoc-lieu?id=${this.item.HocLieuID}`
+				// })
+			}
+		}
+	}
 </script>
 
 <style scoped>

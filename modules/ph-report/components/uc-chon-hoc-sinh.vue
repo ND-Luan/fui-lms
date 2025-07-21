@@ -7,7 +7,12 @@
 				</div>
 			</template>
 		</v-img>
-		<p class="text-h6 text-primary">{{ $t('message.selectedStudent') }}</p>
+		<div class="d-flex w-100">
+			<p class="text-h6 text-primary">{{ $t('message.selectedStudent') }}</p>
+			<v-spacer></v-spacer>
+			<!-- <uc-nien-khoa :is-Show-Title='false' :class-Custom='true'></uc-nien-khoa> -->
+		</div>
+		
 
 	</v-card-text>
 
@@ -46,7 +51,7 @@
 
 		<div v-for="(hocSinh, index) in DSHocSinh" :key="hocSinh.StudentID">
 			<v-list-item :class="vueData.HocSinhSelected?.StudentID === hocSinh.StudentID ? 'bg-primary' : ''"
-				:title="hocSinh.HoTen" :subtitle="'Lớp ' + hocSinh.TenLop + ' - ' + hocSinh.StudentID"
+				:title="hocSinh.HoTen" :subtitle="'Lớp ' + hocSinh.TenLop + ' (Hiện tại)' + ' - ' + hocSinh.StudentID"
 				:disabled="!hocSinh.IsShow">
 				<template v-slot:prepend>
 					<v-avatar>

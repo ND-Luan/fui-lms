@@ -203,3 +203,148 @@ function validateSave(typeCell, value, min, max) {
     if ((typeCell === 'number' && value < min) || value > max) return 1
     else return 0
 }
+function exportExcel() {
+    // 1. Dữ liệu mẫu (mảng object)
+    const rawData = vueData.DSHocSinh
+    // 2. Định nghĩa header nhóm (dòng 1) và header cột (dòng 2)
+    const headerRow1 = [
+        "Thông tin học sinh", null, null,
+        "Theme 1", null, null,null,null,null,null,null,null,null,
+        "Theme 2", null, null,null,null,null,null,null,null,null,
+        "Giữa HK1", null, null,null,null,null,null,null,null,null,null,null,
+        "Điểm TA2 Giữa HK1", null, null,null,null,null,null,null,null,null,null,
+        "Quy đổi IELTS Giữa HK1", null, null,null,null,
+        "Theme 3", null, null,null,null,null,null,null,null,null,
+        "Theme 4", null, null,null,null,null,null,null,null,null,
+        "Cuối HK1", null, null,null,null,null,null,null,null,null,null,null,
+        "Cuối TA2 HK1", null, null,null,null,null,null,null,null,null,null,
+        "Quy đổi IELTS Cuối HK1", null, null,null,null,
+        "Theme 5", null, null,null,null,null,null,null,null,null,
+        "Theme 6", null, null,null,null,null,null,null,null,null,
+        "Giữa HK2", null, null,null,null,null,null,null,null,null,null,null,
+        "Giữa TA2 HK2", null, null,null,null,null,null,null,null,null,null,
+        "Quy đổi IELTS Giữa HK2", null, null,null,null,
+        "Theme 7", null, null,null,null,null,null,null,null,null,
+        "Theme 8", null, null,null,null,null,null,null,null,null,
+        "Cuối HK2", null, null,null,null,null,null,null,null,null,null,null,
+        "Cuối TA2 HK2", null, null,null,null,null,null,null,null,null,null,
+        "Quy đổi IELTS Cuối HK2", null, null,null,null,
+        "Điểm trung bình"
+    ]
+    const headerRow2 = vueData.columnHeader.filter(item => item.title != 'STT' && item.title != 'HSLopID' && item.title!='Điểm TB HK1' && item.title!='Điểm TB HK2').map(item => item.title)
+    // 3. Đặt thứ tự key để đảm bảo map đúng cột theo headerRow2
+    const keys = vueData.columnHeader.filter(item => item.title != 'STT' && item.title != 'HSLopID'&& item.title!='Điểm TB HK1' && item.title!='Điểm TB HK2').map(item => item.name)
+    //     "TenLop",
+    //     "SoDanhBo",
+    //     "HoTen",
+    //     "NgaySinh",
+    //     "Phai",
+    //     "TVM",
+    //     "TVD",
+    //     "TOM",
+    //     "TOD",
+    //     "NNM",
+    //     "NND",
+    //     "SDM",
+    //     "SDD",
+    //     "KHM",
+    //     "KHD",
+    //     "THM",
+    //     "THD",
+    //     "CNM",
+    //     "CND",
+    //     "DDM",
+    //     "TDM",
+    //     "ANM",
+    //     "MTM",
+    //     "KTM",
+    //     "DTM",
+    //     "NL1",
+    //     "NL2",
+    //     "NL3",
+    //     "NL4",
+    //     "NL5",
+    //     "NL6",
+    //     "NL7",
+    //     "NL8",
+    //     "NL9",
+    //     "NL10",
+    //     "PC1",
+    //     "PC2",
+    //     "PC3",
+    //     "PC4",
+    //     "PC5",
+    //     "HoanThanhXuatSac",
+    //     "HoanThanhTot",
+    //     "HoanThanh",
+    //     "ChuaHoanThanh",
+    //     "KTCN",
+    //     "KTDX",
+    //     "ChuaLenLop",
+    //     "DanhGia",
+    //     "DanhHieu",
+    //     "KhenThuong",
+    //     "PhanLoai_TuyenThang",
+    //     "Flyers",
+    //     "DiemTA",
+    //     "DKHocTiep",
+    //     "PhoiHopCMHS",
+    //     "NhanXetGVCN_VePhuHuynh_HTML",
+    //     "NhanXetGVCN_VeHocSinh_HTML",
+    //     "DeXuat_NDCamKet"
+    // ]
+    // 4. Chuyển rawData thành mảng 2 chiều
+    const dataRows = rawData.map(item =>
+        keys.map(k => item[k] != null ? item[k] : "")
+    )
+    console.log('dataRows', dataRows)
+    // 5. Gom lại AOA (array of arrays)
+    const aoa = [
+        headerRow1,
+        headerRow2,
+        ...dataRows
+    ]
+    // 6. Tạo worksheet từ AOA và thiết lập merge
+    const worksheet = XLSX.utils.aoa_to_sheet(aoa)
+    worksheet['!merges'] = [
+  { s: { r: 0, c: 0 }, e: { r: 0, c: 2 } },
+  { s: { r: 0, c: 3 }, e: { r: 0, c: 12 } },
+  { s: { r: 0, c: 13 }, e: { r: 0, c: 22 } },
+  { s: { r: 0, c: 23 }, e: { r: 0, c: 34 } },
+  { s: { r: 0, c: 35 }, e: { r: 0, c: 45 } },
+  { s: { r: 0, c: 46 }, e: { r: 0, c: 50 } },
+  { s: { r: 0, c: 51 }, e: { r: 0, c: 60 } },
+  { s: { r: 0, c: 61 }, e: { r: 0, c: 70 } },
+  { s: { r: 0, c: 71 }, e: { r: 0, c: 82 } },
+  { s: { r: 0, c: 83 }, e: { r: 0, c: 93 } },
+  { s: { r: 0, c: 94 }, e: { r: 0, c: 98 } },
+  { s: { r: 0, c: 99 }, e: { r: 0, c: 108 } },
+  { s: { r: 0, c: 109 }, e: { r: 0, c: 118 } },
+  { s: { r: 0, c: 119 }, e: { r: 0, c: 130 } },
+  { s: { r: 0, c: 131 }, e: { r: 0, c: 141 } },
+  { s: { r: 0, c: 142 }, e: { r: 0, c: 144 } },
+  { s: { r: 0, c: 147 }, e: { r: 0, c: 156 } },
+  { s: { r: 0, c: 157 }, e: { r: 0, c: 166 } },
+  { s: { r: 0, c: 167 }, e: { r: 0, c: 178 } },
+  { s: { r: 0, c: 179 }, e: { r: 0, c: 189 } },
+  { s: { r: 0, c: 190 }, e: { r: 0, c: 194 } },
+  { s: { r: 0, c: 195 }, e: { r: 0, c: 195 } }
+]
+    // 7. Tạo workbook, append sheet và ghi file
+    const workbook = XLSX.utils.book_new()
+    XLSX.utils.book_append_sheet(workbook, worksheet, "TongBangDiemQuaTrinh")
+    XLSX.writeFile(workbook, "TongBangDiemQuaTrinh.xlsx")
+}
+vueData.exportExcel  = exportExcel
+function buildMergeRanges(lengths, startRow = 0, startCol = 0) {
+  const result = [];
+  let col = startCol;
+  for (let len of lengths) {
+    result.push({
+      s: { r: startRow, c: col },
+      e: { r: startRow, c: col + len - 1 }
+    });
+    col += len;
+  }
+  return result;
+}

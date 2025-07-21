@@ -1,1 +1,1 @@
-{"data":[{"EXE":"checkRedirectRole()"}],"watch":{},"controls":[{"prop":"fluid grid-list-md","rows":[{"prop":"","cols":[{"el":"uc-main-layout"}]}]}],"set":{}}
+{"data":[{"EXE":"checkRedirectRole()"}],"watch":{},"controls":[{"prop":"fluid grid-list-md pa-0","rows":[{"prop":":no-gutters='true'","cols":[{"el":"uc-main-layout"}]}]}],"set":{}}
