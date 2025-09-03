@@ -7,6 +7,12 @@ addEventListener('resize', () => {
         renderHeaderTable()
     }
 })
+vueData.renderTextLop = renderTextLop
+function renderTextLop(item) {
+    let string = item.TenLop
+    if (item.GVCN === vueData.user.UserID) string += ' (Bạn đang giáo viên chủ nhiệm của lớp)'
+    return string
+}
 function processDataBeforePostAPI() {
     vueData.JSON_NhanXetThang = []
     const newData = []

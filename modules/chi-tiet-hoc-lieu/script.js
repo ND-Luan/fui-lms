@@ -79,13 +79,12 @@ function onMucLucSelect(node) {
 }
 function onHoatDongClick(hoatDong) {
     if (hoatDong && hoatDong.NoiDungID) {
-        vueData.selectedHoatDong = hoatDong;
-        // openWindow({
-        //     title: "Chi tiết",
-        //     //url: `/bai-giang-view?id=${hoatDong.NoiDungID}`
-        //     url: `/bai-giang-view?hoclieuid=${vueData.id}&noidungid=${hoatDong.NoiDungID}`
-        // })
+        if (hoatDong.LoaiNoiDung === 'NHOM_KY_NANG') {
+            if (hoatDong.children.length === 0) return Vue.$toast.warning(`${hoatDong.TenNoiDung} chưa nội dung. Vui lòng thông báo giáo viên để cập nhật nội dung`, { position: "top" })
+            redirect(`/hoc-lieu-view-v2?hoclieuid=${vueData.id}&noidungid=${hoatDong.children[0]?.NoiDungID}`)
+            return
+        }
         redirect(`/hoc-lieu-view-v2?hoclieuid=${vueData.id}&noidungid=${hoatDong.NoiDungID}`)
-        // CALL('getNoiDungDetail');
+        // vueData.selectedHoatDong = hoatDong;
     }
 }

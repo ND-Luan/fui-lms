@@ -51,6 +51,7 @@
 						</v-card-title>
 						<v-card-text>
 							<f-editor v-model="textEditor" variant="outlined" :height="300"
+							 :imageapi="vueData.v_Set.apiImageAdapter"
 								placeholder="Dán nội dung câu hỏi vào đây...">
 							</f-editor>
 						</v-card-text>
@@ -172,6 +173,7 @@
 	
 		data() {
 			return {
+				vueData,
 				textEditor: '',
 				selectedQuestionType: 'QUIZ_SINGLE_CHOICE',
 				selectedGroupIndex: 0,

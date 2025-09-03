@@ -1,0 +1,1 @@
+{"data":[{"LopID":"parseInt(LopID)","MonHocID":"parseInt(MonHocID)"}],"watch":{},"controls":[{"prop":"fluid pa-0","rows":[{"cols":[{"el":"uc-gradebook","attr":{":initial-lop-id":"LopID",":initial-mon-hoc-id":"MonHocID"}}]}]}],"set":{"menu":false}}

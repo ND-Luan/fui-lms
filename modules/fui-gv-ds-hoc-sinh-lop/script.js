@@ -30,6 +30,7 @@ function renderDSHocSinh() {
             obj.Nu = _hs.Nu
             obj.TinhTrangKQHT = _hs?.TinhTrang
             obj.TenTinhTrangKQHT = _hs?.TenTinhTrang
+            obj.EnglishName = _hs?.EnglishName
         }
         if (hocSinhLMS) {
             //EDUBOT
@@ -105,4 +106,10 @@ function localStorageSetItem(item) {
         url: '/ph-report'
     })
 }
+function onOpenModalEditProfile(item) {
+    vueData.StudentProfile = {...item}
+    vueData.isOpenModalEditProfile= true
+}
 vueData.TitlePage = getTitlePageByURL(window.location.pathname + window.location.search)
+vueData.localStorageSetItem = localStorageSetItem
+vueData.onOpenModalEditProfile = onOpenModalEditProfile

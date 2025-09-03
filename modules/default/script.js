@@ -22,6 +22,9 @@ async function checkRedirectRole() {
         } else if (user.GroupID === 2) {
             //Phụ huynh
             redirect('/ph-report')
+        } else if (user.GroupID === 3) {
+            //Học sinh
+            redirect('/lms-student-dashboard')
         }
     }
 }

@@ -1642,7 +1642,7 @@
 }
 
 .lh-question-header {
-  margin-bottom: var(--lh-space-lg);
+  /* margin-bottom: var(--lh-space-lg); */
 }
 
 .lh-question-number {
@@ -2079,7 +2079,7 @@
 
 .lh-options-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
   gap: var(--lh-space-md);
   margin-bottom: var(--lh-space-xl);
 }

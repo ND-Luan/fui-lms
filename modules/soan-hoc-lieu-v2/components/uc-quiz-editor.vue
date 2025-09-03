@@ -4,19 +4,21 @@
 		<div v-if="loaiNoiDung === 'QUIZ_SINGLE_CHOICE'">
 			<!-- <v-textarea label="Câu hỏi/Yêu cầu" v-model="editableData.prompt" variant="outlined" rows="2" auto-grow>
 			</v-textarea> -->
-			<f-editor label="Câu hỏi/Yêu cầu" v-model="editableData.prompt" variant="outlined" rows="2" auto-grow>
+			<f-editor label="Câu hỏi/Yêu cầu" v-model="editableData.prompt" :imageapi="vueData.v_Set.apiImageAdapter"
+				variant="outlined" rows="2" auto-grow>
 			</f-editor>
 			<div class="d-flex align-center justify-space-between form-label mt-4">
 				<label>Các lựa chọn và đáp án đúng:</label>
-				<v-checkbox v-model="isAdvanced" label="Soạn đáp án nâng cao" />
+				<v-checkbox v-model="editableData.isAdvanced" label="Soạn đáp án nâng cao" />
 			</div>
 			<v-radio-group v-model="editableData.correctAnswer">
 				<div v-for="(option, index) in editableData.options" :key="index" class="d-flex align-center mb-2">
 					<v-radio :value="option.id"></v-radio>
-					<v-text-field v-if="!isAdvanced" v-model="option.text" density="compact" variant="outlined"
-						hide-details>
+					<v-text-field v-if="!editableData.isAdvanced" v-model="option.text" density="compact"
+						variant="outlined" hide-details>
 					</v-text-field>
-					<uc-editor-dialog v-else v-model:text="option.text" />
+					<!-- <uc-editor-dialog v-else v-model:text="option.text" /> -->
+					<uc-latex-edit v-else v-model:content="option.text" :isEditable="true" />
 					<v-btn v-if="editableData.options.length > 2" icon="mdi-delete-outline" variant="text" size="small"
 						color="red" @click="removeOption('options', index)"></v-btn>
 				</div>
@@ -32,17 +34,18 @@
 		<div v-else-if="loaiNoiDung === 'QUIZ_MULTIPLE_CHOICE'">
 			<!-- <v-textarea label="Câu hỏi/Yêu cầu" v-model="editableData.prompt" variant="outlined" rows="2" auto-grow>
 			</v-textarea> -->
-			<f-editor label="Câu hỏi/Yêu cầu" v-model="editableData.prompt" variant="outlined" rows="2" auto-grow>
+			<f-editor label="Câu hỏi/Yêu cầu" v-model="editableData.prompt" variant="outlined" rows="2" auto-grow
+				:imageapi="vueData.v_Set.apiImageAdapter">
 			</f-editor>
 
 			<div class="d-flex align-center justify-space-between form-label mt-4">
 				<label class="form-label mt-4">Các lựa chọn (chọn các đáp án đúng):</label>
-				<v-checkbox v-model="isAdvanced" label="Soạn đáp án nâng cao" />
+				<v-checkbox v-model="editableData.isAdvanced" label="Soạn đáp án nâng cao" />
 			</div>
 			<div v-for="(option, index) in editableData.options" :key="index" class="d-flex align-center mb-2">
 				<v-checkbox v-model="editableData.correctAnswers" :value="option.id" hide-details class="mr-2">
 				</v-checkbox>
-				<v-text-field v-if="!isAdvanced" v-model="option.text" density="compact" variant="outlined"
+				<v-text-field v-if="!editableData.isAdvanced" v-model="option.text" density="compact" variant="outlined"
 					hide-details>
 				</v-text-field>
 				<uc-editor-dialog v-else v-model:text="option.text" />
@@ -59,10 +62,11 @@
 		<div v-else-if="loaiNoiDung === 'QUIZ_MATCHING'">
 			<!-- <v-textarea label="Câu hỏi/Yêu cầu" v-model="editableData.prompt" variant="outlined" rows="2" auto-grow>
 			</v-textarea> -->
-			<f-editor label="Câu hỏi/Yêu cầu" v-model="editableData.prompt" variant="outlined" rows="2" auto-grow>
+			<f-editor label="Câu hỏi/Yêu cầu" v-model="editableData.prompt" variant="outlined" rows="2" auto-grow
+				:imageapi="vueData.v_Set.apiImageAdapter">
 			</f-editor>
 			<div>
-				<v-checkbox v-model="isAdvanced" label="Soạn đáp án nâng cao" />
+				<v-checkbox v-model="editableData.isAdvanced" label="Soạn đáp án nâng cao" />
 			</div>
 			<v-row>
 				<v-col><label class="form-label">Cột A</label></v-col>
@@ -70,16 +74,16 @@
 			</v-row>
 			<v-row v-for="(pair, index) in editableData.columnA" :key="index" class="mb-n5">
 				<v-col>
-					<v-text-field v-if="!isAdvanced" v-model="pair.text" density="compact" variant="outlined"
-						hide-details></v-text-field>
+					<v-text-field v-if="!editableData.isAdvanced" v-model="pair.text" density="compact"
+						variant="outlined" hide-details />
 					<uc-editor-dialog v-else v-model:text="pair.text" />
 				</v-col>
 				<v-col class="d-flex align-center">
-					<v-text-field v-if="!isAdvanced" v-model="editableData.columnB[index].text" density="compact"
-						variant="outlined" hide-details></v-text-field>
+					<v-text-field v-if="!editableData.isAdvanced" v-model="editableData.columnB[index].text"
+						density="compact" variant="outlined" hide-details />
 					<uc-editor-dialog v-else v-model:text="editableData.columnB[index].text" />
-					<v-btn icon="mdi-delete-outline" variant="text" size="small" color="red" @click="removePair(index)">
-					</v-btn>
+					<v-btn icon="mdi-delete-outline" variant="text" size="small" color="red"
+						@click="removePair(index)" />
 				</v-col>
 			</v-row>
 			<v-btn prepend-icon="mdi-plus" variant="text" color="primary" @click="addPair" class="mt-4">Thêm cặp</v-btn>
@@ -89,16 +93,17 @@
 		<div v-else-if="loaiNoiDung === 'QUIZ_ORDERING'">
 			<!-- <v-textarea label="Câu hỏi/Yêu cầu" v-model="editableData.prompt" variant="outlined" rows="2" auto-grow>
 			</v-textarea> -->
-			<f-editor label="Câu hỏi/Yêu cầu" v-model="editableData.prompt" variant="outlined" rows="2" auto-grow>
+			<f-editor label="Câu hỏi/Yêu cầu" v-model="editableData.prompt" variant="outlined" rows="2" auto-grow
+				:imageapi="vueData.v_Set.apiImageAdapter">
 			</f-editor>
 			<div class="d-flex align-center justify-space-between form-label mt-4">
 				<label class="form-label mt-4">Các mục (nhập theo thứ tự đúng):</label>
-				<v-checkbox v-model="isAdvanced" label="Soạn đáp án nâng cao" />
+				<v-checkbox v-model="editableData.isAdvanced" label="Soạn đáp án nâng cao" />
 			</div>
 
 			<div v-for="(item, index) in editableData.items" :key="index" class="d-flex align-center mb-2">
 				<span class="mr-2 font-weight-bold">{{ index + 1 }}.</span>
-				<v-text-field v-if="!isAdvanced" v-model="item.text" density="compact" variant="outlined"
+				<v-text-field v-if="!editableData.isAdvanced" v-model="item.text" density="compact" variant="outlined"
 					hide-details></v-text-field>
 				<uc-editor-dialog v-else v-model:text="item.text" />
 				<v-btn icon="mdi-delete-outline" variant="text" size="small" color="red"
@@ -111,7 +116,8 @@
 		<div v-else-if="loaiNoiDung === 'QUIZ_DRAG_DROP_CATEGORIZE'">
 			<!-- <v-textarea label="Câu hỏi/Yêu cầu" v-model="editableData.prompt" variant="outlined" rows="2" auto-grow>
 			</v-textarea> -->
-			<f-editor label="Câu hỏi/Yêu cầu" v-model="editableData.prompt" variant="outlined" rows="2" auto-grow>
+			<f-editor label="Câu hỏi/Yêu cầu" v-model="editableData.prompt" variant="outlined" rows="2" auto-grow
+				:imageapi="vueData.v_Set.apiImageAdapter">
 			</f-editor>
 			<label class="form-label mt-4">Các nhóm:</label>
 			<div v-for="(cat, index) in editableData.categories" :key="index" class="d-flex align-center mb-2">
@@ -138,8 +144,9 @@
 
 		<!-- ==================== 6. QUIZ_FILL_IN_BLANK ==================== -->
 		<div v-else-if="loaiNoiDung === 'QUIZ_FILL_IN_BLANK'">
-			<v-textarea label="Hướng dẫn" v-model="editableData.prompt" variant="outlined" rows="2" auto-grow>
-			</v-textarea>
+			<f-editor v-model="editableData.prompt" :imageapi="vueData.v_Set.apiImageAdapter"></f-editor>
+			<!-- <v-textarea label="Hướng dẫn" v-model="editableData.prompt" variant="outlined" rows="2" auto-grow>
+			</v-textarea> -->
 			<label class="form-label mt-4">Nội dung câu (thêm các phần text và chỗ trống):</label>
 			<div v-for="(part, index) in editableData.parts" :key="index" class="d-flex align-center mb-2">
 				<v-chip class="mr-2">{{ part.type === 'text' ? 'Văn bản' : 'Ô trống' }}</v-chip>
@@ -155,8 +162,9 @@
 		</div>
 		<!-- ==================== 7. Soạn thảo: Nối nhóm (QUIZ_CONNECTION) ==================== -->
 		<div v-else-if="loaiNoiDung === 'QUIZ_CONNECTION'">
-			<v-textarea label="Câu hỏi/Yêu cầu" v-model="editableData.prompt" variant="outlined" rows="2" auto-grow>
-			</v-textarea>
+			<f-editor v-model="editableData.prompt" :imageapi="vueData.v_Set.apiImageAdapter"></f-editor>
+			<!-- <v-textarea label="Câu hỏi/Yêu cầu" v-model="editableData.prompt" variant="outlined" rows="2" auto-grow>
+			</v-textarea> -->
 			<label class="form-label mt-4">Các nhóm:</label>
 			<div v-for="(group, index) in editableData.groups" :key="index" class="d-flex align-center mb-2">
 				<v-text-field v-model="group.text" density="compact" variant="outlined" hide-details
@@ -209,10 +217,20 @@
 							density="compact">
 							<template v-slot:label>
 								<div class="d-flex align-center">
-									<v-icon class="mr-2">{{ editableData.hasGroups ? 'mdi-folder-multiple' :
-										'mdi-format-list-bulleted' }}</v-icon>
-									<span>{{ editableData.hasGroups ? 'Chế độ nhóm câu hỏi' : 'Chế độ danh sách đơn'
-										}}</span>
+									<v-icon class="mr-2">
+										{{
+										editableData.hasGroups
+										? 'mdi-folder-multiple'
+										: 'mdi-format-list-bulleted'
+										}}
+									</v-icon>
+									<span>
+										{{
+										editableData.hasGroups
+										? 'Chế độ nhóm câu hỏi'
+										: 'Chế độ danh sách đơn'
+										}}
+									</span>
 									<v-chip class="ml-2" size="small"
 										:color="editableData.hasGroups ? 'success' : 'grey'">
 										{{ editableData.hasGroups ? 'BẬT' : 'TẮT' }}
@@ -318,11 +336,14 @@
 				<label v-else>
 					Danh sách câu hỏi
 				</label>
-				<!-- <uc-editor-dialog-quiz-composite v-model:text="currentQuestionsList" /> -->
-				<uc-editor-dialog-quiz-composite v-model:text="currentQuestionsList"
-					:has-groups="editableData.hasGroups" :groups="editableData.groups || []"
-					:target-group-index="activeGroupIndex" @update:text="handleImportQuestions" />
-
+				<div> <!-- <uc-editor-dialog-quiz-composite v-model:text="currentQuestionsList" /> -->
+					<uc-editor-dialog-quiz-composite v-model:text="currentQuestionsList"
+						:has-groups="editableData.hasGroups" :groups="editableData.groups || []"
+						:target-group-index="activeGroupIndex" @update:text="handleImportQuestions" />
+					<uc-editor-chat-ai v-model:text="currentQuestionsList" :has-groups="editableData.hasGroups"
+						:groups="editableData.groups || []" :target-group-index="activeGroupIndex"
+						@update:text="handleImportQuestions" />
+				</div>
 			</div>
 
 			<!-- HIỂN THỊ DANH SÁCH CÂU HỎI -->
@@ -416,14 +437,17 @@
 		<div v-else-if="loaiNoiDung === 'QUIZ_TRUE_FALSE'">
 			<!-- <v-textarea label="Câu hỏi/Yêu cầu" v-model="editableData.prompt" variant="outlined" rows="2" auto-grow>
 			</v-textarea> -->
-			<f-editor label="Câu hỏi/Yêu cầu" v-model="editableData.prompt" variant="outlined" rows="2" auto-grow>
+			<f-editor label="Câu hỏi/Yêu cầu" v-model="editableData.prompt" :imageapi="vueData.v_Set.apiImageAdapter"
+				variant="outlined" rows="2" auto-grow>
 			</f-editor>
 			<div class="d-flex align-center justify-space-between form-label mt-4">
 				<label>Các lựa chọn và đáp án đúng:</label>
+				<v-checkbox v-model="editableData.isAdvanced" label="Soạn đáp án nâng cao">
 			</div>
 			<div>
-				
-				<div v-for="(option, index) in editableData.options" :key="index" class="d-flex align-center mb-2 ga-4">
+
+				<div v-for="(option, index) in editableData.options" :key="index"
+					class="d-flex justify-space-between align-center mb-2 ga-4">
 					<div class="d-flex ga-2">
 						<v-checkbox v-model="option.correctAnswer" color="primary" label="Đúng"
 							@update:modelValue="(val) => {if(val) option.inCorrectAnswer = false}" />
@@ -432,11 +456,13 @@
 					</div>
 					<!-- <v-checkbox v-model="editableData.correctAnswers" :value="option.id" hide-details class="mr-2">
 									</v-checkbox> -->
-					<v-text-field v-model="option.text" density="compact" variant="outlined" hide-details
-						:clearable="false">
-					</v-text-field>
-					<v-btn v-if="editableData.options.length > 2" icon="mdi-delete-outline" variant="text" size="small"
-						color="red" @click="removeOption('options', index)"></v-btn>
+					<div class="d-flex ga-2">
+						<v-text-field v-if="!editableData.isAdvanced" v-model="option.text" density="compact"
+							variant="outlined" hide-details :clearable="false" style="width: 500px" />
+						<uc-latex-edit v-else v-model:content="option.text" :isEditable="true" />
+						<v-btn v-if="editableData.options.length > 2" icon="mdi-delete-outline" variant="text"
+							size="small" color="red" @click="removeOption('options', index)" />
+					</div>
 				</div>
 			</div>
 			<v-btn prepend-icon="mdi-plus" variant="text" color="primary" @click="addOption('options')">Thêm lựa
@@ -465,6 +491,7 @@
 		emits: ['update:modelValue'],
 		data() {
 			return {
+				vueData,
 				editableData: {},
 				panel: 0,
 				nextQuizType: 'QUIZ_SINGLE_CHOICE',
@@ -551,6 +578,7 @@
 			}
 		},
 		methods: {
+	
 			ensureDataStructure(type, data) {
 				let defaults = {};
 				switch (type) {

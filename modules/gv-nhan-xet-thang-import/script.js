@@ -42,9 +42,8 @@ function convertHocSinhToAPI() {
     vueData.JSON_NhanXetThang = []
     const tableData = vueData.dataSource.map((s) => {
         const hsl = vueData.dataSource_API.find(h => h.HocSinhID == s.HocSinhID)
-        console.log('vueData.dataSource', vueData.dataSource);
-        console.log('vueData.dataSource_API', vueData.dataSource_API);
-        if (hsl.CapID === 1) {
+        console.log('hsl', hsl);
+        if (hsl?.CapID === 1) {
             return {
                 HocSinhID: s[0],
                 SoDanhBo: s[1],
@@ -60,7 +59,7 @@ function convertHocSinhToAPI() {
                 Lop_NhanXetThangID: vueData.Lop_NhanXetThangID,
                 HSLopID: hsl.HSLopID
             }
-        } else {
+        } else if (hsl?.CapID === 2 || hsl?.CapID === 3) {
             return {
                 HocSinhID: s.HocSinhID,
                 SoDanhBo: s.SoDanhBo,

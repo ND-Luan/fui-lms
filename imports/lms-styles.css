@@ -224,9 +224,225 @@
     padding-inline: 8px;
 }
 
-.v-col:has(.sticky-filter){
-        position: sticky;
+.v-col:has(.sticky-filter) {
+    position: sticky;
     top: 0;
     z-index: 1000;
     padding-top: 0px !important;
+}
+
+
+/* CSS QUIZ MATCHING */
+.qMatching-container {
+    display: flex;
+    gap: 40px;
+    justify-content: center;
+    align-items: flex-start;
+    margin-top: 20px;
+}
+
+.qMatching-column {
+    flex: 1;
+    max-width: 300px;
+}
+
+.qMatching-title {
+    font-weight: 600;
+    text-align: center;
+    margin-bottom: 12px;
+    font-size: 16px;
+    color: #444;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    border-bottom: 2px solid #1976d2;
+    padding-bottom: 6px;
+}
+
+.qMatching-item-a,
+.qMatching-item-b {
+    /* Kế thừa style cũ */
+    padding: 12px 14px;
+    border-radius: 10px;
+    background: #f9f9f9;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+    font-size: 15px;
+    display: flex;
+    align-items: center;
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+
+    /* NEW: chiều cao bằng nhau theo dòng */
+    height: 100%;
+}
+.qMatching-item-a:hover,
+.qMatching-item-b:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.12);
+}
+
+.qMatching-drag-icon {
+    cursor: grab;
+    font-size: 18px;
+    margin-right: 8px;
+    color: #999;
+}
+
+.qMatching-text {
+    flex: 1;
+}
+
+.qMatching-ghost {
+    opacity: 0.5;
+    background: #e3f2fd !important;
+    border: 2px dashed #1976d2 !important;
+}
+
+.qMatching-feedback {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+}
+
+.qMatching-feedback .v-icon {
+    font-size: 20px;
+}
+
+.qMatching-feedback .v-icon[color="success"] {
+    animation: popIn 0.3s ease;
+}
+
+.qMatching-feedback .v-icon[color="error"] {
+    animation: shake 0.3s ease;
+}
+
+@keyframes popIn {
+    0% {
+        transform: scale(0.7);
+        opacity: 0;
+    }
+
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+@keyframes shake {
+    0% {
+        transform: translateX(0);
+    }
+
+    25% {
+        transform: translateX(-3px);
+    }
+
+    50% {
+        transform: translateX(3px);
+    }
+
+    75% {
+        transform: translateX(-2px);
+    }
+
+    100% {
+        transform: translateX(0);
+    }
+}
+
+.qMatching-grading {
+    margin-top: 20px;
+}
+
+.qMatching-container {
+    width: 100%;
+}
+
+.qMatching-title-row {
+    /* font-weight: bold;
+    margin-bottom: 8px; */
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    max-width: 640px;
+    margin: 0 auto;
+    gap: 40px;
+}
+
+.qMatching-row {
+    /* display: flex;
+    align-items: stretch;
+    /* Đảm bảo 2 cột có chiều cao bằng nhau */
+    /* margin-bottom: 8px; */
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 40px;
+    max-width: 640px;
+    margin: 0 auto 12px auto;
+}
+
+.qMatching-column-a,
+.qMatching-column-b {
+    flex: 1;
+    padding: 8px;
+    box-sizing: border-box;
+}
+
+.qMatching-item {
+    background: #f9f9f9;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+.qMatching-item-b {
+    display: flex;
+    align-items: center;
+}
+
+
+
+.qMultipleTrueFalse-options-grid {
+    display: grid;
+    /* grid-template-columns: repeat(auto-fit, minmax(700px, 1fr)); */
+    gap: 16px;
+    width: 100%;
+}
+
+.qMultipleTrueFalse-option-card {
+    display: flex;
+    align-items: center;
+    padding: 16px;
+    border: 1px solid #e0e0e0;
+    border-radius: 12px;
+    background-color: #fff;
+    transition: all 0.2s ease;
+}
+
+.qMultipleTrueFalse-option-card:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    border-color: #ccc;
+}
+
+.qMultipleTrueFalse-selected {
+    border-color: #1976d2;
+    box-shadow: 0 0 0 2px rgba(25, 118, 210, 0.2);
+}
+
+.qMultipleTrueFalse-option-content {
+    flex: 1;
+    margin-left: 16px;
+    display: flex;
+    align-items: center;
+}
+
+.qMultipleTrueFalse-option-text {
+    font-size: 16px;
+    line-height: 1.5;
+}
+
+.teacher-grading-area {
+    border-top: 1px dashed #ddd;
+    padding-top: 12px;
+}
+
+.qMultipleTrueFalse-option-card v-select {
+    min-width: 130px;
 }

@@ -1,0 +1,1 @@
+{"data":[{"AssignToClassID":"AssignToClassID"}],"watch":{},"controls":[{"prop":"fluid pa-0","rows":[{"cols":[{"el":"uc-crosstab-report","attr":{":assign-to-class-id":"parseInt(AssignToClassID)"}}]}]}],"set":{"menu":false}}

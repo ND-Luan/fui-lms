@@ -84,19 +84,23 @@
 							</v-tabs>
 
 							<!-- Tab Content -->
-							<v-window v-model="activeTab" class="editor-content">
+							<v-tabs-window v-model="activeTab" class="editor-content">
 								<!-- Tab 1: F-Editor (Rich Text) -->
-								<v-window-item value="rich" class="tab-content">
-									<f-editor v-model="htmlContent" label="Nội dung văn bản" variant="outlined"
-										:height="400" />
-								</v-window-item>
+								<v-tabs-window-item value="rich" class="tab-content">
+									<f-editor :imageapi="vueData.v_Set.apiImageAdapter" v-model="textContent"
+										label="Nội dung văn bản" variant="outlined" :height="400" />
+								</v-tabs-window-item>
 
 								<!-- Tab 2: Raw HTML -->
-								<v-window-item value="html" class="tab-content">
-									<v-textarea v-model="htmlContent" label="Mã HTML" variant="outlined" rows="20"
-										placeholder="Nhập mã HTML tại đây..." />
-								</v-window-item>
-							</v-window>
+								<v-tabs-window-item value="html" class="tab-content">
+									<v-card>
+										<v-card-text>
+											<v-textarea v-model="htmlContent" label="Mã HTML" variant="outlined"
+												auto-grow rows="20" placeholder="Nhập mã HTML tại đây..." />
+										</v-card-text>
+									</v-card>
+								</v-tabs-window-item>
+							</v-tabs-window>
 						</div>
 						<div v-else-if="isSlide">
 							<v-file-input accept=".doc,.docx,.ppt,.pptx,.pdf" label="Tải tập tin"
@@ -199,7 +203,7 @@
 					{ value: 'NHOM_KY_NANG', title: 'Nhóm kỹ năng' },
 					{ value: 'VIDEO', title: 'Video' },
 					{ value: 'AUDIO', title: 'Audio' },
-					{ value: 'HTML', title: 'Html' },
+					{ value: 'HTML', title: 'HTML' },
 	
 					{ value: 'SLIDE', title: 'PPT, DOC & PDF' },
 	
@@ -244,7 +248,7 @@
 			isISpring() { return this.editableItem?.LoaiNoiDung === 'ISPRING_CONTENT'; },
 			htmlContent: {
 				get() {
-					console.log('get', this.editableItem.DataJson)
+					console.log('gethtmlContent', this.editableItem.DataJson)
 					// KHI HIỂN THỊ: Lấy giá trị từ object và trả về chuỗi
 					if (this.editableItem && this.editableItem.DataJson) {
 						// Nếu là object, lấy thuộc tính htmlContent, nếu không thì lấy chính nó
@@ -253,7 +257,7 @@
 					return '';
 				},
 				set(newValue) {
-					console.log('set', newValue)
+					console.log('set htmlContent', newValue)
 					// KHI NHẬP LIỆU: Cập nhật lại object DataJson
 					if (this.editableItem) {
 						// Luôn đảm bảo DataJson là một object
@@ -261,6 +265,30 @@
 							this.editableItem.DataJson = {};
 						}
 						this.editableItem.DataJson.htmlContent = newValue;
+						this.editableItem.DataJson.isType = this.activeTab;
+					}
+				}
+			},
+			textContent: {
+				get() {
+					console.log('get textContent', this.editableItem.DataJson)
+					// KHI HIỂN THỊ: Lấy giá trị từ object và trả về chuỗi
+					if (this.editableItem && this.editableItem.DataJson) {
+						// Nếu là object, lấy thuộc tính htmlContent, nếu không thì lấy chính nó
+						return this.editableItem.DataJson.textContent || '';
+					}
+					return '';
+				},
+				set(newValue) {
+					console.log('set textContent', newValue)
+					// KHI NHẬP LIỆU: Cập nhật lại object DataJson
+					if (this.editableItem) {
+						// Luôn đảm bảo DataJson là một object
+						if (typeof this.editableItem.DataJson !== 'object' || this.editableItem.DataJson === null) {
+							this.editableItem.DataJson = {};
+						}
+						this.editableItem.DataJson.textContent = newValue;
+						this.editableItem.DataJson.isType = this.activeTab;
 					}
 				}
 			}
@@ -270,18 +298,23 @@
 				if (newVal) {
 					// Khi mở, sao chép và parse dữ liệu
 					const initialData = JSON.parse(JSON.stringify(this.item || {}));
-	
 					// Luôn đảm bảo DataJson là một object
 					if (initialData.DataJson && typeof initialData.DataJson === 'string') {
-						try { initialData.DataJson = JSON.parse(initialData.DataJson); }
+						try {
+							initialData.DataJson = JSON.parse(initialData.DataJson);
+						}
 						catch (e) {
 							// Nếu không phải JSON, coi nó là HTML thô
-							initialData.DataJson = { htmlContent: initialData.DataJson };
+							initialData.DataJson = {
+								htmlContent: initialData.DataJson ?? '',
+								textContent: '',
+								isType: 'html'
+							};
 						}
 					} else if (!initialData.DataJson) {
 						initialData.DataJson = {};
 					}
-	
+					console.log('initialData', initialData)
 					this.editableItem = initialData;
 				}
 			}

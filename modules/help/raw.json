@@ -1,1 +1,0 @@
-{"data":[{"userMessage":""},{"chatMessages":[]}],"watch":{"userMessage":[{"type":"EXE","do":"// Tùy chọn: có thể xử lý khi nhập liệu thay đổi"}]},"controls":[{"prop":"fluid grid-list-md pa-0","rows":[{"prop":"justify-space-between align-center pa-2","cols":[{"el":"uc-help"}]}]}],"set":{},"ModuleName":"Trò chuyện cùng AI"}

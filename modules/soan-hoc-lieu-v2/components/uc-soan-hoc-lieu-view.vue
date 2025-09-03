@@ -5,10 +5,10 @@
 		<div class="header-section">
 			<div class="header-content">
 				<div class="header-info">
-					<h2 class="page-title">
+					<p class="page-title">
 						<v-icon class="title-icon"> mdi-book-open-page-variant</v-icon>
 						Soạn thảo Học liệu
-					</h2>
+					</p>
 					<p class="page-subtitle">Quản lý cấu trúc nội dung và tổ chức bài học</p>
 				</div>
 				<div class="header-actions" v-if="selectedHocLieu">
@@ -81,7 +81,7 @@
 					<div class="book-badge">
 						<v-icon class="badge-icon">mdi-book-open</v-icon>
 						<div class="badge-content">
-							<h3 class="selected-title">{{ selectedHocLieu.TenHocLieu }}</h3>
+							<p class="selected-title">{{ selectedHocLieu.TenHocLieu }}</p>
 							<p class="selected-meta">{{ selectedHocLieu.TenBoSach }} • Đang soạn thảo</p>
 						</div>
 					</div>
@@ -290,7 +290,17 @@
 				}
 				this.isDialogOpen = true;
 			},
-			// HÀM MỚI: Chỉ để mở dialog khi SỬA
+			escapeHtml(unsafeString) {
+				if (typeof unsafeString !== 'string') {
+					return '';
+				}
+				return unsafeString
+					.replace(/&/g, "&amp;")
+					.replace(/</g, "&lt;").replace(/>/g, "&gt;")
+					.replace(/"/g, "&quot;")
+					.replace(/'/g, "&#039;");
+			},
+	
 			onEditItem(itemToEdit) {
 				if (!itemToEdit) return;
 				console.log("Chỉnh sửa node:", itemToEdit);
@@ -342,8 +352,14 @@
 	
 			// HÀM MỚI: Xử lý sự kiện delete từ cây
 			onDeleteNode(node) {
+				function escapeHTML(str) {
+					const div = document.createElement('div');
+					div.textContent = str;
+					return div.innerHTML;
+				}
+				console.log('node', node)
 				confirm({
-					title: `Bạn có chắc chắn muốn xóa mục "${node.TenNoiDung}" và tất cả các mục con của nó?`,
+					title: `Bạn có chắc chắn muốn xóa mục "${escapeHTML(node.TenNoiDung)}" và tất cả các mục con của nó?`,
 					action: () => {
 						ajaxCALL('lms/FP_NoiDung_Delete', { NoiDungID: node.NoiDungID }, (res) => {
 							Vue.$toast.success("Đã xóa thành công!");
@@ -426,11 +442,6 @@
 				this.onOpenDialog(node);
 			}
 	
-	
 		}
 	}
 </script>
-
-<style scoped>
-
-</style>

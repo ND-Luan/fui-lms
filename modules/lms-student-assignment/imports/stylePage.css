@@ -1,0 +1,399 @@
+/* View Mode Toggle - Compact */
+.v-btn-toggle {
+    box-shadow: none;
+}
+
+/* Progress bar inline */
+.progress-bar-inline {
+    width: 120px;
+    min-width: 120px;
+}
+
+/* All Questions Mode Styles */
+.all-questions-mode {
+    max-width: 100%;
+}
+
+.progress-summary {
+    border: 1px solid #e3f2fd;
+}
+
+.questions-container {
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.group-section {
+    margin-bottom: 2rem;
+}
+
+.group-header-card {
+    border: 1px solid #e0e0e0;
+}
+
+.questions-in-group {
+    margin-left: 0;
+}
+
+.question-card-all {
+    border: 1px solid #e0e0e0;
+    transition: all 0.2s ease;
+}
+
+.question-card-all:hover {
+    border-color: #2196f3;
+    box-shadow: 0 2px 8px rgba(33, 150, 243, 0.15);
+}
+
+.question-card-all.question-answered {
+    border-left: 4px solid #4caf50;
+    background-color: #f8fff8;
+}
+
+/* Compact question header (responsive layout) */
+.question-header-all-compact {
+    padding: 12px 16px;
+    background-color: #fafafa;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.question-number-badge-compact {
+    background: linear-gradient(135deg, #2196f3 0%, #1976d2 100%);
+    color: white;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    font-size: 0.8rem;
+    flex-shrink: 0;
+}
+
+.question-text-compact {
+    font-size: 0.95rem;
+    line-height: 1.4;
+    color: #333;
+    margin-right: 8px;
+    flex-direction: column;
+}
+
+.mobile-question-label {
+    font-weight: 600;
+    color: #333;
+    font-size: 0.9rem;
+}
+
+.points-chip-mobile {
+    font-weight: 600;
+    box-shadow: 0 1px 3px rgba(33, 150, 243, 0.3) !important;
+    border: 1px solid #2196f3 !important;
+}
+
+.question-content-compact {
+    padding: 16px;
+}
+
+.answer-section-compact {
+    border-top: 1px dashed #ddd;
+    padding-top: 12px;
+}
+
+/* Remove old styles */
+.question-header-all,
+.question-number-badge-all,
+.question-content-all,
+.question-text-all,
+.answer-section-all {
+    display: none;
+}
+
+/* Due date chip styling */
+.due-date-chip {
+    font-weight: 600;
+    animation: pulse-gentle 2s ease-in-out infinite;
+}
+
+.due-date-chip.v-chip--variant-elevated {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+/* Gentle pulse animation for urgent items */
+@keyframes pulse-gentle {
+
+    0%,
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+
+    50% {
+        transform: scale(1.02);
+        opacity: 0.9;
+    }
+}
+
+/* Apply stronger pulse for overdue */
+.due-date-chip.v-chip--color-error {
+    animation: pulse-urgent 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse-urgent {
+
+    0%,
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+
+    50% {
+        transform: scale(1.05);
+        opacity: 0.85;
+    }
+}
+
+/* Group headers */
+.group-header-card {
+    border: 1px solid #e0e0e0;
+    border-left: 4px solid #2196f3;
+    background: linear-gradient(135deg, #fafafa 0%, #f5f5f5 100%);
+}
+
+.group-icon-wrapper {
+    background: rgba(33, 150, 243, 0.1);
+    border-radius: 8px;
+    padding: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.group-title-main {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #333;
+    margin: 0;
+    line-height: 1.3;
+}
+
+.group-meta {
+    margin-top: 2px;
+    display: flex;
+    align-items: center;
+}
+
+.group-description {
+    font-size: 0.9rem;
+    line-height: 1.5;
+    color: #666;
+    margin-top: 8px;
+    padding-left: 36px;
+    /* Align with title */
+}
+
+.progress-chip {
+    font-weight: 600;
+    min-width: 50px;
+}
+
+/* Navigation */
+.assignment-header {
+    border-radius: 8px;
+  
+}
+
+.responsive-fs-title{
+     font-size: clamp(0.8rem, 2vw + 0.1rem, 1.2rem) ;
+}
+
+.assignment-header .v-card-subtitle {
+    color: rgba(255, 255, 255, 0.8) !important;
+}
+
+.assignment-header .v-card-text {
+    color: white !important;
+}
+
+.question-nav {
+    border-radius: 8px;
+}
+
+.question-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(50px, 1fr));
+    gap: 8px;
+    padding: 0 8px 0px 8px;
+}
+
+.question-btn {
+    /* min-width: 50px !important; */
+    height: 36px !important;
+}
+
+.question-content-card {
+    border-radius: 8px;
+}
+
+.question-text {
+    font-size: 1.1rem;
+    line-height: 1.6;
+    color: #333;
+}
+
+.answer-area {
+    border-top: 1px dashed #ddd;
+}
+
+/* Media Containers */
+.youtube-container {
+    position: relative;
+    width: 100%;
+    padding-bottom: 56.25%;
+    height: 0;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.youtube-container iframe {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+}
+
+.media-container {
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+/* Mobile Responsive for All Questions Mode */
+@media (max-width: 600px) {
+    .questions-container {
+        padding: 0 8px;
+    }
+
+    .question-content-compact {
+        padding: 12px;
+    }
+
+    .question-text-compact {
+        font-size: 0.85rem;
+        line-height: 1.3;
+        margin-right: 0;
+        margin-top: 4px;
+    }
+
+    .progress-bar-inline {
+        width: 80px;
+        min-width: 80px;
+    }
+
+    .progress-summary .v-card-text>div {
+        gap: 8px;
+    }
+
+    .question-header-all-compact {
+        padding: 8px 12px;
+        flex-direction: column;
+        align-items: stretch;
+        gap: 8px;
+    }
+
+    .question-header-all-compact .d-flex {
+        flex-direction: row;
+        align-items: stretch;
+        gap: 8px;
+    }
+
+    .question-meta-mobile {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .question-number-badge-compact {
+        width: 20px;
+        height: 20px;
+        font-size: 0.75rem;
+    }
+
+    .mobile-question-label {
+        font-size: 0.85rem;
+    }
+}
+
+.v-chip a {
+    color: black !important;
+    text-decoration: none;
+}
+
+.w-100 {
+    width: 100%;
+}
+
+.feedback-icon {
+    margin-left: 16px;
+    min-width: 24px;
+}
+
+.correct-answer-hint {
+    color: #4CAF50 !important;
+}
+
+.text-disabled {
+    opacity: 0.6;
+}
+
+.header-respondsive-fs{
+    font-size: clamp(16px,2vw,20px);
+}
+.body-respondsive-fs{
+    font-size: clamp(12px, 2vw, 16px);
+}
+
+/******FIX SCROLL NGANG IOS *****
+/* 0) Chặn pan ngang mức root (chỉ trên thiết bị cảm ứng) */
+@media (hover: none) and (pointer: coarse) {
+  html, body, #mainContainer { max-width: 100%; overflow-x: clip; }
+}
+
+/* 1) ĐÈ INLINE: gỡ min-width:fit-content trong toolbar title của dialog fullscreen */
+.v-overlay-container .v-dialog.v-dialog--fullscreen .v-toolbar-title p {
+  min-width: 0 !important;
+  max-width: 100% !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important; /* hoặc bỏ nếu muốn tự xuống dòng */
+}
+/* Phòng trường hợp không phải <p> */
+.v-overlay-container .v-dialog.v-dialog--fullscreen .v-toolbar-title > * {
+  min-width: 0 !important;
+  max-width: 100% !important;
+}
+
+/* 2) Cho cha flex co lại đúng (rất quan trọng trên iOS) */
+.v-overlay-container .v-dialog.v-dialog--fullscreen .v-toolbar,
+.v-overlay-container .v-dialog.v-dialog--fullscreen .v-toolbar__content {
+  min-width: 0 !important;
+}
+
+.v-overlay-container .v-dialog.v-dialog--fullscreen .v-toolbar-title {
+  flex: 1 1 auto !important;
+  min-width: 0 !important;
+  overflow: hidden !important;
+}
+
+/* 3) Đảm bảo nội dung overlay không vượt 100vw */
+.v-overlay-container .v-overlay__content,
+.v-overlay-container .v-dialog.v-dialog--fullscreen .v-card {
+  max-width: 100vw !important;
+  overflow-x: clip !important;
+}
+
+/* 4) Grid/col của Vuetify co đúng (tránh đẩy tràn khi zoom) */
+.v-row, .v-col { min-width: 0; }
+
+/* 5) Calendar phòng rounding khi zoom */
+.week-calendar { min-width: 0; overflow-x: auto; -webkit-overflow-scrolling: touch; }

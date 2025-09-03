@@ -1,31 +1,29 @@
 function callAPIPushME() {
-    //.filter(x => x.HocSinhID === 23300048) ==> Cháu a Tâm
-    for (var item of vueData.items) {
-        const html = item.RenderNhanXet
-        // Tạo thẻ ảo
-        const container = document.createElement("div");
-        // Thay thẻ <br> và </p> bằng \n, bỏ <p>
-        const preProcessedHTML = html
-            .replace(/<br\s*\/?>/gi, '\n')
-            .replace(/<\/p>/gi, '\n')
-            .replace(/<p[^>]*>/gi, ''); // loại bỏ <p> nhưng giữ nội dung
-        container.innerHTML = preProcessedHTML;
-        let plainText = `Kết quả học tập của học sinh: ${item.HoTen}
-            Năm học: ${vueData.NienKhoa} - ${vueData.NienKhoa + 1}  - Kỳ đánh giá: Tháng ${vueData.ThangObj.Thang} - Học kì 2
-        ` + container.textContent.trim()
-            +
-            `
-              Xem chi tiết kết quả học tập: https://lms.lhbs.vn/ph-report
-          `
-        ajaxCALL(`student/LMS_SendMessageToME`,
-            {
-                HocSinhID: item.HocSinhID,
-                NoiDung: plainText
-            },
-            res => {
-                Vue.$toast.success('Đẩy dữ liệu tháng sang ME', { position: "top" })
-            })
-        // console.log(item, plainText)
+    if (vueData.CapID === 2 || vueData.CapID === 3) {
+        //.filter(x => x.HocSinhID === 23300048) ==> Cháu a Tâm
+        for (var item of vueData.items) {
+            const html = item.RenderNhanXet
+            // Tạo thẻ ảo
+            const container = document.createElement("div");
+            // Thay thẻ <br> và </p> bằng \n, bỏ <p>
+            const preProcessedHTML = html
+                .replace(/<br\s*\/?>/gi, '\n')
+                .replace(/<\/p>/gi, '\n')
+                .replace(/<p[^>]*>/gi, ''); // loại bỏ <p> nhưng giữ nội dung
+            container.innerHTML = preProcessedHTML;
+            let plainText = `Kết quả học tập của học sinh: ${item.HoTen}\n` +
+                `Năm học: ${vueData.NienKhoa} - ${vueData.NienKhoa + 1}  - Kỳ đánh giá: Tháng ${vueData.ThangObj.Thang} - Học kì 1\n`
+                + `Học tập: \n${item.NoiDungKienThuc_HTML?.trim() || "-"}\nNề nếp: \n${item.NoiDungNangLuc_HTML?.trim() || "-"}\nThông báo: \n${item.NoiDungHoatDongKhac_HTML?.trim() || "-"}`
+                + `\nXem chi tiết kết quả học tập: https://lms.lhbs.vn/ph-report`
+            ajaxCALL(`student/LMS_SendMessageToME`,
+                {
+                    HocSinhID: item.HocSinhID,
+                    NoiDung: plainText
+                },
+                res => {
+                    Vue.$toast.success(`Đẩy ${item.HocSinhID} - ${item.HoTen} dữ liệu tháng sang ME`, { position: "top" })
+                })
+        }
     }
 }
 addEventListener('resize', () => {
@@ -90,7 +88,7 @@ function renderHeaderTable() {
             }
         }
     ]
-    if (!vueData.ThangObj.Is_HienThiPhuHuynh) {
+    if (!vueData.ThangObj?.Is_HienThiPhuHuynh) {
         const lop = vueData.DSLop.find(x => x.LopID === vueData.LopID)
         console.log(lop)
         const DSKhoi_CanLoai = [1, 2, 3, 4, 6, 7, 8, 9, 10, 11, 12]
@@ -814,20 +812,20 @@ function renderHeaderTable() {
             })
         }
     }
-    if (!vueData.TinhTrang) {
-        columns.push({
-            "key": "v_btn",
-            "el": "v-btn",
-            "attr": {
-                "color": "primary",
-                "variant": "tonal",
-                "v-on:click": "() => vueData.onLuuTamByHocSinhID(item)"
-            },
-            "innerHTML": "Lưu tạm",
-            "align": "center",
-            "width": 150,
-        })
-    }
+    // if (!vueData.TinhTrang) {
+    //     columns.push({
+    //         "key": "v_btn",
+    //         "el": "v-btn",
+    //         "attr": {
+    //             "color": "primary",
+    //             "variant": "tonal",
+    //             "v-on:click": "() => vueData.onLuuTamByHocSinhID(item)"
+    //         },
+    //         "innerHTML": "Lưu tạm",
+    //         "align": "center",
+    //         "width": 150,
+    //     })
+    // }
     vueData.headers = columns
 }
 const renderLabelTable = () => {
@@ -854,6 +852,13 @@ function getFirstAndLastDay(year, month) {
     return { firstDay, lastDay };
 }
 async function convertItems() {
+    function convertNewLineToP(text) {
+        if (!text) return '';
+        return text
+            .split(/\n+/)
+            .map(line => `<p>${line}</p>`)
+            .join('');
+    }
     vueData.items = vueData.items.map(x => {
         const existDSTreVang = vueData.DSChuyenCan_TreVang?.find(n => n.HocSinhID === x.HocSinhID)
         x.NgayNghi = {
@@ -863,7 +868,10 @@ async function convertItems() {
         x.firstDay = vueData.firstDay;
         x.lastDay = vueData.lastDay;
         x.LopID = vueData.LopID;
-        x.RenderNhanXet = ((x.NoiDungKienThuc_HTML ? ('<b>Học tập: </b>' + x.NoiDungKienThuc_HTML.toString() + '<br/>') : '<b>Học tập: - </b><br/>') + (x.NoiDungNangLuc_HTML ? ('<b>Nền nếp: </b>' + x.NoiDungNangLuc_HTML.toString() + '<br/>') : '<b>Nền nếp: - </b><br/>') + (x.NoiDungHoatDongKhac_HTML ? ('<b>Thông báo: </b>' + x.NoiDungHoatDongKhac_HTML.toString() + '<br/>') : '<b>Thông báo: - </b><br/>'))
+        x.RenderNhanXet = (
+            (x.NoiDungKienThuc_HTML ? ('<b>Học tập: </b>' + convertNewLineToP(x.NoiDungKienThuc_HTML) + '<br/>') : '<b>Học tập: - </b><br/>')
+            + (x.NoiDungNangLuc_HTML ? ('<b>Nền nếp: </b>' + convertNewLineToP(x.NoiDungNangLuc_HTML) + '<br/>') : '<b>Nền nếp: - </b><br/>')
+            + (x.NoiDungHoatDongKhac_HTML ? ('<b>Thông báo: </b>' + convertNewLineToP(x.NoiDungHoatDongKhac_HTML) + '<br/>') : '<b>Thông báo: - </b><br/>'))
         return x
     })
     // vueData.DSTongHop_LoaiViPham = vueData.DSTongHop_LoaiViPham?.filter(x => x.SoLuong > 0)

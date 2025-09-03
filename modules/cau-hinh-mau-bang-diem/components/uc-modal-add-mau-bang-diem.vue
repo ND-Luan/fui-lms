@@ -14,34 +14,36 @@
 
 <script>
 	export default {
-	    props: {
-	        onFinish: {
-	            type: Function
-	        }
-	    },
-	    data() {
-	        return {
-	            formData: {
-	                TemplateBangDiemName: ''
-	            },
-	            isShow: this.modelValue,
-	            vueData
-	        }
-	    },
-	    methods: {
-	        async onHandleAdd() {
-	            const form = this.$refs.form
-	            const { valid } = await form.validate()
-	            if (valid) {
-	                let params = { ...this.formData }
-	                const { IsSuccess } = await TemplateBangDiem_Service.Ins(params)
-	                if (IsSuccess) {
-	                    Vue.$toast.success('Thêm mẫu bảng điểm thành công!', { position: 'top' })
-	                    vueData.isShowModalAddMauBangDiem = false
-	                    CALL('TemplateBangDiem_Get')
-	                }
-	            }
-	        }
-	    },
+		props: {
+			onFinish: {
+				type: Function
+			}
+		},
+		data() {
+			return {
+				formData: {
+					TemplateBangDiemName: '',
+					CapID: vueData.CapID,
+					NienKhoa: null, //vueData.NienKhoa
+				},
+				isShow: this.modelValue,
+				vueData
+			}
+		},
+		methods: {
+			async onHandleAdd() {
+				const form = this.$refs.form
+				const { valid } = await form.validate()
+				if (valid) {
+					let params = { ...this.formData, NienKhoa: vueData.NienKhoa }
+					const { IsSuccess } = await TemplateBangDiem_Service.Ins(params)
+					if (IsSuccess) {
+						Vue.$toast.success('Thêm mẫu bảng điểm thành công!', { position: 'top' })
+						vueData.isShowModalAddMauBangDiem = false
+						CALL('TemplateBangDiem_Get')
+					}
+				}
+			}
+		},
 	}
 </script>

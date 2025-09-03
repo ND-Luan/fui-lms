@@ -1,0 +1,53 @@
+{
+    "data": [
+        {
+            "dataReady": false,
+            "focusTasks": [],
+            "weekSchedule": [],
+            "subjectProgress": [],
+            "recentFeed": [],
+            "gradeSummary": {
+                "visible": false,
+                "loading": false,
+                "submissionId": null,
+                "data": null
+            },
+            "achievements": []
+        },
+        {
+            "EXE": "initPage()"
+        }
+    ],
+    "watch": {},
+    "controls": [
+        {
+            "prop": "fluid pa-0",
+            "rows": [
+                {
+                    "props": "class='pa-0'",
+                    "cols": [
+                        {
+                            "w": 12,
+                            "el": "uc-student-dashboard-v2",
+                            "attr": {
+                                "v-if": "dataReady",
+                                ":focus-tasks": "focusTasks",
+                                ":week-schedule": "weekSchedule",
+                                ":subject-progress": "subjectProgress",
+                                ":recent-feed": "recentFeed",
+                                ":achievements": "achievements",
+                                ":grade-summary": "gradeSummary",
+                                ":on-view-summary": "onViewSummary",
+                                ":on-view-details": "goToFullGradingPage",
+                                "v-model:gradeSummary": "gradeSummary"
+                            }
+                        }
+                    ]
+                }
+            ]
+        }
+    ],
+    "set": {
+        "menu": false
+    }
+}

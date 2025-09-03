@@ -72,7 +72,21 @@ function convertDSHocSinh() {
                     readOnly: true
                 }
                 return column
-            } else if (x.GiaTriCotDiem === 'ICO_Star') { // cấu hình header cột điểm có dạng ICO_Star
+            } else if (x.GiaTriCotDiem === 'Dropdown_text') { // cấu hình header cột điểm có dạng text
+                let column = {
+                    type: 'dropdown',
+                    title: x.TenCotDiem_VI,
+                    name: x.MaCotDiem,
+                    width: x.WidthCSS,
+                    typeValue: x.GiaTriCotDiem,
+                    backGroundColor: x.HexBackground,
+                    wrap: true,
+                    align: 'center',
+                    source: [{ id: '1', name: 'Done' }, { id: '0', name: 'Not Yet' }], //x.MaCotDiem === '' ? ['Done', 'Not Yet'] : ['Đ', 'T', 'H']
+                    readOnly: true
+                }
+                return column
+            }else if (x.GiaTriCotDiem === 'ICO_Star') { // cấu hình header cột điểm có dạng ICO_Star
                 let column = {
                     type: 'html',
                     title: x.TenCotDiem_VI,

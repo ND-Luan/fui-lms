@@ -556,6 +556,13 @@ function getFirstAndLastDay(year, month) {
     return { firstDay, lastDay };
 }
 async function convertItems() {
+    function convertNewLineToP(text) {
+        if (!text) return '';
+        return text
+            .split(/\n+/)
+            .map(line => `<p>${line}</p>`)
+            .join('');
+    }
     vueData.items = vueData.items.map(x => {
         const existDSTreVang = vueData.DSChuyenCan_TreVang?.find(n => n.HocSinhID === x.HocSinhID)
         x.NgayNghi = {
@@ -565,7 +572,10 @@ async function convertItems() {
         x.firstDay = vueData.firstDay;
         x.lastDay = vueData.lastDay;
         x.LopID = vueData.LopID;
-        x.RenderNhanXet = ((x.NoiDungKienThuc_HTML ? ('<b>Học tập: </b>' + x.NoiDungKienThuc_HTML.toString() + '<br/>') : '<b>Học tập: - </b><br/>') + (x.NoiDungNangLuc_HTML ? ('<b>Nền nếp: </b>' + x.NoiDungNangLuc_HTML.toString() + '<br/>') : '<b>Nền nếp: - </b><br/>') + (x.NoiDungHoatDongKhac_HTML ? ('<b>Thông báo: </b>' + x.NoiDungHoatDongKhac_HTML.toString() + '<br/>') : '<b>Thông báo: - </b><br/>'))
+        x.RenderNhanXet = (
+            (x.NoiDungKienThuc_HTML ? ('<b>Học tập: </b>' + convertNewLineToP(x.NoiDungKienThuc_HTML) + '<br/>') : '<b>Học tập: - </b><br/>')
+            + (x.NoiDungNangLuc_HTML ? ('<b>Nền nếp: </b>' + convertNewLineToP(x.NoiDungNangLuc_HTML) + '<br/>') : '<b>Nền nếp: - </b><br/>')
+            + (x.NoiDungHoatDongKhac_HTML ? ('<b>Thông báo: </b>' + convertNewLineToP(x.NoiDungHoatDongKhac_HTML) + '<br/>') : '<b>Thông báo: - </b><br/>'))
         return x
     })
     vueData.DSTongHop_LoaiViPham = vueData.DSTongHop_LoaiViPham?.filter(x => x.SoLuong > 0)

@@ -5,7 +5,7 @@ function onSelectedHocSinh(item) {
     ajaxCALL('lms/HocSinh_Detail_GetBy_HocSinhID',
         {
             HocSinhID: item.StudentID,
-            NienKhoa: vueData.NienKhoa ?? 2024
+            NienKhoa: vueData.NienKhoa ?? vueData.DSNienKhoa.find(item => item.IsActive == 1)?.IsActive
         }, data => {
             console.log('data',data)
             vueData.HocSinhSelected = { ...item, ...data }

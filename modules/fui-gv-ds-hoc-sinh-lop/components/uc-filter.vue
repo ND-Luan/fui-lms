@@ -10,7 +10,7 @@
 			</v-col>
 			<v-col>
 				<v-select label="Chọn lớp" v-model="vueData.LopItem"
-					:items="vueData.DSLop.filter(item=> !item.TenLop.includes('AV'))" item-title="TenLop"
+					:items="vueData.DSLop.filter(item=> !item.TenLop.includes('AV'))" :item-title="renderTextLop"
 					item-value="LopID" :return-object="true" :hide-details="true"></v-select>
 			</v-col>
 			<v-col>
@@ -31,6 +31,12 @@
 		mounted() { },
 		computed: {},
 		watch: {},
-		methods: {},
+		methods: {
+			renderTextLop(item) {
+				let string = item.TenLop
+				if (item.GVCN === vueData.user.UserID) string += ' (Bạn đang giáo viên chủ nhiệm của lớp)'
+				return string
+			}
+		},
 	}
 </script>

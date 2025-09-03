@@ -20,7 +20,7 @@
 				</div>
 			</v-responsive>
 		</v-fade-transition>
-		<uc-chartTA2-HocSinh v-if="vueData.HocSinhSelected.CapID == 3"/>
+		<uc-chartTA2-HocSinh v-if="vueData.HocSinhSelected.CapID == 3" />
 	</div>
 </template>
 
@@ -40,14 +40,13 @@
 				Semester: localStorage.getItem('Semester'),
 			}
 		},
-		mounted() {
+		async mounted() {
 			if (!vueData.HocSinhSelected) return
-	
 			this.IsLoading = true
-			ajaxCALL('lms/PH_TA_MaNhomDiem_Get_By_HocSinhID',
+			 ajaxCALL('lms/PH_TA_MaNhomDiem_Get_By_HocSinhID',
 				{
 					HocSinhID: vueData.HocSinhSelected.StudentID,
-					Semester: 'HK' + this.Semester
+					NienKhoa: vueData.NienKhoa
 				},
 				res => {
 					console.log('res', res.data)
@@ -57,14 +56,15 @@
 						const ListMaNhomCotDiem = ['S1_Mid', 'S1_Final', 'S2_Mid', 'S2_Final']
 						this.DSNhomDiem = res.data.filter(x => ListMaNhomCotDiem.includes(x.MaNhomCotDiem)).map(item => {
 							item.TenNhomCotDiem_VI = item.TenNhomCotDiem_VI.replace('Điểm', 'Đánh giá')
-	
 							return item
 						})
 						console.log('this.DSNhomDiem', this.DSNhomDiem)
 					}
 					this.IsLoading = false
+					this.XepNhomTiengAnh()
 				}
 			)
+			
 		},
 		computed: {
 	
@@ -85,6 +85,21 @@
 			},
 			renderTextTitle(obj) {
 				return this.IsLanguage ? obj.TenNhomCotDiem_EN : obj.TenNhomCotDiem_VI
+			},
+			XepNhomTiengAnh(){
+				ajaxCALL('/lms/XepNhomTiengAnh_GetByHocSinhID',{
+					HocSinhID: vueData.HocSinhSelected.StudentID
+				},
+				res => {
+					if(res.data.length> 0 ){
+						this.DSNhomDiem.unshift({
+						TenNhomCotDiem_VI: "Xếp nhóm Tiếng Anh",
+						TenNhomCotDiem_EN: "Survey results",
+						MaNhomCotDiem: "NhomTiengAnh",
+						HocSinhID: vueData.HocSinhSelected.StudentID
+						})
+					}
+				})
 			},
 			openWindow,
 			redirect

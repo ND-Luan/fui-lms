@@ -9,6 +9,10 @@
 		props: {
 			modelValue: {},
 	
+			rootDataSource: {
+				type: Array,
+				default: []
+			},
 			dataSource: {
 				type: Array,
 				default: []
@@ -74,7 +78,8 @@
 		},
 		data() {
 			return {
-				jExcelObj: null
+				jExcelObj: null,
+				isProgrammaticChange: false
 			}
 		},
 		watch: {
@@ -175,28 +180,57 @@
 				}
 			},
 			changed(instance, cell, x, y, value) {
+				if (this.isProgrammaticChange) return;
 				// Lấy dữ liệu từ bảng
-				const rawData = this.jExcelObj[0].getData();
-	
-				// Lấy tiêu đề cột (nếu có)
+				const rawData = instance.getData();
 				const columns = this.columns.map(col => col.name);
 	
-				// Chuyển đổi sang mảng đối tượng
+				// Chuyển dữ liệu thành mảng object
 				const dataObjects = rawData.map(row => {
 					const obj = {};
 					columns.forEach((colName, index) => {
-						obj[colName] = row[index] ?? ''//|| '';
+						obj[colName] = row[index] ?? '';
 					});
 					return obj;
 				});
-				console.log(`Ô (${x}, ${y}) đã thay đổi thành: ${value}`);
+	
+				console.log('dataObjects =>', cell, x, y, value)
+	
+				const rowObject = dataObjects[y];
+				const columnName = columns[x];
+				const cellValue = rowObject[columnName];
 				const rowData = instance.getRowData(y);
-				console.log('rowData', rowData)
-				console.log(dataObjects);
+	
+				// Lọc dữ liệu phù hợp
+				const CD_HocSinhExist = this.rootDataSource.filter(
+					item => item.HocSinhID === rowObject?.HocSinhID && item.MaCotDiem === columnName
+				);
+	
+				CD_HocSinhExist.forEach(item => {
+					if (item.HeSo >= 2) {
+						const inputValue = parseFloat(value);
+						if (!isNaN(inputValue)) {
+							const newValue = item.HeSo * inputValue;
+							if (String(newValue) !== String(cellValue)) {
+								// ✅ Cập nhật trực tiếp không gây loop
+								instance.options.data[y][x] = newValue;
+								instance.records[y][x].innerHTML = newValue;
+	
+								// Cập nhật lại dữ liệu emit ra ngoài
+								dataObjects[y][columnName] = newValue;
+								this.isProgrammaticChange = true;
+								instance.setValueFromCoords(x, y, newValue)
+								this.isProgrammaticChange = false
+							}
+						}
+					}
+				});
+	
+				// Emit dữ liệu
 				this.$emit('update:dataSource', dataObjects);
 				this.$emit('onChange', { instance, cell, x, y, value, dataObjects });
 				this.$emit('rowData', rowData);
-				this.$emit('addressCell', [x, y])
+				this.$emit('addressCell', [x, y]);
 			},
 			onselection(instance, x1, y1, x2, y2, origin) {
 				//v5

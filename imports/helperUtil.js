@@ -251,16 +251,38 @@ function calculateColumnWidth(text) {
     return text.length * charWidth;
 }
 
-function getColumnAddress(columns, columnName, numberCols) {
-    let char = 68
-    if (numberCols === 4) char = 69
-    console.log('numberCols', numberCols);
+// function getColumnAddress(columns, columnName, numberCols) {
+//     let char = 68
+//     let charOver = 65
+//     if (numberCols === 4) char = 69
+//     const columnMap = {};
+//     columns.forEach((column, index) => {
+//         //Mẫn thêm 24/07 nếu vượt qua kí tự Z thì set về AA,..
+//         const columnAddress = (char + index) <= 90 ? String.fromCharCode(char + index) : (String.fromCharCode(65) + String.fromCharCode(65+(index-22))) ; // 67 là mã ASCII của 'C'
+//         columnMap[column.name] = columnAddress;
+//     });
+//     return columnMap[columnName] || columnName; // Trả về địa chỉ cột nếu có, nếu không giữ nguyên tên cột
+// }
+
+function getColumnAddress(columns, columnName, freezeColumns = 0) {
     const columnMap = {};
+
+    // Hàm chuyển index thành địa chỉ cột Excel (A, B, ..., Z, AA, AB, ...)
+    function numberToExcelColumn(n) {
+        let result = '';
+        while (n >= 0) {
+            result = String.fromCharCode((n % 26) + 65) + result;
+            n = Math.floor(n / 26) - 1;
+        }
+        return result;
+    }
+
     columns.forEach((column, index) => {
-        const columnAddress = String.fromCharCode(char + index); // 67 là mã ASCII của 'C'
+        const columnAddress = numberToExcelColumn(index + freezeColumns); // cộng offset freeze
         columnMap[column.name] = columnAddress;
     });
-    return columnMap[columnName] || columnName; // Trả về địa chỉ cột nếu có, nếu không giữ nguyên tên cột
+
+    return columnMap[columnName] || columnName;
 }
 function replaceFormula(columns, formula, indexRow, numberCols) {
     // Thay IIF thành IF trước (hoặc sau đều được)
@@ -269,7 +291,9 @@ function replaceFormula(columns, formula, indexRow, numberCols) {
     return formula.replace(/\b\w+_\w+\b/g, (match) => {
         try {
             // Lấy địa chỉ cột từ tên cột
+
             const columnAddress = getColumnAddress(columns, match, numberCols);
+
             // Trả về địa chỉ cột + số dòng
             return `${columnAddress}${indexRow}`;
         } catch (error) {
@@ -600,4 +624,31 @@ function getTitlePageByURL(url) {
         }
     }
     return text
+}
+
+function renderUrlYoutube(source) {
+    const urlObj = new URL(source);
+    let videoId = '';
+    let startTime = '';
+
+    if (urlObj.hostname === 'youtu.be') {
+        // Dạng rút gọn
+        videoId = urlObj.pathname.slice(1);
+        startTime = urlObj.searchParams.get('t');
+    } else if (
+        urlObj.hostname === 'www.youtube.com' ||
+        urlObj.hostname === 'youtube.com'
+    ) {
+        // Dạng đầy đủ
+        videoId = urlObj.searchParams.get('v');
+        startTime = urlObj.searchParams.get('t') || urlObj.searchParams.get('start');
+    } else {
+        throw new Error('URL không phải của YouTube');
+    }
+
+    // Tạo embed URL
+    const embedUrl = `https://www.youtube.com/embed/${videoId}`;
+    return startTime
+        ? `${embedUrl}?start=${parseInt(startTime, 10)}`
+        : embedUrl;
 }

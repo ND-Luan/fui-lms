@@ -1,0 +1,119 @@
+
+/* ======================================================= */
+/* == STYLING CHUNG CHO TRANG                           == */
+/* ======================================================= */
+.page-container {
+    background-color: #f3f4f6; /* Nền xám rất nhạt */
+    padding: 6px !important;
+}
+
+/* ======================================================= */
+/* == KHU VỰC HEADER TÍCH HỢP                           == */
+/* ======================================================= */
+.summary-card {
+    border-radius: 12px;
+    background-color: #ffffff;
+    border: 1px solid #e5e7eb;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    padding: 24px;
+    margin-bottom: 24px; /* Khoảng cách với bảng bên dưới */
+}
+
+.filters-column {
+    padding-right: 24px !important;
+}
+
+.header-title-group .text-h6 {
+    color: #111827;
+}
+.header-title-group .text-body-2 {
+    color: #6b7280;
+}
+
+.filters-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 16px;
+}
+
+:deep(.v-select .v-field),
+:deep(.v-text-field .v-field) {
+    background-color: #f9fafb;
+    border-radius: 8px !important;
+    box-shadow: none !important;
+    border: 1px solid #e5e7eb !important;
+}
+:deep(.v-field__outline) {
+    display: none;
+}
+
+.stats-column {
+    display: flex;
+    align-items: center;
+    padding-left: 24px !important;
+    border-left: 1px solid #e5e7eb;
+}
+
+.stat-item {
+    flex: 1;
+    padding: 0 16px; /* Thêm padding ngang */
+}
+.stat-item:first-child {
+    padding-left: 0;
+}
+.stat-item:last-child {
+    padding-right: 0;
+}
+.stat-item .text-overline {
+    color: #6b7280;
+    font-size: 0.75rem !important;
+    font-weight: 500;
+}
+.stat-item .stat-ratio {
+    font-size: 0.9rem;
+    color: #374151;
+}
+.stat-item .stat-ratio strong {
+    font-weight: 600;
+}
+.stat-item .stat-value {
+    color: #111827;
+    font-size: 2.25rem;
+    font-weight: 700;
+    line-height: 1.2;
+}
+.v-progress-linear {
+    margin-top: 8px;
+}
+
+/* ======================================================= */
+/* == BẢNG DỮ LIỆU                                      == */
+/* ======================================================= */
+.table-card {
+    background-color: #ffffff;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+:deep(th) {
+    color: #6b7280 !important;
+    font-weight: 600 !important;
+    font-size: 0.75rem !important;
+    text-transform: uppercase !important;
+}
+
+.text-muted {
+    color: #6b7280;
+    font-size: 0.8rem;
+}
+.text-secondary {
+    color: #374151;
+}
+.score-bad {
+    color: #ef4444 !important;
+}
+.score-average {
+    color: #f97316 !important;
+}
+.score-good {
+    color: #16a34a !important;
+}

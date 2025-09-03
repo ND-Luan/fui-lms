@@ -1,44 +1,88 @@
-// ====== SCRIPT ======
-function handleElementAdd(elementType) {
-    // 1. Chuẩn bị object dữ liệu hoàn chỉnh
-    const newElement = {
-        ElementID: 0, // Gửi 0 để backend biết đây là INSERT
-        LessonID: vueData.lessonId,
-        ElementType: elementType,
-        ElementData: '{}', // Dữ liệu JSON rỗng ban đầu
-        SortOrder: (vueData.elements.length + 1) * 10,
-        // Các thuộc tính khác nếu SP yêu cầu...
-    };
-    // 2. Thêm vào UI ngay lập tức để người dùng thấy (với một ID tạm thời)
-    const tempElement = { ...newElement, ElementID: 'new_' + Date.now() };
-    vueData.elements.push(tempElement);
-    vueData.selectedElementId = tempElement.ElementID;
-    vueData.isDirty = true;
-    // 3. Gọi API với object dữ liệu đã được chuẩn bị
-    Fui.run('saveElementApi', newElement);
+function processInitialData(data) {
+    if (data && data.length >= 2) {
+        const lessonData = data[0][0];
+        const elementsData = data[1];
+        lessonData.elements = (elementsData || []).map(el => {
+            try {
+                el.ElementData = typeof el.ElementData === 'string' ? JSON.parse(el.ElementData) : (el.ElementData || {});
+            } catch (e) {
+                el.ElementData = {};
+            }
+            return el;
+        });
+        vueData.lesson = lessonData;
+    } else {
+        Vue.$toast.error("Tải dữ liệu bài giảng thất bại.", { position: 'top' });
+    }
+    console.log('process...')
+    vueData.dataReady = true;
 }
-function selectElement(element) {
-    vueData.selectedElementId = element.ElementID;
-}
-function updateElementProperty(key, value) {
-    if (!vueData.selectedElement) return;
-    vueData.selectedElement[key] = value;
-    vueData.isDirty = true;
-}
-// Hàm này sẽ được gọi bởi component uc-element-properties
-function onPropertyChange(key, value) {
-    // Tìm element trong mảng và cập nhật
-    const index = vueData.elements.findIndex(el => el.ElementID === vueData.selectedElementId);
-    if (index !== -1) {
-        vueData.elements[index][key] = value;
-        vueData.isDirty = true; // Đánh dấu là có thay đổi chưa lưu
+function initPage() {
+    const LessonID = vueData.LessonID;
+    if (LessonID && LessonID > 0) {
+        vueData.isEditMode = true;
+        CALL('getLessonData')
+    } else {
+        vueData.isEditMode = false;
+        vueData.lesson = {
+            Title: '', Description: '', Tuan: '', Chuong: '',
+            Status: 1,
+            elements: []
+        };
+        vueData.dataReady = true;
     }
 }
-function saveChanges() {
-    // Logic gọi API lưu bài giảng và các elements
-    // Chúng ta sẽ hoàn thiện sau
-    console.log("Saving lesson:", vueData.lessonData);
-    console.log("Saving elements:", vueData.elements);
-    vueData.isDirty = false;
-    Fui.toast('Đã lưu bài giảng!');
+function saveLesson(payload) {
+    const dataToSend = { ...payload.lesson };
+    dataToSend.Status = payload.isPublishing ? 2 : 1;
+    dataToSend.EstimatedDuration = dataToSend.EstimatedDuration || 0
+    // API 1: Lưu thông tin chính
+    ajaxCALL("lms/EL_Lesson_Save", {
+        LessonID: dataToSend.LessonID,
+        TuanHocID: dataToSend.TuanHocID,
+        Chuong: dataToSend.Chuong,
+        Title: dataToSend.Title,
+        Description: dataToSend.Description,
+        KhoiID: dataToSend.KhoiID,
+        MonHocID: dataToSend.MonHocID,
+        NienKhoa: dataToSend.NienKhoa,
+        HocKi: dataToSend.HocKi || 1,
+        EstimatedDuration: dataToSend.EstimatedDuration,
+        ThumbnailURL: dataToSend.ThumbnailURL,
+        Status: dataToSend.Status,
+    }, (response) => {
+        console.log('response', response)
+        if (response && response.data && response.data[0]) {
+            const newLessonID = response.data[0].LessonID;
+            if (!vueData.isEditMode) {
+                window.history.pushState({}, '', `?LessonID=${newLessonID}`);
+                vueData.isEditMode = true;
+                vueData.LessonID = newLessonID; // Cập nhật lại ID
+            }
+            const Json_Elements = dataToSend.elements.map(x => ({ ...x, ElementData: JSON.stringify(x.ElementData) }))
+            ajaxCALL('lms/EL_Element_Save_Multiple', {
+                LessonID: newLessonID,
+                Json_Elements
+            }, res => {
+                Vue.$toast.success('Lưu bài học thành công!', { position: 'top' });
+                CALL('getLessonData') // Tải lại dữ liệu mới nhất
+            })
+            // // API 2: Lưu các elements
+            // const elementSavePromises = dataToSend.elements.map((element, index) => {
+            //     const elementPayload = {
+            //         ElementID: element.ElementID || 0,
+            //         LessonID: newLessonID,
+            //         ElementType: element.ElementType,
+            //         ElementData: JSON.stringify(element.ElementData),
+            //         SortOrder: (index + 1) * 10
+            //     };
+            //     return new Promise(resolve => ajaxCALL("lms/EL_Element_Save", elementPayload, resolve));
+            // });
+            // Promise.all(elementSavePromises).then(() => {
+            // });
+        }
+    });
 }
+vueData.initPage = initPage;
+vueData.processInitialData = processInitialData;
+vueData.saveLesson = saveLesson;

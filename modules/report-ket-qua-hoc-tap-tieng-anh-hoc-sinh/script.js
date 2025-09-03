@@ -360,6 +360,156 @@ function handleData() {
         vueData.defColorActivities = color
     }
 }
+function handleDataNhomLop() {
+    if (!vueData.DataNhomLop[0] || !vueData.DataNhomLop[0]?.HocSinhID) return
+    let dataDiemTiengAnh = [
+        {
+            title: "Nghe",
+            key: 'Nghe',
+            backgroundColor: "rgb(209 231 211)",
+            icon: "mdi-headphones"
+        }, {
+            title: "Đọc",
+            key: 'Doc',
+            backgroundColor: "rgb(209 231 211)",
+            icon: "mdi-book-open-outline"
+        },
+        {
+            title: "Viết",
+            key: 'Viet',
+            backgroundColor: "rgb(209 231 211)",
+            icon: "mdi-lead-pencil"
+        },
+        {
+            title: "Nói",
+            key: 'Noi',
+            backgroundColor: "rgb(209 231 211)",
+            icon: "mdi-account-voice"
+        }
+    ]
+    if (vueData.DataNhomLop[0].LoaiHocSinh == 'Moi') {
+        dataDiemTiengAnh = [
+            {
+                title: "Nghe",
+                key: 'Nghe',
+                backgroundColor: "rgb(209 231 211)",
+                icon: "mdi-headphones"
+            }, {
+                title: "Ngôn ngữ",
+                key: 'NgonNgu',
+                backgroundColor: "rgb(209 231 211)",
+                icon: "mdi-book-open-outline"
+            },
+            {
+                title: "Viết",
+                key: 'Viet',
+                backgroundColor: "rgb(209 231 211)",
+                icon: "mdi-lead-pencil"
+            },
+            {
+                title: "Nói",
+                key: 'Noi',
+                backgroundColor: "rgb(209 231 211)",
+                icon: "mdi-account-voice"
+            }
+        ]
+    }
+    let dataDiemCEFR = [
+        {
+            title: "Nghe",
+            key: 'CEFR_Nghe',
+            backgroundColor: "rgb(209 231 211)",
+            icon: "mdi-headphones"
+        }, {
+            title: "Ngôn ngữ",
+            key: 'CEFR_Language',
+            backgroundColor: "rgb(209 231 211)",
+            icon: "mdi-book-open-outline"
+        },
+        {
+            title: "Viết",
+            key: 'CEFR_Viet',
+            backgroundColor: "rgb(209 231 211)",
+            icon: "mdi-lead-pencil"
+        },
+        {
+            title: "Nói",
+            key: 'CEFR_Noi',
+            backgroundColor: "rgb(209 231 211)",
+            icon: "mdi-account-voice"
+        }
+    ]
+    let propertiesShow = [
+        // {
+        //     title: "Lớp cũ",
+        //     key: 'LopCu'
+        // },
+        {
+            title: "Mã học sinh",
+            key: 'HocSinhID'
+        },
+        // {
+        //     title: "Họ",
+        //     key: 'Ho'
+        // },
+        // {
+        //     title: "Tên",
+        //     key: 'Ten'
+        // },
+        // {
+        //     title: "Ngày sinh",
+        //     key: 'NgaySinh'
+        // },
+        // {
+        //     title: "Phái",
+        //     key: 'Phai'
+        // },
+        // {
+        //     title: "Số điện thoại",
+        //     key: 'SDT'
+        // },
+        {
+            title: "Nghe (%)",
+            key: 'Nghe'
+        }, {
+            title: "Ngôn ngữ (%)",
+            key: 'Doc'
+        },
+        {
+            title: "Viết (%)",
+            key: 'Viet'
+        },
+        {
+            title: "Nói (%)",
+            key: 'Noi'
+        },
+        {
+            title: "Chung (%)",
+            key: 'Chung'
+        },
+        {
+            title: "Điểm Cambrige",
+            key: 'Diem_Cambridge'
+        },
+        {
+            title: "CEFR",
+            key: 'CEFR_Tong'
+        },
+        {
+            title: "Ghi chú (thi chính thức)",
+            key: 'GhiChu'
+        }, {
+            title: "Xếp nhóm Tiếng Anh",
+            key: 'XepNhomTiengAnh'
+        }
+    ]
+    let resultData = propertiesShow.map(item => { return { ...item, value: vueData.DataNhomLop[0][item.key] } })
+    let resultDiemTiengAnh = dataDiemTiengAnh.map(item => { return { ...item, value: vueData.DataNhomLop[0][item.key] } })
+    let resultDiemCEFR = dataDiemCEFR.map(item => { return { ...item, value: vueData.DataNhomLop[0][item.key] } })
+    vueData.HocSinhDiemTiengAnh = resultDiemTiengAnh
+    vueData.HocSinhNhomLopDetail = resultData
+    vueData.HocSinhDiemCEFR = resultDiemCEFR
+}
 //render cái mô tả kết quả học tập
 function initdefColorResult() {
     vueData.defColorResult = [

@@ -1,0 +1,329 @@
+/**
+ * Ghép nối 3 bảng dữ liệu từ API GetGroupedDashboard thành một cấu trúc lồng nhau hoàn chỉnh.
+ * @param {object} response - Phản hồi từ ajaxCALL.
+ */
+function processGroupedDashboardData(response) {
+    console.log("BƯỚC 1: Dữ liệu thô từ API", response);
+    if (!response || !response.data || response.data.length < 3) {
+        console.error("LỖI: API GetGroupedDashboard không trả về đủ 3 bảng dữ liệu.");
+        vueData.teachingGroups = [];
+        return;
+    }
+    const groups = response.data[0];
+    const classes = response.data[1];
+    // const assignments = response.data[2];
+    // debugger
+    // console.log("BƯỚC 2: Dữ liệu đã tách - Nhóm:", groups, "Lớp:", classes, "Bài tập:", assignments);
+    // if (!groups || groups.length === 0) {
+    //     console.warn("Không tìm thấy nhóm (Khối-Môn) nào được phân công.");
+    //     vueData.teachingGroups = [];
+    //     return;
+    // }
+    // // Bước A: Ghép các bài tập vào đúng lớp của nó
+    // const classesWithAssignments = classes.map(classItem => {
+    //     const childAssignments = assignments.filter(a => a.LopID === classItem.LopID).map(a => ({
+    //         ...a,
+    //         MonHocID: classItem.MonHocID,
+    //         TenMon: classItem.TenMonHoc,
+    //     }));
+    //     return { ...classItem, assignments: childAssignments };
+    // });
+    // console.log(1, classesWithAssignments)
+    // // Bước B: Ghép các lớp (đã có bài tập) vào đúng nhóm Khối-Môn
+    // const groupedData = groups.map(group => {
+    //     const childClasses = classesWithAssignments.filter(c =>
+    //         // Đảm bảo so sánh cùng kiểu dữ liệu (chuyển đổi sang chuỗi cho an toàn)
+    //         String(c.KhoiID) === String(group.KhoiID) && String(c.MonHocID) === String(group.MonHocID)
+    //     );
+    //     return { ...group, classes: childClasses };
+    // });
+    // console.log("BƯỚC 3: Dữ liệu cuối cùng đã được ghép nối", groupedData);
+    // vueData.teachingGroups = groupedData;
+    const assignments = [...response.data[2], ...response.data[3]]; // gom cả 2 loại assignment
+    // Gom theo Khối → Tuần → Lớp
+    const groupedData = groups.map(group => {
+        // lấy các lớp thuộc group
+        const childClasses = classes.filter(c =>
+            String(c.KhoiID) === String(group.KhoiID) &&
+            String(c.MonHocID) === String(group.MonHocID)
+        );
+        // từ assignments, gom thành weeks
+        const weeksMap = {};
+        assignments.forEach(a => {
+            // chỉ giữ assignment thuộc lớp trong childClasses
+            if (childClasses.some(c => String(c.LopID) === String(a.LopID))) {
+                if (!weeksMap[a.TuanHocID]) {
+                    weeksMap[a.TuanHocID] = {
+                        TuanHocID: a.TuanHocID,
+                        Tuan_HienThi: a.Tuan_HienThi,
+                        classes: []
+                    };
+                }
+                // tìm hoặc thêm lớp
+                let week = weeksMap[a.TuanHocID];
+                let cls = week.classes.find(c => c.LopID === a.LopID);
+                if (!cls) {
+                    const classInfo = childClasses.find(c => c.LopID === a.LopID);
+                    cls = { ...classInfo, assignments: [] };
+                    week.classes.push(cls);
+                }
+                cls.assignments.push(a);
+            }
+        });
+        const sortedArray = Object.values(weeksMap).sort((a, b) => b.TuanHocID - a.TuanHocID);
+        const obj = Object.fromEntries(
+            sortedArray.map(item => [`week_${item.TuanHocID}`, item])
+        );
+        // const obj = Object.fromEntries(
+        //     sortedArray.map(item => [item.TuanHocID, item])
+        // );
+        return {
+            ...group,
+            weeks: Object.values(obj)
+        };
+    });
+    vueData.teachingGroups = groupedData;
+    console.log("gom", groupedData);
+}
+/**
+ * Xử lý dữ liệu thư viện (danh sách phẳng) và gom nhóm thành cấu trúc cây lồng nhau.
+ * @param {Array} flatLibraryData - Dữ liệu thô từ API GetMyContentLibrary.
+ * @returns {Array} - Dữ liệu đã được gom nhóm.
+ */
+function processLibraryData(flatLibraryData) {
+    console.log('flatLibraryData', flatLibraryData)
+    if (!flatLibraryData || flatLibraryData.length === 0) {
+        return [];
+    }
+    // Bước 1: Gom nhóm theo (Môn-Khối) -> Tuần -> Chương
+    const groupedDataStructure = flatLibraryData.reduce((acc, item) => {
+        const groupKey = `${item.KhoiID}-${item.MonHocID}`;
+        if (!acc[groupKey]) {
+            acc[groupKey] = {
+                KhoiID: item.KhoiID,
+                TenKhoi: item.TenKhoi,
+                MonHocID: item.MonHocID,
+                MonHocName: item.MonHocName,
+                weeks: {}
+            };
+        }
+        const weekKey = `${item.Tuan_HienThi || '[Chưa xếp tuần]'}`;
+        if (!acc[groupKey].weeks[weekKey]) {
+            acc[groupKey].weeks[weekKey] = {
+                title: weekKey,
+                chapters: {}
+            };
+        }
+        const chapterKey = item.Chuong || 'Nội dung chung';
+        if (!acc[groupKey].weeks[weekKey].chapters[chapterKey]) {
+            acc[groupKey].weeks[weekKey].chapters[chapterKey] = {
+                title: chapterKey,
+                items: []
+            };
+        }
+        acc[groupKey].weeks[weekKey].chapters[chapterKey].items.push(item);
+        return acc;
+    }, {});
+    const _ = Object.values(groupedDataStructure).map(group => {
+        group.weeks = Object.values(group.weeks).map(week => {
+            week.chapters = Object.values(week.chapters);
+            return week;
+        });
+        return group;
+    });
+    console.log('asdsad', _)
+    // Bước 2: Chuyển đổi các object lồng nhau thành mảng để v-for có thể duyệt qua
+    return _
+}
+/**
+ * Lấy ngày đầu tuần (Thứ Hai) của một ngày bất kỳ.
+ * @param {Date} d - Ngày hiện tại.
+ * @returns {string} - Chuỗi ngày tháng dạng 'YYYY-MM-DD'.
+ */
+function getStartOfWeek(d) {
+    d = new Date(d);
+    const day = d.getDay();
+    const diff = d.getDate() - day + (day === 0 ? -6 : 1);
+    const monday = new Date(d.setDate(diff));
+    const year = monday.getFullYear();
+    const month = ('0' + (monday.getMonth() + 1)).slice(-2);
+    const date = ('0' + monday.getDate()).slice(-2);
+    return `${year}-${month}-${date}`;
+}
+/**
+ * Xử lý dữ liệu TKB tuần và trích xuất lịch dạy cho ngày hôm nay.
+ * @param {Array} weeklyScheduleData - Dữ liệu từ API.
+ */
+function processWeeklyScheduleForToday(weeklyScheduleData) {
+    if (!weeklyScheduleData || weeklyScheduleData.length === 0) {
+        vueData.schedule = [];
+        return;
+    }
+    const today = new Date();
+    const todayColumnKey = (today.getDay() === 0) ? '1' : (today.getDay() + 1).toString();
+    const periodTimes = {
+        1: '07:30 - 08:15', 2: '08:25 - 09:10', 3: '09:30 - 10:15', 4: '10:25 - 11:10', 5: '11:20 - 12:05',
+        6: '13:30 - 14:15', 7: '14:25 - 15:10', 8: '15:30 - 16:15', 9: '16:25 - 17:10', 10: '17:15 - 18:00'
+    };
+    const todaySchedule = [];
+    weeklyScheduleData.forEach(period => {
+        const classInfoHtml = period[todayColumnKey];
+        if (classInfoHtml) {
+            const cleanedInfo = classInfoHtml.replace(/<br\s*\/?>/gi, ' - ').replace(/<\/?b>/g, '').trim();
+            const finalTitle = `Tiết ${period.Tiet}: ${cleanedInfo.endsWith(' -') ? cleanedInfo.slice(0, -2) : cleanedInfo}`;
+            todaySchedule.push({
+                title: finalTitle,
+                subtitle: `Buổi ${period.Buoi} (Thời gian: ${periodTimes[period.Tiet] || 'N/A'})`
+            });
+        }
+    });
+    vueData.schedule = todaySchedule;
+}
+/**
+ * Hàm khởi tạo chính, gọi tất cả các API cần thiết khi trang tải.
+ */
+function apiCall1() {
+    return new Promise((resolve, reject) => {
+        ajaxCALL("lms/EL_Teacher_GetGroupedDashboard", null, response => {
+            processGroupedDashboardData(response);
+            resolve();
+        }, reject);
+    })
+};
+function apiCall2() {
+    return new Promise((resolve, reject) => {
+        ajaxCALL("lms/EL_Teacher_GetRecentActivities", { PageSize: 10 }, response => {
+            vueData.activities = response.data;
+            resolve();
+        }, reject);
+    })
+};
+function apiCall3() {
+    return new Promise((resolve, reject) => {
+        ajaxCALL("lms/EL_Teacher_GetMyContentLibrary", null, response => {
+            vueData.contentLibrary = processLibraryData(response.data);
+            resolve();
+        }, reject);
+    })
+};
+function apiCall4() {
+    return new Promise((resolve, reject) => {
+        ajaxCALL("lms/EL_Teacher_GetFocusTasks", null, function (response) {
+            vueData.focusTasks = response.data;
+            resolve();
+        }, reject);
+    })
+};
+async function initPage() {
+    vueData.dataReady = false; // Bắt đầu với trạng thái chưa sẵn sàng
+    await apiCall1()
+    await apiCall2()
+    await apiCall3()
+    await apiCall4()
+    // Chờ tất cả các API nội bộ hoàn thành
+    Promise.all([apiCall1, apiCall2, apiCall3, apiCall4]).then(() => {
+        console.log("Tất cả API nội bộ đã tải xong.");
+        vueData.dataReady = true; // Chỉ bật giao diện khi mọi thứ đã sẵn sàng
+    }).catch(error => {
+        console.error("Một trong các API nội bộ đã thất bại:", error);
+        Toast.error({ text: "Tải dữ liệu dashboard thất bại." });
+        vueData.dataReady = true; // Vẫn hiển thị giao diện với thông báo lỗi
+    });
+    // API bên ngoài vẫn chạy độc lập
+    const payload = { "NgayDauTuan": getStartOfWeek(new Date()), "GiaoVienID": vueData.sys_UserID };
+    $.ajax({
+        url: 'https://tapi.lhbs.vn/quansinh/ThoiKhoaBieu_GiaoVien',
+        type: 'POST',
+        contentType: 'application/json',
+        data: JSON.stringify(payload),
+        headers: { 'Authorization': 'Bearer ' + window.F_TOKEN },
+        success: function (response) {
+            if (response && response.data && response.data.length >= 2) {
+                processWeeklyScheduleForToday(response.data[1]);
+            }
+        },
+        error: function (jqXHR) {
+            console.error("Lỗi khi tải lịch dạy từ API bên ngoài.", jqXHR.responseText);
+            vueData.schedule = [{ title: 'Không thể tải lịch dạy', subtitle: 'Vui lòng kiểm tra lại' }];
+        }
+    });
+}
+/**
+ * Xử lý sự kiện khi giáo viên click nút "Vào lớp".
+ * @param {object} classInfo - Object chứa thông tin của lớp được click.
+ */
+function goToClassPage(classInfo) {
+    Toast.info({ text: `Vào lớp ${classInfo.TenLop}...` });
+    console.log("Điều hướng đến trang chi tiết lớp:", classInfo);
+}
+/**
+ * Xử lý sự kiện khi giáo viên click nút "Chấm bài".
+ * @param {object} classInfo - Object chứa thông tin của lớp được click.
+ */
+function goToGradingPage(classInfo) {
+    Toast.info({ text: `Mở trang chấm bài cho lớp ${classInfo.TenLop}...` });
+    console.log("Điều hướng đến trang chấm bài của lớp:", classInfo);
+}
+/**
+ * Xử lý sự kiện khi giáo viên click nút "Tạo bài tập cho nhóm".
+ * @param {object} groupInfo - Object chứa thông tin của nhóm (Khối, Môn).
+ */
+function createAssignmentForGroup(groupInfo) {
+    Toast.info({ text: `Mở trang tạo bài tập cho ${groupInfo.TenKhoi} - ${groupInfo.MonHocName}...` });
+    console.log("Mở trang tạo bài tập cho nhóm:", groupInfo);
+}
+Vue.component('FWindowCustom', {
+    props: ['winData', 'dialogOpen'],
+    emits: ['update:dialogOpen'],
+    template: `
+       <v-dialog ref="refsWindow" v-model="dialogOpen" :fullscreen="true" scrollable persistent>
+          <v-card height="100%">
+            <v-toolbar  density="compact" color="primary">
+              <v-toolbar-title class="font-weight-medium" v-html="winData?.title" style="max-height: 48px;"></v-toolbar-title>
+              <v-spacer></v-spacer>
+              <v-btn icon @click="closeDialog" class="ml-4"><v-icon>mdi-close</v-icon></v-btn>
+            </v-toolbar>
+             <iframe v-if="winData.url" :src="winData?.url" v-bind="$attrs" :id="winData?.id" name='frameName' height="100%" width="100%" style="border:none;" allow="fullscreen"></iframe>
+          </v-card>
+        </v-dialog>
+    `,
+    data: function () {
+        return {
+        }
+    },
+    mounted: function () { },
+    methods: {
+        closeDialog() {
+            this.$emit('update:dialogOpen', false)
+        },
+    }
+});
+function onOpenWindowCustom(object) {
+    console.log('object', object)
+    setTimeout(function () {
+        if (object.id != undefined && vueData.arrWindowID.find(item => item.id === object.id) != undefined) {
+            console.log("Cửa sổ bị trùng tên: ", object.id)
+            return;
+        }
+        vueData.arrWindowID.push(object);
+    }, 10);
+    vueData.winData = object
+    vueData.isOpenWindowCustom = true
+}
+function onCloseWindow(id) {
+    let indexWindow = app.config.globalProperties.v_OpenWindowList.indexOf(item => item.id = id)
+    if (indexWindow != -1) {
+        app.config.globalProperties.v_OpenWindowList.splice(indexWindow, 1)
+    }
+}
+// Đăng ký các hàm vào vueData để ALLDRAW có thể gọi
+vueData.initPage = initPage;
+vueData.goToClassPage = goToClassPage;
+vueData.goToGradingPage = goToGradingPage;
+vueData.createAssignmentForGroup = createAssignmentForGroup;
+vueData.onOpenWindowCustom = onOpenWindowCustom
+vueData.onCloseWindow = onCloseWindow
+vueData.apiCall1 = apiCall1
+vueData.apiCall2 = apiCall2
+vueData.apiCall3 = apiCall3
+vueData.apiCall4 = apiCall4
