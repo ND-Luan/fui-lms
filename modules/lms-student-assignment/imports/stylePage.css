@@ -12,6 +12,8 @@
 /* All Questions Mode Styles */
 .all-questions-mode {
     max-width: 100%;
+    max-height: calc(100vh - 66px);
+    overflow-y: auto;
 }
 
 .progress-summary {
@@ -200,11 +202,11 @@
 /* Navigation */
 .assignment-header {
     border-radius: 8px;
-  
+
 }
 
-.responsive-fs-title{
-     font-size: clamp(0.8rem, 2vw + 0.1rem, 1.2rem) ;
+.responsive-fs-title {
+    font-size: clamp(0.8rem, 2vw + 0.1rem, 1.2rem);
 }
 
 .assignment-header .v-card-subtitle {
@@ -346,54 +348,125 @@
     opacity: 0.6;
 }
 
-.header-respondsive-fs{
-    font-size: clamp(16px,2vw,20px);
+.header-respondsive-fs {
+    font-size: clamp(16px, 2vw, 20px);
 }
-.body-respondsive-fs{
+
+.body-respondsive-fs {
     font-size: clamp(12px, 2vw, 16px);
 }
 
 /******FIX SCROLL NGANG IOS *****
 /* 0) Chặn pan ngang mức root (chỉ trên thiết bị cảm ứng) */
 @media (hover: none) and (pointer: coarse) {
-  html, body, #mainContainer { max-width: 100%; overflow-x: clip; }
+
+    html,
+    body,
+    #mainContainer {
+        max-width: 100%;
+        overflow-x: clip;
+    }
 }
 
 /* 1) ĐÈ INLINE: gỡ min-width:fit-content trong toolbar title của dialog fullscreen */
 .v-overlay-container .v-dialog.v-dialog--fullscreen .v-toolbar-title p {
-  min-width: 0 !important;
-  max-width: 100% !important;
-  overflow: hidden !important;
-  text-overflow: ellipsis !important;
-  white-space: nowrap !important; /* hoặc bỏ nếu muốn tự xuống dòng */
+    min-width: 0 !important;
+    max-width: 100% !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
+    /* hoặc bỏ nếu muốn tự xuống dòng */
 }
+
 /* Phòng trường hợp không phải <p> */
-.v-overlay-container .v-dialog.v-dialog--fullscreen .v-toolbar-title > * {
-  min-width: 0 !important;
-  max-width: 100% !important;
+.v-overlay-container .v-dialog.v-dialog--fullscreen .v-toolbar-title>* {
+    min-width: 0 !important;
+    max-width: 100% !important;
 }
 
 /* 2) Cho cha flex co lại đúng (rất quan trọng trên iOS) */
 .v-overlay-container .v-dialog.v-dialog--fullscreen .v-toolbar,
 .v-overlay-container .v-dialog.v-dialog--fullscreen .v-toolbar__content {
-  min-width: 0 !important;
+    min-width: 0 !important;
 }
 
 .v-overlay-container .v-dialog.v-dialog--fullscreen .v-toolbar-title {
-  flex: 1 1 auto !important;
-  min-width: 0 !important;
-  overflow: hidden !important;
+    flex: 1 1 auto !important;
+    min-width: 0 !important;
+    overflow: hidden !important;
 }
 
 /* 3) Đảm bảo nội dung overlay không vượt 100vw */
 .v-overlay-container .v-overlay__content,
 .v-overlay-container .v-dialog.v-dialog--fullscreen .v-card {
-  max-width: 100vw !important;
-  overflow-x: clip !important;
+    max-width: 100vw !important;
+    overflow-x: clip !important;
 }
 
 /* 4) Grid/col của Vuetify co đúng (tránh đẩy tràn khi zoom) */
-.v-row, .v-col { min-width: 0; }
+.v-row,
+.v-col {
+    min-width: 0;
+}
 
 /* 5) Calendar phòng rounding khi zoom */
-.week-calendar { min-width: 0; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+.week-calendar {
+    min-width: 0;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+
+
+.image {
+    position: relative;
+}
+
+.image.image_resized {
+    max-width: 100%;
+    display: block;
+    box-sizing: border-box;
+}
+
+
+.image-style-align-left {
+    float: left;
+    margin-right: var(--ck-image-style-spacing);
+}
+
+.image-style-align-center {
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.image-style-align-right {
+    float: right;
+    margin-left: var(--ck-image-style-spacing);
+}
+
+.image {
+    display: table;
+    clear: both;
+    text-align: center;
+    margin: 1em auto;
+}
+
+.image.image_resized img {
+    width: 100%;
+}
+
+.image img {
+    display: block;
+    margin: 0 auto;
+    max-width: 100%;
+    min-width: 50px;
+}
+
+.chip-file-upload{
+    height: fit-content !important;
+
+}
+.chip-file-upload .v-chip__content{
+    white-space: normal;
+    margin: 4px 0px !important;
+}

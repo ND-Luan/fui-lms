@@ -233,85 +233,195 @@
 
 
 /* CSS QUIZ MATCHING */
+/* Container chính */
 .qMatching-container {
-    display: flex;
-    gap: 40px;
-    justify-content: center;
-    align-items: flex-start;
-    margin-top: 20px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 12px;
+    border: 1px solid #e0e0e0;
+    border-radius: 12px;
+    background-color: #fafafa;
 }
 
-.qMatching-column {
-    flex: 1;
-    max-width: 300px;
+/* Header title row */
+.qMatching-title-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 40px;
+    max-width: 800px;
+    margin: 0 auto 16px auto;
 }
 
 .qMatching-title {
     font-weight: 600;
     text-align: center;
-    margin-bottom: 12px;
     font-size: 16px;
     color: #444;
     text-transform: uppercase;
     letter-spacing: 1px;
-    border-bottom: 2px solid #1976d2;
-    padding-bottom: 6px;
+    border-bottom: 3px solid #1976d2;
+    padding-bottom: 8px;
+    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+    padding: 12px;
+    border-radius: 8px 8px 0 0;
 }
 
-.qMatching-item-a,
-.qMatching-item-b {
-    /* Kế thừa style cũ */
-    padding: 12px 14px;
-    border-radius: 10px;
-    background: #f9f9f9;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+/* Các cột */
+.qMatching-column-a,
+.qMatching-column-b {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+/* Items cột A - tĩnh */
+.qMatching-item-a {
+    padding: 16px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
     font-size: 15px;
     display: flex;
     align-items: center;
-    transition: transform 0.15s ease, box-shadow 0.15s ease;
-
-    /* NEW: chiều cao bằng nhau theo dòng */
-    height: 100%;
+    min-height: 60px;
+    font-weight: 500;
+    position: relative;
+    border-left: 4px solid rgba(255, 255, 255, 0.3);
 }
-.qMatching-item-a:hover,
+
+.qMatching-item-a::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0) 100%);
+    border-radius: 12px;
+    pointer-events: none;
+}
+
+/* Items cột B - có thể kéo thả */
+.qMatching-item-b {
+    padding: 16px;
+    background: #ffffff;
+    border: 2px solid #e1e5e9;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    font-size: 15px;
+    display: flex;
+    align-items: center;
+    min-height: 60px;
+    cursor: move;
+    transition: all 0.2s ease;
+    position: relative;
+}
+
 .qMatching-item-b:hover {
     transform: translateY(-2px);
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.12);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+    border-color: #1976d2;
 }
 
+/* Drag icon */
 .qMatching-drag-icon {
     cursor: grab;
     font-size: 18px;
-    margin-right: 8px;
+    margin-right: 12px;
     color: #999;
+    padding: 4px;
+    border-radius: 4px;
+    transition: all 0.2s ease;
 }
 
-.qMatching-text {
-    flex: 1;
+.qMatching-drag-icon:hover {
+    background-color: #f0f0f0;
+    color: #1976d2;
 }
 
-.qMatching-ghost {
-    opacity: 0.5;
-    background: #e3f2fd !important;
-    border: 2px dashed #1976d2 !important;
+.qMatching-drag-icon:active {
+    cursor: grabbing;
 }
 
-.qMatching-feedback {
-    margin-left: auto;
+/* Status icon cho kết quả */
+.qMatching-status-icon {
+    margin-right: 12px;
+    font-weight: bold;
+    font-size: 18px;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
     display: flex;
     align-items: center;
+    justify-content: center;
+    animation: statusPop 0.3s ease;
 }
 
-.qMatching-feedback .v-icon {
-    font-size: 20px;
+/* Text content */
+.qMatching-text {
+    flex: 1;
+    line-height: 1.4;
 }
 
-.qMatching-feedback .v-icon[color="success"] {
-    animation: popIn 0.3s ease;
+/* Ghost effect khi đang kéo */
+.qMatching-ghost {
+    opacity: 0.6;
+    background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%) !important;
+    border: 2px dashed #1976d2 !important;
+    transform: scale(1.02);
 }
 
-.qMatching-feedback .v-icon[color="error"] {
-    animation: shake 0.3s ease;
+/* Trạng thái đúng */
+.qMatching-correct {
+    background: linear-gradient(135deg, #e8f5e8 0%, #c8e6c9 100%);
+    border-color: #4caf50;
+    box-shadow: 0 2px 8px rgba(76, 175, 80, 0.2);
+}
+
+.qMatching-correct .qMatching-status-icon {
+    color: #ffffff;
+    background-color: #4caf50;
+}
+
+.qMatching-correct:hover {
+    box-shadow: 0 6px 20px rgba(76, 175, 80, 0.3);
+}
+
+/* Trạng thái sai */
+.qMatching-incorrect {
+    background: linear-gradient(135deg, #ffebee 0%, #ffcdd2 100%);
+    border-color: #f44336;
+    box-shadow: 0 2px 8px rgba(244, 67, 54, 0.2);
+}
+
+.qMatching-incorrect .qMatching-status-icon {
+    color: #ffffff;
+    background-color: #f44336;
+}
+
+.qMatching-incorrect:hover {
+    box-shadow: 0 6px 20px rgba(244, 67, 54, 0.3);
+}
+
+/* Animations */
+@keyframes statusPop {
+    0% {
+        transform: scale(0.8);
+        opacity: 0;
+    }
+
+    50% {
+        transform: scale(1.1);
+    }
+
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
 }
 
 @keyframes popIn {
@@ -327,7 +437,9 @@
 }
 
 @keyframes shake {
-    0% {
+
+    0%,
+    100% {
         transform: translateX(0);
     }
 
@@ -342,62 +454,116 @@
     75% {
         transform: translateX(-2px);
     }
+}
 
-    100% {
-        transform: translateX(0);
+/* Grading section */
+.qMatching-grading {
+    margin-top: 24px;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .qMatching-main-container {
+        grid-template-columns: 1fr;
+        gap: 20px;
+    }
+
+    .qMatching-title-row {
+        grid-template-columns: 1fr;
+        gap: 0;
+    }
+
+    .qMatching-main-container {
+        padding: 16px;
+    }
+
+    .qMatching-title {
+        margin-bottom: 8px;
+    }
+
+    /* .qMatching-title:first-child::after {
+        content: " (câu hỏi)";
+        font-size: 0.8em;
+        font-weight: normal;
+        color: rgba(255, 255, 255, 0.8);
+    } */
+
+    .qMatching-title:last-child::after {
+        content: " (kéo thả để sắp xếp)";
+        font-size: 0.8em;
+        font-weight: normal;
+        color: #666;
+    }
+
+    .qMatching-item-a,
+    .qMatching-item-b {
+        min-height: 50px;
+        padding: 12px;
+        font-size: 14px;
     }
 }
 
-.qMatching-grading {
-    margin-top: 20px;
+@media (max-width: 480px) {
+    .qMatching-container {
+        padding: 12px;
+    }
+
+    .qMatching-item-a,
+    .qMatching-item-b {
+        min-height: 45px;
+        padding: 10px;
+        font-size: 13px;
+    }
+
+    .qMatching-drag-icon,
+    .qMatching-status-icon {
+        font-size: 16px;
+        margin-right: 8px;
+    }
 }
 
-.qMatching-container {
-    width: 100%;
+/* Print styles */
+@media print {
+    .qMatching-drag-icon {
+        display: none;
+    }
+
+    .qMatching-item-b {
+        cursor: default;
+    }
+
+    .qMatching-container {
+        box-shadow: none;
+        border: 1px solid #ccc;
+    }
 }
 
-.qMatching-title-row {
-    /* font-weight: bold;
-    margin-bottom: 8px; */
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    max-width: 640px;
-    margin: 0 auto;
-    gap: 40px;
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+    .qMatching-item-a {
+        background: #000000;
+        color: #ffffff;
+        border: 2px solid #ffffff;
+    }
+
+    .qMatching-item-b {
+        background: #ffffff;
+        color: #000000;
+        border: 2px solid #000000;
+    }
+
+    .qMatching-correct {
+        background: #ffffff;
+        border: 3px solid #008000;
+    }
+
+    .qMatching-incorrect {
+        background: #ffffff;
+        border: 3px solid #ff0000;
+    }
 }
 
-.qMatching-row {
-    /* display: flex;
-    align-items: stretch;
-    /* Đảm bảo 2 cột có chiều cao bằng nhau */
-    /* margin-bottom: 8px; */
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 40px;
-    max-width: 640px;
-    margin: 0 auto 12px auto;
-}
-
-.qMatching-column-a,
-.qMatching-column-b {
-    flex: 1;
-    padding: 8px;
-    box-sizing: border-box;
-}
-
-.qMatching-item {
-    background: #f9f9f9;
-    padding: 8px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-}
-
-.qMatching-item-b {
-    display: flex;
-    align-items: center;
-}
-
-
+/* */
 
 .qMultipleTrueFalse-options-grid {
     display: grid;
@@ -445,4 +611,17 @@
 
 .qMultipleTrueFalse-option-card v-select {
     min-width: 130px;
+}
+
+
+.mjx-help {
+    display: none ! important;
+}
+
+.annotator-body {
+    width: 100%;
+    height: calc(100vh - 48px - 48px);
+    /* Trừ đi cả 2 toolbar */
+    overflow: auto;
+    background-color: #546E7A;
 }

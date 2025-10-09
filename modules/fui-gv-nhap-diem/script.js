@@ -48,6 +48,7 @@ function convertDSHocSinh() {
         'Theme8_Result'
     ]
     const ListMonHoc = [5, 46, 76]
+    const isDisabled = vueData.TinhTrang.isDisabled
     let columnsCotDiem = SLCotDiem_OfFirstSTD
         .map((x) => {
             if (x.GiaTriCotDiem === 'number') { // cấu hình header cột điểm có dạng number
@@ -62,7 +63,7 @@ function convertDSHocSinh() {
                     backGroundColor: x.HexBackground,
                     width: x.WidthCSS,
                     wrapText: true,
-                    readOnly: x.LoaiCotDiem === 'Công thức' ? true : false,
+                    readOnly: x.LoaiCotDiem === 'Công thức' || isDisabled ? true : false,
                     align: 'center'
                 }
                 return column
@@ -77,7 +78,7 @@ function convertDSHocSinh() {
                     backGroundColor: x.HexBackground,
                     wrap: true,
                     align: arrCotDiemWithAlignCenter.some(item => x.MaCotDiem.includes(item)) ? 'center' : 'left',
-                    readOnly: x.LoaiCotDiem === 'Công thức' ? true : false,
+                    readOnly: x.LoaiCotDiem === 'Công thức' || isDisabled ? true : false,
                 }
                 return column
             } else if (x.GiaTriCotDiem === 'ICO_Star') { // cấu hình header cột điểm có dạng ICO_Star
@@ -104,14 +105,65 @@ function convertDSHocSinh() {
                     backGroundColor: x.HexBackground,
                     wrap: true,
                     align: 'center',
-                    source: [{ id: '1', name: 'Done' }, { id: '0', name: 'Not Yet' }] //x.MaCotDiem === '' ? ['Done', 'Not Yet'] : ['Đ', 'T', 'H']
-                    // readOnly: x.LoaiCotDiem === 'Công thức' ? true : false,
+                    source: [{ id: '1', name: 'Done' }, { id: '0', name: 'Not Yet' }], //x.MaCotDiem === '' ? ['Done', 'Not Yet'] : ['Đ', 'T', 'H']
+                    readOnly: x.LoaiCotDiem === 'Công thức' || isDisabled ? true : false,
+                }
+                return column
+            } else if (x.GiaTriCotDiem === 'Dropdown_THC') { // cấu hình header cột điểm có dạng ICO_Star
+                let column = {
+                    type: 'dropdown',
+                    title: x.TenCotDiem_VI, // + fn_IsDisabledTinhTrangDiem(x.TinhTrang, 'GV').isDisabled,
+                    name: x.MaCotDiem,
+                    width: x.WidthCSS,
+                    typeValue: x.GiaTriCotDiem,
+                    backGroundColor: x.HexBackground,
+                    wrap: true,
+                    align: 'center',
+                    source: ['T', 'H', 'C'], //x.MaCotDiem === '' ? ['Done', 'Not Yet'] : ['Đ', 'T', 'H']
+                    readOnly: x.LoaiCotDiem === 'Công thức' || isDisabled ? true : false,
+                }
+                return column
+            } else if (x.GiaTriCotDiem === 'Dropdown_TDC') { // cấu hình header cột điểm có dạng ICO_Star
+                let column = {
+                    type: 'dropdown',
+                    title: x.TenCotDiem_VI, // + fn_IsDisabledTinhTrangDiem(x.TinhTrang, 'GV').isDisabled,
+                    name: x.MaCotDiem,
+                    width: x.WidthCSS,
+                    typeValue: x.GiaTriCotDiem,
+                    backGroundColor: x.HexBackground,
+                    wrap: true,
+                    align: 'center',
+                    source: ['T', 'Đ', 'C'], //x.MaCotDiem === '' ? ['Done', 'Not Yet'] : ['Đ', 'T', 'H']
+                    readOnly: x.LoaiCotDiem === 'Công thức' || isDisabled ? true : false,
+                }
+                return column
+            }
+            else if (x.GiaTriCotDiem === 'Dropdown_CD_D') { // cấu hình header cột điểm có dạng ICO_Star
+                let column = {
+                    type: 'dropdown',
+                    title: x.TenCotDiem_VI, // + fn_IsDisabledTinhTrangDiem(x.TinhTrang, 'GV').isDisabled,
+                    name: x.MaCotDiem,
+                    width: x.WidthCSS,
+                    typeValue: x.GiaTriCotDiem,
+                    backGroundColor: x.HexBackground,
+                    wrap: true,
+                    align: 'center',
+                    source: ['CĐ', 'Đ'], //x.MaCotDiem === '' ? ['Done', 'Not Yet'] : ['Đ', 'T', 'H']
+                    readOnly: x.LoaiCotDiem === 'Công thức' || isDisabled ? true : false,
                 }
                 return column
             }
         })
     //Nếu là gửi điểm thì freezecolumn = 4 để thêm cột từ chối
-    vueData.freezeColumns = ListMonHoc.includes(vueData.MonHocItem.MonHocID) ? 4 : 3
+    if (vueData.MonHocItem.MonHocID == 5 || vueData.MonHocItem.MonHocID == 46) {
+        vueData.freezeColumns = ListMonHoc.includes(vueData.MonHocItem.MonHocID) ? 4 : 3
+    }
+    else if (vueData.MonHocItem.MonHocID == 76) {
+        vueData.freezeColumns = ListMonHoc.includes(vueData.MonHocItem.MonHocID) ? 5 : 3
+    }
+    else if (vueData.MonHocItem.MonHocID == 101) {
+        vueData.freezeColumns = 4
+    }
     let columnThongTinHocSinh = [
         {
             type: 'text',
@@ -142,6 +194,20 @@ function convertDSHocSinh() {
             readOnly: true
         },
     ]
+    const ListDSMonHocNhom = [101]
+    if (ListDSMonHocNhom.includes(vueData.MonHocItem.MonHocID)) {
+        columnThongTinHocSinh.push(
+            {
+                type: 'text',
+                title: 'Lớp chủ nhiệm',
+                name: 'TenLop',
+                width: 70,
+                backGroundColor: null,
+                wrap: true,
+                align: "left",
+                readOnly: true
+            })
+    }
     if (ListMonHoc.includes(vueData.MonHocItem.MonHocID)) {
         columnThongTinHocSinh.push({
             type: 'text',
@@ -154,6 +220,8 @@ function convertDSHocSinh() {
             readOnly: true
         })
     }
+    // console.log("columnThongTinHocSinh", columnThongTinHocSinh)
+    // console.log("columnsCotDiem", columnsCotDiem)
     headers = [...columnThongTinHocSinh, ...columnsCotDiem]
     //Xử lý data jexcel
     const dataJexcel = []
@@ -166,7 +234,9 @@ function convertDSHocSinh() {
             HoVaTenHocSinh: arrCotDiemExist[0].Ho + ' ' + arrCotDiemExist[0].Ten,
             SoDanhBo: arrCotDiemExist[0].SoDanhBo,
         }
-        if (ListMonHoc.includes(vueData.MonHocItem.MonHocID)) obj.EnglishName = arrCotDiemExist[0].EnglishName
+        if (ListDSMonHocNhom.includes(vueData.MonHocItem.MonHocID)) obj.TenLop = arrCotDiemExist[0].TenLop
+        if (ListMonHoc.includes(vueData.MonHocItem.MonHocID)) obj.EnglishName = arrCotDiemExist[0].EnglishName;
+        if (vueData.MonHocItem.MonHocID === 76) obj.TenLop = arrCotDiemExist[0]?.TenLop ?? '';
         //Xử lý nếu từ chối từ bên Tổ trưởng
         for (var cotDiemExist of arrCotDiemExist) {
             if (cotDiemExist.LoaiCotDiem !== 'Công thức') {
@@ -182,7 +252,8 @@ function convertDSHocSinh() {
                 //dùng cho formula để hiển thị
                 obj[cotDiemExist.MaCotDiem] = cotDiemExist?.KetQuaDanhGia_VI
             }
-            else if (cotDiemExist.LoaiCotDiem == 'Công thức' && cotDiemExist.Formula !== null && isGetResultTopic(cotDiemExist)) {
+            //Có sử dụng hàm isGetResultTopic => chỉ dùng cho các môn tiếng Anh
+            else if (cotDiemExist.LoaiCotDiem == 'Công thức' && cotDiemExist.Formula !== null && isGetResultTopic(cotDiemExist) && ListMonHoc.includes(vueData.MonHocItem.MonHocID)) {
                 //dùng cho formula để hiển thị
                 obj[cotDiemExist.MaCotDiem] = cotDiemExist?.KetQuaDanhGia_VI
             } else if (cotDiemExist.LoaiCotDiem == 'Công thức' && cotDiemExist.Formula !== null && arrCotDiemExist.length === 1) {
@@ -204,6 +275,57 @@ function convertDSHocSinh() {
         indexRow++
         dataJexcel.push(obj)
     }
+    //BEGIN CREATE EXCEL
+    vueData.DataExcel = []
+    let indexRow1 = 2
+    for (var hocSinh of vueData.DSHocSinh) {
+        const arrCotDiemExist = vueData.DSCotDiem.filter((x) => x.HocSinhID === hocSinh.HocSinhID) // Lấy danh sách điểm của học sinh
+        if (arrCotDiemExist.length === 0) return
+        let obj = {
+            HocSinhID: arrCotDiemExist[0].HocSinhID,
+            HoVaTenHocSinh: arrCotDiemExist[0].Ho + ' ' + arrCotDiemExist[0].Ten,
+            SoDanhBo: arrCotDiemExist[0].SoDanhBo
+        }
+        if (ListMonHoc.includes(vueData.MonHocItem.MonHocID)) obj.EnglishName = arrCotDiemExist[0].EnglishName;
+        if (vueData.MonHocItem.MonHocID === 76) obj.TenLop = arrCotDiemExist[0]?.TenLop ?? '';
+        //Xử lý nếu từ chối từ bên Tổ trưởng
+        for (var cotDiemExist of arrCotDiemExist) {
+            if (cotDiemExist.LoaiCotDiem !== 'Công thức') {
+                //Text
+                obj[cotDiemExist.MaCotDiem] = cotDiemExist.GiaTriCotDiem === 'number' ? (
+                    (cotDiemExist.KetQuaDanhGia_VI === '' || cotDiemExist.KetQuaDanhGia_VI === null) ? null : parseFloat(cotDiemExist.KetQuaDanhGia_VI)
+                ) : cotDiemExist.KetQuaDanhGia_VI
+                //Set default giá trị nếu cột điểm Mức độ đánhg giá null hoặc rỗng
+                if (cotDiemExist.MaCotDiem.includes('MucDoDanhGia') && cotDiemExist.KQHTID === 0) {
+                    if (obj[cotDiemExist.MaCotDiem] === null || obj[cotDiemExist.MaCotDiem] === '') obj[cotDiemExist.MaCotDiem] = 'T'
+                }
+            } else if (cotDiemExist.LoaiCotDiem == 'Công thức' && cotDiemExist.Formula !== null && (vueData.MaNhomCotDiemItem.MaNhomCotDiem == 'DiemTBCK_HK1' || vueData.MaNhomCotDiemItem.MaNhomCotDiem == 'DiemTBCK_HK2') && (cotDiemExist.MaCotDiem !== 'DiemTBCK_HK1' && cotDiemExist.MaCotDiem !== 'DiemTBCK_HK2' && !cotDiemExist.MaCotDiem.includes('DanhHieu'))) {
+                //dùng cho formula để hiển thị
+                obj[cotDiemExist.MaCotDiem] = cotDiemExist?.KetQuaDanhGia_VI
+            }
+            else if (cotDiemExist.LoaiCotDiem == 'Công thức' && cotDiemExist.Formula !== null && isGetResultTopic(cotDiemExist) && ListMonHoc.includes(vueData.MonHocItem.MonHocID)) {
+                //dùng cho formula để hiển thị
+                obj[cotDiemExist.MaCotDiem] = cotDiemExist?.KetQuaDanhGia_VI
+            } else if (cotDiemExist.LoaiCotDiem == 'Công thức' && cotDiemExist.Formula !== null && arrCotDiemExist.length === 1) {
+                //dùng cho formula để hiển thị
+                obj[cotDiemExist.MaCotDiem] = parseFloat(cotDiemExist?.KetQuaDanhGia_VI ?? 0)
+            } else if (cotDiemExist.LoaiCotDiem == 'Công thức' && cotDiemExist.GiaTriCotDiem === 'number') {
+                //Công thức // parseFloat(cotDiemExist.KetQuaDanhGia_VI ?? 0) //
+                obj[cotDiemExist.MaCotDiem] = '=' + replaceFormula(columnsCotDiem, cotDiemExist.Formula, indexRow1, vueData.freezeColumns)
+            } else if (cotDiemExist.LoaiCotDiem == 'Công thức' && cotDiemExist.GiaTriCotDiem === 'text') {
+                //Công thức // parseFloat(cotDiemExist.KetQuaDanhGia_VI ?? 0) //
+                obj[cotDiemExist.MaCotDiem] = '=' + replaceFormula(columnsCotDiem, cotDiemExist.Formula, indexRow1, vueData.freezeColumns)
+            }
+            else if (cotDiemExist.LoaiCotDiem == 'Công thức' && cotDiemExist.GiaTriCotDiem === 'ICO_Star') {
+                //Ngôi sao
+                //obj[cotDiemExist.MaCotDiem] = `=RATING(${replaceFormula(columnsCotDiem, cotDiemExist.Formula.replace(/IIF/g, 'IF'), indexRow)})`
+                obj[cotDiemExist.MaCotDiem] = parseFloat(cotDiemExist.KetQuaDanhGia_VI ?? 0)
+            }
+        }
+        indexRow1++
+        vueData.DataExcel.push(obj)
+    }
+    //END CREATE EXCEL
     const firstStudent = dataJexcel[0]
     const dsCotDiem = vueData.DSCotDiem.filter(x => x.HocSinhID === firstStudent.HocSinhID)
     vueData.styleSheet = {}
@@ -228,7 +350,6 @@ function convertDSHocSinh() {
                 // vueData.styleSheet[cellAdresss] = 'color: red !important;'
                 vueData.comments[cellAdresss] = 'Cột điểm do ' + dsCotDiem[j].NhapDiemUser + ' đã nhập'
             }
-            // if(obj.)
         }
     }
     vueData.keyComp++
@@ -285,11 +406,9 @@ function processBeforePushAPI() {
             }
             if (DSCotDiem[j].GiaTriCotDiem === 'number') {
                 if (giaTriCotDiem === null || giaTriCotDiem === NaN || giaTriCotDiem === '') {
-                    console.log('FIND NULL OR NaN=>', val[i].HocSinhID, DSCotDiem[j].MaCotDiem, giaTriCotDiem)
                     giaTriCotDiem = ''
                 } else {
-                    console.log('NUMBER =>', val[i].HocSinhID, DSCotDiem[j].MaCotDiem, giaTriCotDiem)
-                    giaTriCotDiem = parseFloat(giaTriCotDiem)
+                    // console.log('NUMBER =>', val[i].HocSinhID, DSCotDiem[j].MaCotDiem, giaTriCotDiem)
                 }
             }
             let cotDiem_HS = {
@@ -313,9 +432,6 @@ function processBeforePushAPI() {
                 return
             }
             cotDiem_HS.KetQuaDanhGia_VI = cotDiem_HS.KetQuaDanhGia_VI === NaN ? null : cotDiem_HS.KetQuaDanhGia_VI
-            if (DSCotDiem[j].CotDiemID === 2772) {
-                console.log(val[i].HocSinhID, DSCotDiem[j].MaCotDiem, giaTriCotDiem, cotDiem_HS)
-            }
             vueData.dataBeforeInsertToDB.push(cotDiem_HS)
         }
     }
@@ -361,7 +477,6 @@ function isNotTopic() {
     } catch (error) {
         console.log('error', error)
     }
-    console.log('isNotTopic', isNotTopic)
     return isNotTopic
 }
 function reloadBangDiem() {
@@ -373,7 +488,59 @@ function reloadBangDiem() {
     }
 }
 function isGetResultTopic(cotDiem) {
-    return (vueData.MaNhomCotDiemItem.MaNhomCotDiem.includes('DiemGK_') || vueData.MaNhomCotDiemItem.MaNhomCotDiem.includes('DiemCK_')) && (!cotDiem.MaCotDiem.includes('DiemGK_') || !cotDiem.MaCotDiem.includes('DiemCK_'))
+    return (vueData.MaNhomCotDiemItem.MaNhomCotDiem.includes('DiemGK_') || vueData.MaNhomCotDiemItem.MaNhomCotDiem.includes('DiemCK_'))
+        && (!cotDiem.MaCotDiem.includes('DiemGK_') || !cotDiem.MaCotDiem.includes('DiemCK_'))
 }
+function isMonHocConvertWithStar(currentMonHocID) {
+    const arrMonHoc = [36, 37, 38, 40, 41, 42, 43, 106]
+    return arrMonHoc.includes(currentMonHocID)
+}
+async function exportExcel() {
+    const headers = vueData.columnHeader.map(x => x.name)
+    await processBeforeExport()
+    const data = vueData.DataExcel.map(item =>
+        headers.map(h => item[h] ?? "")
+    )
+    const worksheet = XLSX.utils.aoa_to_sheet([headers, ...data])
+    const workbook = XLSX.utils.book_new()
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'Sheet1')
+    XLSX.writeFile(workbook, `Bang_Diem_Lop${vueData.LopItem.TenLop}_${vueData.MonHocItem.MonHocName}.xlsx`)
+}
+function processBeforeExport() {
+    vueData.DataExcel = []
+    let val = vueData.DSHocSinh
+    const ListMonHoc = [5, 46, 76]
+    //val là dữ liệu trên sheet jexcel
+    let DSCotDiem = vueData.DSCotDiem_ByMaNhomCotDiem //DS cột điểm của nhóm bảng điểm
+    //Xử lý data mapping giá trị
+    //B1: Vòng lặp thứ nhất để lặp các học sinh
+    //B2: Vòng lặp bên trong để lặp các cột điểm của 1 học sinh
+    for (let i = 0; i < val.length; i++) {
+        let cotDiem_HS = {
+            HocSinhID: val[i].HocSinhID,
+            HoVaTenHocSinh: val[i].HoVaTenHocSinh,
+            SoDanhBo: val[i].SoDanhBo
+        }
+        if (vueData.MonHocItem.MonHocID == 76) cotDiem_HS.TenLop = val[i].TenLop ?? '';
+        if (ListMonHoc.includes(vueData.MonHocItem.MonHocID)) cotDiem_HS.EnglishName = val[i].EnglishName ?? '';
+        for (let j = 0; j < DSCotDiem.length; j++) {
+            let giaTriCotDiem = val[i][DSCotDiem[j].MaCotDiem]
+            if (DSCotDiem[j].LoaiCotDiem === 'Công thức') {
+                giaTriCotDiem = vueData.instance[0].records[i][j + vueData.freezeColumns]?.element?.innerHTML
+            }
+            if (DSCotDiem[j].GiaTriCotDiem === 'number') {
+                if (giaTriCotDiem === null || giaTriCotDiem === NaN || giaTriCotDiem === '') {
+                    giaTriCotDiem = ''
+                } else {
+                    giaTriCotDiem = parseFloat(giaTriCotDiem)
+                }
+            }
+            cotDiem_HS[DSCotDiem[j].MaCotDiem] = giaTriCotDiem
+        }
+        vueData.DataExcel.push(cotDiem_HS)
+    }
+}
+vueData.isMonHocConvertWithStar = isMonHocConvertWithStar
+vueData.exportExcel = exportExcel
 vueData.isNotTopic = isNotTopic
 vueData.reloadBangDiem = reloadBangDiem

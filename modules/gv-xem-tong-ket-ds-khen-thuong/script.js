@@ -429,7 +429,7 @@ function renderDSHocSinh_QLD() {
         const objHocSinh = vueData.DSHocSinh_API_QLD.find(x => x.HocSinhID === HocSinhID)
         const objHocSinh_KhenThuong = vueData.DSKhenThuong.find(x => x.HocSinhID === HocSinhID)
         let ThuKhen = 'x'
-        if (objHocSinh.KT_Truong_XuatSac == 'x' || objHocSinh_KhenThuong.HocSinhTieuBieu) {
+        if (objHocSinh.KT_Truong_XuatSac == 'x' || objHocSinh_KhenThuong?.HocSinhTieuBieu) {
             ThuKhen = ''
         }
         if (objHocSinh) _dsHocSinh.push({
@@ -440,16 +440,16 @@ function renderDSHocSinh_QLD() {
             NgaySinh: objHocSinh.NgaySinh,
             Phai: objHocSinh.Phai,
             KT_Truong_XuatSac: objHocSinh.KT_Truong_XuatSac,
-            KT_Truong_TieuBieu: objHocSinh_KhenThuong.HocSinhTieuBieu ? 'x' : '',
+            KT_Truong_TieuBieu: objHocSinh_KhenThuong?.HocSinhTieuBieu ? 'x' : '',
             ThuKhen: ThuKhen,
             DanhHieu: objHocSinh.DanhHieu, //Danh hiệu vẫn lấy bên a Chiến
             NoiDungThuKhen: objHocSinh_KhenThuong?.NoiDungThuKhen,
             ThanhTichKhac: objHocSinh_KhenThuong?.ThanhTichKhac,
-            VaoSoKT: objHocSinh_KhenThuong.VaoSoKT,
-            SoQuyetDinhKT: objHocSinh_KhenThuong.SoQuyetDinhKT,
-            NgayKhenThuong_VI: objHocSinh_KhenThuong.NgayKhenThuong_VI,
-            NgayKhenThuong_EN: objHocSinh_KhenThuong.NgayKhenThuong_EN,
-            Is_DaIn: objHocSinh_KhenThuong.Is_DaIn,
+            VaoSoKT: objHocSinh_KhenThuong?.VaoSoKT,
+            SoQuyetDinhKT: objHocSinh_KhenThuong?.SoQuyetDinhKT,
+            NgayKhenThuong_VI: objHocSinh_KhenThuong?.NgayKhenThuong_VI,
+            NgayKhenThuong_EN: objHocSinh_KhenThuong?.NgayKhenThuong_EN,
+            Is_DaIn: objHocSinh_KhenThuong?.Is_DaIn,
         })
     }
     handleHeaders()

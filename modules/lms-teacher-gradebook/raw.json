@@ -1,1 +1,42 @@
-{"data":[{"LopID":"parseInt(LopID)","MonHocID":"parseInt(MonHocID)"}],"watch":{},"controls":[{"prop":"fluid pa-0","rows":[{"cols":[{"el":"uc-gradebook","attr":{":initial-lop-id":"LopID",":initial-mon-hoc-id":"MonHocID"}}]}]}],"set":{"menu":false}}
+{
+    "data": [
+        {
+            "LopID": "parseInt(LopID)",
+            "MonHocID": "parseInt(MonHocID)"
+        },
+        {
+            "CallTest": {
+                "#PARENT": [
+                    {
+                        "EXE": "app.config.globalProperties.v_OpenWindowList.pop()"
+                    },
+                    {
+                        "CALL": "initPage()"
+                    }
+                ]
+            }
+        }
+    ],
+    "watch": {},
+    "controls": [
+        {
+            "prop": "fluid pa-0",
+            "rows": [
+                {
+                    "cols": [
+                        {
+                            "el": "uc-gradebook",
+                            "attr": {
+                                ":initial-lop-id": "LopID",
+                                ":initial-mon-hoc-id": "MonHocID"
+                            }
+                        }
+                    ]
+                }
+            ]
+        }
+    ],
+    "set": {
+        "menu": false
+    }
+}

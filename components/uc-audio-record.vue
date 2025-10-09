@@ -2,7 +2,7 @@
 	<v-card elevation="4">
 		<v-card-text>
 			<!-- Nút điều khiển ghi âm -->
-			<div class="d-flex align-center ga-3" v-if="isShowBtn">
+			<div class="d-flex align-center ga-2" v-if="isShowBtn">
 				<v-btn v-if="!readonly" color="primary" variant="tonal" :disabled="isRecording" @click="startRecording">
 					<v-icon start>mdi-microphone</v-icon>
 					Ghi âm
@@ -12,9 +12,9 @@
 					<v-icon start>mdi-stop</v-icon>
 					Dừng
 				</v-btn>
-				<v-btn v-if="!readonly && file && !isRecording " color="red" variant="tonal" :disabled="isSaveFile"
+				<v-btn v-if="!readonly && file && !isRecording" color="success" variant="tonal" :disabled="isSaveFile"
 					@click="$emit('handleSave')">
-					<v-icon start>mdi-stop</v-icon>
+					<v-icon start>mdi-content-save</v-icon>
 					Lưu file
 				</v-btn>
 
@@ -54,6 +54,9 @@
 		},
 		created() {
 			this.recorder = new MicRecorder({ bitRate: 128 });
+		},
+		watch: {
+			src: function (v) { this.audioUrl = v }
 		},
 		methods: {
 			async startRecording() {

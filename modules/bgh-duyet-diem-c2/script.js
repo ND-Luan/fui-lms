@@ -40,7 +40,7 @@ function convertDSHocSinh() {
                     backGroundColor: x.HexBackground,
                     width: x.WidthCSS,
                     wrapText: true,
-                    readOnly: x.LoaiCotDiem === 'Công thức' ? true : false,
+                    readOnly: true
                 }
                 return column
             } else if (x.GiaTriCotDiem === 'text') { // cấu hình header cột điểm có dạng text
@@ -54,6 +54,7 @@ function convertDSHocSinh() {
                     backGroundColor: x.HexBackground,
                     wrap: true,
                     align: arrCotDiemWithAlignCenter.some(item => x.MaCotDiem.includes(item)) ? 'center' : 'left',
+                    readOnly: true
                 }
                 return column
             } else if (x.GiaTriCotDiem === 'ICO_Star') { // cấu hình header cột điểm có dạng ICO_Star
@@ -66,7 +67,64 @@ function convertDSHocSinh() {
                     backGroundColor: x.HexBackground,
                     wrap: true,
                     align: 'center',
-                    // readOnly: x.LoaiCotDiem === 'Công thức' ? true : false,
+                    readOnly: true
+                }
+                return column
+            } else if (x.GiaTriCotDiem === 'Dropdown_text') { // cấu hình header cột điểm có dạng ICO_Star
+                let column = {
+                    type: 'dropdown',
+                    title: x.TenCotDiem_VI, // + fn_IsDisabledTinhTrangDiem(x.TinhTrang, 'GV').isDisabled,
+                    name: x.MaCotDiem,
+                    width: x.WidthCSS,
+                    typeValue: x.GiaTriCotDiem,
+                    backGroundColor: x.HexBackground,
+                    wrap: true,
+                    align: 'center',
+                    source: [{ id: '1', name: 'Done' }, { id: '0', name: 'Not Yet' }], //x.MaCotDiem === '' ? ['Done', 'Not Yet'] : ['Đ', 'T', 'H']
+                    readOnly: true
+                }
+                return column
+            } else if (x.GiaTriCotDiem === 'Dropdown_THC') { // cấu hình header cột điểm có dạng ICO_Star
+                let column = {
+                    type: 'dropdown',
+                    title: x.TenCotDiem_VI, // + fn_IsDisabledTinhTrangDiem(x.TinhTrang, 'GV').isDisabled,
+                    name: x.MaCotDiem,
+                    width: x.WidthCSS,
+                    typeValue: x.GiaTriCotDiem,
+                    backGroundColor: x.HexBackground,
+                    wrap: true,
+                    align: 'center',
+                    source: ['T', 'H', 'C'], //x.MaCotDiem === '' ? ['Done', 'Not Yet'] : ['Đ', 'T', 'H']
+                    readOnly: true
+                }
+                return column
+            } else if (x.GiaTriCotDiem === 'Dropdown_TDC') { // cấu hình header cột điểm có dạng ICO_Star
+                let column = {
+                    type: 'dropdown',
+                    title: x.TenCotDiem_VI, // + fn_IsDisabledTinhTrangDiem(x.TinhTrang, 'GV').isDisabled,
+                    name: x.MaCotDiem,
+                    width: x.WidthCSS,
+                    typeValue: x.GiaTriCotDiem,
+                    backGroundColor: x.HexBackground,
+                    wrap: true,
+                    align: 'center',
+                    source: ['T', 'Đ', 'C'], //x.MaCotDiem === '' ? ['Done', 'Not Yet'] : ['Đ', 'T', 'H']
+                    readOnly: true
+                }
+                return column
+            }
+            else if (x.GiaTriCotDiem === 'Dropdown_CD_D') { // cấu hình header cột điểm có dạng ICO_Star
+                let column = {
+                    type: 'dropdown',
+                    title: x.TenCotDiem_VI, // + fn_IsDisabledTinhTrangDiem(x.TinhTrang, 'GV').isDisabled,
+                    name: x.MaCotDiem,
+                    width: x.WidthCSS,
+                    typeValue: x.GiaTriCotDiem,
+                    backGroundColor: x.HexBackground,
+                    wrap: true,
+                    align: 'center',
+                    source: ['CĐ', 'Đ'], //x.MaCotDiem === '' ? ['Done', 'Not Yet'] : ['Đ', 'T', 'H']
+                    readOnly: true
                 }
                 return column
             }

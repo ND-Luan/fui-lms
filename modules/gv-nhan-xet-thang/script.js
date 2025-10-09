@@ -22,14 +22,14 @@ function processDataBeforePostAPI() {
             LopID: vueData.LopID,
             Lop_NhanXetThangID: vueData.ThangObj.Lop_NhanXetThangID,
             Is_Reject: false,
-            DiemToan: item.DiemToan ?? 0,
-            DiemTiengViet: item.DiemTiengViet ?? 0,
+            DiemToan: item.DiemToan,
+            DiemTiengViet: item.DiemTiengViet,
             PhoiHopCMHS: item.PhoiHopCMHS,
             NhanXetGVCN_VePhuHuynh_HTML: item.NhanXetGVCN_VePhuHuynh_HTML,
             NhanXetGVCN_VeHocSinh_HTML: item.NhanXetGVCN_VeHocSinh_HTML,
             PhanLoai_TuyenThang: item.PhanLoai_TuyenThang,
-            Flyers: item.Flyers === '' || item.Flyers === null ? '' : item.Flyers,
-            DiemTA: item.DiemTA === '' || item.DiemTA === null ? '' : item.DiemTA,
+            Flyers: item.Flyers,
+            DiemTA: item.DiemTA,
             DKHocTiep: item.DKHocTiep ?? false,
             DeXuat_NDCamKet: item.DeXuat_NDCamKet,
         })
@@ -38,10 +38,10 @@ function processDataBeforePostAPI() {
 }
 function onLuuTamByHocSinhID(item) {
     console.log(item)
-    item.DiemToan = item.DiemToan ?? 0
-    item.DiemTiengViet = item.DiemTiengViet ?? 0
-    item.Flyers = item.Flyers ?? 0
-    item.DiemTA = item.DiemTA ?? 0
+    item.DiemToan = item.DiemToan //?? 0
+    item.DiemTiengViet = item.DiemTiengViet //?? 0
+    item.Flyers = item.Flyers //?? 0
+    item.DiemTA = item.DiemTA //?? 0
     item.DKHocTiep = item.DKHocTiep ?? false
     ajaxCALL('lms/NhanXetThang_Ins_By_NhanXetThangID', {
         ...item,
@@ -745,7 +745,7 @@ function renderHeaderTable() {
                                 attr: {
                                     class: "text-left"
                                 },
-                                "innerHTML": "Thông báo"
+                                "innerHTML": "Mong muốn phối hợp"
                             },
                             {
                                 "el": "uc-quill-editor",
@@ -823,7 +823,7 @@ function renderHeaderTable() {
                         }
                     }
                 ],
-                "title": "Thông báo",
+                "title": "Mong muốn phối hợp",
                 "value": "NoiDungHoatDongKhac",
                 "attr": {
                     style: "padding:10px;"

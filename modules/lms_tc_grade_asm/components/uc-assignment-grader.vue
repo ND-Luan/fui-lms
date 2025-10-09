@@ -4,52 +4,68 @@
 		<p class="mt-4">Đang tải dữ liệu bài nộp...</p>
 	</div>
 
-	<div v-else>
+	<div v-else class="container-scroll">
 		<!-- Assignment Header -->
-		<v-card class=" assignment-header rounded-0" color="primary" dark flat>
-			<v-card-title class="d-flex justify-space-between">
-				<span class="text-h5">Chấm bài: {{ assignment.Title }}</span>
-				<div class="d-flex align-center ga-2 flex-wrap">
-					<span><strong>Nộp bài lúc:</strong> {{ formatDate(submission.SubmissionTime) }}</span>
-					<v-chip :color="getSubmissionStatusColor()" variant="elevated" size="small" class="progress-chip">
-						{{ getSubmissionStatusText() }}
-					</v-chip>
-				</div>
-				<span class="text-h6">Học sinh: {{ submission?.HoTenHocSinh }} - Lớp: {{ assignment?.TenLop
-				}}</span>
-			</v-card-title>
+		<v-card class="rounded-0" variant="tonal" color="primary">
+			<v-alert class="rounded-0 pa-2" color="primary" variant="tonal">
+				<v-list-item class="pa-0">
+					<template #prepend>
+						<v-avatar :size="mobile ? 40 : 60"
+							@click="() => { window.postMessage('REFRESH_GRADE_LIST', '*') }" class="elevation-1">
+							<v-img :src="vueData.v_Set.urlAvatarHocSinh + submission.HocSinhID" />
+						</v-avatar>
+					</template>
+					<template #append>
+						<div class="d-flex flex-column align-center">
+							<p class="text-caption">Nộp bài: {{ formatDate(submission.SubmissionTime) }}</p>
+							<v-chip :color="getSubmissionStatusColor()" variant="elevated" size="small"
+								class="progress-chip">
+								{{ getSubmissionStatusText() }}
+							</v-chip>
+						</div>
+					</template>
+					<v-list-item-title>
+						<p class="font-weight-medium text-h6">{{ assignment?.Title }}</p>
+						<p class="d-flex flex-wrap text-subtitle-2">{{
+							submission?.HoTenHocSinh }} • {{
+								assignment?.TenLop }}
+						</p>
+					</v-list-item-title>
+				</v-list-item>
+			</v-alert>
 		</v-card>
 		<v-row class="ma-0">
-			<v-col cols="3">
+			<v-col cols="3" v-if="!mobile">
 				<v-card class="question-nav" sticky top="80px">
-					<v-card-title class="d-flex justify-space-between align-center">
+					<div class="d-flex justify-space-between align-center text-subtitle-1 font-weight-medium">
 						Cấu trúc bài tập
 						<v-btn icon size="small" @click="navCollapsed = !navCollapsed">
 							<v-icon>{{ navCollapsed ? 'mdi-chevron-down' : 'mdi-chevron-up' }}</v-icon>
 						</v-btn>
-					</v-card-title>
+					</div>
 					<v-divider />
-
 					<v-expand-transition>
-						<div v-show="!navCollapsed" class="pa-2">
+						<div v-show="!navCollapsed" style="height: calc(100vh - 129px); overflow: auto;">
 							<div v-for="(group, groupIndex) in assignment.groups" :key="group.id" class="mb-2">
-								<v-list-item @click="toggleGroupCollapse(groupIndex)"
-									class="group-header-item px-2 py-1" density="compact">
+								<v-list-item @click="toggleGroupCollapse(groupIndex)" class="group-header-item pa-2"
+									density="compact">
 									<template v-slot:prepend>
 										<v-icon size="20" class="group-toggle-icon">
-											{{ groupCollapsed[groupIndex] ? 'mdi-chevron-right' : 'mdi-chevron-down' }}
+											{{ groupCollapsed[groupIndex] ? 'mdi-chevron-right' :
+												'mdi-chevron-down'
+											}}
 										</v-icon>
 									</template>
 									<v-list-item-title class="group-title">{{ group.title }}</v-list-item-title>
 									<template v-slot:append>
 										<v-chip size="small" color="primary" variant="outlined">
-											{{ group.questions.length }}
+											{{ group.questions.length }} câu
 										</v-chip>
 									</template>
 								</v-list-item>
 
 								<v-expand-transition>
-									<div v-show="!groupCollapsed[groupIndex]" class="ml-4 mt-2">
+									<div v-show="!groupCollapsed[groupIndex]" class="ml-2 mt-2">
 										<div class="question-grid">
 											<v-btn v-for="(q, questionIndexInGroup) in group.questions" :key="q.id"
 												@click="navigateToQuestion(groupIndex, questionIndexInGroup, q.id)"
@@ -67,120 +83,197 @@
 					</v-expand-transition>
 				</v-card>
 			</v-col>
-			<v-col cols="6" style="height: calc(100dvh - 48px); overflow: auto">
+			<v-divider vertical />
+			<v-col :cols="mobile ? 12 : 6" style="height: calc(100dvh - 64px); overflow: auto" class="pa-2">
 				<!-- Single Question Mode -->
 				<div v-if="viewMode === 'single'">
-					<v-row>
-						<!-- Navigation Sidebar -->
-						<!-- Single Question Grading Content -->
-						<v-col cols="12" md="10" class="mx-auto" style="width: fit-content !important">
-							<v-card v-if="currentQuestion?.config" class="question-content-card w-100">
-								<v-card-title class="d-flex justify-space-between align-center">
-									<div class="d-flex align-center ga-3">
-										<span class="text-h6">Câu {{ globalQuestionNumber }}</span>
-										<v-chip color="blue-grey-4" label>
-											{{ currentGroup.title }}
-										</v-chip>
+					<v-card v-if="currentQuestion?.config" class="question-content-card w-100 px-2">
+						<div class="d-flex justify-space-between align-center px-0">
+							<v-card class="group-header-card mb-2 w-100" flat border>
+								<v-card-text class="py-2">
+									<div class="d-flex justify-space-between align-center">
+										<div class="d-flex align-center ga-2">
+											<div class="group-icon-wrapper">
+												<v-icon color="primary" size="20">mdi-folder-text-outline</v-icon>
+											</div>
+											<div class="group-info">
+												<h3 class="group-title-main">{{ currentGroup.title }}</h3>
+												<div class="group-meta">
+													<span class="text-caption text-medium-emphasis">{{
+														currentGroup.questions.length }} câu hỏi</span>
+													<span class="mx-2">•</span>
+													<span class="text-caption text-medium-emphasis">
+														Tối đa {{currentGroup.questions.reduce((sum, q) => sum +
+															q.points, 0)
+														}} điểm
+													</span>
+												</div>
+											</div>
+										</div>
 									</div>
-									<v-chip color="primary" variant="elevated" class="progress-chip">{{
-										currentQuestion.points }}
-										điểm</v-chip>
-								</v-card-title>
-								<v-divider />
-
-								<!-- Group instruction -->
-								<v-alert class="mt-2 mb-2" v-if="currentGroup.description" color="blue-lighten-5"
-									border="start" border-color="info">
-									<strong>Hướng dẫn phần {{ currentGroup.title }}:</strong>
-									{{ currentGroup.description }}
-								</v-alert>
-
-								<!-- YOUTUBE, RECORD_AUDIO, IMAGE, FILE -->
-								<!-- Media Container -->
-								<div v-if="currentQuestion.config.media" class="media-container mb-4">
-									<div v-if="currentQuestion.config.media.type === 'YOUTUBE' && currentQuestion.config.media.sourceYT.source.length > 0"
-										class="youtube-container">
-										<iframe :src="renderUrlYoutube(currentQuestion.config.media.sourceYT.source)"
-											frameborder="0"
-											allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-											allowfullscreen></iframe>
+									<p v-if="currentGroup.description" class="group-description mb-0"
+										style="text-wrap: auto;">
+										{{ currentGroup.description }}
+									</p>
+									<!-- Media -->
+									<div v-if="currentGroup.media" class="media-container mb-2 d-flex flex-column ga-2">
+										<div v-if="currentGroup.media.sourceYT.source?.length > 0"
+											class="youtube-container">
+											<iframe :src="renderUrlYoutube(currentGroup.media.sourceYT.source)"
+												frameborder="0"
+												allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+												allowfullscreen></iframe>
+										</div>
+										<uc-wave-audio-player v-if="currentGroup.media.sourceRecord.source?.length > 0"
+											v-model:audioUrl="currentGroup.media.sourceRecord.source" />
+										<div v-if="currentGroup.media.sourceFiles.image.length > 0"
+											style="max-height: 350px">
+											<v-img v-for="file in currentGroup.media.sourceFiles.image"
+												:key="file.source"
+												:src="'https://drive.google.com/thumbnail?id=' + getDriveFileId(file.source) + '&sz=w1000'"
+												:lazy-src="'https://drive.google.com/thumbnail?id=' + getDriveFileId(file.source) + '&sz=w1000'"
+												class="rounded-lg" max-height="350">
+												<template #placeholder>
+													<v-row align="center" class="fill-height ma-0" justify="center">
+														<v-progress-circular color="grey-lighten-5" indeterminate />
+													</v-row>
+												</template>
+											</v-img>
+										</div>
+										<div v-if="currentGroup.media.sourceFiles.file.length > 0">
+											<iframe v-for="file in currentGroup.media.sourceFiles.file"
+												:key="file.source" :src="file.source"
+												style="width: 100%; height: 400px;"></iframe>
+										</div>
 									</div>
-									<uc-wave-audio-player
-										v-else-if="currentQuestion.config.media.type === 'RECORD_AUDIO' && currentQuestion.config.media.sourceRecord.source.length > 0"
-										v-model:audioUrl="currentQuestion.config.media.sourceRecord.source" />
-									<div v-else-if="currentQuestion.config.media.type === 'IMAGE' && currentQuestion.config.media.sourceIMGs.length > 0"
-										style="min-height: 400px">
-										<v-img v-for="file in currentQuestion.config.media.sourceIMGs"
-											:src="'https://drive.google.com/thumbnail?id=' + getDriveFileId(file.source) + '&sz=w1000'"
-											:lazy-src="'https://drive.google.com/thumbnail?id=' + getDriveFileId(file.source) + '&sz=w1000'"
-											class="rounded-lg" max-height="400">
-											<template v-slot:placeholder>
-												<v-row align="center" class="fill-height ma-0" justify="center">
-													<v-progress-circular color="grey-lighten-5" indeterminate />
-												</v-row>
-											</template>
-										</v-img>
-									</div>
-									<div
-										v-else-if="currentQuestion.config.media.type === 'FILE' && currentQuestion.config.media.sourceFiles.length > 0">
-										<iframe v-for="file in currentQuestion.config.media.sourceFiles"
-											:src="file.source" style="width: 100%; height: 400px;"></iframe>
-									</div>
-								</div>
-
-								<!-- Question text -->
-								<!-- <div class="question-text mb-5" v-html="currentQuestion.config.questionText"></div> -->
-								<uc-latex-view class="flex-column"
-									:content="currentQuestion.config.questionText"></uc-latex-view>
-								<!-- Grading Component -->
-								<div class="answer-area" v-if="!isLoading">
-									<component :is="getQuestionComponent(currentQuestion.type)"
-										:question="currentQuestion"
-										:answer="studentAnswers[currentQuestion.id] ? studentAnswers[currentQuestion.id].answerData : null"
-										:grading="gradingData[currentQuestion.id] ? gradingData[currentQuestion.id]?.grading : null"
-										:is-grade="true" @grading-change="updateGrading(currentQuestion.id, $event)"
-										:submissionstatus="submission.SubmissionStatus" />
-								</div>
-
-								<!-- Single Mode Action Bar -->
-								<v-divider></v-divider>
-								<v-card-actions class="pa-4 d-flex justify-space-between">
-									<v-btn @click="prevQuestion" :disabled="globalQuestionNumber === 1" variant="text">
-										<v-icon start>mdi-chevron-left</v-icon>Câu trước
-									</v-btn>
-
-									<div class="d-flex align-center ga-3" v-if="submission?.SubmissionStatus !== 4">
-										<v-btn @click="saveGrading(false)" color="grey-darken-1" variant="outlined"
-											:loading="isSaving" size="small">
-											<v-icon start>mdi-content-save-outline</v-icon>
-											Chấm nháp
-										</v-btn>
-
-										<v-btn @click="saveGrading(true)" color="success" size="small"
-											variant="elevated" :loading="isSaving">
-											<v-icon start>mdi-send-check</v-icon>
-											Hoàn tất & Trả bài
-										</v-btn>
-									</div>
-
-									<v-btn @click="nextQuestion" :disabled="globalQuestionNumber === totalQuestions"
-										variant="text">
-										Câu sau
-										<v-icon end>mdi-chevron-right</v-icon>
-									</v-btn>
-								</v-card-actions>
+								</v-card-text>
 							</v-card>
-						</v-col>
-					</v-row>
+						</div>
+						<v-divider />
+						<div class="d-flex flex-column ga-2 mt-2">
+							<div class="d-flex align-center ga-2 justify-end">
+								<v-chip v-if="questionsTypesLabel(currentQuestion.type)" size="small"
+									:color="questionsTypesLabel(currentQuestion.type).color">
+									{{ questionsTypesLabel(currentQuestion.type).label }}
+								</v-chip>
+								<v-chip color="primary" variant="elevated" class="progress-chip" size="small">
+									{{ currentQuestion.points }} điểm
+								</v-chip>
+							</div>
+							<div class="d-flex ga-2">
+								<!-- Question text for desktop -->
+								<b class="font-weight-bold" style="flex: none;">Câu {{ globalQuestionNumber
+								}}:</b>
+								<!-- Question text -->
+								<uc-latex-view class="flex-column ms-2" style="align-items: flex-start !important;"
+									:content="currentQuestion.config.questionText" />
+							</div>
+						</div>
+						<!-- YOUTUBE, RECORD_AUDIO, IMAGE, FILE -->
+						<!-- Media Container -->
+						<div v-if="currentQuestion.config.media" class="media-container mb-2">
+							<div v-if="currentQuestion.config.media.sourceYT.source.length > 0"
+								class="youtube-container">
+								<iframe :src="renderUrlYoutube(currentQuestion.config.media.sourceYT.source)"
+									frameborder="0"
+									allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+									allowfullscreen></iframe>
+							</div>
+							<uc-wave-audio-player v-if="currentQuestion.config.media.sourceRecord.source.length > 0"
+								v-model:audioUrl="currentQuestion.config.media.sourceRecord.source" />
+							<div v-if="currentQuestion.config.media.sourceFiles.image.length > 0">
+								<v-img v-for="file in currentQuestion.config.media.sourceFiles.image"
+									:src="'https://drive.google.com/thumbnail?id=' + getDriveFileId(file.source) + '&sz=w1000'"
+									:lazy-src="'https://drive.google.com/thumbnail?id=' + getDriveFileId(file.source) + '&sz=w1000'"
+									class="rounded-lg" height="400">
+									<template v-slot:placeholder>
+										<v-row align="center" class="fill-height ma-0" justify="center">
+											<v-progress-circular color="grey-lighten-5" indeterminate />
+										</v-row>
+									</template>
+								</v-img>
+							</div>
+							<div v-if="currentQuestion.config.media.sourceFiles.file.length > 0">
+								<iframe v-for="file in currentQuestion.config.media.sourceFiles" :src="file.source"
+									style="width: 100%; height: 400px;"></iframe>
+							</div>
+						</div>
+
+
+						<!-- Grading Component -->
+						<div class="answer-area" v-if="!isLoading">
+							<component :is="getQuestionComponent(currentQuestion.type)" :question="currentQuestion"
+								:answer="studentAnswers[currentQuestion.id] ? studentAnswers[currentQuestion.id].answerData : null"
+								@answer-change="updateAnswer(currentQuestion.id, $event)"
+								:grading="gradingData[currentQuestion.id] ? gradingData[currentQuestion.id]?.grading : null"
+								:is-grade="true" @grading-change="updateGrading(currentQuestion.id, $event)"
+								:submissionstatus="submission.SubmissionStatus" />
+						</div>
+
+						<!-- Single Mode Action Bar -->
+						<v-divider></v-divider>
+						<v-card-actions class="pa-4 d-flex justify-space-between">
+							<v-btn @click="prevQuestion" :disabled="globalQuestionNumber === 1" variant="text">
+								<v-icon start>mdi-chevron-left</v-icon>Câu trước
+							</v-btn>
+
+							<div class="d-flex align-center ga-2"
+								v-if="![0, 1, 4].includes(submission?.SubmissionStatus)">
+								<v-btn @click="saveGrading(false)" color="grey-darken-1" variant="outlined"
+									:loading="isSaving" size="small">
+									<v-icon start>mdi-content-save-outline</v-icon>
+									Chấm nháp
+								</v-btn>
+								<v-menu location="top" scroll-strategy="close" open-on-click
+									:close-on-content-click="false" offset="4">
+									<template v-slot:activator="{ props }">
+										<v-btn v-bind="props" color="warning" size="small" variant="elevated"
+											:loading="isSaving">
+											<v-icon start>mdi-reload-alert</v-icon>
+											Yêu cầu nộp lại bài
+										</v-btn>
+									</template>
+									<v-card>
+										<v-card-title class="border-b bg-warning text-body-2">Lý do yêu cầu nộp lại bài
+											tập</v-card-title>
+										<v-card-text class="pa-1">
+											<v-textarea label="Lý do" v-model="Reason" :rows="2" variant="outlined"
+												hide-details="auto" dense placeholder="Nhập lý do..." />
+										</v-card-text>
+										<v-card-actions class="border-t py-0">
+											<v-spacer></v-spacer>
+											<v-btn variant="text" size="small" @click="YeuCauLamLaiBai()"
+												color="warning">Xác
+												nhận</v-btn>
+										</v-card-actions>
+									</v-card>
+								</v-menu>
+
+								<v-btn @click="saveGrading(true)" color="success" size="small" variant="elevated"
+									:loading="isSaving">
+									<v-icon start>mdi-send-check</v-icon>
+									Hoàn tất & Trả bài
+								</v-btn>
+
+
+							</div>
+
+							<v-btn @click="nextQuestion" :disabled="globalQuestionNumber === totalQuestions"
+								variant="text">
+								Câu sau
+								<v-icon end>mdi-chevron-right</v-icon>
+							</v-btn>
+						</v-card-actions>
+					</v-card>
 				</div>
 
 				<!-- All Questions Mode -->
 				<div v-else class="all-questions-mode">
 					<!-- Progress Summary -->
-					<v-card class="mb-4 progress-summary" flat border>
-						<v-card-text class="py-3">
-							<div class="d-flex justify-space-between align-center flex-wrap ga-3">
-								<div class="d-flex align-center ga-3 flex-wrap">
+					<v-card class="mb-2 progress-summary" flat border>
+						<v-card-text class="py-2">
+							<div class="d-flex justify-space-between align-center flex-wrap ga-2">
+								<div class="d-flex align-center ga-2 flex-wrap">
 									<div class="progress-stats">
 										<span class="text-subtitle-2 text-medium-emphasis">Tiến độ chấm:</span>
 										<span class="text-h6 ml-1">{{ gradedCount }}/{{ totalQuestions }}</span>
@@ -193,11 +286,35 @@
 									</span>
 								</div>
 
-								<div class="d-flex align-center ga-2" v-if="submission?.SubmissionStatus !== 4">
+								<div class="d-flex flex-wrap align-center ga-2"
+									v-if="![0, 1, 4].includes(submission?.SubmissionStatus)">
 									<v-btn @click="saveGrading(false)" color="grey-darken-1" variant="outlined"
 										size="small" :loading="isSaving">
 										<v-icon start size="16">mdi-content-save-outline</v-icon>Chấm nháp
 									</v-btn>
+									<v-menu location="bottom" scroll-strategy="close" open-on-click
+										:close-on-content-click="false" offset="4">
+										<template v-slot:activator="{ props }">
+											<v-btn v-bind="props" color="warning" size="small" variant="elevated"
+												:loading="isSaving">
+												<v-icon start>mdi-reload-alert</v-icon>
+												Yêu cầu nộp lại bài
+											</v-btn>
+										</template>
+										<v-card>
+											<v-card-title class="border-b bg-warning text-body-2">Lý do yêu cầu nộp lại
+												bài tập</v-card-title>
+											<v-card-text class="pa-1">
+												<v-textarea label="Lý do" v-model="Reason" :rows="2" variant="outlined"
+													hide-details="auto" dense placeholder="Nhập lý do..." />
+											</v-card-text>
+											<v-card-actions class="border-t py-0">
+												<v-spacer></v-spacer>
+												<v-btn variant="text" size="small" @click="YeuCauLamLaiBai()"
+													color="warning">Xác nhận</v-btn>
+											</v-card-actions>
+										</v-card>
+									</v-menu>
 									<v-btn @click="saveGrading(true)" color="success" size="small" variant="elevated"
 										:loading="isSaving">
 										<v-icon start size="16">mdi-send-check</v-icon>Hoàn tất & Trả bài
@@ -210,12 +327,12 @@
 					<!-- All Questions List -->
 					<div class="questions-container">
 						<div v-for="(group, groupIndex) in assignment.groups" :key="group.id"
-							class="group-section mb-6">
+							class="group-section mb-2">
 							<!-- Group Header (same as taker but with grading stats) -->
-							<v-card class="group-header-card mb-3" flat border>
-								<v-card-text class="py-4">
-									<div class="d-flex justify-space-between align-center mb-2">
-										<div class="d-flex align-center ga-3">
+							<v-card class="group-header-card mb-2" flat border>
+								<v-card-text class="py-2">
+									<div class="d-flex justify-space-between align-center">
+										<div class="d-flex align-center ga-2">
 											<div class="group-icon-wrapper ">
 												<v-icon color="primary" size="20">mdi-folder-text-outline</v-icon>
 											</div>
@@ -241,70 +358,100 @@
 									<p v-if="group.description" class="group-description mb-0">
 										{{ group.description }}
 									</p>
+									<!-- Media -->
+									<div v-if="group.media" class="media-container mt-2 d-flex flex-column ga-2">
+										<div v-if="group.media.sourceYT.source?.length > 0" class="youtube-container">
+											<iframe :src="renderUrlYoutube(group.media.sourceYT.source)" frameborder="0"
+												allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+												allowfullscreen></iframe>
+										</div>
+										<uc-wave-audio-player v-if="group.media.sourceRecord.source?.length > 0"
+											v-model:audioUrl="group.media.sourceRecord.source" />
+										<div v-if="group.media.sourceFiles.image.length > 0" style="max-height: 350px">
+											<v-img v-for="file in group.media.sourceFiles.image" :key="file.source"
+												:src="'https://drive.google.com/thumbnail?id=' + getDriveFileId(file.source) + '&sz=w1000'"
+												:lazy-src="'https://drive.google.com/thumbnail?id=' + getDriveFileId(file.source) + '&sz=w1000'"
+												class="rounded-lg" max-height="350">
+												<template #placeholder>
+													<v-row align="center" class="fill-height ma-0" justify="center">
+														<v-progress-circular color="grey-lighten-5" indeterminate />
+													</v-row>
+												</template>
+											</v-img>
+										</div>
+										<div v-else-if="group.media.sourceFiles.file.length > 0">
+											<iframe v-for="file in group.media.sourceFiles.file" :key="file.source"
+												:src="file.source" style="width: 100%; height: 400px;"></iframe>
+										</div>
+									</div>
 								</v-card-text>
 							</v-card>
 
 							<!-- Questions in Group -->
 							<div class="questions-in-group">
 								<v-card v-for="(question, questionIndexInGroup) in group.questions" :key="question.id"
-									class="question-card-all mb-3"
+									class="question-card-all mb-2"
 									:class="{ 'question-graded': isQuestionGraded(question.id) }" flat border
 									:id="question.id">
 									<!-- Question header (responsive) -->
 									<div class="question-header-all-compact">
-										<div class="d-flex flex-column ga-2 d-lg-flex d-none ">
+										<div class="d-flex flex-column ga-2 d-lg-flex d-none">
 											<!-- Desktop layout -->
 											<div class="d-flex justify-space-between">
 												<b style="flex-shrink: 0;display: inline-block;">
-													<v-icon class="mb-1" :color="getGradingIconColor(question.id)" size="18">
+													<v-icon class="mb-1" :color="getGradingIconColor(question.id)"
+														size="18">
 														{{ getGradingStatusIcon(question.id) }}
 													</v-icon>
 													Câu {{ getGlobalQuestionNumberByQuestionId(question.id) }}:
 												</b>
-												<v-chip color="white" text-color="primary" variant="elevated"
-													size="x-small"
-													class="progress-chip status-badge points-chip-mobile">
-													{{ question.points }} điểm
-												</v-chip>
+												<div class="d-flex align-center ga-2 justify-end">
+													<v-chip v-if="questionsTypesLabel(question.type)" size="small"
+														:color="questionsTypesLabel(question.type).color">
+														{{ questionsTypesLabel(question.type).label }}
+													</v-chip>
+													<v-chip color="white" text-color="primary" variant="elevated"
+														size="small"
+														class="progress-chip status-badge points-chip-mobile">
+														{{ question.points }} điểm
+													</v-chip>
+												</div>
 											</div>
 
-											<uc-latex-view class="flex-column px-5" style="align-items: start !important;"
+											<uc-latex-view class="flex-column px-2"
+												style="align-items: start !important;"
 												:content="question.config.questionText" />
 										</div>
 
-										<div class="d-flex d-lg-none">
-											<!-- Mobile layout -->
+										<!-- Mobile layout -->
+										<!-- <div class="d-flex d-lg-none">
 											<div class="question-meta-mobile">
 												<div class="d-flex align-center ga-2">
 													<v-icon :color="getGradingIconColor(question.id)" size="18">
-														{{ getGradingStatusIcon(question.id) }}
+														{{ getGradingStatusIcon(question.id, question) }}
 													</v-icon>
-													<span class="mobile-question-label">Câu {{
-														getGlobalQuestionNumber(groupIndex, questionIndexInGroup)
-													}}</span>
+													<span class="mobile-question-label">
+														Câu {{getGlobalQuestionNumber(groupIndex,questionIndexInGroup)}}</span>
 												</div>
 												<v-chip color="white" text-color="primary" variant="elevated"
 													size="x-small" class="points-chip-mobile">
 													{{ question.points }}đ
 												</v-chip>
 											</div>
-										</div>
+										</div> -->
 									</div>
 
-									<v-card-text class="question-content-compact pt-3 pb-4">
+									<v-card-text class="question-content-compact pt-2 pb-2">
 										<!-- Question text for mobile -->
-										<div class="d-block d-lg-none mb-3">
-											<!-- <div class="question-text-mobile" v-html="question.config.questionText">
-											</div> -->
+										<!-- <div class="d-block d-lg-none mb-2">
 											<uc-latex-view class="flex-column"
 												:content="question.config.questionText"></uc-latex-view>
-										</div>
+										</div> -->
 
 										<!-- YOUTUBE, RECORD_AUDIO, IMAGE, FILE -->
 										<!-- Media Container -->
-										<div v-if="question.config.media" class="media-container mb-4">
-											<div
-												v-if="question.config.media.type === 'YOUTUBE' && question.config.media.sourceYT.source.length > 0">
+										<div v-if="question.config.media" class="media-container mb-2">
+											<div v-if="question.config.media.sourceYT.source.length > 0">
 												<div class="youtube-container"
 													v-if="question.config.media.sourceYT.source.length > 0">
 													<iframe
@@ -315,9 +462,9 @@
 												</div>
 												<v-container class="fill-height d-flex align-center justify-center py-8"
 													v-else>
-													<v-card class="pa-8 text-center mx-auto" max-width="720"
+													<v-card class="pa-2 text-center mx-auto" max-width="720"
 														elevation="2" rounded="sm">
-														<div class="mb-4 d-flex justify-center">
+														<div class="mb-2 d-flex justify-center">
 															<v-avatar size="84" class="elevation-1"
 																color="surface-variant">
 																<v-icon size="48">mdi-link-off</v-icon>
@@ -329,16 +476,15 @@
 													</v-card>
 												</v-container>
 											</div>
-											<div
-												v-else-if="question.config.media.type === 'RECORD_AUDIO' && question.config.media.sourceRecord.length > 0">
+											<div v-if="question.config.media.sourceRecord.length > 0">
 												<uc-wave-audio-player
 													v-if="question.config.media.sourceRecord.length > 0"
 													v-model:audioUrl="question.config.media.sourceRecord" />
 												<v-container class="fill-height d-flex align-center justify-center py-8"
 													v-else>
-													<v-card class="pa-8 text-center mx-auto" max-width="720"
+													<v-card class="pa-2 text-center mx-auto" max-width="720"
 														elevation="2" rounded="sm">
-														<div class="mb-4 d-flex justify-center">
+														<div class="mb-2 d-flex justify-center">
 															<v-avatar size="84" class="elevation-1"
 																color="surface-variant">
 																<v-icon size="48">mdi-link-off</v-icon>
@@ -351,9 +497,8 @@
 												</v-container>
 											</div>
 
-											<div v-else-if="question.config.media.type === 'IMAGE' && question.config.media.sourceIMGs.length > 0"
-												style="min-height: 400px">
-												<v-img v-for="file in question.config.media.sourceIMGs"
+											<div v-if="question.config.media.sourceFiles.image.length > 0">
+												<v-img v-for="file in question.config.media.sourceFiles.image"
 													:src="'https://drive.google.com/thumbnail?id=' + getDriveFileId(file.source) + '&sz=w1000'"
 													:lazy-src="'https://drive.google.com/thumbnail?id=' + getDriveFileId(file.source) + '&sz=w1000'"
 													class="rounded-lg" max-height="400">
@@ -364,19 +509,17 @@
 													</template>
 												</v-img>
 											</div>
-											<div
-												v-else-if="question.config.media.type === 'FILE' && question.config.media.sourceFiles.length > 0">
-												<iframe v-for="file in question.config.media.sourceFiles"
+											<div v-if="question.config.media.sourceFiles.files?.length > 0">
+												<iframe v-for="file in question.config.media.sourceFiles.files"
 													:src="file.source" style="width: 100%; height: 400px;"></iframe>
 											</div>
-
-
 										</div>
 
 										<!-- Grading component -->
 										<div class="answer-section-compact" v-if="!isLoading">
 											<component :is="getQuestionComponent(question.type)" :question="question"
 												:answer="studentAnswers[question.id] ? studentAnswers[question.id].answerData : null"
+												@answer-change="updateAnswer(question.id, $event)"
 												:grading="gradingData[question.id] ? gradingData[question.id].grading : null"
 												:is-grade="true" @grading-change="updateGrading(question.id, $event)"
 												:submissionstatus="submission.SubmissionStatus" />
@@ -388,20 +531,18 @@
 					</div>
 				</div>
 			</v-col>
-			<v-col cols="3">
+			<v-divider vertical />
+			<v-col cols="3" v-if="!mobile">
 				<!-- View Mode Toggle (same as taker) -->
-				<div class="d-flex justify-space-between align-center">
-					<v-card-title class="ma-0">
-						<v-icon left color="primary">mdi-clipboard-check-outline</v-icon>
-						Tổng kết & Nhận xét chung
-					</v-card-title>
-
+				<div class="text-subtitle-1 font-weight-medium">
+					<v-icon left color="primary">mdi-clipboard-check-outline</v-icon>
+					Tổng kết & Nhận xét chung
 				</div>
-
+				<v-divider class="my-2" />
 				<!-- Overall Grading Summary -->
 				<v-card class="mb-2">
-					<v-card-text>
-						<v-row>
+					<v-card-text class="pa-0">
+						<v-row dense>
 							<v-col cols="12">
 								<v-btn-toggle v-model="viewMode" color="primary" variant="outlined" density="compact"
 									divided mandatory size="small">
@@ -418,7 +559,6 @@
 							<v-col cols="12">
 								<label class="font-weight-medium mb-2 d-block">Điểm tổng kết</label>
 								<div class="d-flex align-center">
-
 									<v-number-input v-model="gradingSummary.totalScore" label="Điểm"
 										:max="assignment.MaxScore" :min="0" variant="outlined" density="compact"
 										hide-details style="max-width: 100px;" control-variant="stacked" inset>
@@ -428,7 +568,8 @@
 								</div>
 							</v-col>
 							<v-col cols="12">
-								<label class="font-weight-medium mb-2 d-block">Nhận xét chung cho toàn bài</label>
+								<label class="font-weight-medium mb-2 d-block">Nhận xét chung cho toàn
+									bài</label>
 								<v-textarea v-model="gradingSummary.teacherComment" hide-details
 									placeholder="Nhập nhận xét tổng quát về bài làm của học sinh..." />
 							</v-col>
@@ -438,7 +579,6 @@
 
 			</v-col>
 		</v-row>
-
 	</div>
 </template>
 
@@ -452,7 +592,9 @@ export default {
 		onOpenPublishDialog: { type: Function, default: () => { } }
 	},
 	data() {
+		const { mobile } = Vuetify.useDisplay()
 		return {
+			Reason: "",
 			viewMode: 'all', // 'single' or 'all'
 			navCollapsed: false,
 			groupCollapsed: {},
@@ -462,12 +604,20 @@ export default {
 			submission: null,
 			studentAnswers: {},
 			gradingData: {},
-			gradingSummary: { totalScore: 0, teacherComment: '' },
+			gradingSummary: { totalScore: null, teacherComment: '' },
 			isSaving: false,
 			isLoading: false,
+			vueData,
+			mobile
+		}
+	},
+	mounted() {
+		if (this.mobile) {
+			this.viewMode = 'all'
 		}
 	},
 	computed: {
+
 		totalQuestions() {
 			if (!this.assignment?.groups) return 0;
 			return this.assignment.groups.reduce((total, group) => total + group.questions.length, 0);
@@ -486,7 +636,6 @@ export default {
 		}
 	},
 	methods: {
-
 		async processData(data) {
 			this.isLoading = true
 			let promise = await new Promise((resolve, reject) => {
@@ -557,7 +706,18 @@ export default {
 		getGroupGradedCount(group) {
 			return group.questions.filter(q => this.isQuestionGraded(q.id)).length;
 		},
+		//Hiện tại đang sử dụng cho File Upload
+		updateAnswer(questionId, newAnswer) {
+			console.log('this.gradingData', this.gradingData)
+			this.gradingData[questionId] = {
+				...this.gradingData[questionId],
+				answerData: newAnswer
+			}
+			console.log('this.gradingData', this.gradingData)
+			console.log('this.gradingData', this.gradingData, this.gradingData)
 
+			this.saveGrading(false)
+		},
 		saveGrading(isPublishing) {
 			let listQuestions = _.flatten(this.assignment.groups.map(q => { return [...q.questions] }))
 			this.isSaving = true;
@@ -568,7 +728,7 @@ export default {
 				TeacherComment: this.gradingSummary.teacherComment,
 				SubmissionContent: JSON.stringify({ answers: this.gradingData })
 			};
-			console.log('payload', payload)
+			// console.log('payload', payload)
 			if (isPublishing) {
 				//Hàm warning những câu chưa chấm
 				let messageQuestionsNotGrade = this.onHandleQuestionNotGrade(listQuestions)
@@ -582,19 +742,17 @@ export default {
 			} else {
 				this.onSaveGradingDraft(payload);
 			}
-			setTimeout(() => { this.isSaving = false; }, 1500);
+			setTimeout(() => { this.isSaving = false; }, 200);
 		},
 		updateGrading(questionId, newGradingData) {
 			const newGrading = { ...this.gradingData };
 			const currentAnswer = newGrading[questionId] || {};
 			newGrading[questionId] = { ...currentAnswer, grading: newGradingData };
 			this.gradingData = newGrading;
-
 			// Avoid tight recursive update loop
 			setTimeout(() => {
 				this.calculateTotalScore();
 			}, 0);
-			// this.calculateTotalScore();
 		},
 		calculateTotalScore() {
 			let total = 0;
@@ -604,9 +762,9 @@ export default {
 					total += parseFloat(grade.autoScore || 0) + parseFloat(grade.manualScore || 0);
 				}
 			});
-			this.gradingSummary.totalScore = parseFloat(total.toFixed(2));
+			this.gradingSummary.totalScore = parseFloat(total);
 		},
-		getGradingStatusIcon(questionId) {
+		getGradingStatusIcon(questionId, question) {
 			const grading = this.gradingData[questionId]?.grading;
 			if (!grading || (grading.manualScore === null || grading.manualScore === undefined)) return 'mdi-help-circle-outline';
 			if (grading.isCorrect === true || grading.manualScore === this.getQuestionById(questionId)?.points) return 'mdi-check-circle';
@@ -638,29 +796,40 @@ export default {
 			return map[type] || 'div';
 		},
 		getSubmissionStatusColor() {
+			if (this.submission?.SubmissionStatus == 0 && this.submission?.Reason) {
+				return 'warning';
+			}
 			switch (this.submission?.SubmissionStatus) {
-				case 4: return 'success'; case 2: return 'info'; case 3: return 'purple'; default: return 'grey';
+				case 4:
+					return 'success';
+				case 2:
+					return 'info';
+				case 3:
+					return 'purple';
+				default: return 'grey';
 			}
 		},
 		getSubmissionStatusText() {
+			if (this.submission?.SubmissionStatus == 0 && this.submission?.Reason) return 'Yêu cầu nộp lại bài';
 			switch (this.submission?.SubmissionStatus) {
-				case 4: return 'Đã chấm bài và trả bài'; case 2: return 'Đã nộp'; case 3: return 'Đã chấm nháp'; default: return 'Chưa nộp';
+				case 4: return 'Đã chấm bài và trả bài'; case 2: return 'Đã nộp'; case 3: return 'Đã chấm nháp';
+
+				default: return 'Chưa nộp';
 			}
 		},
 		toggleGroupCollapse(groupIndex) { this.groupCollapsed = { ...this.groupCollapsed, [groupIndex]: !this.groupCollapsed[groupIndex] }; },
 		navigateToQuestion(groupIndex, questionIndexInGroup, id) {
 			if (this.viewMode == 'all') {
-				document.getElementById(id).scrollIntoView({
-					behavior: "smooth", // cuộn mượt
-					block: "start" // vị trí hiển thị: start | center | end | nearest
+				var element = document.getElementById(id);
+				element.scrollIntoView({
+					behavior: "smooth", // cuộn mượt 
+					block: "start",// vị trí hiển thị: start | center | end | nearest 
 				});
-				return
 			}
 			this.currentGroupIndex = groupIndex;
 			this.currentQuestionIndexInGroup = questionIndexInGroup;
-			if (this.groupCollapsed[groupIndex]) {
-				this.toggleGroupCollapse(groupIndex);
-			}
+			if (this.groupCollapsed[groupIndex]) { this.toggleGroupCollapse(groupIndex); }
+
 		},
 		prevQuestion() { if (this.currentQuestionIndexInGroup > 0) { this.currentQuestionIndexInGroup--; } else if (this.currentGroupIndex > 0) { this.currentGroupIndex--; this.currentQuestionIndexInGroup = this.assignment.groups[this.currentGroupIndex].questions.length - 1; } },
 		nextQuestion() {
@@ -675,11 +844,8 @@ export default {
 			return number + questionIndexInGroup;
 		},
 		getDriveFileId(url) {
-			const match = url.match(/\/d\/([^/]+)\//);
+			const match = url?.match(/\/d\/([^/]+)\//);
 			return match ? match[1] : null;
-		},
-		submitPoints() {
-
 		},
 		formatDate(dateString) { if (!dateString) return 'Chưa có thông tin'; const date = new Date(dateString); return date.toLocaleString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }); },
 		onHandleQuestionNotGrade(listQuestions) {
@@ -692,41 +858,43 @@ export default {
 			}, [])
 			return getNumberQuestionNotGrade.length > 0 ? getNumberQuestionNotGrade.join(', ') : ''
 		},
-		renderUrlYoutube,
 		getGlobalQuestionNumberByQuestionId(questionId) {
 			if (!this.allQuestions) return 0;
 			const index = this.allQuestions.findIndex(q => q.id === questionId);
 			return index + 1;
 		},
+		questionsTypesLabel,
+		renderUrlYoutube,
+		YeuCauLamLaiBai() {
+			const $this = this
+			if (!$this.Reason) {
+				Vue.$toast.warning("Vui lòng nhập lý do!", { position: "top" })
+				return
+			}
+			confirm({
+				title: "Xác nhận yêu cầu học sinh nộp lại bài tập?",
+				action: () => {
+					ajaxCALL("/lms/EL_Teacher_YeuCauNopBaiLai", {
+						SubmissionID: $this.submission?.SubmissionID,
+						Reason: $this.Reason
+					}, res => {
+						Vue.$toast.success("Yêu cầu học sinh nộp lại bài tập thành công!", { position: "top" })
+						vueData.initPage()
+					})
+				}
+			})
+
+		}
 	},
 	watch: {
 		submissionData: {
 			handler: 'processData',
 			immediate: true,
-			// deep: true
+		},
+		mobile: function (val) {
+			if (val) this.viewMode = 'all'
+			else this.viewMode = 'single'
 		}
 	}
 }
 </script>
-
-<style>
-.progress-chip {
-	max-width: none !important;
-	white-space: nowrap;
-}
-
-.status-badge {
-	display: inline-flex;
-	align-items: center;
-	justify-content: center;
-	background-color: #eaf5eb;
-	color: #34a853;
-	border-radius: 9999px;
-	font-weight: 600;
-	font-size: 14px;
-	padding: 2px 10px;
-	line-height: 1;
-	min-width: 40px;
-	height: 24px;
-}
-</style>

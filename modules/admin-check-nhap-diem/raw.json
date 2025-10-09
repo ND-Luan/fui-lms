@@ -1,0 +1,23 @@
+{
+    "data": [],
+    "watch": {},
+    "controls": [
+        {
+            "prop": "fluid grid-list-md",
+            "rows": [
+                {
+                    "prop": "",
+                    "cols": [
+                        {
+                            "el": "uc-main-page",
+                            "attr": {
+                                "v-if": "NienKhoa && (user.UserID == 'NA0000022'||user.UserID == 'NV0000134' )"
+                            }
+                        }
+                    ]
+                }
+            ]
+        }
+    ],
+    "set": {}
+}

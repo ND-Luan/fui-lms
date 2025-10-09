@@ -1,38 +1,50 @@
 <template>
 	<div class="assignment-builder">
-		<v-row class="ma-0">
-			<v-col cols="12" md="3">
+		<v-row class="ma-0" dense>
+			<v-col cols="12" md="2">
 				<uc-assignment-component-library @add-component="addComponent"
-					style="height: calc(100dvh - 73px); overflow: auto"></uc-assignment-component-library>
-
+					style="height: calc(100dvh - 96px); overflow: auto" />
 				<v-divider />
 				<div class="mt-4">
-					<p class="text-display text-center">Tổng điểm <v-chip color="primary">
-							{{totalScoreAsm}}</v-chip></p>
+					<div class="text-display text-center">
+						Tổng điểm
+						<v-chip color="primary" size="small"> {{ totalScoreAsm }}</v-chip>
+					</div>
+					<v-divider class="mt-1 mb-1 " />
+					<v-row dense>
+						<v-col cols="6">
+							<v-btn @click="onOpenPreview" text='Xem trước' color="teal" block variant="tonal" />
+						</v-col>
+						<v-col cols="6">
+							<v-btn @click="onRemarkQuestion" text='Cập nhật STT' color="amber" block variant="tonal" />
+						</v-col>
+					</v-row>
 				</div>
 				<!-- Component uc-quiz-importer của bạn có thể đặt ở đây -->
 			</v-col>
+			<v-divider vertical />
 
-			<v-col cols="12" md="6" style="height: calc(100dvh); overflow: auto">
+			<v-col cols="12" md="7" style="height: calc(100dvh); overflow: auto">
 				<uc-assignment-canvas :groups="assignment?.AssignmentConfig?.groups" :selected-item="selectedItem"
 					@update:groups="updateGroups" @update:selected-item="selectedItem = $event" />
 			</v-col>
-
-			<v-col cols="12" md="3">
-				<div style="height: calc(100dvh - 60px); overflow: auto;">
-					<uc-assignment-properties :groups="assignment.AssignmentConfig?.groups" :item="selectedItem"
+			<v-divider vertical />
+			<v-col class="pa-0" cols="12" md="3">
+				<div style="height: calc(100dvh - 45px); overflow: auto;" class="position-relative pa-2">
+					<uc-assignment-properties v-if="selectedItem" :assignment="assignment"
+						:groups="assignment.AssignmentConfig?.groups" :item="selectedItem"
 						@update:groups="updateGroups" />
 				</div>
-				<v-row dense>
+				<v-divider />
+				<v-row class="ma-0" dense v-if="assignment.AssignmentConfig?.groups.length > 0">
+					<!-- <v-col :cols="!vueData.AssignToClassID ? 4 : 6">
+						<v-btn @click="onOpenPreview" text='Xem trước' color="teal" block />
+					</v-col> -->
 					<v-col :cols="!vueData.AssignToClassID ? 6 : 12">
-						<v-btn color="primary" block elevation="2" @click="handleSave(true)">
-							Lưu bài tập
-						</v-btn>
+						<v-btn text='Lưu bài tập' color="primary" block elevation="2" @click="handleSave(true)" />
 					</v-col>
 					<v-col cols="6" v-if="!vueData.AssignToClassID">
-						<v-btn color="success" block elevation="2" @click="openSheetAssignToClass">
-							Lưu bài tập và giao bài
-						</v-btn>
+						<v-btn text='Giao bài' color="success" block elevation="2" @click="openSheetAssignToClass" />
 					</v-col>
 				</v-row>
 			</v-col>
@@ -44,7 +56,7 @@
 					<span class="text-white">Giao bài tập</span>
 					<v-spacer></v-spacer>
 					<v-btn variant="text" icon="mdi-close" color="white"
-						@click="isOpenSheetAssignToClass=false"></v-btn>
+						@click="isOpenSheetAssignToClass = false"></v-btn>
 				</v-card-title>
 				<v-card-text>
 					<v-row dense class="mb-3">
@@ -71,11 +83,9 @@
 						<div v-for="item in classOptions" class="d-flex ga-1 justify-center align-center">
 							<v-checkbox v-model='selectedClass' :key="item.LopID" :value="item.LopID" color="success">
 							</v-checkbox>
-							<p>{{item.TenLop}}</p>
+							<p>{{ item.TenLop }}</p>
 						</div>
-
 					</div>
-
 				</v-card-text>
 				<v-divider></v-divider>
 				<v-card-actions>
@@ -145,18 +155,19 @@
 			}
 		},
 		mounted() {
-			ajaxCALL("/lms/EL_Teacher_GetGroupedDashboard", {
-	
-			}, (res) => {
+			ajaxCALL("/lms/EL_Teacher_GetGroupedDashboard", null, (res) => {
 				const assignment = { ...vueData.assignment }
 				const id = assignment.AssignmentID
-				this.classAssigned = (res?.data[2] || []).filter(x => x.AssignmentID == id);
+				this.classAssigned = (res?.data[2]).filter(x => x.AssignmentID == id);
 	
 				let classAssignedByKhoiMon = (res?.data[1] || []).filter(
 					c => c.KhoiID == assignment.KhoiID && c.MonHocID == assignment.MonHocID
-				);
+				)
+				if ([10, 11, 12].includes(assignment.KhoiID)) {
+					classAssignedByKhoiMon = classAssignedByKhoiMon.filter(c => c.TenLop.includes('AV'))
+				}
 	
-				const assignedLopIDs = this.classAssigned.map(c => c.LopID);
+				const assignedLopIDs = this.classAssigned.map(c => c.LopID );
 	
 				this.classOptions = classAssignedByKhoiMon.filter(
 					item => !assignedLopIDs.includes(item.LopID)
@@ -179,9 +190,32 @@
 					}
 				})
 				return total
-			}
+			},
 		},
 		methods: {
+			onRemarkQuestion() {
+				let number = 0
+				this.assignment?.AssignmentConfig?.groups.forEach((group) => {
+					group.questions = group.questions.map((x) => {
+						number++ // tăng lần lượt 1, 2, 3, 4...
+						x.ordinalNumber = number
+						return x
+					})
+				})
+			},
+			async onOpenPreview() {
+				const groups = this.assignment.AssignmentConfig.groups
+				const { message, isNotChoose } = vueData.isCheckGroupHasAnswerQuestionNotChoose(groups)
+				if (isNotChoose) {
+					Vue.$toast.warning(message + ' chưa có đáp án. Vui lòng kiểm tra lại.', { position: "top" })
+					return
+				}
+				await this.handleSave(true)
+				openWindow({
+					title: "Xem trước bài soạn",
+					url: `/lms-tc-asm-preview?AssignmentID=${vueData.AssignmentID || 0}&AssignToClassID=${vueData.AssignToClassID || 0}`
+				})
+			},
 			selectedAllClass() {
 				if (this.isAllSelected) {
 					this.selectedClass = []
@@ -196,9 +230,14 @@
 					let indexOfLopID = this.selectedClass.indexOf(item.LopID)
 					this.selectedClass.splice(indexOfLopID, 1)
 				}
-				console.log('this.selectedClass', this.selectedClass)
 			},
 			openSheetAssignToClass() {
+				const groups = this.assignment.AssignmentConfig.groups
+				const { message, isNotChoose } = vueData.isCheckGroupHasAnswerQuestionNotChoose(groups)
+				if (isNotChoose) {
+					Vue.$toast.warning(message + ' chưa có đáp án. Vui lòng kiểm tra lại.', { position: "top" })
+					return
+				}
 				this.isOpenSheetAssignToClass = true
 			},
 			async onAssignToClassAndSave() {
@@ -212,12 +251,14 @@
 				}
 				const d = { date: this.deadlines?.date, time: this.deadlines?.time };
 				const due = this.getDue(d);
+				// truyền true => isPushlish = true
+				await this.handleSave(true)
 				let isReponse = await new Promise((resolve, reject) => {
 					for (item of this.selectedClass) {
 						const payload = [{
 							LopID: item,
 							DueDate: due,
-							MaxScore: 0, // thêm nếu cần
+							MaxScore: this.totalScoreAsm, // thêm nếu cần
 							Status: 1,
 							ResourceType: "ASSIGNMENT",
 							ResourceID: vueData.AssignmentID
@@ -235,17 +276,29 @@
 					}
 					resolve()
 				})
-				// truyền true => isPushlish = true
-				await this.handleSave(true)
+	
 				Vue.$toast.success("Lưu bài và giao bài thành công!", { position: 'top' });
 				this.isOpenSheetAssignToClass = false
 				await setTimeout(() => { }, 2000)
-				window.open("/lms-teacher-dashboard",'_parent');
+				window.open("/lms-teacher-dashboard", '_parent');
 			},
 			addComponent(componentInfo) {
+				const newGroups = [...JSON.parse(JSON.stringify(this.assignment.AssignmentConfig.groups))];
+				let ordinalNumber = 1;
+				let previousQuestion = 1
+				for (let i = 0; i < newGroups.length; i++) {
+					if (newGroups[i].questions.length > 0) {
+						ordinalNumber += newGroups[i].questions.length;
+						previousQuestion = ordinalNumber
+					}
+					else ordinalNumber = previousQuestion
+				}
+	
 				const newQuestion = {
 					id: `q_${Date.now()}`,
 					type: componentInfo.type,
+					label: componentInfo.label,
+					ordinalNumber,
 					points: 1.0,
 					gradingType: 'auto',
 					config: {
@@ -256,26 +309,28 @@
 								name: "",
 								source: ""
 							},
-							sourceIMGs: [],
 							sourceRecord: {
 								id: "",
 								name: "",
 								source: ""
 							},
-							sourceFiles: []
+							sourceFiles: {
+								file: [],
+								image: []
+							}
 						},
 						isAdvanced: false,
-						questionText: 'Nội dung câu hỏi mới...'
+						questionText: ''
 					}
 				};
-				console.log('type', componentInfo.type)
+	
 				switch (componentInfo.type) {
 					case 'QUIZ_SINGLE_CHOICE':
-						newQuestion.config.options = [{ id: `opt_1`, text: 'Lựa chọn A' }, { id: `opt_2`, text: 'Lựa chọn B' }];
+						newQuestion.config.options = [{ id: `opt_1`, text: 'Lựa chọn A' }, { id: `opt_2`, text: 'Lựa chọn B' }, { id: `opt_3`, text: 'Lựa chọn C' }, { id: `opt_4`, text: 'Lựa chọn D' }];
 						newQuestion.config.correctAnswer = null;
 						break;
 					case 'QUIZ_MULTIPLE_CHOICE':
-						newQuestion.config.options = [{ id: `opt_1`, text: 'Lựa chọn A' }, { id: `opt_2`, text: 'Lựa chọn B' }];
+						newQuestion.config.options = [{ id: `opt_1`, text: 'Lựa chọn A' }, { id: `opt_2`, text: 'Lựa chọn B' }, { id: `opt_3`, text: 'Lựa chọn C' }, { id: `opt_5`, text: 'Lựa chọn D' }];
 						newQuestion.config.correctAnswers = [];
 						break;
 					case 'QUIZ_TRUE_FALSE':
@@ -283,7 +338,6 @@
 						newQuestion.config.correctAnswer = true;
 						break;
 					case 'QUIZ_MULTIPLE_TRUE_FALSE':
-						console.log('add....')
 						newQuestion.config.options = [{ id: 'a', text: '', correctAnswer: null, inCorrectAnswer: null }]
 						break;
 					case 'QUIZ_FILL_IN_BLANK':
@@ -299,6 +353,7 @@
 						newQuestion.config.correctPairs = []
 						break
 					case 'ESSAY':
+						newQuestion.gradingType = 'manual';
 						// newQuestion.config.media = {
 						// 	"type": "IMAGE_GALLERY",
 						// 	"sources": []
@@ -306,8 +361,10 @@
 						// console.log('newQuestion', newQuestion)
 						break;
 					case 'SHORT_ANSWER':
+						newQuestion.gradingType = 'manual';
 						break;
 					case 'FILE_UPLOAD':
+						newQuestion.gradingType = 'manual';
 						// newQuestion.config.media = {
 						// 	"type": "FILE_UPLOAD",
 						// 	"sources": ""
@@ -324,7 +381,6 @@
 						break;
 				}
 	
-				const newGroups = JSON.parse(JSON.stringify(this.assignment.AssignmentConfig.groups));
 				if (newGroups.length > 0) {
 					newGroups[newGroups.length - 1].questions.push(newQuestion);
 				} else {
@@ -332,145 +388,68 @@
 						id: `group_${Date.now()}`,
 						title: 'Phần 1',
 						description: '',
+						media: {
+							type: "YOUTUBE",
+							sourceYT: {
+								id: "",
+								source: "",
+								name: ""
+							},
+							sourceRecord: {
+								id: "",
+								source: "",
+								name: ""
+							},
+							sourceFiles: {
+								file: [],
+								image: []
+							}
+						},
 						questions: [newQuestion]
 					});
 				}
 				this.updateGroups(newGroups);
 				this.selectedItem = { type: 'question', groupIndex: newGroups.length - 1, qIndex: newGroups[newGroups.length - 1].questions.length - 1 };
-	
 			},
 			updateGroups(newGroups) {
-				this.assignment.AssignmentConfig.groups = newGroups;
+				this.assignment.AssignmentConfig.groups = newGroups.map(item => {
+					if (!item.media) {
+						let media = {
+							type: "YOUTUBE",
+							sourceYT: {
+								id: "",
+								source: "",
+								name: ""
+							},
+							sourceRecord: {
+								id: "",
+								source: "",
+								name: ""
+							},
+							sourceFiles: {
+								file: [],
+								image: []
+							}
+						}
+						return { ...item, media }
+					} else {
+						return item
+					}
+				});
 			},
 			async handleSave(isPublishing) {
+				const groups = this.assignment.AssignmentConfig.groups
+				const { message, isNotChoose } = vueData.isCheckGroupHasAnswerQuestionNotChoose(groups)
+				if (isNotChoose) {
+					Vue.$toast.warning(message + ' chưa có đáp án. Vui lòng kiểm tra lại.', { position: "top" })
+					return
+				}
+	
 				const payload = {
 					assignment: this.assignment,
 					isPublishing: isPublishing
 				};
-				//Thực thi đẩy file record 
-				console.log('this.', this.selectedItem)
-				console.log('groups.', this.assignment.AssignmentConfig.groups)
-	
-				//const indexGroup = this.selectedItem.groupIndex
-				//const indexQuestion = this.selectedItem.qIndex
-				//const question = this.assignment.AssignmentConfig.groups[indexGroup].questions[indexQuestion]
-	
-	
-				console.log('file', this.fileAudio)
-				//await this.uploadToGoogleDrive(this.fileAudio)
 				await this.onSave(payload);
-			},
-			ajaxCALLPromise(url, params = null) {
-				return new Promise(resolve => {
-					ajaxCALL(url, params, res => {
-						if (res?.data) { resolve(res.data) }
-						else { resolve(res) }
-					})
-				})
-			},
-			async ensureFolderPathExists(path, access_token) {
-				const parts = path.split('/');
-				let parentId = 'root';
-	
-				for (const part of parts) {
-					parentId = await this.getOrCreateFolderId(part, parentId, access_token);
-				}
-	
-				return parentId; // Trả về folder cuối cùng
-			},
-			async getOrCreateFolderId(folderName, parentId = 'root', access_token) {
-				const query = `name = '${folderName}' and mimeType = 'application/vnd.google-apps.folder' and '${parentId}' in parents and trashed = false`;
-	
-				const res = await fetch(`https://www.googleapis.com/drive/v3/files?q=${encodeURIComponent(query)}&fields=files(id)`, {
-					headers: {
-						Authorization: `Bearer ${access_token}`,
-					},
-				});
-	
-				const data = await res.json();
-				if (data.files.length > 0) return data.files[0].id;
-	
-				// ⛏️ Nếu không có, tạo thư mục
-				const createRes = await fetch('https://www.googleapis.com/drive/v3/files', {
-					method: 'POST',
-					headers: {
-						Authorization: `Bearer ${access_token}`,
-						'Content-Type': 'application/json',
-					},
-					body: JSON.stringify({
-						name: folderName,
-						mimeType: 'application/vnd.google-apps.folder',
-						parents: [parentId],
-					}),
-				});
-	
-				const created = await createRes.json();
-				return created.id;
-			},
-			async uploadToGoogleDrive(file) {
-				//Trường hợp vô if
-				//Khi nội dung source ko có thay đổi, vẫn là file cũ thì sẽ ko có "file"
-				//Nêu ghi âm thì sẽ có file mới thì sẽ bảo qua điều kiện if
-				if (!file) return
-	
-				this.loadingPage.isLoading = true
-				this.loadingPage.text = "Đang tải dữ liệu..."
-	
-				//Lấy Token từ câu gọi Youtube
-				const { access_token } = await this.ajaxCALLPromise('lms/FP_Youtube_Token_Get')
-	
-				this.loadingPage.text = "Đang tìm kiếm folder..."
-				const pathPrefix = `LMS/${vueData.assignment.MonHocName} ${vueData.assignment.KhoiID}/${vueData.assignment.Title}/${vueData.user.UserID}`
-				const folderId = await this.ensureFolderPathExists(pathPrefix, access_token);
-	
-				const metadata = {
-					name: file.name,
-					mimeType: file.type,
-					parents: [folderId],
-				};
-	
-				const form = new FormData();
-				form.append('metadata', new Blob([JSON.stringify(metadata)], { type: 'application/json' }));
-				form.append('file', file);
-	
-				this.loadingPage.text = "Đang upload..."
-				const res = await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart', {
-					method: 'POST',
-					headers: new Headers({ Authorization: 'Bearer ' + access_token }),
-					body: form,
-				});
-	
-				const fileDrive = await res.json();
-	
-				this.loadingPage.text = "Đang cấp quyền file..."
-				//Cấp quyền cho file được công khai
-				const reponse_permision = await fetch(`https://www.googleapis.com/drive/v3/files/${fileDrive?.id}/permissions`, {
-					method: 'POST',
-					headers: {
-						Authorization: 'Bearer ' + access_token
-					},
-					body: JSON.stringify({
-						role: 'reader', // Quyền xem
-						type: 'anyone', // Bất kỳ ai
-					}),
-				});
-	
-				//Khi cập nhật permision xong thì lưu lại vào trong json editableItem
-				if (reponse_permision.ok) {
-					const driveFileUrl = `https://drive.google.com/file/d/${fileDrive.id}/preview`
-					this.loadingPage.isLoading = false
-	
-	
-					const newGroups = [...this.assignment.AssignmentConfig.groups]
-					const group = newGroups[this.selectedItem.groupIndex]
-					const question = group.questions[this.selectedItem.qIndex]
-					console.log('group', group)
-					console.log('question', question)
-					question.config.media.sourceRecord = driveFileUrl
-					console.log('newGroups', newGroups)
-					this.updateGroups(newGroups)
-					// this.selectedItem.config.media.source = driveFileUrl
-				}
 			},
 			// ==== Helpers hiển thị ====
 			formattedDate(dateStr) {
@@ -520,20 +499,15 @@
 			},
 			selectedItem: function (item) {
 				this.fileAudio = null
+			},
+			assignment: {
+				handler(newVal) {
+					if (newVal && this.isEditMode) {
+						vueData.AssignmentDataLog = _.cloneDeep(newVal);
+					}
+				},
+				deep: true
 			}
 		}
 	}
 </script>
-
-<style scoped>
-	.bottom-actions {
-		position: sticky;
-		bottom: 0;
-		background-color: white;
-		padding: 16px;
-		border-top: 1px solid #e0e0e0;
-		display: flex;
-		gap: 8px;
-		z-index: 10;
-	}
-</style>

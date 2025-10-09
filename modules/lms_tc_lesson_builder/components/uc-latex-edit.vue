@@ -6,7 +6,7 @@
                     <div v-if="isEmpty" class="cursor-pointer empty-content">
                         Bấm để <v-icon color="success" size="small">mdi-pencil</v-icon> soạn nội dung...
                     </div>
-                    <div v-else ref="contentContainer" class="cursor-pointer uc-latex-edit" v-html="renderedContent" />
+                    <div v-else ref="contentContainer" class="cursor-pointer uc-latex-edit" v-html="renderedContent" style="word-break: auto-phrase;" />
                 </div>
                 <div v-else ref="contentContainer" class="uc-latex-edit" v-html="renderedContent" />
             </div>
@@ -25,7 +25,7 @@
                             <div v-if="previewEmpty" class="text-grey">
                                 <em>Không có nội dung...</em>
                             </div>
-                            <div v-else ref="previewContainer" v-html="previewContent"></div>
+                            <div v-else ref="previewContainer" v-html="previewContent" style="word-break: auto-phrase;"></div>
                         </div>
                     </div>
                 </v-card-text>

@@ -1,7 +1,8 @@
 <template>
-	<v-card variant="outlined">
+	<v-card>
 		<div class="week-calendar">
-			<v-menu v-for="day in weekDays" :key="day.date" location="top" open-on-hover>
+			<v-menu v-for="day in weekDays" :key="day.date" location="top" open-on-hover open-on-click
+				scroll-strategy="close">
 				<template v-slot:activator="{ props }">
 					<div v-bind="props" class="day-cell"
 						:class="{ 'is-today': day.isToday, 'has-tasks': day.taskCount > 0 }">
@@ -26,44 +27,44 @@
 	</v-card>
 </template>
 <script>
-	export default {
-		name: 'uc-week-calendar',
-		props: ['tasks'],
-		computed: {
-			weekDays() {
-				const days = [];
-				const today = new Date();
-				const dayNames = ['CN', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7'];
-	
-				for (let i = 0; i < 7; i++) {
-					const date = new Date();
-					date.setDate(today.getDate() + i);
-					const dateString = date.toISOString().split('T')[0];
-	
-					// DÒNG NÀY ĐÃ ĐƯỢC SỬA
-					const taskOnDay = this.tasks.find(t => t.DueDate.split('T')[0] === dateString);
-	
-					let parsedTasks = [];
-					if (taskOnDay && taskOnDay.TasksJSON) {
-						try {
-							parsedTasks = JSON.parse(taskOnDay.TasksJSON);
-							console.log("Đã parse thành công JSON cho ngày:", dateString, parsedTasks); // Thêm log để xác nhận
-						} catch (e) {
-							console.error(`Lỗi parse JSON cho ngày ${dateString}:`, taskOnDay.TasksJSON, e);
-						}
+export default {
+	name: 'uc-week-calendar',
+	props: ['tasks'],
+	computed: {
+		weekDays() {
+			const days = [];
+			const today = new Date();
+			const dayNames = ['CN', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7'];
+
+			for (let i = 0; i < 7; i++) {
+				const date = new Date();
+				date.setDate(today.getDate() + i);
+				const dateString = date.toISOString().split('T')[0];
+
+				// DÒNG NÀY ĐÃ ĐƯỢC SỬA
+				const taskOnDay = this.tasks.find(t => t.DueDate.split('T')[0] === dateString);
+
+				let parsedTasks = [];
+				if (taskOnDay && taskOnDay.TasksJSON) {
+					try {
+						parsedTasks = JSON.parse(taskOnDay.TasksJSON);
+						console.log("Đã parse thành công JSON cho ngày:", dateString, parsedTasks); // Thêm log để xác nhận
+					} catch (e) {
+						console.error(`Lỗi parse JSON cho ngày ${dateString}:`, taskOnDay.TasksJSON, e);
 					}
-	
-					days.push({
-						date: dateString,
-						name: i === 0 ? 'H.nay' : dayNames[date.getDay()],
-						number: date.getDate(),
-						isToday: i === 0,
-						taskCount: taskOnDay ? taskOnDay.TaskCount : 0,
-						tasks: parsedTasks
-					});
 				}
-				return days;
+
+				days.push({
+					date: dateString,
+					name: i === 0 ? 'H.nay' : dayNames[date.getDay()],
+					number: date.getDate(),
+					isToday: i === 0,
+					taskCount: taskOnDay ? taskOnDay.TaskCount : 0,
+					tasks: parsedTasks
+				});
 			}
+			return days;
 		}
 	}
+}
 </script>

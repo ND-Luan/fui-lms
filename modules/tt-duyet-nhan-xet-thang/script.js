@@ -1,5 +1,20 @@
 function callAPIPushME() {
-    if (vueData.CapID === 2 || vueData.CapID === 3) {
+    if (vueData.CapID === 1) {
+        for (var item of vueData.items) {
+            let plainText = `Nội dung nhận xét học sinh: ${item.HoTen}\n`
+                + `Năm học: ${vueData.NienKhoa}-${vueData.NienKhoa + 1} - Tháng ${vueData.ThangObj.Thang}\n`
+                + `Quý phụ huynh vui lòng xem nhận xét chi tiết tại:  https://lms.lhbs.vn/ph-report?tab=0`
+             ajaxCALL(`student/LMS_SendMessageToME`,
+                 {
+                     HocSinhID: item.HocSinhID,
+                     NoiDung: plainText
+                 },
+                 res => {
+                     Vue.$toast.success(`Đẩy ${item.HocSinhID} - ${item.HoTen} dữ liệu tháng sang ME`, { position: "top" })
+                 })
+        }
+    }
+    else if (vueData.CapID === 2 || vueData.CapID === 3) {
         //.filter(x => x.HocSinhID === 23300048) ==> Cháu a Tâm
         for (var item of vueData.items) {
             const html = item.RenderNhanXet
@@ -11,9 +26,9 @@ function callAPIPushME() {
                 .replace(/<\/p>/gi, '\n')
                 .replace(/<p[^>]*>/gi, ''); // loại bỏ <p> nhưng giữ nội dung
             container.innerHTML = preProcessedHTML;
-            let plainText = `Kết quả học tập của học sinh: ${item.HoTen}\n` +
-                `Năm học: ${vueData.NienKhoa} - ${vueData.NienKhoa + 1}  - Kỳ đánh giá: Tháng ${vueData.ThangObj.Thang} - Học kì 1\n`
-                + `Học tập: \n${item.NoiDungKienThuc_HTML?.trim() || "-"}\nNề nếp: \n${item.NoiDungNangLuc_HTML?.trim() || "-"}\nThông báo: \n${item.NoiDungHoatDongKhac_HTML?.trim() || "-"}`
+            let plainText = `Kết quả học tập của học sinh: ${ item.HoTen }\n` +
+                `Năm học: ${ vueData.NienKhoa } - ${ vueData.NienKhoa + 1 } - Kỳ đánh giá: Tháng ${ vueData.ThangObj.Thang } - Học kì 1\n`
+                + `Học tập: \n${ item.NoiDungKienThuc_HTML?.trim() || "-" } \nNề nếp: \n${ item.NoiDungNangLuc_HTML?.trim() || "-" } \nMong muốn phối hợp: \n${ item.NoiDungHoatDongKhac_HTML?.trim() || "-" } `
                 + `\nXem chi tiết kết quả học tập: https://lms.lhbs.vn/ph-report`
             ajaxCALL(`student/LMS_SendMessageToME`,
                 {
@@ -90,7 +105,6 @@ function renderHeaderTable() {
     ]
     if (!vueData.ThangObj?.Is_HienThiPhuHuynh) {
         const lop = vueData.DSLop.find(x => x.LopID === vueData.LopID)
-        console.log(lop)
         const DSKhoi_CanLoai = [1, 2, 3, 4, 6, 7, 8, 9, 10, 11, 12]
         columns.push({
             "align": "center",
@@ -214,7 +228,7 @@ function renderHeaderTable() {
         //     "value": "NhanXetCuoiNam",
         // })
     }
-    if ((vueData.CapID === 1) && vueData.ThangObj.Is_HienThiPhuHuynh) {
+    if ((vueData.CapID === 1) && vueData.ThangObj?.Is_HienThiPhuHuynh) {
         if (vueData.isLowScreen) {
             columns.push({
                 "key": "Nhanxet",
@@ -576,7 +590,7 @@ function renderHeaderTable() {
             })
         }
     }
-    if ((vueData.CapID == 2 || vueData.CapID === 3) && vueData.ThangObj.Is_HienThiPhuHuynh) {
+    if ((vueData.CapID == 2 || vueData.CapID === 3) && vueData.ThangObj?.Is_HienThiPhuHuynh) {
         columns.push({
             key: "NgayNghi",
             title: "Ngày nghỉ",
@@ -766,7 +780,7 @@ function renderHeaderTable() {
                                 attr: {
                                     class: "text-left"
                                 },
-                                "innerHTML": "Thông báo"
+                                "innerHTML": "Mong muốn phối hợp"
                             },
                             {
                                 "el": "uc-quill-editor",
@@ -871,7 +885,7 @@ async function convertItems() {
         x.RenderNhanXet = (
             (x.NoiDungKienThuc_HTML ? ('<b>Học tập: </b>' + convertNewLineToP(x.NoiDungKienThuc_HTML) + '<br/>') : '<b>Học tập: - </b><br/>')
             + (x.NoiDungNangLuc_HTML ? ('<b>Nền nếp: </b>' + convertNewLineToP(x.NoiDungNangLuc_HTML) + '<br/>') : '<b>Nền nếp: - </b><br/>')
-            + (x.NoiDungHoatDongKhac_HTML ? ('<b>Thông báo: </b>' + convertNewLineToP(x.NoiDungHoatDongKhac_HTML) + '<br/>') : '<b>Thông báo: - </b><br/>'))
+            + (x.NoiDungHoatDongKhac_HTML ? ('<b>Mong muốn phối hợp: </b>' + convertNewLineToP(x.NoiDungHoatDongKhac_HTML) + '<br/>') : '<b>Mong muốn phối hợp: - </b><br/>'))
         return x
     })
     // vueData.DSTongHop_LoaiViPham = vueData.DSTongHop_LoaiViPham?.filter(x => x.SoLuong > 0)

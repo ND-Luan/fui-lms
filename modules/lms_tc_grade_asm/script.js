@@ -16,19 +16,27 @@ function initPage() {
     });
 }
 function saveGradingDraft(payload) {
-    confirm({
-        title: "Xác nhận chấm pháp?",
-        action: () => {
-            ajaxCALL("lms/EL_Teacher_SaveGradeDraft", payload, function (response) {
-                initPage()
-                Vue.$toast.success("Đã lưu nháp kết quả chấm!", { position: "top" });
-                if (response && response.data && response.data[0]) {
-                    vueData.submissionData[1][0] = { ...response.data[0] };
-                    vueData.submissionData = [...vueData.submissionData];
-                }
-            });
+    // confirm({
+    //     title: "Xác nhận chấm pháp?",
+    //     action: () => {
+    //         ajaxCALL("lms/EL_Teacher_SaveGradeDraft", payload, function (response) {
+    //             initPage()
+    //             Vue.$toast.success("Đã lưu nháp kết quả chấm!", { position: "top" });
+    //             if (response && response.data && response.data[0]) {
+    //                 vueData.submissionData[1][0] = { ...response.data[0] };
+    //                 vueData.submissionData = [...vueData.submissionData];
+    //             }
+    //         });
+    //     }
+    // })
+    ajaxCALL("lms/EL_Teacher_SaveGradeDraft", payload, function (response) {
+        initPage()
+        Vue.$toast.success("Đã lưu nháp kết quả chấm!", { position: "top" });
+        if (response && response.data && response.data[0]) {
+            vueData.submissionData[1][0] = { ...response.data[0] };
+            vueData.submissionData = [...vueData.submissionData];
         }
-    })
+    });
 }
 function publishGrades(payload) {
     ajaxCALL("lms/EL_Teacher_PublishGrade", payload, function (response) {

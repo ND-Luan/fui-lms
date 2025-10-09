@@ -8,7 +8,7 @@
         <div v-else>
             <!-- Header & Bộ lọc -->
             <div class="page-header d-flex justify-space-between align-center mb-6">
-            
+
                 <!-- ============================================= -->
                 <!-- == KHỐI BÊN TRÁI: TIÊU ĐỀ                 == -->
                 <!-- ============================================= -->
@@ -23,23 +23,24 @@
                         </div>
                     </div>
                 </div>
-            
+
                 <!-- ============================================= -->
                 <!-- == KHỐI BÊN PHẢI: BỘ LỌC & HÀNH ĐỘNG      == -->
                 <!-- ============================================= -->
                 <div class="header-filters d-flex align-center ga-3">
-                    <v-select label="Lớp" :items="lopList" item-title="TenLop" item-value="LopID" v-model="selectedLopID"
-                        variant="outlined" density="compact" hide-details clearable style="min-width: 200px;" />
+                    <v-select label="Lớp" :items="lopList" item-title="TenLop" item-value="LopID"
+                        v-model="selectedLopID" variant="outlined" density="compact" hide-details clearable
+                        style="min-width: 200px;" />
                     <v-select label="Môn học" :items="monHocList" item-title="MonHocName" item-value="MonHocID"
-                        v-model="selectedMonHocID" variant="outlined" density="compact" hide-details :disabled="!selectedLopID"
-                        clearable style="min-width: 200px;" />
-                    <v-btn color="primary" @click="exportToCSV" prepend-icon="mdi-file-excel-outline"
+                        v-model="selectedMonHocID" variant="outlined" density="compact" hide-details
+                        :disabled="!selectedLopID" clearable style="min-width: 200px;" />
+                    <!-- <v-btn color="primary" @click="exportToCSV" prepend-icon="mdi-file-excel-outline"
                         :disabled="!studentGrades.length || loading" :loading="exporting" variant="flat">
                         Xuất Excel
-                    </v-btn>
+                    </v-btn> -->
                 </div>
             </div>
-            
+
 
             <!-- Bảng điểm ma trận -->
             <v-card class="table-card">
@@ -47,6 +48,7 @@
                     <thead>
                         <tr>
                             <th class="fixed-col student-col">Mã HS</th>
+                            <th class="fixed-col student-col">Số danh bộ</th>
                             <th class="fixed-col student-col">Họ tên</th>
                             <th v-for="header in assignmentHeaders" :key="header.AssignToClassID"
                                 class="assignment-header text-center">
@@ -69,6 +71,7 @@
                         </tr>
                         <tr v-for="student in studentGrades" :key="student.HocSinhID">
                             <td class="fixed-col student-col text-medium-emphasis">{{ student.HocSinhID }}</td>
+                            <td class="fixed-col student-col text-medium-emphasis">{{ student.SoDanhBo }}</td>
                             <td class="fixed-col student-col font-weight-medium">{{ student.HoTen }}</td>
                             <td v-for="header in assignmentHeaders" :key="header.AssignToClassID" class="text-center">
                                 <uc-gradebook-cell :cell-data="student[header.AssignToClassID]"
@@ -80,7 +83,7 @@
                     </tbody>
                     <tfoot>
                         <tr>
-                            <th colspan="2" class="fixed-col">Điểm TB Lớp</th>
+                            <th colspan="3" class="fixed-col">Điểm TB Lớp</th>
                             <th v-for="header in assignmentHeaders" :key="header.AssignToClassID" class="text-center">
                                 {{ getColumnAverage(header.AssignToClassID) }}
                             </th>
@@ -94,7 +97,7 @@
 </template>
 
 <script>
-    export default {
+export default {
     name: 'uc-gradebook',
     props: {
         initialLopId: Number,
@@ -114,9 +117,9 @@
     },
     watch: {
         selectedLopID(newLopID, oldLopID) {
-            
+
             if (newLopID && newLopID !== oldLopID) {
-                this.monHocList = []; 
+                this.monHocList = [];
                 this.selectedMonHocID = null;
                 this.clearData();
                 this.fetchSubjectsByClass(newLopID);
@@ -131,12 +134,12 @@
     methods: {
         async initialize() {
             await this.fetchMyClasses();
-            
+
             if (this.selectedLopID && !this.selectedMonHocID) {
                 await this.fetchSubjectsByClass(this.selectedLopID);
             }
             if (this.selectedLopID && this.selectedMonHocID) {
-                this.selectedLopID = this.lopList.find(x=>x.LopID == this.initialLopId)?.LopID??null;
+                this.selectedLopID = this.lopList.find(x => x.LopID == this.initialLopId)?.LopID ?? null;
                 await this.fetchSubjectsByClass(this.selectedLopID);
                 await this.fetchData();
             }
@@ -146,18 +149,18 @@
             await ajaxCALL("lms/EL_Teacher_GetMyClasses", null, (res) => {
                 this.lopList = res.data || [];
                 if (!this.selectedLopID && this.lopList.length > 0) {
-                    
-                    this.selectedLopID = this.lopList.find(x=>x.LopID == this.initialLopId)?.LopID??this.lopList[0].LopID;
+
+                    this.selectedLopID = this.lopList.find(x => x.LopID == this.initialLopId)?.LopID ?? this.lopList[0].LopID;
                 }
             });
         },
         async fetchSubjectsByClass(lopId) {
             await ajaxCALL("lms/EL_Teacher_GetSubjectsByClass", { LopID: lopId }, (res) => {
                 this.monHocList = res.data || [];
-                
+
                 if (!this.selectedMonHocID && this.monHocList.length > 0) {
-                    
-                    this.selectedMonHocID = this.monHocList.find(x=>x.MonHocID == this.initialMonHocId)?.MonHocID ??this.monHocList[0].MonHocID;
+
+                    this.selectedMonHocID = this.monHocList.find(x => x.MonHocID == this.initialMonHocId)?.MonHocID ?? this.monHocList[0].MonHocID;
 
                 }
             });
@@ -180,7 +183,7 @@
             ajaxCALL("lms/EL_Teacher_UpdateQuickGrade", { SubmissionID: payload.submissionId, NewScore: payload.newScore }, (res) => {
                 if (res.data && res.data[0] && res.data[0].Success) {
                     Toast.success({ text: "Cập nhật điểm thành công." });
-                    this.fetchData(); 
+                    this.fetchData();
                 } else {
                     Toast.error({ text: "Cập nhật điểm thất bại." });
                 }
@@ -198,7 +201,7 @@
                             totalScore += data.score;
                             count++;
                         }
-                    } catch (e) {}
+                    } catch (e) { }
                 }
             });
             return count > 0 ? (totalScore / count).toFixed(2) : '';
@@ -208,7 +211,7 @@
             return stat && stat.AverageScore != null ? stat.AverageScore.toFixed(2) : '';
         },
         exportToCSV() { /* Logic xuất Excel */ },
-        formatDate(iso) { 
+        formatDate(iso) {
             if (!iso) return '';
             return new Date(iso).toLocaleDateString('vi-VN');
         },
@@ -217,6 +220,9 @@
             this.studentGrades = [];
             this.columnStats = [];
         },
+        test() {
+            CALL('CallTest')
+        }
     },
     mounted() {
         this.initialize();
@@ -224,6 +230,4 @@
 }
 </script>
 
-<style scoped>
-   
-</style>
+<style scoped></style>

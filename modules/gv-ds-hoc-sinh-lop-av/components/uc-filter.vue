@@ -12,7 +12,7 @@
 					item-value="KhoiID" :return-object="true" :hide-details="true"></v-select>
 			</v-col>
 			<v-col>
-				<v-select label="Chọn lớp" v-model="vueData.LopItem" :items="vueData.DSLop" :item-title="renderTextLop"
+				<v-select label="Chọn lớp" v-model="vueData.LopItem" :items="vueData.DSLop.filter(item => item.TenLop.includes('AV'))" :item-title="renderTextLop"
 					item-value="LopID" :return-object="true" :hide-details="true"></v-select>
 			</v-col>
 			<v-col>

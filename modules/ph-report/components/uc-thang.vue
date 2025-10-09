@@ -34,25 +34,33 @@
 		},
 		mounted() {
 			if (!vueData.HocSinhSelected) return
+			const IsPassRoleParentString = localStorage.getItem("IsPassRoleParent")
+			const IsPassRoleParent = Boolean(IsPassRoleParentString) ?? false
+			console.log('MOUNTED....', IsPassRoleParent)
+			let url = ''
+			//Nếu từ bên Giáo viên qua
+			if (IsPassRoleParent)
+				url = 'lms/GV_Thang_NhanXetThang_Lop_Get'
+			else
+				url = 'lms/PH_Thang_NhanXetThang_Lop_Get'
 	
-			ajaxCALL('lms/PH_Thang_NhanXetThang_Lop_Get', {
+			console.log('url', url)
+			ajaxCALL(url, {
 				"LopID": vueData.HocSinhSelected.LopID,
-				"HSLopID": vueData.HocSinhSelected.HSLopID
+				"HSLopID": vueData.HocSinhSelected.HSLopID,
+				NienKhoa: vueData.NienKhoa
 			}, res => {
 				vueData.DSHocTapThang = res.data
 			})
 		},
-		computed: {},
 		watch: {
 			'$i18n.locale': function (locale) {
-				console.log(locale,)
 				if (locale === 'en') this.IsLanguage = true;
 				else this.IsLanguage = false;
 			},
 		},
 		methods: {
 			onRedirect(thangObj) {
-				console.log('ee')
 				openWindow({
 					title: "Thông báo tháng",
 					url: `report-ket-qua-hoc-tap-thang-hoc-sinh?id=${vueData.HocSinhSelected.StudentID}&lop_nxtid=${thangObj.Lop_NhanXetThangID}&nienkhoa=${vueData.NienKhoa}`,

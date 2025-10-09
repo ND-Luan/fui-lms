@@ -42,19 +42,20 @@ function convertHocSinhToAPI() {
     vueData.JSON_NhanXetThang = []
     const tableData = vueData.dataSource.map((s) => {
         const hsl = vueData.dataSource_API.find(h => h.HocSinhID == s.HocSinhID)
-        console.log('hsl', hsl);
+        console.log('hsl', hsl, s);
         if (hsl?.CapID === 1) {
+            console.log('s')
             return {
-                HocSinhID: s[0],
-                SoDanhBo: s[1],
-                HoTen: s[2],
-                DiemToan: s[3] || 0,
-                NhanXetToan_HTML: s[4] || null,
-                DiemTiengViet: s[5] || 0,
-                NhanXetTiengViet_HTML: s[6] || null,
-                NhanXetMonHocKhac_HTML: s[7] || null,
-                HoatDongGiaoDucKhac_HTML: s[8] || null,
-                PhamChatNangLuc_HTML: s[9] || null,
+                HocSinhID: s.HocSinhID,
+                SoDanhBo: s.SoDanhBo,
+                HoTen: s.HoTen,
+                DiemToan: s.DiemToan || null,
+                NhanXetToan_HTML: s.NhanXetToan_HTML || null,
+                DiemTiengViet: s.DiemTiengViet || null,
+                NhanXetTiengViet_HTML: s.NhanXetTiengViet_HTML || null,
+                NhanXetMonHocKhac_HTML: s.NhanXetMonHocKhac_HTML || null,
+                HoatDongGiaoDucKhac_HTML: s.HoatDongGiaoDucKhac_HTML || null,
+                PhamChatNangLuc_HTML: s.PhamChatNangLuc_HTML || null,
                 LopID: vueData.LopID,
                 Lop_NhanXetThangID: vueData.Lop_NhanXetThangID,
                 HSLopID: hsl.HSLopID
@@ -70,8 +71,8 @@ function convertHocSinhToAPI() {
                 LopID: vueData.LopID,
                 Lop_NhanXetThangID: vueData.Lop_NhanXetThangID,
                 HSLopID: hsl.HSLopID,
-                DiemToan: 0,
-                DiemTiengViet: 0,
+                DiemToan: s.DiemToan || null,
+                DiemTiengViet: s.DiemTiengViet || null,
             }
         }
     })

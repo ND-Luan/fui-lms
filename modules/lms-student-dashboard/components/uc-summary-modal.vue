@@ -3,7 +3,7 @@
     (CẢI TIẾN) Bất kỳ hành động nào làm thay đổi model-value (như nhấn Esc)
     sẽ đều gọi hàm closeDialog.
   -->
-  <v-dialog :model-value="visible" @update:model-value="closeDialog" persistent width="800">
+  <v-dialog :model-value="visible" @update:model-value="closeDialog" persistent :width="mobile ? '80%' : 800">
     <v-card v-if="loading">
       <v-card-text class="text-center pa-10">
         <v-progress-circular indeterminate size="64" color="primary"></v-progress-circular>
@@ -12,13 +12,14 @@
     </v-card>
 
     <v-card v-else-if="summaryData && summaryData.overview">
-      <v-card-title class="text-h5 font-weight-bold">{{ summaryData.overview.Title }}</v-card-title>
+      <v-card-title class="text-h5 font-weight-bold" style="white-space: wrap;">{{ summaryData.overview.Title
+      }}</v-card-title>
       <v-card-subtitle>Kết quả bài làm</v-card-subtitle>
       <v-divider class="my-2"></v-divider>
-      <v-card-text class="py-4">
+      <v-card-text class="pa-2">
         <p>
           <strong>Điểm tổng:</strong>
-          <span class='text-h6 font-weight-bold text-red-darken-2'>
+          <span class='text-subtitle-1 font-weight-bold text-red-darken-2'>
             {{ summaryData.overview.Score }} / {{ summaryData.overview.MaxScore }}
           </span>
         </p>
@@ -31,14 +32,14 @@
       <v-table density="compact">
         <thead>
           <tr>
-            <th class="text-left" style="width: 60%;">Câu hỏi</th>
-            <th class="text-center">Kết quả</th>
-            <th class="text-center">Điểm</th>
+            <th class="text-left text-caption font-weight-bold" style="width: 60%;">Câu hỏi</th>
+            <th class="text-center text-caption font-weight-bold">Kết quả</th>
+            <th class="text-center text-caption font-weight-bold">Điểm</th>
           </tr>
         </thead>
         <tbody>
-          <tr v-for="item in summaryData.details" :key="item.QuestionID">
-            <td v-html="item.QuestionText"></td>
+          <tr v-for="(item,index) in summaryData.details" :key="item.QuestionID">
+            <td class="text-caption" v-html="'Câu '+(index+1) +': ' +item.QuestionText"></td>
             <td class="text-center">
               <v-icon :color="getStatusInfo(item).color">
                 {{ getStatusInfo(item).icon }}
@@ -49,10 +50,10 @@
         </tbody>
       </v-table>
       <v-divider></v-divider>
-      <v-card-actions class="pa-4 bg-grey-lighten-5">
+      <v-card-actions class="pa-4 bg-grey-lighten-5" style="position: sticky; bottom: 0;">
         <v-spacer></v-spacer>
         <v-btn text="Đóng" @click="closeDialog" color="grey-darken-1"></v-btn>
-        <v-btn text="Xem lại bài làm chi tiết" @click="navigateToDetails" color="primary" variant="flat"></v-btn>
+        <v-btn text="Xem lại bài làm chi tiết" @click="navigateToDetails" color="primary" variant="text"></v-btn>
       </v-card-actions>
     </v-card>
   </v-dialog>
@@ -70,7 +71,17 @@ export default {
     'update:visible',
     'navigate-to-details'
   ],
+  data() {
+    const { mobile } = Vuetify.useDisplay()
+    return {
+      mobile
+    };
+  },
+  mounted(){
+   console.log('this.summaryData.overview', this.summaryData)
+  },
   methods: {
+    
     navigateToDetails() {
       if (this.summaryData && this.summaryData.overview && this.summaryData.overview.AssignToClassID) {
         console.log('this.summaryData.overview', this.summaryData.overview)

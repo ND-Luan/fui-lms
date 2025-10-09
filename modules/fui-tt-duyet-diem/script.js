@@ -1,4 +1,21 @@
 function renderDSKhoi() {
+    const funcRight = vueData.user.FunctionRight
+    let KhoiID_List = []
+    if (funcRight.includes("11")) {
+        KhoiID_List.push(1)
+    }
+    if (funcRight.includes("12")) {
+        KhoiID_List.push(2)
+    }
+    if (funcRight.includes("13")) {
+        KhoiID_List.push(3)
+    }
+    if (funcRight.includes("14")) {
+        KhoiID_List.push(4)
+    }
+    if (funcRight.includes("15")) {
+        KhoiID_List.push(5)
+    }
     const DSKhoi = Array.from({ length: 12 }).map((_, i) => {
         const value = i + 1;
         let CapID;
@@ -15,7 +32,7 @@ function renderDSKhoi() {
             CapID,
         };
     });
-    vueData.DSKhoi = DSKhoi.filter((x) => x.CapID === vueData.CapID);
+    vueData.DSKhoi = DSKhoi.filter((x) => KhoiID_List.includes(x.value));
     return DSKhoi;
 }
 function convertDSHocSinh() {

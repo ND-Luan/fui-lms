@@ -194,7 +194,6 @@ function getTextTinhTrangDiem(TinhTrang) {
 }
 
 function fn_IsDisabledTinhTrangDiem({ TinhTrang, type }) {
-    if (TinhTrang === null) return
     const arrStatusGV = [0, 1, 2, 3, 4]
     const obj = {
         color: getColorTinhTrangDiem(TinhTrang),
@@ -203,6 +202,7 @@ function fn_IsDisabledTinhTrangDiem({ TinhTrang, type }) {
         type: type,
         TinhTrang: TinhTrang
     }
+    if (TinhTrang === null) obj
     if (type === 'GV') {
         if (arrStatusGV.indexOf(TinhTrang) >= 0) {
             if (TinhTrang == 0 || TinhTrang == 1 || TinhTrang == 3) obj.isDisabled = false
@@ -228,8 +228,8 @@ function fn_ProrityTinhTrang(DSHocSinh) {
 }
 
 function IsCheck_NotRoleParent(user) {
-    console.log(user)
     if (user.GroupID === 2) {
+        vueData.v_Set.menu = false
         confirm({
             title: "Bạn không có quyền truy cập",
             action: function () {
@@ -239,6 +239,19 @@ function IsCheck_NotRoleParent(user) {
                 redirect('/ph-report')
             },
         })
+        return
+    } else if (user.GroupID === 3) {
+        vueData.v_Set.menu = false
+        confirm({
+            title: "Bạn không có quyền truy cập",
+            action: function () {
+                redirect('/lms-student-dashboard')
+            },
+            cancel: function () {
+                redirect('/lms-student-dashboard')
+            },
+        })
+        return
     }
 }
 
@@ -616,39 +629,78 @@ function getTitlePageByURL(url) {
     let text = ""
     let parentMenu = $projectData.menuLeft
     for (let i = 0; i < parentMenu.length; i++) {
-        let childMenu = parentMenu[i].submenu
-        let objFindMenu = childMenu.find(item => item.url.includes(url))
-        if (objFindMenu) {
-            text = objFindMenu.name
-            break
+        let childMenu = parentMenu[i]?.submenu
+        if (childMenu?.length > 0) {
+            let objFindMenu = childMenu.find(item => item.url.includes(url))
+            if (objFindMenu) {
+                text = objFindMenu.name
+                break
+            }
         }
+
     }
     return text
 }
 
 function renderUrlYoutube(source) {
-    const urlObj = new URL(source);
+    let urlObj;
+
+    try {
+        urlObj = new URL(source);
+    } catch (e) {
+        // Nếu không phải URL hợp lệ → trả lại nguyên chuỗi
+        return source;
+    }
+
     let videoId = '';
     let startTime = '';
 
-    if (urlObj.hostname === 'youtu.be') {
+    const host = urlObj.hostname.replace(/^www\./, '');
+
+    if (host === 'youtu.be') {
         // Dạng rút gọn
         videoId = urlObj.pathname.slice(1);
         startTime = urlObj.searchParams.get('t');
-    } else if (
-        urlObj.hostname === 'www.youtube.com' ||
-        urlObj.hostname === 'youtube.com'
-    ) {
+    } else if (host === 'youtube.com' || host === 'm.youtube.com') {
         // Dạng đầy đủ
         videoId = urlObj.searchParams.get('v');
         startTime = urlObj.searchParams.get('t') || urlObj.searchParams.get('start');
     } else {
-        throw new Error('URL không phải của YouTube');
+        // Không phải YouTube → trả lại nguyên URL
+        return source;
     }
 
-    // Tạo embed URL
+    if (!videoId) {
+        // Không có videoId → không chuyển đổi
+        return source;
+    }
+
+    // Tạo URL embed
     const embedUrl = `https://www.youtube.com/embed/${videoId}`;
     return startTime
         ? `${embedUrl}?start=${parseInt(startTime, 10)}`
         : embedUrl;
+}
+
+function questionsTypesLabel(type) {
+    const questionsComponents = [
+        //quiz
+        { type: 'QUIZ_SINGLE_CHOICE', label: 'Trắc nghiệm (1 đáp án)', icon: 'mdi-radiobox-marked', kind: "quiz" },
+        { type: 'QUIZ_MULTIPLE_CHOICE', label: 'Trắc nghiệm (Nhiều đáp án)', icon: 'mdi-checkbox-multiple-marked-outline', kind: "quiz" },
+        { type: 'QUIZ_TRUE_FALSE', label: 'Đúng / Sai', icon: 'mdi-check-circle-outline', kind: "quiz" },
+        { type: 'QUIZ_MULTIPLE_TRUE_FALSE', label: 'Nhiều đúng / Sai', icon: 'mdi-check-circle-outline', kind: "quiz" },
+        { type: 'QUIZ_FILL_IN_BLANK', label: 'Điền vào chỗ trống', icon: 'mdi-form-textbox', kind: "quiz" },
+        { type: 'QUIZ_MATCHING', label: 'Ghép nối', icon: 'mdi-merge', kind: "quiz" },
+        //manual
+        { type: 'SHORT_ANSWER', label: 'Trả lời ngắn', icon: 'mdi-text-short', kind: "manual" },
+        { type: 'ESSAY', label: 'Tự luận (Soạn thảo)', icon: 'mdi-text-long', kind: "manual" },
+        { type: 'FILE_UPLOAD', label: 'Nộp File', icon: 'mdi-upload-multiple', kind: "manual" },
+        { type: 'AUDIO_RESPONSE', label: 'Ghi âm trả lời', icon: 'mdi-microphone-plus', kind: "manual" }
+    ]
+    let objTypeFind = _.find(questionsComponents, (item) => item.type === type)
+    if (objTypeFind) {
+        return { label: objTypeFind.label, icon: objTypeFind.icon, kind: objTypeFind.kind, color: objTypeFind.kind === "quiz" ? "blue" : "warning" }
+    } else {
+        return undefined
+    }
 }

@@ -1,23 +1,26 @@
 <template>
 	<div>
 		<!-- (2.1) Hướng dẫn nộp / hướng dẫn thêm nếu có -->
-		<v-alert v-if="guideText" class="mb-3" variant="tonal" type="info" density="comfortable" border="start"
+		<v-alert v-if="guideText" class="mb-2" variant="tonal" type="info" density="comfortable" border="start"
 			border-color="info">
 			<strong>Hướng dẫn:</strong> {{ guideText }}
 		</v-alert>
 
 		<!-- Trắc nghiệm: chỉ hiển thị đáp án trực quan bằng radio, không lặp lại khối “Câu trả lời HS” -->
-		<v-radio-group :model-value="answer" @update:model-value="$emit('answer-change', $event)" :readonly="readonly"
+		<v-radio-group :model-value="answer" @update:model-value="$emit('answer-change', $event)" :readonly="submissionstatus >= 2"
 			hide-details>
-			<v-radio v-for="option in question.config.options" :key="option.id" :value="option.id" class="mb-2">
+			<v-radio v-for="option in question.config.options" :key="option.id" :value="option.id">
 				<template #label>
 					<div class="d-flex align-center justify-space-between w-100">
-						<uc-latex-view :class="getOptionTextClass(option.id)" v-model:content="option.text" />
+						<uc-latex-view :class="getOptionTextClass(option.id)" class="ga-2"
+							v-model:content="option.text" />
 						<div v-if="isGraded || submissionstatus == 4" class="feedback-icon">
 							<v-icon v-if="isSelected(option.id) && isCorrect" color="success">mdi-check</v-icon>
 							<v-icon v-if="isSelected(option.id) && !isCorrect" color="error">mdi-close</v-icon>
-							<v-icon v-if="!isSelected(option.id) && isOptionCorrect(option.id) && !isCorrect"
-								color="success" style="opacity:.7">mdi-check</v-icon>
+							<v-icon v-if="!isSelected(option.id) && isOptionCorrect(option.id)" color="success"
+								style="opacity:.7">mdi-check</v-icon>
+							<v-icon v-if="!isSelected(option.id) && !isOptionCorrect(option.id)" color="error"
+								style="opacity:.7">mdi-close</v-icon>
 						</div>
 					</div>
 				</template>
@@ -25,14 +28,36 @@
 		</v-radio-group>
 
 		<!-- (4) Ý kiến học sinh -->
-		<div class="mt-3">
-			<v-textarea v-if="!isGrade && submissionstatus < 2" :model-value="grading?.comment || ''"
-				@update:model-value="onStudentCommentInput" label="Ý kiến của bạn (tùy chọn)" rows="2" outlined dense
-				hide-details />
-			<div v-else-if="grading?.comment" class="pa-3 rounded bg-grey-lighten-4">
+		<div class="mt-2">
+			<div class="text-end" v-if="!isGrade && submissionstatus < 2 && isShowBtnComment">
+				<v-menu v-model="menu" :close-on-content-click="false" scroll-strategy="close" location="start">
+					<template v-slot:activator="{ props }">
+						<v-btn color="orange-darken-1" v-bind="props" icon="mdi-notebook-edit-outline" size="small"
+							v-tooltip="'Ý kiến của bạn'">
+						</v-btn>
+					</template>
+
+					<v-card :min-width="widthScreen < 650 ? null : 600" class="elevation-0" variant="outlined"
+						color="orange">
+						<v-card-title class="bg-orange-darken-1">Ý kiến của bạn</v-card-title>
+						<v-list>
+							<v-list-item>
+								<v-textarea :model-value="grading?.comment || ''"
+									@update:model-value="onStudentCommentInput" rows="2" dense hide-details
+									variant="outlined" placeholder="Nhập ý kiến của bạn" />
+							</v-list-item>
+						</v-list>
+						<v-card-actions class="border-t py-0">
+							<v-spacer></v-spacer>
+							<v-btn text color="orange-darken-1" @click="menu = false">Đóng</v-btn>
+						</v-card-actions>
+					</v-card>
+				</v-menu>
+			</div>
+			<div v-else-if="grading?.comment" class="pa-2 rounded bg-blue-lighten-1">
 				<b>
-					<v-icon class="mr-1" size="18">mdi-message-text-outline</v-icon> Ý kiến {{ isGrade ? 'học sinh' :
-					'bạn' }}:
+					<v-icon class="mr-1" size="18">mdi-message-text-outline</v-icon>
+					Ý kiến của {{ isGrade ? 'học sinh' : 'bạn' }}:
 				</b>
 				<div class="mt-1">{{ grading.comment }}</div>
 			</div>
@@ -48,19 +73,19 @@
 			</v-chip>
 		</div>
 		<!-- (6) Nhận xét GV -->
-		<v-alert v-if="submissionstatus==4 && !isGrade && grading?.teacherComment" border="start" color="info"
+		<v-alert v-if="submissionstatus == 4 && !isGrade && grading?.teacherComment" border="start" color="info"
 			elevation="2" class="mt-2" icon="mdi-comment-quote-outline">
 			<strong>Nhận xét GV:</strong> {{ grading.teacherComment }}
 		</v-alert>
 
 		<!-- ĐANG CHỜ CHẤM -->
-		<v-alert v-if="!isGrade && submissionstatus >= 2 && submissionstatus !== 4" class="mt-2" variant="tonal"
+		<v-alert v-if="!isGrade && submissionstatus >= 2 && submissionstatus !== 4" class="my-2" variant="tonal"
 			type="warning" density="comfortable">
 			ĐANG CHỜ CHẤM
 		</v-alert>
 
 		<!-- Nhập liệu GV -->
-		<div class="mt-4" v-if="isGrade">
+		<div class="mt-2" v-if="isGrade">
 			<v-textarea :model-value="grading?.teacherComment || ''" @update:model-value="updateTeacherComment"
 				label="Nhận xét của giáo viên (tùy chọn)" rows="2" outlined dense hide-details />
 		</div>
@@ -77,11 +102,17 @@
 			grading: { type: Object, default: null },
 			isGrade: { type: Boolean, default: false },
 			submissionstatus: { type: Number, default: -1 },
+			isShowBtnComment: { type: Boolean, default: true }
 		},
 		emits: ['answer-change', 'grading-change'],
+		data() {
+			return {
+				menu: false, widthScreen: null
+			}
+		},
 		computed: {
 			isGraded() { return this.grading && this.isGrade; },
-			isCorrect() { return this.isGraded ? (this.answer === this.question.config.correctAnswer) : false; },
+			isCorrect() { return (this.isGraded || this.submissionstatus == 4) ? (this.answer === this.question.config.correctAnswer) : false; },
 			guideText() { return this.question?.config?.submissionNote || this.question?.config?.instruction || '' },
 			displayScore() {
 				// Ưu tiên manualScore, rồi autoScore, nếu trống thì mặc định 0
@@ -103,8 +134,13 @@
 				const score = (this.answer === this.question.config.correctAnswer) ? this.question.points : 0
 				this.$emit('grading-change', { ...this.grading, manualScore: score });
 			}
+			this.widthScreen = window.innerWidth
+			window.addEventListener('resize', () => { this.handleResize() })
 		},
 		methods: {
+			handleResize() {
+				this.widthScreen = window.innerWidth;
+			},
 			isSelected(optionId) { return this.answer === optionId },
 			isOptionCorrect(id) { return this.question.config.correctAnswer == id },
 			getOptionTextClass(optionId) {
@@ -112,7 +148,10 @@
 				const sel = this.isSelected(optionId), ok = this.isOptionCorrect(optionId);
 				if (sel) return 'font-weight-bold'; if (ok) return 'font-italic correct-answer-hint'; return 'text-disabled';
 			},
-			onStudentCommentInput(val) { this.$emit('grading-change', { ...this.grading, comment: val }) },
+			onStudentCommentInput(val) {
+				this.grading.comment = val
+				this.$emit('grading-change', { ...this.grading, comment: val })
+			},
 			updateTeacherComment(val) { this.$emit('grading-change', { ...this.grading, teacherComment: val }); }
 		}
 	}

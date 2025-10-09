@@ -130,7 +130,7 @@
     display: flex;
     align-items: center;
     font-weight: 600;
-    font-size: 1.1rem;
+    font-size: 0.9rem;
     padding: 16px 20px;
     border-bottom: 1px solid #f3f4f6;
     background-color: #fafafa;
@@ -144,4 +144,10 @@
 .text-content {
     line-height: 1.7;
     color: #374151;
+}
+
+.chip-style{
+        white-space: normal;
+    height: fit-content !important;
+    padding: 4px 12px !important;
 }

@@ -33,10 +33,11 @@
 					<div v-if="element.ElementType === 'TEXT'">
 						<label class="text-subtitle-2 mb-2 d-block">Soạn thảo văn bản</label>
 						<uc-latex-edit :content="element.ElementData.content"
-							@update:content="updateElementData({ content: $event })" />
+							@update:content="updateElementData({ content: $event })"
+							:style="{'word-break': 'auto-phrase'}" />
 					</div>
 					<div v-else-if="element.ElementType === 'IMAGE'">
-						<v-btn @click="$refs.inputImage.click()" text="Tải ảnh" />
+						<v-btn @click="$refs.inputImage.click()" text="Tải ảnh" color="primary" variant="elevated" />
 						<input ref="inputImage" type="file" @change="(e) => handleChangeFile(e, element.ElementType)"
 							style="display: none" />
 						<div class="d-flex ga-2">
@@ -61,16 +62,24 @@
 						</div>
 					</div>
 					<div v-else-if="element.ElementType === 'YOUTUBE'">
-						<v-btn @click="$refs.inputYoutube.click()" text="Tải video" />
+						<div class="d-flex ga-2">
+							<v-text-field v-model="element.ElementData.source"
+								placeholder="Dán link video hoặc youtube..." />
+							<v-btn @click="$refs.inputYoutube.click()" text="Tải video" color="primary"
+								variant="elevated" />
+						</div>
+						<p class="text-caption">
+							*Lưu ý: Tải Video phải dưới 15p và tên file không được vượt quá 100 kí tự
+						</p>
 						<input ref="inputYoutube" type="file" @change="(e) => handleChangeFile(e, element.ElementType)"
 							style="display: none" />
-						<iframe width="560" height="315" :src="element.ElementData.source.replace('watch?v=', 'embed/')"
+						<iframe width="560" height="315" :src="renderUrlYoutube(element.ElementData.source)"
 							title="YouTube video player" frameborder="0"
 							allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
 							allowfullscreen></iframe>
 					</div>
 					<div v-else-if="element.ElementType === 'FILE'">
-						<v-btn @click="$refs.inputFile.click()" text="Tải file" />
+						<v-btn @click="$refs.inputFile.click()" text="Tải file" color="primary" variant="elevated" />
 						<input ref="inputFile" type="file" @change="(e) => handleChangeFile(e, element.ElementType)"
 							style="display: none" />
 						<div class="d-flex ga-2">
@@ -87,6 +96,7 @@
 					</div>
 					<div v-else-if="element.ElementType === 'HTML'">
 						<v-textarea v-model="element.ElementData.source" placeholder="Nhập/Dán HTML ..." />
+						<!-- <f-editor v-model="element.ElementData.source" /> -->
 					</div>
 					<!-- QUIZ -->
 					<div v-else-if="element.ElementType.includes('QUIZ')">
@@ -294,6 +304,20 @@
 					playListCurrent = response[0] //khi insert xong API trả về ID mới
 				}
 	
+				function getCleanTitle(filename) {
+					if (typeof filename !== 'string') return '';
+					// Danh sách phần mở rộng cần loại bỏ
+					const extensions = ['mp4', 'mov', 'avi', 'mkv'];
+					// Biểu thức regex để tìm và loại bỏ đuôi file nếu nó ở cuối chuỗi
+					const regex = new RegExp(`\\.(${extensions.join('|')})$`, 'i');
+					// Bỏ phần mở rộng nếu có
+					const nameWithoutExtension = filename.replace(regex, '');
+					// Cắt khoảng trắng đầu/cuối
+					const cleanTitle = nameWithoutExtension.trim();
+					// Giới hạn 100 ký tự theo quy định của YouTube
+					return cleanTitle.length > 100 ? cleanTitle.slice(0, 100) : cleanTitle;
+				}
+	
 				const url =
 					'https://www.googleapis.com/upload/youtube/v3/videos?uploadType=resumable&part=snippet,status,contentDetails';
 	
@@ -302,7 +326,7 @@
 				const xUploadContentType = file.type; // hoặc 'video/mp4'
 				const body = {
 					snippet: {
-						title: file.name,
+						title: getCleanTitle(file.name),
 						description: '',
 						tags: [],
 						categoryId: '27'
@@ -388,6 +412,14 @@
 					const data = await res.json();
 					const status = data.items?.[0]?.processingDetails?.processingStatus;
 					console.log('🔄 Trạng thái xử lý:', status);
+	
+					// 👉 Nếu không có status
+					if (!status) {
+						Vue.$toast.error('⚠️ Video có thể quá dài (chỉ upload < 15 phút)', { position: 'top' })
+						throw new Error('⚠️ Video có thể quá dài (chỉ upload < 15 phút)');
+						return true // thoát khỏi vòng lặp
+					}
+	
 					if (status === 'succeeded') {
 						return true; // Đã xử lý xong 
 					} if (status === 'failed' || status === 'rejected') {
@@ -551,6 +583,7 @@
 				updatedElement.ElementData = { ...updatedElement.ElementData, ...newData };
 				this.$emit('update:element', { index: this.index, element: updatedElement });
 			},
+			renderUrlYoutube
 		}
 	}
 </script>

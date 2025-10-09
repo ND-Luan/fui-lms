@@ -20,7 +20,12 @@
 		data() {
 			return {
 				contentElements: [
-					{ type: 'TEXT', label: 'Đoạn văn bản', icon: 'mdi-format-text', defaultData: { content: '<p>Nội dung văn bản mới...</p>' } },
+					{
+						type: 'TEXT', label: 'Đoạn văn bản', icon: 'mdi-format-text', defaultData: {
+							title: "Tiêu đề đoạn văn bản",
+							content: '<p>Nội dung văn bản mới...</p>'
+						}
+					},
 					{
 						type: 'IMAGE', label: 'Hình ảnh', icon: 'mdi-image-outline',
 						defaultData: {
@@ -31,7 +36,7 @@
 					{
 						type: 'YOUTUBE', label: 'Video (YouTube)', icon: 'mdi-youtube',
 						defaultData: {
-							title: "Tiêu đề yotube",
+							title: "Tiêu đề youtube",
 							source: ''
 						}
 					},
@@ -50,7 +55,7 @@
 						}
 					},
 					{
-						type: 'HTML', label: 'HTML', icon: 'language-html5', color: 'orange-darken-2',
+						type: 'HTML', label: 'HTML', icon: 'mdi-language-html5', color: 'orange-darken-2',
 						defaultData: {
 							title: "Tiêu đề HTML",
 							source: ''

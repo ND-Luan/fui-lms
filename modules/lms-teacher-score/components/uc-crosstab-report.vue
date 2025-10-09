@@ -35,12 +35,13 @@
 			</div>
 
 			<!-- Bảng Crosstab -->
-			<v-card class="table-card" class="pa-2">
-				<v-table fixed-header height="75vh" density="compact">
+			<v-card class="table-card pa-2" >
+				<v-table fixed-header height="80vh" density="compact">
 					<thead>
 						<tr>
 							<th class="fixed-col student-id-col">Mã HS</th>
 							<th class="fixed-col student-name-col">Học sinh</th>
+								<th class="fixed-col student-name-col">Số danh bộ</th>
 							<th v-for="(header, index) in questionHeaders" :key="header.QuestionID_InJSON"
 								class="text-center question-col">
 								<v-tooltip location="top">
@@ -63,6 +64,10 @@
 							<td class="fixed-col student-name-col font-weight-medium student-name-link"
 								@click="viewStudentSubmission(student)">
 								{{ student.HoTen }}
+							</td>
+							<td class="fixed-col font-weight-medium "
+								>
+								{{ student.SoDanhBo }}
 							</td>
 							<td v-for="header in questionHeaders" :key="header.QuestionID_InJSON" class="text-center">
 								<uc-cell-display :cell-data="student[header.QuestionID_InJSON]" />

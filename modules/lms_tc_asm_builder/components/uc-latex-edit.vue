@@ -1,14 +1,15 @@
 <template>
 	<v-dialog max-width="900">
 		<template v-slot:activator="{ props: activatorProps }">
-			<div v-bind="activatorProps" style="width: 200px">
+			<div v-bind="activatorProps" style="width: 100%">
 				<div v-if="isEditable">
-					<div v-if="isEmpty" class="cursor-pointer empty-content">
+					<div v-if="isEmpty" class="cursor-pointer empty-content text-caption">
 						Bấm <v-icon color="success" size="small">mdi-pencil</v-icon> để soạn
 					</div>
-					<div v-else ref="contentContainer" class="cursor-pointer uc-latex-edit" v-html="renderedContent" />
+					<uc-latex-view v-else ref="contentContainer" class="cursor-pointer uc-latex-edit"
+						:content="renderedContent" />
 				</div>
-				<div v-else ref="contentContainer" class="uc-latex-edit" v-html="renderedContent" />
+				<uc-latex-view v-else ref="contentContainer" class="uc-latex-edit" :content="renderedContent" />
 			</div>
 		</template>
 
@@ -16,8 +17,7 @@
 			<v-card title="Chỉnh sửa nội dung">
 				<v-card-text>
 					<f-editor v-model="contentEditor" :imageapi="vueData.v_Set.apiImageAdapter" variant="outlined"
-						rows="6" auto-grow label="Nội dung (hỗ trợ HTML và LaTeX)"
-						@update:modelValue="val => console.log('upd', val)" @input="v => console.log('v', v)" />
+						rows="6" auto-grow label="Nội dung (hỗ trợ HTML và LaTeX)" />
 					<!-- Preview -->
 					<div class="preview-section mt-4">
 						<label class="text-subtitle-2 mb-2">Xem trước:</label>
@@ -25,7 +25,7 @@
 							<div v-if="previewEmpty" class="text-grey">
 								<em>Không có nội dung...</em>
 							</div>
-							<div v-else ref="previewContainer" v-html="previewContent"></div>
+							<uc-latex-view v-else ref="previewContainer" :content="previewContent" />
 						</div>
 					</div>
 				</v-card-text>
@@ -81,75 +81,28 @@
 				this.renderPreview(newContent)
 			}
 		},
-		mounted() {
-			this.loadMathJax()
+		mounted() {		
+			this.renderContent(this.content)
 		},
 		methods: {
-			loadMathJax() {
-				if (!window.MathJax) {
-	
-					const script = document.createElement('script')
-					script.src = 'https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.min.js'
-					script.onload = () => {
-						this.configureMathJax()
-						this.renderContent(this.content)
-					}
-					document.head.appendChild(script)
-				} else {
-					console.log("đã loà MathJAX");
-					this.renderContent(this.content)
-				}
-			},
-	
-			configureMathJax() {
-				window.MathJax = {
-					tex: {
-						inlineMath: [['$', '$'], ['\\(', '\\)']],
-						displayMath: [['$$', '$$'], ['\\[', '\\]']]
-					},
-					svg: {
-						fontCache: 'global'
-					}
-				}
-			},
-	
 			renderContent(content) {
 				if (!content) {
 					this.renderedContent = ''
 					return
 				}
-	
 				this.renderedContent = content
-	
-				this.$nextTick(() => {
-					if (window.MathJax && window.MathJax.typesetPromise) {
-						window.MathJax.typesetPromise([this.$refs.contentContainer])
-							.catch(err => console.error('MathJax render error:', err))
-					}
-				})
 			},
-	
 			renderPreview(content) {
 				if (!content) {
 					this.previewContent = ''
 					return
 				}
-	
 				this.previewContent = content
-	
-				this.$nextTick(() => {
-					if (window.MathJax && window.MathJax.typesetPromise && this.$refs.previewContainer) {
-						window.MathJax.typesetPromise([this.$refs.previewContainer])
-							.catch(err => console.error('MathJax preview error:', err))
-					}
-				})
 			},
-	
 			saveContent(isActive) {
 				this.$emit('update:content', this.contentEditor)
 				isActive.value = false
 			},
-	
 			cancelEdit(isActive) {
 				this.contentEditor = this.content
 				isActive.value = false

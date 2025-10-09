@@ -1,42 +1,69 @@
 <template>
 	<div>
 		<!-- (2.1) Hướng dẫn -->
-		<v-alert v-if="guideText" class="mb-3" variant="tonal" type="info" density="comfortable" border="start"
+		<v-alert v-if="guideText" class="mb-2" variant="tonal" type="info" density="comfortable" border="start"
 			border-color="info">
 			<strong>Hướng dẫn:</strong> {{ guideText }}
 		</v-alert>
 
-		<div class="qMatching-container flex-column">
-			<div class="qMatching-title-row">
+		<div class="qMatching-container d-flex">
+			<!-- Cột A -->
+			<div class="qMatching-column qMatching-column-a">
 				<div class="qMatching-title">Cột A</div>
-				<div class="qMatching-title">Cột B</div>
-			</div>
-
-			<!-- Duyệt từng hàng -->
-			<div v-for="(itemA, idx) in question.config.columnA" :key="itemA.id" class="qMatching-row">
-				<div class="qMatching-item-a">
+				<div v-for="itemA in question.config.columnA" :key="itemA.id" class="qMatching-item-a">
 					<uc-latex-view v-model:content="itemA.text" />
 				</div>
-				<div class="qMatching-item-b d-flex align-center">
-					<span class="qMatching-drag-icon mr-2">⋮⋮</span>
-					<uc-latex-view class="qMatching-text" v-model:content="userAnswers[idx].text" />
-					<div v-if="isGraded || submissionstatus == 4" class="qMatching-feedback ml-auto">
-						<v-icon v-if="isCorrectPair(itemA.id, userAnswers[idx].id)" color="success">mdi-check</v-icon>
-						<v-icon v-else color="error">mdi-close</v-icon>
+			</div>
+
+			<!-- Cột B -->
+			<div class="qMatching-column qMatching-column-b">
+				<div class="qMatching-title">Cột B</div>
+				<div ref="sortableB" class="qMatching-list">
+					<div v-for="(itemB, idx) in userAnswers" :key="itemB.id"
+						class="qMatching-item-b d-flex align-center" :data-id="itemB.id">
+						<span class="qMatching-drag-icon mr-2">⋮⋮</span>
+						<uc-latex-view class="qMatching-text" v-model:content="itemB.text" />
+						<div v-if="isGraded || submissionstatus == 4" class="qMatching-feedback ml-auto">
+							<v-icon v-if="isCorrectPair(question.config.columnA[idx].id, itemB.id)" color="success">
+								mdi-check</v-icon>
+							<v-icon v-else color="error">mdi-close</v-icon>
+						</div>
 					</div>
 				</div>
 			</div>
 		</div>
 
 		<!-- (4) Ý kiến học sinh -->
-		<div class="mt-3">
-			<v-textarea v-if="!isGrade && submissionstatus < 2" :model-value="grading?.comment || ''"
-				@update:model-value="onStudentCommentInput" label="Ý kiến của bạn (tùy chọn)" rows="2" outlined dense
-				hide-details />
-			<div v-else-if="grading?.comment" class="pa-3 rounded bg-grey-lighten-4">
+		<div class="mt-2">
+			<div class="text-end" v-if="!isGrade && submissionstatus < 2 && isShowBtnComment">
+				<v-menu v-model="menu" :close-on-content-click="false" scroll-strategy="close" location="start">
+					<template v-slot:activator="{ props }">
+						<v-btn color="orange-darken-1" v-bind="props" icon="mdi-notebook-edit-outline" size="small"
+							v-tooltip="'Ý kiến của bạn'">
+						</v-btn>
+					</template>
+
+					<v-card :min-width="widthScreen < 650 ? null : 600" class="elevation-0" variant="outlined"
+						color="orange">
+						<v-card-title class="bg-orange-darken-1">Ý kiến của bạn</v-card-title>
+						<v-list>
+							<v-list-item>
+								<v-textarea :model-value="grading?.comment || ''"
+									@update:model-value="onStudentCommentInput" rows="2" dense hide-details
+									variant="outlined" placeholder="Nhập ý kiến của bạn" />
+							</v-list-item>
+						</v-list>
+						<v-card-actions class="border-t py-0">
+							<v-spacer></v-spacer>
+							<v-btn text color="orange-darken-1" @click="menu = false">Đóng</v-btn>
+						</v-card-actions>
+					</v-card>
+				</v-menu>
+			</div>
+			<div v-else-if="grading?.comment" class="pa-2 rounded bg-blue-lighten-1">
 				<b>
-					<v-icon class="mr-1" size="18">mdi-message-text-outline</v-icon> Ý kiến {{ isGrade ? 'học sinh' :
-					'bạn' }}:
+					<v-icon class="mr-1" size="18">mdi-message-text-outline</v-icon>
+					Ý kiến {{ isGrade ? 'học sinh' : 'bạn' }}:
 				</b>
 				<div class="mt-1">{{ grading.comment }}</div>
 			</div>
@@ -54,18 +81,18 @@
 
 		<!-- (6) Nhận xét GV -->
 		<v-alert v-if="submissionstatus == 4 && !isGrade && grading?.teacherComment?.length > 0" border="start"
-			color="info" elevation="2" class="mt-4" icon="mdi-comment-quote-outline">
+			color="info" elevation="2" class="mt-2" icon="mdi-comment-quote-outline">
 			<strong>Nhận xét GV:</strong> {{ grading?.teacherComment ?? '-' }}
 		</v-alert>
 
 		<!-- ĐANG CHỜ CHẤM -->
-		<v-alert v-if="!isGrade && submissionstatus >= 2 && submissionstatus !== 4" class="mt-2" variant="tonal"
+		<v-alert v-if="!isGrade && submissionstatus >= 2 && submissionstatus !== 4" class="my-2" variant="tonal"
 			type="warning" density="comfortable">
 			ĐANG CHỜ CHẤM
 		</v-alert>
 
 		<!-- GV -->
-		<div class="mt-4 qMatching-grading" v-if="isGrade">
+		<div class="mt-2 qMatching-grading" v-if="isGrade">
 			<v-textarea :model-value="grading?.teacherComment || ''" @update:model-value="updateTeacherComment"
 				label="Nhận xét của giáo viên (tùy chọn)" rows="2" outlined dense hide-details />
 		</div>
@@ -82,13 +109,18 @@
 			grading: { type: Object, default: null },
 			isGrade: { type: Boolean, default: false },
 			submissionstatus: { type: Number, default: -1 },
+			isShowBtnComment: { type: Boolean, default: true }
 		},
 		emits: ["answer-change", "grading-change"],
 		data() {
 			return {
+				menu: false,
+				widthScreen: null,
 				userAnswers: this.answer?.length
 					? this.answer.map(p => this.question.config.columnB.find(b => b.id === p.to))
-					: [...this.question.config.columnB]
+					: //this.shuffleArray([...
+					this.question.config.columnB
+				//])
 			};
 		},
 		computed: {
@@ -110,10 +142,11 @@
 			}
 		},
 		mounted() {
+			this.widthScreen = window.innerWidth
 			if (typeof Sortable !== "undefined") {
 				Sortable.create(this.$refs.sortableB, {
-					animation: 200, ghostClass: "qMatching-ghost", disabled: this.readonly || this.isGrade, onEnd: this.onDragEnd
-				})
+					animation: 200, ghostClass: "qMatching-ghost", disabled: this.readonly || this.isGrade || this.submissionstatus >= 2, onEnd: this.onDragEnd
+				});
 			}
 			if (this.isGrade) {
 				let isCorrect = true
@@ -122,6 +155,7 @@
 				})
 				this.$emit('grading-change', { ...this.grading, manualScore: isCorrect ? this.question.points : 0 });
 			}
+			window.addEventListener('resize', () => { this.handleResize() })
 		},
 		watch: {
 			answer(answer) {
@@ -131,6 +165,16 @@
 			}
 		},
 		methods: {
+			handleResize() {
+				this.widthScreen = window.innerWidth;
+			},
+			shuffleArray(array) {
+				for (let i = array.length - 1; i > 0; i--) {
+					const j = Math.floor(Math.random() * (i + 1));
+					[array[i], array[j]] = [array[j], array[i]];
+				}
+				return array;
+			},
 			onDragEnd() {
 				const newOrder = Array.from(this.$refs.sortableB.children).map(el => {
 					const id = el.getAttribute("data-id");
@@ -141,7 +185,10 @@
 				this.$emit("answer-change", newAnswer);
 			},
 			isCorrectPair(aId, bId) { return this.question.config.correctPairs.some(p => p.from === aId && p.to === bId); },
-			onStudentCommentInput(val) { this.$emit('grading-change', { ...this.grading, comment: val }) },
+			onStudentCommentInput(val) {
+				this.grading.comment = val
+				this.$emit('grading-change', { ...this.grading, comment: val })
+			},
 			updateTeacherComment(val) { this.$emit("grading-change", { ...this.grading, teacherComment: val }); }
 		}
 	}

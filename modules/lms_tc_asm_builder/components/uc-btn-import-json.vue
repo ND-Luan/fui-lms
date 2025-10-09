@@ -16,7 +16,7 @@
 
 				<v-card-text>
 					<!-- Step 1: Chọn target cho import -->
-					<v-card variant="outlined" class="mb-4" v-if="hasGroups">
+					<!-- <v-card variant="outlined" class="mb-4" v-if="hasGroups">
 						<v-card-title class="text-h6">
 							🎯 Bước 1: Chọn vị trí import
 						</v-card-title>
@@ -35,12 +35,12 @@
 								</v-col>
 							</v-row>
 						</v-card-text>
-					</v-card>
+					</v-card> -->
 
 					<!-- Step 2: JSON Input -->
 					<v-card variant="outlined" class="mb-4">
 						<v-card-title class="text-h6">
-							📝 Bước 2: Dán JSON câu hỏi
+							📝 Bước 1: Dán JSON câu hỏi
 						</v-card-title>
 						<v-card-text>
 							<v-textarea v-model="jsonInput" label="JSON Data" variant="outlined" :rows="12"
@@ -77,7 +77,7 @@
 					<!-- Step 3: Preview -->
 					<v-card v-if="parsedQuestions.length > 0" variant="outlined">
 						<v-card-title class="text-h6 d-flex justify-space-between">
-							<span>👀 Bước 3: Xem trước kết quả</span>
+							<span>👀 Bước 2: Xem trước kết quả</span>
 							<div class="d-flex align-center gap-2">
 								<v-chip :color="validQuestions.length > 0 ? 'success' : 'grey'" size="small">
 									✅ {{ validQuestions.length }} hợp lệ
@@ -112,7 +112,8 @@
 											<div class="mt-1 text-caption">{{ question.errorDetail }}</div>
 										</div>
 										<div v-else class="question-preview">
-											<div class="prompt-preview mb-3" v-html="question.config.questionText" />
+											<uc-latex-view class="prompt-preview mb-3"
+												:content="question.config.questionText" />
 
 											<!-- Single Choice -->
 											<div v-if="question.type === 'QUIZ_SINGLE_CHOICE'" class="options-preview">
@@ -216,10 +217,6 @@
 <script>
 	export default {
 		props: {
-			// text: {
-			// 	type: Array,
-			// 	default: () => []
-			// },
 			hasGroups: {
 				type: Boolean,
 				default: false
@@ -227,6 +224,9 @@
 			questions: {
 				type: Array,
 				default: () => []
+			},
+			groups: {
+				type: Array
 			},
 			targetGroupIndex: {
 				type: Number,
@@ -243,58 +243,70 @@
 				validationError: '',
 				parseSuccess: false,
 				processing: false,
-	
+				vueData,
 				// Supported question types
 				supportedQuestionTypes: [
 					{ value: 'QUIZ_SINGLE_CHOICE', title: 'Trắc nghiệm (1 đáp án)', icon: 'mdi-radiobox-marked' },
 					{ value: 'QUIZ_MULTIPLE_CHOICE', title: 'Trắc nghiệm (Nhiều đáp án)', icon: 'mdi-checkbox-multiple-marked-outline' },
 					{ value: 'QUIZ_MULTIPLE_TRUE_FALSE', title: 'Trắc nghiệm (Nhiều Đúng sai)', icon: 'mdi-checkbox-multiple-marked-outline' },
-					// { value: 'QUIZ_TRUE_FALSE', title: 'Đúng / Sai', icon: 'mdi-check-circle-outline' },
-					// { value: 'QUIZ_FILL_IN_BLANK', title: 'Điền vào chỗ trống', icon: 'mdi-form-textbox' },
+					{ value: 'QUIZ_TRUE_FALSE', title: 'Đúng / Sai', icon: 'mdi-check-circle-outline' },
+					{ value: 'QUIZ_FILL_IN_BLANK', title: 'Điền vào chỗ trống', icon: 'mdi-form-textbox' },
 					{ value: 'SHORT_ANSWER', title: 'Trả lời ngắn', icon: 'mdi-text-short' },
-					// { value: 'ESSAY', title: 'Tự luận (Soạn thảo)', icon: 'mdi-text-long' },
+					{ value: 'ESSAY', title: 'Tự luận (Soạn thảo)', icon: 'mdi-text-long' },
 					// { value: 'FILE_UPLOAD', title: 'Nộp File', icon: 'mdi-upload-multiple' },
 					// { value: 'AUDIO_RESPONSE', title: 'Ghi âm trả lời', icon: 'mdi-microphone-plus' },
 				],
-	
 				// Example JSON format
-				exampleJson: ` [
-													{
-														"id": "group_1755488160900",
-														"title": "Phần 1 - Câu hỏi tương tác",
-														"description": "Hướng dẫn câu hỏi tương tác",
-														"questions": [
-														{
-															"id": "q_1755750533345",
-															"type": "QUIZ_SINGLE_CHOICE",
-															"points": 1,
-															"gradingType": "auto",
-															"config": {
-															"media": {
-																"type": "YOUTUBE",
-																"nameFile": "1406-147169807.mp4",
-																"sourceYT": "https://www.youtube.com/watch?v=pwc0Z79jXx0",
-																"sourceIMGs": [],
-																"sourceRecord": "",
-																"sourceFiles": []
-															},
-															"isAdvanced": false,
-															"questionText": "<p>Nội dung câu hỏi mới...</p>",
-															"options": [
-																{
-																"id": "opt_1",
-																"text": "Lựa chọn A"
-																},
-																{
-																"id": "opt_2",
-																"text": "Lựa chọn B"
-																}
-															],
-															"correctAnswer": "opt_1"
-															}
-														} 
-												] 
-																										`
+				exampleJson: `
+																															[
+																															{
+																																"id": "q_1757832127437",
+																																"type": "QUIZ_SINGLE_CHOICE",
+																																"points": 1,
+																																"gradingType": "auto",
+																																"config": {
+																																"media": {
+																																	"type": "YOUTUBE",
+																																	"sourceYT": {
+																																	"id": "",
+																																	"name": "",
+																																	"source": ""
+																																	},
+																																	"sourceRecord": {
+																																	"id": "",
+																																	"name": "",
+																																	"source": ""
+																																	},
+																																	"sourceFiles": {
+																																	"file": [],
+																																	"image": []
+																																	}
+																																},
+																																"isAdvanced": false,
+																																"questionText": "<p>Peter enjoys mountain biking because</p>",
+																																"options": [
+																																	{
+																																	"id": "opt_1",
+																																	"text": "it gives him the opportunity to enjoy the views."
+																																	},
+																																	{
+																																	"id": "opt_2",
+																																	"text": "he can use the time to plan his work."
+																																	},
+																																	{
+																																	"id": "opt_1757832145173",
+																																	"text": "he is able to stop thinking about his problems."
+																																	},
+																																	{
+																																	"id": "opt_1757832145897",
+																																	"text": "it helps him to concentrate better."
+																																	}
+																																],
+																																"correctAnswer": "opt_2"
+																																}
+																															}
+																														]
+																													`
 			}
 		},
 		computed: {
@@ -325,11 +337,12 @@
 				this.selectedGroupIndex = newIndex;
 			},
 	
-			jsonInput() {
+			jsonInput(val) {
 				// Reset validation when input changes
 				this.validationError = '';
 				this.parseSuccess = false;
 				this.parsedQuestions = [];
+				vueData.JSONINPUT = val
 			}
 		},
 	
@@ -353,10 +366,13 @@
 						data = [data];
 					}
 	
-					// Step 3: Validate and transform each question
-					const questions = data.map((item, index) => {
+					const questions = data.map(item => { return [...item.questions] }).flat().map((item, index) => {
 						return this.validateAndTransformQuestion(item, index);
 					});
+					// Step 3: Validate and transform each question
+					// const questions = data.map((item, index) => {
+					// 	return this.validateAndTransformQuestion(item, index);
+					// });
 	
 					this.parsedQuestions = questions;
 					this.parseSuccess = true;
@@ -442,18 +458,18 @@
 			},
 	
 			validateQuestionContent(type, config) {
-				console.log(type, config)
+				// console.log(type, config)
 				if (!config.questionText) throw new Error('Thiếu "questionText" (câu hỏi)');
 	
 				switch (type) {
 					case 'QUIZ_SINGLE_CHOICE':
-						console.log('config', config)
 						if (!config.options || !Array.isArray(config.options) || config.options.length < 2) {
 							throw new Error('Cần ít nhất 2 options');
 						}
-						if (!config.correctAnswer) {
-							throw new Error('Thiếu correctAnswer');
-						}
+	
+						if (!config.hasOwnProperty('correctAnswer')
+							|| config?.correctAnswer === undefined
+						) throw new Error('Thiếu correctAnswer');
 						break;
 					case 'QUIZ_MULTIPLE_CHOICE':
 						if (!config.options || !Array.isArray(config.options) || config.options.length < 2) {
@@ -464,7 +480,6 @@
 						}
 						break;
 					// case 'QUIZ_TRUE_FALSE':
-					// 	console.log('config', config)
 					// 	if (!config.correctAnswer) {
 					// 		throw new Error('Thiếu correctAnswer flags');
 					// 	}
@@ -541,7 +556,31 @@
 					questionType: 'JSON_IMPORT'
 				};
 	
-				const _questions = [...this.questions, ...this.validQuestions]
+	
+				let _questions = [...this.questions, ...this.validQuestions]
+					.map(x => {
+						//Xử lý clear lại media khi import json
+						x.config.media = {
+							type: "YOUTUBE",
+							sourceYT: {
+								id: "",
+								source: "",
+								name: ""
+							},
+							sourceRecord: {
+								id: "",
+								source: "",
+								name: ""
+							},
+							sourceFiles: {
+								file: [],
+								image: []
+							}
+						}
+						return x
+					})
+					.map((x, idx) => ({ ...x, ordinalNumber: idx + 1 }))
+	
 				this.$emit('update:questions', _questions);
 	
 				// Show success message
@@ -558,7 +597,6 @@
 		mounted() {
 			// Set default group index
 			if (this.hasGroups && this.targetGroupIndex !== undefined) {
-				console.log(1)
 				this.selectedGroupIndex = this.targetGroupIndex;
 			}
 		}

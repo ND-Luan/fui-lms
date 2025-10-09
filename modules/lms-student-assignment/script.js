@@ -14,7 +14,11 @@ function initPage() {
             vueData.assignmentData = response.data;
             vueData.monHocName = response.data[0]?.[0]?.MonHocName || '';
             vueData.assignmentInfo = response.data[0] ?? {}
-            vueData.dataReady = true;
+            vueData.submitionInfo = response.data[1][0] ?? {}
+            // vueData.dataReady = true;
+            if (response.data[1][0]?.SubmissionStatus == 4) {
+                vueData.userAnswersSubmitted = JSON.parse(response.data[1][0]?.SubmissionContent || '{}')?.answers || {}
+            }
         } else {
             console.error("API getAssignmentDetail không trả về dữ liệu hợp lệ.");
             Vue.$toast.error("Không thể tải được dữ liệu bài tập.", { position: "top" });
@@ -24,9 +28,12 @@ function initPage() {
 async function saveDraft(payload) {
     return new Promise(resolve => {
         ajaxCALL("lms/EL_Student_SaveSubmission", payload, function (response) {
+            vueData.assignmentData = response.data;
+            if (response.data[1][0]?.SubmissionStatus == 4) {
+                vueData.userAnswersSubmitted = JSON.parse(response.data[1][0]?.SubmissionContent || '{}')?.answers || {}
+            }
             // vueData.assignmentData[0] = response.data[0];
             // vueData.assignmentData[1] = response.data[1]
-            console.log('save ')
             resolve(response.data)
         });
     })
@@ -34,6 +41,7 @@ async function saveDraft(payload) {
 function submitAssignment(payload) {
     ajaxCALL("lms/EL_Student_SaveSubmission", payload, function (response) {
         Vue.$toast.success("Nộp bài thành công!", { position: "top" });
+        initPage()
     }, function (error) {
         Vue.$toast.error("Có lỗi xảy ra khi nộp bài. Vui lòng thử lại.", { position: "top" });
     });

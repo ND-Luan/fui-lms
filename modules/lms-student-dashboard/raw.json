@@ -24,7 +24,7 @@
             "prop": "fluid pa-0",
             "rows": [
                 {
-                    "props": "class='pa-0'",
+                    "prop": "class='pa-0' :no-gutters='true' style='min-height: 100vh'",
                     "cols": [
                         {
                             "w": 12,

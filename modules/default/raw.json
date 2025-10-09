@@ -1,1 +1,1 @@
-{"data":[{"EXE":"checkRedirectRole()"}],"watch":{},"controls":[{"prop":"fluid grid-list-md pa-0","rows":[{"prop":":no-gutters='true'","cols":[{"el":"uc-main-layout"}]}]}],"set":{}}
+{"data":[{"IsLoadPage":false},{"EXE":"vueData.checkRedirectRole()"}],"watch":{},"controls":[{"prop":"fluid grid-list-md pa-0","rows":[{"prop":":no-gutters='true' v-if='IsLoadPage'","cols":[{"el":"uc-main-layout"}]}]}],"set":{}}

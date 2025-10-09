@@ -106,12 +106,12 @@
 			this.$emit('update:modelValue', jExcelObj)
 	
 			// Đợi JSpreadsheet render xong, sau đó gắn sự kiện cuộn
-			this.$nextTick(() => {
-				const container = this.$refs.spreadsheet.querySelector('.jexcel_container');
-				if (container) {
-					container.addEventListener("scroll", this.handleScroll);
-				}
-			});
+			// this.$nextTick(() => {
+			// 	const container = this.$refs.spreadsheet.querySelector('.jexcel_container');
+			// 	if (container) {
+			// 		container.addEventListener("scroll", this.handleScroll);
+			// 	}
+			// });
 		},
 		computed: {
 			jExcelOptions() {

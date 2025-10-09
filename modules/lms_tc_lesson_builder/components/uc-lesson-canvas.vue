@@ -7,16 +7,17 @@
 
 		<div v-for="(element, index) in elements" :key="index" class="element-preview"
 			:class="{ 'selected': selectedIndex === index }" @click="$emit('update:selectedIndex', index)">
-			<v-btn icon size="x-small" variant="text" @click.stop="removeElement(index)" class="delete-btn">
-				<v-icon>mdi-delete-outline</v-icon>
-			</v-btn>
-
-			<p v-if="element.ElementData.title" class="element-title" style="word-break: break-word">
-				{{ element.ElementData.title }}
-			</p>
+			<div class="d-flex ga-2 element-title">
+				<p v-if="element.ElementData.title" style="word-break: break-word; width: 97%">
+					{{ element.ElementData.title }}
+				</p>
+				<v-btn size="x-small" variant="text" @click.stop="removeElement(index)" class="delete-btn"
+					icon="mdi-delete-outline" />
+			</div>
 
 			<div class="element-content" :class="{'with-title': element.ElementData.title}">
-				<div v-if="element.ElementType === 'TEXT'" v-html="element.ElementData.content" class="text-content" />
+				<div v-if="element.ElementType === 'TEXT'" v-html="element.ElementData.content" class="text-content"
+					style="word-break: auto-phrase;" />
 
 				<div v-else-if="element.ElementType === 'IMAGE'" class="d-flex ga-2">
 					<div v-for="file in element.ElementData.sources" style="width: 200px">
@@ -35,8 +36,7 @@
 
 				<div v-else-if="element.ElementType === 'YOUTUBE'">
 					<iframe v-if="element.ElementData.source.length > 0" width="100%" height="400"
-						:src="element.ElementData.source.replace('watch?v=', 'embed/')" title="YouTube video player"
-						frameborder="0"
+						:src="renderUrlYoutube(element.ElementData.source)" title="YouTube video player" frameborder="0"
 						allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
 						allowfullscreen></iframe>
 					<div v-else class="text-center text-grey pa-4">Chưa có video</div>
@@ -50,6 +50,7 @@
 					<uc-wave-audio-player :audio-url="element.ElementData.source" />
 				</div>
 				<div v-else-if="element.ElementType === 'HTML'" style="width: 100%">
+					<!-- <div v-html="element.ElementData.source" /> -->
 					<iframe :srcdoc="element.ElementData.source" sandbox="allow-scripts allow-popups allow-forms"
 						style="width: 100%;height: 600px;">
 					</iframe>
@@ -160,6 +161,7 @@
 				if (element.ElementType === 'QUIZ_MATCHING') answerObject = element.ElementData.config?.correctPairs
 				return answerObject;
 			},
+			renderUrlYoutube
 		}
 	}
 </script>

@@ -17,7 +17,9 @@
 		},
 		computed: {
 			nestedHeaders: function () {
-				return [[{ title: '', colspan: 3 }, ...vueData.DSNhomDiem]]
+				const arr = [[{ title: '', colspan: 3 }, ...vueData.DSNhomDiemFilter]]
+				// console.log('arr',arr)
+				return arr
 			},
 		}
 	}

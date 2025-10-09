@@ -176,3 +176,48 @@
 
 /* 6) Chip/link dài trong chip không đẩy tràn */
 .v-chip a { min-width: 0; max-width: 100%; overflow: hidden; text-overflow: ellipsis; }
+
+.assignment-row {
+    display: grid;
+    grid-template-columns: 1fr auto auto;
+    align-items: center;
+    gap: 16px;
+    padding: 8px 12px;
+    background-color: var(--bg-card-header);
+    margin-bottom: 8px;
+}
+
+.assignment-row:last-child {
+    margin-bottom: 0;
+}
+
+.assignment-title {
+    font-weight: 600;
+    color: var(--text-secondary);
+    margin-bottom: 4px;
+}
+.assignment-details {
+    flex-grow: 1;
+}
+
+.assignment-meta {
+    font-size: 0.875rem;
+    color: var(--text-muted);
+}
+
+.assignment-stats {
+    display: flex;
+    gap: 8px;
+}
+
+.assignment-stats .v-chip {
+    font-weight: 500;
+}
+.week-group-header {
+    font-weight: 600;
+    color: var(--text-secondary);
+    background-color: var(--bg-page);
+    margin-bottom: 5px;
+    height: auto;
+  
+}

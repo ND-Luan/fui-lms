@@ -1,3 +1,7 @@
+	.v-number-input__control{
+		display: none;
+	}
+	
 	/* View Mode Toggle - Compact */
 	.v-btn-toggle {
 		box-shadow: none;
@@ -19,7 +23,7 @@
 	}
 
 	.questions-container {
-		max-width: 800px;
+		/* max-width: 800px; */
 		margin: 0 auto;
 	}
 
@@ -124,12 +128,12 @@
 	}
 
 	.question-content-compact {
-		padding: 16px;
+		padding: 8px;
 	}
 
 	.answer-section-compact {
 		border-top: 1px dashed #ddd;
-		padding-top: 12px;
+		padding-top: 8px;
 	}
 
 	.question-meta-mobile {
@@ -144,13 +148,13 @@
 		border-radius: 8px;
 	}
 
-	.assignment-header .v-card-subtitle {
+	/* .assignment-header .v-card-subtitle {
 		color: rgba(255, 255, 255, 0.8) !important;
 	}
 
 	.assignment-header .v-card-text {
 		color: white !important;
-	}
+	} */
 
 	/* Navigation styles */
 	.question-nav {
@@ -201,7 +205,6 @@
 
 	.answer-area {
 		border-top: 1px dashed #ddd;
-		padding-top: 20px;
 	}
 
 	/* Media containers */
@@ -231,26 +234,26 @@
 	.student-answer-section {
 		border: 2px dashed #e0e0e0;
 		border-radius: 8px;
-		padding: 16px;
+		padding: 8px;
 		background-color: #fafafa;
-		margin-bottom: 20px;
+		margin-bottom: 12px;
 	}
 
 	.grading-section {
 		border: 2px solid #4caf50;
 		border-radius: 8px;
-		padding: 16px;
+		padding: 8px;
 		background: linear-gradient(135deg, #f1f8e9 0%, #e8f5e8 100%);
 	}
 
 	.grading-section h4 {
 		color: #2e7d32;
-		margin-bottom: 16px;
+		margin-bottom: 8px;
 	}
 
 	.student-answer-section h4 {
 		color: #f57c00;
-		margin-bottom: 12px;
+		margin-bottom: 8px;
 	}
 
 	/* Action buttons */
@@ -265,7 +268,7 @@
 	/* Mobile responsive */
 	@media (max-width: 600px) {
 		.questions-container {
-			padding: 0 8px;
+			padding: 0px;
 		}
 
 		.question-content-compact {
@@ -346,19 +349,19 @@
 	.student-submission-content {
 		border: 1px solid #e0e0e0;
 		border-radius: 4px;
-		padding: 16px;
+		padding: 8px;
 		background-color: #fafafa;
 		min-height: 100px;
 	}
 
 	.teacher-grading-area {
 		border-top: 1px dashed #ccc;
-		padding-top: 16px;
+		padding-top: 8px;
 	}
 
 	.teacher-grading-area {
 		border-top: 1px dashed #ccc;
-		padding-top: 16px;
+		padding-top: 8px;
 	}
 
 	.v-chip a {
@@ -377,23 +380,82 @@
 
 	.teacher-grading-area {
 		border-top: 1px dashed #ccc;
-		padding-top: 16px;
+		padding-top: 8px;
 	}
 
 	.student-submission-content {
 		border: 1px solid #e0e0e0;
 		border-radius: 4px;
-		padding: 12px 16px;
+		padding: 4px 8px;
 		background-color: #fafafa;
 		min-height: 48px;
 	}
 
 	.teacher-grading-area {
 		border-top: 1px dashed #ccc;
-		padding-top: 16px;
+		padding-top: 8px;
 	}
 
 	.teacher-grading-area {
 		border-top: 1px dashed #ccc;
-		padding-top: 16px;
+		padding-top: 8px;
 	}
+.canvas-wrapper-inner {
+    position: relative !important;
+}
+.canvas-wrapper-inner .upper-canvas {
+    z-index: 10;
+}
+.canvas-wrapper-inner textarea {
+    position: absolute !important;
+    z-index: 20 !important;
+}
+
+.image {
+	position: relative;
+}
+
+.image.image_resized {
+	max-width: 100%;
+	display: block;
+	box-sizing: border-box;
+}
+
+
+.image-style-align-left {
+	float: left;
+	margin-right: var(--ck-image-style-spacing);
+}
+
+.image-style-align-center {
+	margin-left: auto;
+	margin-right: auto;
+}
+
+.image-style-align-right {
+	float: right;
+	margin-left: var(--ck-image-style-spacing);
+}
+
+.image {
+	display: table;
+	clear: both;
+	text-align: center;
+	margin: 1em auto;
+}
+
+.image.image_resized img {
+	width: 100%;
+}
+
+.image img {
+	display: block;
+	margin: 0 auto;
+	max-width: 100%;
+	min-width: 50px;
+}
+
+.iframeFile img {
+	width: 354px;
+	height: 473px;
+}

@@ -10,27 +10,29 @@
 		</div>
 
 		<!-- 2) Câu trả lời của học sinh (nghe trực tiếp) -->
-		<!-- <div class="student-answer-panel mt-4">
+		<div class="student-answer-panel rounded bg-indigo-lighten-5 pa-2" v-if="submissionstatus >=2">
 			<div class="panel-title d-flex align-center ga-2">
 				<v-icon size="18">mdi-account-outline</v-icon>
-				<b>Câu trả lời của {{ isGrade ? 'học sinh' : 'bạn' }}</b>
+				<b>Câu trả lời của {{ isGrade ? 'học sinh' : 'bạn' }}:</b>
 			</div>
 
 			<div v-if="normalizedAudios.length > 0" class="mt-2 d-flex flex-column ga-2">
-				<div v-for="(item, idx) in normalizedAudios" :key="idx" class="audio-row">
-					<uc-audio-record v-model:file="fileRecordAudio" v-model:src="item.playUrl"
-						v-model:isSaveFile="isSaveFile" :readonly="readonly" :isShowBtn="readonly"
-						@handleSave="uploadFile" />
+				<div v-for="(item, idx) in normalizedAudios" :key="idx" class="audio-row" style="position: relative">
+					<v-btn v-if="!isGrade && submissionstatus < 2" icon="mdi-close" color="red" variant="tonal"
+						@click="answer.splice(idx, 1)" size="small"
+						style="position: absolute; right: 8px; top:8px; z-index: 2" />
+					<uc-audio-record :key="idx" v-model:file="item.file" v-model:src="item.playUrl" :readonly="true"
+						:isSaveFile="false" :isShowBtn="false" />
 				</div>
 			</div>
 
-			<div  class="mt-2 text-red">
+			<div v-else class="mt-2 text-red">
 				<i>{{ isGrade ? 'Học sinh' : 'Bạn' }} không nộp/ghi âm nội dung nào.</i>
 			</div>
-		</div> -->
+		</div>
 
 		<!-- 3) Ý kiến học sinh -->
-		<div v-if="studentCommentToShow.length > 0" class="student-comment mt-3">
+		<!-- <div v-if="isGrade && submissionstatus >= 2 && studentCommentToShow.length > 0" class="student-comment mt-2">
 			<div class="d-flex align-center ga-2">
 				<v-icon size="18">mdi-comment-text-outline</v-icon>
 				<b>Ý kiến của học sinh</b>
@@ -38,16 +40,52 @@
 			<div class="mt-1">
 				{{ studentCommentToShow }}
 			</div>
+		</div> -->
+
+		<!-- Học sinh -->
+		<div class="mt-2">
+			<div class="text-end" v-if="!isGrade && submissionstatus < 2 && isShowBtnComment">
+				<v-menu v-model="menu" :close-on-content-click="false" scroll-strategy="close" location="start">
+					<template v-slot:activator="{ props }">
+						<v-btn color="orange-darken-1" v-bind="props" icon="mdi-notebook-edit-outline" size="small"
+							v-tooltip="'Ý kiến của bạn'">
+						</v-btn>
+					</template>
+
+					<v-card :min-width="widthScreen < 650 ? null : 600" class="elevation-0" variant="outlined"
+						color="orange">
+						<v-card-title class="bg-orange-darken-1">Ý kiến của bạn</v-card-title>
+						<v-list>
+							<v-list-item>
+								<v-textarea :model-value="grading?.comment || ''"
+									@update:model-value="onStudentCommentInput" rows="2" dense hide-details
+									variant="outlined" placeholder="Nhập ý kiến của bạn" />
+							</v-list-item>
+						</v-list>
+						<v-card-actions class="border-t py-0">
+							<v-spacer></v-spacer>
+							<v-btn text color="orange-darken-1" @click="menu = false">Đóng</v-btn>
+						</v-card-actions>
+					</v-card>
+				</v-menu>
+			</div>
+			<div v-else-if="grading?.comment" class="pa-2 rounded bg-blue-lighten-1">
+				<b>
+					<v-icon class="mr-1" size="18">mdi-message-text-outline</v-icon>
+					Ý kiến của {{ isGrade ? 'học sinh' : 'bạn' }}:
+				</b>
+				<div class="mt-1">{{ grading.comment }}</div>
+			</div>
 		</div>
 
 		<!-- 4) Banner “ĐANG CHỜ CHẤM” (đã nộp nhưng chưa trả bài) -->
 		<v-alert v-if="!isGrade && submissionstatus >= 2 && submissionstatus !== 4" variant="tonal" type="warning"
-			density="comfortable" class="mt-3">
+			density="comfortable" class="my-3">
 			ĐANG CHỜ CHẤM
 		</v-alert>
 
 		<!-- 5) Điểm (v-chip) khi đã trả bài -->
-		<div v-if="submissionstatus == 4" class="mt-3">
+		<div v-if="submissionstatus == 4" class="mt-2">
 			<strong>Điểm | Score</strong>
 			<v-chip size="small" :color="scoreChipColor" variant="tonal">
 				<v-icon start size="16">mdi-star</v-icon>
@@ -57,16 +95,16 @@
 
 		<!-- 6) Nhận xét của GV (ở giao diện học sinh) -->
 		<v-alert v-if="submissionstatus == 4 && !isGrade && (grading?.teacherComment || '').trim().length > 0"
-			border="start" color="info" elevation="2" class="mt-3" icon="mdi-comment-quote-outline">
+			border="start" color="info" elevation="2" class="mt-2" icon="mdi-comment-quote-outline">
 			<strong>Nhận xét GV:</strong> {{ grading.teacherComment }}
 		</v-alert>
 
 		<!-- 7) Khu vực chấm điểm cho GV -->
-		<div class="mt-4 teacher-grading-area" v-if="isGrade">
-			<div class="d-flex align-center mb-3">
-				<v-number-input :model-value="grading?.manualScore ?? 0" @update:model-value="onUpdateScoreInput"
+		<div class="mt-2 teacher-grading-area" v-if="isGrade">
+			<div class="d-flex align-center mb-2">
+				<v-number-input :model-value="grading?.manualScore" @update:model-value="onUpdateScoreInput"
 					label="Điểm" :max="question.points" :min="0" variant="outlined" density="compact" hide-details
-					style="max-width: 120px;" control-variant="stacked" inset />
+					style="max-width: 120px;" control-variant="hidden" inset />
 				<span class="text-h6 ml-2 text-primary">/ {{ question.points }}</span>
 				<span class="ml-1 text-caption">điểm</span>
 			</div>
@@ -93,7 +131,8 @@
 			// (mới) nếu parent có truyền ý kiến HS riêng
 			studentComment: { type: String, default: '' },
 			// (mới) nếu parent có truyền max points riêng; fallback question.points
-			maxPoints: { type: Number, default: null }
+			maxPoints: { type: Number, default: null },
+			isShowBtnComment: { type: Boolean, default: true }
 		},
 		emits: ['answer-change', 'grading-change'],
 		data() {
@@ -103,17 +142,17 @@
 				isUploading: false,
 				fileRecordAudio: null,
 				loadingPage: { isLoading: false, text: 'Đang tải dữ liệu...' },
-				isSaveFile: false
+				isSaveFile: false,
+				menu: false, widthScreen: null
 			}
 		},
 		computed: {
 			// Danh sách audio đã nộp, chuẩn hoá playUrl để <audio> phát trực tiếp
 			normalizedAudios() {
 				const arr = Array.isArray(this.answer) ? this.answer : (this.answer ? [this.answer] : [])
-				const arrFilter = arr
+				return arr
 					.map(raw => this.normalizeAudioItem(raw))
 					.filter(x => !!x && !!x.playUrl)
-				return arrFilter
 			},
 			lastAudioSrc() {
 				// để truyền cho uc-audio-record (nếu nó hiển thị preview gần nhất)
@@ -122,6 +161,9 @@
 			studentCommentToShow() {
 				const fromProp = (this.studentComment || '').trim()
 				const fromGrading = (this.grading?.comment || '').trim()
+	
+				console.log('fromProp', fromProp)
+				console.log('fromGrading', fromGrading)
 				return fromProp.length ? fromProp : fromGrading
 			},
 			displayScore() {
@@ -140,7 +182,14 @@
 				return 'primary'
 			}
 		},
+		mounted() {
+			this.widthScreen = window.innerWidth
+			window.addEventListener('resize', () => { this.handleResize() })
+		},
 		methods: {
+			handleResize() {
+				this.widthScreen = window.innerWidth;
+			},
 			// --- Upload flow (giữ nguyên ý tưởng của bạn) ---
 			ajaxCALLPromise(url, params = null) {
 				return new Promise(resolve => {
@@ -295,7 +344,11 @@
 					...(this.grading || {}),
 					manualScore: isNaN(parsed) ? 0 : parsed
 				})
-			}
+			},
+			onStudentCommentInput(val) {
+				this.grading.comment = val
+				this.$emit('grading-change', { ...this.grading, comment: val })
+			},
 		}
 	}
 </script>

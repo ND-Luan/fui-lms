@@ -1,5 +1,5 @@
 <template>
-	<v-dialog v-model="modelValue" max-width="500" persistent>
+	<v-dialog v-model="modelValue" max-width="500" persistent style="width: 500px">
 		<v-list class="py-2" color="primary" elevation="12" rounded="lg">
 			<v-list-item :title="text">
 				<template v-slot:prepend>

@@ -164,7 +164,7 @@
     grid-template-columns: 1fr auto auto;
     align-items: center;
     gap: 16px;
-    padding: 16px;
+    padding: 8px 12px;
     background-color: var(--bg-card-header);
     margin-bottom: 8px;
 }
@@ -209,10 +209,9 @@
     font-weight: 600;
     color: var(--text-secondary);
     background-color: var(--bg-page);
-    margin-bottom: 12px;
+    margin-bottom: 5px;
     height: auto;
-    padding-top: 8px;
-    padding-bottom: 8px;
+  
 }
 
 .content-item-card {
@@ -282,7 +281,7 @@
 .assignment-row {
     display: flex;
     align-items: center;
-    padding: 12px 12px;
+    padding: 8px 12px;
     border-bottom: 1px solid #f0f0f0;
 }
 
@@ -374,7 +373,10 @@
     font-size: 1rem;
     line-height: 1.4;
     color: #1a1a1a;
-    margin-bottom: 4px;
+    white-space: nowrap;      /* ép chữ 1 dòng */
+  overflow: hidden;         /* ẩn phần dư */
+  text-overflow: ellipsis;  /* hiện ... */
+  min-width: 0;   
 }
 
 .task-meta {
@@ -387,7 +389,6 @@
 .task-due-date {
     font-size: 0.8rem;
     font-weight: 500;
-    margin-top: 8px;
 }
 
 /* Màu chữ cho thời gian còn lại */
@@ -421,4 +422,12 @@
     display: flex;
     flex-direction: column;
     justify-content: space-between;
+}
+
+.v-expansion-panel--active>.v-expansion-panel-title:not(.v-expansion-panel-title--static) {
+    min-height: 50px !important;
+}
+
+.custom-panel-liberies>.v-expansion-panel--active>.v-expansion-panel-title:not(.v-expansion-panel-title--static) {
+    min-height: 30px !important;
 }
