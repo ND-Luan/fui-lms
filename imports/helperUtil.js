@@ -193,34 +193,93 @@ function getTextTinhTrangDiem(TinhTrang) {
     return text
 }
 
-function fn_IsDisabledTinhTrangDiem({ TinhTrang, type }) {
-    const arrStatusGV = [0, 1, 2, 3, 4]
+/* 
+    0: Chưa lưu, 
+    1: Lưu tạm, 
+    2: GVBM gửi điểm, 
+    3: GVCN từ chối gửi điểm bộ môn, 
+    4: GVCN gửi điểm, 
+    5: Tổ trưởng từ chối, 
+    6: Tổ trưởng Gửi BGH, 
+    7: BGH từ chối, 
+    8: BGH duyệt (Công bố phụ huynh)
+*/
+function getColorTinhTrangDiem_C1(TinhTrang) {
+    let color = ''
+    if (TinhTrang === 8) color = 'success'
+    else if (TinhTrang === 7) color = 'error'
+    else if (TinhTrang === 6) color = 'primary'
+    else if (TinhTrang === 5) color = 'error'
+    else if (TinhTrang === 4) color = 'primary'
+    else if (TinhTrang === 3) color = 'error'
+    else if (TinhTrang === 2) color = 'orange'
+    else if (TinhTrang === 1) color = 'light-green-lighten-1'
+    else if (TinhTrang === 0) color = ''
+    return color
+}
+function getTextTinhTrangDiem_C1(TinhTrang) {
+    let text = ''
+    if (TinhTrang === 8) text = 'BGH duyệt (Công bố phụ huynh)'
+    else if (TinhTrang === 7) text = 'BGH từ chối'
+    else if (TinhTrang === 6) text = 'Tổ trưởng Gửi BGH'
+    else if (TinhTrang === 5) text = 'Tổ trưởng từ chối'
+    else if (TinhTrang === 4) text = 'GVCN gửi điểm'
+    else if (TinhTrang === 3) text = 'GVCN từ chối gửi điểm bộ môn'
+    else if (TinhTrang === 2) text = 'GVBM gửi điểm'
+    else if (TinhTrang === 1) text = 'Lưu tạm'
+    else if (TinhTrang === 0) text = 'Chưa lưu'
+    return text
+}
+
+
+function fn_IsDisabledTinhTrangDiem({ TinhTrang, type, CapID }) {
+    let arrStatusGV = [0, 1, 2, 3, 4]
     const obj = {
-        color: getColorTinhTrangDiem(TinhTrang),
+        color: CapID === 1 ? getColorTinhTrangDiem_C1(TinhTrang) : getColorTinhTrangDiem(TinhTrang),
         isDisabled: false,
-        text: getTextTinhTrangDiem(TinhTrang),
+        text: CapID === 1 ? getTextTinhTrangDiem_C1(TinhTrang) : getTextTinhTrangDiem(TinhTrang),
         type: type,
         TinhTrang: TinhTrang
     }
     if (TinhTrang === null) obj
-    if (type === 'GV') {
-        if (arrStatusGV.indexOf(TinhTrang) >= 0) {
-            if (TinhTrang == 0 || TinhTrang == 1 || TinhTrang == 3) obj.isDisabled = false
-            else obj.isDisabled = true
 
+    if (CapID === 1) arrStatusGV = [0, 1, 2, 3, 4, 6, 7, 8]
+    else arrStatusGV = [0, 1, 2, 3, 4]
+
+    if (CapID === 1) {
+        if (arrStatusGV.indexOf(TinhTrang) >= 0) {
+            if (TinhTrang == 0
+                || TinhTrang == 1
+                || TinhTrang == 3
+                || TinhTrang == 5
+                || TinhTrang == 7
+            ) obj.isDisabled = false
+            else obj.isDisabled = true
         }
+        return obj
     } else {
-        //Tình trang 2: Gửi tổ trưởng
-        if (TinhTrang === 2) obj.isDisabled = false
-        else obj.isDisabled = true
+        if (type === 'GV') {
+            if (arrStatusGV.indexOf(TinhTrang) >= 0) {
+                if (TinhTrang == 0 || TinhTrang == 1 || TinhTrang == 3) obj.isDisabled = false
+                else obj.isDisabled = true
+
+            }
+        } else {
+            //Tình trang 2: Gửi tổ trưởng
+            if (TinhTrang === 2) obj.isDisabled = false
+            else obj.isDisabled = true
+        }
+        return obj
     }
-    return obj
+
 }
+
+
 
 function fn_ProrityTinhTrang(DSHocSinh) {
     if (!DSHocSinh?.length) return;
 
-    const priorityOrder = [4, 2, 3, 1, 0]; // Thứ tự ưu tiên
+    const priorityOrder = [8, 7, 6, 5, 4, 2, 3, 1, 0]; // Thứ tự ưu tiên
 
     return DSHocSinh.reduce((max, hs) => {
         return priorityOrder.indexOf(hs.TinhTrang) < priorityOrder.indexOf(max.TinhTrang) ? hs : max;
