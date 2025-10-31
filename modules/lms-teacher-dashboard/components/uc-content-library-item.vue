@@ -434,76 +434,9 @@ export default {
 				}
 			})
 		},
-		// ==== Mở dialog giao bài ====
-		addAssignment(item) {
-
-			if (item?.ResourceType == "ASSIGNMENT") {
-				openWindow({
-					title: "Sửa bài tập",
-					url: `/lms_tc_asm_builder?AssignmentID=${item?.AssignmentID}`,
-					onclose: {
-						EXE: "apiCall3()"
-					}
-				});
-			}
-			else if (item?.ResourceType == "LESSON") {
 
 
 
-				openWindow({
-					title: "Sửa bài học",
-					url: `lms_tc_lesson_builder?LessonID=${item?.ResourceID}`,
-					id: "WINSUABAIHOC",
-					onclose: {
-						EXE: "apiCall3()"
-					}
-
-				});
-			}
-			// this.assignmentIDSave = item.ResourceID;
-			// this.resourceType = item.ResourceType;
-			// this.resourceID = item.ResourceID;
-			// this.loadClassOptions(item);
-			// // reset lựa chọn cũ
-			// this.selectedClasses = [];
-			// this.deadlines = {};
-			// this.activeId = null;
-			// this.dateDialogVisible = false;
-			// this.timeDialogVisible = false;
-			this.assignDialog = true;
-		},
-
-		async loadClassOptions(item) {
-			vueData.selectedKhoiID = item.KhoiID;
-
-			// Parse chuỗi JSON thành mảng object
-			let assignedClasses = [];
-			try {
-				assignedClasses = JSON.parse(item.AssignedDetails || '[]');
-			} catch (e) {
-				console.error('AssignedDetails không phải JSON hợp lệ:', e);
-			}
-
-			// Lấy danh sách LopID đã assigned
-			const assignedLopIDs = assignedClasses.map(c => c.LopID);
-
-			// ajaxCALL("/lms/Lop_Get_ByKhoiID", {
-			// 	KhoiID: item.KhoiID,
-			// 	NienKhoa: vueData.NienKhoa
-			// }, (res) => {
-			// 	// Lọc bỏ các lớp có LopID nằm trong danh sách đã assigned
-			// 	this.classOptions = (res?.data || []).filter(c => !assignedLopIDs.includes(c.LopID));
-			// });
-			ajaxCALL("/lms/EL_Teacher_GetGroupedDashboard", {
-
-			}, (res) => {
-
-				// Lọc bỏ các lớp có LopID nằm trong danh sách đã assigned
-				this.classOptions = (res?.data[1] || []).filter(c => !assignedLopIDs.includes(c.LopID) && c.KhoiID == item.KhoiID && c.MonHocID == item.MonHocID);
-			});
-			console.log(this.classOptions);
-
-		},
 
 		getClassName(id) {
 			const cls = this.classOptions.find(c => String(c.LopID) === String(id))

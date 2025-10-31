@@ -17,8 +17,14 @@
 					</div>
 
 					<v-divider vertical class="mx-2 d-none d-md-block"></v-divider>
+					<v-chip :color="displayStatusColor(submissionstatus)">{{ displayStatus(submissionstatus) }}</v-chip>
 					<v-spacer />
-
+					<div v-if="submissionstatus != 4" class="d-flex ga-2">
+						<v-btn size="small" class="text-white" @click="handleClickAction()"
+							:color="submissionstatus < 2 ? 'success' : 'orange'">
+							<v-icon start v-if="submissionstatus == 4">mdi-send-check</v-icon>
+							{{ submissionstatus < 2 ? 'Nộp bài' : 'Hoàn tất & Trả bài' }} </v-btn>
+					</div>
 					<!-- Hạn nộp + trạng thái -->
 					<v-chip size="x-small" :color="dueDateStatus.color" :variant="dueDateStatus.variant" class="mr-1">
 						<v-icon start size="14" :icon="dueDateStatus.icon"></v-icon>
@@ -146,7 +152,7 @@
 												<span class="mx-2">•</span>
 												<span class="text-caption text-medium-emphasis">
 													Tối đa {{currentGroup.questions.reduce((sum, q) => sum +
-													q.points, 0)
+														q.points, 0)
 													}} điểm
 												</span>
 											</div>
@@ -254,10 +260,11 @@
 									style="min-height: calc(-48.6rem + 100dvh); height: 100%;  overflow: auto;">
 									<component :is="getQuestionComponent(question.type)" :question="question"
 										:answer="getAnswerForChild(question)"
-										:grading="userAnswers[question.id]?.grading" :isGrade="false" :readonly="true"
-										:max-points="question.points"
+										:grading="userAnswers[question.id]?.grading" :isGrade="isGrade"
+										:submissionstatus="submissionstatus" :max-points="question.points"
 										:student-comment="userAnswers[question.id]?.grading?.comment || ''"
-										:isShowBtnComment="false" />
+										@grading-change="updateGrading(question.id, $event)"
+										@answer-change="updateAnswer(question.id, $event)" :isShowBtnComment="false" />
 								</div>
 							</div>
 						</v-card-text>
@@ -322,8 +329,10 @@
 								style="min-height: calc(-48.6rem + 100dvh); height: 100%;  overflow: auto;">
 								<component :is="getQuestionComponent(currentQuestion.type)" :question="currentQuestion"
 									:answer="getAnswerForChild(currentQuestion)"
-									:grading="userAnswers[currentQuestion.id]?.grading" :isGrade="false"
-									:readonly="true" :max-points="currentQuestion.points"
+									@answer-change="updateAnswer(currentQuestion.id, $event)"
+									@grading-change="updateGrading(currentQuestion.id, $event)"
+									:grading="userAnswers[currentQuestion.id]?.grading" :isGrade="isGrade"
+									:submissionstatus="submissionstatus" :max-points="currentQuestion.points"
 									:student-comment="userAnswers[currentQuestion.id]?.grading?.comment || ''"
 									:isShowBtnComment="false" />
 							</div>
@@ -406,7 +415,7 @@
 							</div>
 							<div class="questions-in-group">
 								<v-card v-for="(question, questionIndexInGroup) in group.questions" :key="question.id"
-									:id="question.id" class="question-card-all mb-3"
+									:id="question.id" class="question-card-all mb-3 border-b"
 									:class="{ 'question-answered': isAnswered(question.id) }" flat
 									border="!group.isCheckShowAllQuestion">
 									<!-- Compact header -->
@@ -550,8 +559,10 @@
 										<div class="answer-section-compact">
 											<component :is="getQuestionComponent(question.type)" :question="question"
 												:answer="getAnswerForChild(question)"
-												:grading="userAnswers[question.id]?.grading" :isGrade="false"
-												:readonly="true" :max-points="question.points"
+												@answer-change="updateAnswer(question?.id, $event)"
+												@grading-change="updateGrading(question?.id, $event)"
+												:grading="userAnswers[question.id]?.grading" :isGrade="isGrade"
+												:submissionstatus="submissionstatus" :max-points="question.points"
 												:student-comment="userAnswers[question.id]?.grading?.comment || ''"
 												:isShowBtnComment="false" />
 										</div>
@@ -567,109 +578,116 @@
 </template>
 
 <script>
-	export default {
-		name: 'uc-assignment-taker',
-		props: {
-			puseranswers: Object,
-			assignmentData: Object,
-			monHocName: String,
-			onSaveDraft: { type: Function, default: () => { } },
-			onOpenSubmitDialog: { type: Function, default: () => { } }
+export default {
+	name: 'uc-assignment-taker',
+	props: {
+		puseranswers: Object,
+		assignmentData: Object,
+		monHocName: String,
+		onSaveDraft: { type: Function, default: () => { } },
+		onOpenSubmitDialog: { type: Function, default: () => { } }
+	},
+	emits: ['update:puseranswers'],
+	data() {
+		return {
+			viewMode: 'single',
+			navCollapsed: false,
+			groupCollapsed: {},
+			currentGroupIndex: 0,
+			currentQuestionIndexInGroup: 0,
+			saveStatus: 'Đã lưu',
+			saveStatusColor: 'grey',
+			saveStatusIcon: 'mdi-cloud-check-outline',
+			isSaving: false,
+			autoSaveTimer: null,
+			vueData,
+			isMobile: false,
+			isTablet: false,
+			showInstructions: false,
+			toggleTC: false,
+			submissionstatus: 1,
+			answeredQuestions: null,
+			isGrade: false,
+			isUpdate: false
+		}
+	},
+	computed: {
+		userAnswers() {
+			return this.puseranswers || {};
 		},
-		emits: ['update:puseranswers'],
-		data() {
-			return {
-				viewMode: 'single',
-				navCollapsed: false,
-				groupCollapsed: {},
-				currentGroupIndex: 0,
-				currentQuestionIndexInGroup: 0,
-				saveStatus: 'Đã lưu',
-				saveStatusColor: 'grey',
-				saveStatusIcon: 'mdi-cloud-check-outline',
-				isSaving: false,
-				autoSaveTimer: null,
-				vueData,
-				isMobile: false,
-				isTablet: false,
-				showInstructions: false,
-				toggleTC: false
+		assignment() {
+			if (!this.assignmentData) return null
+			const config = this.assignmentData;
+			if (config && typeof config.AssignmentConfig === 'string' && !config.groups) {
+				try { config.groups = JSON.parse(config.AssignmentConfig).groups || []; } catch (e) { config.groups = []; }
 			}
+			return config;
 		},
-		computed: {
-			userAnswers() {
-				return this.puseranswers || {};
-			},
-			assignment() {
-				if (!this.assignmentData) return null
-				const config = this.assignmentData;
-				if (config && typeof config.AssignmentConfig === 'string' && !config.groups) {
-					try { config.groups = JSON.parse(config.AssignmentConfig).groups || []; } catch (e) { config.groups = []; }
-				}
-				return config;
-			},
-			draft() {
-				return this.assignmentData ?? null
-			},
-			totalQuestions() {
-				if (!this.assignment?.groups) return 0;
-				return this.assignment.groups.reduce((total, group) => total + group.questions.length, 0);
-			},
-			currentGroup() { return this.assignment?.groups?.[this.currentGroupIndex]; },
-			currentQuestion() { return this.currentGroup?.questions?.[this.currentQuestionIndexInGroup]; },
-			globalQuestionNumber() {
-				if (!this.assignment?.groups) return 1;
-				return this.getGlobalQuestionNumber(this.currentGroupIndex, this.currentQuestionIndexInGroup);
-			},
-			// isSubmitted() { return this.draft?.SubmissionStatus >= 2; },
-			// isGraded() { return this.isSubmitted && this.draft?.SubmissionStatus === 4; },
-			allQuestions() { return this.assignment?.groups?.flatMap(group => group.questions) || []; },
-			dueDateStatus() {
-				if (!this.assignment?.DueDate) {
-					return { color: 'grey', variant: 'outlined', icon: 'mdi-calendar-blank', text: 'Không giới hạn' };
-				}
-				const now = new Date();
-				const dueDate = new Date(this.assignment.DueDate);
-				const timeDiff = dueDate.getTime() - now.getTime();
-				const daysDiff = Math.ceil(timeDiff / (1000 * 3600 * 24));
-				const hoursDiff = Math.ceil(timeDiff / (1000 * 3600));
-	
-				if (timeDiff < 0) return { color: 'error', variant: 'elevated', icon: 'mdi-clock-alert-outline', text: 'Quá hạn' };
-				if (hoursDiff <= 24) return { color: 'warning', variant: 'elevated', icon: 'mdi-clock-fast', text: hoursDiff <= 1 ? 'Gấp!' : `Còn ${hoursDiff}h` };
-				if (daysDiff <= 3) return { color: 'orange', variant: 'elevated', icon: 'mdi-clock-outline', text: `Còn ${daysDiff} ngày` };
-				return { color: 'success', variant: 'tonal', icon: 'mdi-clock-check-outline', text: daysDiff <= 7 ? `Còn ${daysDiff} ngày` : 'Trong hạn' };
-			},
-			answeredCount() { return this.allQuestions.filter(q => this.isAnswered(q.id)).length; },
-			progressPercent() {
-				if (!this.totalQuestions) return 0;
-				return (this.answeredCount / this.totalQuestions) * 100;
+		draft() {
+			return this.assignmentData ?? null
+		},
+		totalQuestions() {
+			if (!this.assignment?.groups) return 0;
+			return this.assignment.groups.reduce((total, group) => total + group.questions.length, 0);
+		},
+		currentGroup() { return this.assignment?.groups?.[this.currentGroupIndex]; },
+		currentQuestion() { return this.currentGroup?.questions?.[this.currentQuestionIndexInGroup]; },
+		globalQuestionNumber() {
+			if (!this.assignment?.groups) return 1;
+			return this.getGlobalQuestionNumber(this.currentGroupIndex, this.currentQuestionIndexInGroup);
+		},
+		// isSubmitted() { return this.draft?.SubmissionStatus >= 2; },
+		// isGraded() { return this.isSubmitted && this.draft?.SubmissionStatus === 4; },
+		allQuestions() { return this.assignment?.groups?.flatMap(group => group.questions) || []; },
+		dueDateStatus() {
+			if (!this.assignment?.DueDate) {
+				return { color: 'grey', variant: 'outlined', icon: 'mdi-calendar-blank', text: 'Không giới hạn' };
 			}
+			const now = new Date();
+			const dueDate = new Date(this.assignment.DueDate);
+			const timeDiff = dueDate.getTime() - now.getTime();
+			const daysDiff = Math.ceil(timeDiff / (1000 * 3600 * 24));
+			const hoursDiff = Math.ceil(timeDiff / (1000 * 3600));
+
+			if (timeDiff < 0) return { color: 'error', variant: 'elevated', icon: 'mdi-clock-alert-outline', text: 'Quá hạn' };
+			if (hoursDiff <= 24) return { color: 'warning', variant: 'elevated', icon: 'mdi-clock-fast', text: hoursDiff <= 1 ? 'Gấp!' : `Còn ${hoursDiff}h` };
+			if (daysDiff <= 3) return { color: 'orange', variant: 'elevated', icon: 'mdi-clock-outline', text: `Còn ${daysDiff} ngày` };
+			return { color: 'success', variant: 'tonal', icon: 'mdi-clock-check-outline', text: daysDiff <= 7 ? `Còn ${daysDiff} ngày` : 'Trong hạn' };
 		},
-		mounted() {
-			window.addEventListener('resize', () => { this.ResizeWindow() })
-			this.ResizeWindow()
+		answeredCount() { return this.allQuestions.filter(q => this.isAnswered(q.id)).length; },
+		progressPercent() {
+			if (!this.totalQuestions) return 0;
+			return (this.answeredCount / this.totalQuestions) * 100;
+		}
+	},
+	mounted() {
+		window.addEventListener('resize', () => { this.ResizeWindow() })
+		this.ResizeWindow()
+	},
+	methods: {
+		ResizeWindow() {
+			this.isMobile = window.innerWidth < 960
+			this.isTablet = window.innerWidth <= 1240
 		},
-		methods: {
-			ResizeWindow() {
-				this.isMobile = window.innerWidth < 960
-				this.isTablet = window.innerWidth <= 1240
-			},
-			isActiveQuestion(groupIndex, questionIndexInGroup) {
-				return this.currentGroupIndex === groupIndex && this.currentQuestionIndexInGroup === questionIndexInGroup;
-			},
-			getAnswerForChild(question) {
-				let answerObject = null;
+		isActiveQuestion(groupIndex, questionIndexInGroup) {
+			return this.currentGroupIndex === groupIndex && this.currentQuestionIndexInGroup === questionIndexInGroup;
+		},
+		getAnswerForChild(question) {
+
+			console.log('question', question)
+			let answerObject = this.userAnswers[question.id];
+			if (!this.isUpdate) {
 				switch (question.type) {
-					case 'QUIZ_SINGLE_CHOICE': answerObject = question.config.correctAnswer; break;
-					case 'QUIZ_MULTIPLE_CHOICE': answerObject = question.config.correctAnswers; break;
-					case 'QUIZ_TRUE_FALSE': answerObject = question.config.correctAnswer; break;
+					case 'QUIZ_SINGLE_CHOICE': answerObject = ""; break;
+					case 'QUIZ_MULTIPLE_CHOICE': answerObject = []; break;
+					case 'QUIZ_TRUE_FALSE': answerObject = null; break;
 					case 'QUIZ_MULTIPLE_TRUE_FALSE':
 						let obj = {}
 						for (var option of question.config.options) {
 							let answer
 							if (option.correctAnswer) answer = true
 							if (option.inCorrectAnswer) answer = false
-							obj[option.id] = answer
+							obj[option.id] = null
 						}
 						answerObject = obj;
 						break;
@@ -678,192 +696,271 @@
 						const obj = {};
 						if (blanks) {
 							for (var item of blanks) {
-								obj[item.id] = item.acceptedAnswers?.[0];
+								obj[item.id] = "";
 							}
 						}
 						answerObject = obj;
 						break;
 					}
-					case 'QUIZ_MATCHING': answerObject = question.config.correctPairs; break;
+					case 'QUIZ_MATCHING': answerObject = []; break;
+					case 'QUIZ_MATCHING_V2': answerObject = []; break;
 				}
-				console.log('answerObject', answerObject)
-				return answerObject;
-			},
-			// Điểm thực tế của câu
-			getQuestionScore(questionId) {
-				const g = vueData.userAnswersSubmitted?.[questionId]?.grading
-				if (!g) return null
-				let s = 0
-				let has = false
-				if (typeof g.autoScore === 'number') { s += g.autoScore; has = true }
-				if (typeof g.manualScore === 'number') { s += g.manualScore; has = true }
-				return has ? s : null
-			},
-	
-			// Chip trạng thái câu
-			questionStatus(questionId, maxPoint) {
-				const answered = this.isAnswered(questionId)
-				// if (!answered) return { label: 'Chưa TL', color: 'grey', variant: 'tonal' }
-				const s = this.getQuestionScore(questionId)
-				// if (s === null) return { label: 'Chờ chấm', color: 'grey', variant: 'tonal' }
-				if (s <= 0) return { label: 'Sai', color: 'error', variant: 'tonal' }
-				if (s >= (maxPoint ?? 0)) return { label: 'Đúng', color: 'success', variant: 'tonal' }
-				return { label: 'Một phần', color: 'warning', variant: 'tonal' }
-			},
-	
-			initializeAnswers() {
-				if (this.draft) {
-					try {
-						const asmConfigString = this.assignmentData?.AssignmentConfig
-						const asmData = JSON.parse(asmConfigString)
-						const submissionContent = JSON.parse(this.draft.SubmissionContent) || { answers: {} }
-						const answers = submissionContent.answers
-	
-						asmData.groups.forEach(group => {
-							for (var question of group.questions) {
-								answers[question.id] = {
-									answerData: answers[question.id]?.answerData ?? null,
-									grading: {
-										comment: answers[question.id]?.grading?.comment || null,
-										teacherComment: answers[question.id]?.grading?.teacherComment || null,
-										manualScore: answers[question.id]?.grading?.manualScore || null,
-									}
+
+				return answerObject
+			}
+			console.log('answerObject', answerObject)
+			console.log('isGrade', this.isGrade)
+			return answerObject?.answerData
+
+
+		},
+		// Điểm thực tế của câu
+		getQuestionScore(questionId) {
+			const g = vueData.userAnswersSubmitted?.[questionId]?.grading
+			if (!g) return null
+			let s = 0
+			let has = false
+			if (typeof g.autoScore === 'number') { s += g.autoScore; has = true }
+			if (typeof g.manualScore === 'number') { s += g.manualScore; has = true }
+			return has ? s : null
+		},
+
+		// Chip trạng thái câu
+		questionStatus(questionId, maxPoint) {
+			const answered = this.isAnswered(questionId)
+			// if (!answered) return { label: 'Chưa TL', color: 'grey', variant: 'tonal' }
+			const s = this.getQuestionScore(questionId)
+			// if (s === null) return { label: 'Chờ chấm', color: 'grey', variant: 'tonal' }
+			if (s <= 0) return { label: 'Sai', color: 'error', variant: 'tonal' }
+			if (s >= (maxPoint ?? 0)) return { label: 'Đúng', color: 'success', variant: 'tonal' }
+			return { label: 'Một phần', color: 'warning', variant: 'tonal' }
+		},
+
+		initializeAnswers() {
+			if (this.draft) {
+				try {
+					const asmConfigString = this.assignmentData?.AssignmentConfig
+					const asmData = JSON.parse(asmConfigString)
+					const submissionContent = JSON.parse(this.draft.SubmissionContent) || { answers: {} }
+					const answers = submissionContent.answers
+
+					asmData.groups.forEach(group => {
+						for (var question of group.questions) {
+							answers[question.id] = {
+								answerData: answers[question.id]?.answerData ?? null,
+								grading: {
+									comment: answers[question.id]?.grading?.comment || null,
+									teacherComment: answers[question.id]?.grading?.teacherComment || null,
+									manualScore: answers[question.id]?.grading?.manualScore || null,
 								}
 							}
-						})
-						console.log('answers', answers)
-						this.$emit('update:puseranswers', answers || {});
-					} catch (e) {
-						this.$emit('update:puseranswers', {});
-					}
-				} else {
-					// console.log('else')
-					//Nếu chưa có draft phải save trước để biết bấm đã bấm vô làm bài
-					// this.saveDraft()
+						}
+					})
+					console.log('answers', answers)
+					this.$emit('update:puseranswers', answers || {});
+				} catch (e) {
 					this.$emit('update:puseranswers', {});
 				}
-	
-				if (this.assignment?.groups) {
-					const initialCollapsed = {};
-					this.assignment.groups.forEach((group, index) => { initialCollapsed[index] = false });
-					this.groupCollapsed = initialCollapsed;
-				}
-			},
-			getQuestionStatusIcon(questionId) {
-				if (this.isAnswered(questionId)) { return 'mdi-pencil-circle'; }
-				const num = this.getGlobalQuestionNumberByQuestionId(questionId);
-				return `mdi-help-box-outline`;
-			},
-			getIconColor(questionId) {
-				return this.isAnswered(questionId) ? 'blue' : 'grey';
-			},
-			getGlobalQuestionNumber(groupIndex, questionIndexInGroup) {
-				if (!this.assignment?.groups) return 1;
-				let number = 1;
-				for (let i = 0; i < groupIndex; i++) { number += this.assignment.groups[i].questions.length; }
-				return number + questionIndexInGroup;
-			},
-			getGlobalQuestionNumberByQuestionId(questionId) {
-				if (!this.allQuestions) return 0;
-				const index = this.allQuestions.findIndex(q => q.id === questionId);
-				return index + 1;
-			},
-			getGroupAnsweredCount(group) {
-				return group.questions.filter(q => this.isAnswered(q.id)).length;
-			},
-			toggleGroupCollapse(groupIndex) {
-				this.groupCollapsed = { ...this.groupCollapsed, [groupIndex]: !this.groupCollapsed[groupIndex] };
-			},
-			navigateToQuestion(groupIndex, questionIndexInGroup, id) {
-				if (this.viewMode == 'all') {
-	
-					var element = document.getElementById(id);
-					if (element) {
-						element.scrollIntoView({
-							behavior: "smooth", // cuộn mượt
-							block: "start" // vị trí hiển thị: start | center | end | nearest
-						});
-					}
-	
-				}
-				this.currentGroupIndex = groupIndex;
-				this.currentQuestionIndexInGroup = questionIndexInGroup;
-				if (this.groupCollapsed[groupIndex]) { this.toggleGroupCollapse(groupIndex); }
-			},
-			prevQuestion() {
-				if (this.currentQuestionIndexInGroup > 0) { this.currentQuestionIndexInGroup--; }
-				else if (this.currentGroupIndex > 0) {
-					this.currentGroupIndex--;
-					this.currentQuestionIndexInGroup = this.assignment.groups[this.currentGroupIndex].questions.length - 1;
-				}
-			},
-			nextQuestion() {
-				if (!this.assignment || !this.assignment.groups) return;
-				const currentGroup = this.assignment.groups[this.currentGroupIndex];
-				if (this.currentQuestionIndexInGroup < currentGroup.questions.length - 1) { this.currentQuestionIndexInGroup++; }
-				else if (this.currentGroupIndex < this.assignment.groups.length - 1) {
-					this.currentGroupIndex++;
-					this.currentQuestionIndexInGroup = 0;
-				}
-			},
-			getQuestionComponent(type) {
-				const map = {
-					'QUIZ_SINGLE_CHOICE': 'uc-question-single-choice',
-					'QUIZ_MULTIPLE_CHOICE': 'uc-question-multiple-choice',
-					'QUIZ_TRUE_FALSE': 'uc-question-true-false',
-					'QUIZ_MULTIPLE_TRUE_FALSE': 'uc-question-multiple-true-false',
-					'QUIZ_FILL_IN_BLANK': 'uc-question-fill-in-blank',
-					'QUIZ_MATCHING': 'uc-question-matching',
-					'SHORT_ANSWER': 'uc-question-short-answer',
-					'ESSAY': 'uc-question-essay',
-					'FILE_UPLOAD': 'uc-question-file-upload',
-					'AUDIO_RESPONSE': 'uc-question-audio-response'
-				};
-				return map[type] || 'div';
-			},
-			isAnswered(questionId) {
-				const answer = this.userAnswers[questionId]?.answerData;
-				if (answer === null || answer === undefined) return false;
-				if (typeof answer === 'string' && answer.trim() === '') return false;
-				if (Array.isArray(answer) && answer.length === 0) return false;
-				if (typeof answer === 'object' && !Array.isArray(answer) && Object.keys(answer).length === 0) return false;
-				return true;
-			},
-			formatDate(dateString) {
-				if (!dateString) return 'Chưa có thông tin';
-				const date = new Date(dateString);
-				return date.toLocaleString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
-			},
-			getYoutubeEmbedUrl(url) {
-				if (!url) return '';
-				let videoId = '';
-				const standardMatch = url.match(/[?&]v=([^&]+)/);
-				if (standardMatch) videoId = standardMatch[1];
-				const shortMatch = url.match(/youtu\.be\/([^?]+)/);
-				if (shortMatch) videoId = shortMatch[1];
-				const embedMatch = url.match(/embed\/([^?]+)/);
-				if (embedMatch) videoId = embedMatch[1];
-				if (videoId) return `https://www.youtube.com/embed/${videoId}`;
-				return url;
-			},
-			getDriveFileId(url) {
-				const match = url?.match(/\/d\/([^/]+)\//);
-				return match ? match[1] : null;
-			},
-			renderUrlYoutube,
-			test() { window.open("/lms-student-dashboard", '_parent'); },
-			questionsTypesLabel
+			} else {
+				// console.log('else')
+				//Nếu chưa có draft phải save trước để biết bấm đã bấm vô làm bài
+				// this.saveDraft()
+				this.$emit('update:puseranswers', {});
+			}
+
+			if (this.assignment?.groups) {
+				const initialCollapsed = {};
+				this.assignment.groups.forEach((group, index) => { initialCollapsed[index] = false });
+				this.groupCollapsed = initialCollapsed;
+			}
 		},
-		watch: {
-			assignmentData: {
-				handler: 'initializeAnswers'
-				, deep: true
-				//, immediate: true
-			},
-			isMobile(val) { if (val) { this.viewMode = 'all' } }
+		getQuestionStatusIcon(questionId) {
+			if (this.isAnswered(questionId)) { return 'mdi-pencil-circle'; }
+			const num = this.getGlobalQuestionNumberByQuestionId(questionId);
+			return `mdi-help-box-outline`;
 		},
-		beforeUnmount() {
+		getIconColor(questionId) {
+			return this.isAnswered(questionId) ? 'blue' : 'grey';
+		},
+		getGlobalQuestionNumber(groupIndex, questionIndexInGroup) {
+			if (!this.assignment?.groups) return 1;
+			let number = 1;
+			for (let i = 0; i < groupIndex; i++) { number += this.assignment.groups[i].questions.length; }
+			return number + questionIndexInGroup;
+		},
+		getGlobalQuestionNumberByQuestionId(questionId) {
+			if (!this.allQuestions) return 0;
+			const index = this.allQuestions.findIndex(q => q.id === questionId);
+			return index + 1;
+		},
+		getGroupAnsweredCount(group) {
+			return group.questions.filter(q => this.isAnswered(q.id)).length;
+		},
+		toggleGroupCollapse(groupIndex) {
+			this.groupCollapsed = { ...this.groupCollapsed, [groupIndex]: !this.groupCollapsed[groupIndex] };
+		},
+		navigateToQuestion(groupIndex, questionIndexInGroup, id) {
+			if (this.viewMode == 'all') {
+
+				var element = document.getElementById(id);
+				if (element) {
+					element.scrollIntoView({
+						behavior: "smooth", // cuộn mượt
+						block: "start" // vị trí hiển thị: start | center | end | nearest
+					});
+				}
+
+			}
+			this.currentGroupIndex = groupIndex;
+			this.currentQuestionIndexInGroup = questionIndexInGroup;
+			if (this.groupCollapsed[groupIndex]) { this.toggleGroupCollapse(groupIndex); }
+		},
+		prevQuestion() {
+			if (this.currentQuestionIndexInGroup > 0) { this.currentQuestionIndexInGroup--; }
+			else if (this.currentGroupIndex > 0) {
+				this.currentGroupIndex--;
+				this.currentQuestionIndexInGroup = this.assignment.groups[this.currentGroupIndex].questions.length - 1;
+			}
+		},
+		nextQuestion() {
+			if (!this.assignment || !this.assignment.groups) return;
+			const currentGroup = this.assignment.groups[this.currentGroupIndex];
+			if (this.currentQuestionIndexInGroup < currentGroup.questions.length - 1) { this.currentQuestionIndexInGroup++; }
+			else if (this.currentGroupIndex < this.assignment.groups.length - 1) {
+				this.currentGroupIndex++;
+				this.currentQuestionIndexInGroup = 0;
+			}
+		},
+		getQuestionComponent(type) {
+			const map = {
+				'QUIZ_SINGLE_CHOICE': 'uc-question-single-choice',
+				'QUIZ_MULTIPLE_CHOICE': 'uc-question-multiple-choice',
+				'QUIZ_TRUE_FALSE': 'uc-question-true-false',
+				'QUIZ_MULTIPLE_TRUE_FALSE': 'uc-question-multiple-true-false',
+				'QUIZ_FILL_IN_BLANK': 'uc-question-fill-in-blank',
+				'QUIZ_MATCHING': 'uc-question-matching',
+				'QUIZ_MATCHING_V2': 'uc-quiz-matching',
+				'SHORT_ANSWER': 'uc-question-short-answer',
+				'ESSAY': 'uc-question-essay',
+				'FILE_UPLOAD': 'uc-question-file-upload',
+				'AUDIO_RESPONSE': 'uc-question-audio-response'
+			};
+			return map[type] || 'div';
+		},
+		isAnswered(questionId) {
+			const answer = this.userAnswers[questionId]?.answerData;
+			if (answer === null || answer === undefined) return false;
+			if (typeof answer === 'string' && answer.trim() === '') return false;
+			if (Array.isArray(answer) && answer.length === 0) return false;
+			if (typeof answer === 'object' && !Array.isArray(answer) && Object.keys(answer).length === 0) return false;
+			return true;
+		},
+		formatDate(dateString) {
+			if (!dateString) return 'Chưa có thông tin';
+			const date = new Date(dateString);
+			return date.toLocaleString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+		},
+		getYoutubeEmbedUrl(url) {
+			if (!url) return '';
+			let videoId = '';
+			const standardMatch = url.match(/[?&]v=([^&]+)/);
+			if (standardMatch) videoId = standardMatch[1];
+			const shortMatch = url.match(/youtu\.be\/([^?]+)/);
+			if (shortMatch) videoId = shortMatch[1];
+			const embedMatch = url.match(/embed\/([^?]+)/);
+			if (embedMatch) videoId = embedMatch[1];
+			if (videoId) return `https://www.youtube.com/embed/${videoId}`;
+			return url;
+		},
+		getDriveFileId(url) {
+			const match = url?.match(/\/d\/([^/]+)\//);
+			return match ? match[1] : null;
+		},
+		renderUrlYoutube,
+		test() { window.open("/lms-student-dashboard", '_parent'); },
+		questionsTypesLabel,
+		updateAnswer(questionId, newAnswer) {
+
+			this.isUpdate = true
+			console.log('update....', this.isUpdate)
+			const newAnswers = { ...this.userAnswers };
+			console.log('Received answer update for question ID:', questionId, 'New Answer:', newAnswer);
+			const currentAnswerObject = newAnswers[questionId] || {};
+			let answerData;
+
+			const question = this.allQuestions.find(q => q.id === questionId);
+			if (!question) { console.error(`Không tìm thấy cấu hình cho câu hỏi ID: ${questionId}`); return; }
+
+			const questionType = question.type;
+			const fileBasedTypes = ['FILE_UPLOAD', 'AUDIO_RESPONSE'];
+			if (fileBasedTypes.includes(questionType)) { answerData = Array.isArray(newAnswer) ? newAnswer : [newAnswer]; }
+			else { answerData = newAnswer; }
+
+			console.log('Updating answer for question ID:', questionId, 'New Answer:', newAnswers[questionId]);
+
+			newAnswers[questionId] = {
+				...currentAnswerObject,
+				answerData,
+				grading: {
+					teacherComment: newAnswers[questionId]?.grading?.teacherComment ?? '',
+					comment: newAnswers[questionId]?.grading?.comment ?? '',
+				}
+			};
+
+			const manualComp = ['SHORT_ANSWER', 'ESSAY', 'FILE_UPLOAD', 'AUDIO_RESPONSE'];
+			if (manualComp.includes(questionType)) {
+				newAnswers[questionId].grading = { ...newAnswers[questionId]?.grading, manualScore: null }
+			}
+			this.$emit('update:puseranswers', newAnswers);
+			console.log('newAnswers', newAnswers)
+			this.saveStatus = 'Đang soạn...';
+			this.saveStatusColor = 'orange';
+			this.saveStatusIcon = 'mdi-pencil-outline';
 			if (this.autoSaveTimer) clearTimeout(this.autoSaveTimer);
-		}
+			this.autoSaveTimer = setTimeout(this.saveDraft, 2500);
+		},
+		handleClickAction() {
+			if (this.submissionstatus != 2) {
+				this.submissionstatus = 2
+			} else if (this.submissionstatus != 4 && this.submissionstatus == 2) {
+				this.submissionstatus = 4
+				this.isGrade = true
+			}
+
+		},
+		updateGrading(questionId, newGradingData) {
+			const newGrading = { ...this.userAnswers };
+			const currentAnswer = newGrading[questionId] || {};
+			newGrading[questionId] = { ...currentAnswer, grading: newGradingData };
+			this.$emit('update:puseranswers', newGrading);
+		},
+		displayStatus(status) {
+			switch (status) {
+				case 1: return 'Chưa nộp';
+				case 2: return 'Đã nộp';
+				case 4: return 'Đã chấm điểm';
+				default: return 'Không xác định';
+			}
+		},
+		displayStatusColor(status) {
+			switch (status) {
+				case 1: return 'grey';
+				case 2: return 'blue';
+				case 4: return 'green';
+				default: return 'grey';
+			}
+		},
+	},
+	watch: {
+		assignmentData: {
+			handler: 'initializeAnswers'
+			, deep: true
+			//, immediate: true
+		},
+		isMobile(val) { if (val) { this.viewMode = 'all' } }
+	},
+	beforeUnmount() {
+		if (this.autoSaveTimer) clearTimeout(this.autoSaveTimer);
 	}
+}
 </script>

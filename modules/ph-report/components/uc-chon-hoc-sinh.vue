@@ -12,11 +12,11 @@
 			<v-spacer></v-spacer>
 			<!-- <uc-nien-khoa :is-Show-Title='false' :class-Custom='true'></uc-nien-khoa> -->
 		</div>
-		
+
 
 	</v-card-text>
 
-	<v-list lines="two">
+	<v-list lines="two" style="height: calc(-174px + 100dvh); overflow: auto">
 		<!-- <v-list-subheader>{{ $t('message.selectSemester') }}</v-list-subheader>
 		<div class="d-flex ga-4 justify-center">
 			<v-sheet :color="SelectedSemester == 1 ? 'primary': 'gray'"
@@ -34,9 +34,7 @@
 		<v-list-item :key="user.UserID" :title="user.LastName + ' ' + user.FirstName"
 			:subtitle="user.Phone + ' •  ' + user.Email">
 			<template v-slot:prepend>
-				<v-avatar>
-					<v-img :src="urlAvatarPhuHuynh + user.UserID" contain></v-img>
-				</v-avatar>
+				<uc-avatar :user="user" />
 			</template>
 			<template v-slot:append>
 				<div v-if="IsShow_Both_Parent_Teacher" class="d-flex flex-column justify-center align-center">
@@ -48,20 +46,23 @@
 		</v-list-item>
 
 		<v-list-subheader>{{ $t('message.studentList') }}</v-list-subheader>
-
-		<div v-for="(hocSinh, index) in DSHocSinh" :key="hocSinh.StudentID">
-			<v-list-item :class="vueData.HocSinhSelected?.StudentID === hocSinh.StudentID ? 'bg-primary' : ''"
-				:title="hocSinh.HoTen" :subtitle="'Lớp ' + hocSinh.TenLop + ' (Hiện tại)' + ' - ' + hocSinh.StudentID"
-				:disabled="!hocSinh.IsShow">
+		<div v-for="(hocSinh, index) in DSHocSinh" :key="hocSinh.HocSinhID">
+			<v-list-item :class="vueData.HocSinhSelected?.HocSinhID == hocSinh.StudentID ? 'bg-primary' : ''"
+				:title="hocSinh.HoTen" :disabled="!hocSinh.IsShow">
+				<v-list-item-subtitle style="line-height: 1.25rem !important">
+					Lớp (Hiện tại): <b>{{hocSinh?.TenLop ?? 'Unknown'}}</b> <br />
+					Mã học sinh: <b>{{hocSinh.HocSinhID}}</b>
+				</v-list-item-subtitle>
 				<template v-slot:prepend>
-					<v-avatar>
-						<v-img :src="urlAvatarHocSinh + hocSinh.StudentID" contain></v-img>
-					</v-avatar>
+					<uc-avatar :user="hocSinh" />
 				</template>
 				<template v-slot:append>
-					<v-btn icon="mdi-arrow-right"
-						:color="vueData.HocSinhSelected?.StudentID === hocSinh.StudentID ? 'white' : 'primary'"
-						variant="tonal" size="small" @click="onSelectedHocSinh(hocSinh)"></v-btn>
+					<v-btn v-if="vueData.HocSinhSelected?.HocSinhID != hocSinh.StudentID" icon="mdi-arrow-right"
+						:color="vueData.HocSinhSelected?.HocSinhID == hocSinh.StudentID ? 'white' : 'primary'"
+						variant="tonal" size="small" @click="onSelectedHocSinh(hocSinh, { IsSelect: true })" />
+					<div v-else>
+						<v-chip color="white" size="small">Đang chọn</v-chip>
+					</div>
 				</template>
 			</v-list-item>
 
@@ -69,6 +70,7 @@
 		</div>
 		<uc-empty v-if="DSHocSinh.length === 0" />
 	</v-list>
+	<v-btn @click="vueData.drawerSelectStudent = false" variant="tonal" color="primary" block>Đóng</v-btn>
 </template>
 
 <script>

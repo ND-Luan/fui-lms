@@ -108,7 +108,6 @@ function processGroupedDashboardData(response) {
  * @returns {Array} - Dữ liệu đã được gom nhóm.
  */
 function processLibraryData(flatLibraryData) {
-    console.log('flatLibraryData', flatLibraryData)
     if (!flatLibraryData || flatLibraryData.length === 0) {
         return [];
     }
@@ -148,7 +147,7 @@ function processLibraryData(flatLibraryData) {
         });
         return group;
     });
-    console.log('asdsad', _)
+    console.log('DataLibery', _)
     // Bước 2: Chuyển đổi các object lồng nhau thành mảng để v-for có thể duyệt qua
     return _
 }
@@ -247,23 +246,23 @@ async function initPage() {
         vueData.dataReady = true; // Vẫn hiển thị giao diện với thông báo lỗi
     });
     // API bên ngoài vẫn chạy độc lập
-    const payload = { "NgayDauTuan": getStartOfWeek(new Date()), "GiaoVienID": vueData.sys_UserID };
-    $.ajax({
-        url: 'https://tapi.lhbs.vn/quansinh/ThoiKhoaBieu_GiaoVien',
-        type: 'POST',
-        contentType: 'application/json',
-        data: JSON.stringify(payload),
-        headers: { 'Authorization': 'Bearer ' + window.F_TOKEN },
-        success: function (response) {
-            if (response && response.data && response.data.length >= 2) {
-                processWeeklyScheduleForToday(response.data[1]);
-            }
-        },
-        error: function (jqXHR) {
-            console.error("Lỗi khi tải lịch dạy từ API bên ngoài.", jqXHR.responseText);
-            vueData.schedule = [{ title: 'Không thể tải lịch dạy', subtitle: 'Vui lòng kiểm tra lại' }];
-        }
-    });
+    // const payload = { "NgayDauTuan": getStartOfWeek(new Date()), "GiaoVienID": vueData.sys_UserID };
+    // $.ajax({
+    //     url: 'https://tapi.lhbs.vn/quansinh/ThoiKhoaBieu_GiaoVien',
+    //     type: 'POST',
+    //     contentType: 'application/json',
+    //     data: JSON.stringify(payload),
+    //     headers: { 'Authorization': 'Bearer ' + window.F_TOKEN },
+    //     success: function (response) {
+    //         if (response && response.data && response.data.length >= 2) {
+    //             processWeeklyScheduleForToday(response.data[1]);
+    //         }
+    //     },
+    //     error: function (jqXHR) {
+    //         console.error("Lỗi khi tải lịch dạy từ API bên ngoài.", jqXHR.responseText);
+    //         vueData.schedule = [{ title: 'Không thể tải lịch dạy', subtitle: 'Vui lòng kiểm tra lại' }];
+    //     }
+    // });
 }
 /**
  * Xử lý sự kiện khi giáo viên click nút "Vào lớp".

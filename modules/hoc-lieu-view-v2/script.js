@@ -1,6 +1,6 @@
 
 function fn_renderDataPage() {
-    console.log('HocLieuID:', vueData.HocLieuID, 'NoiDungID:', vueData.NoiDungID);
+    // console.log('HocLieuID:', vueData.HocLieuID, 'NoiDungID:', vueData.NoiDungID);
     vueData.IsLoading = true;
     // --- Bước 1: Xây dựng một cây hoàn chỉnh và một map để tra cứu nhanh ---
     const flatList = vueData.DetailNoiDung
@@ -27,12 +27,12 @@ function fn_renderDataPage() {
         vueData.IsLoading = false;
         return;
     }
-    console.log('objCurrentBaiGiang:', objCurrentBaiGiang);
+    // console.log('objCurrentBaiGiang:', objCurrentBaiGiang);
     // --- Bước 3: Tìm ngược lên để xác định cha và ông (nếu có) ---
     let currentNhomKyNang = null;
     let currentBai = null;
     const parentNode = nodeMap.get(objCurrentBaiGiang.ParentID);
-    console.log('parentNode', parentNode)
+    // console.log('parentNode', parentNode)
     if (parentNode) {
         // if (parentNode.LoaiNoiDung === 'CHUONG') {
         //     currentNhomKyNang = parentNode;
@@ -51,20 +51,20 @@ function fn_renderDataPage() {
             currentNhomKyNang = null; // Không có nhóm kỹ năng trung gian
         }
     }
-    console.log('currentBai:', currentBai);
-    console.log('currentNhomKyNang:', currentNhomKyNang);
+    // console.log('currentBai:', currentBai);
+    // console.log('currentNhomKyNang:', currentNhomKyNang);
     // --- Bước 4: Gán dữ liệu ---
     vueData.currentBaiGiang = {
         ...objCurrentBaiGiang,
         currentNhomKyNang: currentNhomKyNang,
         currentBai: currentBai
     };
-    console.log('flatList', flatList)
+    // console.log('flatList', flatList)
     // Logic tìm index để điều hướng
     const allActivities = flatList.filter(x => {
         const isCheck = x.DataJson !== null && x.ParentID !== null
         if (isCheck) {
-            console.log('x.DataJson', x.DataJson)
+            // console.log('x.DataJson', x.DataJson)
             if (isHTML(x.DataJson)) return x
             else {
                 const dataJson = x.DataJson ? JSON.parse(x.DataJson) : x.DataJson
@@ -76,7 +76,7 @@ function fn_renderDataPage() {
             }
         }
     });
-    console.log('allActivities', allActivities)
+    // console.log('allActivities', allActivities)
     const currentIndex = allActivities.findIndex(x => x.NoiDungID === vueData.NoiDungID);
     vueData.lenCurrentNoiDung = currentIndex;
     vueData.lenDetailNoiDung = allActivities.length;
@@ -93,7 +93,7 @@ function increasePage() {
     const DetailNoiDung = vueData.DetailNoiDung.filter(x => {
         const isCheck = x.DataJson !== null && x.ParentID !== null
         if (isCheck) {
-            console.log('x.DataJson', x.DataJson)
+            // console.log('x.DataJson', x.DataJson)
             if (isHTML(x.DataJson)) return x
             else {
                 const dataJson = x.DataJson ? JSON.parse(x.DataJson) : x.DataJson
@@ -105,10 +105,10 @@ function increasePage() {
             }
         }
     })
-    console.log('increased', DetailNoiDung)
+    // console.log('increased', DetailNoiDung)
     const objCurrent = DetailNoiDung[vueData.lenCurrentNoiDung + 1]
     vueData.NoiDungID = objCurrent.NoiDungID
-    pushState('noidungid', objCurrent.NoiDungID)
+    // pushState('noidungid', objCurrent.NoiDungID)
     initPage()
     fn_renderDataPage()
 }
@@ -130,12 +130,12 @@ function decreasePage() {
     })
     const objCurrent = DetailNoiDung[vueData.lenCurrentNoiDung - 1]
     vueData.NoiDungID = objCurrent.NoiDungID
-    pushState('noidungid', objCurrent.NoiDungID)
+    // pushState('noidungid', objCurrent.NoiDungID)
     initPage()
     fn_renderDataPage()
 }
 function initPage() {
-    console.log('init');
+    // console.log('init');
     vueData.isLoading = true;
     vueData.lessonId = new URLSearchParams(window.location.search).get('noidungid');
     if (vueData.lessonId) {

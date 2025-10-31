@@ -126,6 +126,7 @@ export default {
 		}
 	},
 	mounted() {
+		console.log('this.answer multiplechoice', this.answer)
 		this.widthScreen = window.innerWidth
 		if (this.isGrade) {
 			const ok = _.isEqual(_.sortBy(this.question.config.correctAnswers), _.sortBy(this.internalAnswer))

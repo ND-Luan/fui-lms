@@ -1,1 +1,56 @@
-{"data":[{"dataReady":false,"isEditMode":false,"lesson":null,"selectedElementIndex":null},{"getLessonData":{"API":"lms/EL_Lesson_GetDetail","IN":{"LessonID":"vueData.LessonID"},"OUT":"Lesson_API","CALLBACK":[{"EXE":"console.log('running api...')"},{"EXE":"processInitialData(vueData.Lesson_API)"}]}},{"EXE":"initPage()"}],"watch":{},"controls":[{"prop":"fluid pa-0","rows":[{"prop":":no-gutters= 'true'","cols":[{"el":"uc-lesson-builder","attr":{"v-if":"dataReady",":initial-lesson":"lesson",":is-edit-mode":"isEditMode",":on-save":"saveLesson"}}]}]}],"set":{"menu":false}}
+{
+    "data": [
+        {
+            "dataReady": false,
+            "isEditMode": false,
+            "lesson": null,
+            "selectedElementIndex": null
+        },
+        {
+            "getLessonData": {
+                "API": "lms/EL_Lesson_GetDetail",
+                "IN": {
+                    "LessonID": "vueData.LessonID"
+                },
+                "OUT": "Lesson_API",
+                "CALLBACK": [
+                    {
+                        "EXE": "console.log('running api...')"
+                    },
+                    {
+                        "EXE": "processInitialData(vueData.Lesson_API)"
+                    }
+                ]
+            }
+        },
+        {
+            "EXE": "initPage()"
+        }
+    ],
+    "watch": {},
+    "controls": [
+        {
+            "prop": "fluid pa-0",
+            "rows": [
+                {
+                    "prop": ":no-gutters= 'true'",
+                    "cols": [
+                        {
+                            "el": "uc-lesson-builder",
+                            "attr": {
+                                "v-if": "dataReady",
+                                ":initial-lesson": "lesson",
+                                ":is-edit-mode": "isEditMode",
+                                ":on-save": "saveLesson"
+                            }
+                        }
+                    ]
+                }
+            ]
+        }
+    ],
+    "set": {
+        "menu": false,
+        "menuLeft": false
+    }
+}

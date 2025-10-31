@@ -8,7 +8,7 @@
 			</div>
 		</div>
 		<div class="d-flex align-center ga-2 resource-actions">
-			<v-chip :color="statusInfo.color" size="small" variant="flat" label> {{ statusInfo.text }}</v-chip>
+			<v-chip :class="statusInfo.color == 'orange'? 'text-white' : ''" :color="statusInfo.color" size="small" variant="flat" label> {{ statusInfo.text }}</v-chip>
 			<v-btn size="small" color="primary" variant="tonal" @click="onOpenWindow">{{ actionButtonText }}</v-btn>
 		</div>
 	</div>

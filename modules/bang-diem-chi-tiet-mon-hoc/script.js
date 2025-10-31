@@ -106,7 +106,7 @@ function renderHocSinh() {
             } else if (x.GiaTriCotDiem === 'ICO_Star') { // cấu hình header cột điểm có dạng ICO_Star
                 let column = {
                     type: 'html',
-                    title: x.TenCotDiem_VI, 
+                    title: x.TenCotDiem_VI,
                     name: x.MaCotDiem,
                     width: x.WidthCSS,
                     typeValue: x.GiaTriCotDiem,
@@ -120,7 +120,7 @@ function renderHocSinh() {
             else if (x.GiaTriCotDiem === 'Dropdown_text') { // cấu hình header cột điểm có dạng ICO_Star
                 let column = {
                     type: 'dropdown',
-                    title: x.TenCotDiem_VI, 
+                    title: x.TenCotDiem_VI,
                     name: x.MaCotDiem,
                     width: x.WidthCSS,
                     typeValue: x.GiaTriCotDiem,

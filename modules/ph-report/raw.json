@@ -1,4 +1,5 @@
 {
+    "ModuleName": "LMS System",
     "data": [
         {
             "NienKhoa": null,
@@ -14,16 +15,11 @@
             "DSHocTapThangTiengAnh": [],
             "IsLoadingStudent": true,
             "isLowScreen": false,
-            "IsPassRoleParent": null
-        },
-        {
-            "EXE": "initPage()"
-        },
-        {
-            "IF": "!!vueData.HocSinhSelected === false",
-            "THEN": {
-                "drawerOnboarding": true
-            }
+            "IsPassRoleParent": null,
+            "HocSinhID": "vueData.HocSinhID",
+            "HocSinhSelected": null,
+            "IsFinishLoad_getDSHocSinh": false,
+            "DSNienKhoa": []
         },
         {
             "getDSHocSinh": {
@@ -31,10 +27,16 @@
                 "OUT": "DSHocSinh",
                 "CALLBACK": [
                     {
-                        "EXE": "vueData.DSHocSinh = vueData.DSHocSinh.map(x => ({...x, IsShow: x.Khoi > 0 }))"
+                        "EXE": "vueData.DSHocSinh = vueData.DSHocSinh.map(x => ({...x,HocSinhID: x.StudentID, IsShow: x.Khoi > 0 }))"
                     },
                     {
                         "IsLoadingStudent": false
+                    },
+                    {
+                        "EXE": "vueData.onSelectedHocSinh({ HocSinhID: vueData.HocSinhID })"
+                    },
+                    {
+                        "EXE": "vueData.IsFinishLoad_getDSHocSinh = true"
                     }
                 ]
             },
@@ -56,36 +58,29 @@
             }
         },
         {
-            "CALL": "getDSHocSinh"
-        },
-        {
-            "__IF": "vueData.HocSinhSelected",
-            "THEN": {
-                "EXE": "console.log('IsPassRoleParent',vuedata.IsPassRoleParent)",
-                "IF": "IsPassRoleParent",
-                "THEN": {
-                    "CALL": "getDSThang_GV"
-                },
-                "ELSE": {
-                    "CALL": "getDSThang"
-                }
+            "API": "/lms/NienKhoa_Get",
+            "OUT": "DSNienKhoa_ROOT",
+            "CALLBACK": {
+                "EXE": " vueData.NienKhoa = vueData.DSNienKhoa_ROOT.find(x=> x.IsActive)?.NienKhoa ?? 0"
             }
         },
         {
-            "EXE": "HandleWidth()"
+            "CALL": "getDSHocSinh"
         },
         {
-            "API": "/lms/NienKhoa_Get",
-            "OUT": "DSNienKhoa"
+            "EXE": "initPage()"
+        },
+        {
+            "EXE": "HandleWidth()"
         }
     ],
     "watch": {
         "NienKhoa": [
             {
-                "EXE": "onSelectedHocSinh(vueData.HocSinhSelected);"
-            },
-             {
-                "EXE": "console.log('loadinnit')"
+                "IF": "vueData.NienKhoa !== null && vueData.IsFinishLoad_getDSHocSinh",
+                "THEN": {
+                    "EXE": "vueData.onSelectedHocSinh({ HocSinhID: vueData.HocSinhSelected.HocSinhID })"
+                }
             }
         ],
         "bottomNavigation": {
@@ -117,6 +112,7 @@
                             "attr": {
                                 "v-if": "!drawerOnboarding",
                                 ":elevation": "2",
+                                "density": "compact",
                                 "color": "#1d581e"
                             },
                             "innerHTML": [
@@ -178,7 +174,7 @@
                         {
                             "el": "div",
                             "attr": {
-                                "class": "px-4 d-flex align-center justify-space-between"
+                                "class": "px-4 mt-2 d-flex align-center"
                             },
                             "innerHTML": [
                                 {
@@ -189,23 +185,16 @@
                                     "innerHTML": "{{ $t('message.selectedStudent') }}"
                                 },
                                 {
-                                    "el": "v-btn",
+                                    "el": "v-spacer"
+                                },
+                                {
+                                    "el": "uc-nien-khoa",
                                     "attr": {
-                                        "icon": "",
-                                        "variant": "elevated",
-                                        "v-on:click": "() => drawerSelectStudent = true",
-                                        "class": "mt-1"
-                                    },
-                                    "innerHTML": [
-                                        {
-                                            "el": "v-img",
-                                            "attr": {
-                                                "src": "/_cdn/lhbs-lms/home_back.png",
-                                                "width": "40",
-                                                "height": "40"
-                                            }
-                                        }
-                                    ]
+                                        "v-model:dsnienkhoacustom": "DSNienKhoa",
+                                        ":is-Show-Title": "false",
+                                        ":class-Custom": "true",
+                                        ":is-Show-Bottom-Sheet": true
+                                    }
                                 }
                             ],
                             "w": 12
@@ -232,9 +221,9 @@
                                                         {
                                                             "el": "v-list-item",
                                                             "attr": {
-                                                                "v-if": "HocSinhSelected?.StudentID",
+                                                                "v-if": "HocSinhSelected?.HocSinhID",
                                                                 ":title": "HocSinhSelected?.HoTen",
-                                                                ":subtitle": "$t('message.class')+' ' + HocSinhSelected?.TenLop + ' • ' + HocSinhSelected?.StudentID "
+                                                                ":subtitle": "$t('message.class')+' ' + HocSinhSelected?.TenLop + ' • ' + HocSinhSelected?.HocSinhID "
                                                             },
                                                             "innerHTML": [
                                                                 {
@@ -242,21 +231,21 @@
                                                                     "attr": {
                                                                         "v-slot:prepend": "item"
                                                                     },
-                                                                    "innerHTML": "<v-avatar > <v-img :src='v_Set.urlAvatarHocSinh + HocSinhSelected?.StudentID' contain/> </v-avatar>"
+                                                                    "innerHTML": "<uc-avatar :user='HocSinhSelected' />"
                                                                 },
                                                                 {
                                                                     "el": "template",
                                                                     "attr": {
                                                                         "v-slot:append": "item"
                                                                     },
-                                                                    "innerHTML": "<uc-nien-khoa :is-Show-Title='false' :class-Custom='true'></uc-nien-khoa>"
+                                                                    "innerHTML": "<v-chip class='mt-1' color='primary' variant='tonal' v-on:click='() => drawerSelectStudent = true' size='small' text='Chọn con' />"
                                                                 }
                                                             ]
                                                         },
                                                         {
                                                             "el": "uc-empty",
                                                             "attr": {
-                                                                "v-if": "!HocSinhSelected?.StudentID",
+                                                                "v-if": "!HocSinhSelected?.HocSinhID",
                                                                 ":text": "$t('message.studentNotFound')"
                                                             }
                                                         }
@@ -278,8 +267,8 @@
                                 {
                                     "el": "uc-thang",
                                     "attr": {
-                                        "v-memo": "[keyComponentUcThang]",
-                                        "v-if": "bottomNavigation === 0 && NienKhoa"
+                                        ":key": "keyComponentUcThang",
+                                        "v-if": "bottomNavigation === 0 && NienKhoa && HocSinhSelected"
                                     }
                                 },
                                 {
@@ -289,7 +278,7 @@
                                             "el": "uc-tieng-anh",
                                             "attr": {
                                                 ":key": "keyComponentUcTiengAnh",
-                                                "v-if": "bottomNavigation === 1 && NienKhoa"
+                                                "v-if": "bottomNavigation === 1 && NienKhoa && HocSinhSelected"
                                             }
                                         }
                                     ],
@@ -302,7 +291,7 @@
                                             "el": "uc-hoc-ky-2",
                                             "attr": {
                                                 ":key": "keyComponentUcHocKy",
-                                                "v-if": "bottomNavigation === 2 && NienKhoa"
+                                                "v-if": "bottomNavigation === 2 && NienKhoa && HocSinhSelected"
                                             }
                                         }
                                     ],
@@ -543,6 +532,7 @@
         }
     ],
     "set": {
-        "menu": false
+        "menu": false,
+        "menuLeft": false
     }
 }

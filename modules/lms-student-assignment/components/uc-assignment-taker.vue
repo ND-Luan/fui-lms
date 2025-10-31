@@ -86,7 +86,7 @@
 
 		<v-row dense>
 			<!-- NAV -->
-			<v-col cols="12" sm="12" md="4" v-if="!isMobile" style="border-inline-end: 0.5px dashed #a7a2a2;">
+			<v-col cols="12" sm="12" md="3" v-if="!isMobile" style="border-inline-end: 0.5px dashed #a7a2a2;">
 				<v-card class="question-nav" sticky top="80px" flat>
 					<div class="d-flex justify-end mb-2" v-if="isTablet">
 						<v-btn-toggle v-model="viewMode" color="primary" variant="outlined" density="compact" divided
@@ -172,7 +172,7 @@
 			</v-col>
 
 			<!-- CONTENT -->
-			<v-col cols="12" md="8" class="pe-0">
+			<v-col cols="12" md="9" class="pe-0">
 				<div v-if="viewMode === 'single'">
 					<!-- COMPACT PROGRESS (sticky nhỏ gọn cho chế độ single cũng được, nhưng giữ nguyên logic lưu) -->
 					<v-card class="mb-3 mx-2" flat border
@@ -200,7 +200,7 @@
 					</v-card>
 
 					<v-card v-if="currentQuestion?.config" class="question-content-card " style=" overflow: auto;"
-						:style="{height: draft?.SubmissionStatus <= 2 ? 'calc(100vh - 70px)' : 'calc(100vh - 111px)'}">
+						:style="{ height: draft?.SubmissionStatus <= 2 ? 'calc(100vh - 70px)' : 'calc(100vh - 111px)' }">
 						<div class="d-flex justify-space-between align-center px-2">
 							<v-card class="group-header-card mb-3 w-100" flat border>
 								<v-card-text class="py-3">
@@ -228,7 +228,7 @@
 											<v-chip color="primary" variant="tonal" size="small"
 												class="progress-chip justify-center">
 												{{ getGroupAnsweredCount(currentGroup) }}/{{
-												currentGroup.questions.length }}
+													currentGroup.questions.length }}
 											</v-chip>
 										</div>
 									</div>
@@ -250,7 +250,7 @@
 										<div v-if="currentGroup.media.sourceFiles.image.length > 0"
 											style="min-height: 350px">
 											<v-img v-for="file in currentGroup.media.sourceFiles.image"
-												:key="file.source"
+												@click="showDialogImage(file)" :key="file.source"
 												:src="'https://drive.google.com/thumbnail?id=' + getDriveFileId(file.source) + '&sz=w1000'"
 												:lazy-src="'https://drive.google.com/thumbnail?id=' + getDriveFileId(file.source) + '&sz=w1000'"
 												class="rounded-lg" max-height="350">
@@ -312,7 +312,7 @@
 									<uc-wave-audio-player v-if="question.config.media.sourceRecord.source.length > 0"
 										v-model:audioUrl="question.config.media.sourceRecord.source" />
 									<div v-if="question.config.media.sourceFiles.image?.length > 0"
-										style="min-height: 400px">
+										style="min-height: fit-content">
 										<v-img v-for="file in question.config.media.sourceFiles.image"
 											:key="file.source"
 											:src="'https://drive.google.com/thumbnail?id=' + getDriveFileId(file.source) + '&sz=w1000'"
@@ -449,7 +449,6 @@
 						</div>
 					</v-card>
 				</div>
-
 				<div v-else class="all-questions-mode" style="overflow: auto;"
 					:style="{ height: draft?.SubmissionStatus <= 2 ? 'calc(100vh - 70px)' : 'calc(100vh - 111px)' }">
 					<!-- COMPACT PROGRESS (All mode) -->
@@ -548,6 +547,7 @@
 									:class="{ 'question-answered': isAnswered(question.id) }" flat border>
 									<!-- Compact header -->
 									<div class="question-header-all-compact">
+										<!-- Giao diện desktop -->
 										<div v-if="!isMobile">
 											<div class="mb-2 d-flex align-center ga-2">
 												<v-chip v-if="questionsTypesLabel(question.type)"
@@ -584,7 +584,7 @@
 											</div>
 										</div>
 
-
+										<!-- Giao diện mobile -->
 										<div v-else class="d-flex flex-column ga-1">
 											<div class="d-flex align-center ga-2">
 												<v-chip v-if="questionsTypesLabel(question.type)"
@@ -636,9 +636,9 @@
 												v-if="question.config.media.sourceRecord.source.length > 0"
 												v-model:audioUrl="question.config.media.sourceRecord.source" />
 											<div v-if="question.config.media.sourceFiles.image?.length > 0"
-												style="min-height: 400px">
+												style="min-height: fit-content" class="mb-3">
 												<v-img v-for="file in question.config.media.sourceFiles.image"
-													:key="file.source"
+													@click="showDialogImage(file)" :key="file.source"
 													:src="'https://drive.google.com/thumbnail?id=' + getDriveFileId(file.source) + '&sz=w1000'"
 													:lazy-src="'https://drive.google.com/thumbnail?id=' + getDriveFileId(file.source) + '&sz=w1000'"
 													class="rounded-lg" max-height="400">
@@ -648,6 +648,20 @@
 														</v-row>
 													</template>
 												</v-img>
+
+												<!-- Để dialog mở ảnh để test nếu có hình nào nhỏ thì dùng -->
+												<!-- <v-dialog v-model="dialogImage" class="dialog-image">
+													<v-card :width="isMobile ? '100%' : '80%'"
+														class="position-relative">
+														<v-img cover
+															:src="'https://drive.google.com/thumbnail?id=' + getDriveFileId(fileData.source) + '&sz=w1000'"
+															:lazy-src="'https://drive.google.com/thumbnail?id=' + getDriveFileId(fileData.source) + '&sz=w1000'" />
+														<v-btn class="position-absolute top-0 right-0" icon
+															variant="text"
+															@click="dialogImage = false; fileData = {}"><v-icon>mdi-close</v-icon></v-btn>
+
+													</v-card>
+												</v-dialog> -->
 											</div>
 											<div v-if="question.config.media.sourceFiles.file?.length > 0">
 												<iframe v-for="file in question.config.media.sourceFiles.file"
@@ -678,390 +692,412 @@
 </template>
 
 <script>
-	export default {
-		name: 'uc-assignment-taker',
-		props: {
-			puseranswers: Object,
-			assignmentData: Array,
-			monHocName: String,
-			onSaveDraft: { type: Function, default: () => { } },
-			onOpenSubmitDialog: { type: Function, default: () => { } }
+export default {
+	name: 'uc-assignment-taker',
+	props: {
+		puseranswers: Object,
+		assignmentData: Array,
+		monHocName: String,
+		onSaveDraft: { type: Function, default: () => { } },
+		onOpenSubmitDialog: { type: Function, default: () => { } }
+	},
+	emits: ['update:puseranswers'],
+	data() {
+		return {
+			viewMode: 'all',
+			navCollapsed: false,
+			groupCollapsed: {},
+			currentGroupIndex: 0,
+			currentQuestionIndexInGroup: 0,
+			saveStatus: 'Đã lưu',
+			saveStatusColor: 'grey',
+			saveStatusIcon: 'mdi-cloud-check-outline',
+			isSaving: false,
+			autoSaveTimer: null,
+			vueData,
+			isMobile: false,
+			isTablet: false,
+			showInstructions: false,
+			toggleTC: false,
+			fileData: {},
+			dialogImage: false,
+			_
+		}
+	},
+	watch: {
+		assignmentData: {
+			handler: (val) => {
+				console.log('run....', val)
+
+			},
+			deep: true,
+			// immediate: true
 		},
-		emits: ['update:puseranswers'],
-		data() {
-			return {
-				viewMode: 'all',
-				navCollapsed: false,
-				groupCollapsed: {},
-				currentGroupIndex: 0,
-				currentQuestionIndexInGroup: 0,
-				saveStatus: 'Đã lưu',
-				saveStatusColor: 'grey',
-				saveStatusIcon: 'mdi-cloud-check-outline',
-				isSaving: false,
-				autoSaveTimer: null,
-				vueData,
-				isMobile: false,
-				isTablet: false,
-				showInstructions: false,
-				toggleTC: false,
+		isMobile(val) { if (val) { this.viewMode = 'all' } }
+	},
+	computed: {
+		userAnswers() {
+			return this.puseranswers || {};
+		},
+		assignment() {
+			if (!this.assignmentData || !this.assignmentData[0] || !this.assignmentData[0][0]) { return null; }
+			const config = this.assignmentData[0][0];
+			console.log('config', config)
+			if (config && typeof config.AssignmentConfig === 'string' && !config.groups) {
+				try {
+					config.groups = JSON.parse(config.AssignmentConfig).groups || [];
+
+				} catch (e) {
+					config.groups = [];
+				}
 			}
+			return config;
 		},
-		computed: {
-			userAnswers() {
-				return this.puseranswers || {};
-			},
-			assignment() {
-				if (!this.assignmentData || !this.assignmentData[0] || !this.assignmentData[0][0]) { return null; }
-				const config = this.assignmentData[0][0];
-				if (config && typeof config.AssignmentConfig === 'string' && !config.groups) {
-					try { config.groups = JSON.parse(config.AssignmentConfig).groups || []; } catch (e) { config.groups = []; }
-				}
-				return config;
-			},
-			draft() {
-				let _data = null
-				if (!this.assignmentData || !this.assignmentData[1] || !this.assignmentData[1][0])
-					_data = null
-				else _data = this.assignmentData[1][0];
-				return _data
-			},
-			totalQuestions() {
-				if (!this.assignment?.groups) return 0;
-				return this.assignment.groups.reduce((total, group) => total + group.questions.length, 0);
-			},
-			currentGroup() { return this.assignment?.groups?.[this.currentGroupIndex]; },
-			currentQuestion() { return this.currentGroup?.questions?.[this.currentQuestionIndexInGroup]; },
-			globalQuestionNumber() {
-				if (!this.assignment?.groups) return 1;
-				return this.getGlobalQuestionNumber(this.currentGroupIndex, this.currentQuestionIndexInGroup);
-			},
-			isSubmitted() { return this.draft?.SubmissionStatus >= 2; },
-			isGraded() { return this.isSubmitted && this.draft?.SubmissionStatus === 4; },
-			allQuestions() {
-	
-				return this.assignment?.groups?.flatMap(group => group.questions) || [];
-			},
-			dueDateStatus() {
-				if (!this.assignment?.DueDate) {
-					return { color: 'grey', variant: 'outlined', icon: 'mdi-calendar-blank', text: 'Không giới hạn' };
-				}
-				const now = new Date();
-				const dueDate = new Date(this.assignment.DueDate);
-				const timeDiff = dueDate.getTime() - now.getTime();
-				const daysDiff = Math.ceil(timeDiff / (1000 * 3600 * 24));
-				const hoursDiff = Math.ceil(timeDiff / (1000 * 3600));
-	
-				if (timeDiff < 0) return { color: 'error', variant: 'elevated', icon: 'mdi-clock-alert-outline', text: 'Quá hạn' };
-				if (hoursDiff <= 24) return { color: 'warning', variant: 'elevated', icon: 'mdi-clock-fast', text: hoursDiff <= 1 ? 'Gấp!' : `Còn ${hoursDiff}h` };
-				if (daysDiff <= 3) return { color: 'orange', variant: 'elevated', icon: 'mdi-clock-outline', text: `Còn ${daysDiff} ngày` };
-				return { color: 'success', variant: 'tonal', icon: 'mdi-clock-check-outline', text: daysDiff <= 7 ? `Còn ${daysDiff} ngày` : 'Trong hạn' };
-			},
-			answeredCount() { return this.allQuestions.filter(q => this.isAnswered(q.id)).length; },
-			progressPercent() {
-				if (!this.totalQuestions) return 0;
-				return (this.answeredCount / this.totalQuestions) * 100;
+		draft() {
+			let _data = null
+			if (!this.assignmentData || !this.assignmentData[1] || !this.assignmentData[1][0])
+				_data = null
+			else _data = this.assignmentData[1][0];
+
+			console.log('draft', _data)
+			return _data
+		},
+		totalQuestions() {
+			if (!this.assignment?.groups) return 0;
+			return this.assignment.groups.reduce((total, group) => total + group.questions.length, 0);
+		},
+		currentGroup() { return this.assignment?.groups?.[this.currentGroupIndex]; },
+		currentQuestion() { return this.currentGroup?.questions?.[this.currentQuestionIndexInGroup]; },
+		globalQuestionNumber() {
+			if (!this.assignment?.groups) return 1;
+			return this.getGlobalQuestionNumber(this.currentGroupIndex, this.currentQuestionIndexInGroup);
+		},
+		isSubmitted() { return this.draft?.SubmissionStatus >= 2; },
+		isGraded() { return this.isSubmitted && this.draft?.SubmissionStatus === 4; },
+		allQuestions() {
+
+			return this.assignment?.groups?.flatMap(group => group.questions) || [];
+		},
+		dueDateStatus() {
+			if (!this.assignment?.DueDate) {
+				return { color: 'grey', variant: 'outlined', icon: 'mdi-calendar-blank', text: 'Không giới hạn' };
 			}
+			const now = new Date();
+			const dueDate = new Date(this.assignment.DueDate);
+			const timeDiff = dueDate.getTime() - now.getTime();
+			const daysDiff = Math.ceil(timeDiff / (1000 * 3600 * 24));
+			const hoursDiff = Math.ceil(timeDiff / (1000 * 3600));
+
+			if (timeDiff < 0) return { color: 'error', variant: 'elevated', icon: 'mdi-clock-alert-outline', text: 'Quá hạn' };
+			if (hoursDiff <= 24) return { color: 'warning', variant: 'elevated', icon: 'mdi-clock-fast', text: hoursDiff <= 1 ? 'Gấp!' : `Còn ${hoursDiff}h` };
+			if (daysDiff <= 3) return { color: 'orange', variant: 'elevated', icon: 'mdi-clock-outline', text: `Còn ${daysDiff} ngày` };
+			return { color: 'success', variant: 'tonal', icon: 'mdi-clock-check-outline', text: daysDiff <= 7 ? `Còn ${daysDiff} ngày` : 'Trong hạn' };
 		},
-		mounted() {
-			window.addEventListener('resize', () => { this.ResizeWindow() })
-			this.ResizeWindow()
+		answeredCount() { return this.allQuestions.filter(q => this.isAnswered(q.id)).length; },
+		progressPercent() {
+			if (!this.totalQuestions) return 0;
+			return (this.answeredCount / this.totalQuestions) * 100;
+		}
+	},
+	mounted() {
+		console.log('Test mounted.......')
+		console.log('fisrt mounted.......')
+		window.addEventListener('resize', () => { this.ResizeWindow() })
+		this.ResizeWindow()
+		this.initializeAnswers()
+	},
+	methods: {
+		ResizeWindow() {
+			this.isMobile = window.innerWidth < 960
+			this.isTablet = window.innerWidth <= 1240
 		},
-		methods: {
-			ResizeWindow() {
-				this.isMobile = window.innerWidth < 960
-				this.isTablet = window.innerWidth <= 1240
-			},
-			isActiveQuestion(groupIndex, questionIndexInGroup) {
-				return this.currentGroupIndex === groupIndex && this.currentQuestionIndexInGroup === questionIndexInGroup;
-			},
-			getAnswerForChild(question) {
-				const answerObject = this.userAnswers[question.id];
-				if (question.type === 'FILE_UPLOAD') {
-					if (!answerObject || answerObject.answerData === undefined) return [];
+		isActiveQuestion(groupIndex, questionIndexInGroup) {
+			return this.currentGroupIndex === groupIndex && this.currentQuestionIndexInGroup === questionIndexInGroup;
+		},
+		getAnswerForChild(question) {
+			const answerObject = this.userAnswers[question.id];
+			if (question.type === 'FILE_UPLOAD') {
+				if (!answerObject || answerObject.answerData === undefined) return [];
+			}
+			return answerObject?.answerData;
+		},
+		updateAnswer(questionId, newAnswer) {
+			if (this.isSubmitted) return;
+			console.log('Received answer update for question ID:', questionId, 'New Answer:', newAnswer);
+
+			console.log("this.userAnswers", this.userAnswers)
+			const newAnswers = { ...this.userAnswers };
+			const currentAnswerObject = newAnswers[questionId] || {};
+			let answerData;
+
+			const question = this.allQuestions.find(q => q.id === questionId);
+			if (!question) { console.error(`Không tìm thấy cấu hình cho câu hỏi ID: ${questionId}`); return; }
+
+			const questionType = question.type;
+			const fileBasedTypes = ['FILE_UPLOAD', 'AUDIO_RESPONSE'];
+			if (fileBasedTypes.includes(questionType)) { answerData = Array.isArray(newAnswer) ? newAnswer : [newAnswer]; }
+			else { answerData = newAnswer; }
+
+			console.log('Updating answer for question ID:', questionId, 'New Answer:', newAnswers[questionId]);
+
+			newAnswers[questionId] = {
+				...currentAnswerObject,
+				answerData,
+				grading: {
+					teacherComment: newAnswers[questionId].grading?.teacherComment ?? '',
+					comment: newAnswers[questionId].grading?.comment ?? '',
 				}
-				return answerObject?.answerData;
-			},
-			updateAnswer(questionId, newAnswer) {
-				if (this.isSubmitted) return;
-				console.log('Received answer update for question ID:', questionId, 'New Answer:', newAnswer);
-	
-				console.log("this.userAnswers", this.userAnswers)
-				const newAnswers = { ...this.userAnswers };
-				const currentAnswerObject = newAnswers[questionId] || {};
-				let answerData;
-	
-				const question = this.allQuestions.find(q => q.id === questionId);
-				if (!question) { console.error(`Không tìm thấy cấu hình cho câu hỏi ID: ${questionId}`); return; }
-	
-				const questionType = question.type;
-				const fileBasedTypes = ['FILE_UPLOAD', 'AUDIO_RESPONSE'];
-				if (fileBasedTypes.includes(questionType)) { answerData = Array.isArray(newAnswer) ? newAnswer : [newAnswer]; }
-				else { answerData = newAnswer; }
-	
-				console.log('Updating answer for question ID:', questionId, 'New Answer:', newAnswers[questionId]);
-	
-				newAnswers[questionId] = {
-					...currentAnswerObject,
-					answerData,
-					grading: {
-						teacherComment: newAnswers[questionId].grading?.teacherComment ?? '',
-						comment: newAnswers[questionId].grading?.comment ?? '',
+			};
+
+			const manualComp = ['SHORT_ANSWER', 'ESSAY', 'FILE_UPLOAD', 'AUDIO_RESPONSE'];
+			if (manualComp.includes(questionType)) {
+				newAnswers[questionId].grading = { ...newAnswers[questionId].grading, manualScore: null }
+			}
+
+			this.$emit('update:puseranswers', newAnswers);
+			this.saveStatus = 'Đang soạn...';
+			this.saveStatusColor = 'orange';
+			this.saveStatusIcon = 'mdi-pencil-outline';
+			if (this.autoSaveTimer) clearTimeout(this.autoSaveTimer);
+			this.autoSaveTimer = setTimeout(this.saveDraft, 2500);
+		},
+		async saveDraft() {
+			if (this.isSaving || this.isSubmitted) return;
+			this.isSaving = true;
+			this.saveStatus = 'Đang lưu...';
+			this.saveStatusColor = 'blue';
+			this.saveStatusIcon = 'mdi-cloud-upload-outline';
+
+			const payload = {
+				AssignToClassID: this.assignment.AssignToClassID,
+				SubmissionContent: JSON.stringify({ answers: this.userAnswers }),
+				SubmissionStatus: 1,
+				HocSinhID: vueData.HocSinhDetail.HocSinhID
+			};
+			this.onSaveDraft(payload).then(() => {
+				this.isSaving = false;
+				this.saveStatus = 'Đã lưu';
+				this.saveStatusColor = 'grey';
+				this.saveStatusIcon = 'mdi-cloud-check-outline';
+			});
+		},
+
+		// Điểm thực tế của câu
+		getQuestionScore(questionId) {
+			const g = vueData.userAnswersSubmitted?.[questionId]?.grading
+			if (!g) return null
+			let s = 0
+			let has = false
+			if (typeof g.autoScore === 'number') { s += g.autoScore; has = true }
+			if (typeof g.manualScore === 'number') { s += g.manualScore; has = true }
+			return has ? s : null
+		},
+
+		// Chip trạng thái câu
+		questionStatus(questionId, maxPoint) {
+			const answered = this.isAnswered(questionId)
+			if (!this.isSubmitted) {
+				return answered ? { label: 'Đã TL', color: 'primary', variant: 'tonal' }
+					: { label: 'Chưa TL', color: 'grey', variant: 'tonal' }
+			}
+			if (!this.isGraded) return { label: 'Chờ chấm', color: 'grey', variant: 'tonal' }
+
+			if (!answered) return { label: 'Chưa TL', color: 'grey', variant: 'tonal' }
+			const s = this.getQuestionScore(questionId)
+			if (s === null) return { label: 'Chờ chấm', color: 'grey', variant: 'tonal' }
+			if (s <= 0) return { label: 'Sai', color: 'error', variant: 'tonal' }
+			if (s >= (maxPoint ?? 0)) return { label: 'Đúng', color: 'success', variant: 'tonal' }
+			return { label: 'Một phần', color: 'warning', variant: 'tonal' }
+		},
+
+		initializeAnswers() {
+			// console.log('this.draft', this.draft)
+			if (this.draft) {
+				try {
+					const asmConfigString = this.assignmentData[0][0]?.AssignmentConfig
+					const asmData = JSON.parse(asmConfigString)
+					let submissionContent = {
+						answers: {}
 					}
-				};
-	
-				const manualComp = ['SHORT_ANSWER', 'ESSAY', 'FILE_UPLOAD', 'AUDIO_RESPONSE'];
-				if (manualComp.includes(questionType)) {
-					newAnswers[questionId].grading = { ...newAnswers[questionId].grading, manualScore: null }
-				}
-	
-				this.$emit('update:puseranswers', newAnswers);
-				this.saveStatus = 'Đang soạn...';
-				this.saveStatusColor = 'orange';
-				this.saveStatusIcon = 'mdi-pencil-outline';
-				if (this.autoSaveTimer) clearTimeout(this.autoSaveTimer);
-				this.autoSaveTimer = setTimeout(this.saveDraft, 2500);
-			},
-			async saveDraft() {
-				if (this.isSaving || this.isSubmitted) return;
-				this.isSaving = true;
-				this.saveStatus = 'Đang lưu...';
-				this.saveStatusColor = 'blue';
-				this.saveStatusIcon = 'mdi-cloud-upload-outline';
-	
-				const payload = {
-					AssignToClassID: this.assignment.AssignToClassID,
-					SubmissionContent: JSON.stringify({ answers: this.userAnswers }),
-					SubmissionStatus: 1,
-					HocSinhID: vueData.HocSinhDetail.HocSinhID
-				};
-				this.onSaveDraft(payload).then(() => {
-					this.isSaving = false;
-					this.saveStatus = 'Đã lưu';
-					this.saveStatusColor = 'grey';
-					this.saveStatusIcon = 'mdi-cloud-check-outline';
-				});
-			},
-	
-			// Điểm thực tế của câu
-			getQuestionScore(questionId) {
-				const g = vueData.userAnswersSubmitted?.[questionId]?.grading
-				if (!g) return null
-				let s = 0
-				let has = false
-				if (typeof g.autoScore === 'number') { s += g.autoScore; has = true }
-				if (typeof g.manualScore === 'number') { s += g.manualScore; has = true }
-				return has ? s : null
-			},
-	
-			// Chip trạng thái câu
-			questionStatus(questionId, maxPoint) {
-				const answered = this.isAnswered(questionId)
-				if (!this.isSubmitted) {
-					return answered ? { label: 'Đã TL', color: 'primary', variant: 'tonal' }
-						: { label: 'Chưa TL', color: 'grey', variant: 'tonal' }
-				}
-				if (!this.isGraded) return { label: 'Chờ chấm', color: 'grey', variant: 'tonal' }
-	
-				if (!answered) return { label: 'Chưa TL', color: 'grey', variant: 'tonal' }
-				const s = this.getQuestionScore(questionId)
-				if (s === null) return { label: 'Chờ chấm', color: 'grey', variant: 'tonal' }
-				if (s <= 0) return { label: 'Sai', color: 'error', variant: 'tonal' }
-				if (s >= (maxPoint ?? 0)) return { label: 'Đúng', color: 'success', variant: 'tonal' }
-				return { label: 'Một phần', color: 'warning', variant: 'tonal' }
-			},
-	
-			initializeAnswers() {
-				// if (!this.draft) return
-				if (this.draft) {
-	
-	
-					console.log('draft..........', this.draft, this.assignmentData[0][0]?.AssignmentConfig)
-					try {
-						const asmConfigString = this.assignmentData[0][0]?.AssignmentConfig
-						const asmData = JSON.parse(asmConfigString)
-						let submissionContent = {
-							answers: {}
-						}
-						if (this.draft) {
-							submissionContent = JSON.parse(this.draft?.SubmissionContent)
-						}
-						const answers = submissionContent.answers
-						console.log("answers", answers)
-						asmData.groups.forEach(group => {
-							for (var question of group.questions) {
-								answers[question.id] = {
-									answerData: answers[question.id]?.answerData ?? null,
-									flag: answers[question.id]?.flag ?? false,
-									grading: {
-										comment: answers[question.id]?.grading?.comment || null,
-										teacherComment: answers[question.id]?.grading?.teacherComment || null,
-										manualScore: answers[question.id]?.grading?.manualScore || null,
-									}
+					if (this.draft) {
+						submissionContent = JSON.parse(this.draft?.SubmissionContent)
+					}
+					const answers = submissionContent.answers
+					asmData.groups.forEach(group => {
+						for (var question of group.questions) {
+							answers[question.id] = {
+								answerData: answers[question.id]?.answerData ?? null,
+								flag: answers[question.id]?.flag ?? false,
+								grading: {
+									comment: answers[question.id]?.grading?.comment || null,
+									teacherComment: answers[question.id]?.grading?.teacherComment || null,
+									manualScore: answers[question.id]?.grading?.manualScore || null,
 								}
 							}
-						})
-	
-						this.$emit('update:puseranswers', answers || {});
-					} catch (e) {
-						console.log('Lỗi initializeAnswers:', e)
-						this.$emit('update:puseranswers', {});
-					}
+						}
+					})
+
+					this.$emit('update:puseranswers', answers || {});
+				} catch (e) {
+					console.log('Lỗi initializeAnswers:', e)
+					this.$emit('update:puseranswers', {});
 				}
-				else {
-					//Nếu chưa có draft phải save trước để biết bấm đã bấm vô làm bài
-					this.saveDraft()
-	
-					if (this.assignment?.groups) {
-						const initialCollapsed = {};
-						this.assignment.groups.forEach((group, index) => { initialCollapsed[index] = false });
-						this.groupCollapsed = initialCollapsed;
-					}
+			}
+			else {
+				//Nếu chưa có draft phải save trước để biết bấm đã bấm vô làm bài
+				this.saveDraft()
+				if (this.assignment?.groups) {
+					const initialCollapsed = {};
+					this.assignment.groups.forEach((group, index) => { initialCollapsed[index] = false });
+					this.groupCollapsed = initialCollapsed;
 				}
-			},
-			getQuestionStatusIcon(questionId) {
-				if (this.isGraded) {
-					let question = this.allQuestions.find(q => q.id === questionId);
-					const grading = vueData.userAnswersSubmitted?.[questionId]?.grading;
-					if (!grading) return 'mdi-help-circle-outline'
-					else if (grading.isCorrect == true || grading.manualScore == question.points) return 'mdi-check-circle'
-					else if (grading.isCorrect == true || (grading.manualScore < question.points && grading.manualScore > 0)) return 'mdi-minus-circle-outline'
-					else return 'mdi-close-circle';
-				}
-				if (this.isAnswered(questionId)) { return 'mdi-pencil-circle'; }
-				const num = this.getGlobalQuestionNumberByQuestionId(questionId);
-				return `mdi-help-box-outline`;
-			},
-			getIconColor(questionId) {
-				if (this.isGraded) {
-					let question = this.allQuestions.find(q => q.id === questionId);
-					const grading = vueData.userAnswersSubmitted?.[questionId]?.grading;
-					if (!grading) return 'grey'
-					else if (grading.isCorrect == true || grading.manualScore == question.points) return 'green'
-					else if (grading.isCorrect == true || (grading.manualScore < question.points && grading.manualScore > 0)) return 'warning'
-					else return 'red';
-	
-				}
-				return this.isAnswered(questionId) ? 'blue' : 'grey';
-			},
-			getGlobalQuestionNumber(groupIndex, questionIndexInGroup) {
-				if (!this.assignment?.groups) return 1;
-				let number = 1;
-				for (let i = 0; i < groupIndex; i++) { number += this.assignment.groups[i].questions.length; }
-				return number + questionIndexInGroup;
-			},
-			getGlobalQuestionNumberByQuestionId(questionId) {
-				if (!this.allQuestions) return 0;
-				const index = this.allQuestions.findIndex(q => q.id === questionId);
-				return index + 1;
-			},
-			getGroupAnsweredCount(group) {
-				return group.questions.filter(q => this.isAnswered(q.id)).length;
-			},
-			toggleGroupCollapse(groupIndex) {
-				this.groupCollapsed = { ...this.groupCollapsed, [groupIndex]: !this.groupCollapsed[groupIndex] };
-			},
-			navigateToQuestion(groupIndex, questionIndexInGroup, id) {
-				if (this.viewMode == 'all') {
-	
-					var element = document.getElementById(id);
-					element.scrollIntoView({
-						behavior: "smooth", // cuộn mượt 
-						block: "start" // vị trí hiển thị: start | center | end | nearest 
-					});
-				}
-				this.currentGroupIndex = groupIndex;
-				this.currentQuestionIndexInGroup = questionIndexInGroup;
-				if (this.groupCollapsed[groupIndex]) { this.toggleGroupCollapse(groupIndex); }
-			},
-			prevQuestion() {
-				if (this.currentQuestionIndexInGroup > 0) { this.currentQuestionIndexInGroup--; }
-				else if (this.currentGroupIndex > 0) {
-					this.currentGroupIndex--;
-					this.currentQuestionIndexInGroup = this.assignment.groups[this.currentGroupIndex].questions.length - 1;
-				}
-			},
-			nextQuestion() {
-				if (!this.assignment || !this.assignment.groups) return;
-				const currentGroup = this.assignment.groups[this.currentGroupIndex];
-				if (this.currentQuestionIndexInGroup < currentGroup.questions.length - 1) { this.currentQuestionIndexInGroup++; }
-				else if (this.currentGroupIndex < this.assignment.groups.length - 1) {
-					this.currentGroupIndex++;
-					this.currentQuestionIndexInGroup = 0;
-				}
-			},
-			getQuestionComponent(type) {
-				const map = {
-					'QUIZ_SINGLE_CHOICE': 'uc-question-single-choice',
-					'QUIZ_MULTIPLE_CHOICE': 'uc-question-multiple-choice',
-					'QUIZ_TRUE_FALSE': 'uc-question-true-false',
-					'QUIZ_MULTIPLE_TRUE_FALSE': 'uc-question-multiple-true-false',
-					'QUIZ_FILL_IN_BLANK': 'uc-question-fill-in-blank',
-					'QUIZ_MATCHING': 'uc-question-matching',
-					'SHORT_ANSWER': 'uc-question-short-answer',
-					'ESSAY': 'uc-question-essay',
-					'FILE_UPLOAD': 'uc-question-file-upload',
-					'AUDIO_RESPONSE': 'uc-question-audio-response'
-				};
-				return map[type] || 'div';
-			},
-			isAnswered(questionId) {
-				const answer = this.userAnswers[questionId]?.answerData;
-				if (answer === null || answer === undefined) return false;
-				if (typeof answer === 'string' && answer.trim() === '') return false;
-				if (Array.isArray(answer) && answer.length === 0) return false;
-				if (typeof answer === 'object' && !Array.isArray(answer) && Object.keys(answer).length === 0) return false;
-				return true;
-			},
-			formatDate(dateString) {
-				if (!dateString) return 'Chưa có thông tin';
-				const date = new Date(dateString);
-				return date.toLocaleString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
-			},
-			getYoutubeEmbedUrl(url) {
-				if (!url) return '';
-				let videoId = '';
-				const standardMatch = url.match(/[?&]v=([^&]+)/);
-				if (standardMatch) videoId = standardMatch[1];
-				const shortMatch = url.match(/youtu\.be\/([^?]+)/);
-				if (shortMatch) videoId = shortMatch[1];
-				const embedMatch = url.match(/embed\/([^?]+)/);
-				if (embedMatch) videoId = embedMatch[1];
-				if (videoId) return `https://www.youtube.com/embed/${videoId}`;
-				return url;
-			},
-			getDriveFileId(url) {
-				const match = url?.match(/\/d\/([^/]+)\//);
-				return match ? match[1] : null;
-			},
-			renderUrlYoutube,
-			test() { window.open("/lms-student-dashboard", '_parent'); },
-			questionsTypesLabel,
-			iconFlag(isFlagged) {
-				if (isFlagged) return 'mdi-flag-variant'
-				return 'mdi-flag-variant-outline'
-			},
-			handleFlag(qid) {
-				console.log(1)
-				this.userAnswers[qid].flag = !this.userAnswers[qid]?.flag
-	
-				this.saveStatus = 'Đang soạn...';
-				this.saveStatusColor = 'orange';
-				this.saveStatusIcon = 'mdi-pencil-outline';
-				if (this.autoSaveTimer) clearTimeout(this.autoSaveTimer);
-				this.autoSaveTimer = setTimeout(this.saveDraft, 2500);
 			}
 		},
-		watch: {
-			assignmentData: {
-				handler: 'initializeAnswers',
-				deep: true
-				//, immediate: true
-			},
-			isMobile(val) { if (val) { this.viewMode = 'all' } }
+		getQuestionStatusIcon(questionId) {
+			if (this.isGraded) {
+				let question = this.allQuestions.find(q => q.id === questionId);
+				const grading = vueData.userAnswersSubmitted?.[questionId]?.grading;
+				if (!grading) return 'mdi-help-circle-outline'
+				else if (grading.isCorrect == true || grading.manualScore == question.points) return 'mdi-check-circle'
+				else if (grading.isCorrect == true || (grading.manualScore < question.points && grading.manualScore > 0)) return 'mdi-minus-circle-outline'
+				else return 'mdi-close-circle';
+			}
+			if (this.isAnswered(questionId)) { return 'mdi-pencil-circle'; }
+			const num = this.getGlobalQuestionNumberByQuestionId(questionId);
+			return `mdi-help-box-outline`;
 		},
-		beforeUnmount() {
+		getIconColor(questionId) {
+			if (this.isGraded) {
+				let question = this.allQuestions.find(q => q.id === questionId);
+				const grading = vueData.userAnswersSubmitted?.[questionId]?.grading;
+				if (!grading) return 'grey'
+				else if (grading.isCorrect == true || grading.manualScore == question.points) return 'green'
+				else if (grading.isCorrect == true || (grading.manualScore < question.points && grading.manualScore > 0)) return 'warning'
+				else return 'red';
+
+			}
+			return this.isAnswered(questionId) ? 'blue' : 'grey';
+		},
+		getGlobalQuestionNumber(groupIndex, questionIndexInGroup) {
+			if (!this.assignment?.groups) return 1;
+			let number = 1;
+			for (let i = 0; i < groupIndex; i++) { number += this.assignment.groups[i].questions.length; }
+			return number + questionIndexInGroup;
+		},
+		getGlobalQuestionNumberByQuestionId(questionId) {
+			if (!this.allQuestions) return 0;
+			const index = this.allQuestions.findIndex(q => q.id === questionId);
+			return index + 1;
+		},
+		getGroupAnsweredCount(group) {
+			return group.questions.filter(q => this.isAnswered(q.id)).length;
+		},
+		toggleGroupCollapse(groupIndex) {
+			this.groupCollapsed = { ...this.groupCollapsed, [groupIndex]: !this.groupCollapsed[groupIndex] };
+		},
+		navigateToQuestion(groupIndex, questionIndexInGroup, id) {
+			if (this.viewMode == 'all') {
+
+				var element = document.getElementById(id);
+				element.scrollIntoView({
+					behavior: "smooth", // cuộn mượt 
+					block: "start" // vị trí hiển thị: start | center | end | nearest 
+				});
+			}
+			this.currentGroupIndex = groupIndex;
+			this.currentQuestionIndexInGroup = questionIndexInGroup;
+			if (this.groupCollapsed[groupIndex]) { this.toggleGroupCollapse(groupIndex); }
+		},
+		prevQuestion() {
+			if (this.currentQuestionIndexInGroup > 0) { this.currentQuestionIndexInGroup--; }
+			else if (this.currentGroupIndex > 0) {
+				this.currentGroupIndex--;
+				this.currentQuestionIndexInGroup = this.assignment.groups[this.currentGroupIndex].questions.length - 1;
+			}
+		},
+		nextQuestion() {
+			if (!this.assignment || !this.assignment.groups) return;
+			const currentGroup = this.assignment.groups[this.currentGroupIndex];
+			if (this.currentQuestionIndexInGroup < currentGroup.questions.length - 1) { this.currentQuestionIndexInGroup++; }
+			else if (this.currentGroupIndex < this.assignment.groups.length - 1) {
+				this.currentGroupIndex++;
+				this.currentQuestionIndexInGroup = 0;
+			}
+		},
+		getQuestionComponent(type) {
+			const map = {
+				'QUIZ_SINGLE_CHOICE': 'uc-question-single-choice',
+				'QUIZ_MULTIPLE_CHOICE': 'uc-question-multiple-choice',
+				'QUIZ_TRUE_FALSE': 'uc-question-true-false',
+				'QUIZ_MULTIPLE_TRUE_FALSE': 'uc-question-multiple-true-false',
+				'QUIZ_FILL_IN_BLANK': 'uc-question-fill-in-blank',
+				'QUIZ_MATCHING': 'uc-question-matching',
+				'SHORT_ANSWER': 'uc-question-short-answer',
+				'ESSAY': 'uc-question-essay',
+				'FILE_UPLOAD': 'uc-question-file-upload',
+				'AUDIO_RESPONSE': 'uc-question-audio-response'
+			};
+			return map[type] || 'div';
+		},
+		isAnswered(questionId) {
+			const answer = this.userAnswers[questionId]?.answerData;
+			if (answer === null || answer === undefined) return false;
+			if (typeof answer === 'string' && answer.trim() === '') return false;
+			if (Array.isArray(answer) && answer.length === 0) return false;
+			if (typeof answer === 'object' && !Array.isArray(answer) && Object.keys(answer).length === 0) return false;
+			return true;
+		},
+		formatDate(dateString) {
+			if (!dateString) return 'Chưa có thông tin';
+			const date = new Date(dateString);
+			return date.toLocaleString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+		},
+		getYoutubeEmbedUrl(url) {
+			if (!url) return '';
+			let videoId = '';
+			const standardMatch = url.match(/[?&]v=([^&]+)/);
+			if (standardMatch) videoId = standardMatch[1];
+			const shortMatch = url.match(/youtu\.be\/([^?]+)/);
+			if (shortMatch) videoId = shortMatch[1];
+			const embedMatch = url.match(/embed\/([^?]+)/);
+			if (embedMatch) videoId = embedMatch[1];
+			if (videoId) return `https://www.youtube.com/embed/${videoId}`;
+			return url;
+		},
+		getDriveFileId(url) {
+			const match = url?.match(/\/d\/([^/]+)\//);
+			return match ? match[1] : null;
+		},
+		renderUrlYoutube,
+		test() { window.open("/lms-student-dashboard", '_parent'); },
+		questionsTypesLabel,
+		iconFlag(isFlagged) {
+			if (isFlagged) return 'mdi-flag-variant'
+			return 'mdi-flag-variant-outline'
+		},
+		handleFlag(qid) {
+			console.log(1)
+			this.userAnswers[qid].flag = !this.userAnswers[qid]?.flag
+			this.saveStatus = 'Đang soạn...';
+			this.saveStatusColor = 'orange';
+			this.saveStatusIcon = 'mdi-pencil-outline';
 			if (this.autoSaveTimer) clearTimeout(this.autoSaveTimer);
+			this.autoSaveTimer = setTimeout(this.saveDraft, 2500);
+		},
+		showDialogImage(file) {
+			console.log('file', file)
+			if (vueData.user.UserID != '17100132') return;
+			this.dialogImage = true
+
+			this.fileData = file
 		}
+	},
+	beforeUnmount() {
+		console.log('beforeUnmount called, autoSaveTimer cleared.');
+		if (this.autoSaveTimer) clearTimeout(this.autoSaveTimer);
+	},
+	unmounted() {
+		console.log('unmounted called, autoSaveTimer cleared.');
 	}
+}
 </script>

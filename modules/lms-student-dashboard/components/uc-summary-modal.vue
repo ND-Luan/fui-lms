@@ -38,8 +38,8 @@
           </tr>
         </thead>
         <tbody>
-          <tr v-for="(item,index) in summaryData.details" :key="item.QuestionID">
-            <td class="text-caption" v-html="'Câu '+(index+1) +': ' +item.QuestionText"></td>
+          <tr v-for="(item, index) in summaryData.details" :key="item.QuestionID">
+            <td class="text-caption" v-html="'Câu ' + (index + 1) + ': ' + item.QuestionText"></td>
             <td class="text-center">
               <v-icon :color="getStatusInfo(item).color">
                 {{ getStatusInfo(item).icon }}
@@ -77,15 +77,21 @@ export default {
       mobile
     };
   },
-  mounted(){
-   console.log('this.summaryData.overview', this.summaryData)
+  mounted() {
+    console.log('this.summaryData.overview', this.summaryData)
   },
   methods: {
-    
+
     navigateToDetails() {
       if (this.summaryData && this.summaryData.overview && this.summaryData.overview.AssignToClassID) {
         console.log('this.summaryData.overview', this.summaryData.overview)
-        this.$emit('navigate-to-details', this.summaryData.overview.AssignToClassID);
+        let window = {
+          title: this.summaryData.overview.Title + ` - Nộp bài lần ${this.summaryData.overview.LanNop}`,
+          url: `/lms-student-assignment?AssignToClassID=${this.summaryData.overview.AssignToClassID}&LanNop=${this.summaryData.overview.LanNop??1}`,
+          id: '123333',
+          onclose: {}
+        }
+        openWindow(window)
       } else {
         Vue.$toast.error('Không thể điều hướng đến chi tiết bài làm vì thiếu thông tin AssignToClassID.');
       }

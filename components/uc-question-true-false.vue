@@ -10,9 +10,9 @@
 			hide-details>
 			<v-radio v-for="(option, index) in options" :key="index" :value="option.value" class="mb-2">
 				<template #label>
-					<div class="d-flex align-center justify-space-between w-100">
+					<div class="d-flex align-center justify-space-between w-100 ga-2">
 						<uc-latex-view :class="getOptionTextClass(option.value)" v-model:content="option.text" />
-						<div v-if="isGraded || submissionstatus == 4" class="feedback-icon">
+						<div v-if="isGraded || submissionstatus == 4" class="feedback-icon ">
 							<v-icon v-if="isSelected(option.value) && isCorrect" color="success">mdi-check</v-icon>
 							<v-icon v-if="isSelected(option.value) && !isCorrect" color="error">mdi-close</v-icon>
 							<v-icon v-if="!isSelected(option.value) && correctAnswer === option.value" color="success"

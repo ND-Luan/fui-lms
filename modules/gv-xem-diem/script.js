@@ -1,4 +1,6 @@
-
+function isNumber(str) {
+    return str.trim() !== '' && !isNaN(str);
+}
 function getDiemTheoLop_Mon_QLD() {
     if (vueData.Semester.HocKi === 0) {
         getDiemTBLop_Mon()
@@ -95,35 +97,41 @@ function getDiemTBLop_Mon() {
         }
     )
 }
-// function getDiemTheoLop_QLD() {
-//     if (vueData.CapID === 1) {
-//         ajaxCALL('psmark1/LMS_GetDanhGiaHocSinh', {
-//             LopID: vueData.LopItem.LopID,
-//             KyDanhGia: vueData.Semester.KyDanhGia,
-//             NamHoc: 2024
-//         }, res => {
-//             vueData.DSHocSinh_API_QLD = res.data
-//             renderDSHocSinh_QLD()
-//         })
-//     } else {
-//         ajaxCALL(`diemc${vueData.CapID}/LMS_GetDiemTheoLop?LopID=${vueData.LopItem.LopID}&MonHocID=anh&HocKy=2`)
-//     }
-//     // ajaxCALL(`https://tapi.lhbs.vn/diemc${vueData.CapID}/LMS_GetDiemTheoLop?LopID=${vueData.LopItem.LopID}&MonHocID=anh&HocKy=2`, null, res => {
-//     //     vueData.DSHocSinh_API_QLD = res.data.map(item => {
-//     //         let findObj = vueData.MonHoc_QLD.find(e => e.MonHocCode.toLowerCase() == item.MonHocID.toLowerCase())
-//     //         if (!findObj) return item
-//     //         return { ...item, MonHocName: findObj.MonHocName, Sort: findObj.Sort}
-//     //     })
-//     //     vueData.DSHocSinh_API_QLD = vueData.DSHocSinh_API_QLD.sort((a, b) => a.Sort - b.Sort);
-//     //     renderDSHocSinh_QLD()
-//     // })
-// }
-function promiseAjaxCALL(url, params) {
-    return new Promise(resolve => {
-        ajaxCALL(url, params, res => {
-            resolve(res)
-        })
+async function onLoadBangDiemLMS() {
+    const HocSinhBangDiem = await ajaxCALLPromise("lms/HocSinhBangDiem_Get_ByLopID_Semester", {
+        Semester: vueData.Semester.value,
+        NienKhoa: vueData.NienKhoa,
+        LopID: vueData.LopItem.LopID,
     })
+    const newData = []
+    const List_HocSinhID = [... new Set(HocSinhBangDiem.map(x => x.HocSinhID))]
+    for (var HocSinhID of List_HocSinhID) {
+        const obj = {
+            HocSinhID,
+            DSCotDiem: []
+        }
+        const arrCotDiemByHocSinhID = HocSinhBangDiem.filter(x => x.HocSinhID === HocSinhID)
+        const DSMonHoc = [... new Set(arrCotDiemByHocSinhID.map(x => x.MonHocCode))]
+        for (var MonHocCode of DSMonHoc) {
+            const arrMonHoc = arrCotDiemByHocSinhID.filter(x => x.MonHocCode === MonHocCode)
+            const newObj = {
+                HocSinhID,
+                MonHocCode,
+            }
+            for (var cd of arrMonHoc) {
+                newObj[cd.MaCotDiem] = cd.KetQuaDanhGia_VI
+            }
+            obj.DSCotDiem.push(newObj)
+        }
+        newData.push(obj)
+    }
+    console.log("newData", newData)
+    // for (var hocSinh of vueData.DSHocSinhQLD) {
+    //     for (var monHoc of hocSinh.DSCotDiem) {
+    //     }
+    // }
+    // console.log("data", data)
+    // console.log("DSHocSinhQLD", vueData.DSHocSinhQLD)
 }
 function fn_KeoDiem() {
     const uniqueHocSinhID = [...new Set(vueData.DSHocSinh_API_QLD.map(x => x.HocSinhID))]
@@ -163,3 +171,4 @@ function renderDSHocSinh_QLD(newData) {
     vueData.DSHocSinhQLD = _dsHocSinh
 }
 vueData.getDiemTheoLop_Mon_QLD = getDiemTheoLop_Mon_QLD
+vueData.isNumber = isNumber

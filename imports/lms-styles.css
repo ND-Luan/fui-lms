@@ -6,7 +6,7 @@
     border-left: thin solid rgba(var(--v-border-color), var(--v-border-opacity));
 }
 
-.custom-border table th+th {
+.custom-border table th+th { 
     border-left: thin solid rgba(var(--v-border-color), var(--v-border-opacity));
     border-right: thin solid rgba(var(--v-border-color), var(--v-border-opacity));
 }
@@ -192,7 +192,7 @@
 }
 
 .height-excel .jss_content {
-    max-height: calc(100vh - 220px) !important
+    max-height: calc(100vh - 230px) !important
 }
 
 .height-excel-tong-ket-hoc-ki .jss_content {
@@ -624,4 +624,47 @@
     /* Trừ đi cả 2 toolbar */
     overflow: auto;
     background-color: #546E7A;
+}
+
+.custom-legend {
+    display: flex;
+    justify-content: center;
+    gap: 25px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    padding: 5px 10px;
+    border-radius: 4px;
+    transition: all 0.2s;
+    user-select: none;
+}
+
+.legend-item:hover {
+    background-color: #f0f0f0;
+}
+
+.legend-item.inactive {
+    opacity: 0.4;
+}
+
+.legend-marker {
+    width: 14px;
+    height: 14px;
+    border-radius: 2px;
+    flex-shrink: 0;
+}
+
+.legend-text {
+    font-size: 13px;
+    font-weight: 500;
+    color: #333;
+}
+.v-toast {
+z-index: 3000 !important;
 }

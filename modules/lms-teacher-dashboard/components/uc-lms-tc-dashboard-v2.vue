@@ -4,17 +4,20 @@
 		<!-- NAVBAR -->
 		<v-toolbar border density="compact" class="bg-white border-sm" style="position: sticky;top: 0; z-index: 50;">
 			<template #title>
-				<span class="text-h5">Bảng điều khiển</span>
+				<span class="text-h5">{{$t('message.ControlPanel')}}</span>
 			</template>
 			<template #append>
 				<v-btn @click="OpenMyLiberies()">
-					<v-icon class="me-1 text-h6">mdi-library-shelves</v-icon> Tài liệu của tôi
+					<v-icon class="me-1 text-h6">mdi-library-shelves</v-icon> {{$t('message.MyDocument')}}
 				</v-btn>
-				<!-- <v-btn v-tooltip="'Hoạt động gần đây'">
-					<v-badge color="error" content="2">
-						<v-icon>mdi-bell-outline</v-icon>
-					</v-badge>
-				</v-btn> -->
+				<v-btn-toggle v-model="toggle" color="primary" size="small" v-if="vueData.user.UserID == 'NA0000022'">
+					<v-btn :value="false" :disabled="!toggle">
+						<v-img src="/_cdn/lhbs-lms/img_page_ph/icon_vietnam.png" width="30" />
+					</v-btn>
+					<v-btn :value="true" :disabled="toggle">
+						<v-img src="/_cdn/lhbs-lms/img_page_ph/icon_english.png" width="30" />
+					</v-btn>
+				</v-btn-toggle>
 			</template>
 		</v-toolbar>
 		<!-- CONTENT -->
@@ -24,18 +27,17 @@
 				<v-expansion-panels variant="accordion" v-model="assignmentNeedGradingPanel" multiple>
 					<v-expansion-panel>
 						<v-expansion-panel-title class="d-flex pa-2">
-							<span class="text-body-1 font-weight-medium">Bài tập cần chấm</span>
+							<span class="text-body-1 font-weight-medium">{{$t('message.AssignmentsToGrade')}}</span>
 							<v-spacer></v-spacer>
 							<v-chip color="warning" size="small" class="font-weight-medium"
-								v-if="focusTasks.length > 0">Có {{
-									focusTasks.length }} bài tập cần
-								chấm</v-chip>
+								v-if="focusTasks.length > 0">{{$t('message.AssignmentsToGrade')}}: {{
+									focusTasks.length }}</v-chip>
 						</v-expansion-panel-title>
 
 						<v-expansion-panel-text class="py-1">
 							<div v-if="!focusTasks || focusTasks.length === 0"
 								class="text-center pa-5 grey--text rounded border mx-3">
-								<p class="mb-0">Không có bài tập nào cần chấm ngay!</p>
+								<p class="mb-0">{{$t('message.NoAssignmentToGrade')}}</p>
 							</div>
 							<v-row v-else class="pa-1" dense>
 								<v-col v-for="task in focusTasks" :key="task.AssignToClassID" cols="12" lg="3" md="6">
@@ -61,8 +63,7 @@
 								<v-menu transition="slide-y-transition">
 									<template v-slot:activator="{ props }">
 										<v-btn color="primary" variant="tonal" size="small"
-											v-bind="props"><v-icon>mdi-plus</v-icon>Tạo nội
-											dung</v-btn>
+											v-bind="props"><v-icon>mdi-plus</v-icon>{{$t('message.CreateContent')}}</v-btn>
 									</template>
 									<v-list>
 										<v-list-item
@@ -98,7 +99,7 @@
 										<v-col cols="12" md="12">
 											<v-expansion-panels variant="popout"
 												:model-value="KhoiItem.weeks?.map((k, index) => index)" multiple>
-												<p v-if="KhoiItem.weeks.length == 0">Không có bài học và bài tập nào</p>
+												<p v-if="KhoiItem.weeks.length == 0">{{ $t('message.EmptyLessonAndAssignment') }}</p>
 												<!-- Mỗi tuần là 1 expansion panel -->
 												<v-expansion-panel v-for="week in KhoiItem.weeks" :key="week.TuanHocID"
 													:model-value="KhoiItem.weeks?.map((k, index) => index)" multiple>
@@ -121,22 +122,19 @@
 																			}}</div>
 																			<div class="class-meta mt-2">
 																				<span>
-																					Sĩ số: {{ classItem.StudentCount }}
-																					học
-																					sinh</span>
+																					{{ $t('message.ClassSize') }}: {{ classItem.StudentCount }}
+																					{{ $t('message.Students') }}</span>
 																				<span class="pending-tag"
 																					v-if="getPendingCount(classItem) > 0 && classItem.ResourceType == 'ASSIGNMENT'">
 																					<v-icon size="small"
 																						class="mr-1">mdi-alert-circle</v-icon>
-																					{{ getPendingCount(classItem) }} bài
-																					cần
-																					chấm
+																					{{ getPendingCount(classItem) }} {{ $t('message.NeedGrade') }}
 																				</span>
 																			</div>
 																		</div>
 																		<div class="class-actions">
 																			<v-btn size="small" variant="tonal"
-																				color="purple" text="Xem sổ điểm"
+																				color="purple" :text="$t('message.ViewGradebook')"
 																				@click.stop="xemTinhTrang(classItem)" />
 																		</div>
 																	</div>
@@ -151,7 +149,7 @@
 																	</div>
 																	<div class="text-center text-grey pa-2"
 																		v-if="classItem.assignments.length === 0">
-																		Lớp này chưa được giao bài tập nào.
+																		{{$t('message.ClassNotAssigned')}}
 																	</div>
 																</v-expansion-panel-text>
 															</v-expansion-panel>
@@ -167,16 +165,14 @@
 					</v-tabs-window>
 				</v-card>
 			</div>
-
 			<v-empty-state icon="mdi-magnify" v-if="DSMonHocActive.length == 0" class="border elevation-2"
-				text="Thầy/ cô hãy liên hệ bộ phận phát triển để tìm hiểu thêm thông tin!"
-				title="Không tìm thấy môn học của thầy/cô">
+				:text="$t('message.ContactDev')"
+				:title="$t('message.NotFoundSubject')">
 			</v-empty-state>
-
 		</div>
 		<uc-btn-with-dialog-add-bt v-model:isOpen="isShowModalAddNoiDung" v-if="isShowModalAddNoiDung" :KhoiItem />
 		<uc-my-liberies v-model:isOpen="isShowMyLiberies" :DSMonHocActive :teachingGroups v-if="isShowMyLiberies"
-			:contentLibrary @CreateContent="(item) => { this.OpenModalAddNoiDung(item) }" />
+			v-model:contentLibrary="contentLibrary" @CreateContent="(item) => { this.OpenModalAddNoiDung(item) }" />
 
 
 	</div>
@@ -186,6 +182,8 @@
 export default {
 	name: 'uc-lms-tc-dashboard-v2',
 	data() {
+		const toggle = JSON.parse(localStorage.getItem('IsLanguage')) ?? false
+		this.$i18n.locale = toggle ? "en" : "vi"
 		return {
 			activeTab: 'classes', x: null, vueData,
 			isShowModalAddNoiDung: false,
@@ -197,8 +195,9 @@ export default {
 			assignmentNeedGradingPanel: [],
 			isOpen: false,
 			url: '',
+			toggle,
 			text: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.'
-
+		
 		}
 	},
 	emits: ['view-class', 'grade-class', 'create-assignment'],
@@ -216,6 +215,14 @@ export default {
 				this.panelChild = [0]
 			})
 		},
+		contentLibrary: function (newVal) {
+			console.log('contentLibrary changed', newVal)
+		},
+		toggle: function (val) {
+			if (val) this.$i18n.locale = 'en';
+			else this.$i18n.locale = 'vi';
+			localStorage.setItem('IsLanguage', val)
+		}
 	},
 	created() {
 		if (this.focusTasks && this.focusTasks.length > 0) {

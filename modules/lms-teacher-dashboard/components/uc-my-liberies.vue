@@ -1,6 +1,6 @@
 <template>
 	<v-navigation-drawer v-model="isOpen" temporary location="end" width="400">
-		<v-list-item prepend-icon="">
+		<v-list-item prepend-icon="" class="bg-white position-sticky top-0" style="z-index: 50;">
 			<template #prepend>
 				<v-icon size="small">mdi-library-shelves</v-icon>
 			</template>
@@ -24,8 +24,12 @@
 				nào!</span>
 		</div>
 		<v-divider></v-divider>
-		<div class="pa-2 d-flex" v-if="DSMonHoc.length > 0">
+		<div class="pa-2 d-flex ga-2" v-if="DSMonHoc.length > 0">
 			<v-spacer></v-spacer>
+			<v-btn color="pink" variant="tonal" size="small" @click="onOpenKhoNoiDung()" v-tooltip="'Kho nội dung'">
+				<v-icon>mdi-archive-outline</v-icon>
+				<span class="text-subtitle-2" style="font-size: .775rem !important;">Kho nội dung</span>
+			</v-btn>
 			<v-menu transition="slide-y-transition">
 				<template v-slot:activator="{ props }">
 					<v-btn color="primary" variant="tonal" size="small" v-bind="props" v-tooltip="tooltipCreateContent">
@@ -58,7 +62,8 @@
 						<v-expansion-panel-text class="d-flex flex-column">
 							<div v-for="(item, indexw) in week.chapters.map(item => { return [...item.items] }).flat()"
 								class="flex-md-4 flex-sm-12 d-flex align-center flex-grow-1 px-1 py-2  mb-md-0"
-								style="min-width: 0;cursor: pointer;" @click="onSelectedLibery(item)">
+								style="min-width: 0;cursor: pointer;"
+								@click="onSelectedLibery(item, week.chapters.map(item => { return [...item.items] }).flat())">
 								<v-icon :color="itemInfo(item).color" size="22" class="mr-2">
 									{{ itemInfo(item).icon }}
 								</v-icon>
@@ -108,8 +113,9 @@
 			<v-spacer></v-spacer>
 			<v-btn color="primary" variant="text" @click="CloseLiberies">Đóng</v-btn>
 		</div>
-		<uc-libery-details v-if="isShowModalLiberyDetails" v-model:isOpen="isShowModalLiberyDetails" :selectedLibery
-			@update:selectedLibery="(newVal) => { vueData.apiCall3(); this.selectedLibery.AssignedDetails = newVal; console.log('newVal', newVal) }" />
+		<uc-libery-details v-if="isShowModalLiberyDetails" v-model:isOpen="isShowModalLiberyDetails"
+			v-model:selectedLibery="selectedLibery" :key="keyComp" :DSAssignedClass="DSAssignedClass"
+			@update:selectedLibery="(newVal) => { vueData.apiCall3(); console.log('newVal', newVal); }" />
 	</v-navigation-drawer>
 </template>
 <script>
@@ -136,11 +142,10 @@ export default {
 		}
 	},
 	mounted() {
-		console.log('contentLibrary', this.contentLibrary);
+		document.body.classList.add('no-scroll');
 		this.DSMonHoc = [...this.DSMonHocActive]
 		this.$nextTick(() => {
 			if (this.DSMonHoc.length > 0) this.selected = this.DSMonHoc[0];
-			console.log('this.selected', this.selected)
 		})
 
 	},
@@ -149,9 +154,16 @@ export default {
 			return 'Tạo nội dung cho môn học ' + this.selected
 		}
 	},
+	watch: {
+		contentLibrary: function (newVal) {
+			if (newVal && this.isShowModalLiberyDetails) {
+			}
+		},
+	},
 	data() {
 
 		return {
+			keyComp: 0,
 			indentLines: 'default',
 			separateRoots: false,
 			actionIcons: false,
@@ -160,16 +172,17 @@ export default {
 			DSMonHoc: [],
 			selected: '',
 			selectedLibery: {},
-			vueData
+			vueData,
+			DSAssignedClass: []
 		}
 	},
 	methods: {
 		CloseLiberies() {
 			this.$emit('update:isOpen', false);
+			document.body.classList.remove('no-scroll');
 		},
 		getLiberies(item) {
 			this.selected = item;
-			console.log('this.selected ', this.selected)
 		},
 		itemInfo(item) {
 			return item.ResourceType === 'ASSIGNMENT'
@@ -184,8 +197,9 @@ export default {
 			};
 			return statusMap[item.Status] || statusMap[1];
 		},
-		onSelectedLibery(item) {
+		onSelectedLibery(item, DSAssignedClass) {
 			this.selectedLibery = item
+			this.DSAssignedClass = DSAssignedClass
 			this.isShowModalLiberyDetails = true
 		},
 		OpenModalAddNoiDung(item) {
@@ -215,20 +229,29 @@ export default {
 						ajaxCALL('lms/EL_Assignment_Delete', {
 							AssignmentID: item.ResourceID
 						}, res => {
-							vueData.apiCall3()
+							vueData.initPage()
 							Vue.$toast.success("Xóa bài tập thành công!", { position: "top" });
 						})
 					} else {
 						ajaxCALL('lms/EL_Lesson_Delete', {
 							LessonID: item.ResourceID
 						}, res => {
-							vueData.apiCall3()
+							vueData.initPage()
 							Vue.$toast.success("Xóa bài học thành công!", { position: "top" });
 						})
 					}
 				}
 			})
-		}
+		},
+		onOpenKhoNoiDung() {
+			openWindow({
+				url: 'https://lms.lhbs.vn/kho-noi-dung-cong-khai?NienKhoa=' + vueData.NienKhoa,
+				title: 'Kho nội dung',
+				onclose: {
+					"EXE": "vueData.apiCall3()"
+				}
+			})
+		},
 	}
 }
 </script>

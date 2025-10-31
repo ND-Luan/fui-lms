@@ -1,1 +1,149 @@
-{"data":[{"dsBaiTap":[],"dsBaiTapDaGiao":[],"selectedKhoi":null,"selectedLop":null,"selectedMon":null,"selectedCap":[],"selectedAssignment":"parseInt(assignmentID)","selectedAssignmentIDGiaoBaiTapAdd":null,"selectedLopGiaoBaiTapAdd":null,"selectedDueDateGiaoBaiTapAdd":null,"selectedMaxScoreGiaoBaiTapAdd":null,"dsKhoi":[],"dsCap":[],"dsLop":[],"dsMon":[],"active":0,"dialog1":false,"dialog2":false,"dialog3":false,"arrr":null},{"getBaiTap":{"API":"/lms/EL_Teacher_AssignToClass_Get_By_KhoiID_MonHocID","IN":{"KhoiID":"selectedKhoi??0","MonHocID":"selectedMon??0"},"OUT":"dsBaiTap"},"getBaiTapDaGiao":{"API":"/lms/EL_Teacher_GetAssignmentStatusByClass","IN":{"AssignmentID":"vueData.assignmentID","ResourceType":"vueData.resourceType"},"OUT":"dsBaiTapDaGiao"},"apiAddAssignment":{"API":"/lms/EL_Teacher_AssignToClasses_CLASS","IN":{"AssignmentID":"selectedAssignmentIDGiaoBaiTapAdd","JsonLopIDs":"selectedLopGiaoBaiTapAdd","DueDate":"selectedDueDateGiaoBaiTapAdd","MaxScore":"selectedMaxScoreGiaoBaiTapAdd"},"MESS":"Thêm thành công"}},{"CALL":"getBaiTapDaGiao","CALLBACK":{"FUN":"returnArr","IN":{"arr":"dsBaiTapDaGiao"},"OUT":"arrr"}}],"watch":{"selectedCap":{"IF":"vueData.selectedCap != null","THEN":[{"CALL":"getKhoi"},{"CALL":"getMon"}],"ELSE":[{"EXE":"vueData.dsKhoi = []"},{"EXE":"vueData.dsLop = []"},{"EXE":"vueData.dsMon = []"},{"CALL":"getBaiTap"}]},"selectedKhoi":{"IF":"vueData.selectedKhoi != null","THEN":[{"CALL":"getLop"}],"ELSE":[{"EXE":"vueData.dsLop = []"},{"CALL":"getBaiTap"}]},"selectedMon":{"IF":"vueData.selectedMon != null","THEN":[{"CALL":"getBaiTap"},{"CALL":"getBaiTapDaGiao"}],"ELSE":[{"EXE":"vueData.dsBaiTap = []"},{"CALL":"getBaiTap"}]},"selectedAssignment":{}},"controls":[{"prop":"fluid grid-list-md","rows":[{"prop":"","cols":[{"el":"uc-quanlybaitap","attr":{":databaitapdagiao":"dsBaiTapDaGiao"}}]}]}],"set":{"menu":false}}
+{
+    "data": [
+        {
+            "dsBaiTap": [],
+            "dsBaiTapDaGiao": [],
+            "selectedKhoi": null,
+            "selectedLop": null,
+            "selectedMon": null,
+            "selectedCap": [],
+            "selectedAssignment": "parseInt(assignmentID)",
+            "selectedAssignmentIDGiaoBaiTapAdd": null,
+            "selectedLopGiaoBaiTapAdd": null,
+            "selectedDueDateGiaoBaiTapAdd": null,
+            "selectedMaxScoreGiaoBaiTapAdd": null,
+            "dsKhoi": [],
+            "dsCap": [],
+            "dsLop": [],
+            "dsMon": [],
+            "active": 0,
+            "dialog1": false,
+            "dialog2": false,
+            "dialog3": false,
+            "arrr": null
+        },
+        {
+            "getBaiTap": {
+                "API": "/lms/EL_Teacher_AssignToClass_Get_By_KhoiID_MonHocID",
+                "IN": {
+                    "KhoiID": "selectedKhoi??0",
+                    "MonHocID": "selectedMon??0"
+                },
+                "OUT": "dsBaiTap"
+            },
+            "getBaiTapDaGiao": {
+                "API": "/lms/EL_Teacher_GetAssignmentStatusByClass",
+                "IN": {
+                    "AssignmentID": "vueData.assignmentID",
+                    "ResourceType": "vueData.resourceType"
+                },
+                "OUT": "dsBaiTapDaGiao"
+            },
+            "apiAddAssignment": {
+                "API": "/lms/EL_Teacher_AssignToClasses_CLASS",
+                "IN": {
+                    "AssignmentID": "selectedAssignmentIDGiaoBaiTapAdd",
+                    "JsonLopIDs": "selectedLopGiaoBaiTapAdd",
+                    "DueDate": "selectedDueDateGiaoBaiTapAdd",
+                    "MaxScore": "selectedMaxScoreGiaoBaiTapAdd"
+                },
+                "MESS": "Thêm thành công"
+            }
+        },
+        {
+            "CALL": "getBaiTapDaGiao",
+            "CALLBACK": {
+                "FUN": "returnArr",
+                "IN": {
+                    "arr": "dsBaiTapDaGiao"
+                },
+                "OUT": "arrr"
+            }
+        }
+    ],
+    "watch": {
+        "selectedCap": {
+            "IF": "vueData.selectedCap != null",
+            "THEN": [
+                {
+                    "CALL": "getKhoi"
+                },
+                {
+                    "CALL": "getMon"
+                }
+            ],
+            "ELSE": [
+                {
+                    "EXE": "vueData.dsKhoi = []"
+                },
+                {
+                    "EXE": "vueData.dsLop = []"
+                },
+                {
+                    "EXE": "vueData.dsMon = []"
+                },
+                {
+                    "CALL": "getBaiTap"
+                }
+            ]
+        },
+        "selectedKhoi": {
+            "IF": "vueData.selectedKhoi != null",
+            "THEN": [
+                {
+                    "CALL": "getLop"
+                }
+            ],
+            "ELSE": [
+                {
+                    "EXE": "vueData.dsLop = []"
+                },
+                {
+                    "CALL": "getBaiTap"
+                }
+            ]
+        },
+        "selectedMon": {
+            "IF": "vueData.selectedMon != null",
+            "THEN": [
+                {
+                    "CALL": "getBaiTap"
+                },
+                {
+                    "CALL": "getBaiTapDaGiao"
+                }
+            ],
+            "ELSE": [
+                {
+                    "EXE": "vueData.dsBaiTap = []"
+                },
+                {
+                    "CALL": "getBaiTap"
+                }
+            ]
+        },
+        "selectedAssignment": {}
+    },
+    "controls": [
+        {
+            "prop": "fluid grid-list-md",
+            "rows": [
+                {
+                    "prop": "",
+                    "cols": [
+                        {
+                            "el": "uc-quanlybaitap",
+                            "attr": {
+                                ":databaitapdagiao": "dsBaiTapDaGiao"
+                            }
+                        }
+                    ]
+                }
+            ]
+        }
+    ],
+    "set": {
+        "menu": false,
+        "menuLeft": false
+    }
+}

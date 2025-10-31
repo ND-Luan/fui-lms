@@ -21,8 +21,9 @@
 }
 
 .questions-container {
-    max-width: 800px;
+    /* max-width: 800px; */
     margin: 0 auto;
+    padding: 0px 8px;
 }
 
 .group-section {
@@ -277,7 +278,7 @@
     }
 
     .question-content-compact {
-        padding: 12px;
+        padding: 8px;
     }
 
     .question-text-compact {
@@ -469,4 +470,8 @@
 .chip-file-upload .v-chip__content{
     white-space: normal;
     margin: 4px 0px !important;
+}
+.dialog-image   .v-overlay__content{
+    display: flex;
+    align-items: center;
 }

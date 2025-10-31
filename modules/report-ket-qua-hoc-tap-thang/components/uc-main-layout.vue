@@ -91,15 +91,15 @@
                 </template>
                 <v-list>
                     <v-list-subheader>{{ $t('message.studentList') }}</v-list-subheader>
-                    <v-list-item v-for="item in DSHocSinh" :key="item.StudentID" :disabled="item.Khoi <= 0"
+                    <v-list-item v-for="item in DSHocSinh" :key="item.HocSinhID" :disabled="item.Khoi <= 0"
                         @click="() => onSelectHocSinh(item)">
                         <template v-slot:prepend>
                             <v-avatar>
-                                <v-img :src="urlAvatarHocSinh + item.StudentID" />
+                                <v-img :src="urlAvatarHocSinh + item.HocSinhID" />
                             </v-avatar>
                         </template>
                         <v-list-item-title>{{ item.HoTen }}</v-list-item-title>
-                        <v-list-item-title>{{ item.TenLop ?? '-' }} • {{ item.StudentID }}</v-list-item-title>
+                        <v-list-item-title>{{ item.TenLop ?? '-' }} • {{ item.HocSinhID }}</v-list-item-title>
                     </v-list-item>
                 </v-list>
             </v-menu>
@@ -141,7 +141,7 @@ export default {
                 const DSHocSinhWithoutMamNon = response.Result.filter(x => x.Khoi > 0)
                 if (DSHocSinhWithoutMamNon.length > 0) {
                     const firstHocSinhDetail = DSHocSinhWithoutMamNon[0]
-                    this.loadHocSinhDetail(firstHocSinhDetail.StudentID).then(() => {
+                    this.loadHocSinhDetail(firstHocSinhDetail.HocSinhID).then(() => {
                         this.IsLoadingPage = false
                     })
                 } else {
@@ -164,7 +164,7 @@ export default {
         },
         async onSelectHocSinh(item) {
             this.IsLoadingPage = true
-            this.loadHocSinhDetail(item.StudentID).then(() => {
+            this.loadHocSinhDetail(item.HocSinhID).then(() => {
                 this.IsLoadingPage = false
             })
         }

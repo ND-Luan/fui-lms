@@ -6,12 +6,16 @@
 		<v-card-text v-else class="pa-2">
 			<v-row align="center">
 				<v-col cols="12" md="8" class="border-e-md ">
-					<div class="mb-4">
+					<div>
 						<div class="d-flex align-baseline ga-2">
 							<div class="text-overline">Thống kê:</div>
 							<div class="text-h6 font-weight-bold text-truncate" :title="assignmentTitle">
 								{{ assignmentTitle || 'Vui lòng chọn bài tập' }}
 							</div>
+						</div>
+					</div>
+					<div class="mb-2">
+						<div class="text-overline">Giới hạn nộp bài: <b>{{ assignmentInfo?.LimitAssigned ?? 1 }}</b>
 						</div>
 					</div>
 					<!-- Hàng chứa các bộ lọc -->
@@ -70,7 +74,12 @@
 	<v-card class="table-card mt-2">
 		<v-card-title
 			class="d-flex flex-column flex-md-row align-md-center align-start justify-md-space-between justify-start">
-			<span v-if="!isMobile">Danh sách học sinh</span>
+			<div v-if="!isMobile" class="d-flex ga-2 flex-wrap">Danh sách học sinh
+				<span class="text-primary text-body" style="font-size: 15px !important;"
+					v-if="assignmentInfo?.LimitAssigned > 1">*Chú ý: Hệ thống ghi nhận
+					lần nộp bài được chấm điểm cao
+					nhất</span>
+			</div>
 			<div class="d-flex flex-column flex-md-row justify-md-end w-100 ga-2">
 				<v-btn color="primary" variant="flat" :disabled="!studentSubmissions.length"
 					@click.stop="viewClassReport" :size="isMobile ? 'small' : 'default'">
@@ -87,7 +96,73 @@
 		</v-card-title>
 		<v-data-table class="table-custom" :headers="headers" :items="processedSubmissions" :search="search"
 			:items-per-page="-1" :mobile="isMobile" :loading="loading" :hide-default-footer="true"
-			@update:sort-by="false" style="max-height: calc(100dvh - 196px)" density="compact">
+			@update:sort-by="false" style="max-height: calc(100dvh - 196px)" density="compact"
+			:show-expand="assignmentInfo?.LimitAssigned > 1 ? true : false" item-value="HocSinhID">
+
+			<template v-slot:item.data-table-expand="{ internalItem, isExpanded, toggleExpand }">
+				<v-btn :append-icon="isExpanded(internalItem) ? 'mdi-chevron-up' : 'mdi-chevron-down'"
+					:text="isExpanded(internalItem) ? 'Đóng' : 'Xem chi tiết'" class="text-none" color="medium-emphasis"
+					size="small" variant="text" style="    min-width: fit-content !important;" border slim
+					@click=" toggleExpand(internalItem); console.log('internalItem', internalItem)"
+					:disabled="!internalItem.raw.SubmissionStatus"></v-btn>
+			</template>
+
+			<template v-slot:expanded-row="{ columns, item }">
+				<tr>
+					<td :colspan="columns.length" class="py-2">
+						<v-sheet rounded="lg" border>
+							<v-table density="compact" :mobile="isMobile">
+								<tbody class="bg-surface-light">
+									<tr>
+										<th>Lần nộp</th>
+										<th>Trạng thái</th>
+										<th>Thời gian nộp</th>
+										<th>Điểm</th>
+										<th></th>
+									</tr>
+								</tbody>
+
+								<tbody>
+									<tr v-for="(obj, index) in getAllAssigned(item)">
+										<td class="py-2">
+											<v-chip size="small" variant="flat" color="deep-orange-lighten-1"
+												class="me-1" v-if="obj.Status !== 'NOT_SUBMITTED'">
+												Lần {{ index + 1 }}
+											</v-chip>
+										</td>
+										<td class="py-2">
+											<v-chip :color="statusColors[item.Status]" size="small" variant="flat"
+												class="font-weight-medium">
+												{{ statusTexts[item.Status] }}
+											</v-chip>
+										</td>
+										<td class="py-2"><span v-if="obj.SubmissionTime">{{
+											formatDate(obj.SubmissionTime) }}</span>
+											<span v-else class="text-medium-emphasis">—</span>
+										</td>
+										<td class="py-2">
+											<span class="font-weight-bold" :class="getScoreColor(obj.Score)">
+												{{ obj.Score != null ? obj.Score : '—' }}
+											</span>
+											<span class="font-weight-bold text-success" v-tooltip="`Điểm tối đa`">
+												/{{ stats.MaxScore || '-' }}
+											</span>
+										</td>
+										<td class="py-2 text-end">
+											<v-btn size="small" color="primary" variant="flat"
+												:disabled="!obj.SubmissionID || obj.SubmissionStatus == 1 || obj.SubmissionStatus == 0"
+												@click.stop="ontest(obj)">
+												{{ obj.SubmissionStatus == 4 ? 'Xem lại bài chấm' : 'Chấm bài' }}
+											</v-btn>
+										</td>
+									</tr>
+								</tbody>
+							</v-table>
+						</v-sheet>
+					</td>
+				</tr>
+			</template>
+
 			<template #item.HocSinhID="{ item }">
 				<div class="text-muted">{{ item.HocSinhID }}</div>
 			</template>
@@ -102,6 +177,22 @@
 			<template #item.SubmissionTime="{ item }">
 				<span v-if="item.SubmissionTime">{{ formatDate(item.SubmissionTime) }}</span>
 				<span v-else class="text-medium-emphasis">—</span>
+			</template>
+			<template #item.thongtinnopbai="{ item }">
+				<div class="d-flex flex-wrap ga-2">
+					<v-chip v-for="(obj, index) in getAllAssigned(item)" :key="index" :color="statusColors[obj.Status]"
+						size="small" variant="flat" class="font-weight-medium "
+						:class="obj.Status !== 'NOT_SUBMITTED' ? 'ps-0' : ''" style="min-height: fit-content;">
+						<v-chip size="small" variant="flat" color="deep-orange-lighten-1" class="me-1"
+							v-if="obj.Status !== 'NOT_SUBMITTED'">
+							Lần {{ index + 1 }}
+						</v-chip>
+						{{
+							statusTexts[obj.Status]
+						}}
+					</v-chip>
+				</div>
+
 			</template>
 			<template #item.Score="{ item }">
 				<span class="font-weight-bold" :class="getScoreColor(item.Score)">
@@ -118,6 +209,10 @@
 					                    </span>
 					                    <span v-else class="text-medium-emphasis">—</span>
 					                </template> -->
+
+			<!-- <template #item.note="{ item }">
+				<i class="text-primary">Hệ thống ghi nhận lần nộp bài được chấm điểm cao nhất</i>
+			</template> -->
 			<template #item.actions="{ item }">
 				<v-btn size="small" color="primary" variant="flat"
 					:disabled="!item.SubmissionID || item.SubmissionStatus == 1 || item.SubmissionStatus == 0"
@@ -168,25 +263,24 @@ export default {
 			selectedAssignToClassID: this.assigntoclassid,
 			search: '',
 			headers: [
-				{ title: 'Mã HS', key: 'HocSinhID', sortable: true },
-				{ title: 'Số danh bộ', key: 'SoDanhBo', sortable: true },
-				{ title: 'Học sinh', key: 'HoTen', sortable: true },
-				{ title: 'Trạng thái', key: 'Status', sortable: true },
-				{ title: 'Thời gian nộp', key: 'SubmissionTime', sortable: true },
-				{ title: 'Điểm', key: 'Score', sortable: true },
-				// { title: 'Số câu sai', key: 'IncorrectQuestionsJSON', sortable: true },
-				{ title: 'Chấm bài', key: 'actions', sortable: false, align: 'end' }
+
+
 			],
 			statusColors: { 'SUBMITTED': 'info', 'GRADED': 'success', 'NOT_SUBMITTED': 'grey', 'SAVE_DRAFT': 'purple', 'IN_PROGRESS': 'teal', 'RESUBMIT': 'warning' },
 			statusTexts: { 'SUBMITTED': 'Đã nộp', 'GRADED': 'Đã chấm', 'NOT_SUBMITTED': 'Chưa nộp', 'SAVE_DRAFT': "Chấm nháp", 'IN_PROGRESS': 'Đang làm', 'RESUBMIT': 'Yêu cầu nộp lại' },
 			isOpen: false,
 			url: "",
-			isMobile: mobile
+			isMobile: mobile,
+			_,
+			studentSubmissionsOriginal: []
 		}
 	},
 	computed: {
 		assignmentTitle() {
 			return this.assignmentList.find(a => a.AssignToClassID === this.selectedAssignToClassID)?.AssignmentTitle || '...';
+		},
+		assignmentInfo() {
+			return this.assignmentList.find(a => a.AssignToClassID === this.selectedAssignToClassID) || {};
 		},
 		completionRate() {
 			if (!this.stats.TotalStudents || this.stats.TotalStudents === 0) return 0;
@@ -281,7 +375,7 @@ export default {
 					}
 
 					//Lấy học sinh đã nộp hoặc giáo viên đã chấm nháp
-					const DSHocSinhSubmited = $this.processedSubmissions.filter(x => x.SubmissionStatus === 2 || x.SubmissionStatus === 3)
+					const DSHocSinhSubmited = $this.studentSubmissionsOriginal.filter(x => x.SubmissionStatus === 2 || x.SubmissionStatus === 3)
 					const DSHocSinhGraded = []
 					for (var hocSinh of DSHocSinhSubmited) {
 						const { SubmissionContent, Score } = $this.fn_ChamBaiStudent(hocSinh, AsmConfig)
@@ -349,15 +443,22 @@ export default {
 					}
 					else if (question.type === "QUIZ_MATCHING") { }
 					else if (question.type === "QUIZ_FILL_IN_BLANK") {
-						question.config.parts.forEach(x => {
-							if (x.type === "blank") {
+						const parts = question.config.parts || []
+						const blanks = parts.filter(p => p.type === 'blank')
+						if (blanks.length === 0) {
+							manualScore = question.points
+						} else {
+							let correctsAnswer = 0
+							blanks.forEach(x => {
 								const answerToLowerCase = answerData[x.id].toLowerCase() ?? ''
 								if (x.acceptedAnswers.map(item => item.toLowerCase()).includes(answerToLowerCase)) {
-									Score += question.points
-									manualScore = question.points
+									correctsAnswer+=1
 								}
-							}
-						})
+							})
+							const pts = Number(question?.points ?? 0)
+							manualScore = (correctsAnswer / blanks.length) * pts
+							Score += manualScore
+						}
 					}
 					answers = {
 						...answers,
@@ -423,6 +524,20 @@ export default {
 				if (this.assignmentList.length > 0) {
 					this.selectedAssignToClassID = this.assignmentList.find(x => x.AssignToClassID == vueData.AssignToClassID_FromURL)?.AssignToClassID ?? this.assignmentList[0].AssignToClassID;
 				}
+				if (this.assignmentInfo && (this.assignmentInfo.LimitAssigned == 1 || this.assignmentInfo.LimitAssigned == null)) {
+					this.headers = [{ title: 'Mã HS', key: 'HocSinhID', sortable: false, width: 100, align: 'center' },
+					{ title: 'Số danh bộ', key: 'SoDanhBo', sortable: false, width: 130, align: 'center' },
+					{ title: 'Học sinh', key: 'HoTen', sortable: false, width: 300 }, { title: 'Trạng thái', key: 'Status', sortable: true },
+					{ title: 'Thời gian nộp', key: 'SubmissionTime', sortable: true },
+					{ title: 'Điểm', key: 'Score', sortable: true },
+					{ title: 'Chấm bài', key: 'actions', sortable: false, align: 'end' }]
+				} else {
+					this.headers = [{ title: 'Mã HS', key: 'HocSinhID', sortable: false, width: 100, align: 'center' },
+					{ title: 'Số danh bộ', key: 'SoDanhBo', sortable: false, width: 130, align: 'center' },
+					{ title: 'Học sinh', key: 'HoTen', sortable: false, width: 300 },
+					{ title: 'Thông tin nộp bài', key: 'thongtinnopbai', }]
+				}
+
 			});
 		},
 		async fetchAssignmentStats(assignToClassID) {
@@ -438,7 +553,18 @@ export default {
 		async fetchStudentSubmissions(assignToClassID) {
 			vueData.loading = true;
 			await ajaxCALL("lms/EL_Teacher_GetSubmissionStatusByStudent", { AssignToClassID: assignToClassID }, (res) => {
-				this.studentSubmissions = res.data || [];
+				let handleData = res.data || [];
+				this.studentSubmissionsOriginal = res.data || [];
+				this.studentSubmissions = res.data.reduce((acc, obj) => {
+					const existIndex = acc.findIndex(x => x.HocSinhID === obj.HocSinhID);
+					if (existIndex === -1) {
+						acc.push(obj);
+					} else if ((acc[existIndex].Score ?? -Infinity) < (obj.Score ?? -Infinity)) {
+						acc[existIndex] = obj;
+					}
+					return acc;
+				}, []);
+				console.log('this.studentSubmissions', this.studentSubmissions)
 			});
 			vueData.loading = false;
 		},
@@ -490,6 +616,10 @@ export default {
 				{ type: "fromIframe", value: "hide" },
 				"*"
 			)
+		},
+		getAllAssigned(hocsinh) {
+			return this.studentSubmissionsOriginal.filter(item => item.HocSinhID == hocsinh.HocSinhID)
+
 		}
 	},
 	async mounted() {

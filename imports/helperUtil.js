@@ -7,7 +7,7 @@ const ColorEnum = {
 
     VuotTroi: "#0091EA",
     Dat: "#00ACC1",
-    ChuaDat: "#CD5D5B",
+    ChuaDat: "#CD5D5B", 
     KhongNhanXet: "#607D8B",
 
     //0: Mở; 1: GVCN Lưu Tạm; 2 : GVCN Gửi BGH Chờ duyệt; 3: BGH: Reject -> Duyệt lại ; 4: BGH Duyệt
@@ -219,7 +219,7 @@ function getColorTinhTrangDiem_C1(TinhTrang) {
 }
 function getTextTinhTrangDiem_C1(TinhTrang) {
     let text = ''
-    if (TinhTrang === 8) text = 'BGH duyệt (Công bố phụ huynh)'
+    if (TinhTrang === 8) text = 'Duyệt (Công bố phụ huynh)'
     else if (TinhTrang === 7) text = 'BGH từ chối'
     else if (TinhTrang === 6) text = 'Tổ trưởng Gửi BGH'
     else if (TinhTrang === 5) text = 'Tổ trưởng từ chối'
@@ -273,8 +273,6 @@ function fn_IsDisabledTinhTrangDiem({ TinhTrang, type, CapID }) {
     }
 
 }
-
-
 
 function fn_ProrityTinhTrang(DSHocSinh) {
     if (!DSHocSinh?.length) return;
@@ -360,21 +358,23 @@ function replaceFormula(columns, formula, indexRow, numberCols) {
     // Thay IIF thành IF trước (hoặc sau đều được)
     formula = formula.replace(/\bIIF\b/g, 'IF');
 
-    return formula.replace(/\b\w+_\w+\b/g, (match) => {
+    const formulaReplace = formula.replace(/\b\w+_\w+\b/g, (match) => {
         try {
             // Lấy địa chỉ cột từ tên cột
 
             const columnAddress = getColumnAddress(columns, match, numberCols);
-
             // Trả về địa chỉ cột + số dòng
-            return `${columnAddress}${indexRow}`;
+            const string = `${columnAddress}${indexRow}`
+            return string;
         } catch (error) {
             // Nếu có lỗi, trả về nguyên mẫu (match) mà không thay thế
             console.error(`Error processing column ${match}:`, error);
             return match;  // Trả về tên cột nếu có lỗi
         }
     });
+    return formulaReplace
 }
+
 
 function getColumnAddressTH(columns, columnName) {
     let char = 68
@@ -673,7 +673,7 @@ function calculateLinearRegression(xData, yData) {
         equation: `y = ${slope.toFixed(4)}x + ${intercept.toFixed(4)}`,
         regressionLine: xData.map(x => ({
             x: x,
-            y: slope * x + intercept
+            y: slope * x + intercept 
         }))
     };
 }
@@ -762,4 +762,13 @@ function questionsTypesLabel(type) {
     } else {
         return undefined
     }
+}
+
+function ajaxCALLPromise(url, params = null) {
+    return new Promise(resolve => {
+        ajaxCALL(url, params, res => {
+            if (res?.data) resolve(res.data)
+            else resolve(res)
+        })
+    })
 }

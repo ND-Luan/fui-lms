@@ -67,7 +67,7 @@ function convertDSHocSinh() {
             } else if (x.GiaTriCotDiem === 'ICO_Star') { // cấu hình header cột điểm có dạng ICO_Star
                 let column = {
                     type: 'html',
-                    title: x.TenCotDiem_VI, 
+                    title: x.TenCotDiem_VI,
                     name: x.MaCotDiem,
                     width: x.WidthCSS,
                     typeValue: x.GiaTriCotDiem,
@@ -308,4 +308,37 @@ const renderDSMonHoc = () => {
         })
     }
     vueData.DSMonHoc = DSMonHoc
+}
+async function onUpdateKyGuiDiem() {
+    let KyDanhGia = null
+    if (vueData.Semester.value === 'GK_HK1') KyDanhGia = 1
+    if (vueData.Semester.value === 'CK_HK1') KyDanhGia = 2
+    if (vueData.Semester.value === 'GK_HK2') KyDanhGia = 3
+    if (vueData.Semester.value === 'CK_HK2') KyDanhGia = 4
+    const params = {
+        LopID: vueData.LopItem.LopID,
+        KyDanhGia
+    }
+    return await ajaxCALLPromise("psmark1/LMS_UpdateKyGuiDiemPhuHuynh", params)
+}
+async function onPushMessageToME() {
+    for (var hocSinh of vueData.DSHocSinh.filter(x => x.HocSinhID !== 25100126)) {
+        await onPushMessageToME_ByHocSinh(hocSinh)
+    }
+}
+async function onPushMessageToME_ByHocSinh(hocSinh) {
+    let textSemester = ''
+    if (vueData.Semester.value === 'GK_HK1') textSemester = "Giữa HK1"
+    if (vueData.Semester.value === 'CK_HK1') textSemester = "Cuối HK1"
+    if (vueData.Semester.value === 'GK_HK2') textSemester = "Giữa HK2"
+    if (vueData.Semester.value === 'CK_HK2') textSemester = "Cuối HK2"
+    const plainText = `Thông báo kết quả học tập học sinh: ${hocSinh?.HoTen} - Lớp ${vueData.LopItem.TenLop}`
+        + `\nNăm học: ${vueData.NienKhoa}-${vueData.NienKhoa + 1} - ${textSemester}`
+        + `\nQuý phụ huynh vui lòng xem nhận xét chi tiết tại: https://lms.lhbs.vn/ph-report?tab=2&HocSinhID=${hocSinh.HocSinhID}`
+    return await ajaxCALLPromise("student/LMS_SendMessageToME", {
+        HocSinhID: hocSinh.HocSinhID,
+        NoiDung: plainText
+    }).then(() => {
+        Vue.$toast.success(`Đẩy ${hocSinh.HocSinhID} - ${hocSinh.HoTen} dữ liệu điểm sang ME`, { position: "top" })
+    })
 }

@@ -207,7 +207,7 @@ export default {
 			const parts = this.question?.config?.parts || []
 			const blanks = parts.filter(p => p.type === 'blank')
 			if (blanks.length === 0) return 0
-
+			
 			let correct = 0
 			blanks.forEach(b => {
 				if (this.isBlankCorrect(b.id)) correct += 1

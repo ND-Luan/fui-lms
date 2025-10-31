@@ -75,10 +75,10 @@
 															item?.TongSoHocSinh ?? 0 }}</v-chip>
 														<v-chip color="orange"
 															prepend-icon="mdi-human-capacity-increase">{{
-																item?.SoHocSinhCaoHon ?? 0 }}</v-chip>
+															item?.SoHocSinhCaoHon ?? 0 }}</v-chip>
 														<v-chip color="light-green"
 															prepend-icon="mdi-arrow-up-circle-outline">{{
-																item?.TiLePhanTram ?? 0 }} %</v-chip>
+															item?.TiLePhanTram ?? 0 }} %</v-chip>
 													</div>
 												</v-card-title>
 												<v-row no-gutters>
@@ -170,312 +170,317 @@
 </template>
 
 <script>
-export default {
-	props: {
-		capid: {
-			type: Number,
-			required: true
-		},
-		khoiid: {},
-		monhocid: {
-			type: Number,
-			required: true
-		}
-	},
-	data() {
-		return {
-			vueData,
-			HocKiValue: 1,
-			DSHocKi: [
-				{
-					name: "Học kì 1",
-					value: 1
-				},
-				{
-					name: "Học kì 2",
-					value: 2
-				}
-			],
-			form: {
-				KhoiID: this.khoiid,
-				MonHocItem: {
-					MonHocID: this.monhocid
-				},
+	export default {
+		props: {
+			capid: {
+				type: Number,
+				required: true
 			},
-			isLoadingLop: false,
-			Chart_TiLe_TheoLop: {
-				"id": "chart-compare-giua-ky-cuoi-ki",
-				"series": [],
-				"chart": {
-					"type": "bar",
-					"height": 350,
-					"stacked": true,
-					"toolbar": {
-						"show": true
+			khoiid: {},
+			monhocid: {
+				type: Number,
+				required: true
+			}
+		},
+		data() {
+			return {
+				vueData,
+				HocKiValue: 1,
+				DSHocKi: [
+					{
+						name: "Học kì 1",
+						value: 1
 					},
-					"zoom": {
-						"enabled": false
+					{
+						name: "Học kì 2",
+						value: 2
+					}
+				],
+				form: {
+					KhoiID: this.khoiid,
+					MonHocItem: {
+						MonHocID: this.monhocid
+					},
+				},
+				isLoadingLop: false,
+				Chart_TiLe_TheoLop: {
+					"id": "chart-compare-giua-ky-cuoi-ki",
+					"series": [],
+					"chart": {
+						"type": "bar",
+						"height": 350,
+						"stacked": true,
+						"toolbar": {
+							"show": true
+						},
+						"zoom": {
+							"enabled": false
+						}
+					},
+					"xaxis": {
+						"categories": []
+					},
+					"plotOptions": {
+						"bar": {
+							"horizontal": false,
+							"borderRadius": 10,
+							"borderRadiusApplication": "end",
+							"borderRadiusWhenStacked": "last",
+							"dataLabels": {
+								"total": {
+									"enabled": true,
+									"style": {
+										"fontSize": "13px",
+										"fontWeight": 900
+									}
+								}
+							}
+						}
+					},
+					"legend": {
+						"position": "right",
+						"offsetY": 40
+					},
+					"fill": {
+						"opacity": 1
+					},
+					yaxis: {
+						min: 0,
+						max: 100
 					}
 				},
-				"xaxis": {
-					"categories": []
-				},
-				"plotOptions": {
-					"bar": {
-						"horizontal": false,
-						"borderRadius": 10,
-						"borderRadiusApplication": "end",
-						"borderRadiusWhenStacked": "last",
-						"dataLabels": {
-							"total": {
-								"enabled": true,
-								"style": {
-									"fontSize": "13px",
-									"fontWeight": 900
-								}
+				Chart_DiemTrungBinh: {
+					chart: {
+						type: "bar",
+						height: 350
+					},
+					series: [],
+					yaxis: {
+						min: 0,
+						max: 10,
+						labels: {
+							formatter: function (value) {
+								return value.toFixed(2);
 							}
 						}
 					}
 				},
-				"legend": {
-					"position": "right",
-					"offsetY": 40
-				},
-				"fill": {
-					"opacity": 1
-				},
-				yaxis: {
-					min: 0,
-					max: 100
-				}
-			},
-			Chart_DiemTrungBinh: {
-				chart: {
-					type: "bar",
-					height: 350
-				},
-				series: [],
-				yaxis: {
-					min: 0,
-					max: 10,
-					labels: {
-						formatter: function (value) {
-							return value.toFixed(2);
-						}
-					}
-				}
-			},
-			Tong_Growth_GiuaKy_CuoiKi: null,
-			List_Tong_Grade_Growth_GiuaKy_CuoiKi: null,
-			List_Tong_Class_Growth_GiuaKy_CuoiKi: null
-		}
-	},
-	mounted() {
-		// if (!this.form.KhoiID) return
-
-		// // this.isLoadingLop = true
-		// this.isLoadingMaNhomCotDiem = true
-		// this.isLoadingMaCotDiem = true
-
-		// // const LopID = localStorage.getItem('LopID_TA_C2')
-
-		// if (LopID) {
-		// 	// await this.onLoadDSLop(this.form.KhoiID)
-		// 	// 	.then(() => this.form.LopID = LopID)
-		// 	// 	.finally(() => this.isLoadingLop = false)
-		// 	await this.onLoadChart({
-		// 		NienKhoa: 2024,
-		// 		KhoiID: this.form.KhoiID,
-		// 		LopID: this.form.LopID,
-		// 	})
-		// }
-		this.onLoadChart3({
-			NienKhoa: vueData.NienKhoa,
-			CapID: this.capid,
-			MonHocID: this.monhocid
-		})
-		this.onLoadChart({
-			NienKhoa: vueData.NienKhoa,
-			KhoiID: this.khoiid,
-			MonHocID: this.monhocid
-		})
-	},
-	computed: {},
-	watch: {
-		// khoiid: function (khoiID) {
-		// 	if (khoiID) {
-		// 		this.onLoadChart(
-		// 			{
-		// 				NienKhoa: 2024,
-		// 				KhoiID: khoiID,
-		// 				MonHocID: this.monhocid
-		// 			}
-		// 		)
-		// 	}
-		// }
-		HocKiValue: function (val) {
-			if (val) {
-				this.onLoadChart3({
-					NienKhoa: vueData.NienKhoa,
-					CapID: this.capid,
-					MonHocID: this.monhocid
-				})
-				this.onLoadChart({
-					NienKhoa: vueData.NienKhoa,
-					KhoiID: this.khoiid,
-					MonHocID: this.monhocid
-				})
-				this.onLoadChart2({
-					NienKhoa: vueData.NienKhoa,
-					KhoiID: this.khoiid,
-					LopID: 0,
-					MonHocID: this.monhocid
-				})
+				Tong_Growth_GiuaKy_CuoiKi: null,
+				List_Tong_Grade_Growth_GiuaKy_CuoiKi: null,
+				List_Tong_Class_Growth_GiuaKy_CuoiKi: null
 			}
-		}
-	},
-	methods: {
-		onLoadChart({ NienKhoa, KhoiID, MonHocID }) {
-
-			return new Promise(resolve => {
-				ajaxCALL('lms/DashboardDiem_Mean_Get1',
-					{
-						NienKhoa,
-						KhoiID,
-						MonHocID,
-						HocKy: this.HocKiValue
-					},
-					res => {
-						const DiemTrungBinh = res.data
-						const series = [
-							{
-								name: "Điểm giữa học kì " + this.HocKiValue,
-								data: DiemTrungBinh.map(x => x.DiemGiua)
-							},
-							{
-								name: "Điểm cuối học kì " + this.HocKiValue,
-								data: DiemTrungBinh.map(x => x.DiemCuoi)
-							},
-							// {
-							// 	name: "Điểm mean (TB) học kì " + this.HocKiValue,
-							// 	data: DiemTrungBinh.map(x => x.DiemTB)
-							// }
-						]
-						const categories = [...new Set(DiemTrungBinh.map(x => x.TenLop))]
-						this.Chart_DiemTrungBinh = {
-							...this.Chart_DiemTrungBinh,
-							series: series,
-							xaxis: {
-								categories: categories
-							},
-							dataLabels: {
-								enabled: false
-							},
-							stroke: {
-								show: true,
-								width: 2,
-								colors: ['transparent']
-							},
-						}
-						resolve()
-					}
-				)
-			})
 		},
-		onLoadDSLop(KhoiID) {
-			return new Promise(resolve => {
-				ajaxCALL('lms/Lop_Get_ByKhoiID',
-					{
+		mounted() {
+			// if (!this.form.KhoiID) return
+	
+			// // this.isLoadingLop = true
+			// this.isLoadingMaNhomCotDiem = true
+			// this.isLoadingMaCotDiem = true
+	
+			// // const LopID = localStorage.getItem('LopID_TA_C2')
+	
+			// if (LopID) {
+			// 	// await this.onLoadDSLop(this.form.KhoiID)
+			// 	// 	.then(() => this.form.LopID = LopID)
+			// 	// 	.finally(() => this.isLoadingLop = false)
+			// 	await this.onLoadChart({
+			// 		NienKhoa: 2024,
+			// 		KhoiID: this.form.KhoiID,
+			// 		LopID: this.form.LopID,
+			// 	})
+			// }
+	
+		},
+		computed: {},
+		watch: {
+			"vueData.NienKhoa": function (nk) {
+				if (nk) {
+					this.onLoadChart3({
 						NienKhoa: vueData.NienKhoa,
-						KhoiID: KhoiID
-					},
-					res => {
-						this.DSLop = res.data
-						resolve()
-					}
-				)
-			})
+						CapID: this.capid,
+						MonHocID: this.monhocid
+					})
+					this.onLoadChart({
+						NienKhoa: vueData.NienKhoa,
+						KhoiID: this.khoiid,
+						MonHocID: this.monhocid
+					})
+				}
+			},
+			// khoiid: function (khoiID) {
+			// 	if (khoiID) {
+			// 		this.onLoadChart(
+			// 			{
+			// 				NienKhoa: 2024,
+			// 				KhoiID: khoiID,
+			// 				MonHocID: this.monhocid
+			// 			}
+			// 		)
+			// 	}
+			// }
+			HocKiValue: function (val) {
+				if (val) {
+					this.onLoadChart3({
+						NienKhoa: vueData.NienKhoa,
+						CapID: this.capid,
+						MonHocID: this.monhocid
+					})
+					this.onLoadChart({
+						NienKhoa: vueData.NienKhoa,
+						KhoiID: this.khoiid,
+						MonHocID: this.monhocid
+					})
+					this.onLoadChart2({
+						NienKhoa: vueData.NienKhoa,
+						KhoiID: this.khoiid,
+						LopID: 0,
+						MonHocID: this.monhocid
+					})
+				}
+			}
 		},
-		onLoadChart2({ NienKhoa, KhoiID, LopID, MonHocID }) {
-			return new Promise(resolve => {
-				ajaxCALL('lms/DashboardTiLeDat_Compare_GiuaKy_CuoiKi_Get1',
-					{
-						NienKhoa,
-						KhoiID,
-						LopID: LopID ?? 0,
-						MonHocID
-					},
-					res => {
-						const categoriesChartTiLe_TheoLops = [...new Set(res.data.map(x => x.TenLop))]
-						const serieChartTiLe_TheoLops = [
-							{
-								name: 'Exceeding Requirements/Vượt yêu cầu - Giữa kì',
-								group: `S${this.HocKiValue}_Mid_Total_Conv`,
-								data: res.data.filter(x => x.MaCotDiem === `S${this.HocKiValue}_Mid_Total_Conv` && x.KetQuaDanhGia_VI === 'Exceeding Requirements/Vượt yêu cầu').map(x => x.TyLe)
-							},
-							{
-								name: 'Exceeding Requirements/Vượt yêu cầu - Cuối kì',
-								group: `S${this.HocKiValue}_Final_Total_Conv`,
-								data: res.data.filter(x => x.MaCotDiem === `S${this.HocKiValue}_Final_Total_Conv` && x.KetQuaDanhGia_VI === 'Exceeding Requirements/Vượt yêu cầu').map(x => x.TyLe)
-							},
-							{
-								name: 'Meeting Requirements/Đạt yêu cầu - Giữa kì',
-								group: `S${this.HocKiValue}_Mid_Total_Conv`,
-								data: res.data.filter(x => x.MaCotDiem === `S${this.HocKiValue}_Mid_Total_Conv` && x.KetQuaDanhGia_VI === 'Meeting Requirements/Đạt yêu cầu').map(x => x.TyLe)
-							},
-							{
-								name: 'Meeting Requirements/Đạt yêu cầu - Cuối kì',
-								group: `S${this.HocKiValue}_Final_Total_Conv`,
-								data: res.data.filter(x => x.MaCotDiem === `S${this.HocKiValue}_Final_Total_Conv` && x.KetQuaDanhGia_VI === 'Meeting Requirements/Đạt yêu cầu').map(x => x.TyLe)
-							},
-							{
-								name: 'Not Meeting Requirements/Chưa đạt - Giữa kì',
-								group: `S${this.HocKiValue}_Mid_Total_Conv`,
-								data: res.data.filter(x => x.MaCotDiem === `S${this.HocKiValue}_Mid_Total_Conv` && x.KetQuaDanhGia_VI === 'Not Meeting Requirements/Chưa đạt').map(x => x.TyLe)
-							},
-							{
-								name: 'Not Meeting Requirements/Chưa đạt - Cuối kì',
-								group: `S${this.HocKiValue}_Final_Total_Conv`,
-								data: res.data.filter(x => x.MaCotDiem === `S${this.HocKiValue}_Final_Total_Conv` && x.KetQuaDanhGia_VI === 'Not Meeting Requirements/Chưa đạt').map(x => x.TyLe)
+		methods: {
+			onLoadChart({ NienKhoa, KhoiID, MonHocID }) {
+	
+				return new Promise(resolve => {
+					ajaxCALL('lms/DashboardDiem_Mean_Get1',
+						{
+							NienKhoa,
+							KhoiID,
+							MonHocID,
+							HocKy: this.HocKiValue
+						},
+						res => {
+							const DiemTrungBinh = res.data
+							const series = [
+								{
+									name: "Điểm giữa học kì " + this.HocKiValue,
+									data: DiemTrungBinh.map(x => x.DiemGiua)
+								},
+								{
+									name: "Điểm cuối học kì " + this.HocKiValue,
+									data: DiemTrungBinh.map(x => x.DiemCuoi)
+								},
+								// {
+								// 	name: "Điểm mean (TB) học kì " + this.HocKiValue,
+								// 	data: DiemTrungBinh.map(x => x.DiemTB)
+								// }
+							]
+							const categories = [...new Set(DiemTrungBinh.map(x => x.TenLop))]
+							this.Chart_DiemTrungBinh = {
+								...this.Chart_DiemTrungBinh,
+								series: series,
+								xaxis: {
+									categories: categories
+								},
+								dataLabels: {
+									enabled: false
+								},
+								stroke: {
+									show: true,
+									width: 2,
+									colors: ['transparent']
+								},
 							}
-						]
-						this.Chart_TiLe_TheoLop = {
-							...this.Chart_TiLe_TheoLop,
-							series: serieChartTiLe_TheoLops,
-							colors: ['#008FFB', '#008FFB', '#80c7fd', '#80c7fd', '#fdb72f', '#fdb72f'],
-							xaxis: {
-								categories: categoriesChartTiLe_TheoLops
-							},
-							plotOptions: {
-								bar: {
-									horizontal: false
-								}
-							},
+							resolve()
 						}
-						resolve()
-					}
-				)
-			})
-		},
-		onLoadChart3({ NienKhoa, CapID, MonHocID }) {
-			return new Promise(resolve => {
-				ajaxCALL('lms/DashboardTiLeDat_Growth_GiuaKy_CuoiKi_Get1',
-					{
-						NienKhoa,
-						CapID,
-						MonHocID,
-						HocKy: this.HocKiValue
-					},
-					res => {
-						this.Tong_Growth_GiuaKy_CuoiKi = res.data[0][0]
-						this.List_Tong_Grade_Growth_GiuaKy_CuoiKi = res.data[1]
-						this.List_Tong_Class_Growth_GiuaKy_CuoiKi = res.data[2]
-						resolve()
-					}
+					)
+				})
+			},
+			onLoadDSLop(KhoiID) {
+				return new Promise(resolve => {
+					ajaxCALL('lms/Lop_Get_ByKhoiID',
+						{
+							NienKhoa: vueData.NienKhoa,
+							KhoiID: KhoiID
+						},
+						res => {
+							this.DSLop = res.data
+							resolve()
+						}
+					)
+				})
+			},
+			onLoadChart2({ NienKhoa, KhoiID, LopID, MonHocID }) {
+				return new Promise(resolve => {
+					ajaxCALL('lms/DashboardTiLeDat_Compare_GiuaKy_CuoiKi_Get1',
+						{
+							NienKhoa,
+							KhoiID,
+							LopID: LopID ?? 0,
+							MonHocID
+						},
+						res => {
+							const categoriesChartTiLe_TheoLops = [...new Set(res.data.map(x => x.TenLop))]
+							const serieChartTiLe_TheoLops = [
+								{
+									name: 'Exceeding Requirements/Vượt yêu cầu - Giữa kì',
+									group: `S${this.HocKiValue}_Mid_Total_Conv`,
+									data: res.data.filter(x => x.MaCotDiem === `S${this.HocKiValue}_Mid_Total_Conv` && x.KetQuaDanhGia_VI === 'Exceeding Requirements/Vượt yêu cầu').map(x => x.TyLe)
+								},
+								{
+									name: 'Exceeding Requirements/Vượt yêu cầu - Cuối kì',
+									group: `S${this.HocKiValue}_Final_Total_Conv`,
+									data: res.data.filter(x => x.MaCotDiem === `S${this.HocKiValue}_Final_Total_Conv` && x.KetQuaDanhGia_VI === 'Exceeding Requirements/Vượt yêu cầu').map(x => x.TyLe)
+								},
+								{
+									name: 'Meeting Requirements/Đạt yêu cầu - Giữa kì',
+									group: `S${this.HocKiValue}_Mid_Total_Conv`,
+									data: res.data.filter(x => x.MaCotDiem === `S${this.HocKiValue}_Mid_Total_Conv` && x.KetQuaDanhGia_VI === 'Meeting Requirements/Đạt yêu cầu').map(x => x.TyLe)
+								},
+								{
+									name: 'Meeting Requirements/Đạt yêu cầu - Cuối kì',
+									group: `S${this.HocKiValue}_Final_Total_Conv`,
+									data: res.data.filter(x => x.MaCotDiem === `S${this.HocKiValue}_Final_Total_Conv` && x.KetQuaDanhGia_VI === 'Meeting Requirements/Đạt yêu cầu').map(x => x.TyLe)
+								},
+								{
+									name: 'Not Meeting Requirements/Chưa đạt - Giữa kì',
+									group: `S${this.HocKiValue}_Mid_Total_Conv`,
+									data: res.data.filter(x => x.MaCotDiem === `S${this.HocKiValue}_Mid_Total_Conv` && x.KetQuaDanhGia_VI === 'Not Meeting Requirements/Chưa đạt').map(x => x.TyLe)
+								},
+								{
+									name: 'Not Meeting Requirements/Chưa đạt - Cuối kì',
+									group: `S${this.HocKiValue}_Final_Total_Conv`,
+									data: res.data.filter(x => x.MaCotDiem === `S${this.HocKiValue}_Final_Total_Conv` && x.KetQuaDanhGia_VI === 'Not Meeting Requirements/Chưa đạt').map(x => x.TyLe)
+								}
+							]
+							this.Chart_TiLe_TheoLop = {
+								...this.Chart_TiLe_TheoLop,
+								series: serieChartTiLe_TheoLops,
+								colors: ['#008FFB', '#008FFB', '#80c7fd', '#80c7fd', '#fdb72f', '#fdb72f'],
+								xaxis: {
+									categories: categoriesChartTiLe_TheoLops
+								},
+								plotOptions: {
+									bar: {
+										horizontal: false
+									}
+								},
+							}
+							resolve()
+						}
+					)
+				})
+			},
+			onLoadChart3({ NienKhoa, CapID, MonHocID }) {
+				return new Promise(resolve => {
+					ajaxCALL('lms/DashboardTiLeDat_Growth_GiuaKy_CuoiKi_Get1',
+						{
+							NienKhoa,
+							CapID,
+							MonHocID,
+							HocKy: this.HocKiValue
+						},
+						res => {
+							this.Tong_Growth_GiuaKy_CuoiKi = res.data[0][0]
+							this.List_Tong_Grade_Growth_GiuaKy_CuoiKi = res.data[1]
+							this.List_Tong_Class_Growth_GiuaKy_CuoiKi = res.data[2]
+							resolve()
+						}
+					)
+				}
 				)
 			}
-			)
-		}
-	},
-}
+		},
+	}
 </script>

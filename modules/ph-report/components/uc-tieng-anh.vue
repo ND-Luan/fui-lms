@@ -1,6 +1,6 @@
 <template>
 	<v-divider></v-divider>
-	<div style="min-height: calc(100dvh - 248px);display: flex; flex-direction: column;">
+	<div class="d-flex flex-column" style="max-height: calc(100dvh - 205px); overflow: auto;">
 		<template v-if="IsLoading">
 			<v-skeleton-loader type="heading"></v-skeleton-loader>
 			<v-skeleton-loader type="list-item-two-line" v-for="i in 6" :key="i"></v-skeleton-loader>
@@ -21,102 +21,103 @@
 				<uc-empty v-if="DSNhomDiem.length === 0" class="text-center" />
 			</v-responsive>
 		</v-fade-transition>
-		<uc-chartTA2-HocSinh v-if="vueData.HocSinhSelected.CapID == 3" />
+		<uc-chartTA2-HocSinh v-if="vueData.HocSinhSelected?.CapID == 3" />
 	</div>
 </template>
 
 <script>
-	export default {
-		props: [],
-		data() {
-			const { useI18n } = VueI18n
-			const { t } = useI18n()
-			return {
-				t,
-				vueData,
-				DSNhomDiem: [],
-				selectedGroup: null,
-				IsLoading: false,
-				IsLanguage: JSON.parse(localStorage.getItem('IsLanguage')),
-				Semester: localStorage.getItem('Semester'),
-			}
-		},
-		async mounted() {
-			if (!vueData.HocSinhSelected) return
-	
-			const IsPassRoleParentString = localStorage.getItem("IsPassRoleParent")
-			const IsPassRoleParent = Boolean(IsPassRoleParentString) ?? false
-			console.log('MOUNTED....', IsPassRoleParent)
-			let url = ''
-			//Nếu từ bên Giáo viên qua
-			if (IsPassRoleParent)
-				url = 'lms/gv_TA_MaNhomDiem_Get_By_HocSinhID'
-			else
-				url = 'lms/PH_TA_MaNhomDiem_Get_By_HocSinhID'
-	
-			this.IsLoading = true
-			ajaxCALL(url,
-				{
-					HocSinhID: vueData.HocSinhSelected.StudentID,
-					NienKhoa: vueData.NienKhoa
-				},
-				res => {
-					console.log('res', res.data)
-					if (vueData.HocSinhSelected.CapID === 1) {
-						this.DSNhomDiem = res.data
-					} else {
-						const ListMaNhomCotDiem = ['S1_Mid', 'S1_Final', 'S2_Mid', 'S2_Final']
-						this.DSNhomDiem = res.data
-							// .filter(x => ListMaNhomCotDiem.includes(x.MaNhomCotDiem))
-							.map(item => {
-								item.TenNhomCotDiem_VI = item.TenNhomCotDiem_VI.replace('Điểm', 'Đánh giá')
-								return item
-							})
-						console.log('this.DSNhomDiem', this.DSNhomDiem)
-					}
-					this.IsLoading = false
-					this.XepNhomTiengAnh()
+export default {
+	props: [],
+	data() {
+		const { useI18n } = VueI18n
+		const { t } = useI18n()
+		return {
+			t,
+			vueData,
+			DSNhomDiem: [],
+			selectedGroup: null,
+			IsLoading: false,
+			IsLanguage: JSON.parse(localStorage.getItem('IsLanguage')),
+			Semester: localStorage.getItem('Semester'),
+		}
+	},
+	async mounted() {
+		console.log('vueData.HocSinhSelected uc-TiengAnh', vueData.HocSinhSelected)
+		if (!vueData.HocSinhSelected) return
+
+		const IsPassRoleParentString = localStorage.getItem("IsPassRoleParent")
+		const IsPassRoleParent = Boolean(IsPassRoleParentString) ?? false
+		console.log('MOUNTED....', IsPassRoleParent)
+		let url = ''
+		//Nếu từ bên Giáo viên qua
+		if (IsPassRoleParent)
+			url = 'lms/gv_TA_MaNhomDiem_Get_By_HocSinhID'
+		else
+			url = 'lms/PH_TA_MaNhomDiem_Get_By_HocSinhID'
+
+		this.IsLoading = true
+		ajaxCALL(url,
+			{
+				HocSinhID: vueData.HocSinhSelected.HocSinhID,
+				NienKhoa: vueData.NienKhoa
+			},
+			res => {
+				console.log('res', res.data)
+				if (vueData.HocSinhSelected.CapID === 1) {
+					this.DSNhomDiem = res.data
+				} else {
+					const ListMaNhomCotDiem = ['S1_Mid', 'S1_Final', 'S2_Mid', 'S2_Final']
+					this.DSNhomDiem = res.data
+						.filter(x => ListMaNhomCotDiem.includes(x.MaNhomCotDiem))
+						.map(item => {
+							item.TenNhomCotDiem_VI = item.TenNhomCotDiem_VI.replace('Điểm', 'Đánh giá')
+							return item
+						})
+					console.log('this.DSNhomDiem', this.DSNhomDiem)
 				}
-			)
-	
+				this.IsLoading = false
+				this.XepNhomTiengAnh()
+			}
+		)
+
+	},
+	computed: {
+
+	},
+	watch: {
+		'$i18n.locale': function (locale) {
+			if (locale === 'en') this.IsLanguage = true;
+			else this.IsLanguage = false;
 		},
-		computed: {
-	
+	},
+	methods: {
+		onRedirect(nhomDiem) {
+			const language = this.t('message.english')
+			openWindow({
+				title: language,
+				url: `/report-ket-qua-hoc-tap-tieng-anh-hoc-sinh?hsid=${nhomDiem.HocSinhID}&mnd=${nhomDiem.MaNhomCotDiem}&tnd=${nhomDiem.TenNhomCotDiem_VI}`
+			})
 		},
-		watch: {
-			'$i18n.locale': function (locale) {
-				if (locale === 'en') this.IsLanguage = true;
-				else this.IsLanguage = false;
+		renderTextTitle(obj) {
+			return this.IsLanguage ? obj.TenNhomCotDiem_EN : obj.TenNhomCotDiem_VI
+		},
+		XepNhomTiengAnh() {
+			ajaxCALL('/lms/XepNhomTiengAnh_GetByHocSinhID', {
+				HocSinhID: vueData.HocSinhSelected.HocSinhID
 			},
-		},
-		methods: {
-			onRedirect(nhomDiem) {
-				const language = this.t('message.english')
-				openWindow({
-					title: language,
-					url: `/report-ket-qua-hoc-tap-tieng-anh-hoc-sinh?hsid=${nhomDiem.HocSinhID}&mnd=${nhomDiem.MaNhomCotDiem}&tnd=${nhomDiem.TenNhomCotDiem_VI}`
+				res => {
+					if (res.data.length > 0) {
+						this.DSNhomDiem.unshift({
+							TenNhomCotDiem_VI: "Xếp nhóm Tiếng Anh",
+							TenNhomCotDiem_EN: "Survey results",
+							MaNhomCotDiem: "NhomTiengAnh",
+							HocSinhID: vueData.HocSinhSelected.HocSinhID
+						})
+					}
 				})
-			},
-			renderTextTitle(obj) {
-				return this.IsLanguage ? obj.TenNhomCotDiem_EN : obj.TenNhomCotDiem_VI
-			},
-			XepNhomTiengAnh() {
-				ajaxCALL('/lms/XepNhomTiengAnh_GetByHocSinhID', {
-					HocSinhID: vueData.HocSinhSelected.StudentID
-				},
-					res => {
-						if (res.data.length > 0) {
-							this.DSNhomDiem.unshift({
-								TenNhomCotDiem_VI: "Xếp nhóm Tiếng Anh",
-								TenNhomCotDiem_EN: "Survey results",
-								MaNhomCotDiem: "NhomTiengAnh",
-								HocSinhID: vueData.HocSinhSelected.StudentID
-							})
-						}
-					})
-			},
-			openWindow,
-			redirect
 		},
-	}
+		openWindow,
+		redirect
+	},
+}
 </script>

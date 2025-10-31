@@ -1,1 +1,190 @@
-{"data":[{"EXE":"IsCheck_NotRoleParent(vueData.user)"},{"LopID":"parseInt(lopid)","HocSinhID":"parseInt(hocsinhid)","NgayBatDau":"ngaybatdau","NgayKetThuc":"ngayketthuc","ChuyenVan_TreVangItem":null},{"GVCN_ChuyenCan_BaoNghiCoPhep":{"API":"quansinh/GVCN_ChuyenCan_BaoNghiCoPhep","IN":{"LopID":"vueData.LopID","NgayBatDau":"vueData.NgayBatDau","NgayKetThuc":"vueData.NgayKetThuc"},"OUT":"DSBaoNghi_CoPhep"},"GVCN_ChuyenCan_BaoNghiCoPhep_NgayNghi":{"API":"quansinh/GVCN_ChuyenCan_BaoNghiCoPhep_NgayNghi","IN":{"LopID":"vueData.LopID","NgayBatDau":"vueData.NgayBatDau","NgayKetThuc":"vueData.NgayKetThuc"},"OUT":"DSBaoNghi_CoPhep_NgayNghi"},"GVCN_ChuyenCan_TreVangSelect_VangTiet":{"API":"quansinh/GVCN_ChuyenCan_TreVangSelect","IN":{"Loai":2,"LopID":"vueData.LopID","NgayBatDau":"vueData.NgayBatDau","NgayKetThuc":"vueData.NgayKetThuc"},"OUT":"DSChuyenCan_TreVang_VangTiet"},"GVCN_ChuyenCan_TreVangSelect_TreTiet":{"API":"quansinh/GVCN_ChuyenCan_TreVangSelect","IN":{"Loai":3,"LopID":"vueData.LopID","NgayBatDau":"vueData.NgayBatDau","NgayKetThuc":"vueData.NgayKetThuc"},"OUT":"DSChuyenCan_TreVang_TreTiet"},"GVCN_ChuyenCan_TreVangChiTietByHocSinhID":{"API":"quansinh/GVCN_ChuyenCan_TreVangChiTietByHocSinhID","IN":{"Loai":2,"LopID":"vueData.LopID","TuNgay":"vueData.NgayBatDau","DenNgay":"vueData.NgayKetThuc","HocSinhID":"vueData.HocSinhID"},"OUT":"DSChuyenCan_TreVang_ChiTiet","CALLBACK":{"CALL":"progressAPI()"}}},{"CALL":[{"CALL":"GVCN_ChuyenCan_BaoNghiCoPhep"},{"CALL":"GVCN_ChuyenCan_BaoNghiCoPhep_NgayNghi"},{"CALL":"GVCN_ChuyenCan_TreVangSelect_VangTiet"},{"CALL":"GVCN_ChuyenCan_TreVangSelect_TreTiet"},{"CALL":"GVCN_ChuyenCan_TreVangChiTietByHocSinhID"}]},{"EXE":"vueData.renderBuoi = renderBuoi"}],"watch":{},"controls":[{"prop":"fluid","rows":[{"prop":"","cols":[{"el":"f-table","attr":{"label":"DANH SÁCH VẮNG TIẾT",":headers":[{"title":"STT","value":"STT","align":"center"},{"key":"NgayBuoi","title":"Ngày - Buổi","el":"div","innerHTML":"<span>{{item.Buoi}} - {{ item.Ngay }}</span>"},{"title":"Tiết","value":"Tiet","align":"center"},{"title":"Tên môn học","value":"TenMonHoc"},{"title":"Giáo viên","value":"GiaoVien"},{"title":"Ghi chú","value":"GhiChu"}],":items":"DSChuyenCan_TreVang_ChiTiet"},"w":12},{"el":"f-table","attr":{"label":"DANH SÁCH HỌC SINH VẮNG PHÉP",":headers":[{"title":"HocSinhID","value":"HocSinhID"},{"title":"Họ tên","value":"HoTenHocSinh"},{"title":"Ngày nghỉ","key":"NgayNghiChiTiet","value":"NgayNghiChiTiet","el":"div","attr":{"v-if":"item.NgayNghiChiTiet","class":"d-flex ga-2"},"innerHTML":[{"el":"v-chip","attr":{"v-for":"ngayNghi in JSON.parse(item.NgayNghiChiTiet)"},"innerHTML":"{{ngayNghi.NgayBaoNghi}} [{{vueData.renderBuoi(ngayNghi.Buoi)}} - {{ngayNghi.SoTiet}} Tiết]"}]},{"title":"Số tiết nghỉ","value":"TongTiet","align":"center"},{"title":"Lý do nghỉ","value":"LyDoNghi"}],":items":"DSBaoNghi_CoPhep_NgayNghi.filter(x => x.HocSinhID == HocSinhID)"}}]}]}],"set":{"menu":false}}
+{
+    "data": [
+        {
+            "EXE": "IsCheck_NotRoleParent(vueData.user)"
+        },
+        {
+            "LopID": "parseInt(lopid)",
+            "HocSinhID": "parseInt(hocsinhid)",
+            "NgayBatDau": "ngaybatdau",
+            "NgayKetThuc": "ngayketthuc",
+            "ChuyenVan_TreVangItem": null
+        },
+        {
+            "GVCN_ChuyenCan_BaoNghiCoPhep": {
+                "API": "quansinh/GVCN_ChuyenCan_BaoNghiCoPhep",
+                "IN": {
+                    "LopID": "vueData.LopID",
+                    "NgayBatDau": "vueData.NgayBatDau",
+                    "NgayKetThuc": "vueData.NgayKetThuc"
+                },
+                "OUT": "DSBaoNghi_CoPhep"
+            },
+            "GVCN_ChuyenCan_BaoNghiCoPhep_NgayNghi": {
+                "API": "quansinh/GVCN_ChuyenCan_BaoNghiCoPhep_NgayNghi",
+                "IN": {
+                    "LopID": "vueData.LopID",
+                    "NgayBatDau": "vueData.NgayBatDau",
+                    "NgayKetThuc": "vueData.NgayKetThuc"
+                },
+                "OUT": "DSBaoNghi_CoPhep_NgayNghi"
+            },
+            "GVCN_ChuyenCan_TreVangSelect_VangTiet": {
+                "API": "quansinh/GVCN_ChuyenCan_TreVangSelect",
+                "IN": {
+                    "Loai": 2,
+                    "LopID": "vueData.LopID",
+                    "NgayBatDau": "vueData.NgayBatDau",
+                    "NgayKetThuc": "vueData.NgayKetThuc"
+                },
+                "OUT": "DSChuyenCan_TreVang_VangTiet"
+            },
+            "GVCN_ChuyenCan_TreVangSelect_TreTiet": {
+                "API": "quansinh/GVCN_ChuyenCan_TreVangSelect",
+                "IN": {
+                    "Loai": 3,
+                    "LopID": "vueData.LopID",
+                    "NgayBatDau": "vueData.NgayBatDau",
+                    "NgayKetThuc": "vueData.NgayKetThuc"
+                },
+                "OUT": "DSChuyenCan_TreVang_TreTiet"
+            },
+            "GVCN_ChuyenCan_TreVangChiTietByHocSinhID": {
+                "API": "quansinh/GVCN_ChuyenCan_TreVangChiTietByHocSinhID",
+                "IN": {
+                    "Loai": 2,
+                    "LopID": "vueData.LopID",
+                    "TuNgay": "vueData.NgayBatDau",
+                    "DenNgay": "vueData.NgayKetThuc",
+                    "HocSinhID": "vueData.HocSinhID"
+                },
+                "OUT": "DSChuyenCan_TreVang_ChiTiet",
+                "CALLBACK": {
+                    "CALL": "progressAPI()"
+                }
+            }
+        },
+        {
+            "CALL": [
+                {
+                    "CALL": "GVCN_ChuyenCan_BaoNghiCoPhep"
+                },
+                {
+                    "CALL": "GVCN_ChuyenCan_BaoNghiCoPhep_NgayNghi"
+                },
+                {
+                    "CALL": "GVCN_ChuyenCan_TreVangSelect_VangTiet"
+                },
+                {
+                    "CALL": "GVCN_ChuyenCan_TreVangSelect_TreTiet"
+                },
+                {
+                    "CALL": "GVCN_ChuyenCan_TreVangChiTietByHocSinhID"
+                }
+            ]
+        },
+        {
+            "EXE": "vueData.renderBuoi = renderBuoi"
+        }
+    ],
+    "watch": {},
+    "controls": [
+        {
+            "prop": "fluid",
+            "rows": [
+                {
+                    "prop": "",
+                    "cols": [
+                        {
+                            "el": "f-table",
+                            "attr": {
+                                "label": "DANH SÁCH VẮNG TIẾT",
+                                ":headers": [
+                                    {
+                                        "title": "STT",
+                                        "value": "STT",
+                                        "align": "center"
+                                    },
+                                    {
+                                        "key": "NgayBuoi",
+                                        "title": "Ngày - Buổi",
+                                        "el": "div",
+                                        "innerHTML": "<span>{{item.Buoi}} - {{ item.Ngay }}</span>"
+                                    },
+                                    {
+                                        "title": "Tiết",
+                                        "value": "Tiet",
+                                        "align": "center"
+                                    },
+                                    {
+                                        "title": "Tên môn học",
+                                        "value": "TenMonHoc"
+                                    },
+                                    {
+                                        "title": "Giáo viên",
+                                        "value": "GiaoVien"
+                                    },
+                                    {
+                                        "title": "Ghi chú",
+                                        "value": "GhiChu"
+                                    }
+                                ],
+                                ":items": "DSChuyenCan_TreVang_ChiTiet"
+                            },
+                            "w": 12
+                        },
+                        {
+                            "el": "f-table",
+                            "attr": {
+                                "label": "DANH SÁCH HỌC SINH VẮNG PHÉP",
+                                ":headers": [
+                                    {
+                                        "title": "HocSinhID",
+                                        "value": "HocSinhID"
+                                    },
+                                    {
+                                        "title": "Họ tên",
+                                        "value": "HoTenHocSinh"
+                                    },
+                                    {
+                                        "title": "Ngày nghỉ",
+                                        "key": "NgayNghiChiTiet",
+                                        "value": "NgayNghiChiTiet",
+                                        "el": "div",
+                                        "attr": {
+                                            "v-if": "item.NgayNghiChiTiet",
+                                            "class": "d-flex ga-2"
+                                        },
+                                        "innerHTML": [
+                                            {
+                                                "el": "v-chip",
+                                                "attr": {
+                                                    "v-for": "ngayNghi in JSON.parse(item.NgayNghiChiTiet)"
+                                                },
+                                                "innerHTML": "{{ngayNghi.NgayBaoNghi}} [{{vueData.renderBuoi(ngayNghi.Buoi)}} - {{ngayNghi.SoTiet}} Tiết]"
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "title": "Số tiết nghỉ",
+                                        "value": "TongTiet",
+                                        "align": "center"
+                                    },
+                                    {
+                                        "title": "Lý do nghỉ",
+                                        "value": "LyDoNghi"
+                                    }
+                                ],
+                                ":items": "DSBaoNghi_CoPhep_NgayNghi.filter(x => x.HocSinhID == HocSinhID)"
+                            }
+                        }
+                    ]
+                }
+            ]
+        }
+    ],
+    "set": {
+        "menu": false,
+        "menuLeft": false
+    }
+}

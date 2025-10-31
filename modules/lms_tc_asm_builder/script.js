@@ -1,5 +1,5 @@
+const urlParams = new URLSearchParams(window.location.search);
 function initPage() {
-    const urlParams = new URLSearchParams(window.location.search);
     const assignmentId = urlParams.get('AssignmentID');
     if (assignmentId && assignmentId > 0) {
         vueData.isEditMode = true;
@@ -27,6 +27,10 @@ function initPage() {
                             }
                         },
                         description: '',
+                        advancedFeatures: {
+                            isShuffleQuestions: false,
+                            isShuffleAnswers: false
+                        },
                         questions: []
                     }
                 ]
@@ -49,6 +53,7 @@ function initPage() {
             vueData.dataReady = true;
         });
     } else {
+        console.log(' vueData.isEditMode vueData.isEditMode', vueData.isEditMode)
         vueData.isEditMode = false;
         vueData.assignment = {
             Title: '',
@@ -59,6 +64,10 @@ function initPage() {
                     id: 'group_' + Date.now(),
                     title: 'Phần 1',
                     description: '',
+                    AdvancedFeatures: {
+                        isShuffleQuestions: false,
+                        isShuffleAnswers: false
+                    },
                     questions: [],
                     media: {
                         type: "YOUTUBE",
@@ -85,8 +94,8 @@ function initPage() {
         vueData.dataReady = true;
     }
 }
-function saveAssignment(payload) {
-    const dataToSend = { ...payload.assignment, AssignmentID: vueData.AssignmentID || 0, AssignToClassID: vueData.AssignToClassID || 0 };
+async function saveAssignment(payload) {
+    const dataToSend = { ...payload.assignment, AssignmentID: vueData.AssignmentID || 0, AssignToClassID: vueData.AssignToClassID || 0, Is_Full_Quiz: payload.Is_Full_Quiz ? 1 : 0 };
     dataToSend.Status = payload.isPublishing ? 2 : 1;
     // Chuyển đổi lại thành chuỗi JSON trước khi gửi đi
     const groups = payload.assignment.AssignmentConfig?.groups || []
@@ -115,25 +124,36 @@ function saveAssignment(payload) {
     }
     dataToSend.AssignmentConfig_NoAnswer = JSON.stringify(cloneGroup)
     dataToSend.AssignmentConfig = JSON.stringify(dataToSend.AssignmentConfig)
-    console.log('run saving...', dataToSend)
-    ajaxCALL("lms/EL_Teacher_SaveAssignment",
+    console.log('run saving......', dataToSend)
+    await ajaxCALL("lms/EL_Teacher_SaveAssignment",
         dataToSend,
         (response) => {
             Vue.$toast.success('Lưu bài tập thành công', { position: 'top' })
+            console.log('vueData.isEditMode', vueData.isEditMode)
+            if (urlParams.get('AssignToClassID')) {
+                window.open("/lms-teacher-dashboard", '_parent');
+            }
             if (!vueData.isEditMode && response.data && response.data[0] && response.data[0].AssignmentID) {
                 const newId = response.data[0].AssignmentID;
                 window.history.pushState({}, '', `?AssignmentID=${newId}`);
                 vueData.isEditMode = true;
                 vueData.assignment.AssignmentID = newId;
+                console.log('assignment', vueData.assignment)
             }
         });
 }
-function onCloseWindow() {
-    console.log('app.config.globalProperties.v_OpenWindowList', { ...app.config.globalProperties.v_OpenWindowList })
-    let indexWindow = app.config.globalProperties.v_OpenWindowList.indexOf(item => item.id = 'WinSoanBaiTap')
-    if (indexWindow != -1) {
-        app.config.globalProperties.v_OpenWindowList.splice(indexWindow, 1)
+function isCheckAllGroupFullQuiz(groups) {
+    let isNotFullQuiz = false
+    if (!groups) return isNotFullQuiz
+    for (var group of groups) {
+        for (var question of group.questions) {
+            let isCheck = question.type.includes('QUIZ') ? true : false
+            if (!isCheck) {
+                return true
+            }
+        }
     }
+    return isNotFullQuiz
 }
 function isCheckGroupHasAnswerQuestionNotChoose(groups) {
     const obj = {
@@ -191,8 +211,8 @@ function isCheckAnswerQuestionNotChoose(question) {
     }
     return flag
 }
-vueData.onCloseWindow = onCloseWindow
 vueData.initPage = initPage;
 vueData.saveAssignment = saveAssignment;
+vueData.isCheckAllGroupFullQuiz = isCheckAllGroupFullQuiz
 vueData.isCheckGroupHasAnswerQuestionNotChoose = isCheckGroupHasAnswerQuestionNotChoose
 vueData.isCheckAnswerQuestionNotChoose = isCheckAnswerQuestionNotChoose

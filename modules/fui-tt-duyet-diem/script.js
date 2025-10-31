@@ -32,7 +32,12 @@ function renderDSKhoi() {
             CapID,
         };
     });
-    vueData.DSKhoi = DSKhoi.filter((x) => KhoiID_List.includes(x.value));
+    const sysRight = vueData.user.SystemRight
+    if (sysRight === 9) {
+        vueData.DSKhoi = DSKhoi.filter(x => x.CapID === vueData.CapID)
+    } else {
+        vueData.DSKhoi = DSKhoi.filter((x) => KhoiID_List.includes(x.value));
+    }
     return DSKhoi;
 }
 function convertDSHocSinh() {

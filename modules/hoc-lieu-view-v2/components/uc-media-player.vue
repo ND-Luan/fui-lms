@@ -95,22 +95,18 @@
 	
 				// Kiểm tra link Youtube
 				try {
-					console.log('urlStr', urlStr)
 					const url = new URL(urlStr);
 					if (url.hostname.includes('youtube.com') || url.hostname === 'youtu.be') {
 						let videoId = '';
 						if (url.hostname.includes('youtube.com')) {
 							videoId = url.searchParams.get('v');
 							// videoId = url.pathname.slice(1);
-							console.log('includes', url)
 						}
 	
 						if (url.pathname.includes('shorts')) {
 							const urlSplit = url.pathname.split('/')
 							videoId = urlSplit[2]
-							console.log('short')
 						}
-						console.log('videoId---------------------', videoId)
 						if (videoId) {
 							this.mediaType = 'youtube';
 							this.mediaUrl = `https://www.youtube.com/embed/${videoId}`;
@@ -124,7 +120,6 @@
 					else {
 						this.mediaType = 'video';
 						this.mediaUrl = vueData.v_Set.urlReadFile + urlStr;
-						console.log(this.mediaUrl);
 						this.isLoading = false;
 					}
 				} catch (e) {
@@ -140,7 +135,6 @@
 					} else {
 						this.mediaUrl = vueData.v_Set.urlReadFile + urlStr;
 					}
-					console.log(this.mediaUrl);
 					this.isLoading = false;
 					return;
 				}
@@ -152,7 +146,6 @@
 	
 					this.mediaUrl = vueData.v_Set.urlReadFile + urlStr;
 	
-					console.log(this.mediaUrl);
 					this.isLoading = false;
 					return;
 				}

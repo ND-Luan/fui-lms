@@ -22,25 +22,25 @@ function initPage() {
 }
 async function saveDraft(payload) {
     return new Promise(resolve => {
-        ajaxCALL("lms/EL_Student_SaveSubmission", payload, function (response) {
-            vueData.assignmentData = response.data;
-            if (response.data[1][0]?.SubmissionStatus == 4) {
-                vueData.userAnswersSubmitted = JSON.parse(response.data[1][0]?.SubmissionContent || '{}')?.answers || {}
-            }
-            // vueData.assignmentData[0] = response.data[0];
-            // vueData.assignmentData[1] = response.data[1]
-            console.log('save ')
-            resolve(response.data)
-        });
+        // ajaxCALL("lms/EL_Student_SaveSubmission", payload, function (response) {
+        //     vueData.assignmentData = response.data;
+        //     if (response.data[1][0]?.SubmissionStatus == 4) {
+        //         vueData.userAnswersSubmitted = JSON.parse(response.data[1][0]?.SubmissionContent || '{}')?.answers || {}
+        //     }
+        //     // vueData.assignmentData[0] = response.data[0];
+        //     // vueData.assignmentData[1] = response.data[1]
+        //     console.log('save ')
+        //     resolve(response.data)
+        // });
     })
 }
 function submitAssignment(payload) {
-    ajaxCALL("lms/EL_Student_SaveSubmission", payload, function (response) {
-        Vue.$toast.success("Nộp bài thành công!", { position: "top" });
-        initPage()
-    }, function (error) {
-        Vue.$toast.error("Có lỗi xảy ra khi nộp bài. Vui lòng thử lại.", { position: "top" });
-    });
+    // ajaxCALL("lms/EL_Student_SaveSubmission", payload, function (response) {
+    //     Vue.$toast.success("Nộp bài thành công!", { position: "top" });
+    //     initPage()
+    // }, function (error) {
+    //     Vue.$toast.error("Có lỗi xảy ra khi nộp bài. Vui lòng thử lại.", { position: "top" });
+    // });
 }
 function openSubmitDialog() {
     vueData.confirmSubmitDialog = true;

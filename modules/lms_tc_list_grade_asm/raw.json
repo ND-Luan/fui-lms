@@ -1,1 +1,201 @@
-{"data":[{"MonHocItem":null,"KhoiItem":null,"AssignmentItem":null,"NienKhoa":null,"DSKhoi":[],"DSMonHoc":[],"DSNienKhoa":[],"DSAssignment":[],"DSSubmission":[]},{"MonHoc_GetByKhoiID":{"API":"lms/MonHoc_GetByKhoiID","IN":{"KhoiID":"vueData.KhoiItem.KhoiID","NienKhoa":"vueData.NienKhoa"},"OUT":"DSMonHoc"},"NienKhoa_Get":{"API":"lms/NienKhoa_Get","OUT":"DSNienKhoa","CALLBACK":{"EXE":"vueData.NienKhoa = vueData.DSNienKhoa.find(x=>x.IsActive)?.NienKhoa ?? null"}},"EL_Teacher_AssignToClass_Get_By_KhoiID_MonHocID":{"API":"lms/EL_Teacher_AssignToClass_Get_By_KhoiID_MonHocID","IN":{"KhoiID":"vueData.KhoiItem.KhoiID","MonHocID":"vueData.MonHocItem.MonHocID","NienKhoa":"vueData.NienKhoa"},"OUT":"DSAssignment"},"EL_Teacher_GetSubmissionStatusByStudent":{"API":"lms/EL_Teacher_GetSubmissionStatusByStudent","IN":{"AssignToClassID":"vueData.AssignmentItem.AssignToClassID"},"OUT":"DSSubmission"}},{"CALL":"NienKhoa_Get"},{"EXE":"initPage()"}],"watch":{"KhoiItem":{"IF":"vueData.KhoiItem?.KhoiID > 0","THEN":[{"MonHocItem":null,"AssignmentItem":null,"DSMonHoc":[],"DSAssignment":[],"DSSubmission":[]},{"CALL":"MonHoc_GetByKhoiID"}]},"MonHocItem":{"IF":"vueData.MonHocItem?.MonHocID > 0","THEN":[{"AssignmentItem":null,"DSAssignment":[],"DSSubmission":[]},{"CALL":"EL_Teacher_AssignToClass_Get_By_KhoiID_MonHocID"}]},"AssignmentItem":{"IF":"vueData.AssignmentItem?.AssignmentID > 0","THEN":[{"DSSubmission":[]},{"CALL":"EL_Teacher_GetSubmissionStatusByStudent"}]}},"controls":[{"prop":"fluid","rows":[{"prop":"","cols":[{"el":"v-row","attr":{},"innerHTML":[{"el":"v-col","innerHTML":[{"el":"v-select","attr":{"v-model":"KhoiItem","label":"Chọn khối",":items":"DSKhoi","item-title":"TenKhoiHoc","item-value":"KhoiID",":return-object":true}}]},{"el":"v-col","innerHTML":[{"el":"v-select","attr":{"label":"Chọn môn học","v-model":"MonHocItem",":items":"DSMonHoc","item-title":"MonHocName","item-value":"MonHocID",":return-object":true}}]},{"el":"v-col","innerHTML":[{"el":"v-select","attr":{"label":"Chọn bài giảng","v-model":"AssignmentItem",":items":"DSAssignment","item-title":"Title","item-value":"AssignmentID",":return-object":true}}]}],"w":12},{"el":"f-table","attr":{"label":"Danh sách học sinh chấm bài",":headers":[{"title":"Mã học sinh","value":"HocSinhID"},{"title":"Họ tên","value":"HoTen"},{"el":"v-chip","key":"Status","title":"Trạng thái","value":"Status","align":"center","innerHTML":"{{item.Status}}"},{"el":"v-btn","key":"ChamBai","innerHTML":"Chấm bài","attr":{"v-if":"item.Status === 'SUBMITTED' || item.Status === 'GRADED'","v-on:click":"vueData.onChamBai(item)"}}],":items":"DSSubmission"},"w":12}]}]}],"set":{"menu":false}}
+{
+    "data": [
+        {
+            "MonHocItem": null,
+            "KhoiItem": null,
+            "AssignmentItem": null,
+            "NienKhoa": null,
+            "DSKhoi": [],
+            "DSMonHoc": [],
+            "DSNienKhoa": [],
+            "DSAssignment": [],
+            "DSSubmission": []
+        },
+        {
+            "MonHoc_GetByKhoiID": {
+                "API": "lms/MonHoc_GetByKhoiID",
+                "IN": {
+                    "KhoiID": "vueData.KhoiItem.KhoiID",
+                    "NienKhoa": "vueData.NienKhoa"
+                },
+                "OUT": "DSMonHoc"
+            },
+            "NienKhoa_Get": {
+                "API": "lms/NienKhoa_Get",
+                "OUT": "DSNienKhoa",
+                "CALLBACK": {
+                    "EXE": "vueData.NienKhoa = vueData.DSNienKhoa.find(x=>x.IsActive)?.NienKhoa ?? null"
+                }
+            },
+            "EL_Teacher_AssignToClass_Get_By_KhoiID_MonHocID": {
+                "API": "lms/EL_Teacher_AssignToClass_Get_By_KhoiID_MonHocID",
+                "IN": {
+                    "KhoiID": "vueData.KhoiItem.KhoiID",
+                    "MonHocID": "vueData.MonHocItem.MonHocID",
+                    "NienKhoa": "vueData.NienKhoa"
+                },
+                "OUT": "DSAssignment"
+            },
+            "EL_Teacher_GetSubmissionStatusByStudent": {
+                "API": "lms/EL_Teacher_GetSubmissionStatusByStudent",
+                "IN": {
+                    "AssignToClassID": "vueData.AssignmentItem.AssignToClassID"
+                },
+                "OUT": "DSSubmission"
+            }
+        },
+        {
+            "CALL": "NienKhoa_Get"
+        },
+        {
+            "EXE": "initPage()"
+        }
+    ],
+    "watch": {
+        "KhoiItem": {
+            "IF": "vueData.KhoiItem?.KhoiID > 0",
+            "THEN": [
+                {
+                    "MonHocItem": null,
+                    "AssignmentItem": null,
+                    "DSMonHoc": [],
+                    "DSAssignment": [],
+                    "DSSubmission": []
+                },
+                {
+                    "CALL": "MonHoc_GetByKhoiID"
+                }
+            ]
+        },
+        "MonHocItem": {
+            "IF": "vueData.MonHocItem?.MonHocID > 0",
+            "THEN": [
+                {
+                    "AssignmentItem": null,
+                    "DSAssignment": [],
+                    "DSSubmission": []
+                },
+                {
+                    "CALL": "EL_Teacher_AssignToClass_Get_By_KhoiID_MonHocID"
+                }
+            ]
+        },
+        "AssignmentItem": {
+            "IF": "vueData.AssignmentItem?.AssignmentID > 0",
+            "THEN": [
+                {
+                    "DSSubmission": []
+                },
+                {
+                    "CALL": "EL_Teacher_GetSubmissionStatusByStudent"
+                }
+            ]
+        }
+    },
+    "controls": [
+        {
+            "prop": "fluid",
+            "rows": [
+                {
+                    "prop": "",
+                    "cols": [
+                        {
+                            "el": "v-row",
+                            "attr": {},
+                            "innerHTML": [
+                                {
+                                    "el": "v-col",
+                                    "innerHTML": [
+                                        {
+                                            "el": "v-select",
+                                            "attr": {
+                                                "v-model": "KhoiItem",
+                                                "label": "Chọn khối",
+                                                ":items": "DSKhoi",
+                                                "item-title": "TenKhoiHoc",
+                                                "item-value": "KhoiID",
+                                                ":return-object": true
+                                            }
+                                        }
+                                    ]
+                                },
+                                {
+                                    "el": "v-col",
+                                    "innerHTML": [
+                                        {
+                                            "el": "v-select",
+                                            "attr": {
+                                                "label": "Chọn môn học",
+                                                "v-model": "MonHocItem",
+                                                ":items": "DSMonHoc",
+                                                "item-title": "MonHocName",
+                                                "item-value": "MonHocID",
+                                                ":return-object": true
+                                            }
+                                        }
+                                    ]
+                                },
+                                {
+                                    "el": "v-col",
+                                    "innerHTML": [
+                                        {
+                                            "el": "v-select",
+                                            "attr": {
+                                                "label": "Chọn bài giảng",
+                                                "v-model": "AssignmentItem",
+                                                ":items": "DSAssignment",
+                                                "item-title": "Title",
+                                                "item-value": "AssignmentID",
+                                                ":return-object": true
+                                            }
+                                        }
+                                    ]
+                                }
+                            ],
+                            "w": 12
+                        },
+                        {
+                            "el": "f-table",
+                            "attr": {
+                                "label": "Danh sách học sinh chấm bài",
+                                ":headers": [
+                                    {
+                                        "title": "Mã học sinh",
+                                        "value": "HocSinhID"
+                                    },
+                                    {
+                                        "title": "Họ tên",
+                                        "value": "HoTen"
+                                    },
+                                    {
+                                        "el": "v-chip",
+                                        "key": "Status",
+                                        "title": "Trạng thái",
+                                        "value": "Status",
+                                        "align": "center",
+                                        "innerHTML": "{{item.Status}}"
+                                    },
+                                    {
+                                        "el": "v-btn",
+                                        "key": "ChamBai",
+                                        "innerHTML": "Chấm bài",
+                                        "attr": {
+                                            "v-if": "item.Status === 'SUBMITTED' || item.Status === 'GRADED'",
+                                            "v-on:click": "vueData.onChamBai(item)"
+                                        }
+                                    }
+                                ],
+                                ":items": "DSSubmission"
+                            },
+                            "w": 12
+                        }
+                    ]
+                }
+            ]
+        }
+    ],
+    "set": {
+        "menu": false,
+        "menuLeft": false
+    }
+}

@@ -1,18 +1,25 @@
 <template>
 	<v-card sticky top="80px">
-		<div class="d-flex align-center text-subtitle-1 font-weight-medium">
+		<div class="d-flex align-center text-subtitle-1 font-weight-medium flex-wrap ga-2">
 			Thuộc tính
 			<div class="ml-2" v-if="item.type === 'question' && globalQuestionNumber !== 0">
 				<v-chip v-if="isQuestionTextField === false" label color="primary"
-					@click="isQuestionTextField = true; $nextTick(()=> {$refs.questionInput.focus()});">
-					Câu {{selectedQuestionData.ordinalNumber}} <v-icon end>mdi-pencil-circle</v-icon>
+					@click="isQuestionTextField = true; $nextTick(() => { $refs.questionInput.focus() });">
+					Câu {{ selectedQuestionData.ordinalNumber }} <v-icon end>mdi-pencil-circle</v-icon>
 				</v-chip>
 				<v-text-field v-else ref="questionInput" v-model="selectedQuestionData.ordinalNumber"
 					hide-details="auto" @blur="isQuestionTextField = false" />
 			</div>
 			<v-chip v-else-if="item.type === 'group'" class="ml-2" label color="primary">
-				{{selectedGroupData.title}}
+				{{ selectedGroupData.title }}
 			</v-chip>
+			<v-spacer></v-spacer>
+			<div class="d-flex">
+				<v-spacer></v-spacer>
+				<v-btn v-if="item.type === 'group'" variant="tonal" color="primary"
+					@click="onOpenModalImportFromHocLieu()">Import từ kho
+					học liệu</v-btn>
+			</div>
 		</div>
 		<v-divider class="my-2" />
 		<div v-if="!item" class="text-center pa-10 text-grey">
@@ -21,19 +28,28 @@
 		</div>
 
 		<div v-else>
-			<div v-if="item.type === 'group'">
+			<div v-if="item.type === 'group'" class="d-flex flex-column ga-2">
 				<v-text-field class="mt-2" :model-value="selectedGroupData.title"
 					@update:model-value="updateItem('title', $event)" label="Tên Phần/Nhóm" variant="outlined"
 					density="compact" />
-				<v-divider class="my-2" />
+				<div class="d-flex align-center ga-2 w-100">
+					<v-checkbox :model-value="selectedGroupData.advancedFeatures.isShuffleQuestions"
+						@update:model-value="(value) => { updateShuffleQuestions(selectedGroupData.id, value) }"
+						label="Trộn câu hỏi"></v-checkbox>
+					<v-checkbox :model-value="selectedGroupData.advancedFeatures.isShuffleAnswers"
+						@update:model-value="(value) => { updateShuffleAnswers(selectedGroupData.id, value) }"
+						label="Trộn đáp án"></v-checkbox>
+				</div>
+
+				<v-divider />
 				<!-- Thêm các YT, IMG, RECOURD_AUDIO source -->
 				<uc-media :key="item.groupIndex" :selectedData="selectedGroupData" :item="item"
 					v-model:loadingPage="loadingPage" @update:selectedData="handleGroupMediaUpdate" />
 				<!-- END -->
-				<v-divider class="my-2" />
+				<v-divider />
 				<v-textarea :model-value="selectedGroupData.description"
 					@update:model-value="updateItem('description', $event)" label="Mô tả/Hướng dẫn cho Phần này"
-					variant="outlined" density="compact" rows="3" class="mt-4" />
+					variant="outlined" density="compact" rows="3" />
 				<v-checkbox v-model="selectedGroupData.isCheckShowAllQuestion"
 					label="Hiển thị tất cả câu hỏi trong nhóm" />
 			</div>
@@ -143,7 +159,7 @@
 						</v-col>
 						<v-col cols="2">
 							<v-btn v-if="selectedQuestionData.config.options.length > 2" icon="mdi-delete-outline"
-								variant="text" size="small" color="red" @click="removeOption( index)" />
+								variant="text" size="small" color="red" @click="removeOption(index)" />
 						</v-col>
 					</v-row>
 					<v-btn prepend-icon="mdi-plus" variant="text" color="primary" @click="addOption('options')"
@@ -197,6 +213,34 @@
 						Thêm cặp
 					</v-btn>
 				</div>
+				<!-- QUIZ_MATCHING_V2 -->
+				<div v-else-if="selectedQuestionData.type === 'QUIZ_MATCHING_V2'">
+					<v-row>
+						<v-col><label class="form-label">Cột A</label></v-col>
+						<v-col><label class="form-label">Cột B (tương ứng)</label></v-col>
+					</v-row>
+					<v-row v-for="(pair, index) in selectedQuestionData.config.columnA" :key="index" class="mb-n5">
+						<v-col cols="5">
+							<v-text-field v-if="!selectedQuestionData.config.isAdvanced" v-model="pair.text"
+								density="compact" variant="outlined" hide-details :clearable="false" />
+							<uc-latex-edit v-else v-model:content="pair.text" style="width: 50%" />
+						</v-col>
+						<v-col cols="5" class="d-flex align-center">
+							<v-text-field v-if="!selectedQuestionData.config.isAdvanced"
+								v-model="selectedQuestionData.config.columnB[index].text" density="compact"
+								variant="outlined" hide-details style="width: 40%" :clearable="false" />
+							<uc-latex-edit v-else v-model:content="selectedQuestionData.config.columnB[index].text" />
+
+						</v-col>
+						<v-col cols="2">
+							<v-btn icon="mdi-delete-outline" variant="text" size="small" color="red"
+								@click="removePair(index)" />
+						</v-col>
+					</v-row>
+					<v-btn prepend-icon="mdi-plus" variant="tonal" color="primary" @click="addPair" class="mt-4 mb-4">
+						Thêm cặp
+					</v-btn>
+				</div>
 				<!-- FILE_UPLOAD -->
 				<div v-else-if="selectedQuestionData.type === 'FILE_UPLOAD'">
 					<div v-if="selectedQuestionData.config.media.type === 'VIDEO'">
@@ -219,138 +263,165 @@
 	</v-card>
 
 	<uc-loading-page v-model="loadingPage.isLoading" v-model:text="loadingPage.text" />
+	<uc-question-from-hoc-lieu v-if="isShowModalImportFromHocLieu" v-model:isOpen="isShowModalImportFromHocLieu"
+		:assignmentDetail="assignment" @importJson="bindingImport" />
 </template>
 
 <script>
-	export default {
-		name: 'uc-assignment-properties',
-		props: { groups: { type: Array, default: () => [] }, item: Object, assignment: Object },
-		emits: ['update:groups'],
-		data() {
-			return {
-				vueData,
-				window,
-				fileRecordAudio: null,
-				loadingPage: {
-					isLoading: false,
-					text: "Đang tải dữ liệu..."
-				},
-				isSaveFile: false,
-				isQuestionTextField: false
-			}
-		},
-		watch: {},
-		computed: {
-			selectedGroupData() {
-				if (!this.item || this.item.type !== 'group') return null;
-				return this.groups[this.item.groupIndex];
+export default {
+	name: 'uc-assignment-properties',
+	props: { groups: { type: Array, default: () => [] }, item: Object, assignment: Object },
+	emits: ['update:groups'],
+	data() {
+		return {
+			vueData,
+			window,
+			fileRecordAudio: null,
+			loadingPage: {
+				isLoading: false,
+				text: "Đang tải dữ liệu..."
 			},
-			selectedQuestionData() {
-				if (!this.item || this.item.type !== 'question') return null;
-				return this.groups[this.item.groupIndex]?.questions?.[this.item.qIndex];
-			},
-			globalQuestionNumber() {
-				if (!this.item || this.item.type !== 'question') return 0;
-				let n = 1;
-				for (let i = 0; i < this.item.groupIndex; i++) {
-					n += this.groups[i].questions.length;
+			isSaveFile: false,
+			isQuestionTextField: false,
+			isShowModalImportFromHocLieu: false
+		}
+	},
+	watch: {},
+	computed: {
+		selectedGroupData() {
+			if (!this.item || this.item.type !== 'group') return null;
+			let mapGroup = this.groups[this.item.groupIndex]
+			if (!mapGroup.advancedFeatures) {
+				this.groups[this.item.groupIndex].advancedFeatures = {
+					isShuffleQuestions: false,
+					isShuffleAnswers: false
 				}
-				return n + this.item.qIndex;
 			}
+			return mapGroup;
 		},
-		mounted() { },
-		methods: {
-			isAutoGradable(type) { return type.startsWith('QUIZ_'); },
-			// Handle emit từ uc-media cho group
-			handleGroupMediaUpdate(updatedData) {
-				console.log('1 updateData', updatedData)
-				if (!this.item || this.item.type !== 'group') return;
-				const ng = this.groups;
-				const media = updatedData.media
-	
-				console.log('updatedData', updatedData)
-				ng[this.item.groupIndex] = {
-					...ng[this.item.groupIndex],
-					media: {
-						...ng[this.item.groupIndex].media,
-						sourceYT: media.sourceYT,
-						sourceRecord: media.sourceRecord,
-						sourceFiles: {
-							file: media.sourceFiles.file ?? [],
-							image: media.sourceFiles.image ?? [],
-						}
+		selectedQuestionData() {
+			if (!this.item || this.item.type !== 'question') return null;
+			return this.groups[this.item.groupIndex]?.questions?.[this.item.qIndex];
+		},
+		globalQuestionNumber() {
+			if (!this.item || this.item.type !== 'question') return 0;
+			let n = 1;
+			for (let i = 0; i < this.item.groupIndex; i++) {
+				n += this.groups[i].questions.length;
+			}
+			return n + this.item.qIndex;
+		}
+	},
+	mounted() {
+		console.log('item', this.item)
+		console.log('selectedGroupData', this.selectedGroupData)
+	},
+	methods: {
+		isAutoGradable(type) { return type.startsWith('QUIZ_'); },
+		// Handle emit từ uc-media cho group
+		handleGroupMediaUpdate(updatedData) {
+			console.log('1 updateData', updatedData)
+			if (!this.item || this.item.type !== 'group') return;
+			const ng = this.groups;
+			const media = updatedData.media
+
+			console.log('updatedData', updatedData)
+			ng[this.item.groupIndex] = {
+				...ng[this.item.groupIndex],
+				media: {
+					...ng[this.item.groupIndex].media,
+					sourceYT: media.sourceYT,
+					sourceRecord: media.sourceRecord,
+					sourceFiles: {
+						file: media.sourceFiles.file ?? [],
+						image: media.sourceFiles.image ?? [],
 					}
-				};
-				this.updateGroups(ng);
-			},
-			// Handle emit từ uc-media cho question
-			handleQuestionMediaUpdate(updatedData) {
-				if (!this.item || this.item.type !== 'question') return;
-				const ng = this.groups;
-				const media = updatedData.media
-	
-				const keysToRemove = ["sourceYT", "sourceRecord", "sourceFiles"]; //Này bị thêm do phần cấu trúc uc-media, xóa đi cho gọn json, media đã thêm vào config, phần này bị dư ra
-	
-				keysToRemove.forEach(key => {
-					if (ng[this.item.groupIndex].questions[this.item.qIndex].config.hasOwnProperty(key)) {
-						delete ng[this.item.groupIndex].questions[this.item.qIndex].config[key];
-					}
-				});
-	
-				ng[this.item.groupIndex].questions[this.item.qIndex] = {
-					...ng[this.item.groupIndex].questions[this.item.qIndex],
-					config: {
-						...ng[this.item.groupIndex].questions[this.item.qIndex].config,
-						sourceYT: media.sourceYT,
-						sourceRecord: media.sourceRecord,
-						sourceFiles: {
-							file: media.sourceFiles.file,
-							image: media.sourceFiles.image,
-						}
-					}
-				};
-				this.updateGroups(ng);
-			},
-	
-			updateGroups(newGroups) {
-				this.$emit('update:groups', newGroups);
-			},
-			updateItem(key, value) {
-				const ng = JSON.parse(JSON.stringify(this.groups));
-				if (this.item.type === 'group') {
-					ng[this.item.groupIndex][key] = value;
 				}
-				this.updateGroups(ng);
-			},
-			updateQuestion(key, value) { const ng = JSON.parse(JSON.stringify(this.groups)); ng[this.item.groupIndex].questions[this.item.qIndex][key] = value; this.updateGroups(ng); },
-			updateQuestionConfig(key, value) { const ng = JSON.parse(JSON.stringify(this.groups)); ng[this.item.groupIndex].questions[this.item.qIndex].config[key] = value; this.updateGroups(ng); },
-			updateOptionText(optionIndex, text) { const ng = JSON.parse(JSON.stringify(this.groups)); ng[this.item.groupIndex].questions[this.item.qIndex].config.options[optionIndex].text = text; this.updateGroups(ng); },
-			addOption() { const ng = JSON.parse(JSON.stringify(this.groups)); const opts = ng[this.item.groupIndex].questions[this.item.qIndex].config.options; opts.push({ id: `opt_${Date.now()}`, text: 'Lựa chọn mới' }); this.updateGroups(ng); },
-			removeOption(optionIndex) {
-				console.log('optionIndex', optionIndex)
-				const ng = JSON.parse(JSON.stringify(this.groups));
-				ng[this.item.groupIndex].questions[this.item.qIndex].config.options.splice(optionIndex, 1);
-				this.updateGroups(ng);
-			},
-			updatePart(partIndex, key, value) { const ng = JSON.parse(JSON.stringify(this.groups)); ng[this.item.groupIndex].questions[this.item.qIndex].config.parts[partIndex][key] = value; this.updateGroups(ng); },
-			addPart(type) { const ng = JSON.parse(JSON.stringify(this.groups)); const parts = ng[this.item.groupIndex].questions[this.item.qIndex].config.parts; if (type === 'text') { parts.push({ type: 'text', value: ' ' }); } else { parts.push({ type: 'blank', id: `blank_${Date.now()}`, acceptedAnswers: [] }); } this.updateGroups(ng); },
-			removePart(partIndex) { const ng = JSON.parse(JSON.stringify(this.groups)); ng[this.item.groupIndex].questions[this.item.qIndex].config.parts.splice(partIndex, 1); this.updateGroups(ng); },
-			addPair() {
-				const newIndex = Date.now();
-				const aId = `a${newIndex}`; const bId = `b${newIndex}`;
-				const newA = [...this.selectedQuestionData.config.columnA, { id: aId, text: '' }];
-				const newB = [...this.selectedQuestionData.config.columnB, { id: bId, text: '' }];
-				const newPairs = [...this.selectedQuestionData.config.correctPairs, { from: aId, to: bId }];
+			};
+			this.updateGroups(ng);
+		},
+		// Handle emit từ uc-media cho question
+		handleQuestionMediaUpdate(updatedData) {
+			if (!this.item || this.item.type !== 'question') return;
+			const ng = this.groups;
+			const media = updatedData.media
+
+			const keysToRemove = ["sourceYT", "sourceRecord", "sourceFiles"]; //Này bị thêm do phần cấu trúc uc-media, xóa đi cho gọn json, media đã thêm vào config, phần này bị dư ra
+
+			keysToRemove.forEach(key => {
+				if (ng[this.item.groupIndex].questions[this.item.qIndex].config.hasOwnProperty(key)) {
+					delete ng[this.item.groupIndex].questions[this.item.qIndex].config[key];
+				}
+			});
+
+			ng[this.item.groupIndex].questions[this.item.qIndex] = {
+				...ng[this.item.groupIndex].questions[this.item.qIndex],
+				config: {
+					...ng[this.item.groupIndex].questions[this.item.qIndex].config,
+					sourceYT: media.sourceYT,
+					sourceRecord: media.sourceRecord,
+					sourceFiles: {
+						file: media.sourceFiles.file,
+						image: media.sourceFiles.image,
+					}
+				}
+			};
+			this.updateGroups(ng);
+		},
+
+		updateGroups(newGroups) {
+			this.$emit('update:groups', newGroups);
+		},
+		updateItem(key, value) {
+			const ng = JSON.parse(JSON.stringify(this.groups));
+			if (this.item.type === 'group') {
+				ng[this.item.groupIndex][key] = value;
+			}
+			this.updateGroups(ng);
+		},
+		updateQuestion(key, value) { const ng = JSON.parse(JSON.stringify(this.groups)); ng[this.item.groupIndex].questions[this.item.qIndex][key] = value; this.updateGroups(ng); },
+		updateQuestionConfig(key, value) { const ng = JSON.parse(JSON.stringify(this.groups)); ng[this.item.groupIndex].questions[this.item.qIndex].config[key] = value; this.updateGroups(ng); },
+		updateOptionText(optionIndex, text) { const ng = JSON.parse(JSON.stringify(this.groups)); ng[this.item.groupIndex].questions[this.item.qIndex].config.options[optionIndex].text = text; this.updateGroups(ng); },
+		addOption() { const ng = JSON.parse(JSON.stringify(this.groups)); const opts = ng[this.item.groupIndex].questions[this.item.qIndex].config.options; opts.push({ id: `opt_${Date.now()}`, text: 'Lựa chọn mới' }); this.updateGroups(ng); },
+		removeOption(optionIndex) {
+			console.log('optionIndex', optionIndex)
+			const ng = JSON.parse(JSON.stringify(this.groups));
+			ng[this.item.groupIndex].questions[this.item.qIndex].config.options.splice(optionIndex, 1);
+			this.updateGroups(ng);
+		},
+		updatePart(partIndex, key, value) { const ng = JSON.parse(JSON.stringify(this.groups)); ng[this.item.groupIndex].questions[this.item.qIndex].config.parts[partIndex][key] = value; this.updateGroups(ng); },
+		addPart(type) { const ng = JSON.parse(JSON.stringify(this.groups)); const parts = ng[this.item.groupIndex].questions[this.item.qIndex].config.parts; if (type === 'text') { parts.push({ type: 'text', value: ' ' }); } else { parts.push({ type: 'blank', id: `blank_${Date.now()}`, acceptedAnswers: [] }); } this.updateGroups(ng); },
+		removePart(partIndex) { const ng = JSON.parse(JSON.stringify(this.groups)); ng[this.item.groupIndex].questions[this.item.qIndex].config.parts.splice(partIndex, 1); this.updateGroups(ng); },
+		addPair() {
+			const newIndex = Date.now();
+			const aId = `a${newIndex}`; const bId = `b${newIndex}`;
+			const newA = [...this.selectedQuestionData.config.columnA, { id: aId, text: '' }];
+			const newB = [...this.selectedQuestionData.config.columnB, { id: bId, text: '' }];
+			const newPairs = [...this.selectedQuestionData.config.correctPairs, { from: aId, to: bId }];
+			this.selectedQuestionData.config = { ...this.selectedQuestionData.config, columnA: newA, columnB: newB, correctPairs: newPairs };
+		},
+		removePair(index) {
+			if (this.selectedQuestionData.config.columnA.length > 1) {
+				const newA = [...this.selectedQuestionData.config.columnA]; newA.splice(index, 1);
+				const newB = [...this.selectedQuestionData.config.columnB]; newB.splice(index, 1);
+				const newPairs = [...this.selectedQuestionData.config.correctPairs]; newPairs.splice(index, 1);
 				this.selectedQuestionData.config = { ...this.selectedQuestionData.config, columnA: newA, columnB: newB, correctPairs: newPairs };
-			},
-			removePair(index) {
-				if (this.selectedQuestionData.config.columnA.length > 1) {
-					const newA = [...this.selectedQuestionData.config.columnA]; newA.splice(index, 1);
-					const newB = [...this.selectedQuestionData.config.columnB]; newB.splice(index, 1);
-					const newPairs = [...this.selectedQuestionData.config.correctPairs]; newPairs.splice(index, 1);
-					this.selectedQuestionData.config = { ...this.selectedQuestionData.config, columnA: newA, columnB: newB, correctPairs: newPairs };
-				}
-			},
+			}
+		},
+		updateShuffleQuestions(id, val) {
+			this.groups[this.item.groupIndex].advancedFeatures.isShuffleQuestions = val
+			this.$emit('update:groups', this.groups);
+		},
+		updateShuffleAnswers(id, val) {
+			this.groups[this.item.groupIndex].advancedFeatures.isShuffleAnswers = val
+			this.$emit('update:groups', this.groups);
+		},
+		onOpenModalImportFromHocLieu() {
+			this.isShowModalImportFromHocLieu = true
+		},
+		bindingImport(val) {
+			this.groups[this.item.groupIndex].questions = [...this.groups[this.item.groupIndex].questions, val]
 		}
 	}
+}
 </script>

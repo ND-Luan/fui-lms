@@ -2,9 +2,6 @@ function renderDSHocSinh() {
     const eduBotHocSinhLop = []
     let items = []
     const currentDSHocSinhLop_LMS = vueData.DSHocSinhLop_LMS.filter(x => x.LopID == vueData.LopItem.LopID)
-    let distinctClassFromEdubot = [...new Set(vueData.DSHocSinhLop_LMS.map(x => x.LopID))]
-    console.log('distinctClassFromEdubot', distinctClassFromEdubot)
-    console.log('vueData.LopItem.LopID', vueData.LopItem.LopID)
     for (var hsl of currentDSHocSinhLop_LMS) {
         const hs = vueData.DSHocSinh_LMS.find(x => x.HocSinhID === hsl.HocSinhID)
         if (hs) {
@@ -12,7 +9,6 @@ function renderDSHocSinh() {
         }
     }
     const uniqueHocSinhID = [...new Set(eduBotHocSinhLop.map(x => x.HocSinhID))]
-    console.log('uniqueHocSinhID', uniqueHocSinhID)
     for (var id of uniqueHocSinhID) {
         let obj = {}
         const hocSinh = vueData.DSHocSinhLop.find(x => x.HocSinhID === id)
@@ -57,7 +53,6 @@ function renderDSHocSinh() {
             UpdateTime: hocSinhLMS.UpdateTime,
         })
     }
-    console.log(items)
     vueData.items = items.sort((a, b) => {
         // Ưu tiên sắp xếp theo SoDanhBo (chuyển sang số nếu cần)
         const soA = isNaN(a.SoDanhBo) ? a.SoDanhBo : parseInt(a.SoDanhBo)
@@ -77,25 +72,7 @@ function renderDSHocSinh() {
     })
 }
 function localStorageSetItem(item) {
-    const lop = vueData.DSLop.find(x => x.LopID == item.LopID)
-    localStorage.setItem('HocSinhSelected',
-        JSON.stringify({
-            StudentID: item.HocSinhID,
-            HocSinhID: item.HocSinhID,
-            HoTen: item.HoTen,
-            TenLop: lop.TenLop,
-            Khoi: vueData.KhoiItem.KhoiID,
-            HinhThucHoc: item.HinhThucHoc,
-            MaDonVi: item.MaDonVi,
-            NgaySinh: item.NgaySinh,
-            Nu: item.Nu,
-            LopID: item.LopID,
-            HSLopID: item.HSLopID,
-            NienKhoa: vueData.NienKhoa,
-            KhoiID: vueData.KhoiItem.KhoiID,
-            CapID: vueData.CapID,
-        })
-    )
+    console.log('item',item)
     const bottomNavigation = localStorage.getItem('tabBottomNavigation')
     if (bottomNavigation === null) localStorage.setItem('tabBottomNavigation', 0)
     const Semester = localStorage.getItem('Semester')
@@ -103,12 +80,12 @@ function localStorageSetItem(item) {
     localStorage.setItem('IsPassRoleParent', true)
     openWindow({
         title: 'Xem chi tiết ' + item.HoTen,
-        url: '/ph-report'
+        url: `/ph-report?HocSinhID=${item.HocSinhID}`
     })
 }
 function onOpenModalEditProfile(item) {
-    vueData.StudentProfile = {...item}
-    vueData.isOpenModalEditProfile= true
+    vueData.StudentProfile = { ...item }
+    vueData.isOpenModalEditProfile = true
 }
 vueData.TitlePage = getTitlePageByURL(window.location.pathname + window.location.search)
 vueData.localStorageSetItem = localStorageSetItem

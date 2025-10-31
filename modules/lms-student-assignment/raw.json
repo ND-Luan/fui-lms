@@ -1,7 +1,7 @@
 {
     "data": [
         {
-            "HocSinhID": "vueData.user.UserName",
+            "HocSinhID": "parseInt(vueData.user.UserID)",
             "dataReady": false,
             "assignmentData": [],
             "monHocName": "",
@@ -10,7 +10,11 @@
             "NienKhoa": null,
             "assignmentInfo": {},
             "userAnswersSubmitted": {},
-            "submitionInfo": {}
+            "submitionInfo": {},
+            "isRendered": false,
+            "keyComp": 0,
+            "Is_Resubmit": 0,
+            "LanNop": 1
         },
         {
             "HocSinh_Detail_GetBy_HocSinhID": {
@@ -58,10 +62,11 @@
                             "w": 12,
                             "el": "uc-assignment-taker",
                             "attr": {
+                                ":key": "keyComp",
                                 "class": "pa-0",
                                 "ref": "assignmentTaker",
                                 "v-if": "dataReady === true",
-                                ":assignment-data": "assignmentData",
+                                "v-model:assignment-data": "assignmentData",
                                 "v-model:puseranswers": "puseranswers",
                                 ":mon-hoc-name": "monHocName",
                                 ":on-save-draft": "saveDraft",
@@ -136,6 +141,7 @@
         }
     ],
     "set": {
-        "menu": false
+        "menu": false,
+        "menuLeft": false
     }
 }

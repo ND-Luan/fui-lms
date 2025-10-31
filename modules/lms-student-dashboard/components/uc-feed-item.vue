@@ -12,7 +12,7 @@
 			{{ formatTimeAgo(feed.EventTime) }}
 		</v-list-item-subtitle>
 
-		<!-- Nút hành động chỉ hiển thị cho loại GRADED -->
+		<!-- Nút hành động chỉ hiển thị cho loại GRADED (DESKTOP)-->
 		<template v-slot:append>
 			<div v-if="feed.FeedType === 'GRADED' && !isMobile" class="d-flex align-center ga-2">
 				<v-btn size="small" variant="tonal" @click.stop="onViewSummaryClick">
@@ -22,7 +22,13 @@
 					Xem chi tiết
 				</v-btn>
 			</div>
+			<div v-else-if="feed.FeedType === 'SUBMITTED' && !isMobile" class="d-flex align-center ga-2">
+				<v-btn v-if="feed.Is_MaxAssigned == 0" size="small" variant="tonal" @click.stop="onResubmitAssignment">
+					Làm lại
+				</v-btn>
+			</div>
 		</template>
+		<!-- Nút hành động chỉ hiển thị cho loại GRADED (MOBILE)-->
 		<div v-if="feed.FeedType === 'GRADED' && isMobile" class="d-flex align-center ga-2 mt-2">
 			<v-btn size="small" variant="tonal" @click.stop="onViewSummaryClick">
 				Xem điểm
@@ -50,24 +56,42 @@ export default {
 	},
 	data() {
 		return {
-			isMobile: false
+			isMobile: false,
+			vueData
 		}
 	},
 	computed: {
 		feedInfo() {
 			switch (this.feed.FeedType) {
 				case 'GRADED':
-					return {
-						gradient: 'linear-gradient(135deg, #4caf50 0%, #66bb6a 100%)',
-						icon: 'mdi-check-decagram',
-						title: `Bài <strong>${this.feed.Title}</strong> đã được chấm: <strong>${this.feed.Details}</strong>`
-					};
+					if (this.feed.LanNop == 1 && this.feed.Is_MaxAssigned == 1 && this.feed.DSLanNop.length == 3) {
+						return {
+							gradient: 'linear-gradient(135deg, #4caf50 0%, #66bb6a 100%)',
+							icon: 'mdi-check-decagram',
+							title: `Bài <strong>${this.feed.Title}</strong> đã được chấm: <strong>${this.feed.Details}</strong> `
+						};
+					} else {
+						return {
+							gradient: 'linear-gradient(135deg, #4caf50 0%, #66bb6a 100%)',
+							icon: 'mdi-check-decagram',
+							title: `Bài <strong>${this.feed.Title}</strong> <span>(Lần ${this.feed.LanNop})</span> đã được chấm: <strong>${this.feed.Details}</strong> `
+						};
+					}
 				case 'SUBMITTED':
-					return {
-						gradient: 'linear-gradient(135deg, #2196f3 0%, #42a5f5 100%)',
-						icon: 'mdi-upload',
-						title: `Bạn đã nộp bài tập <strong>${this.feed.Title}</strong>`
-					};
+					if (this.feed.LanNop == 1 && this.feed.Is_MaxAssigned == 1 && this.feed.DSLanNop.length == 3) {
+						return {
+							gradient: 'linear-gradient(135deg, #2196f3 0%, #42a5f5 100%)',
+							icon: 'mdi-upload',
+							title: `Bạn đã nộp bài tập <strong>${this.feed.Title}</strong> `
+						};
+					} else {
+						return {
+							gradient: 'linear-gradient(135deg, #2196f3 0%, #42a5f5 100%)',
+							icon: 'mdi-upload',
+							title: `Bạn đã nộp bài tập <strong>${this.feed.Title}</strong> <span>(Lần ${this.feed.LanNop})</span>`
+						};
+					}
+
 				case 'SAVE_DRAFT':
 					return {
 						gradient: 'linear-gradient(135deg, #2196f3 0%, #42a5f5 100%)',
@@ -109,7 +133,7 @@ export default {
 					// Chuyển đến trang xem lại bài đã nộp (chưa chấm)
 					openWindow({
 						title: `<p style="min-width: fit-content">${this.feed.Title}</p>`,
-						url: `/lms-student-assignment?AssignToClassID=${id}`,
+						url: `/lms-student-assignment?AssignToClassID=${id}&LanNop=${this.feed.LanNop??1}`,
 						id: "123",
 						onclose: {
 							"EXE": "vueData.initPage()"
@@ -150,7 +174,30 @@ export default {
 		// Hàm xử lý cho nút "Xem chi tiết" (thay cho "Xem bài làm")
 		onViewDetailsClick() {
 			if (this.feed.AssignToClassID) {
-				this.$emit('view-details', this.feed.AssignToClassID);
+				let window = {
+					title: this.feed.Title + ` - Nộp bài lần ${this.feed.LanNop}`,
+					url: `/lms-student-assignment?AssignToClassID=${this.feed.AssignToClassID}&LanNop=${this.feed.LanNop??1}`,
+					id: '12333',
+					onclose: {
+						"EXE": "vueData.initPage()"
+					}
+				}
+				openWindow(window)
+			}
+		},
+		// Hàm xử lý cho nút "Làm lại" 
+		onResubmitAssignment() {
+			if (this.feed.AssignToClassID) {
+				if (!this.feed.AssignToClassID) return Vue.$toast.error("Không tìm thấy thông tin bài tập để điều hướng.")
+				let window = {
+					title: this.feed.Title,
+					url: `/lms-student-assignment?AssignToClassID=${this.feed.AssignToClassID}&Is_Resubmit=1`,
+					id: '123334',
+					onclose: {
+						"EXE": "vueData.initPage()"
+					}
+				}
+				openWindow(window)
 			}
 		},
 		formatTimeAgo(dateString) {

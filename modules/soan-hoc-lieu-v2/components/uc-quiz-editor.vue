@@ -589,7 +589,7 @@
 						defaults = { prompt: '', options: [{ id: 'a', text: '' }], correctAnswers: [], isAdvanced: false };
 						break;
 					case 'QUIZ_MATCHING':
-						defaults = { prompt: '', columnA: [{ id: 'a1', text: '' }], columnB: [{ id: 'b1', text: '' }], correctPairs: [] };
+						defaults = { prompt: '', columnA: [{ id: 'a1', text: '' }], columnB: [{ id: 'b1', text: '' }], correctPairs: [{ from: "a1", to: "b1" }] };
 						break;
 					case 'QUIZ_ORDERING':
 						defaults = { prompt: '', items: [{ id: 'i1', text: '' }] };

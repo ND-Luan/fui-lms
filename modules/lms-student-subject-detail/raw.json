@@ -1,1 +1,29 @@
-{"data":[{"MonHocID":"MonHocID"}],"watch":{},"controls":[{"prop":"fluid pa-0","rows":[{"cols":[{"el":"uc-subject-progress-detail","attr":{":mon-hoc-id":"parseInt(MonHocID)"}}]}]}],"set":{"menu":false}}
+{
+    "data": [
+        {
+            "MonHocID": "MonHocID"
+        }
+    ],
+    "watch": {},
+    "controls": [
+        {
+            "prop": "fluid pa-0",
+            "rows": [
+                {
+                    "cols": [
+                        {
+                            "el": "uc-subject-progress-detail",
+                            "attr": {
+                                ":mon-hoc-id": "parseInt(MonHocID)"
+                            }
+                        }
+                    ]
+                }
+            ]
+        }
+    ],
+    "set": {
+        "menu": false,
+        "menuLeft": false
+    }
+}

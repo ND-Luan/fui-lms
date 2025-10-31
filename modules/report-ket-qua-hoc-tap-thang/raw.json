@@ -1,1 +1,25 @@
-{"data":[],"watch":{},"controls":[{"prop":"fluid pa-0","rows":[{"prop":"style='margin:0; padding: 0'","cols":[{"el":"uc-main-layout","attr":{},"cols":12}]}]}],"set":{"menu":false}}
+{
+    "data": [],
+    "watch": {},
+    "controls": [
+        {
+            "prop": "fluid pa-0",
+            "rows": [
+                {
+                    "prop": "style='margin:0; padding: 0'",
+                    "cols": [
+                        {
+                            "el": "uc-main-layout",
+                            "attr": {},
+                            "cols": 12
+                        }
+                    ]
+                }
+            ]
+        }
+    ],
+    "set": {
+        "menu": false,
+        "menuLeft": false
+    }
+}

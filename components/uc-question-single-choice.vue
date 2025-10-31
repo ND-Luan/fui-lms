@@ -7,11 +7,11 @@
 		</v-alert>
 
 		<!-- Trắc nghiệm: chỉ hiển thị đáp án trực quan bằng radio, không lặp lại khối “Câu trả lời HS” -->
-		<v-radio-group :model-value="answer" @update:model-value="$emit('answer-change', $event)" :readonly="submissionstatus >= 2"
-			hide-details>
+		<v-radio-group :model-value="answer" @update:model-value="$emit('answer-change', $event)"
+			:readonly="submissionstatus >= 2" hide-details>
 			<v-radio v-for="option in question.config.options" :key="option.id" :value="option.id">
 				<template #label>
-					<div class="d-flex align-center justify-space-between w-100">
+					<div class="d-flex align-center justify-space-between w-100 ga-2">
 						<uc-latex-view :class="getOptionTextClass(option.id)" class="ga-2"
 							v-model:content="option.text" />
 						<div v-if="isGraded || submissionstatus == 4" class="feedback-icon">
@@ -93,77 +93,86 @@
 </template>
 
 <script>
-	export default {
-		name: 'uc-question-single-choice',
-		props: {
-			question: { type: Object, required: true },
-			answer: { default: null },
-			readonly: { type: Boolean, default: false },
-			grading: { type: Object, default: null },
-			isGrade: { type: Boolean, default: false },
-			submissionstatus: { type: Number, default: -1 },
-			isShowBtnComment: { type: Boolean, default: true }
+export default {
+	name: 'uc-question-single-choice',
+	props: {
+		question: { type: Object, required: true },
+		answer: { default: null },
+		readonly: { type: Boolean, default: false },
+		grading: { type: Object, default: null },
+		isGrade: { type: Boolean, default: false },
+		submissionstatus: { type: Number, default: -1 },
+		isShowBtnComment: { type: Boolean, default: true }
+	},
+	emits: ['answer-change', 'grading-change'],
+	data() {
+		return {
+			menu: false, widthScreen: null
+		}
+	},
+	computed: {
+		isGraded() { return this.grading && this.isGrade; },
+		isCorrect() { return (this.isGraded || this.submissionstatus == 4) ? (this.answer === this.question.config.correctAnswer) : false; },
+		guideText() { return this.question?.config?.submissionNote || this.question?.config?.instruction || '' },
+		displayScore() {
+			// Ưu tiên manualScore, rồi autoScore, nếu trống thì mặc định 0
+			const s = this.grading?.manualScore ?? this.grading?.autoScore ?? 0;
+			return typeof s === 'number' ? s : 0;
 		},
-		emits: ['answer-change', 'grading-change'],
-		data() {
-			return {
-				menu: false, widthScreen: null
-			}
+		effectiveMaxPoints() {
+			return this.question?.points ?? 0;
 		},
-		computed: {
-			isGraded() { return this.grading && this.isGrade; },
-			isCorrect() { return (this.isGraded || this.submissionstatus == 4) ? (this.answer === this.question.config.correctAnswer) : false; },
-			guideText() { return this.question?.config?.submissionNote || this.question?.config?.instruction || '' },
-			displayScore() {
-				// Ưu tiên manualScore, rồi autoScore, nếu trống thì mặc định 0
-				const s = this.grading?.manualScore ?? this.grading?.autoScore ?? 0;
-				return typeof s === 'number' ? s : 0;
-			},
-			effectiveMaxPoints() {
-				return this.question?.points ?? 0;
-			},
-			scoreChipColor() {
-				const s = this.displayScore;
-				const max = this.effectiveMaxPoints;
-				if (s <= 0) return 'error'; // 0 điểm if (max && s>= max) return 'success'; // đạt tối đa
-				return 'primary'; // điểm trung gian
-			}
-		},
-		mounted() {
-			if (this.isGrade) {
+		scoreChipColor() {
+			const s = this.displayScore;
+			const max = this.effectiveMaxPoints;
+			if (s <= 0) return 'error'; // 0 điểm if (max && s>= max) return 'success'; // đạt tối đa
+			return 'primary'; // điểm trung gian
+		}
+	},
+	mounted() {
+		if (this.isGrade) {
+			const score = (this.answer === this.question.config.correctAnswer) ? this.question.points : 0
+			this.$emit('grading-change', { ...this.grading, manualScore: score });
+		}
+		this.widthScreen = window.innerWidth
+		window.addEventListener('resize', () => { this.handleResize() })
+	},
+	watch: {
+		isGrade: function (val) {
+			if (val) {
+
 				const score = (this.answer === this.question.config.correctAnswer) ? this.question.points : 0
 				this.$emit('grading-change', { ...this.grading, manualScore: score });
 			}
-			this.widthScreen = window.innerWidth
-			window.addEventListener('resize', () => { this.handleResize() })
-		},
-		methods: {
-			handleResize() {
-				this.widthScreen = window.innerWidth;
-			},
-			isSelected(optionId) { return this.answer === optionId },
-			isOptionCorrect(id) { return this.question.config.correctAnswer == id },
-			getOptionTextClass(optionId) {
-				if (!this.isGraded) return this.isSelected(optionId) ? 'font-weight-bold' : '';
-				const sel = this.isSelected(optionId), ok = this.isOptionCorrect(optionId);
-				if (sel) return 'font-weight-bold'; if (ok) return 'font-italic correct-answer-hint'; return 'text-disabled';
-			},
-			onStudentCommentInput(val) {
-				this.grading.comment = val
-				this.$emit('grading-change', { ...this.grading, comment: val })
-			},
-			updateTeacherComment(val) { this.$emit('grading-change', { ...this.grading, teacherComment: val }); }
 		}
+	},
+	methods: {
+		handleResize() {
+			this.widthScreen = window.innerWidth;
+		},
+		isSelected(optionId) { return this.answer === optionId },
+		isOptionCorrect(id) { return this.question.config.correctAnswer == id },
+		getOptionTextClass(optionId) {
+			if (!this.isGraded) return this.isSelected(optionId) ? 'font-weight-bold' : '';
+			const sel = this.isSelected(optionId), ok = this.isOptionCorrect(optionId);
+			if (sel) return 'font-weight-bold'; if (ok) return 'font-italic correct-answer-hint'; return 'text-disabled';
+		},
+		onStudentCommentInput(val) {
+			this.grading.comment = val
+			this.$emit('grading-change', { ...this.grading, comment: val })
+		},
+		updateTeacherComment(val) { this.$emit('grading-change', { ...this.grading, teacherComment: val }); }
 	}
+}
 </script>
 
 <style scoped>
-	.correct-answer-hint {
-		font-style: italic;
-		color: green;
-	}
+.correct-answer-hint {
+	font-style: italic;
+	color: green;
+}
 
-	.text-disabled {
-		color: grey;
-	}
+.text-disabled {
+	color: grey;
+}
 </style>

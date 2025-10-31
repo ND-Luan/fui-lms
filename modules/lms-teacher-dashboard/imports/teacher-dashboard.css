@@ -305,7 +305,6 @@
 
 .assignment-stats {
     flex-shrink: 0;
-    margin: 0 16px;
 }
 
 .assignment-actions {
@@ -430,4 +429,7 @@
 
 .custom-panel-liberies>.v-expansion-panel--active>.v-expansion-panel-title:not(.v-expansion-panel-title--static) {
     min-height: 30px !important;
+}
+.no-scroll {
+    overflow: hidden;
 }

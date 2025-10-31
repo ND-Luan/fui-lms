@@ -124,7 +124,7 @@ vueData.v_Set.themeStyle = {
     //                 secondary: "#5BB377"
     //             }
     //         },
-    //     },
+    //     }, 
     // },
     locale: {
         locale: 'vi',
@@ -268,7 +268,7 @@ vueData.v_Set.themeStyle = {
             variant: 'accordion'
         },
         VButton: {
-            variant:"outlined"
+            variant: "outlined"
         }
     }
 }
@@ -352,7 +352,29 @@ $('document').ready(() => {
                     MidtermPoints: "Mid-term Points",
                     FinalPoints: "Final Points",
                     RegularTest: "Regular Test",
-                    TotalPoints: "Total points"
+                    TotalPoints: "Total points",
+
+                    //Module Giao bài
+                    ControlPanel: "Control Panel",
+                    MyDocument: "My Document",
+                    Subject:"Subject",
+                    AssignmentsToGrade:"Assignments to Grade",
+                    NoAssignmentToGrade: "No assignments need grading right now!",
+                    CreateContent:"Create Content",
+                    ClassNotAssigned: "This class hasn’t been assigned any assignments yet.",
+                    ContactDev:"Please contact the development team for more information!",
+                    NotFoundSubject: "Your subject could not be found",
+                    ClassSize:"Class Size",
+                    Students:"students",
+                    EmptyLessonAndAssignment:"No lessons or assignments available",
+                    GradeNow:"Grade Now",
+                    Submitted: "Submitted",
+                    Graded:"Graded",
+                    DueDate:"Due Date",
+                    ViewGradebook:"View Gradebook",
+                    NeedGrade:"Need Grade",
+                    ReviewGraded:"Review Graded",
+                    Completed:"Completed"
                 }
             },
             vi: {
@@ -420,7 +442,28 @@ $('document').ready(() => {
                     MidtermPoints: "Điểm GK",
                     FinalPoints: "Điểm cuối kì",
                     RegularTest: "Điểm Thường xuyên",
-                    TotalPoints: "Điểm tổng"
+                    TotalPoints: "Điểm tổng",
+
+                     //Module Giao bài
+                    ControlPanel: "Bảng điều khiển",
+                    MyDocument: "Tài liệu của tôi",
+                    Subject:"Môn học",
+                    AssignmentsToGrade:"Bài tập cần chấm",
+                    NoAssignmentToGrade: "Không có bài tập nào cần chấm ngay!",
+                    CreateContent:"Tạo nội dung",
+                    ClassNotAssigned: "Lớp này chưa được giao bài tập nào.",
+                    ContactDev:"Thầy/ cô hãy liên hệ bộ phận phát triển để tìm hiểu thêm thông tin!",
+                    NotFoundSubject: "Không tìm thấy môn học của thầy/cô",
+                    ClassSize:"Sĩ số",
+                    Students:"học sinh",
+                    EmptyLessonAndAssignment:"Không có bài học và bài tập nào",
+                    GradeNow:"Chấm ngay",
+                    Submitted: "Đã nộp",
+                    Graded:"Đã chấm",
+                    DueDate:"Hạn nộp",
+                    ViewGradebook:"Xem sổ điểm",
+                    ReviewGraded:"Xem lại bài chấm",
+                    Completed:"Đã hoàn thành"
                 }
             }
         }

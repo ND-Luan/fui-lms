@@ -48,8 +48,7 @@ export default {
 				onclose: {
 					"CALL": "vueData.initPage()"
 				}
-			})
-				;
+			});
 		}
 	},
 }

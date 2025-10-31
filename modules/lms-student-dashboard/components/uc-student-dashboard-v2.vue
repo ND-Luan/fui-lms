@@ -213,7 +213,7 @@ export default {
 		},
 		getInfoHocSinhByUserName() {
 			ajaxCALL('/lms/HocSinh_Detail_GetBy_HocSinhID', {
-				HocSinhID: parseInt(this.userAccount.UserName),
+				HocSinhID: parseInt(this.userAccount.UserID),
 				NienKhoa: this.NienKhoa
 			}, res => {
 				this.studentInfoDetail = res

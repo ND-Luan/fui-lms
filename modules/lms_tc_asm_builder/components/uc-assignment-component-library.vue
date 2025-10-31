@@ -24,31 +24,32 @@
 </template>
 
 <script>
-	export default {
-		name: 'uc-assignment-component-library',
-		emits: ['add-component'],
-		data() {
-			return {
-				quizComponents: [
-					{ type: 'QUIZ_SINGLE_CHOICE', label: 'Trắc nghiệm', description: "Một đáp án", icon: 'mdi-radiobox-marked', kind: "quiz" },
-					{ type: 'QUIZ_MULTIPLE_CHOICE', label: 'Trắc nghiệm', description: "Nhiều đáp án", icon: 'mdi-checkbox-multiple-marked-outline', kind: "quiz" },
-					{ type: 'QUIZ_TRUE_FALSE', label: 'Đúng / Sai', icon: 'mdi-check-circle-outline', kind: "quiz" },
-					{ type: 'QUIZ_MULTIPLE_TRUE_FALSE', label: 'Nhiều đúng / Sai', icon: 'mdi-check-circle-outline', kind: "quiz" },
-					{ type: 'QUIZ_FILL_IN_BLANK', label: 'Điền vào chỗ trống', icon: 'mdi-form-textbox', kind: "quiz" },
-					{ type: 'QUIZ_MATCHING', label: 'Ghép nối', icon: 'mdi-merge', kind: "quiz" },
-				],
-				manualComponents: [
-					{ type: 'SHORT_ANSWER', label: 'Trả lời ngắn', icon: 'mdi-text-short', kind: "manual" },
-					{ type: 'ESSAY', label: 'Tự luận', description: "Soạn thảo", icon: 'mdi-text-long', kind: "manual" },
-					{ type: 'FILE_UPLOAD', label: 'Nộp File', icon: 'mdi-upload-multiple', kind: "manual" },
-					{ type: 'AUDIO_RESPONSE', label: 'Ghi âm trả lời', icon: 'mdi-microphone-plus', kind: "manual" }
-				]
-			}
-		},
-		methods: {
-			selectComponent(componentInfo) {
-				this.$emit('add-component', componentInfo);
-			}
+export default {
+	name: 'uc-assignment-component-library',
+	emits: ['add-component'],
+	data() {
+		return {
+			quizComponents: [
+				{ type: 'QUIZ_SINGLE_CHOICE', label: 'Trắc nghiệm', description: "Một đáp án", icon: 'mdi-radiobox-marked', kind: "quiz" },
+				{ type: 'QUIZ_MULTIPLE_CHOICE', label: 'Trắc nghiệm', description: "Nhiều đáp án", icon: 'mdi-checkbox-multiple-marked-outline', kind: "quiz" },
+				{ type: 'QUIZ_TRUE_FALSE', label: 'Đúng / Sai', icon: 'mdi-check-circle-outline', kind: "quiz" },
+				{ type: 'QUIZ_MULTIPLE_TRUE_FALSE', label: 'Nhiều đúng / Sai', icon: 'mdi-check-circle-outline', kind: "quiz" },
+				{ type: 'QUIZ_FILL_IN_BLANK', label: 'Điền vào chỗ trống', icon: 'mdi-form-textbox', kind: "quiz" },
+				{ type: 'QUIZ_MATCHING', label: 'Ghép nối', icon: 'mdi-merge', kind: "quiz" },
+				// { type: 'QUIZ_MATCHING_V2', label: 'Ghép nối V2', icon: 'mdi-merge', kind: "quiz" },
+			],
+			manualComponents: [
+				{ type: 'SHORT_ANSWER', label: 'Trả lời ngắn', icon: 'mdi-text-short', kind: "manual" },
+				{ type: 'ESSAY', label: 'Tự luận', description: "Soạn thảo", icon: 'mdi-text-long', kind: "manual" },
+				{ type: 'FILE_UPLOAD', label: 'Nộp File', icon: 'mdi-upload-multiple', kind: "manual" },
+				{ type: 'AUDIO_RESPONSE', label: 'Ghi âm trả lời', icon: 'mdi-microphone-plus', kind: "manual" }
+			]
+		}
+	},
+	methods: {
+		selectComponent(componentInfo) {
+			this.$emit('add-component', componentInfo);
 		}
 	}
+}
 </script>

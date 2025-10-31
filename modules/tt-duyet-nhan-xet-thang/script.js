@@ -3,15 +3,15 @@ function callAPIPushME() {
         for (var item of vueData.items) {
             let plainText = `Nội dung nhận xét học sinh: ${item.HoTen}\n`
                 + `Năm học: ${vueData.NienKhoa}-${vueData.NienKhoa + 1} - Tháng ${vueData.ThangObj.Thang}\n`
-                + `Quý phụ huynh vui lòng xem nhận xét chi tiết tại:  https://lms.lhbs.vn/ph-report?tab=0`
-             ajaxCALL(`student/LMS_SendMessageToME`,
-                 {
-                     HocSinhID: item.HocSinhID,
-                     NoiDung: plainText
-                 },
-                 res => {
-                     Vue.$toast.success(`Đẩy ${item.HocSinhID} - ${item.HoTen} dữ liệu tháng sang ME`, { position: "top" })
-                 })
+                + `Quý phụ huynh vui lòng xem nhận xét chi tiết tại: https://lms.lhbs.vn/ph-report?tab=0&HocSinhID=${item.HocSinhID}`
+            ajaxCALL(`student/LMS_SendMessageToME`,
+                {
+                    HocSinhID: item.HocSinhID,
+                    NoiDung: plainText
+                },
+                res => {
+                    Vue.$toast.success(`Đẩy ${item.HocSinhID} - ${item.HoTen} dữ liệu tháng sang ME`, { position: "top" })
+                })
         }
     }
     else if (vueData.CapID === 2 || vueData.CapID === 3) {
@@ -26,10 +26,10 @@ function callAPIPushME() {
                 .replace(/<\/p>/gi, '\n')
                 .replace(/<p[^>]*>/gi, ''); // loại bỏ <p> nhưng giữ nội dung
             container.innerHTML = preProcessedHTML;
-            let plainText = `Kết quả học tập của học sinh: ${ item.HoTen }\n` +
-                `Năm học: ${ vueData.NienKhoa } - ${ vueData.NienKhoa + 1 } - Kỳ đánh giá: Tháng ${ vueData.ThangObj.Thang } - Học kì 1\n`
-                + `Học tập: \n${ item.NoiDungKienThuc_HTML?.trim() || "-" } \nNề nếp: \n${ item.NoiDungNangLuc_HTML?.trim() || "-" } \nMong muốn phối hợp: \n${ item.NoiDungHoatDongKhac_HTML?.trim() || "-" } `
-                + `\nXem chi tiết kết quả học tập: https://lms.lhbs.vn/ph-report`
+            let plainText = `Kết quả học tập của học sinh: ${item.HoTen}\n` +
+                `Năm học: ${vueData.NienKhoa} - ${vueData.NienKhoa + 1} - Kỳ đánh giá: Tháng ${vueData.ThangObj.Thang} - Học kì ${vueData.ThangObj.HocKy}\n`
+                + `Học tập: \n${item.NoiDungKienThuc_HTML?.trim() || "-"} \nNề nếp: \n${item.NoiDungNangLuc_HTML?.trim() || "-"} \nMong muốn phối hợp: \n${item.NoiDungHoatDongKhac_HTML?.trim() || "-"} `
+                + `\nXem chi tiết kết quả học tập: https://lms.lhbs.vn/ph-report?tab=0&HocSinhID=${item.HocSinhID}`
             ajaxCALL(`student/LMS_SendMessageToME`,
                 {
                     HocSinhID: item.HocSinhID,

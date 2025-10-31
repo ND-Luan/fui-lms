@@ -1,5 +1,12 @@
+const urlParams = new URLSearchParams(window.location.search);
 function initPage() {
-    const urlParams = new URLSearchParams(window.location.search);
+    vueData.LanNop = urlParams.get('LanNop') ? parseInt(urlParams.get('LanNop')) : 1
+    console.log('vueData.LanNop', vueData.LanNop)
+    if (urlParams.get('Is_Resubmit')) {
+        vueData.Is_Resubmit = urlParams.get('Is_Resubmit') == '1' ? 1 : 0
+    } else {
+        vueData.Is_Resubmit = 0
+    }
     const AssignToClassID = urlParams.get('AssignToClassID');
     if (!AssignToClassID) {
         Vue.$toast.error("Không tìm thấy ID bài tập trên URL.", { position: "top" });
@@ -7,14 +14,58 @@ function initPage() {
         return;
     }
     ajaxCALL("lms/EL_Student_GetAssignmentDetail", {
-        AssignToClassID,
+        AssignToClassID: parseInt(AssignToClassID),
+        LanNop: vueData.LanNop ?? 1
         //HocSinhID: vueData.HocSinhID
-    }, function (response) {
+    }, async function (response) {
         if (response && response.data && response.data.length > 0 && response.data[0].length > 0) {
             vueData.assignmentData = response.data;
+            if (vueData.Is_Resubmit == 1) {
+                vueData.assignmentData[1] = []
+            }
             vueData.monHocName = response.data[0]?.[0]?.MonHocName || '';
             vueData.assignmentInfo = response.data[0] ?? {}
             vueData.submitionInfo = response.data[1][0] ?? {}
+            const config = vueData.assignmentData[0][0];
+            config.groups = JSON.parse(config.AssignmentConfig).groups || [];
+            //Xử lí đảo câu hỏi, đáp án
+            if (config.Is_Shuffle == 0 && !vueData.submitionInfo?.SubmissionID) {
+                config.groups.forEach((group) => {
+                    if (group.advancedFeatures && group.advancedFeatures.isShuffleQuestions) {
+                        group.questions = _.shuffle(group.questions)
+                    }
+                    if (group.advancedFeatures && group.advancedFeatures.isShuffleAnswers) {
+                        group.questions.filter(q => q.type.includes('QUIZ_')).forEach(q => {
+                            if (q.type == 'QUIZ_SINGLE_CHOICE') {
+                                q.config.options = _.shuffle(q.config.options)
+                            }
+                            else if (q.type == 'QUIZ_TRUE_FALSE') {
+                            }
+                            else if (q.type == 'QUIZ_MULTIPLE_TRUE_FALSE') {
+                                q.config.options = _.shuffle(q.config.options)
+                            }
+                            else if (q.type == 'QUIZ_FILL_IN_BLANK') {
+                            }
+                            else if (q.type == 'QUIZ_MATCHING') {
+                                q.config.columnA = _.shuffle(q.config.columnA)
+                                q.config.columnB = _.shuffle(q.config.columnB)
+                            }
+                            else if (q.type == 'QUIZ_MULTIPLE_CHOICE') {
+                                q.config.options = _.shuffle(q.config.options)
+                            }
+                        })
+                    }
+                })
+                vueData.AssignmentConfigAfterShuffle = { ...JSON.parse(config.AssignmentConfig), groups: config.groups }
+            }
+            if (vueData.Is_Resubmit == 1) {
+                insertSubmissionForResubmit()
+            }
+            //Xử lí mapping đáp án cho bài đã chấm điểm
+            if (vueData.submitionInfo?.SubmissionID && vueData.submitionInfo?.SubmissionStatus == 4) {
+                let config_After_Mapping = await handleMapingAnswer_For_Graded(JSON.parse(config.AssignmentConfig_HadAnswer), JSON.parse(config.AssignmentConfig))
+                config.groups = config_After_Mapping
+            }
             // vueData.dataReady = true;
             if (response.data[1][0]?.SubmissionStatus == 4) {
                 vueData.userAnswersSubmitted = JSON.parse(response.data[1][0]?.SubmissionContent || '{}')?.answers || {}
@@ -23,23 +74,35 @@ function initPage() {
             console.error("API getAssignmentDetail không trả về dữ liệu hợp lệ.");
             Vue.$toast.error("Không thể tải được dữ liệu bài tập.", { position: "top" });
         }
+        vueData.keyComp++
     });
 }
 async function saveDraft(payload) {
     return new Promise(resolve => {
-        ajaxCALL("lms/EL_Student_SaveSubmission", payload, function (response) {
+        if (vueData.Is_Resubmit == 1) {
+            return resolve(null)
+        }
+        ajaxCALL("lms/EL_Student_SaveSubmission", { ...payload, Is_Resubmit: vueData.Is_Resubmit ?? 0 }, function (response) {
             vueData.assignmentData = response.data;
             if (response.data[1][0]?.SubmissionStatus == 4) {
                 vueData.userAnswersSubmitted = JSON.parse(response.data[1][0]?.SubmissionContent || '{}')?.answers || {}
             }
             // vueData.assignmentData[0] = response.data[0];
             // vueData.assignmentData[1] = response.data[1]
+            if (response.data[0][0].Is_Shuffle != 1) {
+                ajaxCALL('/lms/EL_Student_Save_AssignmentConfig', {
+                    SubmissionID: response.data[1][0]?.SubmissionID,
+                    AssignmentConfig: JSON.stringify(vueData.AssignmentConfigAfterShuffle)
+                }, res => {
+                    initPage()
+                })
+            }
             resolve(response.data)
         });
     })
 }
 function submitAssignment(payload) {
-    ajaxCALL("lms/EL_Student_SaveSubmission", payload, function (response) {
+    ajaxCALL("lms/EL_Student_SaveSubmission", { ...payload, Is_Resubmit: vueData.Is_Resubmit }, function (response) {
         Vue.$toast.success("Nộp bài thành công!", { position: "top" });
         initPage()
     }, function (error) {
@@ -74,8 +137,67 @@ function renderQuestionNotSubmit() {
     })
     return questionNotDone.join(', ')
 }
+function handleMapingAnswer_For_Graded(asmConfig, asmConfigNoAnswer) {
+    const groups_asmConfig = asmConfig.groups;
+    const flatGroups_asmConfig = groups_asmConfig.map(g => g.questions).flat();
+    // ✅ clone sâu toàn bộ groups để không làm thay đổi bản gốc
+    const groups_asmConfigNoAnswer = _.cloneDeep(asmConfigNoAnswer.groups);
+    const flatGroups_asmConfigNoAnswer = groups_asmConfigNoAnswer.map(g => g.questions).flat();
+    const AnsweredQuestions = [];
+    flatGroups_asmConfig.forEach(questionWithAnswer => {
+        const questionNoAnswer = flatGroups_asmConfigNoAnswer.find(q => q.id === questionWithAnswer.id);
+        if (!questionNoAnswer) return;
+        switch (questionWithAnswer.type) {
+            case 'QUIZ_SINGLE_CHOICE':
+                questionNoAnswer.config.correctAnswer = _.cloneDeep(questionWithAnswer.config.correctAnswer);
+                break;
+            case 'QUIZ_MULTIPLE_CHOICE':
+                questionNoAnswer.config.correctAnswers = _.cloneDeep(questionWithAnswer.config.correctAnswers);
+                break;
+            case 'QUIZ_TRUE_FALSE':
+                questionNoAnswer.config.correctAnswer = _.cloneDeep(questionWithAnswer.config.correctAnswer);
+                break;
+            case 'QUIZ_MULTIPLE_TRUE_FALSE':
+                questionNoAnswer.config.options = _.cloneDeep(questionWithAnswer.config.options);
+                break;
+            case 'QUIZ_FILL_IN_BLANK':
+                questionNoAnswer.config.parts = _.cloneDeep(questionWithAnswer.config.parts);
+                break;
+            case 'QUIZ_MATCHING':
+                questionNoAnswer.config.columnA = _.cloneDeep(questionWithAnswer.config.columnA);
+                questionNoAnswer.config.columnB = _.cloneDeep(questionWithAnswer.config.columnB);
+                questionNoAnswer.config.correctPairs = _.cloneDeep(questionWithAnswer.config.correctPairs);
+                break;
+        }
+        AnsweredQuestions.push(questionNoAnswer);
+    });
+    // ✅ đảm bảo giữ nguyên question chưa có đáp án
+    groups_asmConfigNoAnswer.forEach(group => {
+        group.questions = group.questions.map(question => {
+            const answered = AnsweredQuestions.find(q => q && q.id === question.id);
+            return answered ? answered : question;
+        });
+    });
+    console.log('groups_asmConfig', groups_asmConfig);
+    console.log('groups_asmConfigNoAnswer_After', groups_asmConfigNoAnswer);
+    return groups_asmConfigNoAnswer
+}
+function insertSubmissionForResubmit() {
+    const payload = {
+        AssignToClassID: vueData.assignmentData[0][0].AssignToClassID,
+        SubmissionContent: JSON.stringify({ answers: {} }),
+        SubmissionStatus: 1,
+        // HocSinhID: vueData.HocSinhDetail.HocSinhID,
+    }
+    ajaxCALL("lms/EL_Student_InsertSubmission", payload, function (response) {
+        urlParams.delete('Is_Resubmit');
+        urlParams.set('LanNop', response.data[1][0].LanNop.toString());
+        initPage()
+    })
+}
 vueData.initPage = initPage;
 vueData.saveDraft = saveDraft;
 vueData.openSubmitDialog = openSubmitDialog;
 vueData.submitAssignmentFinal = submitAssignmentFinal;
 vueData.renderQuestionNotSubmit = renderQuestionNotSubmit
+_

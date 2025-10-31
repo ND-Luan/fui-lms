@@ -85,15 +85,20 @@
 										{{ getNameType(assignment.ResourceType) }}
 									</v-chip>
 									{{ assignment.Title ?? assignment.LessonTitle }}
+
 								</div>
 								<div class="resource-meta">
 									Hạn nộp: {{ formatDate(assignment.DueDate) }}
 								</div>
+								<v-chip size="small" color="pink"
+									v-if="assignment.LimitAssigned && assignment.LimitAssigned != 1">
+									Nộp lần: {{ assignment.LanNop }}
+								</v-chip>
 
 							</div>
 
 							<div class="d-flex align-center ga-2 resource-actions">
-								<v-chip :color="statusInfo(assignment).color" size="small" variant="flat" label>
+								<v-chip :color="statusInfo(assignment).color" :class="statusInfo(assignment).color == 'orange'? 'text-white' : ''" size="small" variant="flat" label>
 									{{ statusInfo(assignment).text }}
 								</v-chip>
 								<v-btn size="small" color="primary" variant="tonal" @click="onOpenWindow(assignment)">
@@ -204,7 +209,7 @@ export default {
 			if (item.ResourceType === 'LESSON') {
 				url = `/lms-student-lesson-viewer?AssignToClassID=${item.AssignToClassID}`
 			} else {
-				url = `/lms-student-assignment?AssignToClassID=${item.AssignToClassID}`
+				url = `/lms-student-assignment?AssignToClassID=${item.AssignToClassID}&LanNop=${item.LanNop ?? 1}`
 			}
 			openWindow({
 				title: 'Xem lại ' + `${item.ResourceType === 'LESSON' ? 'bài học ' : 'bài tập '}` + item.Title,
@@ -214,7 +219,7 @@ export default {
 			})
 		},
 		statusInfo(item) {
-			const scoreText = item.StudentScore != null ? `Kết quả: ${item.StudentScore} điểm` : 'Đã chấm';
+			const scoreText = item.StudentScore != null ? `Kết quả: ${item.StudentScore}/${item.MaxScore} điểm` : 'Đã chấm';
 			const statusMap = {
 				'NOT_STARTED': { text: 'Chưa bắt đầu', color: 'grey' },
 				'IN_PROGRESS': { text: 'Đang thực hiện', color: 'orange' },

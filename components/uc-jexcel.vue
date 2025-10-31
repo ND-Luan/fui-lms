@@ -87,18 +87,7 @@
 				if (val) {
 					this.ExportExcel()
 				}
-			},
-			isSubmit: function (val) {
-				if (val) {
-					this.onSubmit()
-				}
-			},
-			styleSheet: function (val) {
-				if (this.jExcelObj) {
-					this.jExcelObj.setStyle(val); // Giả sử có một phương thức để cập nhật style
-				}
-			},
-	
+			}
 		},
 		mounted: function () {
 			const jExcelObj = jspreadsheet(this.$refs["spreadsheet"], this.jExcelOptions);
@@ -118,6 +107,7 @@
 				//Nếu sử dụng pagination thì off đi lazyLoading
 				let isLazyLoading = true
 				if (this.pagination) isLazyLoading = false
+	
 				const worksheets = [
 					{
 						data: this.dataSource,
@@ -150,7 +140,6 @@
 					onchange: this.changed,
 					onload: this.onload,
 					onselection: this.onselection,
-	
 				};
 			}
 		},
@@ -181,6 +170,7 @@
 			},
 			changed(instance, cell, x, y, value) {
 				if (this.isProgrammaticChange) return;
+	
 				// Lấy dữ liệu từ bảng
 				const rawData = instance.getData();
 				const columns = this.columns.map(col => col.name);
@@ -194,7 +184,7 @@
 					return obj;
 				});
 	
-				console.log('dataObjects =>', cell, x, y, value)
+				// console.log('dataObjects =>', dataObjects)
 	
 				const rowObject = dataObjects[y];
 				const columnName = columns[x];

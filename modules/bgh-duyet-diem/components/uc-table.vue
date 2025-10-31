@@ -15,7 +15,6 @@
 					</template>
 					<template #item.log="{item}">
 						<v-btn v-if="item.Count_Log_Diem > 0" @click="redirectLog(item)">
-							{{item.Count_Log_Diem}}
 							<v-icon>mdi-history</v-icon>
 						</v-btn>
 					</template>
@@ -67,17 +66,22 @@
 				]
 	
 				const Semester = vueData.Semester
-				const getKi = Semester?.value.split('_')[0]
+				const getKi = Semester.value.split('_')[0]
 				const uniqueMaCotDiemHeaders = [...new Set(DSCotDiem.map(x => x.MaCotDiem))]
-				const listMaCotDiem = ['MucDoDanhGia', 'NhanXet', 'Diem'];
+				const listMaCotDiem = ['MucDoDanhGia', 'Diem', 'Sao', 'NhanXet',];
 	
-				const filteredMaCotDiemHeaders = uniqueMaCotDiemHeaders.filter(MaCotDiem =>
+				let filteredMaCotDiemHeaders = uniqueMaCotDiemHeaders.filter(MaCotDiem =>
 					listMaCotDiem.some(prefix =>
 						MaCotDiem.startsWith(prefix) &&
 						MaCotDiem.includes(getKi) &&
 						!ignoreColumns.includes(MaCotDiem) // Sửa chỗ này
 					)
 				);
+				filteredMaCotDiemHeaders = filteredMaCotDiemHeaders.sort((a, b) => {
+					const getKey = (s) => listMaCotDiem.findIndex(k => s.startsWith(k));
+					return getKey(a) - getKey(b);
+				});
+				// console.log('filteredMaCotDiemHeaders', filteredMaCotDiemHeaders)
 				for (const MaCotDiem of filteredMaCotDiemHeaders) {
 					const objHeader = DSCotDiem.find(x => x.MaCotDiem === MaCotDiem);
 					if (objHeader) {
@@ -89,7 +93,9 @@
 						});
 					}
 				}
-				return [...noiDungDanhGia, ...headers, { title: "Lịch sử chỉnh sửa", value: "log", align: 'center' },]
+				const newHeaders = [...noiDungDanhGia, ...headers, { title: "Lịch sử chỉnh sửa", value: "log", align: 'center' },]
+				console.log("newHEader", newHeaders)
+				return newHeaders
 			},
 			getItems(hocSinh) {
 				const DSCotDiem = hocSinh.DSCotDiem
@@ -100,7 +106,9 @@
 					const objMonHoc = DSCotDiem.find(x => x.MonHocID === MonHocID)
 					if (objMonHoc) {
 						const arrCotDiemFilter = DSCotDiem.filter(x => x.MonHocID === MonHocID && x.MaCotDiem.includes(vueData.Semester.value))
+						console.log("arrCotDiemFilter", arrCotDiemFilter)
 						for (var CotDiem of arrCotDiemFilter) {
+							console.log('=>', CotDiem.MaCotDiem)
 							obj[CotDiem.MaCotDiem] = CotDiem.KetQuaDanhGia_VI || CotDiem.KetQuaDanhGia_EN
 						}
 						if (arrCotDiemFilter.length > 0) {
@@ -108,7 +116,7 @@
 							obj.TenTinhTrang = arrCotDiemFilter[0].TenTinhTrang
 							obj.MauTinhTrang = arrCotDiemFilter[0].MauTinhTrang
 						}
-	
+						console.log("obj", MonHocID, obj)
 						items.push({
 							...obj,
 							TenMonHoc_HienThi: objMonHoc.TenMonHoc_HienThi,
@@ -126,7 +134,7 @@
 				return items
 			},
 			redirectLog(item) {
-				const url = `/log-diem?lopid=${item.LopID}&monhocid=${item.MonHocID}&manhomcotdiem=${item.MaNhomCotDiem}&hocsinhid=${item.HocSinhID}`
+				const url = `/log-diem?lopid=${item.LopID}&monhocid=${item.MonHocID}&manhomcotdiem=${item.MaNhomCotDiem}&hocsinhid=${item.HocSinhID}&NienKhoa=${vueData.NienKhoa}`
 				openWindow({
 					title: "Lịch sử chỉnh sửa",
 					url: url,

@@ -84,7 +84,7 @@ function convertDSHocSinh() {
             } else if (x.GiaTriCotDiem === 'ICO_Star') { // cấu hình header cột điểm có dạng ICO_Star
                 let column = {
                     type: 'html',
-                    title: x.TenCotDiem_VI, 
+                    title: x.TenCotDiem_VI,
                     name: x.MaCotDiem,
                     width: x.WidthCSS,
                     typeValue: x.GiaTriCotDiem,
@@ -98,7 +98,7 @@ function convertDSHocSinh() {
             else if (x.GiaTriCotDiem === 'Dropdown_text') { // cấu hình header cột điểm có dạng ICO_Star
                 let column = {
                     type: 'dropdown',
-                    title: x.TenCotDiem_VI, 
+                    title: x.TenCotDiem_VI,
                     name: x.MaCotDiem,
                     width: x.WidthCSS,
                     typeValue: x.GiaTriCotDiem,
@@ -112,7 +112,7 @@ function convertDSHocSinh() {
             } else if (x.GiaTriCotDiem === 'Dropdown_THC') { // cấu hình header cột điểm có dạng ICO_Star
                 let column = {
                     type: 'dropdown',
-                    title: x.TenCotDiem_VI, 
+                    title: x.TenCotDiem_VI,
                     name: x.MaCotDiem,
                     width: x.WidthCSS,
                     typeValue: x.GiaTriCotDiem,
@@ -163,6 +163,8 @@ function convertDSHocSinh() {
     }
     else if (vueData.MonHocItem.MonHocID == 101) {
         vueData.freezeColumns = 4
+    } else {
+        vueData.freezeColumns = 3
     }
     let columnThongTinHocSinh = [
         {
@@ -194,7 +196,7 @@ function convertDSHocSinh() {
             readOnly: true
         },
     ]
-    const ListDSMonHocNhom = [101]
+    const ListDSMonHocNhom = [101, 76]
     if (ListDSMonHocNhom.includes(vueData.MonHocItem.MonHocID)) {
         columnThongTinHocSinh.push(
             {
@@ -220,8 +222,6 @@ function convertDSHocSinh() {
             readOnly: true
         })
     }
-    // console.log("columnThongTinHocSinh", columnThongTinHocSinh)
-    // console.log("columnsCotDiem", columnsCotDiem)
     headers = [...columnThongTinHocSinh, ...columnsCotDiem]
     //Xử lý data jexcel
     const dataJexcel = []
@@ -325,6 +325,7 @@ function convertDSHocSinh() {
         indexRow1++
         vueData.DataExcel.push(obj)
     }
+    console.log("vueData.DataExcel", vueData.DataExcel)
     //END CREATE EXCEL
     const firstStudent = dataJexcel[0]
     const dsCotDiem = vueData.DSCotDiem.filter(x => x.HocSinhID === firstStudent.HocSinhID)
@@ -348,7 +349,7 @@ function convertDSHocSinh() {
             const obj = vueData.DSCotDiem.find(x => x.HocSinhID === dataJexcel[i].HocSinhID && x.MaCotDiem === dsCotDiem[j].MaCotDiem && x.Is_Comment)
             if (obj) {
                 // vueData.styleSheet[cellAdresss] = 'color: red !important;'
-                vueData.comments[cellAdresss] = 'Cột điểm do ' + dsCotDiem[j].NhapDiemUser + ' đã nhập'
+                vueData.comments[cellAdresss] = 'Cột điểm do ' + obj.NhapDiemUser + ' đã nhập'
             }
         }
     }
@@ -381,7 +382,6 @@ function onLuuDiem() {
                 ) // Hoặc KetQuaDanhGia_VI hợp lệ thì giữ lại
             );
         vueData.dataBeforeInsertToDB = dataFilter.filter(x => !Number.isNaN(x.KetQuaDanhGia_VI)) //Filter thêm lần nữa khi có Công thức ko có tính được 'Error: #VALUE!'
-        console.log('dataFilter', vueData.dataBeforeInsertToDB)
         // Insert xong cập nhật tình trạng
         CALL("insKQHT_MonHocLop")
         vueData.keyComp++
@@ -399,8 +399,6 @@ function processBeforePushAPI() {
         for (let j = 0; j < DSCotDiem.length; j++) {
             const cellAdresss = jspreadsheet.helpers.getCellNameFromCoords(j + vueData.freezeColumns, i) // (j+3) là địa chỉ cột điểm đầu tiên, i là row
             let giaTriCotDiem = val[i][DSCotDiem[j].MaCotDiem] //vueData.instance[0].getValueFromCoords(j + vueData.freezeColumns, i)
-            // console.log(val[i].HocSinhID, vueData.instance[0])
-            // console.log(val[i].HocSinhID, val[i][DSCotDiem[j].MaCotDiem], vueData.instance[0].getValueFromCoords(j + vueData.freezeColumns, i))
             if (DSCotDiem[j].LoaiCotDiem === 'Công thức') {
                 giaTriCotDiem = vueData.instance[0].records[i][j + vueData.freezeColumns]?.element?.innerHTML
             }
@@ -408,7 +406,6 @@ function processBeforePushAPI() {
                 if (giaTriCotDiem === null || giaTriCotDiem === NaN || giaTriCotDiem === '') {
                     giaTriCotDiem = ''
                 } else {
-                    // console.log('NUMBER =>', val[i].HocSinhID, DSCotDiem[j].MaCotDiem, giaTriCotDiem)
                 }
             }
             let cotDiem_HS = {
@@ -540,7 +537,82 @@ function processBeforeExport() {
         vueData.DataExcel.push(cotDiem_HS)
     }
 }
+function isExistThemeHas_TA2() {
+    let flag = false
+    if (!vueData.MaNhomCotDiemItem) return flag
+    if (vueData.MonHocItem?.MonHocID == 76) {
+        if (vueData.MaNhomCotDiemItem.MaNhomCotDiem === 'Theme_2') flag = true
+        if (vueData.MaNhomCotDiemItem.MaNhomCotDiem === 'Theme_4') flag = true
+        if (vueData.MaNhomCotDiemItem.MaNhomCotDiem === 'Theme_6') flag = true
+        if (vueData.MaNhomCotDiemItem.MaNhomCotDiem === 'Theme_8') flag = true
+    }
+    return flag
+}
+async function onGetLayDiemThemeTest() {
+    let MaNhomCotDiem_TA2 = ''
+    let MaCotDiem_TA2 = ''
+    let MaCotDiem = ''
+    if (vueData.MaNhomCotDiemItem.MaNhomCotDiem === 'Theme_2') {
+        MaNhomCotDiem_TA2 = 'S1_Mid_TA2'
+        MaCotDiem_TA2 = "S1_Mid_TA2_Point"
+        MaCotDiem = 'Theme2_TST'
+    }
+    if (vueData.MaNhomCotDiemItem.MaNhomCotDiem === 'Theme_4') {
+        MaNhomCotDiem_TA2 = 'S1_Final_TA2'
+        MaCotDiem_TA2 = "S1_Final_TA2_Point"
+        MaCotDiem = 'Theme4_TST'
+    }
+    if (vueData.MaNhomCotDiemItem.MaNhomCotDiem === 'Theme_6') {
+        MaNhomCotDiem_TA2 = 'S2_Mid_TA2'
+        MaCotDiem_TA2 = "S2_Mid_TA2_Point"
+        MaCotDiem = 'Theme6_TST'
+    }
+    if (vueData.MaNhomCotDiemItem.MaNhomCotDiem === 'Theme_8') {
+        MaNhomCotDiem_TA2 = 'S2_Final_TA2'
+        MaCotDiem_TA2 = "S2_Final_TA2_Point"
+        MaCotDiem = 'Theme8_TST'
+    }
+    const DSCotDiem_TA2 = await ajaxCALLPromise("lms/HocSinhBangDiem_Get_ByMonHocID_MaNhom", {
+        LopID: vueData.LopItem.LopID,
+        MonHocID: vueData.MonHocItem.MonHocID,
+        TemplateBangDiemID: vueData.MonHocItem.TemplateBangDiemID,
+        MaNhomCotDiem: MaNhomCotDiem_TA2
+    })
+    const arrFilterDSCotDiemWithThemeTest = DSCotDiem_TA2.filter(x => x.MaCotDiem === MaCotDiem_TA2)
+    for (var hocSinh of vueData.DSHocSinh) {
+        const cotDiemByHocSinh = arrFilterDSCotDiemWithThemeTest.find(x => x.HocSinhID == hocSinh.HocSinhID)
+        hocSinh[MaCotDiem] = cotDiemByHocSinh.KetQuaDanhGia_VI
+    }
+    vueData.keyComp++
+}
+async function fn_udpKQHT_MonHocLop_TinhTrang_LuuTam() {
+    let ListMonHoc = vueData.MonHocItem.List_MonHoc_NLPC_ID
+    if (ListMonHoc) {
+        ListMonHoc = ListMonHoc.split(",")
+        for (var monHocID of ListMonHoc) {
+            const MonHocLop = await ajaxCALLPromise("lms/MonHocLop_Select_By_MonHocID", {
+                MonHocID: monHocID,
+                LopID: vueData.LopItem.LopID,
+                NienKhoa: vueData.NienKhoa,
+            })
+            const MonHocLopID = MonHocLop[0]?.MonHocLopID
+            if (MonHocLopID) {
+                await ajaxCALLPromise("lms/KQHT_MonHocLop_TinhTrang_Udp", {
+                    NienKhoa: vueData.NienKhoa,
+                    MonHocLopID: MonHocLopID,
+                    LopID: vueData.LopItem.LopID,
+                    TinhTrang: 1,
+                    MaNhomCotDiem: vueData.MaNhomCotDiemItem.MaNhomCotDiem,
+                    IsSendToManager: false
+                })
+            }
+        }
+    }
+    CALL("udpKQHT_MonHocLop_TinhTrang_LuuTam")
+}
 vueData.isMonHocConvertWithStar = isMonHocConvertWithStar
 vueData.exportExcel = exportExcel
 vueData.isNotTopic = isNotTopic
 vueData.reloadBangDiem = reloadBangDiem
+vueData.isExistThemeHas_TA2 = isExistThemeHas_TA2
+vueData.onGetLayDiemThemeTest = onGetLayDiemThemeTest

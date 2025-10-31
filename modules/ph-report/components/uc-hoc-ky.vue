@@ -242,7 +242,7 @@ export default {
 			return new Promise(async resolve => {
 				ajaxCALL('lms/HocSinh_KQHT',
 					{
-						HocSinhID: vueData.HocSinhSelected.StudentID,
+						HocSinhID: vueData.HocSinhSelected.HocSinhID,
 						LopNhom: vueData.HocSinhSelected.LopID,
 						Semester: code
 					},

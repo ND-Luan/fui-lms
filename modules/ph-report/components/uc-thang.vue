@@ -1,5 +1,5 @@
 <template>
-	<div style="height: calc(100dvh - 220px)">
+	<div style="height: calc(100dvh - 212px)">
 		<v-divider></v-divider>
 		<v-list lines="two" style="height: 100%">
 			<v-list-subheader> {{ $t('message.monthList') }}</v-list-subheader>
@@ -24,55 +24,52 @@
 </template>
 
 <script>
-	export default {
-		props: [],
-		data() {
-			return {
-				vueData,
-				IsLanguage: JSON.parse(localStorage.getItem('IsLanguage'))
-			}
+export default {
+	props: [],
+	data() {
+		return {
+			vueData,
+			IsLanguage: JSON.parse(localStorage.getItem('IsLanguage'))
+		}
+	},
+	mounted() {
+		if (!vueData.HocSinhSelected || !vueData.NienKhoa) return
+
+		const IsPassRoleParentString = localStorage.getItem("IsPassRoleParent")
+		const IsPassRoleParent = Boolean(IsPassRoleParentString) ?? false
+		console.log('MOUNTED....', IsPassRoleParent, vueData.NienKhoa)
+		let url = ''
+		//Nếu từ bên Giáo viên qua
+		if (IsPassRoleParent) url = 'lms/GV_Thang_NhanXetThang_Lop_Get'
+		else url = 'lms/PH_Thang_NhanXetThang_Lop_Get'
+		ajaxCALL(url, {
+			"LopID": vueData.HocSinhSelected.LopID,
+			"HSLopID": vueData.HocSinhSelected.HSLopID,
+			NienKhoa: vueData.NienKhoa
+		}, res => {
+			vueData.DSHocTapThang = res.data
+		})
+	},
+	watch: {
+		'$i18n.locale': function (locale) {
+			if (locale === 'en') this.IsLanguage = true;
+			else this.IsLanguage = false;
 		},
-		mounted() {
-			if (!vueData.HocSinhSelected) return
-			const IsPassRoleParentString = localStorage.getItem("IsPassRoleParent")
-			const IsPassRoleParent = Boolean(IsPassRoleParentString) ?? false
-			console.log('MOUNTED....', IsPassRoleParent)
-			let url = ''
-			//Nếu từ bên Giáo viên qua
-			if (IsPassRoleParent)
-				url = 'lms/GV_Thang_NhanXetThang_Lop_Get'
-			else
-				url = 'lms/PH_Thang_NhanXetThang_Lop_Get'
-	
-			console.log('url', url)
-			ajaxCALL(url, {
-				"LopID": vueData.HocSinhSelected.LopID,
-				"HSLopID": vueData.HocSinhSelected.HSLopID,
-				NienKhoa: vueData.NienKhoa
-			}, res => {
-				vueData.DSHocTapThang = res.data
+	},
+	methods: {
+		onRedirect(thangObj) {
+			openWindow({
+				title: "Thông báo tháng",
+				url: `report-ket-qua-hoc-tap-thang-hoc-sinh?id=${vueData.HocSinhSelected.HocSinhID}&lop_nxtid=${thangObj.Lop_NhanXetThangID}&nienkhoa=${vueData.NienKhoa}`,
+				onclose: {
+					"CALL": "getDSThang"
+				}
 			})
 		},
-		watch: {
-			'$i18n.locale': function (locale) {
-				if (locale === 'en') this.IsLanguage = true;
-				else this.IsLanguage = false;
-			},
+		renderTextTitle(thang) {
+			return this.IsLanguage ? thang.Thang_HienThi_EN : thang.Thang_HienThi_VI
 		},
-		methods: {
-			onRedirect(thangObj) {
-				openWindow({
-					title: "Thông báo tháng",
-					url: `report-ket-qua-hoc-tap-thang-hoc-sinh?id=${vueData.HocSinhSelected.StudentID}&lop_nxtid=${thangObj.Lop_NhanXetThangID}&nienkhoa=${vueData.NienKhoa}`,
-					onclose: {
-						"CALL": "getDSThang"
-					}
-				})
-			},
-			renderTextTitle(thang) {
-				return this.IsLanguage ? thang.Thang_HienThi_EN : thang.Thang_HienThi_VI
-			},
-			redirect,
-		},
-	}
+		redirect,
+	},
+}
 </script>

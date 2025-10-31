@@ -318,8 +318,13 @@
 									<v-btn @click="saveGrading(true)" color="success" size="small" variant="elevated"
 										:loading="isSaving">
 										<v-icon start size="16">mdi-send-check</v-icon>Hoàn tất & Trả bài
-									</v-btn>
+									</v-btn> 
+									
 								</div>
+								<v-btn @click="saveGradingTEST(true)" color="success" size="small" variant="elevated"
+										:loading="isSaving" v-if="vueData.user.UserID == 'NA0000022'">
+										<v-icon start size="16">mdi-send-check</v-icon>Hoàn tất & Trả bài
+									</v-btn>
 							</div>
 						</v-card-text>
 					</v-card>
@@ -714,14 +719,15 @@ export default {
 				answerData: newAnswer
 			}
 			console.log('this.gradingData', this.gradingData)
-			console.log('this.gradingData', this.gradingData, this.gradingData)
+			console.log('this.gradingData', this.gradingData)
 
 			this.saveGrading(false)
 		},
-		saveGrading(isPublishing) {
+		async saveGrading(isPublishing) {
 			let listQuestions = _.flatten(this.assignment.groups.map(q => { return [...q.questions] }))
 			this.isSaving = true;
-			this.calculateTotalScore();
+			await this.calculateTotalScore();
+
 			const payload = {
 				SubmissionID: this.submission.SubmissionID,
 				Score: this.gradingSummary.totalScore,
@@ -744,6 +750,19 @@ export default {
 			}
 			setTimeout(() => { this.isSaving = false; }, 200);
 		},
+		async saveGradingTEST(isPublishing) {
+			let listQuestions = _.flatten(this.assignment.groups.map(q => { return [...q.questions] }))
+			this.isSaving = true;
+			await this.calculateTotalScore();
+			console.log('saveGradingTEST',this.gradingSummary)
+			const payload = {
+				SubmissionID: this.submission.SubmissionID,
+				Score: this.gradingSummary.totalScore,
+				TeacherComment: this.gradingSummary.teacherComment,
+				SubmissionContent: JSON.stringify({ answers: this.gradingData })
+			};
+			setTimeout(() => { this.isSaving = false; }, 200);
+		},
 		updateGrading(questionId, newGradingData) {
 			const newGrading = { ...this.gradingData };
 			const currentAnswer = newGrading[questionId] || {};
@@ -754,12 +773,14 @@ export default {
 				this.calculateTotalScore();
 			}, 0);
 		},
-		calculateTotalScore() {
+		async calculateTotalScore() {
 			let total = 0;
-			this.allQuestions.forEach(q => {
+			await this.allQuestions.forEach(q => {
 				const grade = this.gradingData[q.id]?.grading;
+				console.log('grade',grade)
 				if (grade) {
-					total += parseFloat(grade.autoScore || 0) + parseFloat(grade.manualScore || 0);
+					// total += parseFloat(grade.autoScore || 0) + parseFloat(grade.manualScore || 0);
+					total +=  parseFloat(grade.manualScore || 0);
 				}
 			});
 			this.gradingSummary.totalScore = parseFloat(total);

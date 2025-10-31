@@ -164,7 +164,6 @@
 		// Add manual render button to window for debugging (remove in production)
 		if (typeof window !== 'undefined') {
 			window.manualRender = () => this.manualRender();
-			console.log('💡 Debug: Call window.manualRender() to manually trigger render');
 		}
 	},
 	beforeDestroy() {
@@ -308,8 +307,6 @@
 				this.isLoading = true;
 				this.error = null;
 
-				console.log('Initializing PDF from:', this.pdfUrl);
-
 				// Initialize PDF.js
 				const pdfReady = await this.ensurePDFJSLoaded();
 				if (!pdfReady) {
@@ -448,11 +445,6 @@
 				const leftCanvas = this.$refs.leftCanvas;
 				const rightCanvas = this.$refs.rightCanvas;
 				
-				console.log('Canvas refs:', { 
-					leftCanvas: !!leftCanvas, 
-					rightCanvas: !!rightCanvas 
-				});
-				
 				if (this.isDoublePage) {
 					// Double page mode: show page (currentPage-1) on left, currentPage on right
 					
@@ -576,7 +568,6 @@
 
 		// Add method to manually trigger render (useful for debugging)
 		async manualRender() {
-			console.log('🔄 Manual render triggered');
 			this.setupCanvasElements();
 			await this.renderCurrentPages();
 			this.emitPageChange();

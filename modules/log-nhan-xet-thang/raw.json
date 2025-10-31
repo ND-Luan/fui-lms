@@ -203,6 +203,7 @@
         }
     ],
     "set": {
-        "menu": false
+        "menu": false,
+        "menuLeft": false
     }
 }

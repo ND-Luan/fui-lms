@@ -34,6 +34,7 @@
 				if (!window.MathJax) {
 					// Cấu hình MathJax từ đầu
 					window.MathJax = {
+						...window.MathJax,
 						tex: {
 							inlineMath: [['$', '$'], ['\\(', '\\)']],
 							displayMath: [['$$', '$$'], ['\\[', '\\]']]
@@ -52,6 +53,7 @@
 					}
 				} else {
 					window.MathJax = {
+						...window.MathJax,
 						tex: {
 							inlineMath: [['$', '$'], ['\\(', '\\)']],
 							displayMath: [['$$', '$$'], ['\\[', '\\]']]

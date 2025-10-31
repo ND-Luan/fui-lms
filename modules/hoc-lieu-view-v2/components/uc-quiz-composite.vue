@@ -1322,7 +1322,7 @@
 				} else if (Vue.$toast) {
 					Vue.$toast[type](message);
 				} else {
-					console.log(`[${type.toUpperCase()}] ${message}`);
+					// console.log(`[${type.toUpperCase()}] ${message}`);
 				}
 			},
 	
