@@ -73,7 +73,7 @@
 		props: {
 			visible: Boolean,
 			fileUrl: String,
-			initialAnnotations: String,
+			initialAnnotations: Object,
 			originalFile: Object
 		},
 		emits: ['update:visible', 'save'],
@@ -102,6 +102,9 @@
 				}
 			}
 		},
+		mounted(){
+			console.log('this.fileUrlll',this.fileUrl)
+		},
 		methods: {
 			async initializeCanvas() {
 				if (this.fabricCanvas) this.fabricCanvas.dispose();
@@ -119,6 +122,7 @@
 				};
 	
 				const response = await fetch(this.fileUrl, requestOptions)
+				console.log('response',response)
 				const blob = await response.blob();
 				const url = URL.createObjectURL(blob);
 	

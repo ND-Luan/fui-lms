@@ -83,7 +83,7 @@
 	    },
 	    computed: {
 	        formattedText() {
-	            let string = '• ' + this.content
+	            let string = '• ' + this.content.trim()
 	            return string.replace(/\n/g, '<br> • ');
 	        },
 	    },

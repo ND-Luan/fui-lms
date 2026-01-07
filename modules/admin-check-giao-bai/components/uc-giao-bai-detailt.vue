@@ -15,7 +15,7 @@
 					<v-chip color="success" size="small">{{ itemDetail.SoLuongBaiHoc }} bài
 						học</v-chip>
 				</div>
-				<v-data-table :items="DataTable" :headers="headers" class="custom-table" hide-default-footer>
+				<v-data-table :items="DataTable" :headers="headers" class="custom-table">
 					<template #item.ResourceType="{ item }">
 						<v-chip :color="item.ResourceType == 'Bài tập' ? 'primary' : 'success'"
 							size="small">{{item.ResourceType}}</v-chip>
@@ -103,6 +103,7 @@
 	            let payload = {
 	                GiaoVienID: this.itemDetail.GiaoVienID,
 	                KhoiID: this.itemDetail.KhoiID,
+					MonHocID :this.itemDetail.MonHocID
 	            }
 	            ajaxCALL('lms/TienDo_GiaoBai_DetailByGiaoVienID', payload, res => {
 	                if (res.data.length > 0) {
@@ -121,11 +122,8 @@
 	                        }
 	                        return mapItem
 	                    })
-	                    console.log('DSBaiTap', DSBaiTap)
-	                    console.log('DSBaiHoc', DSBaiHoc)
-	                    console.log('DSLopDuocGiao', DSLopDuocGiao)
-	                    console.log('DataTable', DataTable)
 	                    this.DataTable = DataTable
+	                    console.log('DataTable',  this.DataTable)
 	
 	
 	                }

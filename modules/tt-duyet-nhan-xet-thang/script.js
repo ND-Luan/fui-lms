@@ -26,10 +26,19 @@ function callAPIPushME() {
                 .replace(/<\/p>/gi, '\n')
                 .replace(/<p[^>]*>/gi, ''); // loại bỏ <p> nhưng giữ nội dung
             container.innerHTML = preProcessedHTML;
-            let plainText = `Kết quả học tập của học sinh: ${item.HoTen}\n` +
-                `Năm học: ${vueData.NienKhoa} - ${vueData.NienKhoa + 1} - Kỳ đánh giá: Tháng ${vueData.ThangObj.Thang} - Học kì ${vueData.ThangObj.HocKy}\n`
-                + `Học tập: \n${item.NoiDungKienThuc_HTML?.trim() || "-"} \nNề nếp: \n${item.NoiDungNangLuc_HTML?.trim() || "-"} \nMong muốn phối hợp: \n${item.NoiDungHoatDongKhac_HTML?.trim() || "-"} `
-                + `\nXem chi tiết kết quả học tập: https://lms.lhbs.vn/ph-report?tab=0&HocSinhID=${item.HocSinhID}`
+            let plainText = ''
+            if ([12, 5].includes(vueData.ThangObj.Thang)) {
+                plainText = `Kết quả học tập của học sinh: ${item.HoTen}\n` +
+                    `Năm học: ${vueData.NienKhoa} - ${vueData.NienKhoa + 1} - Kỳ đánh giá: Tháng ${vueData.ThangObj.Thang} - Học kì ${vueData.ThangObj.HocKy}\n`
+                    + `Ưu điểm: \n${item.UuDiem?.trim() || "-"} \nNhược điểm: \n${item.NhuocDiem?.trim() || "-"} \nĐề xuất: \n${item.DeXuat?.trim() || "-"} `
+                    + `\nXem chi tiết kết quả học tập: https://lms.lhbs.vn/ph-report?tab=0&HocSinhID=${item.HocSinhID}`
+            } else {
+                plainText = `Kết quả học tập của học sinh: ${item.HoTen}\n` +
+                    `Năm học: ${vueData.NienKhoa} - ${vueData.NienKhoa + 1} - Kỳ đánh giá: Tháng ${vueData.ThangObj.Thang} - Học kì ${vueData.ThangObj.HocKy}\n`
+                    + `Học tập: \n${item.NoiDungKienThuc_HTML?.trim() || "-"} \nNề nếp: \n${item.NoiDungNangLuc_HTML?.trim() || "-"} \nMong muốn phối hợp: \n${item.NoiDungHoatDongKhac_HTML?.trim() || "-"} `
+                    + `\nXem chi tiết kết quả học tập: https://lms.lhbs.vn/ph-report?tab=0&HocSinhID=${item.HocSinhID}`
+            }
+            console.log("plainText", plainText)
             ajaxCALL(`student/LMS_SendMessageToME`,
                 {
                     HocSinhID: item.HocSinhID,
@@ -590,6 +599,7 @@ function renderHeaderTable() {
             })
         }
     }
+    const ListThang_CuoiKi = [12, 5]
     if ((vueData.CapID == 2 || vueData.CapID === 3) && vueData.ThangObj?.Is_HienThiPhuHuynh) {
         columns.push({
             key: "NgayNghi",
@@ -716,91 +726,180 @@ function renderHeaderTable() {
             ]
         })
         if (vueData.isLowScreen) {
-            columns.push({
-                "key": "NoiDungHoatDongKhacMobile",
-                "el": "div",
-                "align": "center",
-                "innerHTML": [
-                    {
-                        el: "div",
-                        attr: {
-                            class: "d-flex flex-column ga-2"
-                        },
-                        innerHTML: [
-                            {
-                                el: "b",
-                                attr: {
-                                    class: "text-left"
-                                },
-                                "innerHTML": "Về học tập"
+            if (ListThang_CuoiKi.includes(vueData.ThangObj?.Thang)) {
+                columns.push({
+                    "key": "ListThang_CuoiKiMobile",
+                    "el": "div",
+                    "align": "center",
+                    "innerHTML": [
+                        {
+                            el: "div",
+                            attr: {
+                                class: "d-flex flex-column ga-2"
                             },
-                            {
-                                "el": "uc-quill-editor",
-                                "attr": {
-                                    ":key": "'NoiDungKienThuc_HTML_' + item.HocSinhID",
-                                    "v-model": "item.NoiDungKienThuc_HTML",
-                                    ":spellcheck": "false",
-                                    style: "height: 100px;"
-                                }
-                            }
-                        ]
-                    },
-                    {
-                        el: "div",
-                        attr: {
-                            class: "d-flex flex-column ga-2"
-                        },
-                        innerHTML: [
-                            {
-                                el: "b",
-                                attr: {
-                                    class: "text-left"
+                            innerHTML: [
+                                {
+                                    el: "b",
+                                    attr: {
+                                        class: "text-left"
+                                    },
+                                    "innerHTML": "Ưu điểm"
                                 },
-                                "innerHTML": "Về nền nếp"
-                            },
-                            {
-                                "el": "uc-quill-editor",
-                                "attr": {
-                                    ":key": "'NoiDungNangLuc_HTML_' + item.HocSinhID",
-                                    "v-model": "item.NoiDungNangLuc_HTML",
-                                    ":spellcheck": "false",
-                                    style: "height: 100px;"
+                                {
+                                    "el": "uc-quill-editor",
+                                    "attr": {
+                                        ":key": "'UuDiem_' + item.HocSinhID",
+                                        "v-model": "item.UuDiem",
+                                        ":spellcheck": "false",
+                                        style: "height: 100px;"
+                                    }
                                 }
-                            }
-                        ]
-                    },
-                    {
-                        el: "div",
-                        attr: {
-                            class: "d-flex flex-column ga-2"
+                            ]
                         },
-                        innerHTML: [
-                            {
-                                el: "b",
-                                attr: {
-                                    class: "text-left"
-                                },
-                                "innerHTML": "Mong muốn phối hợp"
+                        {
+                            el: "div",
+                            attr: {
+                                class: "d-flex flex-column ga-2"
                             },
-                            {
-                                "el": "uc-quill-editor",
-                                "attr": {
-                                    ":key": "'NoiDungHoatDongKhac_HTML_' + item.HocSinhID",
-                                    "v-model": "item.NoiDungHoatDongKhac_HTML",
-                                    ":spellcheck": "false",
-                                    style: "height: 100px;"
+                            innerHTML: [
+                                {
+                                    el: "b",
+                                    attr: {
+                                        class: "text-left"
+                                    },
+                                    "innerHTML": "Nhược điểm"
+                                },
+                                {
+                                    "el": "uc-quill-editor",
+                                    "attr": {
+                                        ":key": "'NhuocDiem_' + item.HocSinhID",
+                                        "v-model": "item.NhuocDiem",
+                                        ":spellcheck": "false",
+                                        style: "height: 100px;"
+                                    }
                                 }
-                            }
-                        ]
-                    },
-                ],
-                "title": "Nhận xét",
-                "value": "NoiDungHoatDongKhacMobile",
-                "attr": {
-                    style: "padding:10px;witdh: 300px;",
-                    class: "d-flex flex-column ga-2"
-                }
-            })
+                            ]
+                        },
+                        {
+                            el: "div",
+                            attr: {
+                                class: "d-flex flex-column ga-2"
+                            },
+                            innerHTML: [
+                                {
+                                    el: "b",
+                                    attr: {
+                                        class: "text-left"
+                                    },
+                                    "innerHTML": "Đề xuất"
+                                },
+                                {
+                                    "el": "uc-quill-editor",
+                                    "attr": {
+                                        ":key": "'DeXuat_' + item.HocSinhID",
+                                        "v-model": "item.DeXuat",
+                                        ":spellcheck": "false",
+                                        style: "height: 100px;"
+                                    }
+                                }
+                            ]
+                        },
+                    ],
+                    "title": "Nhận xét",
+                    "value": "ListThang_CuoiKiMobile",
+                    "attr": {
+                        style: "padding:10px;witdh: 300px;",
+                        class: "d-flex flex-column ga-2"
+                    }
+                })
+            }
+            else {
+                columns.push({
+                    "key": "NoiDungHoatDongKhacMobile",
+                    "el": "div",
+                    "align": "center",
+                    "innerHTML": [
+                        {
+                            el: "div",
+                            attr: {
+                                class: "d-flex flex-column ga-2"
+                            },
+                            innerHTML: [
+                                {
+                                    el: "b",
+                                    attr: {
+                                        class: "text-left"
+                                    },
+                                    "innerHTML": "Về học tập"
+                                },
+                                {
+                                    "el": "uc-quill-editor",
+                                    "attr": {
+                                        ":key": "'NoiDungKienThuc_HTML_' + item.HocSinhID",
+                                        "v-model": "item.NoiDungKienThuc_HTML",
+                                        ":spellcheck": "false",
+                                        style: "height: 100px;"
+                                    }
+                                }
+                            ]
+                        },
+                        {
+                            el: "div",
+                            attr: {
+                                class: "d-flex flex-column ga-2"
+                            },
+                            innerHTML: [
+                                {
+                                    el: "b",
+                                    attr: {
+                                        class: "text-left"
+                                    },
+                                    "innerHTML": "Về nền nếp"
+                                },
+                                {
+                                    "el": "uc-quill-editor",
+                                    "attr": {
+                                        ":key": "'NoiDungNangLuc_HTML_' + item.HocSinhID",
+                                        "v-model": "item.NoiDungNangLuc_HTML",
+                                        ":spellcheck": "false",
+                                        style: "height: 100px;"
+                                    }
+                                }
+                            ]
+                        },
+                        {
+                            el: "div",
+                            attr: {
+                                class: "d-flex flex-column ga-2"
+                            },
+                            innerHTML: [
+                                {
+                                    el: "b",
+                                    attr: {
+                                        class: "text-left"
+                                    },
+                                    "innerHTML": "Mong muốn phối hợp"
+                                },
+                                {
+                                    "el": "uc-quill-editor",
+                                    "attr": {
+                                        ":key": "'NoiDungHoatDongKhac_HTML_' + item.HocSinhID",
+                                        "v-model": "item.NoiDungHoatDongKhac_HTML",
+                                        ":spellcheck": "false",
+                                        style: "height: 100px;"
+                                    }
+                                }
+                            ]
+                        },
+                    ],
+                    "title": "Nhận xét",
+                    "value": "NoiDungHoatDongKhacMobile",
+                    "attr": {
+                        style: "padding:10px;witdh: 300px;",
+                        class: "d-flex flex-column ga-2"
+                    }
+                })
+            }
         } else {
             columns.push({
                 "key": "NhanXet",
@@ -882,10 +981,19 @@ async function convertItems() {
         x.firstDay = vueData.firstDay;
         x.lastDay = vueData.lastDay;
         x.LopID = vueData.LopID;
-        x.RenderNhanXet = (
-            (x.NoiDungKienThuc_HTML ? ('<b>Học tập: </b>' + convertNewLineToP(x.NoiDungKienThuc_HTML) + '<br/>') : '<b>Học tập: - </b><br/>')
-            + (x.NoiDungNangLuc_HTML ? ('<b>Nền nếp: </b>' + convertNewLineToP(x.NoiDungNangLuc_HTML) + '<br/>') : '<b>Nền nếp: - </b><br/>')
-            + (x.NoiDungHoatDongKhac_HTML ? ('<b>Mong muốn phối hợp: </b>' + convertNewLineToP(x.NoiDungHoatDongKhac_HTML) + '<br/>') : '<b>Mong muốn phối hợp: - </b><br/>'))
+        let text = ''
+        if ([12, 5].includes(vueData.ThangObj.Thang)) {
+            text = (
+                (x.UuDiem ? ('<b>Ưu điểm: </b>' + convertNewLineToP(x.UuDiem) + '<br/>') : '<b>Ưu điểm: - </b><br/>')
+                + (x.NhuocDiem ? ('<b>Nhược điểm: </b>' + convertNewLineToP(x.NhuocDiem) + '<br/>') : '<b>Nhược điểm: - </b><br/>')
+                + (x.DeXuat ? ('<b>Đề xuất: </b>' + convertNewLineToP(x.DeXuat) + '<br/>') : '<b>Đề xuất: - </b><br/>'))
+        } else {
+            text = (
+                (x.NoiDungKienThuc_HTML ? ('<b>Học tập: </b>' + convertNewLineToP(x.NoiDungKienThuc_HTML) + '<br/>') : '<b>Học tập: - </b><br/>')
+                + (x.NoiDungNangLuc_HTML ? ('<b>Nền nếp: </b>' + convertNewLineToP(x.NoiDungNangLuc_HTML) + '<br/>') : '<b>Nền nếp: - </b><br/>')
+                + (x.NoiDungHoatDongKhac_HTML ? ('<b>Mong muốn phối hợp: </b>' + convertNewLineToP(x.NoiDungHoatDongKhac_HTML) + '<br/>') : '<b>Mong muốn phối hợp: - </b><br/>'))
+        }
+        x.RenderNhanXet = text
         return x
     })
     // vueData.DSTongHop_LoaiViPham = vueData.DSTongHop_LoaiViPham?.filter(x => x.SoLuong > 0)

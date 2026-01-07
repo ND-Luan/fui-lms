@@ -839,7 +839,7 @@ export default {
 				'QUIZ_MULTIPLE_TRUE_FALSE': 'uc-question-multiple-true-false',
 				'QUIZ_FILL_IN_BLANK': 'uc-question-fill-in-blank',
 				'QUIZ_MATCHING': 'uc-question-matching',
-				'QUIZ_MATCHING_V2': 'uc-quiz-matching',
+				'QUIZ_MATCHING_V2': 'uc-question-matching',
 				'SHORT_ANSWER': 'uc-question-short-answer',
 				'ESSAY': 'uc-question-essay',
 				'FILE_UPLOAD': 'uc-question-file-upload',

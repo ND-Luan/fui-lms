@@ -1,13 +1,23 @@
 <template>
 	<v-card class="px-4 pt-0 pb-4 card-border">
-		<v-card-title class=" my-3 ga-2 card-border rounded-sm ">
-			<span class="text-primary">TIỂU HỌC</span>
+		<v-card-title class="my-3 ga-2 card-border rounded-sm ">
+			<div>
+				<span class="text-primary">TIỂU HỌC</span>
+				<div v-if="BaoCaoItem?.IsChotBaoCao" class="text-caption">
+					<span class="text-red">Thời điểm chốt:</span> [{{BaoCaoItem.NguoiChot}}]
+					{{BaoCaoItem.HoTenNguoiChot}} - {{BaoCaoItem.NgayChot}}
+				</div>
+			</div>
 			<v-spacer></v-spacer>
 			<div class="d-flex ga-2">
 				<v-select v-model="HocKi" label="Chọn học kì" :items="DSHocKi" style="min-width: 200px;"></v-select>
 				<v-btn @click="ThongKe_KQRL_Get_All_Khoi_C1" color="primary" :loading="isBusy" variant="outlined"
 					:disabled="!HocKi">
 					Làm mới
+				</v-btn>
+				<v-btn @click="onChotBaoCao" color="primary" :loading="isBusy" variant="outlined"
+					:disabled="!HocKi || !BaoCaoItem || BaoCaoItem?.IsChotBaoCao">
+					Chốt báo cáo
 				</v-btn>
 			</div>
 		</v-card-title>
@@ -18,7 +28,7 @@
 				<v-col cols="12">
 					<v-card class="card-border">
 						<v-card-title class="text-primary " style="text-wrap:auto">
-							KẾT QUẢ RÈN LUYỆN KHỐI 1, 2, 3, 4 – PHẨM CHẤT</v-card-title>
+							KẾT QUẢ RÈN LUYỆN KHỐI 1, 2, 3, 4, 5 – PHẨM CHẤT</v-card-title>
 						<v-card-text class="pa-0">
 							<v-data-table :items="DataChart1" :headers="headersChart1" :hide-default-footer="true" />
 						</v-card-text>
@@ -31,8 +41,9 @@
 			<v-row class="elevation-1 pa-3">
 				<v-col cols="12">
 					<v-card class="card-border">
-						<v-card-title class="text-primary" style="text-wrap:auto">KẾT QUẢ RÈN LUYỆN KHỐI 1, 2, 3, 4 –
-							NĂNG LỰC</v-card-title>
+						<v-card-title class="text-primary" style="text-wrap:auto">
+							KẾT QUẢ RÈN LUYỆN KHỐI 1, 2, 3, 4, 5 – NĂNG LỰC
+						</v-card-title>
 						<v-card-text class="pa-0">
 							<v-data-table :items="DataChart2" :headers="headersChart2" :hide-default-footer="true">
 								<template #item="{ item, index }">
@@ -53,12 +64,12 @@
 				</v-col>
 			</v-row>
 
-			<v-row class="elevation-1 pa-3">
+			<!-- <v-row class="elevation-1 pa-3">
 				<v-col cols="12">
 					<v-card class="card-border">
-						<v-card-title class="text-primary" style="text-wrap:auto">KẾT QUẢ RÈN LUYỆN KHỐI 5 – PHẨM CHẤT,
-							NĂNG
-							LỰC</v-card-title>
+						<v-card-title class="text-primary" style="text-wrap:auto">
+							KẾT QUẢ RÈN LUYỆN KHỐI 5 – PHẨM CHẤT, NĂNG LỰC
+						</v-card-title>
 						<v-card-text class="pa-0">
 							<v-data-table :items="DataChart3" :headers="headersChart3" :hide-default-footer="true">
 								<template #item="{ item, index }">
@@ -77,7 +88,7 @@
 				<v-col cols="12" class="mt-5 elevation-2 " v-if="!isBusy && DataChart3.length > 0">
 					<uc-chart-apex :options="OptionsChart3" />
 				</v-col>
-			</v-row>
+			</v-row> -->
 
 			<v-row class="elevation-1 pa-3">
 				<v-col cols="12">
@@ -96,7 +107,6 @@
 				</v-col>
 			</v-row>
 
-
 			<v-row class="elevation-1 pa-3">
 				<v-col cols="12">
 					<v-card class="card-border">
@@ -105,17 +115,17 @@
 						</v-card-title>
 					</v-card>
 				</v-col>
-				<v-col cols="6">
+				<v-col cols="12">
 					<v-card class="card-border">
 						<v-card-title class="text-primary">
-							Khối 1,2,3,4
+							Khối 1,2,3,4,5
 						</v-card-title>
 						<v-card-text class="pa-0">
 							<v-data-table :items="DataChart5" :headers="headersChart5" :hide-default-footer="true" />
 						</v-card-text>
 					</v-card>
 				</v-col>
-				<v-col cols="6">
+				<!-- <v-col cols="6">
 					<v-card class="card-border">
 						<v-card-title class="text-primary" style="text-wrap:auto">
 							Khối 5
@@ -124,13 +134,13 @@
 							<v-data-table :items="DataChart6" :headers="headersChart5" :hide-default-footer="true" />
 						</v-card-text>
 					</v-card>
-				</v-col>
-				<v-col cols="6" class="mt-5 elevation-2 pa-2" v-if="!isBusy && DataChart5.length > 0">
+				</v-col> -->
+				<v-col cols="12" class="mt-5 elevation-2 pa-2" v-if="!isBusy && DataChart5.length > 0">
 					<uc-chart-apex :options="OptionsChart5" />
 				</v-col>
-				<v-col cols="6" class="mt-5 elevation-2 pa-2" v-if="!isBusy && DataChart6.length > 0">
+				<!-- <v-col cols="6" class="mt-5 elevation-2 pa-2" v-if="!isBusy && DataChart6.length > 0">
 					<uc-chart-apex :options="OptionsChart6" />
-				</v-col>
+				</v-col> -->
 			</v-row>
 		</v-card-text>
 	</v-card>
@@ -218,6 +228,8 @@
 			};
 			return {
 				vueData,
+				BaoCaoItem: null,
+				DataChotBaoCao: null,
 				isBusy: false,
 				HocKi: null,
 				ChartPie_PC: options,
@@ -230,19 +242,23 @@
 				DSHocKi: [
 					{
 						title: "Giữa HK1",
-						value: "GK_HK1"
+						value: 1,
+						textValue: "GK_HK1"
 					},
 					{
 						title: "Cuối HK1",
-						value: "CK_HK1"
+						value: 2,
+						textValue: "CK_HK1"
 					},
 					{
 						title: "Giữa HK2",
-						value: "GK_HK2"
+						value: 3,
+						textValue: "GK_HK2"
 					},
 					{
 						title: "Cuối HK2",
-						value: "CK_HK2"
+						value: 4,
+						textValue: "CK_HK2"
 					}
 				],
 				DataChart1: [],
@@ -443,24 +459,38 @@
 			}
 		},
 		methods: {
-			PromiseAPI(url, param) {
-				this.isBusy = true
-				return new Promise((resolve, reject) => {
-					ajaxCALL(url, param, res => resolve(res), err => reject(err))
-				})
-			},
 			async ThongKe_KQRL_Get_All_Khoi_C1() {
 				if (!this.HocKi) return
-				const res = await this.PromiseAPI('/lms/ThongKe_KQRL_Get_All_Khoi_C1', {
-					HocKi: this.HocKi,
-					NienKhoa: vueData.NienKhoa
+				let data
+				const valueHK = this.DSHocKi.find(x => x.value === this.HocKi)
+				console.log("valueHK", valueHK)
+				const dataLMS = await ajaxCALLPromise("lms/BaoCao_TongHop_Get_BaoCaoID_HocKi_CapID", {
+					BaoCaoID: 8,
+					HocKi: valueHK.textValue,
+					CapID: 1,
+					NienKhoa: vueData.NienKhoa,
 				})
-				this.handleChart4(res.data[3])
-				this.handleChart5(res.data[4])
-				this.handleChart6(res.data[5])
-				//Lấy khối 1 -> 4 => Phẩm Chất
-				let Chart1 = res.data[0]
-				this.DataChart1 = res.data[0].map(item => {
+				this.BaoCaoItem = dataLMS[1][0]
+				if (this.BaoCaoItem?.IsChotBaoCao) {
+					data = JSON.parse(this.BaoCaoItem.JSON_BaoCao)
+				}
+				else {
+					data = await ajaxCALLPromise('lms/ThongKe_KQRL_Get_All_Khoi_C1', {
+						HocKi: valueHK.textValue,
+						NienKhoa: vueData.NienKhoa
+					})
+					this.DataChotBaoCao = data
+				}
+	
+	
+	
+				this.DataChotBaoCao = data
+				this.handleChart4(data[2])
+				this.handleChart5(data[3])
+				// this.handleChart6(data[5])
+				//Lấy khối 1 -> 5 => Phẩm Chất
+				let Chart1 = data[0]
+				this.DataChart1 = data[0].map(item => {
 					let Khoi = item.KhoiDay.split('-')
 					if (Khoi.length < 5) {
 						item.TenMonHoc_HienThi = item.TenMonHoc_HienThi + ` (${item.KhoiDay})`
@@ -535,8 +565,8 @@
 					}
 				}
 	
-				//Lấy khối 1 -> 4 => Năng lực
-				let Chart2 = res.data[1]
+				//Lấy khối 1 -> 5 => Năng lực
+				let Chart2 = data[1]
 				let arrNangLuc = [...new Set(Chart2.map(item => item.TenMonHoc_HienThi))]
 				let seriesHandleChart2 = []
 				for (let tile of arrSeriesData) {
@@ -591,7 +621,7 @@
 						}
 					}
 				}
-				let NangLucChungArr = res.data[1].filter(item => item.TenMonHoc_HienThi.includes('và')).map(item => {
+				let NangLucChungArr = data[1].filter(item => item.TenMonHoc_HienThi.includes('và')).map(item => {
 					return {
 						...item,
 						TiLe_Tot: (item.TiLe_Tot).toFixed(2),
@@ -599,7 +629,7 @@
 						TiLe_C: (item.TiLe_C).toFixed(2)
 					}
 				})
-				let NangLucDacThuArr = res.data[1].filter(item => !item.TenMonHoc_HienThi.includes('và')).map(item => {
+				let NangLucDacThuArr = data[1].filter(item => !item.TenMonHoc_HienThi.includes('và')).map(item => {
 					let Khoi = item.KhoiDay.split('-')
 					if (Khoi.length < 5) {
 						item.TenMonHoc_HienThi = item.TenMonHoc_HienThi + ` (${item.KhoiDay})`
@@ -618,85 +648,85 @@
 					TenMonHoc_HienThi: 'Năng lực đặc thù'
 				}]
 				this.DataChart2 = [...objNangLucChung, ...NangLucChungArr, ...objNangLucDacThu, ...NangLucDacThuArr]
-				//Lấy khối 5 => Phẩm Chất- Năng lực
-				let Chart3 = res.data[2]
-				let arrNangLucPhamChat = [...new Set(Chart3.map(item => item.TenMonHoc_HienThi))]
-				let seriesHandleChart3 = []
-				for (let tile of arrSeriesData) {
-					let obj = {
-						name: tile,
-						data: []
-					}
-					if (tile == 'TiLe_Tot') {
-						obj.name = 'Tốt'
-					} else if (tile == 'TiLe_Dat') {
-						obj.name = 'Đạt'
-					} else if (tile == 'TiLe_C') {
-						obj.name = 'Cần cố gắng'
-					}
-					for (let nlpc of arrNangLucPhamChat) {
-						let objFind = Chart3.find(item => item.TenMonHoc_HienThi == nlpc)
-						if (objFind) {
-							obj.data.push(objFind[tile])
-						} else {
-							obj.data.push(0)
-						}
-					}
-					seriesHandleChart3.push(obj)
-				}
-				this.OptionsChart3 = {
-					...this.OptionsChart3,
-					chart: {
-						type: 'bar',
-						stacked: true,
-						height: 500
-					},
-					title: {
-						text: 'Biểu đồ tỉ lệ',
-						align: 'left',
-						style: {
-							fontSize: '16px',
-							color: '#263238'
-						}
-					},
-					xaxis: {
-						categories: arrNangLucPhamChat,
-					},
-					series: seriesHandleChart3,
-					fill: {
-						opacity: 1
-					},
-					tooltip: {
-						y: {
-							formatter: function (val) {
-								return val + "%"
-							}
-						}
-					}
-				}
-				let PhamChatArr = res.data[2].filter(item => item.Is_PhamChat).map(item => {
-					let Khoi = item.KhoiDay.split('-')
-					if (Khoi.length < 5) {
-						item.TenMonHoc_HienThi = item.TenMonHoc_HienThi + ` (${item.KhoiDay})`
-					}
-					return {
-						...item,
-						TiLe_Tot: (item.TiLe_Tot).toFixed(2),
-						TiLe_Dat: (item.TiLe_Dat).toFixed(2),
-						TiLe_C: (item.TiLe_C).toFixed(2)
-					}
-				})
-				let NangLucArr = res.data[2].filter(item => !item.Is_PhamChat).map(item => {
-					return {
-						...item,
-						TiLe_Tot: (item.TiLe_Tot).toFixed(2),
-						TiLe_Dat: (item.TiLe_Dat).toFixed(2),
-						TiLe_C: (item.TiLe_C).toFixed(2)
-					}
-				})
-				let objPhamChat = [{ TenMonHoc_HienThi: 'Phẩm chất' }]
-				let objNangLuc = [{ TenMonHoc_HienThi: 'Năng lực' }]
-				this.DataChart3 = [...objPhamChat, ...PhamChatArr, ...objNangLuc, ...NangLucArr]
+				// //Lấy khối 5 => Phẩm Chất- Năng lực
+				// let Chart3 = data[2]
+				// let arrNangLucPhamChat = [...new Set(Chart3.map(item => item.TenMonHoc_HienThi))]
+				// let seriesHandleChart3 = []
+				// for (let tile of arrSeriesData) {
+				// 	let obj = {
+				// 		name: tile,
+				// 		data: []
+				// 	}
+				// 	if (tile == 'TiLe_Tot') {
+				// 		obj.name = 'Tốt'
+				// 	} else if (tile == 'TiLe_Dat') {
+				// 		obj.name = 'Đạt'
+				// 	} else if (tile == 'TiLe_C') {
+				// 		obj.name = 'Cần cố gắng'
+				// 	}
+				// 	for (let nlpc of arrNangLucPhamChat) {
+				// 		let objFind = Chart3.find(item => item.TenMonHoc_HienThi == nlpc)
+				// 		if (objFind) {
+				// 			obj.data.push(objFind[tile])
+				// 		} else {
+				// 			obj.data.push(0)
+				// 		}
+				// 	}
+				// 	seriesHandleChart3.push(obj)
+				// }
+				// this.OptionsChart3 = {
+				// 	...this.OptionsChart3,
+				// 	chart: {
+				// 		type: 'bar',
+				// 		stacked: true,
+				// 		height: 500
+				// 	},
+				// 	title: {
+				// 		text: 'Biểu đồ tỉ lệ',
+				// 		align: 'left',
+				// 		style: {
+				// 			fontSize: '16px',
+				// 			color: '#263238'
+				// 		}
+				// 	},
+				// 	xaxis: {
+				// 		categories: arrNangLucPhamChat,
+				// 	},
+				// 	series: seriesHandleChart3,
+				// 	fill: {
+				// 		opacity: 1
+				// 	},
+				// 	tooltip: {
+				// 		y: {
+				// 			formatter: function (val) {
+				// 				return val + "%"
+				// 			}
+				// 		}
+				// 	}
+				// }
+				// let PhamChatArr = data[2].filter(item => item.Is_PhamChat).map(item => {
+				// 	let Khoi = item.KhoiDay.split('-')
+				// 	if (Khoi.length < 5) {
+				// 		item.TenMonHoc_HienThi = item.TenMonHoc_HienThi + ` (${item.KhoiDay})`
+				// 	}
+				// 	return {
+				// 		...item,
+				// 		TiLe_Tot: (item.TiLe_Tot).toFixed(2),
+				// 		TiLe_Dat: (item.TiLe_Dat).toFixed(2),
+				// 		TiLe_C: (item.TiLe_C).toFixed(2)
+				// 	}
+				// })
+				// let NangLucArr = data[2].filter(item => !item.Is_PhamChat).map(item => {
+				// 	return {
+				// 		...item,
+				// 		TiLe_Tot: (item.TiLe_Tot).toFixed(2),
+				// 		TiLe_Dat: (item.TiLe_Dat).toFixed(2),
+				// 		TiLe_C: (item.TiLe_C).toFixed(2)
+				// 	}
+				// })
+				// let objPhamChat = [{ TenMonHoc_HienThi: 'Phẩm chất' }]
+				// let objNangLuc = [{ TenMonHoc_HienThi: 'Năng lực' }]
+				// this.DataChart3 = [...objPhamChat, ...PhamChatArr, ...objNangLuc, ...NangLucArr]
 	
 	
 				this.isBusy = false
@@ -772,6 +802,7 @@
 				}
 			},
 			handleChart5(DataChart5) {
+				console.log("DataChart5", DataChart5)
 				this.DataChart5 = DataChart5.map(item => {
 					return {
 						...item,
@@ -814,7 +845,6 @@
 				}
 			},
 			getRowStyle(item) {
-				console.log('item', item)
 				if (item.TenMonHoc_HienThi == 'Năng lực chung' || item.TenMonHoc_HienThi == 'Phẩm chất') {
 					return 'background-color: rgb(0 176 255 / 83%);font-weight: bold;color: #ffffff;';
 				} else if (item.TenMonHoc_HienThi == 'Năng lực đặc thù' || item.TenMonHoc_HienThi == 'Năng lực') {
@@ -827,6 +857,21 @@
 					return 'text-uppercase'; // chữ in hoa
 				}
 				return '';
+			},
+			onChotBaoCao() {
+				const $this = this
+				confirm({
+					title: "Xác nhận chốt báo cáo",
+					action: function () {
+						ajaxCALLPromise("lms/BaoCao_TongHop_Upd_Chot_BaoCao", {
+							BaoCao_ChiTietID: $this.BaoCaoItem.BaoCao_ChiTietID,
+							JSON_BaoCao: $this.DataChotBaoCao
+						}).then(() => {
+							$this.ThongKe_KQRL_Get_All_Khoi_C1()
+							Vue.$toast.success("Chốt báo cáo thành công", { position: "top" })
+						})
+					}
+				})
 			}
 		},
 	}

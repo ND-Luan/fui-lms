@@ -1,6 +1,6 @@
 <template>
 	<v-card flat>
-		<v-card-title class="text-subtitle-1">Thư viện Nội dung</v-card-title>
+		<v-card-title class="text-subtitle-1">{{ $t('message.ContentLibrary') }}</v-card-title>
 		<v-divider></v-divider>
 		<v-list density="compact" nav>
 			<v-list-item v-for="item in contentElements" :key="item.type" @click="$emit('add-element', item)" link>
@@ -18,46 +18,48 @@
 		name: 'uc-lesson-component-library',
 		emits: ['add-element'],
 		data() {
+			this.$i18n.locale = (localStorage.getItem('IsLanguage') && localStorage.getItem('IsLanguage') == 'true') ? 'en' : 'vi'
 			return {
 				contentElements: [
 					{
-						type: 'TEXT', label: 'Đoạn văn bản', icon: 'mdi-format-text', defaultData: {
-							title: "Tiêu đề đoạn văn bản",
-							content: '<p>Nội dung văn bản mới...</p>'
+						type: 'TEXT', label: this.$t('message.TextBlock'), icon: 'mdi-format-text', defaultData: {
+							title: this.$t('message.TextTitle'),
+							content: `<p>${this.$t('message.NewTextContent')}</p>`
 						}
 					},
 					{
-						type: 'IMAGE', label: 'Hình ảnh', icon: 'mdi-image-outline',
+						type: 'IMAGE', label: this.$t('message.Image'), icon: 'mdi-image-outline',
 						defaultData: {
-							title: "Tiêu đề hình ảnh",
+							title: this.$t('message.ImageTitle'),
 							sources: []
 						}
 					},
 					{
 						type: 'YOUTUBE', label: 'Video (YouTube)', icon: 'mdi-youtube',
 						defaultData: {
-							title: "Tiêu đề youtube",
+							title: this.$t('message.YoutubeTitle'),
 							source: ''
 						}
 					},
 					{
-						type: 'FILE', label: 'Tệp đính kèm', icon: 'mdi-paperclip',
+						type: 'FILE', label: this.$t('message.Attachment'), icon: 'mdi-paperclip',
 						defaultData: {
-							title: "Tiêu đề file",
+							title: this.$t('message.FileTitle'),
 							sources: []
 						}
 					},
 					{
-						type: 'AUDIO', label: 'Audio (Ghi âm/Tải lên)', icon: 'mdi-volume-high', color: 'orange-darken-2',
+						type: 'AUDIO', label: this.$t('message.Audio'), icon: 'mdi-volume-high', color: 'orange-darken-2',
 						defaultData: {
-							title: "Tiêu đề audio",
+							title: this.$t('message.AudioTitle'),
 							source: ''
 						}
 					},
 					{
 						type: 'HTML', label: 'HTML', icon: 'mdi-language-html5', color: 'orange-darken-2',
 						defaultData: {
-							title: "Tiêu đề HTML",
+							title: this.$t('message.HtmlTitle'),
+							IsHTML: true,
 							source: ''
 						}
 					},

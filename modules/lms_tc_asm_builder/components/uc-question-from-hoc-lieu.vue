@@ -128,6 +128,7 @@ export default {
             ],
             GroupQuestion: [],
             isSelectedAll: false,
+			crypto
         }
     },
     computed: {
@@ -209,13 +210,12 @@ export default {
             })
         },
         parseQuestionData(type, data) {
-            console.log('type', type)
             console.log(' data', data)
             if (type === 'QUIZ_TRUE_FALSE') {
                 type = 'QUIZ_MULTIPLE_TRUE_FALSE'
             }
             const newQuestion = {
-                id: `q_${Date.now()}`,
+                id: `q_${crypto.randomUUID()}`,
                 type: type,
                 label: this.getLabelQuestion(type)?.label,
                 ordinalNumber: this.GroupQuestion.length + 1,

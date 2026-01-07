@@ -56,8 +56,11 @@
 			</div>
 			<div v-else-if="grading?.comment" class="pa-2 rounded bg-blue-lighten-1">
 				<b>
-					<v-icon class="mr-1" size="18">mdi-message-text-outline</v-icon> Ý kiến {{ isGrade ? 'học sinh' :
-						'bạn' }}:
+					<v-icon class="mr-1" size="18">mdi-message-text-outline</v-icon><span
+						v-if="$i18n.locale == 'en' && isGrade">
+						Student's Feedback
+					</span>
+					<span v-else-if="$i18n.locale != 'en' && isGrade">Ý kiến {{ isGrade ? 'học sinh' : 'bạn' }}:</span>
 				</b>
 				<div class="mt-1">{{ grading.comment }}</div>
 			</div>
@@ -66,7 +69,7 @@
 		<!-- (5) Điểm -->
 		<!-- Điểm câu – hiển thị khi đã trả bài (status == 4) -->
 		<div v-if="submissionstatus == 4" class="mt-2">
-			<strong>Điểm | Score:</strong>
+			<strong>{{ $i18n.locale == 'en' ? 'Score' : 'Điểm' }}:</strong>
 			<v-chip size="small" :color="scoreChipColor" variant="tonal">
 				<v-icon start size="16">mdi-star</v-icon>
 				{{ displayScore }} / {{ effectiveMaxPoints }}
@@ -88,7 +91,7 @@
 		<!-- GV -->
 		<div class="mt-2" v-if="isGrade">
 			<v-textarea :model-value="grading?.teacherComment || ''" @update:model-value="updateTeacherComment"
-				label="Nhận xét của giáo viên (tùy chọn)" rows="2" outlined dense hide-details />
+				:label="$t('message.TeacherCommentOptional')" rows="2" outlined dense hide-details />
 		</div>
 	</div>
 </template>
@@ -106,7 +109,10 @@ export default {
 		isShowBtnComment: { type: Boolean, default: true }
 	},
 	emits: ['answer-change', 'grading-change'],
-	data() { return { internalAnswer: this.answer ? [...this.answer] : [], menu: false, widthScreen: null } },
+	data() {
+		this.$i18n.locale = (localStorage.getItem('IsLanguage') && localStorage.getItem('IsLanguage') == 'true') ? 'en' : 'vi'
+		return { internalAnswer: this.answer ? [...this.answer] : [], menu: false, widthScreen: null }
+	},
 	computed: {
 		isGraded() { return this.grading && this.isGrade; },
 		guideText() { return this.question?.config?.submissionNote || this.question?.config?.instruction || '' },
@@ -126,11 +132,13 @@ export default {
 		}
 	},
 	mounted() {
-		console.log('this.answer multiplechoice', this.answer)
 		this.widthScreen = window.innerWidth
 		if (this.isGrade) {
+			console.log('mounted', this.answer)
+			console.log('www', this.question.config.correctAnswers)
+			console.log('www', this.totalScore())
 			const ok = _.isEqual(_.sortBy(this.question.config.correctAnswers), _.sortBy(this.internalAnswer))
-			this.$emit('grading-change', { ...this.grading, manualScore: ok ? this.question.points : 0 });
+			this.$emit('grading-change', { ...this.grading, manualScore: this.totalScore() });
 		}
 		window.addEventListener('resize', () => { this.handleResize() })
 	},
@@ -145,6 +153,14 @@ export default {
 	methods: {
 		handleResize() {
 			this.widthScreen = window.innerWidth;
+		},
+		totalScore() {
+			if (!this.isGrade) return 0;
+			let c = 0;
+			this.question.config.correctAnswers.forEach(opt => {
+				if (this.answer.includes(opt)) c++;
+			});
+			return (c / this.question.config.correctAnswers.length) * this.question.points;
 		},
 		isSelected(optionId) { return this.internalAnswer.includes(optionId) },
 		isOptionCorrect(optionId) {

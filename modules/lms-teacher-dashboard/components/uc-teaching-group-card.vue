@@ -197,10 +197,7 @@ export default {
 			openWindow({
 				title: "Sổ điểm Lớp học",
 				url: `/lms-teacher-gradebook?LopID=${assignment.LopID}&MonHocID=${assignment.MonHocID}`,
-				id: "WinGiaoBaiTap",
-				onclose: {
-					EXE: "vueData.initPage()"
-				}
+				id: "WinGiaoBaiTap"
 			});
 		}
 	}

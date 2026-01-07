@@ -1,7 +1,7 @@
 <template>
 	<div>
 		<v-divider></v-divider>
-		<v-list class="pt-0" style="overflow: auto; height: calc(100dvh - 213px);">
+		<v-list class="pt-0" style="overflow: auto; height: calc(100dvh - 213px); padding-bottom: 42px;">
 			<!-- Giao diện dành cho cấp 1 -->
 			<div v-if="vueData.HocSinhSelected?.CapID === 1">
 				<v-tabs id="Tab_C1" v-model="tab" align-tabs="center" grow>

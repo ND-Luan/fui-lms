@@ -158,7 +158,7 @@
 				<v-table density="comfortable">
 					<thead>
 						<tr>
-							<th>Lớp</th>
+							<th>Lớp/Học sinh</th>
 							<th>Trạng Thái</th>
 							<th>Hạn nộp</th>
 							<th>Điểm tối đa</th>

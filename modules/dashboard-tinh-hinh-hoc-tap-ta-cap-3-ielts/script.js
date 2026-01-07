@@ -26,3 +26,11 @@ function renderMonHocID() {
         vueData.MonHocID = 76
     }
 }
+async function GET_Dashboard_PhanPhoiDiem_IELTS_Boxplot_ByKhoiID(payload) {
+    const res = await new Promise((resolve, reject) => {
+        ajaxCALL('lms/Dashboard_PhanPhoiDiem_IELTS_Boxplot_ByKhoiID', payload, res => {
+            resolve(res.data)
+        })
+    })
+    return res
+}

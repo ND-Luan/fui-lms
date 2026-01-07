@@ -1,18 +1,27 @@
+let ListTab = [0, 1, 2, 4, 5, 6]
 function initPage() {
-    let bottomNavigation = 0
+    let bottomNavigation = Number(vueData.tab || 0)
+    if (!ListTab.includes(bottomNavigation)) {
+        bottomNavigation = 0
+    }
+    if ([5, 6].includes(bottomNavigation)) {
+        vueData.IsUsedLMS = true
+    }
     // let HocSinhSelected = null
     let IsLanguage = false
     let IsPassRoleParent = false
     if (window.localStorage) {
-        if (localStorage.getItem('tabBottomNavigation')) bottomNavigation = parseInt(localStorage.getItem('tabBottomNavigation'))
+        // if (localStorage.getItem('tabBottomNavigation')) bottomNavigation = parseInt(localStorage.getItem('tabBottomNavigation'))
         // if (localStorage.getItem('HocSinhSelected')) HocSinhSelected = JSON.parse(localStorage.getItem('HocSinhSelected'))
         if (localStorage.getItem('IsLanguage')) IsLanguage = Boolean(localStorage.getItem('IsLanguage'))
         if (localStorage.getItem('IsPassRoleParent')) IsPassRoleParent = Boolean(localStorage.getItem('IsPassRoleParent'))
     }
     vueData.bottomNavigation = bottomNavigation
+    console.log('vueData.bottomNavigation', vueData.bottomNavigation)
     // vueData.HocSinhSelected = HocSinhSelected
     vueData.IsLanguage = IsLanguage
     vueData.IsPassRoleParent = IsPassRoleParent
+    console.log('vueData.IsPassRoleParent', vueData.IsPassRoleParent)
 }
 function onSelectedHocSinh(item, options = { IsSelect: false }) {
     console.log('onSelectedHocSinh...')
@@ -49,27 +58,25 @@ function onSelectedHocSinh(item, options = { IsSelect: false }) {
             vueData.drawerSelectStudent = false
             vueData.drawerOnboarding = false
             setActiveComponentKey()
+            CALL('getCountThongBao')
         }
     )
 }
 function setUrlTab() {
     let url = new URL(window.location.href);
+    if (!ListTab.includes(vueData.bottomNavigation)) {
+        vueData.bottomNavigation = 0
+    }
     url.searchParams.set('tab', vueData.bottomNavigation); // Thêm tham số
     history.pushState(null, '', url); // Cập nhật URL
 }
 function setActiveComponentKey() {
     const bottomNavigation = vueData.bottomNavigation
-    console.log('bottomNavigation', bottomNavigation)
-    console.log('vueData.keyComponentUcThang', vueData.keyComponentUcThang)
-    if (bottomNavigation === 0) {
-        // if (vueData.IsPassRoleParent) CALL('getDSThang_GV')
-        // else CALL('getDSThang')
-        vueData.keyComponentUcThang++
-        console.log('vueData.keyComponentUcThang', vueData.keyComponentUcThang)
-    }
+    if (bottomNavigation === 0) vueData.keyComponentUcThang++
     else if (bottomNavigation === 1) vueData.keyComponentUcTiengAnh++
     else if (bottomNavigation === 2) vueData.keyComponentUcHocKy++
-    else if (bottomNavigation === 3) vueData.keyComponentUcTongDiemQuaTrinh++
+    else if (bottomNavigation === 3) vueData.bottomNavigation = 0
+    else if (bottomNavigation === 4) vueData.keyComponentUcThongBao++
 }
 function HandleWidth() {
     if (window.innerWidth < 960) {

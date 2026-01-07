@@ -1,73 +1,124 @@
 <template>
 	<v-container fluid class="dashboard-bg pa-3 pb-0 h-100">
-		<div class="d-flex justify-space-between align-center mb-6">
-			<div class="w-100">
-				<div class="d-flex  align-center">
-					<h1 class="dashboard-title " @click="test()">Tổng quan học tập</h1>
-					<v-spacer></v-spacer>
-					<v-menu v-model="menu" :close-on-content-click="false" location="end" v-if="isMobile">
+		<!-- Header Card -->
+		<v-card class="mb-3 overflow-visible" elevation="2">
+			<v-card-text class="pa-3">
+				<div class="d-flex align-center ga-2">
+					<div class="flex-grow-1">
+						<div class="d-flex align-center flex-wrap ga-2 mb-2">
+							<h1 class="dashboard-title" @click="test()">Tổng quan học tập</h1>
+							<!-- <v-chip color="primary" size="small"
+								@click="openWindow({title : 'Học liệu số', url: '/kham-pha?capid=' + vueData.HocSinhChiTiet?.CapID + '&khoiid=' + vueData.HocSinhChiTiet?.KhoiID})">
+								<v-icon start size="small">mdi-book-open-page-variant</v-icon>
+								Học liệu số
+							</v-chip> -->
+						</div>
+						<p class="dashboard-subtitle mb-0">
+							Chào mừng trở lại! Hãy tiếp tục hành trình học tập nhé!
+						</p>
+					</div>
+
+					<!-- Desktop: User Card -->
+					<v-card v-if="!isMobile" class="user-info-card user-card-custom d-flex align-center pa-2 px-3 ms-3"
+						elevation="0">
+						<!-- Achievement Button -->
+						<v-btn v-tooltip="'Thành tích'" color="warning" @click="onOpenAchievement()" variant="text"
+							size="small" class="me-2" icon>
+							<v-icon>mdi-trophy</v-icon>
+						</v-btn>
+						<v-divider vertical class="me-3" style="height: 40px;"></v-divider>
+						<!-- User Avatar & Info -->
+						<div class="d-flex align-center" style="max-width: 280px;">
+							<v-avatar :image="avatarStudent" class="me-3 flex-shrink-0 elevation-2" size="42"
+								style="border: 2px solid rgba(255,255,255,0.8);">
+							</v-avatar>
+							<div class="d-flex flex-column justify-center overflow-hidden">
+								<div class="d-flex align-center">
+									<span class="text-truncate font-weight-medium" style="font-size: 0.95rem;">
+										{{ studentInfoDetail.HoTen }}
+									</span>
+									<v-icon class="ms-1 flex-shrink-0" v-if="!studentInfoDetail.Nu" color="primary"
+										size="16">
+										mdi-gender-male
+									</v-icon>
+									<v-icon class="ms-1 flex-shrink-0" v-else color="pink" size="16">
+										mdi-gender-female
+									</v-icon>
+								</div>
+								<small class="text-medium-emphasis text-truncate"
+									style="display: block; font-size: 0.8rem; line-height: 1.2;">
+									{{ studentInfoDetail.TenLop }}
+									<span v-if="studentInfoDetail?.TenLopAV" class="text-primary">
+										• {{ studentInfoDetail.TenLopAV }}
+									</span>
+								</small>
+							</div>
+						</div>
+						<v-divider vertical class="mx-3" style="height: 40px;"></v-divider>
+						<!-- Logout Button -->
+						<v-btn v-tooltip="'Đăng xuất'" variant="tonal" color="error" @click="SignOut()"
+							class="flex-shrink-0" size="small">
+							<v-icon size="18" class="me-1">mdi-logout-variant</v-icon>
+						</v-btn>
+					</v-card>
+
+					<!-- Mobile: Menu Button -->
+					<v-menu v-model="menu" :close-on-content-click="false" location="bottom end" v-if="isMobile">
 						<template v-slot:activator="{ props }">
-							<v-btn icon v-bind="props">
-								<v-avatar color="brown" size="large" :image="avatarStudent">
+							<v-btn icon v-bind="props" class="ms-2">
+								<v-avatar color="brown" size="48" :image="avatarStudent">
 								</v-avatar>
 							</v-btn>
 						</template>
 
-						<v-list-item class="bg-white rounded py-3">
-							<template v-slot:prepend>
-								<v-avatar color="grey-darken-3" :image="avatarStudent">
-								</v-avatar>
-							</template>
-							<v-list-item-title class="d-flex align-center"><span>{{ studentInfoDetail.HoTen }}</span>
-								<v-icon class="ms-1" v-if="!studentInfoDetail.Nu" color="primary"
-									size="small">mdi-gender-male</v-icon>
-								<v-icon class="ms-1" size="small" v-else color="pink">mdi-gender-female</v-icon>
-							</v-list-item-title>
-							<v-list-item-subtitle>Lớp: {{ studentInfoDetail.TenLop }}
-								<span v-if="studentInfoDetail?.TenLopAV">
-									- Lớp AV: {{ studentInfoDetail.TenLopAV }}
-								</span>
-							</v-list-item-subtitle>
-						</v-list-item>
-						<v-list-item class="bg-white rounded py-3">
+						<v-card min-width="280" class="mt-2">
+							<!-- User Info Section -->
+							<v-list-item class="py-3">
+								<template v-slot:prepend>
+									<v-avatar color="grey-darken-3" :image="avatarStudent" size="48">
+									</v-avatar>
+								</template>
+								<v-list-item-title class="d-flex align-center">
+									<span>{{ studentInfoDetail.HoTen }}</span>
+									<v-icon class="ms-1" v-if="!studentInfoDetail.Nu" color="primary" size="small">
+										mdi-gender-male
+									</v-icon>
+									<v-icon class="ms-1" size="small" v-else color="pink">mdi-gender-female</v-icon>
+								</v-list-item-title>
+								<v-list-item-subtitle>
+									Lớp: {{ studentInfoDetail.TenLop }}
+									<span v-if="studentInfoDetail?.TenLopAV">
+										- Lớp AV: {{ studentInfoDetail.TenLopAV }}
+									</span>
+								</v-list-item-subtitle>
+							</v-list-item>
 
-							<v-list-item-title class="d-flex align-center">
-								<v-spacer></v-spacer><v-btn color="orange" @click="SignOut()" variant="outlined"
-									size="small"><v-icon>mdi-logout</v-icon><span>Đăng
-										xuất</span></v-btn>
-							</v-list-item-title>
+							<v-divider></v-divider>
 
-						</v-list-item>
+							<!-- Achievement Button -->
+							<v-list-item class="py-2">
+								<v-btn color="warning" @click="onOpenAchievement(); menu = false" block variant="tonal">
+									<v-icon class="me-2">mdi-trophy</v-icon>
+									<span>Thành tích</span>
+								</v-btn>
+							</v-list-item>
+
+							<!-- Logout Button -->
+							<v-list-item class="py-2">
+								<v-btn color="error" @click="SignOut()" block variant="outlined">
+									<v-icon class="me-2">mdi-logout</v-icon>
+									<span>Đăng xuất</span>
+								</v-btn>
+							</v-list-item>
+						</v-card>
 					</v-menu>
 				</div>
-
-				<p class="dashboard-subtitle">Chào mừng
-					trở lại!
-					Hãy tiếp tục hành trình học tập nhé!
-				</p>
-			</div>
-			<v-list-item v-if="!isMobile">
-				<template v-slot:append>
-					<v-avatar color="grey-darken-3" :image="avatarStudent">
-					</v-avatar>
-				</template>
-
-				<v-list-item-title class="d-flex align-center"><span>{{ studentInfoDetail.HoTen }}</span> <v-icon
-						class="ms-1" v-if="!studentInfoDetail.Nu" color="primary" size="small">mdi-gender-male</v-icon>
-					<v-icon class="ms-1" size="small" v-else color="pink">mdi-gender-female</v-icon>
-				</v-list-item-title>
-
-				<v-list-item-subtitle>Lớp: {{ studentInfoDetail.TenLop }}
-					<span v-if="studentInfoDetail?.TenLopAV">
-						- Lớp AV: {{ studentInfoDetail.TenLopAV }}
-					</span>
-				</v-list-item-subtitle>
-			</v-list-item>
-		</div>
+			</v-card-text>
+		</v-card>
 
 		<v-row>
 			<!-- --- CỘT NHIỆM VỤ CẦN LÀM (8/12) --- -->
-			<v-col cols="12" lg="8">
+			<v-col class="pb-0" cols="12" lg="8">
 				<div class="bg-white container-widget">
 					<div class="widget-header widget-header-dark-green mb-2">
 						<v-icon class="widget-icon">mdi-target</v-icon>
@@ -89,42 +140,22 @@
 				</div>
 			</v-col>
 
-			<v-col cols="12" lg="4">
+			<v-col class="pb-0" cols="12" lg="4">
 				<!-- WIDGET 2: Lịch trong tuần -->
 				<div class="container-widget">
-					<div class="widget-header widget-header-green  mb-2">
+					<div class="widget-header widget-header-green mb-2">
 						<v-icon class="widget-icon">mdi-calendar-week</v-icon>
 						<h2 class="widget-title">Nhiệm vụ trong tuần</h2>
 					</div>
 					<uc-week-calendar :tasks="weekSchedule" />
 				</div>
 			</v-col>
-
-			<!-- --- CỘT THÀNH TÍCH (4/12) --- -->
-
-			<!-- <v-col cols="12" lg="4">
-				<div class="mb-8">
-					<h2 class="text-h6 mb-3">
-						<v-icon class="mr-2" color="amber">mdi-trophy-variant</v-icon>Thành tích gần đây
-					</h2>
-
-
-					<div v-if="!achievements || achievements.length === 0"
-						class="text-center pa-5 grey--text rounded border" style="height: calc(100% - 40px);">
-						<p class="mb-0">Bạn chưa có thành tích nào. Hãy cố gắng học tập nhé!</p>
-					</div>
-
-					<div v-else class="achievement-grid-container">
-						<uc-achievement-card v-for="(item, index) in achievements" :key="index" :achievement="item" />
-					</div>
-				</div>
-			</v-col> -->
 		</v-row>
 
 		<v-row>
 			<v-col cols="12" lg="12">
 				<!-- WIDGET 3: Tiến độ học kỳ -->
-				<div class="mb-6 container-widget">
+				<div class="mb-3 container-widget">
 					<div class="widget-header widget-header-blue">
 						<v-icon class="widget-icon">mdi-chart-donut</v-icon>
 						<h2 class="widget-title">Tiến độ các môn học</h2>
@@ -137,11 +168,10 @@
 					</v-card>
 				</div>
 			</v-col>
-
 		</v-row>
 
 		<!-- WIDGET 4: Bảng tin -->
-		<div class="mb-6 container-widget">
+		<div class="mb-3 container-widget">
 			<div class="widget-header widget-header-blue">
 				<v-icon class="widget-icon">mdi-bulletin-board</v-icon>
 				<h2 class="widget-title">Hoạt động gần đây</h2>
@@ -160,6 +190,9 @@
 
 		<uc-summary-modal v-model:visible="gradeSummary.visible" :loading="gradeSummary.loading"
 			:summaryData="gradeSummary.data" @update:visible="handleCloseModal" @navigate-to-details="onViewDetails" />
+
+		<uc-achievement-card v-model:isOpen="isShowModalAchievement" :HocSinhID="userAccount.UserID">
+		</uc-achievement-card>
 	</v-container>
 </template>
 
@@ -184,7 +217,8 @@ export default {
 			NienKhoa: null,
 			studentInfoDetail: {},
 			isMobile: window.innerWidth <= 620,
-			menu: false
+			menu: false,
+			isShowModalAchievement: false
 		}
 	},
 	computed: {
@@ -225,7 +259,6 @@ export default {
 				ajaxCALL('/lms/NienKhoa_Get', null, res => {
 					if (res.data.length > 0) {
 						this.NienKhoa = res.data.filter(item => item.IsActive)[0].NienKhoa
-						console.log('this.NienKhoa', this.NienKhoa)
 						resolve()
 					} else {
 						Vue.$toast.error('Không tìm thấy niên khóa hiện hành', { position: "top" })
@@ -235,17 +268,17 @@ export default {
 		},
 		async initStudentInfoDetail() {
 			let $this = this
-			// let promise = await new Promise((resolve,reject)=> {
-
-
-			// 	resolve()
-			// })
 			await $this.getNienKhoaIsActive()
 			await $this.getInfoHocSinhByUserName()
 		},
+
 		SignOut() {
 			redirect('https://login.lhbs.vn/')
-		}
+		},
+		onOpenAchievement() {
+			this.isShowModalAchievement = true
+		},
+		openWindow
 	}
 }
 </script>

@@ -7,9 +7,10 @@
 		</v-card-title>
 		<div class="w-100 px-3 d-flex flex-column align-center justify-center border-s-xl border-primary elevation-1 mt-3 rounded-s-lg ga-2"
 			style="min-height: 100px;">
-			<div class="d-flex align-center w-100"><v-select v-model="vueData.CapID" label="Cấp" :items="CapIDArr"
+			<div class="d-flex align-center ga-2 w-100"><v-select v-model="vueData.CapID" label="Cấp" :items="CapIDArr"
 					style="max-width: 150px"></v-select>
 				<v-spacer></v-spacer>
+				<v-btn variant="text"  @click="onExportExcel()" color="green" icon="mdi-microsoft-excel"></v-btn>
 				<v-btn color="primary" @click="onSave()"
 					:disabled="vueData.DSLop.length == 0 || vueData.columnHeader == 0" :loading="isLoadingSave">Lưu chỉ
 					tiêu</v-btn>
@@ -72,7 +73,14 @@ export default {
 				this.ChiTieuGet()
 			}
 		},
-
+		'instance': function (newVal) {
+			if (newVal && Object.keys(newVal).length > 0) {
+				console.log('Instance ready:', newVal);
+				this.$nextTick(() => {
+					this.onload();
+				});
+			}
+		}
 	},
 	methods: {
 		ChiTieuGet() {
@@ -169,22 +177,22 @@ export default {
 					case 3:
 						obj[`KD_ChiTieu`] = lop.ChiTieuDatRa ?? null
 						obj[`KD_ThucTe`] = lop.ChiTieuThucTe ?? null
-						obj[`KD_SoVoiThucTe`] = lop.SoVoiThucTe ?? null
+						obj[`KD_SoVoiThucTe`] = (lop.ChiTieuThucTe - lop.ChiTieuDatRa).toFixed('2', 0) ?? null
 						break;
 					case 4:
 						obj[`D_ChiTieu`] = lop.ChiTieuDatRa ?? null
 						obj[`D_ThucTe`] = lop.ChiTieuThucTe ?? null
-						obj[`D_SoVoiThucTe`] = lop.SoVoiThucTe ?? null
+						obj[`D_SoVoiThucTe`] = (lop.ChiTieuThucTe - lop.ChiTieuDatRa).toFixed('2', 0) ?? null
 						break;
 					case 5:
 						obj[`K_ChiTieu`] = lop.ChiTieuDatRa ?? null
 						obj[`K_ThucTe`] = lop.ChiTieuThucTe ?? null
-						obj[`K_SoVoiThucTe`] = lop.SoVoiThucTe ?? null
+						obj[`K_SoVoiThucTe`] = (lop.ChiTieuThucTe - lop.ChiTieuDatRa).toFixed('2', 0) ?? null
 						break;
 					case 6:
 						obj[`T_ChiTieu`] = lop.ChiTieuDatRa ?? null
 						obj[`T_ThucTe`] = lop.ChiTieuThucTe ?? null
-						obj[`T_SoVoiThucTe`] = lop.SoVoiThucTe ?? null
+						obj[`T_SoVoiThucTe`] = (lop.ChiTieuThucTe - lop.ChiTieuDatRa).toFixed('2', 0) ?? null
 						break;
 				}
 			} else if (vueData.CapID == 3) {
@@ -192,22 +200,22 @@ export default {
 					case 10:
 						obj[`KD_ChiTieu`] = lop.ChiTieuDatRa ?? null
 						obj[`KD_ThucTe`] = lop.ChiTieuThucTe ?? null
-						obj[`KD_SoVoiThucTe`] = lop.SoVoiThucTe ?? null
+						obj[`KD_SoVoiThucTe`] = (lop.ChiTieuThucTe - lop.ChiTieuDatRa).toFixed('2', 0) ?? null
 						break;
 					case 11:
 						obj[`D_ChiTieu`] = lop.ChiTieuDatRa ?? null
 						obj[`D_ThucTe`] = lop.ChiTieuThucTe ?? null
-						obj[`D_SoVoiThucTe`] = lop.SoVoiThucTe ?? null
+						obj[`D_SoVoiThucTe`] = (lop.ChiTieuThucTe - lop.ChiTieuDatRa).toFixed('2', 0) ?? null
 						break;
 					case 12:
 						obj[`K_ChiTieu`] = lop.ChiTieuDatRa ?? null
 						obj[`K_ThucTe`] = lop.ChiTieuThucTe ?? null
-						obj[`K_SoVoiThucTe`] = lop.SoVoiThucTe ?? null
+						obj[`K_SoVoiThucTe`] = (lop.ChiTieuThucTe - lop.ChiTieuDatRa).toFixed('2', 0) ?? null
 						break;
 					case 13:
 						obj[`T_ChiTieu`] = lop.ChiTieuDatRa ?? null
 						obj[`T_ThucTe`] = lop.ChiTieuThucTe ?? null
-						obj[`T_SoVoiThucTe`] = lop.SoVoiThucTe ?? null
+						obj[`T_SoVoiThucTe`] = (lop.ChiTieuThucTe - lop.ChiTieuDatRa).toFixed('2', 0) ?? null
 						break;
 				}
 			} else {
@@ -215,17 +223,17 @@ export default {
 					case 7:
 						obj[`HT_ChiTieu`] = lop.ChiTieuDatRa ?? null
 						obj[`HT_ThucTe`] = lop.ChiTieuThucTe ?? null
-						obj[`HT_SoVoiThucTe`] = lop.SoVoiThucTe ?? null
+						obj[`HT_SoVoiThucTe`] = (lop.ChiTieuThucTe - lop.ChiTieuDatRa).toFixed('2', 0) ?? null
 						break;
 					case 8:
 						obj[`CHT_ChiTieu`] = lop.ChiTieuDatRa ?? null
 						obj[`CHT_ThucTe`] = lop.ChiTieuThucTe ?? null
-						obj[`CHT_SoVoiThucTe`] = lop.SoVoiThucTe ?? null
+						obj[`CHT_SoVoiThucTe`] = (lop.ChiTieuThucTe - lop.ChiTieuDatRa).toFixed('2', 0) ?? null
 						break;
 					case 9:
 						obj[`T_ChiTieu`] = lop.ChiTieuDatRa ?? null
 						obj[`T_ThucTe`] = lop.ChiTieuThucTe ?? null
-						obj[`T_SoVoiThucTe`] = lop.SoVoiThucTe ?? null
+						obj[`T_SoVoiThucTe`] = (lop.ChiTieuThucTe - lop.ChiTieuDatRa).toFixed('2', 0) ?? null
 						break;
 				}
 			}
@@ -243,14 +251,14 @@ export default {
 				title: "Thực",
 				align: "end",
 				type: "numeric",
-				mask: "0.00%",
+				// mask: "0.00%",
 				readOnly: true
 			}
 			let objSVTT = {
 				title: "",
 				align: "end",
 				type: "numeric",
-				mask: "0.00%",
+				// mask: "0.00%",
 				readOnly: true,
 
 			}
@@ -652,6 +660,89 @@ export default {
 				}
 			}
 			return bags
+		},
+		onload(instance) {
+			// Duyệt qua tất cả các ô
+			const data = this.instance[0].getData();
+			for (let y = 0; y < data.length; y++) {
+				for (let x = 0; x < data[y].length; x++) {
+					if (x != 0 && [3, 6, 9, 12].includes(x)) {
+						const value = parseFloat(data[y][x]);
+						console.log('value', value)
+						const cellName = jspreadsheet.helpers.getCellNameFromCoords(x, y);
+						console.log('cellName', cellName)
+						// Set từng property riêng
+						this.instance[0].setStyle(cellName, 'font-weight', 'bold', true);
+						if (value == 0) {
+							this.instance[0].setStyle(cellName, 'background-color', 'rgb(153 153 153 / 51%)', true);
+						} else if (value < 0 && value > -10) {
+							this.instance[0].setStyle(cellName, 'background-color', 'yellow', true);
+						} else if (value > 0) {
+							this.instance[0].setStyle(cellName, 'background-color', '#00800082', true);
+						} else {
+							this.instance[0].setStyle(cellName, 'background-color', '#ff0000b8', true);
+						}
+					}
+
+				}
+			}
+		},
+		onExportExcel() {
+			console.log('dataa', vueData.DSLop)
+			let data = this.handleDataExportExcel(vueData.DSLop)
+			const myHeaders = new Headers();
+			myHeaders.append("Content-Type", "application/json");
+			const requestOptions = {
+				method: "POST",
+				headers: myHeaders,
+				body: JSON.stringify({
+					Details: data
+				}),
+				redirect: "follow"
+			};
+			fetch("https://lhbs.iotsoftvn.com/api/english-generator/ta-1", requestOptions)
+				.then((response) => response.blob())
+				.then(blob => {
+					var url = window.URL.createObjectURL(blob);
+					var a = document.createElement('a');
+					a.href = url;
+					a.download = `BaoCaoTA1ChiTieu_Cap${vueData.CapID}.xlsx`
+					document.body.appendChild(a); // we need to append the element to the dom -> otherwise it will not work in firefox
+					a.click();
+					a.remove(); //afterwards we remove the element again
+				})
+				.catch((error) => {
+					console.log(error)
+				});
+		},
+		handleDataExportExcel(data) {
+			let DataExcel = []
+			for (row of data) {
+				let obj = {}
+				obj['Khoi_Lop'] = row.TenLop
+				obj['KhongDat'] = {
+					ChiTieu_Percent: row.KD_ChiTieu,
+					ThucTe_Percent: row.KD_ThucTe,
+					ThucTe_Vs_ChiTieu: row.KD_SoVoiThucTe
+				}
+				obj['Dat'] = {
+					ChiTieu_Percent: row.D_ChiTieu,
+					ThucTe_Percent: row.D_ThucTe,
+					ThucTe_Vs_ChiTieu: row.D_SoVoiThucTe
+				}
+				obj['Kha'] = {
+					ChiTieu_Percent: row.K_ChiTieu,
+					ThucTe_Percent: row.K_ThucTe,
+					ThucTe_Vs_ChiTieu: row.K_SoVoiThucTe
+				}
+				obj['Tot'] = {
+					ChiTieu_Percent: row.T_ChiTieu,
+					ThucTe_Percent: row.T_ThucTe,
+					ThucTe_Vs_ChiTieu: row.T_SoVoiThucTe
+				}
+				DataExcel.push(obj)
+			}
+			return DataExcel
 		}
 	}
 }

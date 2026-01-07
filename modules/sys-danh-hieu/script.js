@@ -7,13 +7,13 @@ function processDataBeforePushAPI() {
         }
     })
 }
-const ajaxCALLPromise = async (url, params) => {
-    return new Promise(resolve => {
-        ajaxCALL(url, params, res => {
-            resolve(res.data)
-        })
-    })
-}
+// const ajaxCALLPromise = async (url, params) => {
+//     return new Promise(resolve => {
+//         ajaxCALL(url, params, res => {
+//             resolve(res.data)
+//         })
+//     })
+// }
 function getDSDanhHieu() {
     const List_Khoi = vueData.DSKhoi.filter(x => x.CapID === vueData.CapID)
     const list_HocSinhDanhHieu = []

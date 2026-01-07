@@ -6,7 +6,7 @@
 
 	<div v-else>
 		<!-- COMPACT HEADER -->
-		<v-card class="mb-3" flat border>
+		<v-card flat border>
 			<v-card-text class="py-2">
 				<div class="d-flex align-center flex-wrap ga-2">
 					<div class="d-flex align-center ga-2">
@@ -20,7 +20,7 @@
 					<v-divider vertical class="mx-2 d-none d-md-block"></v-divider>
 
 					<div class="d-flex align-center ga-2">
-						<v-icon size="18">mdi-account</v-icon>
+						<v-icon size="18">mdi-account-outline</v-icon>
 						<span class="text-caption">
 							{{ vueData.HocSinhDetail?.HoTen }} • {{ vueData.HocSinhDetail?.TenLop }}
 						</span>
@@ -29,8 +29,8 @@
 					<v-spacer />
 
 					<!-- Hạn nộp + trạng thái -->
-					<v-chip size="x-small" :color="dueDateStatus.color" :variant="dueDateStatus.variant"
-						class="mr-1 text-white">
+					<v-chip v-if="draft?.submissionstatus === 0 || draft?.submissionstatus === 1" size="x-small"
+						:color="dueDateStatus.color" :variant="dueDateStatus.variant" class="mr-1 text-white">
 						<v-icon start size="14" :icon="dueDateStatus.icon"></v-icon>
 						{{ dueDateStatus.text }}
 					</v-chip>
@@ -50,7 +50,15 @@
 						variant="tonal" type="info">
 						{{ assignment.Instructions }}
 					</v-alert>
+
+
 				</v-expand-transition>
+				<v-expand-transition>
+					<v-alert v-if="assignment.Reason" class="mt-2" density="comfortable" variant="tonal" type="warning">
+						Lý do yêu cầu nộp lại: {{ assignment.Reason }}
+					</v-alert>
+				</v-expand-transition>
+
 			</v-card-text>
 		</v-card>
 
@@ -86,9 +94,9 @@
 
 		<v-row dense>
 			<!-- NAV -->
-			<v-col cols="12" sm="12" md="3" v-if="!isMobile" style="border-inline-end: 0.5px dashed #a7a2a2;">
+			<v-col cols="12" sm="12" md="2" v-if="!isMobile" style="border-inline-end: 0.5px dashed #a7a2a2;">
 				<v-card class="question-nav" sticky top="80px" flat>
-					<div class="d-flex justify-end mb-2" v-if="isTablet">
+					<!-- <div class="d-flex justify-end mb-2" v-if="isTablet">
 						<v-btn-toggle v-model="viewMode" color="primary" variant="outlined" density="compact" divided
 							mandatory size="x-small">
 							<v-btn value="single" size="x-small">
@@ -100,12 +108,24 @@
 								<span class="ml-1 d-none d-sm-inline">Tất cả</span>
 							</v-btn>
 						</v-btn-toggle>
-					</div>
+					</div> -->
 
 					<v-card-title class="d-flex justify-space-between align-center header-respondsive-fs py-2">
-						Cấu trúc bài tập
+						<span style="font-size: clamp(14px,2vw,16px);">Cấu trúc bài tập</span>
 						<div class="d-flex ga-2 align-center">
-							<div class="d-flex justify-end" v-if="!isTablet">
+
+							<v-btn icon size="small" @click="navCollapsed = !navCollapsed">
+								<v-icon>{{ navCollapsed ? 'mdi-chevron-down' : 'mdi-chevron-up' }}</v-icon>
+							</v-btn>
+						</div>
+					</v-card-title>
+
+					<v-divider></v-divider>
+
+					<v-expand-transition>
+						<div v-show="!navCollapsed" class="pa-2 pb-0"
+							style="max-height: calc(-185px + 100vh);overflow: auto;">
+							<div class="d-flex justify-end mb-2">
 								<v-btn-toggle v-model="viewMode" color="primary" variant="outlined" density="compact"
 									divided mandatory size="x-small">
 									<v-btn value="single" size="x-small">
@@ -118,20 +138,9 @@
 									</v-btn>
 								</v-btn-toggle>
 							</div>
-							<v-btn icon size="small" @click="navCollapsed = !navCollapsed">
-								<v-icon>{{ navCollapsed ? 'mdi-chevron-down' : 'mdi-chevron-up' }}</v-icon>
-							</v-btn>
-						</div>
-					</v-card-title>
-
-					<v-divider></v-divider>
-
-					<v-expand-transition>
-						<div v-show="!navCollapsed" class="pa-2 pb-0"
-							style="max-height: calc(-185px + 100vh);overflow: auto;">
 							<div v-for="(group, groupIndex) in assignment.groups" :key="group.id" class="mb-2">
 								<v-list-item @click="toggleGroupCollapse(groupIndex)"
-									class="group-header-item px-2 py-1" density="compact">
+									class="group-header-item px-0 py-1" density="compact">
 									<template #prepend>
 										<v-icon size="20" class="group-toggle-icon">
 											{{ groupCollapsed[groupIndex] ? 'mdi-chevron-right' : 'mdi-chevron-down' }}
@@ -147,7 +156,7 @@
 								</v-list-item>
 
 								<v-expand-transition>
-									<div v-show="!groupCollapsed[groupIndex]" class="ml-4 mt-2">
+									<div v-show="!groupCollapsed[groupIndex]" class="mt-2">
 										<div class="question-grid">
 											<v-badge v-for="(q, questionIndexInGroup) in group.questions"
 												location="top right" :color="userAnswers[q.id]?.flag ? 'red' : 'white'"
@@ -157,7 +166,7 @@
 													@click="navigateToQuestion(groupIndex, questionIndexInGroup, q.id)"
 													:color="getIconColor(q.id)"
 													:variant="isActiveQuestion(groupIndex, questionIndexInGroup) ? 'elevated' : 'tonal'"
-													class="question-btn" :size="isMobile ? 'x-small' : 'small'">
+													class="question-btn w-100" :size="isMobile ? 'x-small' : 'small'">
 													<v-icon size="16">{{ getQuestionStatusIcon(q.id) }}</v-icon>
 													{{ getGlobalQuestionNumber(groupIndex, questionIndexInGroup) }}
 												</v-btn>
@@ -172,7 +181,7 @@
 			</v-col>
 
 			<!-- CONTENT -->
-			<v-col cols="12" md="9" class="pe-0">
+			<v-col cols="12" md="10" class="pe-0">
 				<div v-if="viewMode === 'single'">
 					<!-- COMPACT PROGRESS (sticky nhỏ gọn cho chế độ single cũng được, nhưng giữ nguyên logic lưu) -->
 					<v-card class="mb-3 mx-2" flat border
@@ -188,7 +197,7 @@
 								<v-chip v-if="!isSubmitted" :color="saveStatusColor" size="small" label>
 									<v-icon start size="16">{{ saveStatusIcon }}</v-icon>{{ saveStatus }}
 								</v-chip>
-								<v-btn v-if="!isSubmitted" color="success" size="small" @click="onOpenSubmitDialog">
+								<v-btn v-if="!isSubmitted" color="success" size="small" @click="handleSubmit">
 									<v-icon start size="16">mdi-check-all</v-icon>Nộp bài
 								</v-btn>
 								<v-chip v-else color="success" size="small" label>
@@ -340,7 +349,8 @@
 										:grading="userAnswers[question.id]?.grading" :isGrade="false"
 										@answer-change="updateAnswer(question.id, $event)" :readonly="isSubmitted"
 										:submissionstatus="draft?.SubmissionStatus" :max-points="question.points"
-										:student-comment="userAnswers[question.id]?.grading?.comment || ''" />
+										:student-comment="userAnswers[question.id]?.grading?.comment || ''"
+										:is-block-copy-paste="isBlockCopyPaste" />
 								</div>
 							</v-card-text>
 
@@ -414,7 +424,8 @@
 										@answer-change="updateAnswer(currentQuestion.id, $event)"
 										:readonly="isSubmitted" :submissionstatus="draft?.SubmissionStatus"
 										:max-points="currentQuestion.points"
-										:student-comment="userAnswers[currentQuestion.id]?.grading?.comment || ''" />
+										:student-comment="userAnswers[currentQuestion.id]?.grading?.comment || ''"
+										:is-block-copy-paste="isBlockCopyPaste" />
 								</div>
 							</v-card-text>
 
@@ -431,7 +442,7 @@
 										<v-icon start size="16">{{ saveStatusIcon }}</v-icon>{{ saveStatus }}
 									</v-chip>
 
-									<v-btn v-if="!isSubmitted" color="success" size="small" @click="onOpenSubmitDialog">
+									<v-btn v-if="!isSubmitted" color="success" size="small" @click="handleSubmit">
 										<v-icon start>mdi-check-all</v-icon>Nộp bài
 									</v-btn>
 
@@ -452,7 +463,7 @@
 				<div v-else class="all-questions-mode" style="overflow: auto;"
 					:style="{ height: draft?.SubmissionStatus <= 2 ? 'calc(100vh - 70px)' : 'calc(100vh - 111px)' }">
 					<!-- COMPACT PROGRESS (All mode) -->
-					<v-card class="mb-3 mx-2" flat border style="position: sticky; top: 0px; z-index: 50;"
+					<v-card class="my-2 mx-2" flat border style="position: sticky; top: 0px; z-index: 50;"
 						v-if="draft?.SubmissionStatus !== 4 && draft?.SubmissionStatus !== 3">
 						<v-card-text class="py-2">
 							<div class="d-flex align-center flex-wrap ga-3">
@@ -465,7 +476,7 @@
 								<v-chip v-if="!isSubmitted" :color="saveStatusColor" size="small" label>
 									<v-icon start size="14">{{ saveStatusIcon }}</v-icon>{{ saveStatus }}
 								</v-chip>
-								<v-btn v-if="!isSubmitted" color="success" size="small" @click="onOpenSubmitDialog">
+								<v-btn v-if="!isSubmitted" color="success" size="small" @click="handleSubmit">
 									<v-icon start size="16">mdi-check-all</v-icon>Nộp bài
 								</v-btn>
 								<v-chip v-else color="success" label size="small">
@@ -678,7 +689,8 @@
 												@answer-change="updateAnswer(question.id, $event)"
 												:readonly="isSubmitted" :submissionstatus="draft?.SubmissionStatus"
 												:max-points="question.points"
-												:student-comment="userAnswers[question.id]?.grading?.comment || ''" />
+												:student-comment="userAnswers[question.id]?.grading?.comment || ''"
+												:is-block-copy-paste="isBlockCopyPaste" />
 										</div>
 									</v-card-text>
 								</v-card>
@@ -721,14 +733,14 @@ export default {
 			toggleTC: false,
 			fileData: {},
 			dialogImage: false,
-			_
+			_,
+			intervalDurationTime: null
 		}
 	},
 	watch: {
 		assignmentData: {
 			handler: (val) => {
 				console.log('run....', val)
-
 			},
 			deep: true,
 			// immediate: true
@@ -742,7 +754,6 @@ export default {
 		assignment() {
 			if (!this.assignmentData || !this.assignmentData[0] || !this.assignmentData[0][0]) { return null; }
 			const config = this.assignmentData[0][0];
-			console.log('config', config)
 			if (config && typeof config.AssignmentConfig === 'string' && !config.groups) {
 				try {
 					config.groups = JSON.parse(config.AssignmentConfig).groups || [];
@@ -758,8 +769,6 @@ export default {
 			if (!this.assignmentData || !this.assignmentData[1] || !this.assignmentData[1][0])
 				_data = null
 			else _data = this.assignmentData[1][0];
-
-			console.log('draft', _data)
 			return _data
 		},
 		totalQuestions() {
@@ -797,14 +806,29 @@ export default {
 		progressPercent() {
 			if (!this.totalQuestions) return 0;
 			return (this.answeredCount / this.totalQuestions) * 100;
+		},
+		isBlockCopyPaste() {
+			return this.assignment?.IsBlockCopy_Paste === true
 		}
 	},
 	mounted() {
-		console.log('Test mounted.......')
-		console.log('fisrt mounted.......')
 		window.addEventListener('resize', () => { this.ResizeWindow() })
 		this.ResizeWindow()
 		this.initializeAnswers()
+
+		// Xử lý thời gian truy cập và thời gian làm bài
+		if (this.assignmentData.length > 0) {
+			if (this.assignmentData[1][0] && ![2, 3, 4].includes(this.assignmentData[1][0].SubmissionStatus)) {
+				this.intervalDurationTime = setInterval(() => {
+					this.InsertDurationTime(this.assignmentData[1][0])
+				}, 5000);
+				this.InsertAccessTime(this.assignmentData[1][0])
+			}
+		}
+		// Thêm block copy/paste
+		if (this.isBlockCopyPaste) {
+			this.addCopyPasteBlocker();
+		}
 	},
 	methods: {
 		ResizeWindow() {
@@ -859,17 +883,18 @@ export default {
 			this.saveStatusColor = 'orange';
 			this.saveStatusIcon = 'mdi-pencil-outline';
 			if (this.autoSaveTimer) clearTimeout(this.autoSaveTimer);
-			this.autoSaveTimer = setTimeout(this.saveDraft, 2500);
+			this.autoSaveTimer = setTimeout(this.saveDraft, 500);
 		},
 		async saveDraft() {
 			if (this.isSaving || this.isSubmitted) return;
+			if (!this.assignment?.AssignToClassID && !this.assignment?.AssignToStudentID) return
 			this.isSaving = true;
 			this.saveStatus = 'Đang lưu...';
 			this.saveStatusColor = 'blue';
 			this.saveStatusIcon = 'mdi-cloud-upload-outline';
 
 			const payload = {
-				AssignToClassID: this.assignment.AssignToClassID,
+				AssignToClassID: this.assignment?.AssignToClassID ?? this.assignment?.AssignToStudentID,
 				SubmissionContent: JSON.stringify({ answers: this.userAnswers }),
 				SubmissionStatus: 1,
 				HocSinhID: vueData.HocSinhDetail.HocSinhID
@@ -912,17 +937,17 @@ export default {
 
 		initializeAnswers() {
 			// console.log('this.draft', this.draft)
-			if (this.draft) {
+			if (this.draft && this.draft.SubmissionContent) {
 				try {
 					const asmConfigString = this.assignmentData[0][0]?.AssignmentConfig
 					const asmData = JSON.parse(asmConfigString)
 					let submissionContent = {
 						answers: {}
 					}
-					if (this.draft) {
+					if (this.draft && this.draft.SubmissionContent) {
 						submissionContent = JSON.parse(this.draft?.SubmissionContent)
 					}
-					const answers = submissionContent.answers
+					const answers = submissionContent?.answers
 					asmData.groups.forEach(group => {
 						for (var question of group.questions) {
 							answers[question.id] = {
@@ -1076,7 +1101,6 @@ export default {
 			return 'mdi-flag-variant-outline'
 		},
 		handleFlag(qid) {
-			console.log(1)
 			this.userAnswers[qid].flag = !this.userAnswers[qid]?.flag
 			this.saveStatus = 'Đang soạn...';
 			this.saveStatusColor = 'orange';
@@ -1085,16 +1109,91 @@ export default {
 			this.autoSaveTimer = setTimeout(this.saveDraft, 2500);
 		},
 		showDialogImage(file) {
-			console.log('file', file)
-			if (vueData.user.UserID != '17100132') return;
 			this.dialogImage = true
 
 			this.fileData = file
+		},
+		addCopyPasteBlocker() {
+			// Block copy, cut, paste events
+			document.addEventListener('copy', this.blockCopyPaste);
+			document.addEventListener('cut', this.blockCopyPaste);
+			document.addEventListener('paste', this.blockCopyPaste);
+			document.addEventListener('contextmenu', this.blockContextMenu);
+			document.addEventListener('keydown', this.blockKeyboardShortcuts);
+		},
+
+		removeCopyPasteBlocker() {
+			document.removeEventListener('copy', this.blockCopyPaste);
+			document.removeEventListener('cut', this.blockCopyPaste);
+			document.removeEventListener('paste', this.blockCopyPaste);
+			document.removeEventListener('contextmenu', this.blockContextMenu);
+			document.removeEventListener('keydown', this.blockKeyboardShortcuts);
+		},
+		blockCopyPaste(e) {
+			// Chỉ block khi chưa submit và trong vùng làm bài
+			if (!this.isSubmitted) {
+				const target = e.target;
+				// Check nếu target là input, textarea hoặc contenteditable
+				if (target.tagName === 'INPUT' ||
+					target.tagName === 'TEXTAREA' ||
+					target.isContentEditable) {
+					e.preventDefault();
+					e.stopPropagation();
+
+					// Hiển thị thông báo (nếu có toast/snackbar)
+					Vue.$toast.warning('Không được phép sao chép/dán nội dung trong bài thi này', { position: "top" });
+				}
+			}
+		},
+
+		blockContextMenu(e) {
+			if (!this.isSubmitted) {
+				const target = e.target;
+				if (target.tagName === 'INPUT' ||
+					target.tagName === 'TEXTAREA' ||
+					target.isContentEditable) {
+					e.preventDefault();
+				}
+			}
+		},
+
+		blockKeyboardShortcuts(e) {
+			if (!this.isSubmitted) {
+				// Block Ctrl+C, Ctrl+X, Ctrl+V (Windows/Linux)
+				// Block Cmd+C, Cmd+X, Cmd+V (Mac)
+				if ((e.ctrlKey || e.metaKey) && ['c', 'x', 'v'].includes(e.key.toLowerCase())) {
+					const target = e.target;
+					if (target.tagName === 'INPUT' ||
+						target.tagName === 'TEXTAREA' ||
+						target.isContentEditable) {
+						e.preventDefault();
+						e.stopPropagation();
+
+						Vue.$toast.warning('Không được phép sử dụng phím tắt sao chép/dán', { position: "top" });
+					}
+				}
+			}
+		},
+		InsertDurationTime,
+		InsertAccessTime,
+		OnCancelIntervalDuration() {
+			clearInterval(this.intervalDurationTime)
+			this.intervalDurationTime = null
+		},
+		handleSubmit() {
+			if (this.intervalDurationTime) {
+				this.OnCancelIntervalDuration()
+			}
+			this.onOpenSubmitDialog()
 		}
 	},
 	beforeUnmount() {
 		console.log('beforeUnmount called, autoSaveTimer cleared.');
 		if (this.autoSaveTimer) clearTimeout(this.autoSaveTimer);
+		// Remove event listeners
+		if (this.isBlockCopyPaste) {
+			this.removeCopyPasteBlocker();
+		}
 	},
 	unmounted() {
 		console.log('unmounted called, autoSaveTimer cleared.');

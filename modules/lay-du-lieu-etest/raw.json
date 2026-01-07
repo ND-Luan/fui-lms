@@ -1,0 +1,1 @@
+{"data":[{"headers":[],"items":[]}],"watch":{},"controls":[{"prop":"","rows":[{"prop":"","cols":[{"el":"v-btn","attr":{"color":"primary","text":"Lấy dữ liệu từ eTest","v-on:click":"getDataEtest"},"w":12},{"el":"f-table","attr":{"label":"Dữ liệu eTest",":headers":"headers",":items":"items"}}]}]}],"set":{}}

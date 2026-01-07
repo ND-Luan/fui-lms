@@ -3,7 +3,8 @@
         {
             "dataReady": false,
             "submissionData": [],
-            "confirmPublishDialog": false
+            "confirmPublishDialog": false,
+            "AssignType": "AssignType"
         },
         {
             "EXE": "initPage()"

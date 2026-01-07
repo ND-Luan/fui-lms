@@ -1,11 +1,152 @@
 function initMaCotDiem() {
     if (vueData.CapID === 1) {
-        vueData.MaCotDiem = 'DiemCK_HK2'
-        vueData.HocKi = 'HK2'
+        vueData.MaCotDiem = 'DiemCK_' + vueData.HocKi
+        vueData.HocKi = 'HK1'
     } else {
-        vueData.MaCotDiem = 'DiemTB_CaNam'
-        vueData.HocKi = 'CaNam'
+        vueData.MaCotDiem = 'DiemTB_' + vueData.HocKi
+        vueData.HocKi = 'HK1'
     }
+}
+function initHeaders() {
+    let headers = []
+    if ([106, 43, 42, 41, 40, 38, 37, 36].includes(vueData.MonHocItem?.MonHocID)) {
+        headers = [
+            {
+                "title": "Giai đoạn",
+                "value": "Semester"
+            },
+            {
+                "title": "Khối",
+                "value": "TenKhoiHoc"
+            },
+            {
+                "title": "Tổng số học sinh",
+                "value": "TongSoHocSinh",
+                "align": "right"
+            },
+            {
+                "title": "Sao < 3",
+                "value": "SaoDuoi3"
+            },
+            {
+                "title": "Tỉ lệ sao < 3",
+                "value": "TiLeSao3"
+            },
+            {
+                "title": "Sao 3",
+                "value": "Sao3"
+            },
+            {
+                "title": "Tỉ lệ sao 3",
+                "value": "TiLeSao3"
+            },
+            {
+                "title": "Sao 4",
+                "value": "Sao4"
+            },
+            {
+                "title": "Tỉ lệ sao 4",
+                "value": "TiLeSao4"
+            },
+            {
+                "title": "Sao 5",
+                "value": "Sao5"
+            },
+            {
+                "title": "Tỉ lệ sao 5",
+                "value": "TiLeSao5"
+            }
+        ]
+    }
+    else {
+        headers = [
+            {
+                "title": "Giai đoạn",
+                "value": "Semester"
+            },
+            {
+                "title": "Khối",
+                "value": "TenKhoiHoc"
+            },
+            {
+                "title": "Tổng số học sinh",
+                "value": "TongSoHocSinh",
+                "align": "right"
+            },
+            {
+                "title": "<5",
+                "value": "DiemDuoi5",
+                "align": "right"
+            },
+            {
+                "title": "TL <5",
+                "value": "TiLeDiem5",
+                "align": "right"
+            },
+            {
+                "title": "5",
+                "value": "DiemDuoi5",
+                "align": "right"
+            },
+            {
+                "title": "TL 5",
+                "value": "TiLeDiem5",
+                "align": "right"
+            },
+            {
+                "title": "6",
+                "value": "Diem6",
+                "align": "right"
+            },
+            {
+                "title": "TL 6",
+                "value": "TiLeDiem6",
+                "align": "right"
+            },
+            {
+                "title": "7",
+                "value": "Diem7",
+                "align": "right"
+            },
+            {
+                "title": "TL 7",
+                "value": "TiLeDiem7",
+                "align": "right"
+            },
+            {
+                "title": "8",
+                "value": "Diem8",
+                "align": "right"
+            },
+            {
+                "title": "TL 8",
+                "value": "TiLeDiem8",
+                "align": "right"
+            },
+            {
+                "title": "9",
+                "value": "Diem9",
+                "align": "right"
+            },
+            {
+                "title": "TL 9",
+                "value": "TiLeDiem9",
+                "align": "right"
+            },
+            {
+                "title": "10",
+                "value": "Diem10",
+                "align": "right"
+            },
+            {
+                "title": "TL 10",
+                "value": "TiLeDiem10",
+                "align": "right"
+            }
+        ]
+    }
+    console.log('initheader')
+    vueData.headers = headers
 }
 function exportExcel() {
     const headers = vueData.columns.map(x => x.name)
@@ -20,7 +161,6 @@ function exportExcel() {
 }
 function renderHocSinh() {
     const uniqueHocSinhID = [... new Set(vueData.DSCotDiem.map(x => x.HocSinhID))]
-    console.log('uniqueHocSinhID', uniqueHocSinhID)
     const DSHocSinh = []
     for (var HocSinhID of uniqueHocSinhID) {
         const hocSinh = vueData.DSCotDiem.find(x => x.HocSinhID === HocSinhID)

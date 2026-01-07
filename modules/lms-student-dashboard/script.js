@@ -1,3 +1,9 @@
+async function HocSinh_Detail_GetBy_HocSinhID() {
+    vueData.HocSinhChiTiet = await ajaxCALLPromise("lms/HocSinh_Detail_GetBy_HocSinhID", {
+        HocSinhID: vueData.user.UserID,
+        NienKhoa: vueData.NienKhoa
+    })
+}
 function initPage() {
     ajaxCALL("lms/EL_Student_GetDashboardData", null, function (response) {
         if (response && response.data && response.data.length >= 4) {

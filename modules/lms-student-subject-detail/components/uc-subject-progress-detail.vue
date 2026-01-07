@@ -12,8 +12,8 @@
 		</div>
 
 		<div v-else>
-			<v-card class="summary-card mb-3 pa-2" variant="tonal" color="primary">
-				<v-row class="mb-3" dense>
+			<v-card class="summary-card  pa-2" variant="tonal" color="primary">
+				<v-row dense>
 					<v-col cols="12" md="12" class="d-flex align-center ga-2">
 						<v-avatar :color="stats.Color || 'grey'" :size="mobile ? 32 : 64" class="mr-4">
 							<v-icon color="white" :size="mobile ? 20 : 36">{{ stats.Icon || 'mdi-school' }}</v-icon>
@@ -25,7 +25,7 @@
 						</div>
 						<div class="progress-stats mt-4 mt-sm-0 d-flex flex-column align-center justify-center">
 							<div class="text-overline text-no-wrap">Tiến độ tổng thể</div>
-							<div class="text-h4 font-weight-bold">
+							<div class="text-h5 font-weight-bold">
 								{{ stats.CompletedResources || 0 }} / {{ stats.TotalResources || 0 }}
 							</div>
 							<v-progress-linear :model-value="completionRate" height="6" rounded color="primary"
@@ -35,12 +35,13 @@
 
 
 				</v-row>
-				<v-btn variant="tonal" prepend-icon="mdi-table-large" @click="gradebookDialogVisible = true"
-					class="mr-4">
+			</v-card>
+			<div class="d-flex justify-end my-2" v-if="groupedResources.length != 0">
+				<v-btn variant="tonal" color="primary" size="small" prepend-icon="mdi-table-large"
+					@click="gradebookDialogVisible = true">
 					Xem sổ điểm
 				</v-btn>
-			</v-card>
-
+			</div>
 			<div v-if="groupedResources.length === 0" class="text-center pa-10 border rounded">
 				<p class="text-grey">Môn học này chưa có bài giảng hoặc bài tập nào.</p>
 			</div>
@@ -64,23 +65,23 @@
 			<v-expansion-panels variant="accordion" v-model="showPanel" v-else multiple>
 				<!-- Mỗi tuần là 1 expansion panel -->
 				<v-expansion-panel v-for="weekGroup in groupedResources" :key="weekGroup.TuanHocID">
-					<v-expansion-panel-title class="week-group-header font-weight-bold text-white mb-1"
-						style="background-color: #00A651;">
-						{{ weekGroup.weekTitle }}
+					<v-expansion-panel-title class="week-group-header font-weight-bold text-white mb-1 pa-2"
+						style="background-color: #00A651;min-height: 40px !important;height: 48px;">
+						<span class="text-body-2">{{ weekGroup.weekTitle }}</span>
 						<v-spacer></v-spacer>
 						<v-chip size="small" color="orange" class="mr-4 text-white" variant="elevated">
 							Hoàn thành: {{ weekGroup.completedCount }}/{{ weekGroup.totalCount }}
 						</v-chip>
 					</v-expansion-panel-title>
 
-					<v-expansion-panel-text>
-						<div class="assignment-row rounded-lg" v-for="assignment in weekGroup.items"
-							:key="assignment.ResourceID"
+					<v-expansion-panel-text class="px-1">
+						<div class="assignment-row rounded-lg d-flex flex-column flex-sm-row"
+							v-for="assignment in weekGroup.items" :key="assignment.ResourceID"
 							:style="{ 'border-left': '7px ' + 'solid ' + getBgColor(assignment.ResourceType) }">
 							<!-- Cột thông tin bài tập -->
 							<div class="assignment-details">
 								<div class="resource-title">
-									<v-chip size="small" label variant="flat"
+									<v-chip size="x-small" label variant="flat"
 										:color="getTypeColor(assignment.ResourceType)">
 										{{ getNameType(assignment.ResourceType) }}
 									</v-chip>
@@ -98,7 +99,9 @@
 							</div>
 
 							<div class="d-flex align-center ga-2 resource-actions">
-								<v-chip :color="statusInfo(assignment).color" :class="statusInfo(assignment).color == 'orange'? 'text-white' : ''" size="small" variant="flat" label>
+								<v-chip :color="statusInfo(assignment).color"
+									:class="statusInfo(assignment).color == 'orange' ? 'text-white' : ''" size="small"
+									variant="flat" label>
 									{{ statusInfo(assignment).text }}
 								</v-chip>
 								<v-btn size="small" color="primary" variant="tonal" @click="onOpenWindow(assignment)">
@@ -209,7 +212,7 @@ export default {
 			if (item.ResourceType === 'LESSON') {
 				url = `/lms-student-lesson-viewer?AssignToClassID=${item.AssignToClassID}`
 			} else {
-				url = `/lms-student-assignment?AssignToClassID=${item.AssignToClassID}&LanNop=${item.LanNop ?? 1}`
+				url = `/lms-student-assignment?AssignToClassID=${item.AssignToClassID}&LanNop=${item.LanNop ?? 1}&Is_SendToClass=${item.Is_SendToClass}`
 			}
 			openWindow({
 				title: 'Xem lại ' + `${item.ResourceType === 'LESSON' ? 'bài học ' : 'bài tập '}` + item.Title,

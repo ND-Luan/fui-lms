@@ -7,14 +7,12 @@
 		<v-toolbar-title>Xu hướng phát triển theo khối năm học {{ vueData.NienKhoa }} -
 			{{ vueData.NienKhoa + 1 }}</v-toolbar-title>
 
-		<template v-slot:extension>
-			<div class="px-5">
-				<v-tabs v-model="KhoiID" selected-class='bg-white text-primary'>
-					<v-tab v-for="khoi in DSKhoi" :key="khoi.KhoiID" :text='khoi.TenKhoiHoc' :value="khoi.KhoiID">
-					</v-tab>
-				</v-tabs>
-			</div>
-		</template>
+		<div class="px-5">
+			<v-tabs v-model="KhoiID" selected-class='bg-white text-primary'>
+				<v-tab v-for="khoi in DSKhoi" :key="khoi.KhoiID" :text='khoi.TenKhoiHoc' :value="khoi.KhoiID">
+				</v-tab>
+			</v-tabs>
+		</div>
 	</v-toolbar>
 
 	<v-tabs-window v-model="KhoiID">

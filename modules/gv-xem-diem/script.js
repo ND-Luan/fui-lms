@@ -2,6 +2,7 @@ function isNumber(str) {
     return str.trim() !== '' && !isNaN(str);
 }
 function getDiemTheoLop_Mon_QLD() {
+    vueData.Is_Compare_LMS = false
     if (vueData.Semester.HocKi === 0) {
         getDiemTBLop_Mon()
     } else {
@@ -125,13 +126,12 @@ async function onLoadBangDiemLMS() {
         }
         newData.push(obj)
     }
-    console.log("newData", newData)
-    // for (var hocSinh of vueData.DSHocSinhQLD) {
-    //     for (var monHoc of hocSinh.DSCotDiem) {
-    //     }
-    // }
-    // console.log("data", data)
-    // console.log("DSHocSinhQLD", vueData.DSHocSinhQLD)
+    let arr = []
+    for (var hs of newData) {
+        arr.push(hs.DSCotDiem)
+    }
+    vueData.DSHocSinh_LMS = arr.flat()
+    vueData.Is_Compare_LMS = true
 }
 function fn_KeoDiem() {
     const uniqueHocSinhID = [...new Set(vueData.DSHocSinh_API_QLD.map(x => x.HocSinhID))]
@@ -142,7 +142,7 @@ function fn_KeoDiem() {
                 for (var MonHocID of uniqueTenMon) {
                     const JsonHocSinh_KeoDiem = vueData.DSHocSinh_API_QLD.filter(x => x.HocSinhID === HocSinhID && x.MonHocID === MonHocID)
                     // console.log('JsonHocSinh_KeoDiem', JsonHocSinh_KeoDiem)
-                    await promiseAjaxCALL(`lms/fn_HocSinh_KeoDiem_C${vueData.CapID}`, {
+                    await ajaxCALLPromise(`lms/fn_HocSinh_KeoDiem_C${vueData.CapID}`, {
                         JsonData: JsonHocSinh_KeoDiem
                     }).then(res => {
                         console.log('Kéo ', HocSinhID, ' - ', MonHocID, ' Thành công!')

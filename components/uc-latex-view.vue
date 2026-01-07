@@ -29,6 +29,41 @@
 			await this.setupMathJax()
 		},
 		methods: {
+			// preprocessMathML(content) {
+			// 	// Xử lý <mfenced open="{" close="}"> ... </mfenced>
+			// 	return content.replace(
+			// 		/<mfenced[^>]*open="\{"[^>]*close="\}"[^>]*>([\s\S]*?)<\/mfenced>/g,
+			// 		'<mo>{</mo><mrow>$1</mrow><mo>}</mo>'
+			// 	); 
+			// },
+			preprocessMathML(content) {
+				let result = content;
+	
+				// Lặp tối đa 10 lần để xử lý nested
+				for (let i = 0; i < 10; i++) {
+					const before = result;
+	
+					// Match bất kỳ <mfenced> nào có open="{"
+					result = result.replace(
+						/<mfenced([^>]+open="\{"[^>]*)>([\s\S]*?)<\/mfenced>/g,
+						(fullMatch, attributes, innerContent) => {
+							// Kiểm tra xem có close="}" không
+							const hasClosingBrace = /close="\}"/.test(attributes);
+	
+							if (hasClosingBrace) {
+								return `<mo>{</mo><mrow>${innerContent}</mrow><mo>}</mo>`;
+							} else {
+								return `<mo>{</mo><mrow>${innerContent}</mrow>`;
+							}
+						}
+					);
+	
+					// Nếu không còn thay đổi thì dừng
+					if (before === result) break;
+				}
+	
+				return result;
+			},
 			setupMathJax() {
 				// Đảm bảo MathJax được cấu hình đúng
 				if (!window.MathJax) {
@@ -39,6 +74,7 @@
 							inlineMath: [['$', '$'], ['\\(', '\\)']],
 							displayMath: [['$$', '$$'], ['\\[', '\\]']]
 						},
+						loader: { load: ['[mml]/mml3'] },
 						options: {
 							enableMenu: false,
 							enableExplorer: false,
@@ -58,6 +94,7 @@
 							inlineMath: [['$', '$'], ['\\(', '\\)']],
 							displayMath: [['$$', '$$'], ['\\[', '\\]']]
 						},
+						loader: { load: ['[mml]/mml3'] },
 						options: {
 							enableMenu: false,
 							enableExplorer: false,
@@ -144,6 +181,9 @@
 					this.renderedContent = ''
 					return
 				}
+	
+				// ✨ PREPROCESS MATHML TRƯỚC
+				content = this.preprocessMathML(content)
 	
 				this.renderedContent = content
 	

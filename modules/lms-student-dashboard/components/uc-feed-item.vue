@@ -15,11 +15,17 @@
 		<!-- Nút hành động chỉ hiển thị cho loại GRADED (DESKTOP)-->
 		<template v-slot:append>
 			<div v-if="feed.FeedType === 'GRADED' && !isMobile" class="d-flex align-center ga-2">
-				<v-btn size="small" variant="tonal" @click.stop="onViewSummaryClick">
+				<v-btn v-if='feed.Is_SendToClass == true' size="small" variant="tonal" @click.stop="onViewSummaryClick">
 					Xem điểm
 				</v-btn>
 				<v-btn size="small" variant="flat" color="primary" @click.stop="onViewDetailsClick">
 					Xem chi tiết
+				</v-btn>
+				<v-btn v-if="feed.Is_MaxAssigned == 0" size="small" variant="tonal" @click.stop="onResubmitAssignment">
+					Làm lại
+				</v-btn>
+				<v-btn size="small" color="primary" variant="tonal" @click.stop="onOpenLeaderboard">
+					Bảng xếp hạng
 				</v-btn>
 			</div>
 			<div v-else-if="feed.FeedType === 'SUBMITTED' && !isMobile" class="d-flex align-center ga-2">
@@ -28,16 +34,56 @@
 				</v-btn>
 			</div>
 		</template>
-		<!-- Nút hành động chỉ hiển thị cho loại GRADED (MOBILE)-->
-		<div v-if="feed.FeedType === 'GRADED' && isMobile" class="d-flex align-center ga-2 mt-2">
-			<v-btn size="small" variant="tonal" @click.stop="onViewSummaryClick">
-				Xem điểm
+
+		<!-- MOBILE: Sử dụng Menu dropdown cho GRADED -->
+		<div v-if="feed.FeedType === 'GRADED' && isMobile" class="mobile-actions-container">
+			<v-btn size="small" variant="flat" color="primary" @click.stop="onViewDetailsClick"
+				class="mobile-primary-btn">
+				<v-icon size="18" class="mr-1">mdi-eye</v-icon>
+				CHI TIẾT
 			</v-btn>
-			<v-btn size="small" variant="flat" color="primary" @click.stop="onViewDetailsClick">
-				Xem chi tiết
+
+			<v-menu location="bottom end">
+				<template v-slot:activator="{ props }">
+					<v-btn size="small" variant="tonal" v-bind="props" class="mobile-menu-btn" icon="mdi-dots-vertical">
+					</v-btn>
+				</template>
+				<v-list density="compact" class="mobile-action-menu">
+					<v-list-item v-if='feed.Is_SendToClass == true' @click="onViewSummaryClick">
+						<template v-slot:prepend>
+							<v-icon size="20">mdi-chart-box</v-icon>
+						</template>
+						<v-list-item-title>Xem điểm</v-list-item-title>
+					</v-list-item>
+
+					<v-list-item v-if="feed.Is_MaxAssigned == 0" @click="onResubmitAssignment">
+						<template v-slot:prepend>
+							<v-icon size="20">mdi-refresh</v-icon>
+						</template>
+						<v-list-item-title>Làm lại</v-list-item-title>
+					</v-list-item>
+
+					<v-list-item @click="onOpenLeaderboard">
+						<template v-slot:prepend>
+							<v-icon size="20">mdi-trophy</v-icon>
+						</template>
+						<v-list-item-title>Bảng xếp hạng</v-list-item-title>
+					</v-list-item>
+				</v-list>
+			</v-menu>
+		</div>
+
+		<!-- MOBILE: SUBMITTED -->
+		<div v-else-if="feed.FeedType === 'SUBMITTED' && isMobile" class="d-flex ga-2 mt-2">
+			<v-btn v-if="feed.Is_MaxAssigned == 0" size="small" variant="tonal" @click.stop="onResubmitAssignment"
+				block>
+				<v-icon size="18" class="mr-1">mdi-refresh</v-icon>
+				Làm lại
 			</v-btn>
 		</div>
 	</v-list-item>
+	<uc-leaderboard v-if="isOpenLeaderboard" :AssignToClassID="feed.AssignToClassID" v-model:isOpen="isOpenLeaderboard">
+	</uc-leaderboard>
 </template>
 
 <script>
@@ -57,7 +103,8 @@ export default {
 	data() {
 		return {
 			isMobile: false,
-			vueData
+			vueData,
+			isOpenLeaderboard: false
 		}
 	},
 	computed: {
@@ -133,7 +180,7 @@ export default {
 					// Chuyển đến trang xem lại bài đã nộp (chưa chấm)
 					openWindow({
 						title: `<p style="min-width: fit-content">${this.feed.Title}</p>`,
-						url: `/lms-student-assignment?AssignToClassID=${id}&LanNop=${this.feed.LanNop??1}`,
+						url: `/lms-student-assignment?AssignToClassID=${id}&LanNop=${this.feed.LanNop ?? 1}&Is_SendToClass=${this.feed.Is_SendToClass}`,
 						id: "123",
 						onclose: {
 							"EXE": "vueData.initPage()"
@@ -144,7 +191,7 @@ export default {
 					// Chuyển đến trang xem lại bài đã nộp (chưa chấm)
 					openWindow({
 						title: this.feed.Title,
-						url: `/lms-student-assignment?AssignToClassID=${id}`,
+						url: `/lms-student-assignment?AssignToClassID=${id}&Is_SendToClass=${this.feed.Is_SendToClass}`,
 						onclose: {
 							"EXE": "vueData.initPage()"
 						}
@@ -176,7 +223,7 @@ export default {
 			if (this.feed.AssignToClassID) {
 				let window = {
 					title: this.feed.Title + ` - Nộp bài lần ${this.feed.LanNop}`,
-					url: `/lms-student-assignment?AssignToClassID=${this.feed.AssignToClassID}&LanNop=${this.feed.LanNop??1}`,
+					url: `/lms-student-assignment?AssignToClassID=${this.feed.AssignToClassID}&LanNop=${this.feed.LanNop ?? 1}&Is_SendToClass=${this.feed.Is_SendToClass}`,
 					id: '12333',
 					onclose: {
 						"EXE": "vueData.initPage()"
@@ -218,6 +265,9 @@ export default {
 		},
 		ResizeWindow() {
 			this.isMobile = window.innerWidth < 960
+		},
+		onOpenLeaderboard() {
+			this.isOpenLeaderboard = true
 		}
 	}
 }

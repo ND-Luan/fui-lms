@@ -8,17 +8,13 @@
 			<v-expansion-panel v-for="(khoi, index) in DSKhoi" :key="khoi.id">
 				<v-expansion-panel-title>
 					<div class="d-flex align-center">
-						<v-icon 
-							:color="getIconColor(index)" 
-							class="mr-3" 
-							size="large"
-						>
+						<v-icon :color="getIconColor(index)" class="mr-3" size="large">
 							{{ getIcon(khoi.name, index) }}
 						</v-icon>
 						{{ khoi.name }}
 					</div>
 				</v-expansion-panel-title>
-				<v-expansion-panel-text style="height: 600px; overflow:auto">
+				<v-expansion-panel-text style="min-height: calc(100dvh - 190px); overflow:auto !important">
 					<v-card class="pa-2">
 						<v-row>
 							<v-col v-for="sach in DSHocLieu" :key="sach.HocLieuID" cols="12" sm="4" md="2" lg="2">
@@ -44,10 +40,21 @@
 				DSHocLieu: []
 			}
 		},
-		mounted() { },
+		mounted() {
+			//mở expand để gọi vô watch
+			this.panel = [0]
+		},
 		computed: {
-			DSKhoi: function () {
-				return vueData.DSKhoi_Init.filter(x => x.CapID === vueData.CapID)
+			DSKhoi() {
+				// Nếu KhoiID null / undefined / 0 ⇒ lấy tất cả khối theo cấp
+				if (!vueData.KhoiID) {
+					return vueData.DSKhoi_Init.filter(x => x.CapID === vueData.CapID)
+				}
+	
+				// Ngược lại ⇒ lọc theo CapID + KhoiID
+				return vueData.DSKhoi_Init.filter(
+					x => x.CapID === vueData.CapID && x.id === vueData.KhoiID
+				)
 			},
 			TenCap: function () {
 				let text = ''
@@ -59,23 +66,20 @@
 		},
 		watch: {
 			panel: function (panel) {
-				console.log('panel', panel)
-				if (panel !== undefined) {
-					this.isLoading = true
-					const khoi = this.DSKhoi[panel]
-					console.log('khoi', khoi)
-					ajaxCALL('lms/FP_HocLieu_GetAll', {
-						PageNumber: 1,
-						PageSize: 100,
-						KhoiID: khoi.id,
-						MonHocID: 0,
-						BoSachID: 0,
-					}, res => {
-						this.DSHocLieu = res.data
-						console.log('res', res.data)
-						this.isLoading = false
-					})
-				}
+				if (panel === undefined) return
+				this.isLoading = true
+				const khoi = this.DSKhoi[panel]
+				ajaxCALL('lms/FP_HocLieu_GetAll', {
+					PageNumber: 1,
+					PageSize: 100,
+					KhoiID: khoi.id,
+					MonHocID: 0,
+					BoSachID: 0,
+				}, res => {
+					this.DSHocLieu = res.data
+					this.isLoading = false
+				})
+	
 			}
 		},
 		methods: {
@@ -83,7 +87,7 @@
 				// Icons dựa trên tên khối/môn
 				const iconMap = {
 					'Khối 1': 'mdi-numeric-1-circle',
-					'Khối 2': 'mdi-numeric-2-circle', 
+					'Khối 2': 'mdi-numeric-2-circle',
 					'Khối 3': 'mdi-numeric-3-circle',
 					'Khối 4': 'mdi-numeric-4-circle',
 					'Khối 5': 'mdi-numeric-5-circle',
@@ -107,12 +111,12 @@
 					'GDQP': 'mdi-shield-star',
 					'Hoạt động trải nghiệm, hướng nghiệp': 'mdi-compass'
 				}
-				
+	
 				// Nếu có icon cụ thể thì dùng, không thì dùng icon dự phòng
 				if (iconMap[name]) {
 					return iconMap[name]
 				}
-				
+	
 				// Icons dự phòng
 				const fallbacks = [
 					'mdi-bookmark', 'mdi-star', 'mdi-heart', 'mdi-diamond', 'mdi-crown',
@@ -120,7 +124,7 @@
 				]
 				return fallbacks[index % fallbacks.length]
 			},
-			
+	
 			getIconColor(index) {
 				// Màu tương ứng với từng panel
 				const colors = [

@@ -59,6 +59,9 @@
 				<template #item.HoTen="{ item }">
 					<div class="font-weight-medium text-secondary">{{ item.HoTen }}</div>
 				</template>
+				<template #item.SoDanhBo="{ item }">
+					<div class="font-weight-medium text-secondary">{{ item.SoDanhBo ?? item.SoTT }}</div>
+				</template>
 				<template #item.Status="{ item }">
 					<v-chip :color="statusColors[item.Status]" size="small" variant="flat" class="font-weight-medium">
 						{{ statusTexts[item.Status] }}
@@ -141,6 +144,7 @@ export default {
 		},
 		completionRate() {
 			if (!this.stats.TotalStudents || this.stats.TotalStudents === 0) return 0;
+			console.log("stats", this.stats)
 			return ((this.stats.LearnedCount || 0) / this.stats.TotalStudents) * 100;
 		},
 		completionColor() {
@@ -196,9 +200,7 @@ export default {
 
 		async fetchstudentLearning(assignToClassID) {
 			vueData.loading = true;
-			await ajaxCALL("lms/EL_Teacher_GetLearning_ProgressByStudent", { AssignToClassID: assignToClassID }, (res) => {
-				this.studentLearning = res.data || [];
-			});
+			this.studentLearning = await ajaxCALLPromise("lms/EL_Teacher_GetLearning_ProgressByStudent", { AssignToClassID: assignToClassID })
 			vueData.loading = false;
 		},
 		getScoreColor(score) {

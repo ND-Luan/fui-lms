@@ -4,13 +4,19 @@
 		<!-- NAVBAR -->
 		<v-toolbar border density="compact" class="bg-white border-sm" style="position: sticky;top: 0; z-index: 50;">
 			<template #title>
-				<span class="text-h5">{{$t('message.ControlPanel')}}</span>
+				<span class="text-h5">{{ $t('message.ControlPanel') }}</span>
+				<v-btn class="ms-3" v-if="vueData.user.UserID == 'NA0000022'" @click="onHandleOpenChangeGV">Chọn
+					GV</v-btn>
+
 			</template>
 			<template #append>
-				<v-btn @click="OpenMyLiberies()">
-					<v-icon class="me-1 text-h6">mdi-library-shelves</v-icon> {{$t('message.MyDocument')}}
+				<v-btn @click="OpenDashboard()">
+					<v-icon class="me-1 text-h6">mdi-blinds-horizontal-closed</v-icon>{{ $t('message.Statistical') }}
 				</v-btn>
-				<v-btn-toggle v-model="toggle" color="primary" size="small" v-if="vueData.user.UserID == 'NA0000022'">
+				<v-btn @click="OpenMyLiberies()">
+					<v-icon class="me-1 text-h6">mdi-library-shelves</v-icon> {{ $t('message.MyDocument') }}
+				</v-btn>
+				<v-btn-toggle v-model="toggle" color="primary" size="small">
 					<v-btn :value="false" :disabled="!toggle">
 						<v-img src="/_cdn/lhbs-lms/img_page_ph/icon_vietnam.png" width="30" />
 					</v-btn>
@@ -21,56 +27,58 @@
 			</template>
 		</v-toolbar>
 		<!-- CONTENT -->
-		<div class=" d-flex flex-column px-2">
+		<div class="d-flex flex-column px-2">
 			<!-- BÀI TẬP CẦN CHẤM -->
-			<div class=" flex-1-0 mb-2 rounded bg-white ">
-				<v-expansion-panels variant="accordion" v-model="assignmentNeedGradingPanel" multiple>
+			<div class="flex-1-0 mb-2 rounded bg-white">
+				<v-expansion-panels v-model="assignmentNeedGradingPanel" svariant="accordion" multiple>
 					<v-expansion-panel>
 						<v-expansion-panel-title class="d-flex pa-2">
-							<span class="text-body-1 font-weight-medium">{{$t('message.AssignmentsToGrade')}}</span>
+							<span class="text-body-1 font-weight-medium">{{ $t('message.AssignmentsToGrade') }}</span>
 							<v-spacer></v-spacer>
-							<v-chip color="warning" size="small" class="font-weight-medium"
-								v-if="focusTasks.length > 0">{{$t('message.AssignmentsToGrade')}}: {{
-									focusTasks.length }}</v-chip>
 						</v-expansion-panel-title>
 
 						<v-expansion-panel-text class="py-1">
-							<div v-if="!focusTasks || focusTasks.length === 0"
-								class="text-center pa-5 grey--text rounded border mx-3">
-								<p class="mb-0">{{$t('message.NoAssignmentToGrade')}}</p>
-							</div>
-							<v-row v-else class="pa-1" dense>
-								<v-col v-for="task in focusTasks" :key="task.AssignToClassID" cols="12" lg="3" md="6">
-									<uc-teacher-focus-card :task="task" />
+							<v-row>
+								<v-col cols="12" class="d-flex justify-space-between ga-2">
+									<div style="max-width: 400px;">
+
+									</div>
 								</v-col>
 							</v-row>
+							<uc-focus-task />
 						</v-expansion-panel-text>
 					</v-expansion-panel>
 				</v-expansion-panels>
 			</div>
 
 			<!-- MÔN HỌC CỦA TÔI -->
-			<div class=" flex-1-0 w-100  bg-white rounded" v-for="MonHocName in DSMonHocActive">
+			<div class="flex-1-0 w-100  bg-white rounded" v-for="mh in DSMonHocActive">
 				<v-card>
 					<v-toolbar color="white">
 						<v-toolbar-title style="margin-right: 20px;">
 							<div class="d-flex w-100">
-								<span class="text-h6 text-primary font-weight-medium">Môn học: {{
-									teachingGroups.filter(item => item.MonHocName == MonHocName)[0]?.MonHocName ??
-									'unknow'}}</span>
+								<span class="text-primary font-weight-medium" style="font-size: 16px !important">{{
+									$t('message.Subject') }}: {{
+										$i18n.locale == 'en' &&
+											teachingGroups.filter(item => item.MonHocName == mh.MonHocName)[0]?.MonHocName ==
+											'Ngoại ngữ' ?
+											'English' : teachingGroups.filter(item =>
+												item.MonHocName == mh.MonHocName)[0]?.MonHocName}}</span>
 								<v-spacer></v-spacer>
 
 								<v-menu transition="slide-y-transition">
 									<template v-slot:activator="{ props }">
 										<v-btn color="primary" variant="tonal" size="small"
-											v-bind="props"><v-icon>mdi-plus</v-icon>{{$t('message.CreateContent')}}</v-btn>
+											v-bind="props"><v-icon>mdi-plus</v-icon>{{ $t('message.CreateContent')
+											}}</v-btn>
 									</template>
 									<v-list>
 										<v-list-item
-											v-for="KhoiItem in teachingGroups.filter(item => item.MonHocName == MonHocName)"
+											v-for="KhoiItem in teachingGroups.filter(item => item.MonHocName == mh.MonHocName)"
 											:value="KhoiItem.KhoiID" :key="KhoiItem.KhoiID"
 											@click="OpenModalAddNoiDung(KhoiItem)">
-											<v-list-item-title>{{ KhoiItem.TenKhoiHoc }}</v-list-item-title>
+											<v-list-item-title>{{ $t('message.Grade') }} {{ KhoiItem.KhoiID
+											}}</v-list-item-title>
 										</v-list-item>
 									</v-list>
 								</v-menu>
@@ -79,19 +87,20 @@
 						<template v-slot:extension>
 							<div class="d-flex flex-column w-100">
 								<v-divider></v-divider>
-								<v-tabs v-model="activeTab" bg-color="transparent" class="mb-1">
+								<v-tabs v-model="mh.activeTab" bg-color="transparent" class="mb-1">
 									<v-tab
-										v-for="KhoiItem in teachingGroups.filter(item => item.MonHocName == MonHocName)"
-										:value="KhoiItem.KhoiID" :key="KhoiItem.KhoiID">{{ KhoiItem.TenKhoiHoc
-										}}</v-tab>
+										v-for="KhoiItem in teachingGroups.filter(item => item.MonHocName == mh.MonHocName && item.weeks.length > 0)"
+										:value="KhoiItem.KhoiID" :key="KhoiItem.KhoiID">{{ $t('message.Grade') }} {{
+											KhoiItem.KhoiID }}
+									</v-tab>
 								</v-tabs>
 							</div>
 						</template>
 					</v-toolbar>
 
-					<v-tabs-window v-model="activeTab">
+					<v-tabs-window v-model="mh.activeTab">
 						<v-tabs-window-item
-							v-for="(KhoiItem, index) in teachingGroups.filter(item => item.MonHocName == MonHocName)"
+							v-for="(KhoiItem, index) in teachingGroups.filter(item => item.MonHocName == mh.MonHocName)"
 							:value="KhoiItem.KhoiID" :key="KhoiItem.KhoiID">
 							<v-card>
 								<v-card-text class="pa-2">
@@ -99,7 +108,9 @@
 										<v-col cols="12" md="12">
 											<v-expansion-panels variant="popout"
 												:model-value="KhoiItem.weeks?.map((k, index) => index)" multiple>
-												<p v-if="KhoiItem.weeks.length == 0">{{ $t('message.EmptyLessonAndAssignment') }}</p>
+												<p v-if="KhoiItem.weeks.length == 0">{{
+													$t('message.EmptyLessonAndAssignment')
+												}}</p>
 												<!-- Mỗi tuần là 1 expansion panel -->
 												<v-expansion-panel v-for="week in KhoiItem.weeks" :key="week.TuanHocID"
 													:model-value="KhoiItem.weeks?.map((k, index) => index)" multiple>
@@ -111,47 +122,61 @@
 														<v-expansion-panels
 															:model-value="week.classes.map((k, index) => index)"
 															multiple>
-															<v-expansion-panel v-for="classItem in week.classes"
+															<v-expansion-panel
+																v-for="classItem in week.classes.sort((a, b) => b.LopID - a.LopID)"
 																:key="classItem.LopID" class="mb-1">
-																<v-expansion-panel-title
-																	style="background-color: #f1f1f1;"
-																	class="px-3 py-0">
-																	<div class="class-row-header">
-																		<div class="class-info">
-																			<div class="class-name">{{ classItem.TenLop
-																			}}</div>
-																			<div class="class-meta mt-2">
-																				<span>
-																					{{ $t('message.ClassSize') }}: {{ classItem.StudentCount }}
-																					{{ $t('message.Students') }}</span>
-																				<span class="pending-tag"
-																					v-if="getPendingCount(classItem) > 0 && classItem.ResourceType == 'ASSIGNMENT'">
-																					<v-icon size="small"
-																						class="mr-1">mdi-alert-circle</v-icon>
-																					{{ getPendingCount(classItem) }} {{ $t('message.NeedGrade') }}
-																				</span>
+																<div v-if="classItem.LopID != -1">
+																	<v-expansion-panel-title
+																		style="background-color: #f1f1f1;"
+																		class="px-3 py-0">
+																		<div class="class-row-header">
+																			<div class="class-info">
+																				<div class="class-name">{{
+																					classItem.TenLop
+																				}}</div>
+																				<div class="class-meta mt-2">
+																					<span>
+																						{{ $t('message.ClassSize') }}:
+																						{{
+																							classItem.StudentCount }}
+																						{{ $t('message.Students')
+																						}}</span>
+																					<span class="pending-tag"
+																						v-if="getPendingCount(classItem) > 0 && classItem.ResourceType == 'ASSIGNMENT'">
+																						<v-icon size="small"
+																							class="mr-1">mdi-alert-circle</v-icon>
+																						{{ getPendingCount(classItem) }}
+																						{{
+																							$t('message.NeedGrade') }}
+																					</span>
+																				</div>
+																			</div>
+																			<div class="class-actions">
+																				<v-btn size="small" variant="tonal"
+																					color="purple"
+																					:text="$t('message.ViewGradebook')"
+																					@click.stop="xemTinhTrang(classItem)" />
 																			</div>
 																		</div>
-																		<div class="class-actions">
-																			<v-btn size="small" variant="tonal"
-																				color="purple" :text="$t('message.ViewGradebook')"
-																				@click.stop="xemTinhTrang(classItem)" />
+																	</v-expansion-panel-title>
+																	<v-expansion-panel-text class="pt-1">
+																		<div class="rounded">
+																			<uc-assignment-status-row
+																				v-for="assignment in classItem.assignments"
+																				:key="assignment.AssignToClassID"
+																				:assignment="assignment" />
 																		</div>
-																	</div>
-																</v-expansion-panel-title>
-
-																<v-expansion-panel-text class="pt-1">
-																	<div class="rounded">
-																		<uc-assignment-status-row
-																			v-for="assignment in classItem.assignments"
-																			:key="assignment.AssignToClassID"
-																			:assignment="assignment" />
-																	</div>
-																	<div class="text-center text-grey pa-2"
-																		v-if="classItem.assignments.length === 0">
-																		{{$t('message.ClassNotAssigned')}}
-																	</div>
-																</v-expansion-panel-text>
+																		<div class="text-center text-grey pa-2"
+																			v-if="classItem.assignments.length === 0">
+																			{{ $t('message.ClassNotAssigned') }}
+																		</div>
+																	</v-expansion-panel-text>
+																</div>
+																<div v-else>
+																	<v-divider class="my-2"></v-divider>
+																	<uc-assignment-status-row-assign-to-student
+																		:assignment="classItem.assignments.reduce((result, item) => result.AssignToStudentID > item.AssignToStudentID ? result : item)" />
+																</div>
 															</v-expansion-panel>
 														</v-expansion-panels>
 													</v-expansion-panel-text>
@@ -166,15 +191,15 @@
 				</v-card>
 			</div>
 			<v-empty-state icon="mdi-magnify" v-if="DSMonHocActive.length == 0" class="border elevation-2"
-				:text="$t('message.ContactDev')"
-				:title="$t('message.NotFoundSubject')">
+				:text="$t('message.ContactDev')" :title="$t('message.NotFoundSubject')">
 			</v-empty-state>
 		</div>
 		<uc-btn-with-dialog-add-bt v-model:isOpen="isShowModalAddNoiDung" v-if="isShowModalAddNoiDung" :KhoiItem />
 		<uc-my-liberies v-model:isOpen="isShowMyLiberies" :DSMonHocActive :teachingGroups v-if="isShowMyLiberies"
 			v-model:contentLibrary="contentLibrary" @CreateContent="(item) => { this.OpenModalAddNoiDung(item) }" />
-
-
+		<uc-change-user v-if="isShowModalChangeUser" v-model:isOpen="isShowModalChangeUser"
+			:giaovienid="vueData.GiaoVienID_Selected" />
+		<!-- <uc-focus-task v-if="isShowModalFocusTask" v-model:isOpen="isShowModalFocusTask"></uc-focus-task> -->
 	</div>
 </template>
 
@@ -185,6 +210,7 @@ export default {
 		const toggle = JSON.parse(localStorage.getItem('IsLanguage')) ?? false
 		this.$i18n.locale = toggle ? "en" : "vi"
 		return {
+			isShowModalChangeUser: false,
 			activeTab: 'classes', x: null, vueData,
 			isShowModalAddNoiDung: false,
 			DSMonHocActive: [],
@@ -196,8 +222,22 @@ export default {
 			isOpen: false,
 			url: '',
 			toggle,
-			text: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.'
-		
+			filterStatus: [],
+			statuses: {
+				'PENDING_GRADING': { color: 'warning', icon: 'mdi-file-clock-outline', iconColor: '#fb8c00', text: this.$i18n.locale == 'en' ? 'Need Grade' : 'Cần chấm', cardClass: 'warning' },
+				'OVERDUE': { color: 'error', icon: 'mdi-calendar-remove', iconColor: '#f44336', text: this.$i18n.locale == 'en' ? 'Over Due' : 'Quá hạn', cardClass: 'urgent' },
+				'UPCOMING': { color: 'primary', icon: 'mdi-calendar-arrow-right', iconColor: '#1976d2', text: this.$i18n.locale == 'en' ? 'Coming' : 'Sắp tới', cardClass: 'primary' }
+			},
+			filterArray: [
+				{ title: this.$i18n.locale == 'en' ? 'Need Grade' : 'Cần chấm', value: 'PENDING_GRADING' },
+				{ title: this.$i18n.locale == 'en' ? 'Over Due' : 'Quá hạn', value: 'OVERDUE' },
+				{ title: this.$i18n.locale == 'en' ? 'Coming' : 'Sắp tới', value: 'UPCOMING' }
+			],
+			KhoiFilter: null,
+			LopFilter: null,
+			page: 1,
+			pageSize: 10,
+			isShowModalFocusTask: false
 		}
 	},
 	emits: ['view-class', 'grade-class', 'create-assignment'],
@@ -207,6 +247,54 @@ export default {
 		schedule: Array,
 		activities: Array,
 		contentLibrary: Array,
+	},
+	computed: {
+		focusTaskFiltered() {
+			return this.focusTasks.concat(vueData.focusTasks_student).filter(task => {
+				// 1. Filter theo trạng thái (nhiều trạng thái)
+				if (this.filterStatus.length > 0 && !this.filterStatus.includes(task.Status)) {
+					return false
+				}
+
+				// 2. Filter theo Khối
+				if (this.KhoiFilter && this.KhoiFilter != -1 && task.KhoiID !== this.KhoiFilter) {
+					return false
+				}
+
+				// 3. Filter theo Lớp
+				if (this.LopFilter && task.LopID !== this.LopFilter) {
+					return false
+				}
+
+				return true
+			});
+		},
+		DSKhoi() {
+			return this.focusTasks.reduce((acc, task) => {
+				if (task.KhoiID && !acc.some(x => x.value === task.KhoiID)) {
+					acc.push({ title: 'Khối ' + task.KhoiID, value: task.KhoiID });
+				}
+				return acc;
+			}, [{ title: 'Tất cả', value: -1 }]);
+		},
+		DSLop() {
+			return this.focusTasks.reduce((acc, task) => {
+				if (task.LopID && !acc.some(x => x.value === task.LopID)) {
+					acc.push({ title: task.TenLopHoacNhom, value: task.LopID, KhoiID: task.KhoiID });
+				}
+				return acc;
+			}, []).filter(item => {
+				if (!this.KhoiFilter) return true;
+				return this.KhoiFilter == -1 ? true : item.KhoiID == this.KhoiFilter;
+			});
+		},
+		pagedItems() {
+			const start = (this.page - 1) * this.pageSize;
+			return this.focusTaskFiltered.slice(start, start + this.focusTaskFiltered.length);
+		},
+		totalPages() {
+			return Math.ceil(this.focusTaskFiltered.length / this.focusTaskFiltered.length)
+		}
 	},
 	watch: {
 		activeTab: function (newVal) {
@@ -219,17 +307,36 @@ export default {
 			console.log('contentLibrary changed', newVal)
 		},
 		toggle: function (val) {
-			if (val) this.$i18n.locale = 'en';
-			else this.$i18n.locale = 'vi';
 			localStorage.setItem('IsLanguage', val)
+			if (val) {
+				this.$i18n.locale = 'en'
+			}
+			else this.$i18n.locale = 'vi';
+		},
+		KhoiFilter: function (val) {
+			if (val) {
+				this.LopFilter = null
+				this.filterStatus = []
+			}
+		},
+		LopFilter: function (val) {
+			if (val) {
+				this.filterStatus = []
+			}
 		}
+
 	},
 	created() {
 		if (this.focusTasks && this.focusTasks.length > 0) {
-			this.assignmentNeedGradingPanel = [0]
+			// this.assignmentNeedGradingPanel = [0]
+			let countMaxItemOfStatus = {
+				'PENDING_GRADING': 0,
+				'OVERDUE': 0,
+				'UPCOMING': 0
+			}
 		}
 		console.log('this.teachingGroups', this.teachingGroups)
-		this.DSMonHocActive = [...new Set(this.teachingGroups.map(item => item.MonHocName))];
+		this.DSMonHocActive = [...new Set(this.teachingGroups.map(item => item.MonHocName))].map(mh => ({ MonHocName: mh, activeTab: this.teachingGroups.filter(item => item.MonHocName == mh)[0].KhoiID }));
 	},
 	mounted() {
 		if (this.teachingGroups && this.teachingGroups.length > 0) {
@@ -260,7 +367,19 @@ export default {
 		OpenMyLiberies() {
 			this.isShowMyLiberies = true;
 		},
-
+		OpenDashboard() {
+			openWindow({
+				url: '/lms-teacher-theo-doi-hoc-tap',
+				title: 'Theo dõi học tập'
+			})
+		},
+		onHandleOpenChangeGV() {
+			console.log('this.isShowModalChangeUser', this.isShowModalChangeUser)
+			this.isShowModalChangeUser = true
+		},
+		TestUIFocusTask() {
+			this.isShowModalFocusTask = true
+		}
 	}
 }
 </script>

@@ -4,7 +4,7 @@
 			<template #prepend>
 				<v-icon size="small">mdi-library-shelves</v-icon>
 			</template>
-			<span class="text-subtitle-1 font-weight-bold">Tài liệu của tôi</span>
+			<span class="text-subtitle-1 font-weight-bold">{{ $t('message.MyDocument') }}</span>
 			<template v-slot:append>
 				<v-btn icon @click="CloseLiberies">
 					<v-icon>mdi-close</v-icon>
@@ -14,48 +14,55 @@
 		<v-divider></v-divider>
 
 		<div class="pa-2 " style="display: flex;flex-direction: row; flex-wrap: wrap; gap: 4px;">
-			<span class="text-subtitle-1 font-weight-medium">Danh sách môn học: </span><br>
-			<v-btn v-for="(item, index) in DSMonHoc" :key="index" size="small" :value="item" variant="tonal"
-				active-color="green" @click="getLiberies(item)" :active="item === selected" color="blue-grey">
-				<span class="text-subtitle-2" style="font-size: .775rem !important;">{{ item }}</span>
+			<span class="text-subtitle-1 font-weight-medium">{{ $t('message.ListSubjects') }}: </span><br>
+			<v-btn v-for="(item, index) in DSMonHoc" :key="index" size="small" :value="item.MonHocName" variant="tonal"
+				active-color="green" @click="getLiberies(item)" :active="item.MonHocName === selected.MonHocName" color="blue-grey">
+				<span class="text-subtitle-2" style="font-size: .775rem !important;">{{ item.MonHocName == 'Ngoại ngữ' ?
+					($i18n.locale ==
+						'en' ? 'English' : item.MonHocName) : item.MonHocName }}</span>
 			</v-btn>
-			<span v-if="DSMonHoc && DSMonHoc.length == 0" class="text-red text-caption">Thầy/Cô chưa được phân công dạy
-				môn học
-				nào!</span>
+			<span v-if="DSMonHoc && DSMonHoc.length == 0" class="text-red text-caption">{{ $t('message.NotFoundSubject')
+			}}</span>
 		</div>
 		<v-divider></v-divider>
 		<div class="pa-2 d-flex ga-2" v-if="DSMonHoc.length > 0">
 			<v-spacer></v-spacer>
-			<v-btn color="pink" variant="tonal" size="small" @click="onOpenKhoNoiDung()" v-tooltip="'Kho nội dung'">
+			<v-btn color="pink" variant="tonal" size="small" @click="onOpenKhoNoiDung()"
+				v-tooltip="$i18n.locale == 'en' ? 'Content Library' : 'Kho nội dung'">
 				<v-icon>mdi-archive-outline</v-icon>
-				<span class="text-subtitle-2" style="font-size: .775rem !important;">Kho nội dung</span>
+				<span class="text-subtitle-2" style="font-size: .775rem !important;">
+					{{ $t('message.ContentLibrary') }}
+				</span>
 			</v-btn>
 			<v-menu transition="slide-y-transition">
 				<template v-slot:activator="{ props }">
 					<v-btn color="primary" variant="tonal" size="small" v-bind="props" v-tooltip="tooltipCreateContent">
 						<v-icon>mdi-plus</v-icon>
-						<span class="text-subtitle-2" style="font-size: .775rem !important;">Tạo nội dung</span>
+						<span class="text-subtitle-2" style="font-size: .775rem !important;">{{
+							$t('message.CreateContent') }}</span>
 					</v-btn>
 				</template>
 				<v-list>
-					<v-list-item v-for="KhoiItem in teachingGroups.filter(item => item.MonHocName == selected)"
+					<v-list-item v-for="KhoiItem in teachingGroups.filter(item => item.MonHocName == selected.MonHocName)"
 						:value="KhoiItem.KhoiID" :key="KhoiItem.KhoiID" @click="OpenModalAddNoiDung(KhoiItem)">
-						<v-list-item-title>{{ KhoiItem.TenKhoiHoc }}</v-list-item-title>
+						<v-list-item-title>{{ $t('message.Grade') }} {{ KhoiItem.KhoiID }}</v-list-item-title>
 					</v-list-item>
 				</v-list>
 			</v-menu>
 		</div>
 		<v-divider></v-divider>
 		<div class="d-flex flex-column ga-2  overflow-y">
-			<div v-for="KhoiItem in contentLibrary.filter(khoi => khoi.MonHocName == selected)"
+			<div v-for="KhoiItem in contentLibrary.filter(khoi => khoi.MonHocName == selected.MonHocName)"
 				class="bg-grey-lighten-4 pa-2">
-				<span class="text-subtitle-1 font-weight-medium">{{ KhoiItem.TenKhoi }}</span>
+				<span class="text-subtitle-1 font-weight-medium">{{ $t('message.Grade') }} {{ KhoiItem.KhoiID }}</span>
 				<v-expansion-panels :model-value="KhoiItem.weeks.map((e, index) => { return index })"
 					variant="accordion" multiple class="border-t pt-1">
 					<v-expansion-panel v-for="(week, index) in KhoiItem.weeks" :key="index"
 						class="mb-1 custom-panel-liberies">
-						<v-expansion-panel-title class="text-body-2 text-white"
+						<v-expansion-panel-title class="text-body-2 text-white "
 							style="background-color: #00A651; min-height: 30px !important ; height: 30px;">
+							<div>
+							</div>
 							{{ week.title }}
 						</v-expansion-panel-title>
 
@@ -68,13 +75,15 @@
 									{{ itemInfo(item).icon }}
 								</v-icon>
 								<div class="item-details">
-									<div class="item-title text-wrap break-words"
+									<div class="item-title text-wrap break-words three-lines"
 										style="font-weight: 500; font-size: 0.875rem !important;">
 										{{ item.Title }}
 									</div>
 									<div v-if="item.Instructions && item.Instructions.length > 0"
-										class=" text-wrap break-words" style=" font-size: 0.775rem !important;">
-										<span class="font-weight-bold">Hướng dẫn:</span> {{ item.Instructions }}
+										class=" text-wrap break-words two-lines"
+										style=" font-size: 0.775rem !important;">
+										<span class="font-weight-bold">{{ $t('message.Instructions') }}:</span> {{
+											item.Instructions }}
 									</div>
 								</div>
 								<v-spacer></v-spacer>
@@ -91,14 +100,22 @@
 									<v-list>
 										<v-list-item @click="onRedirectToASM(item)">
 											<v-list-item-title class="text-subtitle-2"><v-icon color="primary"
-													size="small" class="mr-1">mdi-archive-eye-outline</v-icon>Xem chi
-												tiết</v-list-item-title>
+													size="small" class="mr-1">mdi-archive-eye-outline</v-icon>{{
+														$t('message.ViewDetail')
+													}}</v-list-item-title>
 										</v-list-item>
 										<v-list-item @click="onDeleteItem(item)">
-											<v-list-item-title class="text-subtitle-2">
+											<v-list-item-title class="text-subtitle-2" v-if="$i18n.locale == 'vi'">
 												<v-icon color="red" size="small"
-													class="mr-1">mdi-trash-can-outline</v-icon>Xóa
+													class="mr-1">mdi-trash-can-outline</v-icon>{{
+														$t('message.Delete') }}
 												{{ item.ResourceType == 'LESSON' ? 'bài học' : 'bài tập' }}
+											</v-list-item-title>
+											<v-list-item-title class="text-subtitle-2" v-else>
+												<v-icon color="red" size="small"
+													class="mr-1">mdi-trash-can-outline</v-icon>{{
+														$t('message.Delete') }}
+												{{ item.ResourceType == 'LESSON' ? 'lesson' : 'assignment' }}
 											</v-list-item-title>
 										</v-list-item>
 									</v-list>
@@ -144,19 +161,22 @@ export default {
 	mounted() {
 		document.body.classList.add('no-scroll');
 		this.DSMonHoc = [...this.DSMonHocActive]
+		console.log('this.DSMonHoc ',this.DSMonHoc )
 		this.$nextTick(() => {
 			if (this.DSMonHoc.length > 0) this.selected = this.DSMonHoc[0];
+			console.log('contentLibrary', this.contentLibrary)
 		})
 
 	},
 	computed: {
 		tooltipCreateContent: function () {
-			return 'Tạo nội dung cho môn học ' + this.selected
+			return 'Tạo nội dung cho môn học ' + this.selected.MonHocName
 		}
 	},
 	watch: {
 		contentLibrary: function (newVal) {
 			if (newVal && this.isShowModalLiberyDetails) {
+
 			}
 		},
 	},
@@ -191,13 +211,14 @@ export default {
 		},
 		statusInfo(item) {
 			const statusMap = {
-				1: { text: 'Đang soạn thảo', color: 'grey' },
-				2: { text: 'Sẵn sàng giao', color: 'orange' },
-				3: { text: `Đã giao ${item.AssignedClassCount} lớp`, color: 'success' }
+				1: { text: this.$i18n.locale == 'en' ? 'Drafting' : 'Đang soạn thảo', color: 'grey' },
+				2: { text: this.$i18n.locale == 'en' ? 'Ready to Assign' : 'Sẵn sàng giao', color: 'orange' },
+				3: { text: this.$i18n.locale == 'en' ? `Assigned` : `Đã giao`, color: 'success' },
 			};
 			return statusMap[item.Status] || statusMap[1];
 		},
 		onSelectedLibery(item, DSAssignedClass) {
+			console.log('DSAssignedClass', DSAssignedClass)
 			this.selectedLibery = item
 			this.DSAssignedClass = DSAssignedClass
 			this.isShowModalLiberyDetails = true

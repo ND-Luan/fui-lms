@@ -1,0 +1,38 @@
+{
+    "data": [
+        {
+            "DSNienKhoa": [],
+            "NienKhoa": null
+        },
+        {
+            "API": "lms/NienKhoa_Get",
+            "OUT": "DSNienKhoa",
+            "CALLBACK": {
+                "EXE": "vueData.NienKhoa = vueData.DSNienKhoa.find(nk => nk.IsActive == true).NienKhoa"
+            }
+        }
+    ],
+    "watch": {},
+    "controls": [
+        {
+            "prop": "fluid grid-list-md",
+            "rows": [
+                {
+                    "prop": "",
+                    "cols": [
+                        {
+                            "el": "uc-main-page",
+                            "attr": {
+                                "v-if": "NienKhoa"
+                            }
+                        }
+                    ]
+                }
+            ]
+        }
+    ],
+    "set": {
+        "menu": false,
+        "menuLeft": false
+    }
+}

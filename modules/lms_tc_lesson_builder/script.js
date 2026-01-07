@@ -11,6 +11,7 @@ function processInitialData(data) {
             return el;
         });
         vueData.lesson = lessonData;
+        console.log('vueData.lesson', vueData.lesson)
     } else {
         Vue.$toast.error("Tải dữ liệu bài giảng thất bại.", { position: 'top' });
     }

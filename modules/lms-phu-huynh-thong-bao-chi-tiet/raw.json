@@ -1,0 +1,28 @@
+{
+    "data": [
+        {
+            "SubmissionID": "parseInt(SubmissionID)"
+        }
+    ],
+    "watch": {},
+    "controls": [
+        {
+            "prop": "fluid grid-list-md pa-0",
+            "rows": [
+                {
+                    "prop": "",
+                    "cols": [
+                        {
+                            "el": "uc-main-page",
+                            "attr": {}
+                        }
+                    ]
+                }
+            ]
+        }
+    ],
+    "set": {
+        "menu": false,
+        "menuLeft": false
+    }
+}

@@ -1,0 +1,68 @@
+	.v-window {
+		width: 100%
+	}
+.grade-table {
+	width: 100%;
+	border-collapse: collapse;
+	font-size: 13px;
+}
+
+.grade-table th,
+.grade-table td {
+	border: 1px solid #ddd;
+	padding: 8px;
+	white-space: nowrap;
+}
+
+.grade-table th {
+	background-color: #f5f5f5;
+	font-weight: bold;
+}
+
+.sticky-col {
+	position: sticky;
+	left: 0;
+	background-color: white;
+	z-index: 1;
+}
+
+.sticky-col-2 {
+	position: sticky;
+	left: 50px;
+	background-color: white;
+	z-index: 1;
+}
+
+.sticky-col-combined {
+	position: sticky;
+	left: 0;
+	z-index: 1;
+}
+/* Đảm bảo background cho sticky columns */
+.grade-table tbody tr .sticky-col,
+.grade-table tbody tr .sticky-col-2,
+.grade-table tbody tr .sticky-col-combined {
+	background-color: inherit;
+}
+
+/* Background mặc định cho các hàng thường */
+.grade-table tbody tr .sticky-col,
+.grade-table tbody tr .sticky-col-2 {
+	background-color: white;
+}
+
+/* Background cho hàng xám */
+.grade-table tbody tr.bg-grey-lighten-4 .sticky-col,
+.grade-table tbody tr.bg-grey-lighten-4 .sticky-col-2 {
+	background-color: #f5f5f5;
+}
+
+/* Background cho hàng tổng khối */
+.grade-table tbody tr.bg-blue-grey-lighten-4 .sticky-col-combined {
+	background-color: #cfd8dc;
+}
+
+/* Background cho hàng tổng cộng */
+.grade-table tbody tr.bg-indigo-lighten-4 .sticky-col-combined {
+	background-color: #c5cae9;
+}

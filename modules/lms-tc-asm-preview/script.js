@@ -2,7 +2,7 @@ function initPage() {
     const urlParams = new URLSearchParams(window.location.search);
     const AssignToClassID = urlParams.get('AssignToClassID');
     const AssignmentID = urlParams.get('AssignmentID');
-    ajaxCALL("lms/EL_Teacher_GetAssignmentForEdit", {
+    ajaxCALL("lms/EL_Teacher_GetAssignmentForView", {
         AssignmentID: AssignmentID || 0,
         AssignToClassID: AssignToClassID || 0,
         //HocSinhID: vueData.HocSinhID

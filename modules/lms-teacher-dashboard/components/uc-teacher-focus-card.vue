@@ -10,11 +10,15 @@
 					</div>
 					<div class="task-meta text-caption text-grey-darken-1 d-flex align-center">
 						<v-icon size="14" class="mr-1">mdi-book-open-variant</v-icon>
-						{{ task.MonHocName }} • {{ task.TenLop }}
+						<span class="task-subject">
+							{{ [5, 46, 76].includes(task.MonHocID) ? ($i18n.locale == 'en' ? 'English' :
+								task.MonHocName) :
+								task.MonHocName }}
+						</span> <span v-if="task.TenLopHoacNhom">• {{ task.TenLopHoacNhom }}</span>
 						<v-spacer></v-spacer>
-						<div class="d-flex flex-wrap justify-center mb-1">
+						<div class="d-flex flex-wrap flex-md-nowrap justify-center mb-1">
 							<v-chip size="x-small" color="success" prepend-icon="mdi-file-upload-outline" class="ma-1">
-								Nộp:{{ task.SubmittedCount }}/{{ task.TotalStudents }}
+								{{ $t('message.Submitted') }}:{{ task.SubmittedCount }}/{{ task.TotalStudents }}
 							</v-chip>
 							<v-chip :color="statusInfo.color" size="x-small" variant="tonal" class="ma-1">
 								{{ statusInfo.text }}
@@ -31,7 +35,8 @@
 			<v-dialog v-model="isOpen" fullscreen>
 				<v-card id="ChamBaiDialog" style="overflow: hidden;">
 					<v-card-title class="d-flex bg-primary ChamBaiDialog" style="max-height: 48px">
-						<span class="text-white">Giao Bài Tập Theo Lớp</span>
+						<span class="text-white">Giao Bài Tập Theo {{ task?.AssignType == 'STUDENT' ? 'Học Sinh'
+							: 'Lớp' }}</span>
 						<v-spacer></v-spacer>
 						<v-btn @click="onClose()" variant="text" icon="mdi-close"></v-btn>
 					</v-card-title>
@@ -69,9 +74,9 @@ export default {
 		// Thông tin trạng thái để quyết định màu sắc, icon và text
 		statusInfo() {
 			const statuses = {
-				'PENDING_GRADING': { color: 'warning', icon: 'mdi-file-clock-outline', iconColor: '#fb8c00', text: 'Cần chấm', cardClass: 'warning' },
-				'OVERDUE': { color: 'error', icon: 'mdi-calendar-remove', iconColor: '#f44336', text: 'Quá hạn', cardClass: 'urgent' },
-				'UPCOMING': { color: 'primary', icon: 'mdi-calendar-arrow-right', iconColor: '#1976d2', text: 'Sắp tới', cardClass: 'primary' }
+				'PENDING_GRADING': { color: 'warning', icon: 'mdi-file-clock-outline', iconColor: '#fb8c00', text: this.$i18n.locale == 'en' ? 'Need Grade' : 'Cần chấm', cardClass: 'warning' },
+				'OVERDUE': { color: 'error', icon: 'mdi-calendar-remove', iconColor: '#f44336', text: this.$i18n.locale == 'en' ? 'Over Due' : 'Quá hạn', cardClass: 'urgent' },
+				'UPCOMING': { color: 'primary', icon: 'mdi-calendar-arrow-right', iconColor: '#1976d2', text: this.$i18n.locale == 'en' ? 'Coming' : 'Sắp tới', cardClass: 'primary' }
 			};
 			return statuses[this.task.Status] || statuses['UPCOMING'];
 		},
@@ -79,27 +84,26 @@ export default {
 		// Tính toán thời gian còn lại so với hạn nộp
 		dueDateInfo() {
 			if (!this.task.DueDate) return { text: '', colorClass: '' };
-
 			const now = new Date();
 			const dueDate = new Date(this.task.DueDate);
 			const diffSeconds = Math.floor((dueDate - now) / 1000);
 
 			if (diffSeconds < 0) {
-				return { text: 'đã quá hạn', colorClass: 'text-error' };
+				return { text: this.$i18n.locale == 'en' ? 'Over Due' : 'đã quá hạn', colorClass: 'text-error' };
 			}
 
 			const diffMinutes = Math.floor(diffSeconds / 60);
 			if (diffMinutes < 60) {
-				return { text: `còn ${diffMinutes} phút`, colorClass: 'text-warning' };
+				return { text: this.$i18n.locale == 'en' ? ` ${diffMinutes} minutes left` : `còn ${diffMinutes} phút`, colorClass: 'text-warning' };
 			}
 
 			const diffHours = Math.floor(diffMinutes / 60);
 			if (diffHours < 24) {
-				return { text: `còn ${diffHours} giờ`, colorClass: 'text-warning' };
+				return { text: this.$i18n.locale == 'en' ? ` ${diffHours} hours left` : `còn ${diffHours} giờ`, colorClass: 'text-warning' };
 			}
 
 			const diffDays = Math.floor(diffHours / 24);
-			return { text: `còn ${diffDays} ngày`, colorClass: 'text-success' };
+			return { text: this.$i18n.locale == 'en' ? ` ${diffDays} days left` : `còn ${diffDays} ngày`, colorClass: 'text-success' };
 		}
 	},
 	unmounted() {
@@ -123,12 +127,13 @@ export default {
 			});
 		},
 		chamBai(assignment) {
-			this.url = `https://lms.lhbs.vn/lms_Assignment-Class-Detail?AssignToClassID=${assignment?.AssignToClassID}&LopID=${assignment?.LopID}&MonHocID=${assignment?.MonHocID}`
+			console.log('assignment', assignment)
+			this.url = `https://lms.lhbs.vn/lms_Assignment-Class-Detail?AssignToClassID=${assignment?.AssignToClassID}&LopID=${assignment?.LopID}&MonHocID=${assignment?.MonHocID}&AssignType=${assignment?.AssignType}&KhoiID=${assignment?.KhoiID}`
 			this.isOpen = true
 		},
 		onClose() {
 			this.isOpen = false
-			vueData.initPage()
+			vueData.apiCall1()
 		},
 		handleMessage(event) {
 			if (!event || !event.data || !event.data.type) return

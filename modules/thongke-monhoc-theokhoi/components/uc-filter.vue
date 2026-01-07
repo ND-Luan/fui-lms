@@ -6,6 +6,9 @@
 	</v-card>
 	<v-row dense>
 		<v-col>
+			<v-select v-model="vueData.HocKi" label="Chọn học kì" :items="vueData.DSHocKi" item-title="TenHocKi"
+				item-value="HocKi" /></v-col>
+		<v-col>
 			<v-select v-model="vueData.KhoiID" label="Chọn khối" :items="vueData.DSKhoi" item-title="TenKhoiHoc"
 				item-value="KhoiID" /></v-col>
 		<v-col>
@@ -36,7 +39,14 @@
 		},
 		mounted() { },
 		computed: {},
-		watch: {},
+		watch: {
+			'vueData.HocKi':function(val){
+				if(val){
+					vueData.KhoiID = null 
+					vueData.MonHocItem = null
+				}
+			}
+		},
 		methods: {},
 	}
 </script>

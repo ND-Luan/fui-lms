@@ -1,3 +1,17 @@
+pdfMake.fonts = {
+    Roboto: {
+        normal: 'Roboto-Regular.ttf',
+        bold: 'Roboto-Medium.ttf',
+        italics: 'Roboto-Italic.ttf',
+        bolditalics: 'Roboto-MediumItalic.ttf'
+    },
+    times: {
+        normal: 'times.ttf',
+        bold: 'timesbd.ttf',
+        italics: 'timesbi.ttf',
+        bolditalics: 'timesi.ttf',
+    }
+}
 function renderDSKhoi() {
     const DSKhoi = Array.from({ length: 12 }).map((_, i) => {
         const value = i + 1;
@@ -198,7 +212,6 @@ async function onExportPDF() {
             let dsCotDiem = hocSinh.DSCotDiem
                 .filter(x => x.MonHocID === MonHocID)
             const TenMonHoc = hocSinh.DSCotDiem.find(x => x.MonHocID === MonHocID)
-            console.log("dsCotDiem", dsCotDiem)
             const columnNoiDung = {
                 text: TenMonHoc?.TenMonHoc_HienThi ?? '',
                 border: [true, true, true, true]
@@ -230,12 +243,10 @@ async function onExportPDF() {
             CONTENT_TABLE.push([columnNoiDung, columnMucDoDatDuoc, columnDiem, columnQuyDoiSao, columnNhanXet])
         }
         const monHocIDFirst = hocSinh.DSCotDiem[0]?.MonHocID ?? 0
-        const DSCotDiem = hocSinh.DSCotDiem.filter(x => x.MonHocID === monHocIDFirst)
         const columnNoiDungDanhGia = 100
         const columnMucDoDatDuoc = 80
         const columnDiem = 50
         const columnSao = 50
-        console.log("DSCotDiem.length", DSCotDiem.length)
         const getWidths = [
             columnNoiDungDanhGia
             , columnMucDoDatDuoc
@@ -268,7 +279,8 @@ async function onExportPDF() {
         },
         styles: {},
         defaultStyle: {
-            fontSize: 12
+            fontSize: 12,
+            font: 'times'
         }
     };
     const pdf = pdfMake.createPdf(dd);

@@ -1,1 +1,731 @@
-{"data":[{"EXE":"IsCheck_NotRoleParent(vueData.user)"},{"CapID":"parseInt(capid)","keyTable":0,"DSThang":[],"DSLop":[],"DSKhoi":[],"items":[],"ThangObj":null,"LopID":null,"headers":[],"IsShowDialogCopy":false,"isLowScreen":false,"DSTongHop_LoaiViPham":[],"KhoiID":null,"TitlePage":"renderText(parseInt(capid))"},{"Lop_Get_By_CapID":{"API":"lms/Lop_Get_By_CapID","IN":{"NienKhoa":"vueData.NienKhoa","CapID":"vueData.CapID"},"OUT":"DSLop","CALLBACK":{"EXE":"vueData.DSLop = vueData.DSLop.filter(x => !x.LopID.toString().includes('N25'))"}}},{"NhanXetThang_Lop_Get":{"API":"lms/NhanXetThang_Lop_Get_GV","IN":{"NienKhoa":"vueData.NienKhoa","LopID":"vueData.LopID"},"OUT":"DSThang","CALLBACK":[{"CALL":[{"IF":"vueData.ThangObj !== null","THEN":[{"EXE":"vueData.ThangObj  = vueData.DSThang.find(x=> x.Lop_NhanXetThangID === vueData.ThangObj.Lop_NhanXetThangID)"}]}]}]}},{"NhanXetThang_Get":{"API":"lms/NhanXetThang_Get","IN":{"Lop_NhanXetThangID":"vueData.ThangObj.Lop_NhanXetThangID","LopID":"vueData.LopID"},"OUT":"items","CALLBACK":[{"EXE":"convertItems()"},{"keyTable":"keyTable + 1"}]}},{"EXE":"vueData.onLuuTamByHocSinhID = onLuuTamByHocSinhID"},{"EXE":"vueData.renderLabelTable = renderLabelTable; vueData.renderTextDSHocSinhDaLuu = renderTextDSHocSinhDaLuu; vueData.openWindow = openWindow"}],"watch":{"NienKhoa":{"IF":"vueData.NienKhoa !== null","THEN":[{"LopID":null,"ThangObj":null,"items":[]},{"CALL":"Lop_Get_By_CapID"}]},"LopID":{"IF":"vueData.LopID !== null","THEN":[{"ThangObj":null,"items":[]},{"CALL":"NhanXetThang_Lop_Get"},{"EXE":"localStorage.setItem('LopID_C' + vueData.CapID + '_NXT', vueData.LopID)"},{"EXE":"vueData.KhoiID = vueData.DSLop.find(item => item.LopID == vueData.LopID).KhoiID"},{"EXE":"console.log('window.innerWidth',window.innerWidth)"}]},"ThangObj":{"IF":"vueData.ThangObj?.Lop_NhanXetThangID > 0","THEN":[{"EXE":"const result = fn_IsDisabledTinhTrangDiem({ TinhTrang: vueData.ThangObj.TinhTrang, type: 'GV' }); const { isDisabled } = result || {}; vueData.TinhTrang = isDisabled ?? false;"},{"CALL":"NhanXetThang_Get"},{"EXE":"localStorage.setItem('Thang_C' + vueData.CapID + '_NXT', JSON.stringify(vueData.ThangObj))"},{"EXE":"renderHeaderTable()"},{"EXE":"const { firstDay, lastDay} = getFirstAndLastDay(vueData.ThangObj.Nam, vueData.ThangObj.Thang); vueData.firstDay = firstDay; vueData.lastDay = lastDay"}]}},"controls":[{"prop":"fluid","rows":[{"prop":"class='pt-0'","cols":[{"el":"v-card","attr":{"class":"sticky-filter"},"innerHTML":[{"el":"v-card-title","attr":{"class":"text-primary px-0 pt-0"},"innerHTML":"Nhận xét tháng - {{TitlePage}}"},{"el":"v-card-text","attr":{"class":"pb-0  px-0"},"innerHTML":[{"el":"v-row","attr":{"dense":""},"innerHTML":[{"el":"v-col","attr":{"cols":2},"innerHTML":[{"el":"v-select","attr":{"v-model":"LopID","label":"Chọn lớp",":items":"DSLop",":item-title":"renderTextLop","item-value":"LopID",":hide-details":true}}],"w":2},{"el":"v-col","attr":{"cols":2},"innerHTML":[{"el":"v-select","attr":{"v-model":"ThangObj","label":"Chọn tháng",":items":"DSThang","item-title":"Thang_HienThi","item-value":"Lop_NhanXetThangID",":return-object":true,":hide-details":true},"innerHTML":[{"el":"template","attr":{"v-slot:item":"{ props, item }"},"innerHTML":"<uc-item-thang v-bind='props' :item='item' />"}]}]},{"el":"v-col","innerHTML":[{"el":"f-button","attr":{"label":"Làm mới","color":"primary","variant":"outlined",":action":"NhanXetThang_Get"}}]},{"el":"v-col","attr":{":cols":12,"class":"pb-4"},"innerHTML":[{"el":"div","attr":{"class":"d-flex justify-space-between align-center"},"innerHTML":[{"el":"div","attr":{"class":"d-flex align-center justify-center "},"innerHTML":[{"el":"span","attr":{"class":"text-title"},"innerHTML":[{"el":"span","innerHTML":"Các học sinh đã lưu: <v-chip size='small' color='primary' class='font-weight-medium'>({{renderTextDSHocSinhDaLuu()}} / {{items.length}})</v-chip> "}]},{"el":"div","attr":{"v-if":"ThangObj?.ReasonReject && ThangObj.TinhTrang === 3"},"innerHTML":"Lý do từ chối: <span class='text-red'>{{ThangObj?.ReasonReject}}"}]},{"el":"div","attr":{"class":"d-flex ga-2"},"innerHTML":[{"el":"f-button","attr":{"label":"Import dữ liệu từ Excel",":disabled":"items.length === 0 ||  TinhTrang","color":"success","variant":"outlined","target":"dialog","title":"Import dữ liệu từ Excel",":url":"'/gv-nhan-xet-thang-import?lopid='+ LopID + '&lop_nxtid=' + ThangObj?.Lop_NhanXetThangID",":onclose":[{"IF":"JSON.parse(localStorage.getItem('IsImportNXT'))","THEN":[{"CALL":"NhanXetThang_Lop_Get"},{"CALL":"NhanXetThang_Get"},{"EXE":"localStorage.removeItem('IsImportNXT')"}]}]}},{"el":"f-button","attr":{"label":"Lưu tạm tất cả",":disabled":"items.length === 0 || TinhTrang","color":"info","variant":"outlined",":action":[{"CALL":[{"CONFIRM":"Xác nhận lưu tạm tất cả nhận xét tháng!","CALL":[{"EXE":"processDataBeforePostAPI()"},{"API":"lms/NhanXetThang_Ins","IN":{"JSON_NhanXetThang":"vueData.JSON_NhanXetThang"},"CALLBACK":[{"API":"lms/NhanXetThang_Upd_TinhTrang","IN":{"TinhTrang":1,"Lop_NhanXetThangID":"vueData.ThangObj.Lop_NhanXetThangID","ReasonReject":""},"MESS":"Lưu tạm tất cả nhận xét tháng thành công","CALLBACK":[{"CALL":"NhanXetThang_Lop_Get"},{"CALL":"NhanXetThang_Get"},{"EXE":"renderHeaderTable()"},{"EXE":"const result = fn_IsDisabledTinhTrangDiem({ TinhTrang: vueData.ThangObj.TinhTrang, type: 'GV' }); const { isDisabled } = result || {}; vueData.TinhTrang = isDisabled ?? false;"}]}]}]}]}]}},{"el":"f-button","attr":{"v-if":"CapID === 1","label":"Gửi tổ trưởng",":disabled":"items.length === 0 || TinhTrang","color":"primary","variant":"outlined",":action":[{"CALL":[{"IF":"renderTextDSHocSinhDaLuu() === items.length","THEN":[{"CONFIRM":"Xác nhận gửi tổ trưởng","CALL":[{"EXE":"processDataBeforePostAPI()"},{"API":"lms/NhanXetThang_Ins","IN":{"JSON_NhanXetThang":"vueData.JSON_NhanXetThang"},"MESS":"Cập nhật nhận xét tháng thành công","CALLBACK":[{"API":"lms/NhanXetThang_Upd_TinhTrang","IN":{"TinhTrang":2,"Lop_NhanXetThangID":"vueData.ThangObj.Lop_NhanXetThangID","ReasonReject":""},"MESS":"Gửi tổ trưởng thành công","CALLBACK":[{"CALL":"NhanXetThang_Lop_Get"},{"CALL":"NhanXetThang_Get"},{"EXE":"renderHeaderTable()"},{"EXE":"const result = fn_IsDisabledTinhTrangDiem({ TinhTrang: vueData.ThangObj.TinhTrang, type: 'GV' }); const { isDisabled } = result || {}; vueData.TinhTrang = isDisabled ?? false;"}]}]}]}]},{"IF":"renderTextDSHocSinhDaLuu() !== items.length","THEN":{"MESS":"Vui lòng lưu hết tất cả học sinh trước khi gửi tổ trưởng"}}]}]}},{"el":"f-button","attr":{"v-if":"CapID === 2 || CapID === 3","label":"Gửi BGH",":disabled":"items.length === 0 || TinhTrang","color":"primary","variant":"outlined",":action":[{"CALL":[{"IF":"renderTextDSHocSinhDaLuu() === items.length","THEN":[{"CONFIRM":"Xác nhận gửi BGH","CALL":[{"EXE":"processDataBeforePostAPI()"},{"API":"lms/NhanXetThang_Ins","IN":{"JSON_NhanXetThang":"vueData.JSON_NhanXetThang"},"MESS":"Cập nhật nhận xét tháng thành công","CALLBACK":[{"API":"lms/NhanXetThang_Upd_TinhTrang","IN":{"TinhTrang":2,"Lop_NhanXetThangID":"vueData.ThangObj.Lop_NhanXetThangID","ReasonReject":""},"MESS":"Gửi BGH thành công","CALLBACK":[{"CALL":"NhanXetThang_Lop_Get"},{"CALL":"NhanXetThang_Get"},{"EXE":"renderHeaderTable()"},{"EXE":"const result = fn_IsDisabledTinhTrangDiem({ TinhTrang: vueData.ThangObj.TinhTrang, type: 'GV' }); const { isDisabled } = result || {}; vueData.TinhTrang = isDisabled ?? false;"}]}]}]}]},{"IF":"renderTextDSHocSinhDaLuu() !== items.length","THEN":{"MESS":"Vui lòng lưu hết tất cả học sinh trước khi gửi"}}]}]}}]}],"w":12}]}]}]}]},{"el":"f-table","attr":{":key":"keyTable","ref":"refTable",":label":"renderLabelTable()",":items":"items",":headers":"headers"},"w":12},{"el":"f-button","attr":{"v-if":"CapID === 1","label":"Gửi tổ trưởng",":disabled":"items.length === 0 || TinhTrang","color":"primary","variant":"outlined","class":"float-right",":action":[{"CALL":[{"IF":"renderTextDSHocSinhDaLuu() === items.length","THEN":[{"CONFIRM":"Xác nhận gửi tổ trưởng","CALL":[{"EXE":"processDataBeforePostAPI()"},{"API":"lms/NhanXetThang_Ins","IN":{"JSON_NhanXetThang":"vueData.JSON_NhanXetThang"},"MESS":"Cập nhật nhận xét tháng thành công","CALLBACK":[{"API":"lms/NhanXetThang_Upd_TinhTrang","IN":{"TinhTrang":2,"Lop_NhanXetThangID":"vueData.ThangObj.Lop_NhanXetThangID","ReasonReject":""},"MESS":"Gửi tổ trưởng thành công","CALLBACK":[{"CALL":"NhanXetThang_Lop_Get"},{"CALL":"NhanXetThang_Get"},{"EXE":"renderHeaderTable()"},{"EXE":"const result = fn_IsDisabledTinhTrangDiem({ TinhTrang: vueData.ThangObj.TinhTrang, type: 'GV' }); const { isDisabled } = result || {}; vueData.TinhTrang = isDisabled ?? false;"}]}]}]}]},{"IF":"renderTextDSHocSinhDaLuu() !== items.length","THEN":{"MESS":"Vui lòng lưu hết tất cả học sinh trước khi gửi tổ trưởng"}}]}]},"w":12},{"el":"f-button","attr":{"v-if":"CapID === 2 || CapID === 3","label":"Gửi BGH",":disabled":"items.length === 0 || TinhTrang","color":"primary","variant":"outlined","class":"float-right",":action":[{"CALL":[{"IF":"renderTextDSHocSinhDaLuu() === items.length","THEN":[{"CONFIRM":"Xác nhận gửi BGH","CALL":[{"EXE":"processDataBeforePostAPI()"},{"API":"lms/NhanXetThang_Ins","IN":{"JSON_NhanXetThang":"vueData.JSON_NhanXetThang"},"MESS":"Cập nhật nhận xét tháng thành công","CALLBACK":[{"API":"lms/NhanXetThang_Upd_TinhTrang","IN":{"TinhTrang":2,"Lop_NhanXetThangID":"vueData.ThangObj.Lop_NhanXetThangID","ReasonReject":""},"MESS":"Gửi BGH thành công","CALLBACK":[{"CALL":"NhanXetThang_Lop_Get"},{"CALL":"NhanXetThang_Get"},{"EXE":"renderHeaderTable()"},{"EXE":"const result = fn_IsDisabledTinhTrangDiem({ TinhTrang: vueData.ThangObj.TinhTrang, type: 'GV' }); const { isDisabled } = result || {}; vueData.TinhTrang = isDisabled ?? false;"}]}]}]}]},{"IF":"renderTextDSHocSinhDaLuu() !== items.length","THEN":{"MESS":"Vui lòng lưu hết tất cả học sinh trước khi gửi"}}]}]},"w":12},{"el":"f-dialog","attr":{"v-model":"IsShowDialogCopy","title":"Sao chép nhận xét tháng",":width":500,":controls":[{"el":"v-select","attr":{"v-model":"ThangObj_Copy","label":"Chọn tháng sao chép",":items":"vueData.DSThang.filter(x=> x.Lop_NhanXetThangID !== vueData.ThangObj.Lop_NhanXetThangID)","item-title":"Thang_HienThi","item-value":"Lop_NhanXetThangID",":return-object":true}},{"el":"v-select","attr":{"v-model":"vueData.ThangObj","label":"Tháng đang chọn",":items":"vueData.DSThang","item-title":"Thang_HienThi","item-value":"Lop_NhanXetThangID",":return-object":true,":readOnly":true}}],":button":[{"label":"Đóng","action":[{"IsShowDialogCopy":false}]},{"label":"Xác nhận","action":[{"CONFIRM":"Xác nhận sao chép","API":"lms/NhanXetThang_Copy","IN":{"Lop_NhanXetThangID":"vueData.ThangObj.Lop_NhanXetThangID","Lop_NhanXetThangID_Copy":"ThangObj_Copy.Lop_NhanXetThangID"},"MESS":"Sao chép thành công","CALLBACK":[{"IsShowDialogCopy":false},{"CALL":"NhanXetThang_Get"}]}]}]},"w":12}]}]}],"set":{}}
+{
+    "data": [
+        {
+            "EXE": "IsCheck_NotRoleParent(vueData.user)"
+        },
+        {
+            "CapID": "parseInt(capid)",
+            "keyTable": 0,
+            "DSThang": [],
+            "DSLop": [],
+            "DSKhoi": [],
+            "items": [],
+            "ThangObj": null,
+            "LopID": null,
+            "headers": [],
+            "IsShowDialogCopy": false,
+            "isLowScreen": false,
+            "DSTongHop_LoaiViPham": [],
+            "KhoiID": null,
+            "TitlePage": "renderText(parseInt(capid))"
+        },
+        {
+            "Lop_Get_By_CapID": {
+                "API": "lms/Lop_Get_By_CapID",
+                "IN": {
+                    "NienKhoa": "vueData.NienKhoa",
+                    "CapID": "vueData.CapID"
+                },
+                "OUT": "DSLop",
+                "CALLBACK": {
+                    "EXE": "vueData.DSLop = vueData.DSLop.filter(x => !x.LopID.toString().includes('N25'))"
+                }
+            }
+        },
+        {
+            "NhanXetThang_Lop_Get": {
+                "API": "lms/NhanXetThang_Lop_Get_GV",
+                "IN": {
+                    "NienKhoa": "vueData.NienKhoa",
+                    "LopID": "vueData.LopID"
+                },
+                "OUT": "DSThang",
+                "CALLBACK": [
+                    {
+                        "CALL": [
+                            {
+                                "IF": "vueData.ThangObj !== null",
+                                "THEN": [
+                                    {
+                                        "EXE": "vueData.ThangObj  = vueData.DSThang.find(x=> x.Lop_NhanXetThangID === vueData.ThangObj.Lop_NhanXetThangID)"
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                ]
+            }
+        },
+        {
+            "NhanXetThang_Get": {
+                "API": "lms/NhanXetThang_Get",
+                "IN": {
+                    "Lop_NhanXetThangID": "vueData.ThangObj.Lop_NhanXetThangID",
+                    "LopID": "vueData.LopID"
+                },
+                "OUT": "items",
+                "CALLBACK": [
+                    {
+                        "EXE": "convertItems()"
+                    },
+                    {
+                        "keyTable": "keyTable + 1"
+                    }
+                ]
+            }
+        },
+        {
+            "EXE": "vueData.onLuuTamByHocSinhID = onLuuTamByHocSinhID"
+        },
+        {
+            "EXE": "vueData.renderLabelTable = renderLabelTable; vueData.renderTextDSHocSinhDaLuu = renderTextDSHocSinhDaLuu; vueData.openWindow = openWindow"
+        }
+    ],
+    "watch": {
+        "NienKhoa": {
+            "IF": "vueData.NienKhoa !== null",
+            "THEN": [
+                {
+                    "LopID": null,
+                    "ThangObj": null,
+                    "items": []
+                },
+                {
+                    "CALL": "Lop_Get_By_CapID"
+                }
+            ]
+        },
+        "LopID": {
+            "IF": "vueData.LopID !== null",
+            "THEN": [
+                {
+                    "ThangObj": null,
+                    "items": []
+                },
+                {
+                    "CALL": "NhanXetThang_Lop_Get"
+                },
+                {
+                    "EXE": "localStorage.setItem('LopID_C' + vueData.CapID + '_NXT', vueData.LopID)"
+                },
+                {
+                    "EXE": "vueData.KhoiID = vueData.DSLop.find(item => item.LopID == vueData.LopID).KhoiID"
+                },
+                {
+                    "EXE": "console.log('window.innerWidth',window.innerWidth)"
+                }
+            ]
+        },
+        "ThangObj": {
+            "IF": "vueData.ThangObj?.Lop_NhanXetThangID > 0",
+            "THEN": [
+                {
+                    "EXE": "const result = fn_IsDisabledTinhTrangDiem({ TinhTrang: vueData.ThangObj.TinhTrang, type: 'GV' }); const { isDisabled } = result || {}; vueData.TinhTrang = isDisabled ?? false;"
+                },
+                {
+                    "CALL": "NhanXetThang_Get"
+                },
+                {
+                    "EXE": "localStorage.setItem('Thang_C' + vueData.CapID + '_NXT', JSON.stringify(vueData.ThangObj))"
+                },
+                {
+                    "EXE": "renderHeaderTable()"
+                },
+                {
+                    "EXE": "const { firstDay, lastDay} = getFirstAndLastDay(vueData.ThangObj.Nam, vueData.ThangObj.Thang); vueData.firstDay = firstDay; vueData.lastDay = lastDay"
+                }
+            ]
+        }
+    },
+    "controls": [
+        {
+            "prop": "fluid",
+            "rows": [
+                {
+                    "prop": "class='pt-0'",
+                    "cols": [
+                        {
+                            "el": "v-card",
+                            "attr": {
+                                "class": "sticky-filter"
+                            },
+                            "innerHTML": [
+                                {
+                                    "el": "v-card-title",
+                                    "attr": {
+                                        "class": "text-primary px-0 pt-0"
+                                    },
+                                    "innerHTML": "Nhận xét tháng - {{TitlePage}}"
+                                },
+                                {
+                                    "el": "v-card-text",
+                                    "attr": {
+                                        "class": "pb-0  px-0"
+                                    },
+                                    "innerHTML": [
+                                        {
+                                            "el": "v-row",
+                                            "attr": {
+                                                "dense": ""
+                                            },
+                                            "innerHTML": [
+                                                {
+                                                    "el": "v-col",
+                                                    "attr": {
+                                                        "cols": 2
+                                                    },
+                                                    "innerHTML": [
+                                                        {
+                                                            "el": "v-select",
+                                                            "attr": {
+                                                                "v-model": "LopID",
+                                                                "label": "Chọn lớp",
+                                                                ":items": "DSLop",
+                                                                ":item-title": "renderTextLop",
+                                                                "item-value": "LopID",
+                                                                ":hide-details": true
+                                                            }
+                                                        }
+                                                    ],
+                                                    "w": 2
+                                                },
+                                                {
+                                                    "el": "v-col",
+                                                    "attr": {
+                                                        "cols": 2
+                                                    },
+                                                    "innerHTML": [
+                                                        {
+                                                            "el": "v-select",
+                                                            "attr": {
+                                                                "v-model": "ThangObj",
+                                                                "label": "Chọn tháng",
+                                                                ":items": "DSThang",
+                                                                "item-title": "Thang_HienThi",
+                                                                "item-value": "Lop_NhanXetThangID",
+                                                                ":return-object": true,
+                                                                ":hide-details": true
+                                                            },
+                                                            "innerHTML": [
+                                                                {
+                                                                    "el": "template",
+                                                                    "attr": {
+                                                                        "v-slot:item": "{ props, item }"
+                                                                    },
+                                                                    "innerHTML": "<uc-item-thang v-bind='props' :item='item' />"
+                                                                }
+                                                            ]
+                                                        }
+                                                    ]
+                                                },
+                                                {
+                                                    "el": "v-col",
+                                                    "innerHTML": [
+                                                        {
+                                                            "el": "f-button",
+                                                            "attr": {
+                                                                "label": "Làm mới",
+                                                                "color": "primary",
+                                                                "variant": "outlined",
+                                                                ":action": "NhanXetThang_Get"
+                                                            }
+                                                        }
+                                                    ]
+                                                },
+                                                {
+                                                    "el": "v-col",
+                                                    "attr": {
+                                                        ":cols": 12,
+                                                        "class": "pb-4"
+                                                    },
+                                                    "innerHTML": [
+                                                        {
+                                                            "el": "div",
+                                                            "attr": {
+                                                                "class": "d-flex justify-space-between align-center"
+                                                            },
+                                                            "innerHTML": [
+                                                                {
+                                                                    "el": "div",
+                                                                    "attr": {
+                                                                        "class": "d-flex align-center justify-center "
+                                                                    },
+                                                                    "innerHTML": [
+                                                                        {
+                                                                            "el": "span",
+                                                                            "attr": {
+                                                                                "class": "text-title"
+                                                                            },
+                                                                            "innerHTML": [
+                                                                                {
+                                                                                    "el": "span",
+                                                                                    "innerHTML": "Các học sinh đã lưu: <v-chip size='small' color='primary' class='font-weight-medium'>({{renderTextDSHocSinhDaLuu()}} / {{items.length}})</v-chip> "
+                                                                                }
+                                                                            ]
+                                                                        },
+                                                                        {
+                                                                            "el": "div",
+                                                                            "attr": {
+                                                                                "v-if": "ThangObj?.ReasonReject && ThangObj.TinhTrang === 3"
+                                                                            },
+                                                                            "innerHTML": "Lý do từ chối: <span class='text-red'>{{ThangObj?.ReasonReject}}"
+                                                                        }
+                                                                    ]
+                                                                },
+                                                                {
+                                                                    "el": "div",
+                                                                    "attr": {
+                                                                        "class": "d-flex ga-2"
+                                                                    },
+                                                                    "innerHTML": [
+                                                                        {
+                                                                            "el": "f-button",
+                                                                            "attr": {
+                                                                                "label": "Import dữ liệu từ Excel",
+                                                                                ":disabled": "items.length === 0 ||  TinhTrang",
+                                                                                "color": "success",
+                                                                                "variant": "outlined",
+                                                                                "target": "dialog",
+                                                                                "title": "Import dữ liệu từ Excel",
+                                                                                ":url": "'/gv-nhan-xet-thang-import?lopid='+ LopID + '&lop_nxtid=' + ThangObj?.Lop_NhanXetThangID",
+                                                                                ":onclose": [
+                                                                                    {
+                                                                                        "IF": "JSON.parse(localStorage.getItem('IsImportNXT'))",
+                                                                                        "THEN": [
+                                                                                            {
+                                                                                                "CALL": "NhanXetThang_Lop_Get"
+                                                                                            },
+                                                                                            {
+                                                                                                "CALL": "NhanXetThang_Get"
+                                                                                            },
+                                                                                            {
+                                                                                                "EXE": "localStorage.removeItem('IsImportNXT')"
+                                                                                            }
+                                                                                        ]
+                                                                                    }
+                                                                                ]
+                                                                            }
+                                                                        },
+                                                                        {
+                                                                            "el": "f-button",
+                                                                            "attr": {
+                                                                                "label": "Lưu tạm tất cả",
+                                                                                ":disabled": "items.length === 0 || TinhTrang",
+                                                                                "color": "info",
+                                                                                "variant": "outlined",
+                                                                                ":action": [
+                                                                                    {
+                                                                                        "CALL": [
+                                                                                            {
+                                                                                                "CONFIRM": "Xác nhận lưu tạm tất cả nhận xét tháng!",
+                                                                                                "CALL": [
+                                                                                                    {
+                                                                                                        "EXE": "processDataBeforePostAPI()"
+                                                                                                    },
+                                                                                                    {
+                                                                                                        "API": "lms/NhanXetThang_Ins",
+                                                                                                        "IN": {
+                                                                                                            "JSON_NhanXetThang": "vueData.JSON_NhanXetThang"
+                                                                                                        },
+                                                                                                        "CALLBACK": [
+                                                                                                            {
+                                                                                                                "API": "lms/NhanXetThang_Upd_TinhTrang",
+                                                                                                                "IN": {
+                                                                                                                    "TinhTrang": 1,
+                                                                                                                    "Lop_NhanXetThangID": "vueData.ThangObj.Lop_NhanXetThangID",
+                                                                                                                    "ReasonReject": ""
+                                                                                                                },
+                                                                                                                "MESS": "Lưu tạm tất cả nhận xét tháng thành công",
+                                                                                                                "CALLBACK": [
+                                                                                                                    {
+                                                                                                                        "CALL": "NhanXetThang_Lop_Get"
+                                                                                                                    },
+                                                                                                                    {
+                                                                                                                        "CALL": "NhanXetThang_Get"
+                                                                                                                    },
+                                                                                                                    {
+                                                                                                                        "EXE": "renderHeaderTable()"
+                                                                                                                    },
+                                                                                                                    {
+                                                                                                                        "EXE": "const result = fn_IsDisabledTinhTrangDiem({ TinhTrang: vueData.ThangObj.TinhTrang, type: 'GV' }); const { isDisabled } = result || {}; vueData.TinhTrang = isDisabled ?? false;"
+                                                                                                                    }
+                                                                                                                ]
+                                                                                                            }
+                                                                                                        ]
+                                                                                                    }
+                                                                                                ]
+                                                                                            }
+                                                                                        ]
+                                                                                    }
+                                                                                ]
+                                                                            }
+                                                                        },
+                                                                        {
+                                                                            "el": "f-button",
+                                                                            "attr": {
+                                                                                "v-if": "CapID === 1",
+                                                                                "label": "Gửi tổ trưởng",
+                                                                                ":disabled": "items.length === 0 || TinhTrang",
+                                                                                "color": "primary",
+                                                                                "variant": "outlined",
+                                                                                ":action": [
+                                                                                    {
+                                                                                        "CALL": [
+                                                                                            {
+                                                                                                "IF": "renderTextDSHocSinhDaLuu() === items.length",
+                                                                                                "THEN": [
+                                                                                                    {
+                                                                                                        "CONFIRM": "Xác nhận gửi tổ trưởng",
+                                                                                                        "CALL": [
+                                                                                                            {
+                                                                                                                "EXE": "processDataBeforePostAPI()"
+                                                                                                            },
+                                                                                                            {
+                                                                                                                "API": "lms/NhanXetThang_Ins",
+                                                                                                                "IN": {
+                                                                                                                    "JSON_NhanXetThang": "vueData.JSON_NhanXetThang"
+                                                                                                                },
+                                                                                                                "MESS": "Cập nhật nhận xét tháng thành công",
+                                                                                                                "CALLBACK": [
+                                                                                                                    {
+                                                                                                                        "API": "lms/NhanXetThang_Upd_TinhTrang",
+                                                                                                                        "IN": {
+                                                                                                                            "TinhTrang": 2,
+                                                                                                                            "Lop_NhanXetThangID": "vueData.ThangObj.Lop_NhanXetThangID",
+                                                                                                                            "ReasonReject": ""
+                                                                                                                        },
+                                                                                                                        "MESS": "Gửi tổ trưởng thành công",
+                                                                                                                        "CALLBACK": [
+                                                                                                                            {
+                                                                                                                                "CALL": "NhanXetThang_Lop_Get"
+                                                                                                                            },
+                                                                                                                            {
+                                                                                                                                "CALL": "NhanXetThang_Get"
+                                                                                                                            },
+                                                                                                                            {
+                                                                                                                                "EXE": "renderHeaderTable()"
+                                                                                                                            },
+                                                                                                                            {
+                                                                                                                                "EXE": "const result = fn_IsDisabledTinhTrangDiem({ TinhTrang: vueData.ThangObj.TinhTrang, type: 'GV' }); const { isDisabled } = result || {}; vueData.TinhTrang = isDisabled ?? false;"
+                                                                                                                            }
+                                                                                                                        ]
+                                                                                                                    }
+                                                                                                                ]
+                                                                                                            }
+                                                                                                        ]
+                                                                                                    }
+                                                                                                ]
+                                                                                            },
+                                                                                            {
+                                                                                                "IF": "renderTextDSHocSinhDaLuu() !== items.length",
+                                                                                                "THEN": {
+                                                                                                    "MESS": "Vui lòng lưu hết tất cả học sinh trước khi gửi tổ trưởng"
+                                                                                                }
+                                                                                            }
+                                                                                        ]
+                                                                                    }
+                                                                                ]
+                                                                            }
+                                                                        },
+                                                                        {
+                                                                            "el": "f-button",
+                                                                            "attr": {
+                                                                                "v-if": "CapID === 2 || CapID === 3",
+                                                                                "label": "Gửi BGH",
+                                                                                ":disabled": "items.length === 0 || TinhTrang",
+                                                                                "color": "primary",
+                                                                                "variant": "outlined",
+                                                                                ":action": [
+                                                                                    {
+                                                                                        "CALL": [
+                                                                                            {
+                                                                                                "IF": "renderTextDSHocSinhDaLuu() === items.length",
+                                                                                                "THEN": [
+                                                                                                    {
+                                                                                                        "CONFIRM": "Xác nhận gửi BGH",
+                                                                                                        "CALL": [
+                                                                                                            {
+                                                                                                                "EXE": "processDataBeforePostAPI()"
+                                                                                                            },
+                                                                                                            {
+                                                                                                                "API": "lms/NhanXetThang_Ins",
+                                                                                                                "IN": {
+                                                                                                                    "JSON_NhanXetThang": "vueData.JSON_NhanXetThang"
+                                                                                                                },
+                                                                                                                "MESS": "Cập nhật nhận xét tháng thành công",
+                                                                                                                "CALLBACK": [
+                                                                                                                    {
+                                                                                                                        "API": "lms/NhanXetThang_Upd_TinhTrang",
+                                                                                                                        "IN": {
+                                                                                                                            "TinhTrang": 2,
+                                                                                                                            "Lop_NhanXetThangID": "vueData.ThangObj.Lop_NhanXetThangID",
+                                                                                                                            "ReasonReject": ""
+                                                                                                                        },
+                                                                                                                        "MESS": "Gửi BGH thành công",
+                                                                                                                        "CALLBACK": [
+                                                                                                                            {
+                                                                                                                                "CALL": "NhanXetThang_Lop_Get"
+                                                                                                                            },
+                                                                                                                            {
+                                                                                                                                "CALL": "NhanXetThang_Get"
+                                                                                                                            },
+                                                                                                                            {
+                                                                                                                                "EXE": "renderHeaderTable()"
+                                                                                                                            },
+                                                                                                                            {
+                                                                                                                                "EXE": "const result = fn_IsDisabledTinhTrangDiem({ TinhTrang: vueData.ThangObj.TinhTrang, type: 'GV' }); const { isDisabled } = result || {}; vueData.TinhTrang = isDisabled ?? false;"
+                                                                                                                            }
+                                                                                                                        ]
+                                                                                                                    }
+                                                                                                                ]
+                                                                                                            }
+                                                                                                        ]
+                                                                                                    }
+                                                                                                ]
+                                                                                            },
+                                                                                            {
+                                                                                                "IF": "renderTextDSHocSinhDaLuu() !== items.length",
+                                                                                                "THEN": {
+                                                                                                    "MESS": "Vui lòng lưu hết tất cả học sinh trước khi gửi"
+                                                                                                }
+                                                                                            }
+                                                                                        ]
+                                                                                    }
+                                                                                ]
+                                                                            }
+                                                                        }
+                                                                    ]
+                                                                }
+                                                            ],
+                                                            "w": 12
+                                                        }
+                                                    ]
+                                                }
+                                            ]
+                                        }
+                                    ]
+                                }
+                            ]
+                        },
+                        {
+                            "el": "f-table",
+                            "attr": {
+                                ":key": "keyTable",
+                                "ref": "refTable",
+                                ":label": "renderLabelTable()",
+                                ":items": "items",
+                                ":headers": "headers"
+                            },
+                            "w": 12
+                        },
+                        {
+                            "el": "f-button",
+                            "attr": {
+                                "v-if": "CapID === 1",
+                                "label": "Gửi tổ trưởng",
+                                ":disabled": "items.length === 0 || TinhTrang",
+                                "color": "primary",
+                                "variant": "outlined",
+                                "class": "float-right",
+                                ":action": [
+                                    {
+                                        "CALL": [
+                                            {
+                                                "IF": "renderTextDSHocSinhDaLuu() === items.length",
+                                                "THEN": [
+                                                    {
+                                                        "CONFIRM": "Xác nhận gửi tổ trưởng",
+                                                        "CALL": [
+                                                            {
+                                                                "EXE": "processDataBeforePostAPI()"
+                                                            },
+                                                            {
+                                                                "API": "lms/NhanXetThang_Ins",
+                                                                "IN": {
+                                                                    "JSON_NhanXetThang": "vueData.JSON_NhanXetThang"
+                                                                },
+                                                                "MESS": "Cập nhật nhận xét tháng thành công",
+                                                                "CALLBACK": [
+                                                                    {
+                                                                        "API": "lms/NhanXetThang_Upd_TinhTrang",
+                                                                        "IN": {
+                                                                            "TinhTrang": 2,
+                                                                            "Lop_NhanXetThangID": "vueData.ThangObj.Lop_NhanXetThangID",
+                                                                            "ReasonReject": ""
+                                                                        },
+                                                                        "MESS": "Gửi tổ trưởng thành công",
+                                                                        "CALLBACK": [
+                                                                            {
+                                                                                "CALL": "NhanXetThang_Lop_Get"
+                                                                            },
+                                                                            {
+                                                                                "CALL": "NhanXetThang_Get"
+                                                                            },
+                                                                            {
+                                                                                "EXE": "renderHeaderTable()"
+                                                                            },
+                                                                            {
+                                                                                "EXE": "const result = fn_IsDisabledTinhTrangDiem({ TinhTrang: vueData.ThangObj.TinhTrang, type: 'GV' }); const { isDisabled } = result || {}; vueData.TinhTrang = isDisabled ?? false;"
+                                                                            }
+                                                                        ]
+                                                                    }
+                                                                ]
+                                                            }
+                                                        ]
+                                                    }
+                                                ]
+                                            },
+                                            {
+                                                "IF": "renderTextDSHocSinhDaLuu() !== items.length",
+                                                "THEN": {
+                                                    "MESS": "Vui lòng lưu hết tất cả học sinh trước khi gửi tổ trưởng"
+                                                }
+                                            }
+                                        ]
+                                    }
+                                ]
+                            },
+                            "w": 12
+                        },
+                        {
+                            "el": "f-button",
+                            "attr": {
+                                "v-if": "CapID === 2 || CapID === 3",
+                                "label": "Gửi BGH",
+                                ":disabled": "items.length === 0 || TinhTrang",
+                                "color": "primary",
+                                "variant": "outlined",
+                                "class": "float-right",
+                                ":action": [
+                                    {
+                                        "CALL": [
+                                            {
+                                                "IF": "renderTextDSHocSinhDaLuu() === items.length",
+                                                "THEN": [
+                                                    {
+                                                        "CONFIRM": "Xác nhận gửi BGH",
+                                                        "CALL": [
+                                                            {
+                                                                "EXE": "processDataBeforePostAPI()"
+                                                            },
+                                                            {
+                                                                "API": "lms/NhanXetThang_Ins",
+                                                                "IN": {
+                                                                    "JSON_NhanXetThang": "vueData.JSON_NhanXetThang"
+                                                                },
+                                                                "MESS": "Cập nhật nhận xét tháng thành công",
+                                                                "CALLBACK": [
+                                                                    {
+                                                                        "API": "lms/NhanXetThang_Upd_TinhTrang",
+                                                                        "IN": {
+                                                                            "TinhTrang": 2,
+                                                                            "Lop_NhanXetThangID": "vueData.ThangObj.Lop_NhanXetThangID",
+                                                                            "ReasonReject": ""
+                                                                        },
+                                                                        "MESS": "Gửi BGH thành công",
+                                                                        "CALLBACK": [
+                                                                            {
+                                                                                "CALL": "NhanXetThang_Lop_Get"
+                                                                            },
+                                                                            {
+                                                                                "CALL": "NhanXetThang_Get"
+                                                                            },
+                                                                            {
+                                                                                "EXE": "renderHeaderTable()"
+                                                                            },
+                                                                            {
+                                                                                "EXE": "const result = fn_IsDisabledTinhTrangDiem({ TinhTrang: vueData.ThangObj.TinhTrang, type: 'GV' }); const { isDisabled } = result || {}; vueData.TinhTrang = isDisabled ?? false;"
+                                                                            }
+                                                                        ]
+                                                                    }
+                                                                ]
+                                                            }
+                                                        ]
+                                                    }
+                                                ]
+                                            },
+                                            {
+                                                "IF": "renderTextDSHocSinhDaLuu() !== items.length",
+                                                "THEN": {
+                                                    "MESS": "Vui lòng lưu hết tất cả học sinh trước khi gửi"
+                                                }
+                                            }
+                                        ]
+                                    }
+                                ]
+                            },
+                            "w": 12
+                        },
+                        {
+                            "el": "f-dialog",
+                            "attr": {
+                                "v-model": "IsShowDialogCopy",
+                                "title": "Sao chép nhận xét tháng",
+                                ":width": 500,
+                                ":controls": [
+                                    {
+                                        "el": "v-select",
+                                        "attr": {
+                                            "v-model": "ThangObj_Copy",
+                                            "label": "Chọn tháng sao chép",
+                                            ":items": "vueData.DSThang.filter(x=> x.Lop_NhanXetThangID !== vueData.ThangObj.Lop_NhanXetThangID)",
+                                            "item-title": "Thang_HienThi",
+                                            "item-value": "Lop_NhanXetThangID",
+                                            ":return-object": true
+                                        }
+                                    },
+                                    {
+                                        "el": "v-select",
+                                        "attr": {
+                                            "v-model": "vueData.ThangObj",
+                                            "label": "Tháng đang chọn",
+                                            ":items": "vueData.DSThang",
+                                            "item-title": "Thang_HienThi",
+                                            "item-value": "Lop_NhanXetThangID",
+                                            ":return-object": true,
+                                            ":readOnly": true
+                                        }
+                                    }
+                                ],
+                                ":button": [
+                                    {
+                                        "label": "Đóng",
+                                        "action": [
+                                            {
+                                                "IsShowDialogCopy": false
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "label": "Xác nhận",
+                                        "action": [
+                                            {
+                                                "CONFIRM": "Xác nhận sao chép",
+                                                "API": "lms/NhanXetThang_Copy",
+                                                "IN": {
+                                                    "Lop_NhanXetThangID": "vueData.ThangObj.Lop_NhanXetThangID",
+                                                    "Lop_NhanXetThangID_Copy": "ThangObj_Copy.Lop_NhanXetThangID"
+                                                },
+                                                "MESS": "Sao chép thành công",
+                                                "CALLBACK": [
+                                                    {
+                                                        "IsShowDialogCopy": false
+                                                    },
+                                                    {
+                                                        "CALL": "NhanXetThang_Get"
+                                                    }
+                                                ]
+                                            }
+                                        ]
+                                    }
+                                ]
+                            },
+                            "w": 12
+                        }
+                    ]
+                }
+            ]
+        }
+    ],
+    "set": {}
+}

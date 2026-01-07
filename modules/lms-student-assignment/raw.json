@@ -2,6 +2,7 @@
     "data": [
         {
             "HocSinhID": "parseInt(vueData.user.UserID)",
+            "Is_SendToClass": "Is_SendToClass",
             "dataReady": false,
             "assignmentData": [],
             "monHocName": "",

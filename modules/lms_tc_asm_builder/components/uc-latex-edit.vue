@@ -25,7 +25,7 @@
 							<div v-if="previewEmpty" class="text-grey">
 								<em>Không có nội dung...</em>
 							</div>
-							<uc-latex-view v-else ref="previewContainer" :content="previewContent" />
+							<uc-latex-view v-else ref="previewContainer" v-model:content="previewContent" />
 						</div>
 					</div>
 				</v-card-text>
@@ -81,27 +81,56 @@
 				this.renderPreview(newContent)
 			}
 		},
-		mounted() {		
+		mounted() {
 			this.renderContent(this.content)
 		},
 		methods: {
+			preprocessMathML(content) {
+				let result = content;
+	
+				// Lặp tối đa 10 lần để xử lý nested
+				for (let i = 0; i < 10; i++) {
+					const before = result;
+	
+					// Match bất kỳ <mfenced> nào có open="{"
+					result = result.replace(
+						/<mfenced([^>]+open="\{"[^>]*)>([\s\S]*?)<\/mfenced>/g,
+						(fullMatch, attributes, innerContent) => {
+							// Kiểm tra xem có close="}" không
+							const hasClosingBrace = /close="\}"/.test(attributes);
+	
+							if (hasClosingBrace) {
+								return `<mo>{</mo><mrow>${innerContent}</mrow><mo>}</mo>`;
+							} else {
+								return `<mo>{</mo><mrow>${innerContent}</mrow>`;
+							}
+						}
+					);
+	
+					// Nếu không còn thay đổi thì dừng
+					if (before === result) break;
+				}
+	
+				return result;
+			},
 			renderContent(content) {
 				if (!content) {
 					this.renderedContent = ''
 					return
 				}
-				this.renderedContent = content
+				this.renderedContent = this.preprocessMathML(content);
+				// this.renderedContent = content
 			},
 			renderPreview(content) {
 				if (!content) {
 					this.previewContent = ''
 					return
 				}
-				this.previewContent = content
+				this.previewContent = this.preprocessMathML(content);
 			},
 			saveContent(isActive) {
-				this.$emit('update:content', this.contentEditor)
-				isActive.value = false
+				this.$emit('update:content', this.preprocessMathML(this.contentEditor));
+				isActive.value = false;
 			},
 			cancelEdit(isActive) {
 				this.contentEditor = this.content

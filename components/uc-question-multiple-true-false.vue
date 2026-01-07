@@ -52,8 +52,10 @@
 			</div>
 			<div v-else-if="grading?.comment" class="pa-2 rounded bg-blue-lighten-1">
 				<b>
-					<v-icon class="mr-1" size="18">mdi-message-text-outline</v-icon> Ý kiến {{ isGrade ? 'học sinh' :
-						'bạn' }}:
+					<v-icon class="mr-1" size="18">mdi-message-text-outline</v-icon> <span v-if="$i18n.locale =='en'&& isGrade">
+						Student's Feedback
+					</span>
+					<span v-else-if="$i18n.locale !='en'&& isGrade">Ý kiến {{ isGrade ? 'học sinh' : 'bạn' }}:</span>
 				</b>
 				<div class="mt-1">{{ grading.comment }}</div>
 			</div>
@@ -62,7 +64,7 @@
 		<!-- (5) Điểm -->
 		<!-- Điểm câu – hiển thị khi đã trả bài (status == 4) -->
 		<div v-if="submissionstatus == 4 || isGrade" class="mt-2">
-			<strong>Điểm | Score:</strong>
+			<strong>{{$i18n.locale == 'en' ? 'Score':'Điểm' }}:</strong>
 			<v-chip size="small" :color="scoreChipColor" variant="tonal">
 				<v-icon start size="16">mdi-star</v-icon>
 				{{ displayScore }} / {{ effectiveMaxPoints }}
@@ -84,7 +86,7 @@
 		<!-- GV -->
 		<div class="mt-2" v-if="isGrade">
 			<v-textarea :model-value="grading?.teacherComment || ''" @update:model-value="updateTeacherComment"
-				label="Nhận xét của giáo viên (tùy chọn)" rows="2" outlined dense hide-details />
+				:label="$t('message.TeacherCommentOptional')" rows="2" outlined dense hide-details />
 		</div>
 	</div>
 </template>
@@ -133,7 +135,9 @@ export default {
 	watch: {
 		answer: { deep: true, handler() { if (this.isGrade) this.$emit("grading-change", { ...this.grading, manualScore: this.totalScore }); } }
 	},
-	data() { return { menu: false, widthScreen: null }; },
+	data() {
+		this.$i18n.locale = (localStorage.getItem('IsLanguage') && localStorage.getItem('IsLanguage') == 'true') ? 'en' : 'vi'
+		return { menu: false, widthScreen: null }; },
 	methods: {
 		handleResize() {
 			this.widthScreen = window.innerWidth;

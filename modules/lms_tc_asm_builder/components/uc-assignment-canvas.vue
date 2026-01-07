@@ -2,7 +2,7 @@
 	<div class="assignment-canvas">
 		<div v-if="!groups || groups.length === 0" class="text-center pa-10 text-grey">
 			<v-icon size="48" class="mb-2">mdi-paperclip</v-icon>
-			<div>Kéo hoặc chọn thành phần từ thư viện để bắt đầu.</div>
+			<div>{{ $t('message.DragOrSelectAComponentFromTheLibraryToGetStarted') }}.</div>
 		</div>
 
 		<!-- Vòng lặp qua các Nhóm (Groups) -->
@@ -25,12 +25,12 @@
 						</v-chip>
 					</div>
 					<v-chip color="primary" class="ml-2" v-if="renderPointInGroup(group) > 0" size="small">
-						Tổng {{renderPointInGroup(group)}} điểm
+						{{ $t('message.Total') }} {{renderPointInGroup(group)}} {{ $t('message.Score') }}
 					</v-chip>
 					<v-spacer />
 					<uc-btn-import-json v-model:questions="group.questions" :targetGroupIndex="groupIndex" />
 					<v-chip class="ml-2" size="small" color="primary" variant="tonal">
-						{{ group.questions.length }} câu
+						{{ group.questions.length }} {{ $t('message.Question') }}
 					</v-chip>
 					<v-btn icon size="small" variant="text" @click.stop="removeGroup(groupIndex)">
 						<v-icon>mdi-delete-outline</v-icon>
@@ -69,11 +69,11 @@
 								</template>
 
 								<v-list-item-title class="font-weight-bold d-flex align-center">
-									Câu {{question.ordinalNumber}}:
+									{{ $t('message.Question') }} {{question.ordinalNumber}}:
 									<span class="ml-2" v-if="question.type?.includes('QUIZ')">
 										<v-chip size="x-small" color="red"
 											v-if="vueData.isCheckAnswerQuestionNotChoose(question)">
-											Chưa có đáp án
+											{{ $t('message.NoAnswer') }}
 										</v-chip>
 									</span>
 									<span class="ml-2 d-flex ga-2">
@@ -110,7 +110,7 @@
 						@dragenter.prevent="handleEmptyGroupDragEnter($event, groupIndex)"
 						@dragleave="handleEmptyGroupDragLeave" @drop.prevent="handleEmptyGroupDrop($event, groupIndex)">
 						<v-icon class="mb-2" color="grey-lighten-1">mdi-inbox-arrow-down</v-icon>
-						<div class="text-grey">Thả câu hỏi vào đây</div>
+						<div class="text-grey">{{ $t('message.DropQuestionHere') }}</div>
 					</div>
 				</div>
 			</v-card>
@@ -119,7 +119,7 @@
 		<v-btn block variant="elevated" color="primary" class="mt-4" @click="addGroup"
 			style="position: sticky;bottom: -4px;">
 			<v-icon start>mdi-plus-box-outline</v-icon>
-			Thêm Phần mới
+			{{ $t('message.AddNewSection') }}
 		</v-btn>
 	</div>
 </template>
@@ -201,7 +201,7 @@
 				const newGroups = [...this.groups];
 				newGroups.push({
 					id: `group_${Date.now()}`,
-					title: `Phần ${newGroups.length + 1}`,
+					title: `${this.$i18n.locale == 'en' ? 'Section':'Phần'} ${newGroups.length + 1}`,
 					description: '',
 					media: {
 						type: "YOUTUBE",

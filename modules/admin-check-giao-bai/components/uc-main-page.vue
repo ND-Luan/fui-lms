@@ -130,6 +130,7 @@ export default {
 		},
 		onOpenDetail(item) {
 			this.itemDetail = item
+			this.itemDetail.KhoiID = this.KhoiID
 			this.isShowModalDetail = true
 		},
        

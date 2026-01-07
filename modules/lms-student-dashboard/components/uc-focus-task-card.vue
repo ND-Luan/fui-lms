@@ -34,94 +34,97 @@
 </template>
 
 <script>
-	export default {
-		name: 'uc-focus-task-card',
-		props: {
-			task: {
-				type: Object,
-				required: true
-			}
-		},
-		computed: {
-			typeInfo() {
-				if (this.task.ResourceType === 'ASSIGNMENT') {
-					return {
-						isAssignment: true,
-						icon: 'mdi-pencil-ruler',
-						color: '#1976D2', // Primary,,
-						Reason:this.task?.Reason ?? ''
-					};
-				}
+export default {
+	name: 'uc-focus-task-card',
+	props: {
+		task: {
+			type: Object,
+			required: true
+		}
+	},
+	computed: {
+		typeInfo() {
+			if (this.task.ResourceType === 'ASSIGNMENT') {
 				return {
-					isAssignment: false,
-					icon: 'mdi-book-open-page-variant',
-					color: '#388E3C' // Success
+					isAssignment: true,
+					icon: 'mdi-pencil-ruler',
+					color: '#1976D2', // Primary,,
+					Reason: this.task?.Reason ?? ''
 				};
-			},
-			statusInfo() {
-				const statuses = {
-					'OVERDUE': { color: 'error', text: 'Quá hạn', cardClass: 'urgent' },
-					'IN_PROGRESS': { color: 'warning', text: this.task.ResourceType === 'ASSIGNMENT' ? 'Đang làm' : 'Đang học', cardClass: 'warning' },
-					'NOT_STARTED': { color: this.typeInfo.isAssignment ? 'primary' : 'success', text: 'Bắt đầu', cardClass: 'normal' },
-					'RESUBMIT': { color: 'warning', text: 'Nộp bài lại', cardClass: 'normal' },
-				};
-				return statuses[this.task.Status] || statuses['NOT_STARTED'];
-			},
-			dueDateInfo() {
-				if (!this.task.DueDate) return { text: '', colorClass: '' };
-				const now = new Date();
-				const dueDate = new Date(this.task.DueDate);
-				const diffSeconds = Math.floor((dueDate - now) / 1000);
-				if (diffSeconds < 0) return { text: 'đã quá hạn', colorClass: 'text-error' };
-				const diffMinutes = Math.floor(diffSeconds / 60);
-				if (diffMinutes < 60) return { text: `còn ${diffMinutes} phút`, colorClass: 'text-warning-darken-2' };
-				const diffHours = Math.floor(diffMinutes / 60);
-				if (diffHours < 24) return { text: `còn ${diffHours} giờ`, colorClass: 'text-warning-darken-2' };
-				const timeDiff = dueDate.getTime() - now.getTime();
-				const daysDiff = Math.ceil(timeDiff / (1000 * 3600 * 24));
-				return { text: `còn ${daysDiff} ngày`, colorClass: 'text-success-darken-1' };
+			}
+			return {
+				isAssignment: false,
+				icon: 'mdi-book-open-page-variant',
+				color: '#388E3C' // Success
+			};
+		},
+		statusInfo() {
+			const statuses = {
+				'OVERDUE': { color: 'error', text: 'Quá hạn', cardClass: 'urgent' },
+				'IN_PROGRESS': { color: 'warning', text: this.task.ResourceType === 'ASSIGNMENT' ? 'Đang làm' : 'Đang học', cardClass: 'warning' },
+				'NOT_STARTED': { color: this.typeInfo.isAssignment ? 'primary' : 'success', text: 'Bắt đầu', cardClass: 'normal' },
+				'RESUBMIT': { color: 'warning', text: 'Nộp bài lại', cardClass: 'normal' },
+			};
+			return statuses[this.task.Status] || statuses['NOT_STARTED'];
+		},
+		dueDateInfo() {
+			if (!this.task.DueDate) return { text: '', colorClass: '' };
+			const now = new Date();
+			const dueDate = new Date(this.task.DueDate);
+			const diffSeconds = Math.floor((dueDate - now) / 1000);
+			if (diffSeconds < 0) return { text: 'đã quá hạn', colorClass: 'text-error' };
+			const diffMinutes = Math.floor(diffSeconds / 60);
+			if (diffMinutes < 60) return { text: `còn ${diffMinutes} phút`, colorClass: 'text-warning-darken-2' };
+			const diffHours = Math.floor(diffMinutes / 60);
+			if (diffHours < 24) return { text: `còn ${diffHours} giờ`, colorClass: 'text-warning-darken-2' };
+			const timeDiff = dueDate.getTime() - now.getTime();
+			const daysDiff = Math.ceil(timeDiff / (1000 * 3600 * 24));
+			return { text: `còn ${daysDiff} ngày`, colorClass: 'text-success-darken-1' };
+		}
+	},
+	methods: {
+		goToResource() {
+			console.log('this.task.', this.task)
+			const type = (this.task.ResourceType || '').toLowerCase();
+			const id = this.task.ResourceID;
+			const Is_SendToClass = this.task.Is_SendToClass
+			if (type && id) {
+				if (type === 'assignment') {
+					openWindow({
+						title: this.task.Title,
+						url: `/lms-student-assignment?AssignToClassID=${id}&Is_SendToClass=${Is_SendToClass}`,
+						id: 'StudentDoASM' + id,
+						onclose: {
+							"EXE": "vueData.initPage()"
+						}
+					})
+
+				} else if (type === 'lesson') {
+					openWindow({
+						title: this.task.Title,
+						url: `/lms-student-lesson-viewer?AssignToClassID=${id}`,
+						onclose: {
+							"EXE": "vueData.initPage()"
+						}
+					})
+				}
 			}
 		},
-		methods: {
-			goToResource() {
-				const type = (this.task.ResourceType || '').toLowerCase();
-				const id = this.task.ResourceID;
-				if (type && id) {
-					if (type === 'assignment') {
-						openWindow({
-							title: this.task.Title,
-							url: `/lms-student-assignment?AssignToClassID=${id}`,
-							id: 'StudentDoASM',
-							onclose: {
-								"EXE": "vueData.initPage()"
-							}
-						})
-					} else if (type === 'lesson') {
-						openWindow({
-							title: this.task.Title,
-							url: `/lms-student-lesson-viewer?AssignToClassID=${id}`,
-							onclose: {
-								"EXE": "vueData.initPage()"
-							}
-						})
-					}
+		formatDate(dateString) {
+			if (!dateString) return '';
+			console.log('dateString', dateString)
+			const date = new Date(dateString);
+			console.log('date', date)
+			return date.toLocaleString('vi-VN'
+				, {
+					hour: "2-digit",
+					minute: "2-digit",
+					day: "2-digit",
+					month: "2-digit",
+					year: "numeric"
 				}
-			},
-			formatDate(dateString) {
-				if (!dateString) return '';
-				console.log('dateString', dateString)
-				const date = new Date(dateString);
-				console.log('date', date)
-				return date.toLocaleString('vi-VN'
-					, {
-						hour: "2-digit",
-						minute: "2-digit",
-						day: "2-digit",
-						month: "2-digit",
-						year: "numeric"
-					}
-				);
-			}
+			);
 		}
 	}
+}
 </script>

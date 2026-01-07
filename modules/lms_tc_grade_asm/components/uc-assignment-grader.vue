@@ -1,7 +1,7 @@
 <template>
 	<div v-if="!assignment" class="text-center pa-10">
 		<v-progress-circular indeterminate size="64" />
-		<p class="mt-4">Đang tải dữ liệu bài nộp...</p>
+		<p class="mt-4">{{ IsLanguage ? "Loading data submition..." : "Đang tải dữ liệu bài nộp..." }}</p>
 	</div>
 
 	<div v-else class="container-scroll">
@@ -17,7 +17,8 @@
 					</template>
 					<template #append>
 						<div class="d-flex flex-column align-center">
-							<p class="text-caption">Nộp bài: {{ formatDate(submission.SubmissionTime) }}</p>
+							<p class="text-caption ">{{ $t('message.Submitted') }}: {{
+								formatDate(submission.SubmissionTime) }}</p>
 							<v-chip :color="getSubmissionStatusColor()" variant="elevated" size="small"
 								class="progress-chip">
 								{{ getSubmissionStatusText() }}
@@ -25,10 +26,9 @@
 						</div>
 					</template>
 					<v-list-item-title>
-						<p class="font-weight-medium text-h6">{{ assignment?.Title }}</p>
-						<p class="d-flex flex-wrap text-subtitle-2">{{
-							submission?.HoTenHocSinh }} • {{
-								assignment?.TenLop }}
+						<p class="font-weight-medium text-h6 text-wrap">{{ assignment?.Title }}</p>
+						<p class="d-flex flex-wrap text-subtitle-2">
+							{{ submission?.HocSinhID }} • {{ submission?.HoTenHocSinh }} • {{ assignment?.TenLop }}
 						</p>
 					</v-list-item-title>
 				</v-list-item>
@@ -38,7 +38,7 @@
 			<v-col cols="3" v-if="!mobile">
 				<v-card class="question-nav" sticky top="80px">
 					<div class="d-flex justify-space-between align-center text-subtitle-1 font-weight-medium">
-						Cấu trúc bài tập
+						{{ $t('message.AssignmentStructure') }}
 						<v-btn icon size="small" @click="navCollapsed = !navCollapsed">
 							<v-icon>{{ navCollapsed ? 'mdi-chevron-down' : 'mdi-chevron-up' }}</v-icon>
 						</v-btn>
@@ -59,7 +59,7 @@
 									<v-list-item-title class="group-title">{{ group.title }}</v-list-item-title>
 									<template v-slot:append>
 										<v-chip size="small" color="primary" variant="outlined">
-											{{ group.questions.length }} câu
+											{{ group.questions.length }} {{ $t('message.Question') }}
 										</v-chip>
 									</template>
 								</v-list-item>
@@ -154,15 +154,17 @@
 							<div class="d-flex align-center ga-2 justify-end">
 								<v-chip v-if="questionsTypesLabel(currentQuestion.type)" size="small"
 									:color="questionsTypesLabel(currentQuestion.type).color">
-									{{ questionsTypesLabel(currentQuestion.type).label }}
+									{{ IsEngLish ? questionsTypesLabel(currentQuestion.type).label_EN :
+										questionsTypesLabel(currentQuestion.type)?.label }}
 								</v-chip>
 								<v-chip color="primary" variant="elevated" class="progress-chip" size="small">
-									{{ currentQuestion.points }} điểm
+									{{ currentQuestion.points }} {{ $t('message.points') }}
 								</v-chip>
 							</div>
 							<div class="d-flex ga-2">
 								<!-- Question text for desktop -->
-								<b class="font-weight-bold" style="flex: none;">Câu {{ globalQuestionNumber
+								<b class="font-weight-bold" style="flex: none;">{{ $t('message.Question') }} {{
+									globalQuestionNumber
 								}}:</b>
 								<!-- Question text -->
 								<uc-latex-view class="flex-column ms-2" style="align-items: flex-start !important;"
@@ -214,7 +216,7 @@
 						<v-divider></v-divider>
 						<v-card-actions class="pa-4 d-flex justify-space-between">
 							<v-btn @click="prevQuestion" :disabled="globalQuestionNumber === 1" variant="text">
-								<v-icon start>mdi-chevron-left</v-icon>Câu trước
+								<v-icon start>mdi-chevron-left</v-icon>{{ $t('message.back') }}
 							</v-btn>
 
 							<div class="d-flex align-center ga-2"
@@ -222,7 +224,7 @@
 								<v-btn @click="saveGrading(false)" color="grey-darken-1" variant="outlined"
 									:loading="isSaving" size="small">
 									<v-icon start>mdi-content-save-outline</v-icon>
-									Chấm nháp
+									{{ IsEngLish ? "Draft Grading" : "Chấm nháp" }}
 								</v-btn>
 								<v-menu location="top" scroll-strategy="close" open-on-click
 									:close-on-content-click="false" offset="4">
@@ -230,12 +232,14 @@
 										<v-btn v-bind="props" color="warning" size="small" variant="elevated"
 											:loading="isSaving">
 											<v-icon start>mdi-reload-alert</v-icon>
-											Yêu cầu nộp lại bài
+											{{ IsEngLish ? "Request Resubmission" : "Yêu cầu nộp lại bài" }}
 										</v-btn>
 									</template>
 									<v-card>
-										<v-card-title class="border-b bg-warning text-body-2">Lý do yêu cầu nộp lại bài
-											tập</v-card-title>
+										<v-card-title class="border-b bg-warning text-body-2">
+											{{ IsEngLish ? "Reason for Requesting Resubmission" : `Lý do yêu cầu nộp lại
+											bài`
+											}}</v-card-title>
 										<v-card-text class="pa-1">
 											<v-textarea label="Lý do" v-model="Reason" :rows="2" variant="outlined"
 												hide-details="auto" dense placeholder="Nhập lý do..." />
@@ -243,8 +247,8 @@
 										<v-card-actions class="border-t py-0">
 											<v-spacer></v-spacer>
 											<v-btn variant="text" size="small" @click="YeuCauLamLaiBai()"
-												color="warning">Xác
-												nhận</v-btn>
+												color="warning">{{
+													$t('message.confirm') }}</v-btn>
 										</v-card-actions>
 									</v-card>
 								</v-menu>
@@ -252,7 +256,7 @@
 								<v-btn @click="saveGrading(true)" color="success" size="small" variant="elevated"
 									:loading="isSaving">
 									<v-icon start>mdi-send-check</v-icon>
-									Hoàn tất & Trả bài
+									{{ IsEngLish ? "Complete grade and public" : "Hoàn tất & Trả bài" }}
 								</v-btn>
 
 
@@ -260,7 +264,7 @@
 
 							<v-btn @click="nextQuestion" :disabled="globalQuestionNumber === totalQuestions"
 								variant="text">
-								Câu sau
+								{{ $t('message.next') }}
 								<v-icon end>mdi-chevron-right</v-icon>
 							</v-btn>
 						</v-card-actions>
@@ -275,7 +279,8 @@
 							<div class="d-flex justify-space-between align-center flex-wrap ga-2">
 								<div class="d-flex align-center ga-2 flex-wrap">
 									<div class="progress-stats">
-										<span class="text-subtitle-2 text-medium-emphasis">Tiến độ chấm:</span>
+										<span class="text-subtitle-2 text-medium-emphasis">{{
+											$t('message.GradingProgress') }}:</span>
 										<span class="text-h6 ml-1">{{ gradedCount }}/{{ totalQuestions }}</span>
 									</div>
 									<v-progress-linear :model-value="(gradedCount / totalQuestions) * 100"
@@ -290,7 +295,8 @@
 									v-if="![0, 1, 4].includes(submission?.SubmissionStatus)">
 									<v-btn @click="saveGrading(false)" color="grey-darken-1" variant="outlined"
 										size="small" :loading="isSaving">
-										<v-icon start size="16">mdi-content-save-outline</v-icon>Chấm nháp
+										<v-icon start size="16">mdi-content-save-outline</v-icon>
+										{{ IsEngLish ? "Draft Grading" : "Chấm nháp" }}
 									</v-btn>
 									<v-menu location="bottom" scroll-strategy="close" open-on-click
 										:close-on-content-click="false" offset="4">
@@ -298,12 +304,16 @@
 											<v-btn v-bind="props" color="warning" size="small" variant="elevated"
 												:loading="isSaving">
 												<v-icon start>mdi-reload-alert</v-icon>
-												Yêu cầu nộp lại bài
+												{{ IsEngLish ? "Request Resubmission" : "Yêu cầu nộp lại bài" }}
 											</v-btn>
 										</template>
 										<v-card>
-											<v-card-title class="border-b bg-warning text-body-2">Lý do yêu cầu nộp lại
-												bài tập</v-card-title>
+											<v-card-title class="border-b bg-warning text-body-2">
+												{{
+													IsEngLish ? "Reason for Requesting Resubmission" : `Lý do yêu cầu nộp
+												lại
+												bài`
+												}}</v-card-title>
 											<v-card-text class="pa-1">
 												<v-textarea label="Lý do" v-model="Reason" :rows="2" variant="outlined"
 													hide-details="auto" dense placeholder="Nhập lý do..." />
@@ -311,20 +321,18 @@
 											<v-card-actions class="border-t py-0">
 												<v-spacer></v-spacer>
 												<v-btn variant="text" size="small" @click="YeuCauLamLaiBai()"
-													color="warning">Xác nhận</v-btn>
+													color="warning">{{
+														$t('message.confirm') }}</v-btn>
 											</v-card-actions>
 										</v-card>
 									</v-menu>
 									<v-btn @click="saveGrading(true)" color="success" size="small" variant="elevated"
 										:loading="isSaving">
-										<v-icon start size="16">mdi-send-check</v-icon>Hoàn tất & Trả bài
-									</v-btn> 
-									
-								</div>
-								<v-btn @click="saveGradingTEST(true)" color="success" size="small" variant="elevated"
-										:loading="isSaving" v-if="vueData.user.UserID == 'NA0000022'">
-										<v-icon start size="16">mdi-send-check</v-icon>Hoàn tất & Trả bài
+										<v-icon start size="16">mdi-send-check</v-icon>
+										{{ IsEngLish ? "Complete grade and public" : "Hoàn tất & Trả bài" }}
 									</v-btn>
+
+								</div>
 							</div>
 						</v-card-text>
 					</v-card>
@@ -346,11 +354,12 @@
 												<div class="group-meta">
 													<span class="text-caption text-medium-emphasis">{{
 														group.questions.length }}
-														câu hỏi</span>
+														{{ $t('message.Question') }}</span>
 													<span class="mx-2">•</span>
-													<span class="text-caption text-medium-emphasis">Tối đa {{
-														group.questions.reduce((sum, q) => sum + q.points, 0)}}
-														điểm</span>
+													<span class="text-caption text-medium-emphasis">{{
+														$t('message.MaximumScore') }} {{
+															group.questions.reduce((sum, q) => sum + q.points, 0)}}
+													</span>
 												</div>
 											</div>
 										</div>
@@ -408,17 +417,19 @@
 														size="18">
 														{{ getGradingStatusIcon(question.id) }}
 													</v-icon>
-													Câu {{ getGlobalQuestionNumberByQuestionId(question.id) }}:
+													{{ $t('message.Question') }} {{
+														getGlobalQuestionNumberByQuestionId(question.id) }}:
 												</b>
 												<div class="d-flex align-center ga-2 justify-end">
 													<v-chip v-if="questionsTypesLabel(question.type)" size="small"
 														:color="questionsTypesLabel(question.type).color">
-														{{ questionsTypesLabel(question.type).label }}
+														{{ IsEngLish ? questionsTypesLabel(question.type)?.label_EN :
+															questionsTypesLabel(question.type)?.label }}
 													</v-chip>
 													<v-chip color="white" text-color="primary" variant="elevated"
 														size="small"
 														class="progress-chip status-badge points-chip-mobile">
-														{{ question.points }} điểm
+														{{ question.points }} {{ $t('message.points') }}
 													</v-chip>
 												</div>
 											</div>
@@ -476,7 +487,7 @@
 															</v-avatar>
 														</div>
 														<h2 class="text-h4 mb-2">
-															Không tìm thấy đường dẫn
+															{{ $t('message.PathNotFound') }}
 														</h2>
 													</v-card>
 												</v-container>
@@ -496,7 +507,7 @@
 															</v-avatar>
 														</div>
 														<h2 class="text-h4 mb-2">
-															Không tìm thấy đường dẫn
+															{{ $t('message.PathNotFound') }}
 														</h2>
 													</v-card>
 												</v-container>
@@ -541,7 +552,7 @@
 				<!-- View Mode Toggle (same as taker) -->
 				<div class="text-subtitle-1 font-weight-medium">
 					<v-icon left color="primary">mdi-clipboard-check-outline</v-icon>
-					Tổng kết & Nhận xét chung
+					{{ $t('message.SummaryAndGeneralComments') }}
 				</div>
 				<v-divider class="my-2" />
 				<!-- Overall Grading Summary -->
@@ -553,30 +564,32 @@
 									divided mandatory size="small">
 									<v-btn value="single" size="small">
 										<v-icon size="16">mdi-numeric-1-box</v-icon>
-										<span class="ml-1 d-none d-sm-inline">Từng câu</span>
+										<span class="ml-1 d-none d-sm-inline">
+											{{ IsEngLish ? 'Single' : 'Từng câu' }}
+										</span>
 									</v-btn>
 									<v-btn value="all" size="small">
 										<v-icon size="16">mdi-view-list</v-icon>
-										<span class="ml-1 d-none d-sm-inline">Tất cả</span>
+										<span class="ml-1 d-none d-sm-inline">{{ IsEngLish ? 'All' : 'Tất cả' }}</span>
 									</v-btn>
 								</v-btn-toggle>
 							</v-col>
 							<v-col cols="12">
-								<label class="font-weight-medium mb-2 d-block">Điểm tổng kết</label>
+								<label class="font-weight-medium mb-2 d-block">{{ $t('message.FinalScore') }}</label>
 								<div class="d-flex align-center">
 									<v-number-input v-model="gradingSummary.totalScore" label="Điểm"
 										:max="assignment.MaxScore" :min="0" variant="outlined" density="compact"
 										hide-details style="max-width: 100px;" control-variant="stacked" inset>
 									</v-number-input>
 									<span class="text-h6 ml-2 text-primary"> / {{ assignment.MaxScore }}</span>
-									<span class="ml-1 text-caption">điểm</span>
+									<span class="ml-1 text-caption">{{ $t('message.points') }}</span>
 								</div>
 							</v-col>
 							<v-col cols="12">
-								<label class="font-weight-medium mb-2 d-block">Nhận xét chung cho toàn
-									bài</label>
+								<label class="font-weight-medium mb-2 d-block">{{ $t('message.OverallComment')
+								}}</label>
 								<v-textarea v-model="gradingSummary.teacherComment" hide-details
-									placeholder="Nhập nhận xét tổng quát về bài làm của học sinh..." />
+									:placeholder="$t('message.EnterGeneralFeedback')" />
 							</v-col>
 						</v-row>
 					</v-card-text>
@@ -597,6 +610,7 @@ export default {
 		onOpenPublishDialog: { type: Function, default: () => { } }
 	},
 	data() {
+		this.$i18n.locale = (localStorage.getItem('IsLanguage') && localStorage.getItem('IsLanguage') == 'true') ? 'en' : 'vi'
 		const { mobile } = Vuetify.useDisplay()
 		return {
 			Reason: "",
@@ -638,6 +652,9 @@ export default {
 		},
 		gradedCount() {
 			return this.allQuestions.filter(q => this.isQuestionGraded(q.id)).length;
+		},
+		IsEngLish: function () {
+			return this.$i18n.locale == 'en'
 		}
 	},
 	methods: {
@@ -655,6 +672,7 @@ export default {
 				console.log('submissionData', submissionData)
 				console.log('assignmentConfig', assignmentConfig)
 				this.submission = submissionData;
+				console.log('this.submission', this.submission)
 				if (submissionData && submissionData?.SubmissionContent) {
 					const content = JSON.parse(submissionData.SubmissionContent);
 
@@ -692,6 +710,7 @@ export default {
 
 
 				this.gradingSummary.totalScore = submissionData?.Score || 0;
+				console.log('submissionData?.Score', submissionData?.Score)
 				this.gradingSummary.teacherComment = submissionData?.TeacherComment || '';
 				if (this.assignment?.groups) {
 					const initialCollapsed = {};
@@ -713,21 +732,21 @@ export default {
 		},
 		//Hiện tại đang sử dụng cho File Upload
 		updateAnswer(questionId, newAnswer) {
-			console.log('this.gradingData', this.gradingData)
+			console.log('udp')
 			this.gradingData[questionId] = {
 				...this.gradingData[questionId],
 				answerData: newAnswer
 			}
-			console.log('this.gradingData', this.gradingData)
-			console.log('this.gradingData', this.gradingData)
-
 			this.saveGrading(false)
 		},
 		async saveGrading(isPublishing) {
+			const $this = this
 			let listQuestions = _.flatten(this.assignment.groups.map(q => { return [...q.questions] }))
 			this.isSaving = true;
-			await this.calculateTotalScore();
-
+			console.log('this.submission', this.submission)
+			// if(!this.gradingSummary.totalScore){
+			// }
+			// await this.calculateTotalScore();
 			const payload = {
 				SubmissionID: this.submission.SubmissionID,
 				Score: this.gradingSummary.totalScore,
@@ -739,8 +758,8 @@ export default {
 				//Hàm warning những câu chưa chấm
 				let messageQuestionsNotGrade = this.onHandleQuestionNotGrade(listQuestions)
 				confirm({
-					title: messageQuestionsNotGrade.length > 0 ? "Còn các câu hỏi chưa được chấm. Thầy/Cô xác nhận hoàn tất và trả bài?" : "Xác nhận hoàn tất chấm bài và trả bài cho học sinh?",
-					message: messageQuestionsNotGrade.length > 0 ? ("Danh sách câu chưa chấm: " + messageQuestionsNotGrade) : "",
+					title: messageQuestionsNotGrade.length > 0 ? (`${this.IsEngLish ? 'There are still ungraded questions. Do you want to confirm and return the assignment?' : "Còn các câu hỏi chưa được chấm. Thầy/Cô xác nhận hoàn tất và trả bài?"}`) : (`${this.IsEngLish ? 'Confirm grading completion and return the assignment to the student?' : "Xác nhận hoàn tất chấm bài và trả bài cho học sinh?"}`),
+					message: messageQuestionsNotGrade.length > 0 ? (`${this.IsEngLish ? "List of Ungraded Questions" : "Danh sách câu chưa chấm"}: ` + messageQuestionsNotGrade) : "",
 					action: () => {
 						this.onPublishGrades(payload);
 					}
@@ -754,7 +773,7 @@ export default {
 			let listQuestions = _.flatten(this.assignment.groups.map(q => { return [...q.questions] }))
 			this.isSaving = true;
 			await this.calculateTotalScore();
-			console.log('saveGradingTEST',this.gradingSummary)
+			console.log('saveGradingTEST', this.gradingSummary)
 			const payload = {
 				SubmissionID: this.submission.SubmissionID,
 				Score: this.gradingSummary.totalScore,
@@ -764,23 +783,28 @@ export default {
 			setTimeout(() => { this.isSaving = false; }, 200);
 		},
 		updateGrading(questionId, newGradingData) {
+			console.log('udpee', questionId, newGradingData)
 			const newGrading = { ...this.gradingData };
 			const currentAnswer = newGrading[questionId] || {};
 			newGrading[questionId] = { ...currentAnswer, grading: newGradingData };
 			this.gradingData = newGrading;
 			// Avoid tight recursive update loop
-			setTimeout(() => {
-				this.calculateTotalScore();
-			}, 0);
+			console.log('this.submission', this.submission)
+			if (this.submission.SubmissionStatus <= 3) {
+				setTimeout(() => {
+					this.calculateTotalScore();
+				}, 0);
+			}
+
+
 		},
 		async calculateTotalScore() {
 			let total = 0;
 			await this.allQuestions.forEach(q => {
 				const grade = this.gradingData[q.id]?.grading;
-				console.log('grade',grade)
 				if (grade) {
 					// total += parseFloat(grade.autoScore || 0) + parseFloat(grade.manualScore || 0);
-					total +=  parseFloat(grade.manualScore || 0);
+					total += parseFloat(grade.manualScore || 0);
 				}
 			});
 			this.gradingSummary.totalScore = parseFloat(total);
@@ -831,11 +855,11 @@ export default {
 			}
 		},
 		getSubmissionStatusText() {
-			if (this.submission?.SubmissionStatus == 0 && this.submission?.Reason) return 'Yêu cầu nộp lại bài';
+			if (this.submission?.SubmissionStatus == 0 && this.submission?.Reason) return this.IsEngLish ? 'RequestResubmission' : 'Yêu cầu nộp lại bài';
 			switch (this.submission?.SubmissionStatus) {
-				case 4: return 'Đã chấm bài và trả bài'; case 2: return 'Đã nộp'; case 3: return 'Đã chấm nháp';
+				case 4: return this.IsEngLish ? 'Complete Grade & Public' : 'Đã chấm bài và trả bài'; case 2: return this.IsEngLish ? 'Submitted' : 'Đã nộp'; case 3: return this.IsEngLish ? 'Draft Graded' : 'Đã chấm nháp';
 
-				default: return 'Chưa nộp';
+				default: return this.IsEngLish ? 'Not submitted' : 'Chưa nộp';
 			}
 		},
 		toggleGroupCollapse(groupIndex) { this.groupCollapsed = { ...this.groupCollapsed, [groupIndex]: !this.groupCollapsed[groupIndex] }; },
@@ -874,7 +898,7 @@ export default {
 			let listQuestionsNotGrade = _.keys(_.pickBy(this.gradingData, (value) => { return value.grading.manualScore == null }))
 			//Xử lấy show các câu hỏi chưa chấm
 			let getNumberQuestionNotGrade = _.reduce(listQuestions, (result, q, index) => {
-				if (listQuestionsNotGrade.includes(q.id)) result.push('Câu ' + (index + 1))
+				if (listQuestionsNotGrade.includes(q.id)) result.push(`${this.IsEngLish ? 'Question' : 'Câu'}: ` + (index + 1))
 				return result
 			}, [])
 			return getNumberQuestionNotGrade.length > 0 ? getNumberQuestionNotGrade.join(', ') : ''
@@ -889,17 +913,17 @@ export default {
 		YeuCauLamLaiBai() {
 			const $this = this
 			if (!$this.Reason) {
-				Vue.$toast.warning("Vui lòng nhập lý do!", { position: "top" })
+				Vue.$toast.warning(`${this.IsEngLish ? 'Please enter the reason' : 'Vui lòng nhập lý do!'} `, { position: "top" })
 				return
 			}
 			confirm({
-				title: "Xác nhận yêu cầu học sinh nộp lại bài tập?",
+				title: `${this.IsEngLish ? 'Confirm requesting the student to resubmit the assignment?' : 'Xác nhận yêu cầu học sinh nộp lại bài tập?'} `,
 				action: () => {
 					ajaxCALL("/lms/EL_Teacher_YeuCauNopBaiLai", {
 						SubmissionID: $this.submission?.SubmissionID,
 						Reason: $this.Reason
 					}, res => {
-						Vue.$toast.success("Yêu cầu học sinh nộp lại bài tập thành công!", { position: "top" })
+						Vue.$toast.success(`${this.IsEngLish ? 'Successfully requested the student to resubmit the assignment!' : 'Yêu cầu học sinh nộp lại bài tập thành công!'} `, { position: "top" })
 						vueData.initPage()
 					})
 				}

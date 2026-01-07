@@ -7,7 +7,7 @@ const ColorEnum = {
 
     VuotTroi: "#0091EA",
     Dat: "#00ACC1",
-    ChuaDat: "#CD5D5B", 
+    ChuaDat: "#CD5D5B",
     KhongNhanXet: "#607D8B",
 
     //0: Mở; 1: GVCN Lưu Tạm; 2 : GVCN Gửi BGH Chờ duyệt; 3: BGH: Reject -> Duyệt lại ; 4: BGH Duyệt
@@ -673,7 +673,7 @@ function calculateLinearRegression(xData, yData) {
         equation: `y = ${slope.toFixed(4)}x + ${intercept.toFixed(4)}`,
         regressionLine: xData.map(x => ({
             x: x,
-            y: slope * x + intercept 
+            y: slope * x + intercept
         }))
     };
 }
@@ -744,21 +744,23 @@ function renderUrlYoutube(source) {
 function questionsTypesLabel(type) {
     const questionsComponents = [
         //quiz
-        { type: 'QUIZ_SINGLE_CHOICE', label: 'Trắc nghiệm (1 đáp án)', icon: 'mdi-radiobox-marked', kind: "quiz" },
-        { type: 'QUIZ_MULTIPLE_CHOICE', label: 'Trắc nghiệm (Nhiều đáp án)', icon: 'mdi-checkbox-multiple-marked-outline', kind: "quiz" },
-        { type: 'QUIZ_TRUE_FALSE', label: 'Đúng / Sai', icon: 'mdi-check-circle-outline', kind: "quiz" },
-        { type: 'QUIZ_MULTIPLE_TRUE_FALSE', label: 'Nhiều đúng / Sai', icon: 'mdi-check-circle-outline', kind: "quiz" },
-        { type: 'QUIZ_FILL_IN_BLANK', label: 'Điền vào chỗ trống', icon: 'mdi-form-textbox', kind: "quiz" },
-        { type: 'QUIZ_MATCHING', label: 'Ghép nối', icon: 'mdi-merge', kind: "quiz" },
+        { type: 'QUIZ_SINGLE_CHOICE', label: 'Trắc nghiệm', label_EN: 'Single Choice', description: "Một đáp án", icon: 'mdi-radiobox-marked', kind: "quiz" },
+        { type: 'QUIZ_MULTIPLE_CHOICE', label: 'Trắc nghiệm', label_EN: 'Multiple Choice', description: "Nhiều đáp án", icon: 'mdi-checkbox-multiple-marked-outline', kind: "quiz" },
+        { type: 'QUIZ_TRUE_FALSE', label: 'Đúng / Sai', label_EN: 'True / False', icon: 'mdi-check-circle-outline', kind: "quiz" },
+        { type: 'QUIZ_MULTIPLE_TRUE_FALSE', label: 'Nhiều đúng / Sai', label_EN: 'Multiple True / False', icon: 'mdi-check-circle-outline', kind: "quiz" },
+        { type: 'QUIZ_FILL_IN_BLANK', label: 'Điền vào chỗ trống', label_EN: 'Fill in the Blank', icon: 'mdi-form-textbox', kind: "quiz" },
+        { type: 'QUIZ_MATCHING', label: 'Ghép nối', label_EN: 'Matching', icon: 'mdi-merge', kind: "quiz" },
+
         //manual
-        { type: 'SHORT_ANSWER', label: 'Trả lời ngắn', icon: 'mdi-text-short', kind: "manual" },
-        { type: 'ESSAY', label: 'Tự luận (Soạn thảo)', icon: 'mdi-text-long', kind: "manual" },
-        { type: 'FILE_UPLOAD', label: 'Nộp File', icon: 'mdi-upload-multiple', kind: "manual" },
-        { type: 'AUDIO_RESPONSE', label: 'Ghi âm trả lời', icon: 'mdi-microphone-plus', kind: "manual" }
+        { type: 'SHORT_ANSWER', label: 'Trả lời ngắn', label_EN: 'Short Answer', icon: 'mdi-text-short', kind: "manual" },
+        { type: 'ESSAY', label: 'Tự luận', label_EN: 'Essay', description: "Soạn thảo", icon: 'mdi-text-long', kind: "manual" },
+        { type: 'FILE_UPLOAD', label: 'Nộp File', label_EN: 'File Upload', icon: 'mdi-upload-multiple', kind: "manual" },
+        { type: 'AUDIO_RESPONSE', label: 'Ghi âm trả lời', label_EN: 'Audio Response', icon: 'mdi-microphone-plus', kind: "manual" },
+
     ]
     let objTypeFind = _.find(questionsComponents, (item) => item.type === type)
     if (objTypeFind) {
-        return { label: objTypeFind.label, icon: objTypeFind.icon, kind: objTypeFind.kind, color: objTypeFind.kind === "quiz" ? "blue" : "warning" }
+        return { label_EN: objTypeFind.label_EN,label: objTypeFind.label, icon: objTypeFind.icon, kind: objTypeFind.kind, color: objTypeFind.kind === "quiz" ? "blue" : "warning" }
     } else {
         return undefined
     }

@@ -9,37 +9,12 @@ function processGroupedDashboardData(response) {
         vueData.teachingGroups = [];
         return;
     }
+    //Dữ liệu giao bài theo khối - môn
     const groups = response.data[0];
+    //Dữ liệu lớp học
     const classes = response.data[1];
-    // const assignments = response.data[2];
-    // debugger
-    // console.log("BƯỚC 2: Dữ liệu đã tách - Nhóm:", groups, "Lớp:", classes, "Bài tập:", assignments);
-    // if (!groups || groups.length === 0) {
-    //     console.warn("Không tìm thấy nhóm (Khối-Môn) nào được phân công.");
-    //     vueData.teachingGroups = [];
-    //     return;
-    // }
-    // // Bước A: Ghép các bài tập vào đúng lớp của nó
-    // const classesWithAssignments = classes.map(classItem => {
-    //     const childAssignments = assignments.filter(a => a.LopID === classItem.LopID).map(a => ({
-    //         ...a,
-    //         MonHocID: classItem.MonHocID,
-    //         TenMon: classItem.TenMonHoc,
-    //     }));
-    //     return { ...classItem, assignments: childAssignments };
-    // });
-    // console.log(1, classesWithAssignments)
-    // // Bước B: Ghép các lớp (đã có bài tập) vào đúng nhóm Khối-Môn
-    // const groupedData = groups.map(group => {
-    //     const childClasses = classesWithAssignments.filter(c =>
-    //         // Đảm bảo so sánh cùng kiểu dữ liệu (chuyển đổi sang chuỗi cho an toàn)
-    //         String(c.KhoiID) === String(group.KhoiID) && String(c.MonHocID) === String(group.MonHocID)
-    //     );
-    //     return { ...group, classes: childClasses };
-    // });
-    // console.log("BƯỚC 3: Dữ liệu cuối cùng đã được ghép nối", groupedData);
-    // vueData.teachingGroups = groupedData;
-    const assignments = [...response.data[2], ...response.data[3]]; // gom cả 2 loại assignment
+    // gom cả 2 loại assignment
+    const assignments = [...response.data[2], ...response.data[3]];
     // Gom theo Khối → Tuần → Lớp
     const groupedData = groups.map(group => {
         // lấy các lớp thuộc group
@@ -49,19 +24,19 @@ function processGroupedDashboardData(response) {
         );
         // từ assignments, gom thành weeks
         const weeksMap = {};
-        assignments.forEach(a => {
+        assignments.filter(a => a.MonHocID == group.MonHocID && a.KhoiID == group.KhoiID).forEach(a => {
+            if (!weeksMap[a.TuanHocID]) {
+                weeksMap[a.TuanHocID] = {
+                    TuanHocID: a.TuanHocID,
+                    Tuan_HienThi: a.Tuan_HienThi,
+                    Is_Tuan_Active: a.Is_Tuan_Active,
+                    classes: []
+                };
+            }
+            // tìm hoặc thêm lớp
+            let week = weeksMap[a.TuanHocID];
             // chỉ giữ assignment thuộc lớp trong childClasses
-            if (childClasses.some(c => String(c.LopID) === String(a.LopID))) {
-                if (!weeksMap[a.TuanHocID]) {
-                    weeksMap[a.TuanHocID] = {
-                        TuanHocID: a.TuanHocID,
-                        Tuan_HienThi: a.Tuan_HienThi,
-                        Is_Tuan_Active: a.Is_Tuan_Active,
-                        classes: []
-                    };
-                }
-                // tìm hoặc thêm lớp
-                let week = weeksMap[a.TuanHocID];
+            if (a.AssignType == 'CLASS' && childClasses.some(c => String(c.LopID) === String(a.LopID))) {
                 let cls = week.classes.find(c => c.LopID === a.LopID);
                 if (!cls) {
                     const classInfo = childClasses.find(c => c.LopID === a.LopID);
@@ -69,6 +44,21 @@ function processGroupedDashboardData(response) {
                     week.classes.push(cls);
                 }
                 cls.assignments.push(a);
+            } else if (a.AssignType == "STUDENT") {
+                let ats = week.classes.find(c => c.TenLop == a.AssignmentTitle);
+                if (!ats) {
+                    const atsInfo = {
+                        KhoiID: a.KhoiID,
+                        LopID: -1,
+                        MonHocID: a.MonHocID,
+                        PendingGradingCountInClass: 0,
+                        StudentCount: 0,
+                        TenLop: a.AssignmentTitle
+                    }
+                    ats = { ...atsInfo, assignments: [] };
+                    week.classes.push(ats);
+                }
+                ats.assignments.push(a);
             }
         });
         const currentWeek = Object.values(weeksMap).find(w => w.Is_Tuan_Active);
@@ -91,16 +81,13 @@ function processGroupedDashboardData(response) {
         const obj = Object.fromEntries(
             sortedArray.map(item => [`week_${item.TuanHocID}`, item])
         );
-        // const obj = Object.fromEntries(
-        //     sortedArray.map(item => [item.TuanHocID, item])
-        // );
         return {
             ...group,
             weeks: Object.values(obj)
         };
     });
     vueData.teachingGroups = groupedData;
-    console.log("gom", groupedData);
+    vueData.GiaoVienID_Selected = response.data[4][0].GiaoVienID
 }
 /**
  * Xử lý dữ liệu thư viện (danh sách phẳng) và gom nhóm thành cấu trúc cây lồng nhau.
@@ -216,7 +203,7 @@ function apiCall2() {
 };
 function apiCall3() {
     return new Promise((resolve, reject) => {
-        ajaxCALL("lms/EL_Teacher_GetMyContentLibrary", null, response => {
+        ajaxCALL("lms/EL_Teacher_GetMyContentLibrary", { NienKhoa: vueData.NienKhoa }, response => {
             vueData.contentLibrary = processLibraryData(response.data);
             resolve();
         }, reject);
@@ -235,9 +222,10 @@ async function initPage() {
     await apiCall1()
     await apiCall2()
     await apiCall3()
-    await apiCall4()
+    // await apiCall4()
+    await GET_EL_Teacher_GetFocusTasks_Student()
     // Chờ tất cả các API nội bộ hoàn thành
-    Promise.all([apiCall1, apiCall2, apiCall3, apiCall4]).then(() => {
+    Promise.all([apiCall1, apiCall2, apiCall3, GET_EL_Teacher_GetFocusTasks_Student]).then(() => {
         console.log("Tất cả API nội bộ đã tải xong.");
         vueData.dataReady = true; // Chỉ bật giao diện khi mọi thứ đã sẵn sàng
     }).catch(error => {
@@ -335,6 +323,11 @@ function onCloseWindow(id) {
 function callTest() {
     console.log('Test function called from tc dashboard');
     // app.config.globalProperties.v_OpenWindowList.pop()
+}
+async function GET_EL_Teacher_GetFocusTasks_Student() {
+    ajaxCALL('lms/EL_Teacher_GetFocusTasks_Student', {}, res => {
+        vueData.focusTasks_student = res.data
+    })
 }
 vueData.callTest = callTest;
 // Đăng ký các hàm vào vueData để ALLDRAW có thể gọi

@@ -1,5 +1,4 @@
 {
-    "ModuleName": "LMS System",
     "data": [
         {
             "NienKhoa": null,
@@ -11,15 +10,20 @@
             "keyComponentUcTiengAnh": 0,
             "keyComponentUcHocKy": 0,
             "keyComponentUcTongDiemQuaTrinh": 0,
+            "keyComponentUcThongBao": 0,
+            "keyComponentUcBaiTap": 0,
+            "keyComponentUcBaiHoc": 0,
             "DSHocTapThang": [],
             "DSHocTapThangTiengAnh": [],
             "IsLoadingStudent": true,
             "isLowScreen": false,
             "IsPassRoleParent": null,
+            "IsUsedLMS": false,
             "HocSinhID": "vueData.HocSinhID",
             "HocSinhSelected": null,
             "IsFinishLoad_getDSHocSinh": false,
-            "DSNienKhoa": []
+            "DSNienKhoa": [],
+            "SoLuongThongBao_ChuaXem": 0
         },
         {
             "getDSHocSinh": {
@@ -55,6 +59,16 @@
                     "HSLopID": "vueData.HocSinhSelected.HSLopID"
                 },
                 "OUT": "DSHocTapThang"
+            },
+            "getCountThongBao": {
+                "API": "lms/EL_PhuHuynh_ThongBao_Get_SoLuong_ByHocSinhID",
+                "IN": {
+                    "HocSinhID": "vueData.HocSinhSelected.HocSinhID"
+                },
+                "OUT": "SoLuongThongBao_ChuaXem_API",
+                "CALLBACK": {
+                    "EXE": "vueData.SoLuongThongBao_ChuaXem = vueData.SoLuongThongBao_ChuaXem_API?.SoLuong ?? 0"
+                }
             }
         },
         {
@@ -78,9 +92,11 @@
         "NienKhoa": [
             {
                 "IF": "vueData.NienKhoa !== null && vueData.IsFinishLoad_getDSHocSinh",
-                "THEN": {
-                    "EXE": "vueData.onSelectedHocSinh({ HocSinhID: vueData.HocSinhSelected.HocSinhID })"
-                }
+                "THEN": [
+                    {
+                        "CALL": "vueData.onSelectedHocSinh({ HocSinhID: vueData.HocSinhSelected.HocSinhID })"
+                    }
+                ]
             }
         ],
         "bottomNavigation": {
@@ -93,6 +109,19 @@
                 },
                 {
                     "EXE": "setActiveComponentKey()"
+                }
+            ]
+        },
+        "IsUsedLMS": {
+            "IF": "vueData.IsUsedLMS",
+            "THEN": [
+                {
+                    "EXE": "vueData.bottomNavigation = 5"
+                }
+            ],
+            "ELSE": [
+                {
+                    "EXE": "vueData.bottomNavigation = 0"
                 }
             ]
         }
@@ -238,7 +267,7 @@
                                                                     "attr": {
                                                                         "v-slot:append": "item"
                                                                     },
-                                                                    "innerHTML": "<v-chip class='mt-1' color='primary' variant='tonal' v-on:click='() => drawerSelectStudent = true' size='small' text='Chọn con' />"
+                                                                    "innerHTML": "<v-chip class='mt-1' color='amber' variant='tonal' v-on:click='() => drawerSelectStudent = true' size='small' text='Chọn con' />"
                                                                 }
                                                             ]
                                                         },
@@ -298,18 +327,43 @@
                                     "attr": {}
                                 },
                                 {
-                                    "__attr": {},
-                                    "attr": {},
                                     "el": "keep-alive",
                                     "innerHTML": [
                                         {
-                                            "el": "uc-tong-diem-qua-trinh",
+                                            "el": "uc-thong-bao",
                                             "attr": {
-                                                ":key": "keyComponentUcTongDiemQuaTrinh",
-                                                "v-if": "bottomNavigation === 3"
+                                                ":key": "keyComponentUcThongBao",
+                                                "v-if": "bottomNavigation === 4 && NienKhoa && HocSinhSelected"
                                             }
                                         }
-                                    ]
+                                    ],
+                                    "attr": {}
+                                },
+                                {
+                                    "el": "keep-alive",
+                                    "innerHTML": [
+                                        {
+                                            "el": "uc-baitap",
+                                            "attr": {
+                                                ":key": "keyComponentUcBaiTap",
+                                                "v-if": "bottomNavigation === 5 && NienKhoa && HocSinhSelected"
+                                            }
+                                        }
+                                    ],
+                                    "attr": {}
+                                },
+                                {
+                                    "el": "keep-alive",
+                                    "innerHTML": [
+                                        {
+                                            "el": "uc-baihoc",
+                                            "attr": {
+                                                ":key": "keyComponentUcBaiHoc",
+                                                "v-if": "bottomNavigation === 6 && NienKhoa && HocSinhSelected"
+                                            }
+                                        }
+                                    ],
+                                    "attr": {}
                                 }
                             ],
                             "w": 12
@@ -317,7 +371,7 @@
                         {
                             "el": "v-layout",
                             "attr": {
-                                "class": "overflow-visible",
+                                "class": "overflow-visible position-relative",
                                 "style": "height: 56px;"
                             },
                             "innerHTML": [
@@ -328,12 +382,13 @@
                                         "color": "primary",
                                         ":mandatory": true,
                                         ":grow": true,
-                                        "style": "position: fixed; bottom:0px"
+                                        "style": "position: fixed; bottom:0px;"
                                     },
                                     "innerHTML": [
                                         {
                                             "el": "v-btn",
                                             "attr": {
+                                                "v-if": "!IsUsedLMS",
                                                 ":value": 0
                                             },
                                             "innerHTML": [
@@ -350,6 +405,7 @@
                                         {
                                             "el": "v-btn",
                                             "attr": {
+                                                "v-if": "!IsUsedLMS",
                                                 ":value": 1
                                             },
                                             "innerHTML": [
@@ -366,6 +422,7 @@
                                         {
                                             "el": "v-btn",
                                             "attr": {
+                                                "v-if": "!IsUsedLMS",
                                                 ":value": 2
                                             },
                                             "innerHTML": [
@@ -376,6 +433,76 @@
                                                 {
                                                     "el": "p",
                                                     "innerHTML": "{{ $t('message.semester') }}"
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            "el": "v-btn",
+                                            "attr": {
+                                                "v-if": "IsUsedLMS",
+                                                ":value": 5
+                                            },
+                                            "innerHTML": [
+                                                {
+                                                    "el": "v-icon",
+                                                    "innerHTML": "mdi-book"
+                                                },
+                                                {
+                                                    "el": "p",
+                                                    "innerHTML": "Bài tập"
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            "el": "v-btn",
+                                            "attr": {
+                                                "v-if": "IsUsedLMS",
+                                                ":value": 6
+                                            },
+                                            "innerHTML": [
+                                                {
+                                                    "el": "v-icon",
+                                                    "innerHTML": "mdi-book"
+                                                },
+                                                {
+                                                    "el": "p",
+                                                    "innerHTML": "Bài học"
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            "el": "v-btn",
+                                            "attr": {
+                                                "v-if": "IsUsedLMS",
+                                                ":value": 4
+                                            },
+                                            "innerHTML": [
+                                                {
+                                                    "el": "v-badge",
+                                                    "attr": {
+                                                        "v-if": "SoLuongThongBao_ChuaXem > 0",
+                                                        "location": "top right",
+                                                        "color": "error",
+                                                        ":content": "SoLuongThongBao_ChuaXem",
+                                                        ":bordered": true
+                                                    },
+                                                    "innerHTML": [
+                                                        {
+                                                            "el": "v-icon",
+                                                            "innerHTML": "mdi-calendar-multiple"
+                                                        }
+                                                    ]
+                                                },
+                                                {
+                                                    "el": "v-icon",
+                                                    "attr": {
+                                                        "v-if": "SoLuongThongBao_ChuaXem === 0"
+                                                    },
+                                                    "innerHTML": "mdi-calendar-multiple"
+                                                },
+                                                {
+                                                    "el": "p",
+                                                    "innerHTML": "Thông báo"
                                                 }
                                             ]
                                         },
@@ -521,6 +648,9 @@
                                             }
                                         }
                                     ]
+                                },
+                                {
+                                    "el": "uc-btn-center-nvg-bottom"
                                 }
                             ],
                             "attr": {}
@@ -534,5 +664,6 @@
     "set": {
         "menu": false,
         "menuLeft": false
-    }
+    },
+    "ModuleName": "LMS System"
 }

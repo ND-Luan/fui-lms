@@ -2,7 +2,7 @@
 	<div class="lesson-canvas">
 		<div v-if="!elements || elements.length === 0" class="text-center pa-10 text-grey empty-canvas">
 			<v-icon size="64" class="mb-4">mdi-file-plus-outline</v-icon>
-			<p>Bắt đầu thêm nội dung cho bài giảng của bạn từ thư viện bên trái.</p>
+			<p>{{ $t('message.StartAddingContent') }}</p>
 		</div>
 
 		<div v-for="(element, index) in elements" :key="index" class="element-preview"
@@ -39,7 +39,7 @@
 						:src="renderUrlYoutube(element.ElementData.source)" title="YouTube video player" frameborder="0"
 						allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
 						allowfullscreen></iframe>
-					<div v-else class="text-center text-grey pa-4">Chưa có video</div>
+					<div v-else class="text-center text-grey pa-4">{{ $t('message.NoVideo') }}</div>
 				</div>
 				<div v-else-if="element.ElementType === 'FILE'" class="d-flex ga-2">
 					<v-chip v-for="file in element.ElementData.sources" @click="window.open(file.source)"
@@ -51,8 +51,12 @@
 				</div>
 				<div v-else-if="element.ElementType === 'HTML'" style="width: 100%">
 					<!-- <div v-html="element.ElementData.source" /> -->
-					<iframe :srcdoc="element.ElementData.source" sandbox="allow-scripts allow-popups allow-forms"
-						style="width: 100%;height: 600px;">
+					<iframe v-if="element.ElementData?.IsHTML" :srcdoc="element.ElementData.source"
+						sandbox="allow-scripts allow-popups allow-forms allow-same-origin" style="width: 100%;height: 600px;">
+					</iframe>
+
+					<iframe v-else :src="element.ElementData.source"
+						sandbox="allow-scripts allow-popups allow-forms allow-same-origin" style="width: 100%;height: 600px;">
 					</iframe>
 				</div>
 				<div v-else-if="element.ElementType?.includes('QUIZ')">
@@ -76,13 +80,14 @@
 		props: ['elements', 'selectedIndex'],
 		emits: ['update:elements', 'update:selectedIndex'],
 		data() {
+			this.$i18n.locale = (localStorage.getItem('IsLanguage') && localStorage.getItem('IsLanguage') == 'true') ? 'en' : 'vi'
 			return {
 				window,
 				elementTypes: [
-					{ value: 'TEXT', label: 'Đoạn văn bản', icon: 'mdi-format-text' },
-					{ value: 'IMAGE', label: 'Hình ảnh', icon: 'mdi-image-outline' },
+					{ value: 'TEXT', label: this.$t('message.TextBlock'), icon: 'mdi-format-text' },
+					{ value: 'IMAGE', label: this.$t('message.Image'), icon: 'mdi-image-outline' },
 					{ value: 'YOUTUBE', label: 'Video', icon: 'mdi-youtube' },
-					{ value: 'FILE', label: 'Tệp đính kèm', icon: 'mdi-paperclip' },
+					{ value: 'FILE', label: this.$t('message.Attachment'), icon: 'mdi-paperclip' },
 					{ value: 'AUDIO', label: 'Audio', icon: 'mdi-volume-high' },
 					{ value: 'HTML', label: 'HTML', icon: 'mdi-language-html5' },
 					// { value: 'QUIZ', label: 'Câu hỏi nhanh', icon: 'mdi-frequently-asked-questions' },
@@ -129,7 +134,7 @@
 	
 			getLabelForType(type) {
 				const found = this.elementTypes.find(t => t.value === type);
-				return found ? found.label : 'Thành phần không xác định';
+				return found ? found.label : this.$t('message.UnknownComponent');
 			},
 			getDriveFileId(url) {
 				const match = url.match(/\/d\/([^/]+)\//);

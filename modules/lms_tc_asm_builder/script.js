@@ -1,68 +1,72 @@
 const urlParams = new URLSearchParams(window.location.search);
 function initPage() {
+    let IsLanguage = localStorage.getItem('IsLanguage') ? true : false;
     const assignmentId = urlParams.get('AssignmentID');
+    // 👉 Xác định URL và params theo loại Assign
+    let apiUrl = "lms/EL_Teacher_GetAssignmentForEdit";
+    let apiParams = { AssignmentID: assignmentId };
+    if (vueData.AssignToClassID) {
+        apiParams.AssignToClassID = vueData.AssignToClassID ?? 0;
+    }
+    else if (vueData.AssignToStudentID) {
+        apiUrl = "lms/EL_Teacher_GetAssignmentForEdit_Student";
+        apiParams.AssignToStudentID = vueData.AssignToStudentID;
+    }
+    console.log(
+        apiUrl,
+        apiParams
+    )
     if (assignmentId && assignmentId > 0) {
         vueData.isEditMode = true;
-        ajaxCALL("lms/EL_Teacher_GetAssignmentForEdit", { AssignmentID: assignmentId, AssignToClassID: vueData.AssignToClassID || 0 }, function (response) {
-            console.log('res', response.data[0])
+        ajaxCALL(apiUrl, apiParams, function (response) {
             const asmDefault = {
-                version: "1.2", type: "GROUPED_MIXED", groups: [
-                    {
-                        id: 'group_' + Date.now(), title: 'Phần 1',
-                        media: {
-                            type: "YOUTUBE",
-                            sourceYT: {
-                                id: "",
-                                source: "",
-                                name: ""
-                            },
-                            sourceRecord: {
-                                id: "",
-                                source: "",
-                                name: ""
-                            },
-                            sourceFiles: {
-                                file: [],
-                                image: []
-                            }
-                        },
-                        description: '',
-                        advancedFeatures: {
-                            isShuffleQuestions: false,
-                            isShuffleAnswers: false
-                        },
-                        questions: []
-                    }
-                ]
-            }
-            let assignmentData = {
-                ...response.data[0]
+                version: "1.2",
+                type: "GROUPED_MIXED",
+                groups: [{
+                    id: 'group_' + Date.now(),
+                    title: `${IsLanguage ? 'Section' : 'Phần'} 1`,
+                    media: {
+                        type: "YOUTUBE",
+                        sourceYT: { id: "", source: "", name: "" },
+                        sourceRecord: { id: "", source: "", name: "" },
+                        sourceFiles: { file: [], image: [] }
+                    },
+                    description: '',
+                    advancedFeatures: {
+                        isShuffleQuestions: false,
+                        isShuffleAnswers: false
+                    },
+                    questions: []
+                }]
             };
-            if (!response.data[0]?.AssignmentConfig) assignmentData.AssignmentConfig = asmDefault
+            let assignmentData = { ...response.data[0] };
+            if (!assignmentData?.AssignmentConfig) {
+                assignmentData.AssignmentConfig = asmDefault;
+            }
             try {
-                // Cần parse chuỗi JSON trong AssignmentConfig
                 if (typeof assignmentData.AssignmentConfig === 'string') {
-                    assignmentData.AssignmentConfig = JSON.parse(assignmentData.AssignmentConfig) || asmDefault
+                    assignmentData.AssignmentConfig =
+                        JSON.parse(assignmentData.AssignmentConfig) || asmDefault;
                 }
             } catch (e) {
-                console.error("Lỗi parse AssignmentConfig khi tải bài:", e);
-                // Tạo một cấu trúc mặc định nếu parse lỗi
-                assignmentData.AssignmentConfig = asmDefault
+                assignmentData.AssignmentConfig = asmDefault;
             }
-            vueData.assignment = assignmentData
+            vueData.assignment = assignmentData;
             vueData.dataReady = true;
         });
     } else {
-        console.log(' vueData.isEditMode vueData.isEditMode', vueData.isEditMode)
+        // 👉 Mode tạo mới
         vueData.isEditMode = false;
         vueData.assignment = {
             Title: '',
             Instructions: '',
             MonHocLopID: null,
             AssignmentConfig: {
-                version: "1.2", type: "GROUPED_MIXED", groups: [{
+                version: "1.2",
+                type: "GROUPED_MIXED",
+                groups: [{
                     id: 'group_' + Date.now(),
-                    title: 'Phần 1',
+                    title: `${IsLanguage ? 'Section' : 'Phần'} 1`,
                     description: '',
                     AdvancedFeatures: {
                         isShuffleQuestions: false,
@@ -71,31 +75,26 @@ function initPage() {
                     questions: [],
                     media: {
                         type: "YOUTUBE",
-                        sourceYT: {
-                            id: "",
-                            source: "",
-                            name: ""
-                        },
-                        sourceRecord: {
-                            id: "",
-                            source: "",
-                            name: ""
-                        },
-                        sourceFiles: {
-                            file: [],
-                            image: []
-                        }
-                    },
+                        sourceYT: { id: "", source: "", name: "" },
+                        sourceRecord: { id: "", source: "", name: "" },
+                        sourceFiles: { file: [], image: [] }
+                    }
                 }]
             },
             MaxScore: 10,
-            Status: 1 // 1 = Nháp
+            Status: 1
         };
         vueData.dataReady = true;
     }
 }
 async function saveAssignment(payload) {
-    const dataToSend = { ...payload.assignment, AssignmentID: vueData.AssignmentID || 0, AssignToClassID: vueData.AssignToClassID || 0, Is_Full_Quiz: payload.Is_Full_Quiz ? 1 : 0 };
+    const dataToSend = {
+        ...payload.assignment,
+        AssignmentID: vueData.AssignmentID || 0,
+        AssignToClassID: vueData.AssignToClassID || 0,
+        Is_Full_Quiz: payload.Is_Full_Quiz ? 1 : 0,
+        IsBlockCopy_Paste: payload.setting.IsBlockCopy_Paste
+    };
     dataToSend.Status = payload.isPublishing ? 2 : 1;
     // Chuyển đổi lại thành chuỗi JSON trước khi gửi đi
     const groups = payload.assignment.AssignmentConfig?.groups || []
@@ -125,12 +124,12 @@ async function saveAssignment(payload) {
     dataToSend.AssignmentConfig_NoAnswer = JSON.stringify(cloneGroup)
     dataToSend.AssignmentConfig = JSON.stringify(dataToSend.AssignmentConfig)
     console.log('run saving......', dataToSend)
-    await ajaxCALL("lms/EL_Teacher_SaveAssignment",
+    ajaxCALL("lms/EL_Teacher_SaveAssignment",
         dataToSend,
         (response) => {
             Vue.$toast.success('Lưu bài tập thành công', { position: 'top' })
             console.log('vueData.isEditMode', vueData.isEditMode)
-            if (urlParams.get('AssignToClassID')) {
+            if (urlParams.get('AssignToClassID') && !vueData.isEditMode) {
                 window.open("/lms-teacher-dashboard", '_parent');
             }
             if (!vueData.isEditMode && response.data && response.data[0] && response.data[0].AssignmentID) {

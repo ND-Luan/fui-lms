@@ -40,11 +40,11 @@
 					<!-- Step 2: JSON Input -->
 					<v-card variant="outlined" class="mb-4">
 						<v-card-title class="text-h6">
-							📝 Bước 1: Dán JSON câu hỏi
+							📝 {{ $t('message.Step') }} 1: {{ $t('message.PasteQuestionJSON') }}
 						</v-card-title>
 						<v-card-text>
 							<v-textarea v-model="jsonInput" label="JSON Data" variant="outlined" :rows="12"
-								placeholder="Dán JSON câu hỏi vào đây..." persistent-placeholder>
+								:placeholder="$t('message.PasteQuestionJSONIn')" persistent-placeholder>
 							</v-textarea>
 
 							<!-- JSON Format Helper -->
@@ -52,7 +52,7 @@
 								<v-expansion-panel>
 									<v-expansion-panel-title>
 										<v-icon class="mr-2">mdi-help-circle</v-icon>
-										Xem format JSON mẫu
+										{{ $t('message.ViewSampleJSON') }}
 									</v-expansion-panel-title>
 									<v-expansion-panel-text>
 										<v-code class="json-example">{{ exampleJson }}</v-code>
@@ -63,13 +63,13 @@
 							<!-- Validation Messages -->
 							<v-alert v-if="validationError" type="error" variant="tonal" class="mt-2">
 								<v-icon>mdi-alert-circle</v-icon>
-								<strong>Lỗi JSON:</strong> {{ validationError }}
+								<strong>{{ $t('message.JSONError') }}</strong> {{ validationError }}
 							</v-alert>
 
 							<v-alert v-if="parseSuccess && !validationError" type="success" variant="tonal"
 								class="mt-2">
 								<v-icon>mdi-check-circle</v-icon>
-								<strong>JSON hợp lệ!</strong> Tìm thấy {{ parsedQuestions.length }} câu hỏi
+								<strong>{{ $t('message.ValidJSON') }}!</strong> {{ $t('message.Found') }} {{ parsedQuestions.length }} {{ $t('message.Question') }}
 							</v-alert>
 						</v-card-text>
 					</v-card>
@@ -77,13 +77,13 @@
 					<!-- Step 3: Preview -->
 					<v-card v-if="parsedQuestions.length > 0" variant="outlined">
 						<v-card-title class="text-h6 d-flex justify-space-between">
-							<span>👀 Bước 2: Xem trước kết quả</span>
+							<span>👀 {{ $t('message.Step') }} 2: {{ $t('message.PreviewResult') }}</span>
 							<div class="d-flex align-center gap-2">
 								<v-chip :color="validQuestions.length > 0 ? 'success' : 'grey'" size="small">
-									✅ {{ validQuestions.length }} hợp lệ
+									✅ {{ validQuestions.length }} {{ $t('message.Valid') }}
 								</v-chip>
 								<v-chip :color="invalidQuestions.length > 0 ? 'error' : 'grey'" size="small">
-									❌ {{ invalidQuestions.length }} lỗi
+									❌ {{ invalidQuestions.length }} {{ $t('message.Error') }}
 								</v-chip>
 							</div>
 						</v-card-title>
@@ -181,10 +181,10 @@
 											<!-- Points and explanation -->
 											<div class="mt-2">
 												<v-chip size="x-small" color="orange" class="mr-2">
-													{{ question.points || 1 }} điểm
+													{{ question.points || 1 }} {{$t('message.Score')}}
 												</v-chip>
 												<span v-if="question.config.explanation" class="text-caption">
-													💡 Có giải thích
+													💡 {{$t('message.Explaination')}}
 												</span>
 											</div>
 										</div>
@@ -197,16 +197,16 @@
 
 				<v-card-actions class="pa-4">
 					<v-btn @click="clearAll" variant="text" color="grey">
-						Xóa tất cả
+						{{$t('message.DeleteAll')}}
 					</v-btn>
 					<v-btn @click="validateAndPreview" variant="tonal" color="primary" :loading="processing">
-						🔍 Xem trước
+						🔍 {{$t('message.Preview')}}
 					</v-btn>
 					<v-spacer></v-spacer>
-					<v-btn @click="isActive.value = false" variant="text">Hủy</v-btn>
+					<v-btn @click="isActive.value = false" variant="text">{{$t('message.Cancel')}}</v-btn>
 					<v-btn @click="handleImport(isActive)" color="primary" :disabled="validQuestions.length === 0"
 						variant="flat">
-						✅ Import {{ validQuestions.length }} câu
+						✅ Import {{ validQuestions.length }} {{$t('message.Question')}}
 					</v-btn>
 				</v-card-actions>
 			</v-card>

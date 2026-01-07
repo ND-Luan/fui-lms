@@ -44,11 +44,11 @@
 			}
 		},
 		emits: ['view-summary', 'view-details'],
-		mounted(){
-			window.addEventListener('resize',() => {this.ResizeWindow()})
-			if(window.innerWidth<960) this.isMobile = true
+		mounted() {
+			window.addEventListener('resize', () => { this.ResizeWindow() })
+			if (window.innerWidth < 960) this.isMobile = true
 		},
-		data(){
+		data() {
 			return {
 				isMobile: false
 			}
@@ -58,31 +58,36 @@
 				switch (this.feed.FeedType) {
 					case 'GRADED':
 						return {
-							gradient: 'linear-gradient(135deg, #4caf50 0%, #66bb6a 100%)',
+							// gradient: 'linear-gradient(135deg, #4caf50 0%, #66bb6a 100%)',
+							gradient: '#673AB7',
 							icon: 'mdi-check-decagram',
 							title: `Bài <strong>${this.feed.Title}</strong> đã được chấm: <strong>${this.feed.Details}</strong>`
 						};
 					case 'SUBMITTED':
 						return {
-							gradient: 'linear-gradient(135deg, #2196f3 0%, #42a5f5 100%)',
+							// gradient: 'linear-gradient(135deg, #2196f3 0%, #42a5f5 100%)',
+							gradient: '#558B2F',
 							icon: 'mdi-upload',
 							title: `Bạn đã nộp bài tập <strong>${this.feed.Title}</strong>`
 						};
 					case 'SAVE_DRAFT':
 						return {
-							gradient: 'linear-gradient(135deg, #2196f3 0%, #42a5f5 100%)',
-							icon: 'mdi-upload',
+							// gradient: 'linear-gradient(135deg, #2196f3 0%, #42a5f5 100%)',
+							gradient: '#607D8B',
+							icon: 'mdi-file-document-edit',
 							title: `Bạn đã nộp bài tập <strong>${this.feed.Title}</strong>`
 						};
 					case 'LESSON_COMPLETED':
 						return {
-							gradient: 'linear-gradient(135deg, #9c27b0 0%, #ab47bc 100%)',
+							// gradient: 'linear-gradient(135deg, #9c27b0 0%, #ab47bc 100%)',
+							gradient: '#2196F3',
 							icon: 'mdi-book-check',
 							title: `Bạn đã hoàn thành bài học <strong>${this.feed.Title}</strong>`
 						};
 					case 'ACHIEVEMENT':
 						return {
-							gradient: 'linear-gradient(135deg, #ffc107 0%, #ffca28 100%)',
+							// gradient: 'linear-gradient(135deg, #ffc107 0%, #ffca28 100%)',
+							gradient: '#FF9800',
 							icon: 'mdi-trophy-award',
 							title: `Bạn nhận được thành tích <strong>"${this.feed.Title}"</strong> (${this.feed.Details})`
 						};
@@ -110,7 +115,7 @@
 						openWindow({
 							title: `<p style="min-width: fit-content">${this.feed.Title}</p>`,
 							url: `/lms-student-assignment?AssignToClassID=${id}`,
-							id:"123",
+							id: "123",
 							onclose: {
 								"EXE": "vueData.initPage()"
 							}
@@ -169,7 +174,7 @@
 	
 				return new Intl.DateTimeFormat('vi-VN').format(date);
 			},
-			ResizeWindow(){
+			ResizeWindow() {
 				this.isMobile = window.innerWidth < 960
 			}
 		}

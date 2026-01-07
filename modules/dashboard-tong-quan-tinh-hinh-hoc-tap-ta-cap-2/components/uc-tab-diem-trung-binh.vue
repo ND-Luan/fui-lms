@@ -1,12 +1,12 @@
 <template>
 	<v-card style="background-color: #f9f9f9;">
-		<v-card-title>
+		<!-- <v-card-title>
 			<div class="d-flex w-100 bg-white pa-3">
 				<v-spacer></v-spacer>
 				<v-select class="me-3" v-model="HocKiValue" :items="DSHocKi" item-title="name" item-value="value"
 					style="max-width: 200px" label="Chọn học kì"></v-select>
 			</div>
-		</v-card-title>
+		</v-card-title> -->
 		<v-card-text>
 			<v-row>
 				<v-col cols="12" class="pb-0">
@@ -132,7 +132,7 @@
 						</v-card-text>
 					</v-card>
 				</v-col>
-				<v-col cols="6">
+				<v-col cols="12">
 					<v-card :flat="false">
 						<v-card-title class="text-primary d-flex align-center">
 							Tương quan điểm giữa kì và cuối kì
@@ -148,7 +148,7 @@
 						</v-card-text>
 					</v-card>
 				</v-col>
-				<v-col cols="6">
+				<v-col cols="12">
 					<v-card :flat="false">
 						<v-card-title class="text-primary d-flex align-center">
 							Tỉ lệ học sinh đạt và chưa đạt
@@ -161,7 +161,7 @@
 							})">Xem biểu đồ</v-btn>
 						</v-card-title>
 						<v-card-text>
-							<uc-chart-apex :options="Chart_TiLe_TheoLop" />
+							<uc-chart-apex :options="Chart_TiLe_TheoLop" v-model:modelValue="chartPhanPhoiDiem" />
 						</v-card-text>
 					</v-card>
 				</v-col>
@@ -186,7 +186,7 @@ export default {
 	data() {
 		return {
 			vueData,
-			HocKiValue: 1,
+			HocKiValue: vueData.HocKiValue,
 			DSHocKi: [
 				{
 					name: "Học kì 1",
@@ -209,7 +209,7 @@ export default {
 				"series": [],
 				"chart": {
 					"type": "bar",
-					"height": 350,
+					"height": 450,
 					"stacked": true,
 					"toolbar": {
 						"show": true
@@ -220,6 +220,9 @@ export default {
 				},
 				"xaxis": {
 					"categories": []
+				},
+				"yaxis": {
+					max: 100
 				},
 				"plotOptions": {
 					"bar": {
@@ -239,8 +242,7 @@ export default {
 					}
 				},
 				"legend": {
-					"position": "right",
-					"offsetY": 40
+					"position": "top",
 				},
 				"fill": {
 					"opacity": 1
@@ -263,7 +265,8 @@ export default {
 			},
 			Tong_Growth_GiuaKy_CuoiKi: null,
 			List_Tong_Grade_Growth_GiuaKy_CuoiKi: null,
-			List_Tong_Class_Growth_GiuaKy_CuoiKi: null
+			List_Tong_Class_Growth_GiuaKy_CuoiKi: null,
+			chartPhanPhoiDiem: null
 		}
 	},
 	async mounted() {
@@ -285,6 +288,17 @@ export default {
 		// 		LopID: this.form.LopID,
 		// 	})
 		// }
+		this.onLoadChart({
+			NienKhoa: vueData.NienKhoa,
+			KhoiID: this.khoiid,
+			MonHocID: this.monhocid
+		})
+		this.onLoadChart2({
+			NienKhoa: vueData.NienKhoa,
+			KhoiID: this.khoiid,
+			LopID: 0,
+			MonHocID: this.monhocid
+		})
 		this.onLoadChart3({
 			NienKhoa: vueData.NienKhoa,
 			CapID: this.capid,
@@ -304,8 +318,9 @@ export default {
 		// 		)
 		// 	}
 		// }
-		HocKiValue: function (val) {
+		'vueData.HocKiValue': function (val) {
 			if (val) {
+				this.HocKiValue = val
 				this.onLoadChart3({
 					NienKhoa: vueData.NienKhoa,
 					CapID: this.capid,
@@ -316,10 +331,17 @@ export default {
 					KhoiID: this.khoiid,
 					MonHocID: this.monhocid
 				})
+				this.onLoadChart2({
+					NienKhoa: vueData.NienKhoa,
+					KhoiID: this.khoiid,
+					LopID: 0,
+					MonHocID: this.monhocid
+				})
 			}
-		}
+		},
 	},
 	methods: {
+		//API lấy Tương quan điểm giữa kì và cuối kì
 		onLoadChart({ NienKhoa, KhoiID, MonHocID }) {
 			return new Promise(resolve => {
 				ajaxCALL('lms/DashboardDiem_Mean_Get1',
@@ -380,6 +402,7 @@ export default {
 				)
 			})
 		},
+		//API lấy Tỉ lệ học sinh đạt và chưa đạt
 		onLoadChart2({ NienKhoa, KhoiID, LopID, MonHocID }) {
 			return new Promise(resolve => {
 				ajaxCALL('lms/DashboardTiLeDat_Compare_GiuaKy_CuoiKi_Get',
@@ -387,40 +410,42 @@ export default {
 						NienKhoa,
 						KhoiID,
 						LopID: LopID ?? 0,
-						MonHocID
+						MonHocID,
+						HocKi: vueData.HocKiValue ?? 1
 					},
 					res => {
 						const categoriesChartTiLe_TheoLops = [...new Set(res.data.map(x => x.TenLop))]
 						const serieChartTiLe_TheoLops = [
-							{
-								name: 'Exceeding Requirements/Vượt yêu cầu - Giữa kì',
-								group: 'S1_Mid_Total_Conv',
-								data: res.data.filter(x => x.MaCotDiem === 'S1_Mid_Total_Conv' && x.KetQuaDanhGia_VI === 'Exceeding Requirements/Vượt yêu cầu').map(x => x.TyLe)
-							},
-							{
-								name: 'Exceeding Requirements/Vượt yêu cầu - Cuối kì',
-								group: 'S1_Final_Total_Conv',
-								data: res.data.filter(x => x.MaCotDiem === 'S1_Final_Total_Conv' && x.KetQuaDanhGia_VI === 'Exceeding Requirements/Vượt yêu cầu').map(x => x.TyLe)
-							},
+
 							{
 								name: 'Meeting Requirements/Đạt yêu cầu - Giữa kì',
 								group: 'S1_Mid_Total_Conv',
-								data: res.data.filter(x => x.MaCotDiem === 'S1_Mid_Total_Conv' && x.KetQuaDanhGia_VI === 'Meeting Requirements/Đạt yêu cầu').map(x => x.TyLe)
+								data: res.data.filter(x => x.MaCotDiem === 'S1_Mid_Total_Conv' && this.handleText(x.KetQuaDanhGia_VI) === this.handleText('Meeting Requirements/Đạt yêu cầu')).map(x => x.TyLe)
 							},
 							{
 								name: 'Meeting Requirements/Đạt yêu cầu - Cuối kì',
 								group: 'S1_Final_Total_Conv',
-								data: res.data.filter(x => x.MaCotDiem === 'S1_Final_Total_Conv' && x.KetQuaDanhGia_VI === 'Meeting Requirements/Đạt yêu cầu').map(x => x.TyLe)
+								data: res.data.filter(x => x.MaCotDiem === 'S1_Final_Total_Conv' && this.handleText(x.KetQuaDanhGia_VI) === this.handleText('Meeting Requirements/Đạt yêu cầu')).map(x => x.TyLe)
+							},
+							{
+								name: 'Exceeding Requirements/Vượt yêu cầu - Giữa kì',
+								group: 'S1_Mid_Total_Conv',
+								data: res.data.filter(x => x.MaCotDiem === 'S1_Mid_Total_Conv' && this.handleText(x.KetQuaDanhGia_VI) === this.handleText('Exceeding Requirements/Vượt yêu cầu')).map(x => x.TyLe)
+							},
+							{
+								name: 'Exceeding Requirements/Vượt yêu cầu - Cuối kì',
+								group: 'S1_Final_Total_Conv',
+								data: res.data.filter(x => x.MaCotDiem === 'S1_Final_Total_Conv' && this.handleText(x.KetQuaDanhGia_VI) === this.handleText('Exceeding Requirements/Vượt yêu cầu')).map(x => x.TyLe)
 							},
 							{
 								name: 'Not Meeting Requirements/Chưa đạt - Giữa kì',
 								group: 'S1_Mid_Total_Conv',
-								data: res.data.filter(x => x.MaCotDiem === 'S1_Mid_Total_Conv' && x.KetQuaDanhGia_VI === 'Not Meeting Requirements/Chưa đạt').map(x => x.TyLe)
+								data: res.data.filter(x => x.MaCotDiem === 'S1_Mid_Total_Conv' && this.handleText(x.KetQuaDanhGia_VI) === this.handleText('Not Meeting Requirements/Chưa đạt')).map(x => x.TyLe)
 							},
 							{
 								name: 'Not Meeting Requirements/Chưa đạt - Cuối kì',
 								group: 'S1_Final_Total_Conv',
-								data: res.data.filter(x => x.MaCotDiem === 'S1_Final_Total_Conv' && x.KetQuaDanhGia_VI === 'Not Meeting Requirements/Chưa đạt').map(x => x.TyLe)
+								data: res.data.filter(x => x.MaCotDiem === 'S1_Final_Total_Conv' && this.handleText(x.KetQuaDanhGia_VI) === this.handleText('Not Meeting Requirements/Chưa đạt')).map(x => x.TyLe)
 							}
 						]
 						this.Chart_TiLe_TheoLop = {
@@ -428,19 +453,35 @@ export default {
 							series: serieChartTiLe_TheoLops,
 							colors: ['#008FFB', '#008FFB', '#80c7fd', '#80c7fd', '#fdb72f', '#fdb72f'],
 							xaxis: {
-								categories: categoriesChartTiLe_TheoLops
+								categories: categoriesChartTiLe_TheoLops,
+
 							},
 							plotOptions: {
 								bar: {
 									horizontal: false
 								}
 							},
+							legend: {
+								customLegendItems: [
+									'Meeting Requirements/Đạt yêu cầu',
+									'Exceeding Requirements/Vượt yêu cầu',
+									'Not Meeting Requirements/Chưa đạt',
+
+								],
+								markers: { fillColors: [ '#008FFB','#80c7fd', '#fdb72f'] },
+								position: 'top',
+								floating: false,
+								itemMargin: {
+									horizontal: 10
+								}
+							}
 						}
 						resolve()
 					}
 				)
 			})
 		},
+		//API Lấy điểm tiến bộ
 		onLoadChart3({ NienKhoa, CapID, MonHocID }) {
 			return new Promise(resolve => {
 				ajaxCALL('lms/DashboardTiLeDat_Growth_GiuaKy_CuoiKi_Get1',
@@ -459,6 +500,9 @@ export default {
 				)
 			}
 			)
+		},
+		handleText(str) {
+			return str.toLowerCase().replace(' ', '');
 		}
 	},
 }

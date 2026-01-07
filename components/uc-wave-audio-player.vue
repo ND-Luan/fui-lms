@@ -1,148 +1,247 @@
 <template>
-	<v-card class="pa-2" elevation="2">
-		<div v-if="loading" class="d-flex justify-center align-center" style="height: 100px;">
-			<v-progress-circular indeterminate color="green" />
-		</div>
-		<div v-else>
-			<div v-if="audioUrl">
-				<div ref="waveform" style="width: 100%; height: 100px;">
-				</div>
+	<v-card class="audio-player" elevation="2">
+		<div class="player-content">
+			<!-- Waveform (LUÔN TỒN TẠI) -->
+			<div class="waveform-container">
+				<div :ref="waveformRef" class="waveform"></div>
 
-				<div class="d-flex align-center justify-space-between border-t">
-					<v-btn icon @click="togglePlay" :disabled="loadingAudio">
-						<v-icon>{{ isPlaying ? 'mdi-pause' : 'mdi-play' }}</v-icon>
-					</v-btn>
-
-					<v-slider v-model="volume" min="0" max="1" step="0.01" @update:modelValue="setVolume"
-						label="Âm lượng" hide-details style="width: 200px" :disabled="loadingAudio"></v-slider>
+				<!-- Loading overlay -->
+				<div v-if="loading" class="loading-overlay d-flex align-center justify-center">
+					<v-progress-circular indeterminate size="28" />
+					<div class="mt-1 text-caption">{{ loadingText }}</div>
 				</div>
 			</div>
-			<div v-else class="text-center text-caption">Bạn chưa có ghi âm</div>
+
+			<!-- Controls -->
+			<div class="player-controls">
+				<!-- Play / Pause -->
+				<v-btn icon size="small" variant="text" color="primary" :disabled="loadingAudio || !waveSurfer"
+					@click="togglePlay">
+					<v-icon size="24">
+						{{ isPlaying ? 'mdi-pause' : 'mdi-play' }}
+					</v-icon>
+				</v-btn>
+
+				<!-- Time -->
+				<span class="time-text">{{ currentTime }}</span>
+
+				<!-- Volume -->
+				<div class="volume-control">
+					<v-icon size="18" class="volume-icon" @click="toggleMute">
+						{{ volumeIcon }}
+					</v-icon>
+
+					<v-slider v-model="volume" min="0" max="1" step="0.01" hide-details density="compact"
+						class="volume-slider" :disabled="loadingAudio" @update:modelValue="setVolume" />
+				</div>
+
+				<!-- Speed -->
+				<v-menu>
+					<template #activator="{ props }">
+						<v-chip size="x-small" variant="text" v-bind="props" :disabled="loadingAudio">
+							{{ playbackSpeed }}x
+						</v-chip>
+					</template>
+
+					<v-list density="compact">
+						<v-list-item v-for="speed in speedOptions" :key="speed"
+							:class="{ 'v-list-item--active': playbackSpeed === speed }" @click="setSpeed(speed)">
+							{{ speed }}x
+						</v-list-item>
+					</v-list>
+				</v-menu>
+
+				<!-- Duration -->
+				<span class="time-text text-grey">{{ duration }}</span>
+			</div>
 		</div>
 	</v-card>
 </template>
 
 <script>
-export default {
-	props: {
-		audioUrl: {
-			type: String,
-			default: '',
+	export default {
+		name: 'AudioPlayer',
+	
+		props: {
+			audioUrl: {
+				type: String,
+				default: '',
+			},
 		},
-		fileAudio: null
-	},
-	data() {
-		return {
-			waveSurfer: null,
-			isPlaying: false,
-			volume: 1,
-			loading: false, // thêm biến loading
-			loadingAudio: false,
-		}
-	},
-	mounted() {
-		if (this.audioUrl) {
-			this.loadAudio(this.audioUrl)
-		}
-	},
-	watch: {
-		audioUrl(newUrl) {
-			if (!newUrl) return
-			this.loadAudio(newUrl)
+	
+		data() {
+			return {
+				// ref duy nhất cho waveform
+				waveformRef: `waveform-${generateID()}`,
+	
+				waveSurfer: null,
+				isPlaying: false,
+	
+				volume: 0.8,
+				previousVolume: 0.8, 
+	
+				loading: false,
+				loadingAudio: false,
+				loadingText: 'Đang tải...',
+	
+				currentTime: '0:00',
+				duration: '0:00',
+	
+				playbackSpeed: 1,
+				speedOptions: [0.5, 0.75, 1, 1.25, 1.5, 2],
+			}
 		},
-	},
-	methods: {
-		async loadAudio(url) {
-			this.loading = true // Bắt đầu loading
-			this.loadingAudio = true
-			let newUrl = url
-
-			// Kiểm tra URL có phải là dạng Google Drive URL
-			if (url.includes('https://drive.google.com')) {
-				let fileId = null;
-				const match = url.match(/\/file\/d\/([^/]+)/);
-				if (match && match[1]) {
-					fileId = match[1];
-				} else {
-					const urlParams = new URLSearchParams(new URL(url).search);
-					fileId = urlParams.get('id');
-				}
-				if (fileId) {
-					console.log(fileId); // 👉 "1ID95oD7iJIec1tPp9JbDkFYIGsZ6MSPs"
-
-					const { access_token } = await this.ajaxCALLPromise('lms/FP_Youtube_Token_Get')
-					const resBlob = await fetch(`https://www.googleapis.com/drive/v3/files/${fileId}?alt=media`, {
-						headers: {
-							Authorization: `Bearer ${access_token}`,
+	
+		computed: {
+			volumeIcon() {
+				if (this.volume === 0) return 'mdi-volume-mute'
+				if (this.volume < 0.5) return 'mdi-volume-low'
+				return 'mdi-volume-high'
+			},
+		},
+	
+		mounted() {
+			if (this.audioUrl) {
+				this.loadAudio(this.audioUrl)
+			}
+		},
+	
+		watch: {
+			audioUrl(newUrl) {
+				if (newUrl) this.loadAudio(newUrl)
+			},
+		},
+	
+		methods: {
+			async loadAudio(url) {
+				if (!url) return
+	
+				this.loading = true
+				this.loadingAudio = true
+				this.loadingText = 'Đang tải âm thanh...'
+	
+				let finalUrl = url
+	
+				// ===== Google Drive =====
+				if (url.includes('drive.google.com')) {
+					const fileId =
+						url.match(/\/file\/d\/([^/]+)/)?.[1] ||
+						new URL(url).searchParams.get('id')
+	
+					if (!fileId) {
+						console.error('Không tìm thấy fileId')
+						this.loading = false
+						return
+					}
+	
+					const { access_token } = await this.ajaxCALLPromise(
+						'lms/FP_Youtube_Token_Get'
+					)
+	
+					const blob = await fetch(
+						`https://www.googleapis.com/drive/v3/files/${fileId}?alt=media`,
+						{
+							headers: { Authorization: `Bearer ${access_token}` },
 						}
-					}).then(res => res.blob()).finally(() => { this.loading = false; })
-
-					newUrl = URL.createObjectURL(resBlob);
-				} else {
-					console.error('Không tìm thấy fileId trong URL');
-					this.loading = false;
-					return;
+					).then(res => res.blob())
+	
+					finalUrl = URL.createObjectURL(blob)
 				}
-			}
-
-			// Nếu đã có waveSurfer, hủy và tạo lại
-			if (this.waveSurfer) {
-				this.waveSurfer.destroy()
+	
+				// destroy cũ
+				this.waveSurfer?.destroy()
 				this.waveSurfer = null
-			}
-
-			// Khởi tạo waveSurfer
-			this.waveSurfer = await WaveSurfer.create({
-				container: this.$refs.waveform,
-				waveColor: '#A5D6A7',
-				progressColor: '#388E3C',
-				height: 80,
-				responsive: true,
-				barWidth: 2,
-			})
-
-			// Tải audio vào waveSurfer
-			await this.waveSurfer.load(newUrl)
-			// Khi kết thúc phát, cập nhật trạng thái
-			this.waveSurfer.on('finish', () => {
-				this.isPlaying = false
-			})
-
-			// Đặt volume và trạng thái ban đầu
-			this.waveSurfer.setVolume(this.volume)
-
-			this.isPlaying = false
-			await this.$nextTick()
-			setTimeout(() => {
-				this.loadingAudio = false
-			}, 2000);
-
-
-		},
-		togglePlay() {
-			if (!this.waveSurfer) return
-			this.waveSurfer.playPause()
-			this.isPlaying = !this.isPlaying
-		},
-		setVolume() {
-			if (this.waveSurfer) {
-				this.waveSurfer.setVolume(this.volume)
-			}
-		},
-		ajaxCALLPromise(url, params = null) {
-			return new Promise(resolve => {
-				ajaxCALL(url, params, res => {
-					if (res?.data) { resolve(res.data) }
-					else { resolve(res) }
+	
+				// đợi DOM chắc chắn tồn tại
+				await this.$nextTick()
+	
+				const container = this.$refs[this.waveformRef]
+				if (!container) {
+					console.error('Waveform container not found')
+					return
+				}
+	
+				// create wavesurfer
+				this.waveSurfer = WaveSurfer.create({
+					container,
+					waveColor: '#B3E5FC',
+					progressColor: '#1976D2',
+					cursorColor: '#1976D2',
+					height: 50,
+					barWidth: 2,
+					barRadius: 2,
+					barGap: 1,
 				})
-			})
+	
+				await this.waveSurfer.load(finalUrl)
+	
+				// events
+				this.waveSurfer.on('ready', () => {
+					this.duration = this.formatTime(this.waveSurfer.getDuration())
+					this.waveSurfer.setVolume(this.volume)
+					this.loading = false
+					this.loadingAudio = false
+				})
+	
+				this.waveSurfer.on('audioprocess', () => {
+					this.currentTime = this.formatTime(
+						this.waveSurfer.getCurrentTime()
+					)
+				})
+	
+				this.waveSurfer.on('seek', () => {
+					this.currentTime = this.formatTime(
+						this.waveSurfer.getCurrentTime()
+					)
+				})
+	
+				this.waveSurfer.on('finish', () => {
+					this.isPlaying = false
+				})
+			},
+	
+			togglePlay() {
+				if (!this.waveSurfer) return
+				this.waveSurfer.playPause()
+				this.isPlaying = !this.isPlaying
+			},
+	
+			setVolume() {
+				this.waveSurfer?.setVolume(this.volume)
+			},
+	
+			toggleMute() {
+				if (this.volume === 0) {
+					this.volume = this.previousVolume
+				} else {
+					this.previousVolume = this.volume
+					this.volume = 0
+				}
+				this.setVolume()
+			},
+	
+			setSpeed(speed) {
+				this.playbackSpeed = speed
+				this.waveSurfer?.setPlaybackRate(speed)
+			},
+	
+			formatTime(sec) {
+				const m = Math.floor(sec / 60)
+				const s = Math.floor(sec % 60)
+				return `${m}:${String(s).padStart(2, '0')}`
+			},
+	
+			ajaxCALLPromise(url, params = null) {
+				return new Promise(resolve => {
+					ajaxCALL(url, params, res => {
+						resolve(res?.data ?? res)
+					})
+				})
+			},
 		},
-	},
-	beforeUnmount() {
-		if (this.waveSurfer) {
-			this.waveSurfer.destroy()
-		}
-	},
-
-}
+	
+		beforeUnmount() {
+			this.waveSurfer?.destroy()
+		},
+	}
 </script>

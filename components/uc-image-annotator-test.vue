@@ -81,7 +81,7 @@
 			return {
 				token: $awt,
 				fabricCanvas: null,
-				tool: 'text',
+				tool: 'correct',
 				isSaving: false,
 				activeObject: null,
 				activeObjectProps: {
@@ -93,6 +93,7 @@
 				},
 				currentScale: 1, // Lưu scale hiện tại
 				originalImageSize: { width: 0, height: 0 } // Lưu kích thước ảnh gốc
+	
 			};
 		},
 		watch: {
@@ -100,7 +101,10 @@
 				if (newVal) {
 					this.$nextTick(() => {
 						setTimeout(() => { this.initializeCanvas(); }, 100);
+	
 					});
+				} else {
+					localStorage.setItem("IsShowHeader_ChamBai", true)
 				}
 			}
 		},
@@ -131,45 +135,45 @@
 						scaleY: container.clientHeight / img.height,
 					};
 					const scale = Math.min(options.scaleX, options.scaleY, 1);
-					
+	
 					// Lưu scale và kích thước gốc
 					this.currentScale = scale;
 					this.originalImageSize = { width: img.width, height: img.height };
-					
+	
 					this.fabricCanvas.setWidth(img.width * scale);
 					this.fabricCanvas.setHeight(img.height * scale);
 					this.fabricCanvas.setBackgroundImage(img, this.fabricCanvas.renderAll.bind(this.fabricCanvas), {
 						scaleX: scale,
 						scaleY: scale,
 					});
-					
+	
 					// Load annotations với scale điều chỉnh
 					if (this.initialAnnotations && this.initialAnnotations.objects && this.initialAnnotations.objects.length > 0) {
 						try {
 							// Lấy thông tin backgroundImage từ annotations cũ
 							const bgImg = this.initialAnnotations.backgroundImage;
-							
+	
 							// Kích thước ảnh gốc (từ annotations cũ)
 							const originalImageWidth = bgImg.width;
 							const originalImageHeight = bgImg.height;
-							
+	
 							// Kích thước canvas cũ
 							const oldCanvasWidth = originalImageWidth * bgImg.scaleX;
 							const oldCanvasHeight = originalImageHeight * bgImg.scaleY;
-							
+	
 							// Kích thước canvas mới (hiện tại)
 							const newCanvasWidth = this.fabricCanvas.width;
 							const newCanvasHeight = this.fabricCanvas.height;
-							
+	
 							// Tính tỉ lệ scale
 							const scaleRatioX = newCanvasWidth / oldCanvasWidth;
 							const scaleRatioY = newCanvasHeight / oldCanvasHeight;
-							
+	
 							console.log('Original Image:', originalImageWidth, 'x', originalImageHeight);
 							console.log('Old Canvas:', oldCanvasWidth, 'x', oldCanvasHeight);
 							console.log('New Canvas:', newCanvasWidth, 'x', newCanvasHeight);
 							console.log('Scale Ratio - X:', scaleRatioX, 'Y:', scaleRatioY);
-							
+	
 							// Chỉ lấy và scale lại các objects
 							const scaledObjects = this.initialAnnotations.objects.map(obj => ({
 								...obj,
@@ -179,7 +183,7 @@
 								scaleY: obj.scaleY * scaleRatioY,
 								...(obj.fontSize && { fontSize: obj.fontSize * Math.min(scaleRatioX, scaleRatioY) })
 							}));
-							
+	
 							// Load từng object vào canvas
 							scaledObjects.forEach(objData => {
 								fabric.util.enlivenObjects([objData], (objects) => {
@@ -189,7 +193,7 @@
 									this.fabricCanvas.renderAll();
 								});
 							});
-							
+	
 						} catch (e) {
 							console.error("Lỗi khi tải dữ liệu chú thích cũ:", e);
 						}
@@ -263,7 +267,7 @@
 				// Màn hình lớn (canvas width >= 800px) → icon scale 2.5
 				const canvasWidth = this.fabricCanvas.width;
 				const iconScale = canvasWidth < 800 ? 2.0 : 2.5;
-				
+	
 				const icon = new fabric.Path(path, {
 					left: x, top: y, fill: color,
 					originX: 'center', originY: 'center',
@@ -305,25 +309,25 @@
 					const tempCanvas = new fabric.Canvas(document.createElement('canvas'));
 					const originalWidth = this.originalImageSize.width;
 					const originalHeight = this.originalImageSize.height;
-					
+	
 					tempCanvas.setWidth(originalWidth);
 					tempCanvas.setHeight(originalHeight);
-					
+	
 					// Lấy background image gốc
 					const bgImage = this.fabricCanvas.backgroundImage;
-					
+	
 					// Tính scale ratio để phóng to về kích thước gốc
 					const scaleToOriginal = 1 / this.currentScale;
-					
+	
 					console.log('Original Image:', originalWidth, 'x', originalHeight);
 					console.log('Scale to Original:', scaleToOriginal);
-					
+	
 					// Set background với scale 1:1
 					tempCanvas.setBackgroundImage(bgImage, tempCanvas.renderAll.bind(tempCanvas), {
 						scaleX: 1,
 						scaleY: 1
 					});
-					
+	
 					// Clone và scale objects lên kích thước gốc
 					const originalObjects = this.fabricCanvas.getObjects();
 					originalObjects.forEach(obj => {
@@ -339,26 +343,26 @@
 						}
 						tempCanvas.add(clonedObj);
 					});
-					
+	
 					tempCanvas.renderAll();
-					
+	
 					// === BƯỚC 2: LẤY ANNOTATIONS Ở KÍCH THƯỚC GỐC ===
 					const annotations = tempCanvas.toJSON(['fontFamily', 'fontSize', 'fontWeight', 'fontStyle', 'fill']);
 					const annotationsJSON = JSON.stringify(annotations);
 					console.log("annotations (original size)", annotations);
 	
 					// === BƯỚC 3: EXPORT ẢNH Ở KÍCH THƯỚC GỐC ===
-					const imageDataUrl = tempCanvas.toDataURL({ 
+					const imageDataUrl = tempCanvas.toDataURL({
 						format: 'jpeg', // JPEG để giảm dung lượng
 						quality: 0.85,
 						multiplier: 1 // Giữ nguyên kích thước gốc
 					});
-					
+	
 					const newFile = this.dataURLtoFile(imageDataUrl, `[ANNOTATED]_${this.originalFile.name.replace(/\.[^/.]+$/, '.jpg')}`);
-					
+	
 					console.log('Original size:', originalWidth, 'x', originalHeight);
 					console.log('File size:', (newFile.size / 1024 / 1024).toFixed(2), 'MB');
-					
+	
 					// Dispose temp canvas
 					tempCanvas.dispose();
 	

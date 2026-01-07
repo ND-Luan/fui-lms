@@ -5,6 +5,7 @@
         },
         {
             "focusTasks": [],
+            "focusTasks_student": [],
             "dataReady": false,
             "teachingGroups": [],
             "schedule": [],
@@ -14,7 +15,8 @@
             "winData": {},
             "isOpenWindowCustom": false,
             "arrWindowID": [],
-            "domHeaderLength": 0
+            "domHeaderLength": 0,
+            "GiaoVienID_Selected": null
         },
         {
             "getLop": {

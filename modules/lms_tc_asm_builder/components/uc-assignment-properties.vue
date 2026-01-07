@@ -1,11 +1,12 @@
 <template>
 	<v-card sticky top="80px">
 		<div class="d-flex align-center text-subtitle-1 font-weight-medium flex-wrap ga-2">
-			Thuộc tính
+			{{ $t('message.Attribute') }}
 			<div class="ml-2" v-if="item.type === 'question' && globalQuestionNumber !== 0">
 				<v-chip v-if="isQuestionTextField === false" label color="primary"
 					@click="isQuestionTextField = true; $nextTick(() => { $refs.questionInput.focus() });">
-					Câu {{ selectedQuestionData.ordinalNumber }} <v-icon end>mdi-pencil-circle</v-icon>
+					{{ $t('message.Question') }} {{ selectedQuestionData.ordinalNumber }} <v-icon
+						end>mdi-pencil-circle</v-icon>
 				</v-chip>
 				<v-text-field v-else ref="questionInput" v-model="selectedQuestionData.ordinalNumber"
 					hide-details="auto" @blur="isQuestionTextField = false" />
@@ -19,26 +20,27 @@
 				<v-btn v-if="item.type === 'group'" variant="tonal" color="primary"
 					@click="onOpenModalImportFromHocLieu()">Import từ kho
 					học liệu</v-btn>
+				<v-btn v-else icon variant="text" @click="onOpenModalKiNang()"><v-icon>mdi-cog-outline</v-icon></v-btn>
 			</div>
 		</div>
 		<v-divider class="my-2" />
 		<div v-if="!item" class="text-center pa-10 text-grey">
 			<v-icon size="48" class="mb-2">mdi-cursor-default-click-outline</v-icon>
-			<div>Chọn một phần hoặc câu hỏi để chỉnh sửa.</div>
+			<div>{{ $t('message.SelectSectionOrQuestionToEdit') }}</div>
 		</div>
 
 		<div v-else>
 			<div v-if="item.type === 'group'" class="d-flex flex-column ga-2">
 				<v-text-field class="mt-2" :model-value="selectedGroupData.title"
-					@update:model-value="updateItem('title', $event)" label="Tên Phần/Nhóm" variant="outlined"
-					density="compact" />
+					@update:model-value="updateItem('title', $event)" :label="$t('message.SectionGroupName')"
+					variant="outlined" density="compact" />
 				<div class="d-flex align-center ga-2 w-100">
 					<v-checkbox :model-value="selectedGroupData.advancedFeatures.isShuffleQuestions"
 						@update:model-value="(value) => { updateShuffleQuestions(selectedGroupData.id, value) }"
-						label="Trộn câu hỏi"></v-checkbox>
+						:label="$t('message.ShuffleQuestions')"></v-checkbox>
 					<v-checkbox :model-value="selectedGroupData.advancedFeatures.isShuffleAnswers"
 						@update:model-value="(value) => { updateShuffleAnswers(selectedGroupData.id, value) }"
-						label="Trộn đáp án"></v-checkbox>
+						:label="$t('message.ShuffleAnswers')"></v-checkbox>
 				</div>
 
 				<v-divider />
@@ -48,23 +50,35 @@
 				<!-- END -->
 				<v-divider />
 				<v-textarea :model-value="selectedGroupData.description"
-					@update:model-value="updateItem('description', $event)" label="Mô tả/Hướng dẫn cho Phần này"
+					@update:model-value="updateItem('description', $event)" :label="$t('message.SectionDescription')"
 					variant="outlined" density="compact" rows="3" />
 				<v-checkbox v-model="selectedGroupData.isCheckShowAllQuestion"
-					label="Hiển thị tất cả câu hỏi trong nhóm" />
+					:label="$t('message.ShowAllQuestionsInGroup')" />
 			</div>
 
 			<div v-else-if="item.type === 'question' && selectedQuestionData">
 				<v-row dense>
+					<v-col cols="12">
+						<div class="d-flex flex-wrap ga-2">
+							<b>Cấu hình kĩ năng: </b>
+							<v-chip v-for="(skill, index) in groups[item.groupIndex]?.questions[item.qIndex].skills"
+								color="primary" size="small" closable @click:close="removeChip(index)"
+								:key="skill.KyNang_MonHoc_ChiTietID">
+								{{ getSkillLabel(skill) }}
+							</v-chip>
+						</div>
+					</v-col>
 					<v-col cols="6">
 						<v-text-field :model-value="selectedQuestionData.points"
-							@update:model-value="updateQuestion('points', parseFloat($event) || 0)" label="Điểm"
-							type="number" min="0" step="0.25" variant="outlined" density="compact" :clearable="false" />
+							@update:model-value="updateQuestion('points', parseFloat($event) || 0)"
+							:label="$t('message.Score')" type="number" min="0" step="0.25" variant="outlined"
+							density="compact" :clearable="false" />
 					</v-col>
 					<v-col cols="6">
 						<v-select :model-value="selectedQuestionData.gradingType || 'auto'"
-							@update:model-value="updateQuestion('gradingType', $event)" label="Cách chấm"
-							:items="[{ value: 'auto', title: 'Tự động' }, { value: 'manual', title: 'Chấm tay' }]"
+							@update:model-value="updateQuestion('gradingType', $event)"
+							:label="$t('message.GradingMethod')"
+							:items="[{ value: 'auto', title: IsEngLish == 'en' ? 'auto' : 'Tự động' }, { value: 'manual', title: IsEngLish == 'en' ? 'manual' : 'Chấm tay' }]"
 							variant="outlined" density="compact" :disabled="!isAutoGradable(selectedQuestionData.type)"
 							:clearable="false" />
 					</v-col>
@@ -73,9 +87,10 @@
 				<uc-media :selectedData="selectedQuestionData.config" :item="item" v-model:loadingPage="loadingPage"
 					@update:selectedData="handleQuestionMediaUpdate" />
 				<v-divider class="my-2" />
-				<p class="mb-2 text-subtitle-1 font-weight-medium">Nội dung câu hỏi:</p>
+				<p class="mb-2 text-subtitle-1 font-weight-medium">{{ $t('message.QuestionContent') }}:</p>
 				<div :key="selectedQuestionData.id">
-					<f-editor :model-value="selectedQuestionData.config.questionText" placeholder="Nhập câu hỏi..."
+					<f-editor :model-value="selectedQuestionData.config.questionText"
+						:placeholder="$t('message.EnterQuestion')"
 						@update:model-value="updateQuestionConfig('questionText', $event)"
 						:imageapi="vueData.v_Set.apiImageAdapter" />
 				</div>
@@ -83,8 +98,8 @@
 				<!-- END -->
 				<div class="d-flex justify-space-between align-center"
 					v-if="!['QUIZ_TRUE_FALSE', 'ESSAY', 'AUDIO_RESPONSE', 'FILE_UPLOAD', 'SHORT_ANSWER'].includes(selectedQuestionData.type)">
-					<p class="font-weight-medium">Đáp án:</p>
-					<v-checkbox v-model="selectedQuestionData.config.isAdvanced" label="Nâng cao" />
+					<p class="font-weight-medium">{{ $t('message.Answer') }}:</p>
+					<v-checkbox v-model="selectedQuestionData.config.isAdvanced" :label="$t('message.Advanced')" />
 				</div>
 				<!-- QUIZ_SINGLE_CHOICE -->
 				<div v-if="selectedQuestionData.type === 'QUIZ_SINGLE_CHOICE'">
@@ -100,14 +115,14 @@
 							<v-text-field v-if="!selectedQuestionData.config.isAdvanced" :model-value="option.text"
 								@update:model-value="updateOptionText(index, $event)" dense variant="outlined"
 								hide-details :clearable="false" />
-							<uc-latex-edit class="w-100 xxxxxxxxxxx" v-else v-model:content="option.text" />
+							<uc-latex-edit class="w-100" v-else v-model:content="option.text" />
 						</v-col>
 						<v-col cols="2" class="d-flex justify-center align-center">
 							<v-btn size="x-small" @click="removeOption(index)" class="ml-1" icon="mdi-close" />
 						</v-col>
 					</v-row>
 					<v-btn block small @click="addOption" variant="tonal" class="mt-2">
-						<v-icon start>mdi-plus</v-icon>Thêm lựa chọn
+						<v-icon start>mdi-plus</v-icon>{{ $t('message.MoreAnswer') }}
 					</v-btn>
 				</div>
 				<!-- QUIZ_MULTIPLE_CHOICE -->
@@ -132,15 +147,15 @@
 						</v-col>
 					</v-row>
 					<v-btn small @click="addOption" variant="tonal" class="mt-2">
-						<v-icon left>mdi-plus</v-icon>Thêm lựa chọn
+						<v-icon left>mdi-plus</v-icon>{{ $t('message.MoreAnswer') }}
 					</v-btn>
 				</div>
 				<!-- QUIZ_TRUE_FALSE -->
 				<div v-else-if="selectedQuestionData.type === 'QUIZ_TRUE_FALSE'">
 					<v-radio-group :model-value="selectedQuestionData.config.correctAnswer"
 						@update:model-value="updateQuestionConfig('correctAnswer', $event)">
-						<v-radio :value="true" label="Đúng" />
-						<v-radio :value="false" label="Sai" />
+						<v-radio :value="true" :label="$t('message.Correct')" />
+						<v-radio :value="false" :label="$t('message.Incorrect')" />
 					</v-radio-group>
 				</div>
 				<!-- QUIZ_MULTIPLE_TRUE_FALSE -->
@@ -162,34 +177,39 @@
 								variant="text" size="small" color="red" @click="removeOption(index)" />
 						</v-col>
 					</v-row>
-					<v-btn prepend-icon="mdi-plus" variant="text" color="primary" @click="addOption('options')"
-						text='Thêm lựa chọn' />
+					<v-btn prepend-icon="mdi-plus" variant="text" color="primary" @click="addOption('options')">
+						{{ $t('message.MoreAnswer') }}
+					</v-btn>
 				</div>
 
 				<!-- QUIZ_FILL_IN_BLANK -->
 				<div v-else-if="selectedQuestionData.type === 'QUIZ_FILL_IN_BLANK'">
-					<p class="text-caption">Cấu trúc: [Văn bản] [Ô trống 1] [Văn bản]...</p>
+					<p class="text-caption">{{ $t('message.Structure') }}</p>
 					<div v-for="(part, index) in selectedQuestionData.config.parts" :key="index"
 						class="d-flex flex-wrap align-center mb-2">
 						<v-text-field v-if="part.type === 'text'" :model-value="part.value"
-							@update:model-value="updatePart(index, 'value', $event)" label="Nội dung văn bản"
+							@update:model-value="updatePart(index, 'value', $event)" :label="$t('message.TextContent')"
 							variant="outlined" density="compact" hide-details :clearable="false" />
 
 						<v-text-field v-if="part.type === 'blank'" :model-value="part.acceptedAnswers[0]"
-							@update:model-value="updatePart(index, 'acceptedAnswers', [$event])" label="Đáp án đúng"
-							variant="outlined" density="compact" hide-details class="ml-2" :clearable="false" />
+							@update:model-value="updatePart(index, 'acceptedAnswers', [$event])"
+							:label="$t('message.CorrectAnswer')" variant="outlined" density="compact" hide-details
+							class="ml-2" :clearable="false" />
 						<v-btn icon size="small" @click="removePart(index)" class="ml-1">
 							<v-icon>mdi-close</v-icon>
 						</v-btn>
 					</div>
-					<v-btn small @click="addPart('text')" variant="tonal" class="mr-2 mt-2">Thêm Văn bản</v-btn>
-					<v-btn small @click="addPart('blank')" variant="tonal" class="mt-2">Thêm Ô trống</v-btn>
+					<v-btn small @click="addPart('text')" variant="tonal" class="mr-2 mt-2">{{ $t('message.AddText')
+					}}</v-btn>
+					<v-btn small @click="addPart('blank')" variant="tonal" class="mt-2">{{ $t('message.AddBlank')
+					}}</v-btn>
 				</div>
 				<!-- QUIZ_MATCHING -->
 				<div v-else-if="selectedQuestionData.type === 'QUIZ_MATCHING'">
 					<v-row>
-						<v-col><label class="form-label">Cột A</label></v-col>
-						<v-col><label class="form-label">Cột B (tương ứng)</label></v-col>
+						<v-col><label class="form-label">{{ $t('message.Column') }} A</label></v-col>
+						<v-col><label class="form-label">{{ $t('message.Column') }} B
+								({{ $t('message.Similar') }})</label></v-col>
 					</v-row>
 					<v-row v-for="(pair, index) in selectedQuestionData.config.columnA" :key="index" class="mb-n5">
 						<v-col cols="5">
@@ -210,14 +230,15 @@
 						</v-col>
 					</v-row>
 					<v-btn prepend-icon="mdi-plus" variant="tonal" color="primary" @click="addPair" class="mt-4 mb-4">
-						Thêm cặp
+						{{ $t('message.AddPair') }}
 					</v-btn>
 				</div>
 				<!-- QUIZ_MATCHING_V2 -->
 				<div v-else-if="selectedQuestionData.type === 'QUIZ_MATCHING_V2'">
 					<v-row>
-						<v-col><label class="form-label">Cột A</label></v-col>
-						<v-col><label class="form-label">Cột B (tương ứng)</label></v-col>
+						<v-col><label class="form-label">{{ $t('message.Column') }} A</label></v-col>
+						<v-col><label class="form-label">{{ $t('message.Column') }} B
+								({{ $t('message.Similar') }})</label></v-col>
 					</v-row>
 					<v-row v-for="(pair, index) in selectedQuestionData.config.columnA" :key="index" class="mb-n5">
 						<v-col cols="5">
@@ -238,7 +259,7 @@
 						</v-col>
 					</v-row>
 					<v-btn prepend-icon="mdi-plus" variant="tonal" color="primary" @click="addPair" class="mt-4 mb-4">
-						Thêm cặp
+						{{ $t('message.AddPair') }}
 					</v-btn>
 				</div>
 				<!-- FILE_UPLOAD -->
@@ -249,13 +270,13 @@
 				</div>
 
 				<div v-else-if="selectedQuestionData.type === 'ESSAY'">
-					<v-number-input v-model="selectedQuestionData.config.maxLength" label="Kí tự tối đa"
+					<v-number-input v-model="selectedQuestionData.config.maxLength" :label="$t('message.MaxCharacters')"
 						variant="outlined" density="compact" />
 				</div>
 
 				<div v-else-if="['SHORT_ANSWER', 'AUDIO_RESPONSE'].includes(selectedQuestionData.type)">
 					<p class="text-caption text-grey">
-						Loại câu hỏi này không có cấu hình đáp án. Điểm sẽ được chấm thủ công.
+						{{ $t('message.NoAnswerConfig') }}.
 					</p>
 				</div>
 			</div>
@@ -265,14 +286,16 @@
 	<uc-loading-page v-model="loadingPage.isLoading" v-model:text="loadingPage.text" />
 	<uc-question-from-hoc-lieu v-if="isShowModalImportFromHocLieu" v-model:isOpen="isShowModalImportFromHocLieu"
 		:assignmentDetail="assignment" @importJson="bindingImport" />
+	<uc-chon-ki-nang v-model:dialog="isShowModalSkill" @skillApplied="handleSubmitSkill"></uc-chon-ki-nang>
 </template>
 
 <script>
 export default {
 	name: 'uc-assignment-properties',
 	props: { groups: { type: Array, default: () => [] }, item: Object, assignment: Object },
-	emits: ['update:groups'],
+	emits: ['update:groups', 'update:item'],
 	data() {
+		this.$i18n.locale = (localStorage.getItem('IsLanguage') && localStorage.getItem('IsLanguage') == 'true') ? 'en' : 'vi'
 		return {
 			vueData,
 			window,
@@ -283,7 +306,9 @@ export default {
 			},
 			isSaveFile: false,
 			isQuestionTextField: false,
-			isShowModalImportFromHocLieu: false
+			isShowModalImportFromHocLieu: false,
+			isShowModalSkill: false,
+			skills: new Map()
 		}
 	},
 	watch: {},
@@ -310,22 +335,19 @@ export default {
 				n += this.groups[i].questions.length;
 			}
 			return n + this.item.qIndex;
+		},
+		IsEngLish: function () {
+			return this.$i18n.locale == 'en'
 		}
-	},
-	mounted() {
-		console.log('item', this.item)
-		console.log('selectedGroupData', this.selectedGroupData)
 	},
 	methods: {
 		isAutoGradable(type) { return type.startsWith('QUIZ_'); },
 		// Handle emit từ uc-media cho group
 		handleGroupMediaUpdate(updatedData) {
-			console.log('1 updateData', updatedData)
 			if (!this.item || this.item.type !== 'group') return;
 			const ng = this.groups;
 			const media = updatedData.media
 
-			console.log('updatedData', updatedData)
 			ng[this.item.groupIndex] = {
 				...ng[this.item.groupIndex],
 				media: {
@@ -421,6 +443,23 @@ export default {
 		},
 		bindingImport(val) {
 			this.groups[this.item.groupIndex].questions = [...this.groups[this.item.groupIndex].questions, val]
+		},
+		onOpenModalKiNang() {
+			this.isShowModalSkill = true
+		},
+		handleSubmitSkill(val) {
+			let SkillsNotDuplicate = val.filter(i => !this.selectedQuestionData.skills.map(e => e.KyNang_MonHoc_ChiTietID).includes(i.KyNang_MonHoc_ChiTietID))
+			this.selectedQuestionData.skills = [...this.selectedQuestionData.skills, ...SkillsNotDuplicate]
+			val.forEach(i => {
+				this.skills.set(i.KyNang_MonHoc_ChiTietID, i.TenKyNang)
+			})
+		},
+		removeChip(index) {
+			this.groups[this.item.groupIndex]?.questions[this.item.qIndex].skills.splice(index, 1)
+			this.$emit('update:groups', this.groups);
+		},
+		getSkillLabel(skill) {
+			return this.skills.get(skill.KyNang_MonHoc_ChiTietID) || skill.TenKyNang;
 		}
 	}
 }

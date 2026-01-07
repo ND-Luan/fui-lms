@@ -1,7 +1,7 @@
 <template>
-	<div style="height: calc(100dvh - 212px)">
+	<div style="max-height: calc(100dvh - 212px); height: 100%; overflow: auto; padding-bottom: 42px;">
 		<v-divider></v-divider>
-		<v-list lines="two" style="height: 100%">
+		<v-list lines="two">
 			<v-list-subheader> {{ $t('message.monthList') }}</v-list-subheader>
 			<div v-for="(thang, index) in vueData.DSHocTapThang">
 				<v-list-item :title="renderTextTitle(thang)" @click="onRedirect(thang)">
@@ -58,12 +58,18 @@ export default {
 	},
 	methods: {
 		onRedirect(thangObj) {
+			console.log('redirect')
 			openWindow({
 				title: "Thông báo tháng",
 				url: `report-ket-qua-hoc-tap-thang-hoc-sinh?id=${vueData.HocSinhSelected.HocSinhID}&lop_nxtid=${thangObj.Lop_NhanXetThangID}&nienkhoa=${vueData.NienKhoa}`,
-				onclose: {
-					"CALL": "getDSThang"
-				}
+				onclose: [
+					{
+						"EXE": "console.log('vueData',vueData)"
+					},
+					{
+						"CALL": "getDSThang"
+					}
+				]
 			})
 		},
 		renderTextTitle(thang) {

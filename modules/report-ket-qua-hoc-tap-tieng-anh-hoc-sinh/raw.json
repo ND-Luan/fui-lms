@@ -32,7 +32,7 @@
             "PanelPart1": 0,
             "PanelPart2": 0,
             "DSLopIelts": [
-                "12AV1",
+                "25-12AV11",
                 "12AV2",
                 "12AV3",
                 "12AV4"
@@ -85,7 +85,13 @@
                 "DiemCK_HK1",
                 "DiemGK_HK2",
                 "DiemCK_HK2"
-            ]
+            ],
+            "ListMaNhomCotDiem": {
+                "11": [
+                    "S2_Mid",
+                    "S2_Final"
+                ]
+            }
         },
         {
             "API": "lms/HocSinh_Detail_GetBy_HocSinhID",
@@ -193,7 +199,7 @@
             "prop": "fluid",
             "rows": [
                 {
-                    "prop": " class='v-row--no-gutters'",
+                    "prop": ":no-gutters='true'",
                     "cols": [
                         {
                             "el": "loading-cot-diem",
@@ -288,6 +294,13 @@
                                                                         "v-slot:prepend": "item"
                                                                     },
                                                                     "innerHTML": "<v-avatar > <v-img :src='v_Set.urlAvatarHocSinh + HocSinhDetail?.HocSinhID' contain/> </v-avatar>"
+                                                                },
+                                                                {
+                                                                    "el": "template",
+                                                                    "attr": {
+                                                                        "v-slot:append": "item"
+                                                                    },
+                                                                    "innerHTML": "<v-chip label color='primary'>{{ DSCotDiem[0]?.find(i => i.MaNhomCotDiem == MaNhomCotDiem)?.TenNhomCotDiem_VI}}</v-chip>"
                                                                 }
                                                             ]
                                                         }
@@ -423,7 +436,7 @@
                                                                                                                             "attr": {
                                                                                                                                 "v-slot:append": "item"
                                                                                                                             },
-                                                                                                                            "innerHTML": "<v-chip color='green' size='small'>{{ diem.KetQuaDanhGia_VI }}</v-chip>"
+                                                                                                                            "innerHTML": "<v-chip color='green' size='small'>{{ diem.KetQuaDanhGia_VI }} / {{diem.DiemMax}}</v-chip>"
                                                                                                                         }
                                                                                                                     ]
                                                                                                                 }
@@ -455,7 +468,7 @@
                                                                                                                             "attr": {
                                                                                                                                 "v-slot:append": "item"
                                                                                                                             },
-                                                                                                                            "innerHTML": "<v-chip color='green' size='small'>{{diem.KetQuaDanhGia_VI }}</v-chip>"
+                                                                                                                            "innerHTML": "<v-chip color='green' size='small'>{{diem.KetQuaDanhGia_VI }} / {{diem.DiemMax}}</v-chip>"
                                                                                                                         }
                                                                                                                     ]
                                                                                                                 }
@@ -487,7 +500,7 @@
                                                                                                                             "attr": {
                                                                                                                                 "v-slot:append": "item"
                                                                                                                             },
-                                                                                                                            "innerHTML": "<v-chip color='green' size='small'>{{ diem.KetQuaDanhGia_VI }}</v-chip>"
+                                                                                                                            "innerHTML": "<v-chip color='green' size='small'>{{ diem.KetQuaDanhGia_VI }} / {{diem.DiemMax}}</v-chip>"
                                                                                                                         }
                                                                                                                     ]
                                                                                                                 }
@@ -577,7 +590,7 @@
                                                                                                             "attr": {
                                                                                                                 "v-slot:append": "item"
                                                                                                             },
-                                                                                                            "innerHTML": "<v-chip color='green' size='small'>{{ diem.KetQuaDanhGia_VI }}</v-chip>"
+                                                                                                            "innerHTML": "<v-chip color='green' size='small'>{{ diem.KetQuaDanhGia_VI }} / {{diem.DiemMax}}</v-chip>"
                                                                                                         }
                                                                                                     ]
                                                                                                 }
@@ -629,7 +642,7 @@
                                                                                                 "v-if": "dataDiemPart3?.KetQuaDanhGia_VI",
                                                                                                 "class": " py-4 text-body-2 ml-2"
                                                                                             },
-                                                                                            "innerHTML": "<v-icon class='mr-2'>mdi-star-four-points-small</v-icon>{{dataDiemPart3.KetQuaDanhGia_VI}}"
+                                                                                            "innerHTML": "<v-icon class='mr-2'>mdi-star-four-points-small</v-icon>{{dataDiemPart3.KetQuaDanhGia_VI}} / {{dataDiemPart3.DiemMax}}"
                                                                                         }
                                                                                     ]
                                                                                 }
@@ -712,7 +725,22 @@
                                                                                                                                 "size": "small",
                                                                                                                                 "variant": "outlined"
                                                                                                                             },
-                                                                                                                            "innerHTML": "<span>{{type.data.length}}</span><v-icon icon='mdi-trophy' end></v-icon>"
+                                                                                                                            "innerHTML": [
+                                                                                                                                {
+                                                                                                                                    "el": "span",
+                                                                                                                                    "attr": {
+                                                                                                                                        "v-if": "index === 0"
+                                                                                                                                    },
+                                                                                                                                    "innerHTML": "{{type.data?.[0]?.KetQuaDanhGia_VI}} <v-icon icon='mdi-trophy' end></v-icon>"
+                                                                                                                                },
+                                                                                                                                {
+                                                                                                                                    "el": "span",
+                                                                                                                                    "attr": {
+                                                                                                                                        "v-if": "index === 1"
+                                                                                                                                    },
+                                                                                                                                    "innerHTML": "{{type.data?.length}} <v-icon icon='mdi-trophy' end></v-icon>"
+                                                                                                                                }
+                                                                                                                            ]
                                                                                                                         }
                                                                                                                     ]
                                                                                                                 }
@@ -847,7 +875,7 @@
                                                                                 {
                                                                                     "el": "div",
                                                                                     "attr": {
-                                                                                        "class": "pa-4 pb-0 mb-2"
+                                                                                        "class": "pa-2 pb-0 mb-2"
                                                                                     },
                                                                                     "innerHTML": [
                                                                                         {
@@ -860,7 +888,7 @@
                                                                                                 {
                                                                                                     "el": "v-card-text",
                                                                                                     "attr": {
-                                                                                                        "class": "d-flex justify-space-between align-center gap-5"
+                                                                                                        "class": "d-flex justify-space-between align-center gap-5 pa-2"
                                                                                                     },
                                                                                                     "innerHTML": [
                                                                                                         {
@@ -897,7 +925,7 @@
                                                                                                                     "attr": {
                                                                                                                         "class": "text-caption font-weight-bold"
                                                                                                                     },
-                                                                                                                    "innerHTML": "{{HocSinhDetail.CapID == 2 ? (skills[skills.length-1].score ? (`${$t('message.TotalPoints')}: ` + parseFloat(skills[skills.length-1].score)):'-') : (skills[skills.findIndex(item => item.label_EN == 'Total')]?.score ? (`${$t('message.TotalPoints')}: `+parseFloat(skills[skills.findIndex(item => item.label_EN == 'Total')].score)) : '-')}}"
+                                                                                                                    "innerHTML": "{{HocSinhDetail.CapID == 2 ? (skills[skills.length-1]?.score ? (`${$t('message.TotalPoints')}: ` + parseFloat(skills[skills.length-1].score)):'-') : (skills[skills.findIndex(item => item.label_EN == 'Total')]?.score ? (`${$t('message.TotalPoints')}: `+parseFloat(skills[skills.findIndex(item => item.label_EN == 'Total')].score)) : '-')}}"
                                                                                                                 }
                                                                                                             ]
                                                                                                         }
@@ -909,7 +937,7 @@
                                                                                             "el": "v-row",
                                                                                             "attr": {
                                                                                                 ":dense": true,
-                                                                                                "class": "my-4 ",
+                                                                                                "class": "my-2 ",
                                                                                                 "v-if": "HocSinhDetail?.CapID === 2 && !(MaNhomCotDiem == 'S2_Final' && HocSinhDetail?.KhoiID == 9) "
                                                                                             },
                                                                                             "innerHTML": [
@@ -994,7 +1022,7 @@
                                                                                                 {
                                                                                                     "el": "v-card-text",
                                                                                                     "attr": {
-                                                                                                        "class": "d-flex justify-space-between align-center gap-5"
+                                                                                                        "class": "d-flex align-center  flex-wrap ga-2 justify-end pa-2"
                                                                                                     },
                                                                                                     "innerHTML": [
                                                                                                         {
@@ -1018,6 +1046,9 @@
                                                                                                             ]
                                                                                                         },
                                                                                                         {
+                                                                                                            "el": "v-spacer"
+                                                                                                        },
+                                                                                                        {
                                                                                                             "el": "v-chip",
                                                                                                             "attr": {
                                                                                                                 "class": "v-chip-custom",
@@ -1034,6 +1065,25 @@
                                                                                                                     "innerHTML": "{{HocSinhDetail.CapID == 2 ? (skills[skills.length-1].score ? ('Tổng điểm: ' + parseFloat(skills[skills.length-1].score)):'-') : (skills[skills.findIndex(item => item.label_EN == 'AVG')]?.score ? ('Overall: '+parseFloat(skills[skills.findIndex(item => item.label_EN == 'AVG')].score)) : '-')}}"
                                                                                                                 }
                                                                                                             ]
+                                                                                                        },
+                                                                                                        {
+                                                                                                            "el": "v-chip",
+                                                                                                            "attr": {
+                                                                                                                "class": "v-chip-custom",
+                                                                                                                "color": "#f1ec63",
+                                                                                                                "variant": "outlined",
+                                                                                                                "style": "min-width: 90px,flex: 0 0 auto;",
+                                                                                                                "v-if": "HocSinhDetail.CapID == 3"
+                                                                                                            },
+                                                                                                            "innerHTML": [
+                                                                                                                {
+                                                                                                                    "el": "span",
+                                                                                                                    "attr": {
+                                                                                                                        "class": "text-caption font-weight-bold"
+                                                                                                                    },
+                                                                                                                    "innerHTML": "{{skills[skills.findIndex(item => item.MaCotDiem.includes('IELTS_Band_Conv'))]?.score ? ('IELTS BAND: '+parseFloat(skills[skills.findIndex(item => item.MaCotDiem.includes('IELTS_Band_Conv'))].score)) : '-'}}"
+                                                                                                                }
+                                                                                                            ]
                                                                                                         }
                                                                                                     ]
                                                                                                 }
@@ -1043,7 +1093,7 @@
                                                                                             "el": "v-row",
                                                                                             "attr": {
                                                                                                 ":dense": true,
-                                                                                                "class": "my-4 ",
+                                                                                                "class": "my-2",
                                                                                                 "v-if": "HocSinhDetail?.CapID === 3"
                                                                                             },
                                                                                             "innerHTML": [
@@ -1094,6 +1144,14 @@
                                                                                                                                 "class": " mt-2 "
                                                                                                                             },
                                                                                                                             "innerHTML": "{{$t('message.Score')}}: {{  (skill.score ? parseFloat(skill.score) :'-')}} "
+                                                                                                                        },
+                                                                                                                        {
+                                                                                                                            "el": "span",
+                                                                                                                            "attr": {
+                                                                                                                                "class": " mt-1 ",
+                                                                                                                                "v-if": "(HocSinhDetail.KhoiID == 11 && ListMaNhomCotDiem['11'].includes[MaNhomCotDiem]) || HocSinhDetail.KhoiID == 12"
+                                                                                                                            },
+                                                                                                                            "innerHTML": "IELTS: {{  (skill.Score_IELTS ? parseFloat(skill.Score_IELTS) :'-')}} "
                                                                                                                         },
                                                                                                                         {
                                                                                                                             "el": "div",
@@ -1183,7 +1241,7 @@
                                                                                                                 "class": "v-chip-custom",
                                                                                                                 "color": "#f1ec63",
                                                                                                                 "variant": "outlined",
-                                                                                                                "style": "min-width: 90px,  flex: 0 0 auto;"
+                                                                                                                "style": "min-width: 90px; flex: 0 0 auto;"
                                                                                                             },
                                                                                                             "innerHTML": [
                                                                                                                 {
@@ -1191,7 +1249,7 @@
                                                                                                                     "attr": {
                                                                                                                         "class": "text-caption font-weight-bold"
                                                                                                                     },
-                                                                                                                    "innerHTML": "Overall: {{skills[skills.length-1].percent ? skills[skills.length-1].percent :'-' }}"
+                                                                                                                    "innerHTML": "Overall: {{skills[skills.length-1]?.percent ? skills[skills.length-1]?.percent :'-' }}"
                                                                                                                 },
                                                                                                                 {
                                                                                                                     "el": "v-icon",
@@ -1273,7 +1331,7 @@
                                                                                             "el": "v-row",
                                                                                             "attr": {
                                                                                                 ":dense": true,
-                                                                                                "class": "my-4",
+                                                                                                "class": "my-2",
                                                                                                 "v-if": "HocSinhDetail?.CapID === 2"
                                                                                             },
                                                                                             "innerHTML": [
@@ -1367,14 +1425,14 @@
                                                                                         {
                                                                                             "el": "uc-chart-ky-nang",
                                                                                             "attr": {
-                                                                                                "v-if": "HocSinhDetail?.CapID === 2"
+                                                                                                "v-if": "HocSinhDetail?.CapID === 2 && skills.length>0"
                                                                                             }
                                                                                         },
                                                                                         {
                                                                                             "el": "v-row",
                                                                                             "attr": {
                                                                                                 ":dense": true,
-                                                                                                "class": "my-4",
+                                                                                                "class": "my-2",
                                                                                                 "v-if": "HocSinhDetail?.CapID === 3 && DSLopIelts.includes(HocSinhDetail.TenLopAV)"
                                                                                             },
                                                                                             "innerHTML": [
@@ -1501,7 +1559,7 @@
                                                                                 {
                                                                                     "el": "v-card",
                                                                                     "attr": {
-                                                                                        "class": " pa-4 border-top mb-2"
+                                                                                        "class": " pa-2 border-top mb-2"
                                                                                     },
                                                                                     "innerHTML": [
                                                                                         {
@@ -1716,7 +1774,7 @@
                                                                                 {
                                                                                     "el": "div",
                                                                                     "attr": {
-                                                                                        "class": "pa-4 pb-0 mb-2"
+                                                                                        "class": "pa-2 pb-0 mb-2"
                                                                                     },
                                                                                     "innerHTML": [
                                                                                         {

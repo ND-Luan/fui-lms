@@ -8,7 +8,8 @@
 
 		<f-editor v-if="submissionstatus < 2" :model-value="answer" @update:model-value="handlAnswerd"
 			:imageapi="vueData.v_Set.apiImageAdapter" :readonly="submissionstatus >= 2" variant="outlined" height="300"
-			auto-grow label="Soạn câu trả lời của bạn..." />
+			auto-grow label="Soạn câu trả lời của bạn..." @copy="handleCopyPaste" @cut="handleCopyPaste"
+			@paste="handleCopyPaste" @contextmenu="handleContextMenu" />
 
 		<div v-if="question.config.minWords && !readonly" class="mt-2 text-caption text--grey">
 			Số từ tối thiểu: {{ question.config.minWords }} (Hiện tại: {{ wordCount }})
@@ -62,7 +63,7 @@
 		<!-- (5) Điểm -->
 		<!-- Điểm câu – hiển thị khi đã trả bài (status == 4) -->
 		<div v-if="submissionstatus == 4" class="mt-2">
-			<strong>Điểm | Score:</strong>
+			<strong>{{ $i18n.locale == 'en' ? 'Score' : 'Điểm' }}:</strong>
 			<v-chip size="small" :color="scoreChipColor" variant="tonal">
 				<v-icon start size="16">mdi-star</v-icon>
 				{{ displayScore }} / {{ effectiveMaxPoints }}
@@ -92,72 +93,89 @@
 				<span class="ml-1 text-caption">điểm</span>
 			</div>
 			<v-textarea :model-value="grading ? grading.teacherComment : null"
-				@update:model-value="updateTeacherComment" label="Nhận xét của giáo viên (tùy chọn)" rows="2" outlined
-				dense hide-details />
+				@update:model-value="updateTeacherComment" :label="$t('message.TeacherCommentOptional')" rows="2"
+				outlined dense hide-details />
 		</div>
 	</div>
 </template>
 
 <script>
-export default {
-	name: 'uc-question-essay',
-	props: {
-		question: Object,
-		answer: String,
-		readonly: Boolean,
-		grading: Object,
-		isGrade: { type: Boolean, default: false },
-		submissionstatus: { type: Number, default: -1 },
-		isShowBtnComment: { type: Boolean, default: true }
-	},
-	emits: ['answer-change', 'grading-change'],
-	data() { return { vueData: window.vueData || {}, menu: false, widthScreen: null } },
-	mounted() {
-		this.widthScreen = window.innerWidth
-		window.addEventListener('resize', () => { this.handleResize() })
-	},
-	computed: {
-		guideText() { return this.question?.config?.submissionNote || this.question?.config?.instruction || '' },
-		wordCount() {
-			if (!this.answer) return 0;
-			const text = this.answer.replace(/<[^>]*>?/gm, '');
-			return text.trim().split(/\s+/).filter(w => w.length > 0).length;
+	export default {
+		name: 'uc-question-essay',
+		props: {
+			question: Object,
+			answer: String,
+			readonly: Boolean,
+			grading: Object,
+			isGrade: { type: Boolean, default: false },
+			submissionstatus: { type: Number, default: -1 },
+			isShowBtnComment: { type: Boolean, default: true },
+			isBlockCopyPaste: {
+				type: Boolean,
+				default: false
+			}
 		},
-		displayScore() {
-			// Ưu tiên manualScore, rồi autoScore, nếu trống thì mặc định 0
-			const s = this.grading?.manualScore ?? this.grading?.autoScore ?? 0;
-			return typeof s === 'number' ? s : 0;
+		emits: ['answer-change', 'grading-change'],
+		data() { return { vueData: window.vueData || {}, menu: false, widthScreen: null } },
+		mounted() {
+			this.widthScreen = window.innerWidth
+			window.addEventListener('resize', () => { this.handleResize() })
 		},
-		effectiveMaxPoints() {
-			return this.question?.points ?? 0;
+		computed: {
+			guideText() { return this.question?.config?.submissionNote || this.question?.config?.instruction || '' },
+			wordCount() {
+				if (!this.answer) return 0;
+				const text = this.answer.replace(/<[^>]*>?/gm, '');
+				return text.trim().split(/\s+/).filter(w => w.length > 0).length;
+			},
+			displayScore() {
+				// Ưu tiên manualScore, rồi autoScore, nếu trống thì mặc định 0
+				const s = this.grading?.manualScore ?? this.grading?.autoScore ?? 0;
+				return typeof s === 'number' ? s : 0;
+			},
+			effectiveMaxPoints() {
+				return this.question?.points ?? 0;
+			},
+			scoreChipColor() {
+				const s = this.displayScore;
+				const max = this.effectiveMaxPoints;
+				if (s <= 0) return 'error'; // 0 điểm if (max && s>= max) return 'success'; // đạt tối đa
+				return 'primary'; // điểm trung gian
+			}
 		},
-		scoreChipColor() {
-			const s = this.displayScore;
-			const max = this.effectiveMaxPoints;
-			if (s <= 0) return 'error'; // 0 điểm if (max && s>= max) return 'success'; // đạt tối đa
-			return 'primary'; // điểm trung gian
-		}
-	},
-	methods: {
-		handleResize() {
-			this.widthScreen = window.innerWidth;
-		},
-		onStudentCommentInput(val) {
-			this.grading.comment = val
-			this.$emit('grading-change', { ...this.grading, comment: val })
-		},
-		updateTeacherComment(val) { this.$emit('grading-change', { ...this.grading, teacherComment: val }); },
-		submitPoints() {
-			this.$emit('grading-change', {
-				...this.grading,
-				manualScore: this.grading.manualScore
-			});
-		},
-		handlAnswerd(val) {
-			console.log('valll', val)
-			if (!val) return
-			this.$emit('answer-change', val)
+		methods: {
+			handleResize() {
+				this.widthScreen = window.innerWidth;
+			},
+			onStudentCommentInput(val) {
+				this.grading.comment = val
+				this.$emit('grading-change', { ...this.grading, comment: val })
+			},
+			updateTeacherComment(val) { this.$emit('grading-change', { ...this.grading, teacherComment: val }); },
+			submitPoints() {
+				this.$emit('grading-change', {
+					...this.grading,
+					manualScore: this.grading.manualScore
+				});
+			},
+			handlAnswerd(val) {
+				if (this.submissionstatus == 1) {
+					if (!val) return
+					this.$emit('answer-change', val)
+				}
+			},
+			handleCopyPaste(event) {
+				if (this.isBlockCopyPaste && !this.readonly) {
+					event.preventDefault();
+					// Có thể thêm thông báo cho user
+					Vue.$toast?.warning('Không được phép sao chép/dán nội dung trong bài này', { position: "top" });
+				}
+			},
+			handleContextMenu(event) {
+				if (this.isBlockCopyPaste && !this.readonly) {
+					event.preventDefault();
+				}
+			}
 		}
 	}
-}
 </script>

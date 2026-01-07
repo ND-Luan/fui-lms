@@ -1,3 +1,14 @@
+async function GET_Dashboard_Cambridge_Theo_KyNang() {
+    const params = {
+        CapID: 2,
+        NienKhoa: vueData.NienKhoa,
+        Semester: 'HK' + vueData.HocKiValue
+    }
+    await ajaxCALL('lms/Dashboard_Cambridge_Theo_KyNang', params, function (res) {
+        vueData.Dashboard_Cambridge_Theo_KyNang_GK = res.data[0];
+        vueData.Dashboard_Cambridge_Theo_KyNang_CK = res.data[1];
+    });
+}
 function renderDSKhoi() {
     const DSKhoi = Array.from({ length: 12 }).map((_, i) => {
         const value = i + 1;
@@ -26,3 +37,48 @@ function renderMonHocID() {
         vueData.MonHocID = 76
     }
 }
+const itemTabs = [
+    {
+        title: "Chủ đề",
+        value: 3
+    },
+    // {
+    //     "title": "Kĩ năng theo cấp",
+    //     "value": 0
+    // },
+    // {
+    //     "title": "Kĩ năng theo khối",
+    //     "value": 1
+    // },
+    // {
+    //     "title": "Kĩ năng theo lớp",
+    //     "value": 2
+    // },
+    // {
+    //     "title": "Tương quan điểm giữa kì và cuối kì",
+    //     "value": 4
+    // }
+    {
+        title: "Kĩ năng nghe",
+        value: 5
+    },
+    {
+        title: "Kĩ năng nói",
+        value: 6
+    },
+    {
+        title: "Kĩ năng đọc",
+        value: 7
+    },
+    {
+        title: "Kĩ năng viết",
+        value: 8
+    },
+    {
+        title: "Điểm trung bình",
+        value: 9
+    },
+]
+vueData.GET_Dashboard_Cambridge_Theo_KyNang = GET_Dashboard_Cambridge_Theo_KyNang
+console.log('itemTabs', itemTabs);
+vueData.itemTabs = itemTabs;

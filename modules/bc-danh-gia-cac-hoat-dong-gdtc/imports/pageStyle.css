@@ -1,0 +1,13 @@
+.table-bordered table {
+    border-collapse: collapse;
+    font-size: 12px;
+}
+
+.table-bordered td,
+.table-bordered th {
+    border: 1px solid #ccc !important;
+}
+
+/* .table-bordered tbody tr:last-child {
+    font-weight: bold;
+} */

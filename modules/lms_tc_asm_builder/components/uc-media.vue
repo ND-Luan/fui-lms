@@ -29,15 +29,15 @@
 				<!-- MEDIA YOUTUBE -->
 				<div v-if="selectedData.media.type === 'YOUTUBE'" class="d-flex flex-column ga-2 mt-2">
 					<div class="d-flex ga-2 pb-2">
-						<v-text-field v-model="selectedData.media.sourceYT.source" placeholder="Dán link video..."
-							hint="*Dán đường link youtube hoặc video khác" persistent-hint :clearable="false" />
+						<v-text-field v-model="selectedData.media.sourceYT.source" :placeholder="IsEngLish ? 'Paste video link':'Dán link video...'"
+							:hint="IsEngLish ? '*Paste a YouTube or other video link.':'*Dán đường link youtube hoặc video khác'" persistent-hint :clearable="false" />
 						<v-btn @click="$refs.fileInput.click()" color="primary" variant="tonal" text='Tải video' />
 
 						<input ref="fileInput" type="file" accept="video/*"
 							@change="e => handleFileChange(e, selectedData.media.type)" style="display: none" />
 					</div>
 					<p v-if="selectedData.media.sourceYT.id?.length === 0" class="text-caption">
-						*Lưu ý: Tải Video phải dưới 15p và tên file không được vượt quá 100 kí tự
+						{{IsEngLish ? '*Note: The video must be under 15 minutes and the file name must not exceed 100 characters.':'*Lưu ý: Tải Video phải dưới 15p và tên file không được vượt quá 100 kí tự'}}
 					</p>
 					<iframe v-if="selectedData.media.sourceYT.source?.length > 0" width="100%" height="400"
 						:src="renderUrlYoutube(selectedData.media.sourceYT.source)" title="YouTube video player"
@@ -48,9 +48,9 @@
 				<!-- MEDIA RECORD_AUDIO -->
 				<div v-else-if="selectedData.media.type === 'RECORD_AUDIO'" class="d-flex flex-column ga-2 mt-2">
 					<div class="d-flex ga-2 mb-2">
-						<v-text-field v-model="selectedData.media.sourceRecord.source" placeholder="Dán link record..."
+						<v-text-field v-model="selectedData.media.sourceRecord.source" :placeholder="IsEngLish ?'Paste record link' :'Dán link record...'"
 							:clearable="false" />
-						<v-btn text="Tải audio" @click="$refs.inputUploadRecordAudio.click()" variant="tonal"
+						<v-btn :text="IsEngLish ? 'Download Audio':'Tải audio'" @click="$refs.inputUploadRecordAudio.click()" variant="tonal"
 							color="primary" />
 						<input ref="inputUploadRecordAudio" type="file" accept="audio/*"
 							@change="(e) => handleFileChange(e, 'UPLOAD_RECORD_AUDIO')" style="display:none" />
@@ -61,10 +61,10 @@
 				</div>
 				<!-- MEDIA FILE -->
 				<div v-else-if="selectedData.media.type === 'FILE'" class="d-flex flex-column ga-2 mt-2">
-					<v-btn @click="$refs.inputFile.click()" color="primary" variant="elevated">Tải file</v-btn>
+					<v-btn @click="$refs.inputFile.click()" color="primary" variant="elevated">{{IsEngLish ? 'Download file':'Tải file'}}</v-btn>
 					<input ref="inputFile" type="file" accept=".pdf, .doc, .docx, .ppt, .pptx, image/*"
 						@change="e => handleFileChange(e, selectedData.media.type)" style="display:none" />
-					<p class="text-subtitle-2 mt-2">Hình ảnh</p>
+					<p class="text-subtitle-2 mt-2">{{IsEngLish ? 'Image':'Hình ảnh'}}</p>
 					<v-row dense v-if="selectedData.media.sourceFiles.image?.length > 0">
 						<v-col cols="4" v-for="(file, index) in selectedData.media.sourceFiles.image">
 							<v-img
@@ -107,6 +107,7 @@ export default {
 		loadingPage: Object,
 	},
 	data() {
+		this.$i18n.locale = (localStorage.getItem('IsLanguage') && localStorage.getItem('IsLanguage') == 'true') ? 'en' : 'vi'
 		return {
 			isSaveFile: false,
 			fileRecordAudio: null,
@@ -404,5 +405,10 @@ export default {
 		},
 		renderUrlYoutube
 	},
+	computed:{
+		IsEngLish:function(){
+			return this.$i18n.locale == 'en'
+		}
+	}
 }
 </script>

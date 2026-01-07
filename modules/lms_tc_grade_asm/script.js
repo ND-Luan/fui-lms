@@ -6,14 +6,25 @@ function initPage() {
         vueData.dataReady = true;
         return;
     }
-    ajaxCALL("lms/EL_Teacher_GetSubmissionDetail", { SubmissionID: submissionId }, function (response) {
-        if (response && response.data && response.data.length >= 2 && response.data[0].length > 0) {
-            vueData.submissionData = response.data;
-            vueData.dataReady = true;
-        } else {
-            Vue.$toast.error("Không thể tải dữ liệu bài nộp.", { position: "top" });
-        }
-    });
+    if (vueData.AssignType == 'CLASS') {
+        ajaxCALL("lms/EL_Teacher_GetSubmissionDetail", { SubmissionID: submissionId }, function (response) {
+            if (response && response.data && response.data.length >= 2 && response.data[0].length > 0) {
+                vueData.submissionData = response.data;
+                vueData.dataReady = true;
+            } else {
+                Vue.$toast.error("Không thể tải dữ liệu bài nộp.", { position: "top" });
+            }
+        });
+    } else {
+        ajaxCALL("lms/EL_Teacher_GetSubmissionDetail_AssignToStudent", { SubmissionID: submissionId }, function (response) {
+            if (response && response.data && response.data.length >= 2 && response.data[0].length > 0) {
+                vueData.submissionData = response.data;
+                vueData.dataReady = true;
+            } else {
+                Vue.$toast.error("Không thể tải dữ liệu bài nộp.", { position: "top" });
+            }
+        });
+    }
 }
 function saveGradingDraft(payload) {
     // confirm({
@@ -39,12 +50,22 @@ function saveGradingDraft(payload) {
     });
 }
 function publishGrades(payload) {
-    ajaxCALL("lms/EL_Teacher_PublishGrade", payload, function (response) {
-        Vue.$toast.success("Hoàn tất chấm bài và trả bài thành công!", { position: "top" });
-        initPage()
-        // Chuyển hướng về trang danh sách (có thể kích hoạt sau)
-        // window.location.href = '/teacher/grading-list';
-    });
+    if (vueData.AssignType == 'CLASS') {
+        ajaxCALL("lms/EL_Teacher_PublishGrade", payload, function (response) {
+            Vue.$toast.success("Hoàn tất chấm bài và trả bài thành công!", { position: "top" });
+            initPage()
+            // Chuyển hướng về trang danh sách (có thể kích hoạt sau)
+            // window.location.href = '/teacher/grading-list';
+        });
+    }
+    else {
+        ajaxCALL("lms/EL_Teacher_PublishGrade_AssignToStudent", payload, function (response) {
+            Vue.$toast.success("Hoàn tất chấm bài và trả bài thành công!", { position: "top" });
+            initPage()
+            // Chuyển hướng về trang danh sách (có thể kích hoạt sau)
+            // window.location.href = '/teacher/grading-list';
+        });
+    }
 }
 function openPublishDialog() {
     vueData.confirmPublishDialog = true;

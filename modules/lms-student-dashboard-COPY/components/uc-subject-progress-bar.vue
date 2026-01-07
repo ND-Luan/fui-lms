@@ -5,7 +5,7 @@
 				<span class="text-subtitle-5 font-weight-bold text-no-wrap"> {{subject.MonHocName}}</span>
 			</v-col>
 			<v-col cols="9">
-				<v-progress-linear :model-value="progress" color="teal-lighten-3" height="15" rounded 
+				<v-progress-linear :model-value="progress" color="teal-lighten-3" height="15" rounded
 					bg-color="rgba(255, 255, 255, 0.3)" class="border ma-0">
 					<template v-slot:default="{ value }">
 						<strong>{{ Math.ceil(progress) }}%</strong>
@@ -28,7 +28,6 @@
 		emits: ['filter'],
 		computed: {
 			progress() {
-	
 				if (!this.subject.TotalTasks || this.subject.TotalTasks === 0) return 0;
 				return (this.subject.CompletedTasks / this.subject.TotalTasks) * 100;
 			}

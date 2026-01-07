@@ -42,7 +42,8 @@
 
 			</div>
 
-			<v-data-table :items="DataTable" :headers="headers" class="custom-table" hide-default-footer>
+			<v-data-table :items="DataTable" :headers="headers" class="custom-table" hide-default-footer
+				:items-per-page="-1">
 				<template #item.TenLop="{ item }">
 					<div class="d-flex flex-column ga-2">
 						<span @click="console.log('Lop', item)">{{ item.TenLop }}</span>
@@ -58,9 +59,9 @@
 						</div>
 						<div class="d-flex ga-2">
 							<v-chip color='pink' v-for="(mnd, index1) in item[c]" size="x-small"
-								@click="(e) => { mndItem=mnd; isDialogTinhTrangDiem = true; }">
+								@click="(e) => { mndItem = mnd; isDialogTinhTrangDiem = true; console.log('mnd', mnd) }">
 								<p class="text-pink">
-									{{mnd.TenTinhTrang}} - {{ mnd.MaNhomCotDiem }}
+									{{ mnd.TenTinhTrang }} - {{ mnd.MaNhomCotDiem }}
 								</p>
 							</v-chip>
 						</div>
@@ -69,187 +70,187 @@
 			</v-data-table>
 		</v-card-text>
 	</v-card>
-	<uc-dialog-tinh-trang-diem v-model="isDialogTinhTrangDiem" :item="mndItem" @onSaveFininsh="() => getData()"
-		:capID="CapID" />
+	<uc-dialog-tinh-trang-diem v-if="isDialogTinhTrangDiem" v-model="isDialogTinhTrangDiem" :item="mndItem"
+		@onSaveFininsh="() => getData()" :capID="CapID" />
 </template>
 
 <script>
-	export default {
-		props: [],
-		data() {
-			return {
-				isDialogTinhTrangDiem: false,
-				mndItem: null,
-				vueData,
-				CapID: 2,
-				KhoiID: 6,
-				code: 'TD',
-				DSCap: [
-					{
-						title: "Cấp 1",
-						value: 1
-					},
-					{
-						title: "Cấp 2",
-						value: 2
-					},
-					{
-						title: "Cấp 3",
-						value: 3
-					}
-				],
-				DSKhoi: [],
-				DSMonHocCode: [],
-				DataTable: [],
-				headers: [],
-				_,
-				DSGiaoVien: [],
-				DSLopOriginal: [],
-				formData: {
+export default {
+	props: [],
+	data() {
+		return {
+			isDialogTinhTrangDiem: false,
+			mndItem: null,
+			vueData,
+			CapID: 2,
+			KhoiID: 6,
+			code: 'TD',
+			DSCap: [
+				{
+					title: "Cấp 1",
+					value: 1
+				},
+				{
+					title: "Cấp 2",
+					value: 2
+				},
+				{
+					title: "Cấp 3",
+					value: 3
+				}
+			],
+			DSKhoi: [],
+			DSMonHocCode: [],
+			DataTable: [],
+			headers: [],
+			_,
+			DSGiaoVien: [],
+			DSLopOriginal: [],
+			formData: {
+				GiaoVienID: '',
+				LopID: null,
+				MonHocID: null
+			},
+			DSMonHocOriginal: [],
+		}
+	},
+	mounted() {
+		if (this.CapID && this.KhoiID) this.getKhoi(); this.getData()
+	},
+	watch: {
+		CapID(val) {
+			if (val) {
+				this.KhoiID = null
+				this.formData = {
 					GiaoVienID: '',
 					LopID: null,
 					MonHocID: null
-				},
-				DSMonHocOriginal: [],
+				}
+				this.getKhoi()
 			}
 		},
-		mounted() {
-			if (this.CapID && this.KhoiID) this.getKhoi(); this.getData()
-		},
-		watch: {
-			CapID(val) {
-				if (val) {
-					this.KhoiID = null
-					this.formData = {
-						GiaoVienID: '',
-						LopID: null,
-						MonHocID: null
-					}
-					this.getKhoi()
+		KhoiID(val) {
+			if (val) {
+				this.formData = {
+					GiaoVienID: '',
+					LopID: null,
+					MonHocID: null
 				}
-			},
-			KhoiID(val) {
-				if (val) {
-					this.formData = {
-						GiaoVienID: '',
-						LopID: null,
-						MonHocID: null
-					}
-					this.getData()
-				}
-			}
-		},
-		methods: {
-			getData() {
-				if (!this.KhoiID || !this.CapID) return
-				this.DataTable = []
-				ajaxCALL('/lms/TienDo_NhapDiem', {
-					NienKhoa: vueData.NienKhoa,
-					CapID: this.CapID,
-					KhoiID: this.KhoiID
-				}, res => {
-					let DSMonHocLopDaNhapDiem = res.data[0]
-					let DSBangDiemChiTietCacMonHoc = res.data[1]
-					this.DSGiaoVien = res.data[2]
-					let DSMonHocOriginal = res.data[3]
-					this.DSMonHocOriginal = [...DSMonHocOriginal]
-					let DSLopOriginal = res.data[4]
-					this.DSLopOriginal = [...DSLopOriginal]
-					let DSLopHoc = [...new Set(DSMonHocLopDaNhapDiem.map(item => item.TenLop))]
-					let DSMonHoc = [...new Set(DSBangDiemChiTietCacMonHoc.sort((a, b) => a.Sort - b.Sort).map(item => item.TenMonHoc_HienThi))]
-					let DSMonHocCode = [...new Set(DSBangDiemChiTietCacMonHoc.sort((a, b) => a.Sort - b.Sort).map(item => item.MonHocCode))]
-					this.DSMonHocCode = [...DSMonHocCode]
-	
-					let headers = [
-						{
-							title: 'Tên lớp',
-							value: "TenLop",
-							minWidth: 100,
-							width: 100,
-							fixed: true
-						}
-					]
-					DSMonHoc.forEach((mh, index) => {
-						let MonHocID = DSMonHocOriginal.find(item => mh == item.TenMonHoc_HienThi)?.MonHocID
-						let title = mh
-						if (vueData.user.UserID == 'NA0000022') {
-							title = mh + ` - ${MonHocID}`
-						}
-						headers.push({
-							title: title,
-							key: DSMonHocCode[index],
-							minWidth: 100,
-							sortable: false,
-						})
-					})
-					DSLopHoc.forEach((item, index) => {
-						let LopID = DSLopOriginal.find(lop => item == lop.TenLop)?.LopID
-						let objLop = {
-							TenLop: item,
-							LopID: LopID
-						}
-						DSMonHocCode.forEach((mhc, index) => {
-							if(item == '09F' && mhc== 'GDDP'){
-								console.log('aaa',DSMonHocLopDaNhapDiem.filter(data => data.TenLop == item && data.MonHocCode == mhc))
-							}
-							objLop[mhc] = DSMonHocLopDaNhapDiem.filter(data => data.TenLop == item && data.MonHocCode == mhc)
-							//Check Trùng lấy dữ liệu có Lop_TinhTrangID lớn nhất
-							objLop[mhc] = _(objLop[mhc])
-								.groupBy('MaNhomCotDiem')
-								.map(group => _.maxBy(group, 'Lop_TinhTrangID'))
-								.value()
-							
-						})
-						this.DataTable.push(objLop)
-					})
-					this.headers = [...headers]
-					console.log('MonHocCode',DSMonHocCode )
-						console.log('this.DSGiaoVien',this.DSGiaoVien )
-					console.log('headers', headers)
-					console.log('this.DataTable', this.DataTable)
-				})
-			},
-			getKhoi() {
-				ajaxCALL('/lms/KhoiHocByCapHoc_Get', {
-					CapID: this.CapID
-				}, res => {
-					this.DSKhoi = res.data
-				})
-			},
-			getStringSlot(monhoccode) {
-				let string = `item.${monhoccode}`
-				return string
-			},
-			renderGVMonHoc(TenLop, MonHocCode) {
-				let findGV = this.DSGiaoVien.filter(item => item.TenLop == TenLop && item.MonHocCode == MonHocCode)
-				if (findGV.length == 0) return [{ MaGiaoVien: 'unknow', color: 'orange' }]
-				return findGV.map(gv => { return { MaGiaoVien: gv?.GiaoVienID ?? 'null', color: 'primary', HoTenGV: gv?.HoTenGV } })
-			},
-			addGiaoVienLop() {
-				if (vueData.user.UserID != 'NA0000022') return alert('Bạn không có quyền thêm giáo viên lớp')
-				if (!this.CapID || !this.KhoiID || !this.formData.LopID || !this.formData.MonHocID || !this.formData.GiaoVienID) return alert('Vui lòng chọn đầy đủ thông tin')
-				let payload = {
-					GiaoVienID: this.formData.GiaoVienID,
-					LopID: this.formData.LopID,
-					MonHocID: this.formData.MonHocID,
-					NienKhoa: vueData.NienKhoa,
-					CapID: this.CapID,
-					KhoiID: this.KhoiID
-				}
-				ajaxCALL('/lms/GiaoVienLop_Ins', payload, res => {
-					if (res) {
-						Vue.$toast.success('Thêm thành công')
-						this.getData()
-						this.formData = {
-							GiaoVienID: '',
-							LopID: null,
-							MonHocID: null
-						}
-					}
-				})
+				this.getData()
 			}
 		}
-	
-	
+	},
+	methods: {
+		getData() {
+			if (!this.KhoiID || !this.CapID) return
+			this.DataTable = []
+			ajaxCALL('/lms/TienDo_NhapDiem', {
+				NienKhoa: vueData.NienKhoa,
+				CapID: this.CapID,
+				KhoiID: this.KhoiID
+			}, res => {
+				let DSMonHocLopDaNhapDiem = res.data[0]
+				let DSBangDiemChiTietCacMonHoc = res.data[1]
+				this.DSGiaoVien = res.data[2]
+				let DSMonHocOriginal = res.data[3]
+				this.DSMonHocOriginal = [...DSMonHocOriginal]
+				let DSLopOriginal = res.data[4]
+				this.DSLopOriginal = [...DSLopOriginal]
+				let DSLopHoc = [...new Set(DSMonHocLopDaNhapDiem.map(item => item.TenLop))]
+				let DSMonHoc = [...new Set(DSBangDiemChiTietCacMonHoc.sort((a, b) => a.Sort - b.Sort).map(item => item.TenMonHoc_HienThi))]
+				let DSMonHocCode = [...new Set(DSBangDiemChiTietCacMonHoc.sort((a, b) => a.Sort - b.Sort).map(item => item.MonHocCode))]
+				this.DSMonHocCode = [...DSMonHocCode]
+
+				let headers = [
+					{
+						title: 'Tên lớp',
+						value: "TenLop",
+						minWidth: 100,
+						width: 100,
+						fixed: true
+					}
+				]
+				DSMonHoc.forEach((mh, index) => {
+					let MonHocID = DSMonHocOriginal.find(item => mh == item.TenMonHoc_HienThi)?.MonHocID
+					let title = mh
+					if (vueData.user.UserID == 'NA0000022') {
+						title = mh + ` - ${MonHocID}`
+					}
+					headers.push({
+						title: title,
+						key: DSMonHocCode[index],
+						minWidth: 100,
+						sortable: false,
+					})
+				})
+				DSLopHoc.forEach((item, index) => {
+					let LopID = DSLopOriginal.find(lop => item == lop.TenLop)?.LopID
+					let objLop = {
+						TenLop: item,
+						LopID: LopID
+					}
+					DSMonHocCode.forEach((mhc, index) => {
+						if (item == '06H' && mhc == 'ANH') {
+							console.log('aaa', DSMonHocLopDaNhapDiem.filter(data => data.TenLop == item && data.MonHocCode == mhc))
+						}
+						objLop[mhc] = DSMonHocLopDaNhapDiem.filter(data => data.TenLop == item && data.MonHocCode == mhc)
+						//Check Trùng lấy dữ liệu có Lop_TinhTrangID lớn nhất
+						objLop[mhc] = _(objLop[mhc])
+							.groupBy('MaNhomCotDiem')
+							.map(group => _.maxBy(group, 'Lop_TinhTrangID'))
+							.value()
+
+					})
+					this.DataTable.push(objLop)
+				})
+				this.headers = [...headers]
+				console.log('MonHocCode', DSMonHocCode)
+				console.log('this.DSGiaoVien', this.DSGiaoVien)
+				console.log('headers', headers)
+				console.log('this.DataTable', this.DataTable)
+			})
+		},
+		getKhoi() {
+			ajaxCALL('/lms/KhoiHocByCapHoc_Get', {
+				CapID: this.CapID
+			}, res => {
+				this.DSKhoi = res.data
+			})
+		},
+		getStringSlot(monhoccode) {
+			let string = `item.${monhoccode}`
+			return string
+		},
+		renderGVMonHoc(TenLop, MonHocCode) {
+			let findGV = this.DSGiaoVien.filter(item => item.TenLop == TenLop && item.MonHocCode == MonHocCode)
+			if (findGV.length == 0) return [{ MaGiaoVien: 'unknow', color: 'orange' }]
+			return findGV.map(gv => { return { MaGiaoVien: gv?.GiaoVienID ?? 'null', color: 'primary', HoTenGV: gv?.HoTenGV } })
+		},
+		addGiaoVienLop() {
+			if (vueData.user.UserID != 'NA0000022') return alert('Bạn không có quyền thêm giáo viên lớp')
+			if (!this.CapID || !this.KhoiID || !this.formData.LopID || !this.formData.MonHocID || !this.formData.GiaoVienID) return alert('Vui lòng chọn đầy đủ thông tin')
+			let payload = {
+				GiaoVienID: this.formData.GiaoVienID,
+				LopID: this.formData.LopID,
+				MonHocID: this.formData.MonHocID,
+				NienKhoa: vueData.NienKhoa,
+				CapID: this.CapID,
+				KhoiID: this.KhoiID
+			}
+			ajaxCALL('/lms/GiaoVienLop_Ins', payload, res => {
+				if (res) {
+					Vue.$toast.success('Thêm thành công')
+					this.getData()
+					this.formData = {
+						GiaoVienID: '',
+						LopID: null,
+						MonHocID: null
+					}
+				}
+			})
+		}
 	}
+
+
+}
 </script>

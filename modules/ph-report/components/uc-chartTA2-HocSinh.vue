@@ -9,7 +9,7 @@
 			</v-card-title>
 			<v-card-text class="pa-0">
 				<!-- Biểu đồ tổng các theme -->
-				<v-card class="  rounded-lg">
+				<!-- <v-card class="  rounded-lg">
 					<v-card-title class="text-primary text-subtitle-1 font-weight-medium pb-2"
 						style="background-color: #d1e4f5">
 						📊 1. Thống kê điểm tổng các theme
@@ -20,12 +20,12 @@
 						</div>
 					</v-card-text>
 				</v-card>
-				<v-divider class="my-3"></v-divider>
+				<v-divider class="my-3"></v-divider> -->
 				<!-- Biểu đồ TA2 -->
 				<v-card class="mt-5  rounded-lg">
 					<v-card-title class="text-primary text-subtitle-1 font-weight-medium pb-2 mb-3 "
 						style="background-color: #d1e4f5">
-						📘 2. {{ DSLopIelts.includes(HocSinhSelected.TenLopAV) ? titleIELTS : titleTA2 }}
+						📘 1. {{ DSLopIelts.includes(HocSinhSelected.TenLopAV) ? titleIELTS : titleTA2 }}
 					</v-card-title>
 					<v-card-text class="pb-0">
 						<v-row dense>
@@ -226,7 +226,7 @@ export default {
 					max: 10
 				},
 				xaxis: {
-					categories: ['Nghe', 'Nói', 'Đọc', 'Viết', 'Trung bình'],
+					categories: ['Nghe', 'Đọc', 'Nói', 'Viết', 'Trung bình'],
 					labels: {
 						style: {
 							colors: '#FF0000',
@@ -264,7 +264,7 @@ export default {
 	},
 	methods: {
 		onSelectedHocSinh() {
-			if(!vueData.NienKhoa) return
+			if (!vueData.NienKhoa) return
 			ajaxCALL('lms/HocSinh_Detail_GetBy_HocSinhID',
 				{
 					HocSinhID: vueData.HocSinhSelected.HocSinhID,
@@ -360,7 +360,8 @@ export default {
 						const DSKyHoc = ['S1_Mid_TA2', 'S1_Final_TA2', 'S2_Mid_TA2', 'S2_Final_TA2']
 						let dataHandle = []
 						for (let ky of DSKyHoc) {
-							let obj = this.DataChart2.find(item => item.MaNhomCotDiem == ky)
+							let obj = this.DataChart2[0].find(item => item.MaNhomCotDiem == ky)
+							console.log(' obj', obj)
 							if (obj) {
 								dataHandle.push(obj.KetQuaDanhGia_VI)
 							}
@@ -480,9 +481,9 @@ export default {
 							resolve()
 						} else {
 							const DSKyHoc = ['S1_Mid_TA2', 'S1_Final_TA2', 'S2_Mid_TA2', 'S2_Final_TA2']
-							const DSCotDiem = ['TA2_Listening_Point', 'TA2_Speaking_Point', 'TA2_Reading_Point', 'TA2_Writing_Point',
+							const DSCotDiem = ['TA2_Listening_Point', 'TA2_Reading_Point', 'TA2_Writing_Point', 'TA2_Speaking_Point',
 								'TA2_Avg_Point']
-							this.DataChart3 = res.data[1].filter(item => item.MaNhomCotDiem.includes('TA2'))
+							this.DataChart3 = res.data[1].filter(item => item.MaNhomCotDiem.includes('TA2') && !item.MaCotDiem.includes('TA2_Point'))
 							let dataHandle = []
 							for (let ky of DSKyHoc) {
 								let obj = {
@@ -492,7 +493,7 @@ export default {
 								for (let cotDiem of DSCotDiem) {
 									let objFind = this.DataChart3.filter(item => item.MaNhomCotDiem == ky).find(obj => obj.MaCotDiem.includes(cotDiem))
 									if (cotDiem == 'TA2_Avg_Point') {
-										objFind = this.DataChart2.find(obj => obj.MaNhomCotDiem == ky)
+										objFind = this.DataChart2[0].find(cd => cd.MaNhomCotDiem == ky)
 									}
 									if (objFind) {
 										obj.data.push(objFind.KetQuaDanhGia_VI)
@@ -525,7 +526,7 @@ export default {
 									}
 								],
 								xaxis: {
-									categories: ['Nghe', 'Nói', 'Đọc', 'Viết', 'Trung bình'],
+									categories: ['Nghe', 'Đọc', 'Viết', 'Nói', 'Trung bình'],
 									title: {
 										text: 'Theme'
 									}

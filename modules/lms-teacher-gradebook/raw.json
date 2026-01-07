@@ -2,7 +2,8 @@
     "data": [
         {
             "LopID": "parseInt(LopID)",
-            "MonHocID": "parseInt(MonHocID)"
+            "MonHocID": "parseInt(MonHocID)",
+            "AssignType": "AssignType"
         },
         {
             "CallTest": {

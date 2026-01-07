@@ -8,7 +8,8 @@
 		<v-textarea v-if="submissionstatus < 2" :model-value="answer"
 			@update:model-value="$emit('answer-change', $event)"
 			:label="!isGrade ? 'Nhập câu trả lời của bạn' : 'Câu trả lời của học sinh'" rows="3" outlined
-			:readonly="readonly || isGrade" hide-details class="mt-2" />
+			:readonly="readonly || isGrade" hide-details class="mt-2" @copy="handleCopyPaste" @cut="handleCopyPaste"
+			@paste="handleCopyPaste" @contextmenu="handleContextMenu" />
 
 		<!-- (3) Câu trả lời HS -->
 		<div v-if="submissionstatus >= 2" class="d-flex flex-column pa-2 rounded bg-green-lighten-1">
@@ -48,7 +49,10 @@
 			<div v-else-if="grading?.comment" class="pa-2 rounded bg-blue-lighten-1">
 				<b>
 					<v-icon class="mr-1" size="18">mdi-message-text-outline</v-icon>
-					Ý kiến của {{ isGrade ? 'học sinh' : 'bạn' }}:
+					<span v-if="$i18n.locale =='en'&& isGrade">
+						Student's Feedback
+					</span>
+					<span v-else-if="$i18n.locale !='en'&& isGrade">Ý kiến {{ isGrade ? 'học sinh' : 'bạn' }}:</span>
 				</b>
 				<div class="mt-1">{{ grading.comment }}</div>
 			</div>
@@ -57,7 +61,7 @@
 		<!-- (5) Điểm -->
 		<!-- Điểm câu – hiển thị khi đã trả bài (status == 4) -->
 		<div v-if="submissionstatus == 4" class="mt-2">
-			<strong>Điểm | Score:</strong>
+			<strong>{{$i18n.locale == 'en' ? 'Score':'Điểm' }}:</strong>
 			<v-chip size="small" :color="scoreChipColor" variant="tonal">
 				<v-icon start size="16">mdi-star</v-icon>
 				{{ displayScore }} / {{ effectiveMaxPoints }}
@@ -80,14 +84,14 @@
 		<div class="mt-2 teacher-grading-area" v-if="isGrade">
 			<div class="d-flex align-center mb-2" v-if="submissionstatus == 2 || submissionstatus == 3">
 				<v-number-input :model-value="grading ? grading.manualScore : 0"
-					@update:modelValue="val => { grading.manualScore = val;}" label="Điểm"
-					:max="question.points" :min="0" variant="outlined" density="compact" hide-details
-					style="max-width: 100px;" @blur="submitPoints" control-variant="hidden" inset />
+					@update:modelValue="val => { grading.manualScore = val;}" label="Điểm" :max="question.points"
+					:min="0" variant="outlined" density="compact" hide-details style="max-width: 100px;"
+					@blur="submitPoints" control-variant="hidden" inset />
 				<span class="text-h6 ml-2 text-primary"> / {{ question.points }}</span>
 				<span class="ml-1 text-caption">điểm</span>
 			</div>
 			<v-textarea :model-value="grading ? grading.teacherComment : ''" @update:modelValue="updateTeacherComment"
-				label="Nhận xét của giáo viên (tùy chọn)" rows="2" outlined dense hide-details />
+				:label="$t('message.TeacherCommentOptional')" rows="2" outlined dense hide-details />
 		</div>
 	</div>
 </template>
@@ -102,10 +106,15 @@
 			grading: Object,
 			isGrade: { type: Boolean, default: false },
 			submissionstatus: { type: Number, default: -1 },
-			isShowBtnComment: { type: Boolean, default: true }
+			isShowBtnComment: { type: Boolean, default: true },
+			isBlockCopyPaste: {
+				type: Boolean,
+				default: false
+			}
 		},
 		emits: ['answer-change', 'grading-change'],
 		data() {
+			this.$i18n.locale = (localStorage.getItem('IsLanguage') && localStorage.getItem('IsLanguage') == 'true') ? 'en' : 'vi'
 			return { menu: false, widthScreen: null }
 		},
 		computed: {
@@ -143,6 +152,18 @@
 					...this.grading,
 					manualScore: this.grading.manualScore
 				});
+			},
+			handleCopyPaste(event) {
+				if (this.isBlockCopyPaste && !this.readonly) {
+					event.preventDefault();
+					// Có thể thêm thông báo cho user
+					Vue.$toast?.warning('Không được phép sao chép/dán nội dung trong bài này', { position: "top" });
+				}
+			},
+			handleContextMenu(event) {
+				if (this.isBlockCopyPaste && !this.readonly) {
+					event.preventDefault();
+				}
 			}
 		}
 	}

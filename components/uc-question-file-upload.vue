@@ -84,7 +84,10 @@
 			<div v-else-if="grading?.comment" class="pa-2 rounded bg-blue-lighten-1">
 				<b>
 					<v-icon size="18" class="mr-1">mdi-message-text-outline</v-icon>
-					Ý kiến {{ isGrade ? 'học sinh' : "bạn" }}:
+					<span v-if="$i18n.locale == 'en' && isGrade">
+						Student's Feedback
+					</span>
+					<span v-else-if="$i18n.locale != 'en' && isGrade">Ý kiến {{ isGrade ? 'học sinh' : 'bạn' }}:</span>
 				</b>
 				<span class="ml-1">{{ grading?.comment }}</span>
 			</div>
@@ -93,7 +96,7 @@
 		<!-- (5) Điểm -->
 		<!-- Điểm câu – hiển thị khi đã trả bài (status == 4) -->
 		<div v-if="submissionstatus == 4" class="my-2">
-			<strong>Điểm | Score:</strong>
+			<strong>{{ $i18n.locale == 'en' ? 'Score' : 'Điểm' }}:</strong>
 			<v-chip size="small" :color="scoreChipColor" variant="tonal">
 				<v-icon start size="16">mdi-star</v-icon>
 				{{ displayScore }} / {{ effectiveMaxPoints }}
@@ -123,16 +126,16 @@
 				<span class="ml-1 text-caption">điểm</span>
 			</div>
 			<v-textarea :model-value="grading ? grading.teacherComment : ''" @update:model-value="updateTeacherComment"
-				label="Nhận xét của giáo viên (tùy chọn)" rows="2" outlined dense hide-details />
+				:label="$t('message.TeacherCommentOptional')" rows="2" outlined dense hide-details />
 		</div>
 
 		<!-- THÊM DÒNG NÀY -->
-		<uc-image-annotator-test v-if="vueData.user.UserID === 'NA0000022'" v-model:visible="annotator.visible"
-			:file-url="annotator.fileUrl" :original-file="annotator.currentFileObject"
-			:initial-annotations="annotator.initialData" @save="handleSaveAnnotation" />
-		<uc-image-annotator v-else v-model:visible="annotator.visible" :file-url="annotator.fileUrl"
+		<uc-image-annotator-test v-model:visible="annotator.visible" :file-url="annotator.fileUrl"
 			:original-file="annotator.currentFileObject" :initial-annotations="annotator.initialData"
 			@save="handleSaveAnnotation" />
+		<!-- <uc-image-annotator v-if="annotator.visible" v-model:visible="annotator.visible" :file-url="annotator.fileUrl"
+			:original-file="annotator.currentFileObject" :initial-annotations="annotator.initialData"
+			@save="handleSaveAnnotation" :key="keyComp" /> -->
 
 		<v-dialog v-model="deleteDialog.show" max-width="400">
 			<v-card>
@@ -167,6 +170,7 @@
 		},
 		emits: ['answer-change', 'grading-change'],
 		data() {
+			this.$i18n.locale = (localStorage.getItem('IsLanguage') && localStorage.getItem('IsLanguage') == 'true') ? 'en' : 'vi'
 			return {
 				isOpenFile: false,
 				file: null,
@@ -184,7 +188,8 @@
 					initialData: {},
 					currentFileId: null,
 					currentFileObject: null
-				}
+				},
+				keyComp: 0
 			}
 		},
 		computed: {
@@ -445,7 +450,8 @@
 			},
 	
 			openAnnotator(file) {
-				console.log('file', file)
+				localStorage.setItem("IsShowHeader_ChamBai", false)
+				this.keyComp++
 				let imageUrl = file?.source || '';
 				let annotations = {}
 				if (file?.FileAnnotation)
@@ -458,6 +464,8 @@
 				this.annotator.currentFileObject = file;
 	
 				this.annotator.visible = true;
+				console.log('this.annotator', this.annotator)
+	
 			},
 	
 			handleSaveAnnotation(updatedFileObject) {
@@ -503,12 +511,9 @@
 			onOpenFile(file) {
 				let source = file.source
 				if (this.submissionstatus === 4) {
-					source = file.FileAnnotation.source
+					source = file?.FileAnnotation?.source ?? source
 				}
 				window.open(source, '_blank')
-				// if (!file || !file.source) return
-				// this.file = file
-				// this.isOpenFile = true
 			},
 			onclose() {
 				this.isOpenFile = false

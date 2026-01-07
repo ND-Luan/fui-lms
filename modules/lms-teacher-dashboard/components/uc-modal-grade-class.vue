@@ -29,14 +29,19 @@ export default {
 	},
 	computed: {
 		TitlePage: function () {
-			return this.assignment?.ResourceType == 'ASSIGNMENT' ? 'Giao Bài Tập Theo Lớp' : 'Xem tiến độ bài học'
+			return this.assignment?.ResourceType == 'ASSIGNMENT' ? 'Xem tiến độ bài tập' : 'Xem tiến độ bài học'
 		}
 	},
 	watch: {
 		isOpen: function (val) {
 			if (val) {
 				if (this.assignment.ResourceType == 'ASSIGNMENT') {
-					this.url = `https://lms.lhbs.vn/lms_Assignment-Class-Detail?AssignToClassID=${this.assignment?.AssignToClassID}&LopID=${this.assignment?.LopID}&MonHocID=${this.assignment?.MonHocID}`
+					console.log('this.assignment', this.assignment)
+					if (this.assignment.AssignType == 'CLASS') {
+						this.url = `https://lms.lhbs.vn/lms_Assignment-Class-Detail?AssignToClassID=${this.assignment?.AssignToClassID}&LopID=${this.assignment?.LopID}&KhoiID=${this.assignment?.KhoiID}&MonHocID=${this.assignment?.MonHocID}&AssignType=${this.assignment.AssignType}`
+					} else {
+						this.url = `https://lms.lhbs.vn/lms_Assignment-Class-Detail?AssignToStudentID=${this.assignment?.AssignToStudentID}&LopID=${this.assignment?.LopID}&KhoiID=${this.assignment?.KhoiID}&MonHocID=${this.assignment?.MonHocID}&AssignType=${this.assignment.AssignType}`
+					}
 
 				} else {
 					this.url = `https://lms.lhbs.vn/lms-Lesson-Class-Detail?AssignToClassID=${this.assignment?.AssignToClassID}`
@@ -49,7 +54,7 @@ export default {
 	methods: {
 		onClose() {
 			this.$emit('update:isOpen', false)
-			vueData.initPage()
+			vueData.apiCall1()
 		},
 		handleMessage(event) {
 			if (!event || !event.data || !event.data.type) return

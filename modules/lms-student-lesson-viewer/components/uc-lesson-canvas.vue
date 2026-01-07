@@ -5,7 +5,7 @@
 			<v-icon size="64" class="mb-4">mdi-file-plus-outline</v-icon>
 			<p>
 				{{
-					isViewer ? 'Bài giảng này chưa có nội dung.' : `Bắt đầu thêm nội dung cho bài giảng của bạn từ thư viện
+				isViewer ? 'Bài giảng này chưa có nội dung.' : `Bắt đầu thêm nội dung cho bài giảng của bạn từ thư viện
 				bên trái.`
 				}}
 			</p>
@@ -62,8 +62,11 @@
 					<uc-wave-audio-player :audio-url="element.ElementData.source" />
 				</div>
 				<div v-else-if="element.ElementType === 'HTML'" style="width: 100%">
-					<iframe :srcdoc="element.ElementData.source" sandbox="allow-scripts allow-popups allow-forms"
+					<iframe v-if="element.ElementData?.IsHTML" :srcdoc="element.ElementData.source"
+						sandbox="allow-scripts allow-popups allow-forms allow-same-origin"
 						style="width: 100%;height: 600px;">
+					</iframe>
+					<iframe v-else :src="element.ElementData.source" style="width: 100%;height: 600px;">
 					</iframe>
 				</div>
 				<!-- <div v-else-if="element.ElementType?.includes('QUIZ')">
@@ -82,132 +85,136 @@
 </template>
 
 <script>
-export default {
-	name: 'uc-lesson-canvas',
-	props: {
-		elements: Array,
-		selectedIndex: Number,
-		isViewer: { type: Boolean, default: false }
-	},
-	emits: ['update:elements', 'update:selectedIndex'],
-	data() {
-		return {
-			window,
-			elementTypes: [
-				{ type: 'TEXT', label: 'Đoạn văn bản', icon: 'mdi-text-long', color: '#3B82F6' },
-				{ type: 'IMAGE', label: 'Hình ảnh', icon: 'mdi-image-multiple-outline', color: '#8B5CF6' },
-				{ type: 'YOUTUBE', label: 'Video', icon: 'mdi-youtube', color: '#EF4444' },
-				{ type: 'FILE', label: 'Tệp đính kèm', icon: 'mdi-paperclip', color: '#F97316' },
-				{ type: 'AUDIO', label: 'Audio', icon: 'mdi-volume-high', color: '#10B981' },
-				{ type: 'QUIZ_SINGLE_CHOICE', label: 'Trắc nghiệm (1 đáp án)', icon: 'mdi-help-circle-outline', color: '#0EA5E9' },
-				{ type: 'QUIZ_MULTIPLE_CHOICE', label: 'Trắc nghiệm (Nhiều đáp án)', icon: 'mdi-help-circle-outline', color: '#0EA5E9' },
-				{ type: 'QUIZ_TRUE_FALSE', label: 'Đúng / Sai', icon: 'mdi-help-circle-outline', color: '#0EA5E9' },
-				{ type: 'QUIZ_FILL_IN_BLANK', label: 'Điền vào chỗ trống', icon: 'mdi-help-circle-outline', color: '#0EA5E9' },
-				{ type: 'QUIZ_MATCHING', label: 'Ghép nối', icon: 'mdi-help-circle-outline', color: '#0EA5E9' },
-			]
-		}
-	},
-	methods: {
-		removeElement(index) {
-			if (this.isViewer) return;
-			const element = this.elements[index];
-
-			if (element && element.ElementID) {
-				ajaxCALL('lms/EL_Element_Delete', { ElementID: element.ElementID }, res => {
-					CALL('getLessonData');
+	export default {
+		name: 'uc-lesson-canvas',
+		props: {
+			elements: Array,
+			selectedIndex: Number,
+			isViewer: { type: Boolean, default: false }
+		},
+		emits: ['update:elements', 'update:selectedIndex'],
+		data() {
+			return {
+				window,
+				elementTypes: [
+					{ type: 'TEXT', label: 'Đoạn văn bản', icon: 'mdi-text-long', color: '#3B82F6' },
+					{ type: 'IMAGE', label: 'Hình ảnh', icon: 'mdi-image-multiple-outline', color: '#8B5CF6' },
+					{ type: 'YOUTUBE', label: 'Video', icon: 'mdi-youtube', color: '#EF4444' },
+					{ type: 'FILE', label: 'Tệp đính kèm', icon: 'mdi-paperclip', color: '#F97316' },
+					{ type: 'AUDIO', label: 'Audio', icon: 'mdi-volume-high', color: '#10B981' },
+					{ type: 'QUIZ_SINGLE_CHOICE', label: 'Trắc nghiệm (1 đáp án)', icon: 'mdi-help-circle-outline', color: '#0EA5E9' },
+					{ type: 'QUIZ_MULTIPLE_CHOICE', label: 'Trắc nghiệm (Nhiều đáp án)', icon: 'mdi-help-circle-outline', color: '#0EA5E9' },
+					{ type: 'QUIZ_TRUE_FALSE', label: 'Đúng / Sai', icon: 'mdi-help-circle-outline', color: '#0EA5E9' },
+					{ type: 'QUIZ_FILL_IN_BLANK', label: 'Điền vào chỗ trống', icon: 'mdi-help-circle-outline', color: '#0EA5E9' },
+					{ type: 'QUIZ_MATCHING', label: 'Ghép nối', icon: 'mdi-help-circle-outline', color: '#0EA5E9' },
+				]
+			}
+		},
+		mounted() {
+			console.log('this.elements', this.elements)
+		},
+	
+		methods: {
+			removeElement(index) {
+				if (this.isViewer) return;
+				const element = this.elements[index];
+	
+				if (element && element.ElementID) {
+					ajaxCALL('lms/EL_Element_Delete', { ElementID: element.ElementID }, res => {
+						CALL('getLessonData');
+						if (this.selectedIndex === index) {
+							this.$emit('update:selectedIndex', null);
+						}
+					});
+				} else {
+					const newElements = [...this.elements];
+					newElements.splice(index, 1);
+					this.$emit('update:elements', newElements);
 					if (this.selectedIndex === index) {
 						this.$emit('update:selectedIndex', null);
 					}
-				});
-			} else {
-				const newElements = [...this.elements];
-				newElements.splice(index, 1);
-				this.$emit('update:elements', newElements);
-				if (this.selectedIndex === index) {
-					this.$emit('update:selectedIndex', null);
 				}
-			}
-		},
-		getYoutubeEmbedUrl(url) {
-			if (!url || typeof url !== 'string') return null;
-			let videoId = null;
-			const patterns = [
-				/(?:https?:\/\/)?(?:www\.)?youtube\.com\/watch\?v=([a-zA-Z0-9_-]{11})/,
-				/(?:https?:\/\/)?youtu\.be\/([a-zA-Z0-9_-]{11})/,
-				/(?:https?:\/\/)?(?:www\.)?youtube\.com\/embed\/([a-zA-Z0-9_-]{11})/
-			];
-			for (const pattern of patterns) {
-				const match = url.match(pattern);
-				if (match && match[1]) {
-					videoId = match[1];
-					break;
-				}
-			}
-			return videoId ? `https://www.youtube.com/embed/${videoId}` : null;
-		},
-		getDriveFileId(url) {
-			if (!url) return null;
-			const match = url.match(/\/d\/([^/]+)\//);
-			return match ? match[1] : null;
-		},
-		getQuestionComponent(type) {
-			const map = {
-				'QUIZ_SINGLE_CHOICE': 'uc-question-single-choice',
-				'QUIZ_MULTIPLE_CHOICE': 'uc-question-multiple-choice',
-				'QUIZ_TRUE_FALSE': 'uc-question-true-false',
-				'QUIZ_FILL_IN_BLANK': 'uc-question-fill-in-blank',
-				'QUIZ_MATCHING': 'uc-question-matching',
-			};
-			return map[type] || 'div';
-		},
-
-		// =================================================================
-		// == SỬA LỖI LOGIC TẠI ĐÂY                                      ==
-		// =================================================================
-		getAnswerForChild(element) {
-			const config = element.ElementData?.config;
-			if (!config) return null;
-
-			// --- Ở chế độ Học bài của Học sinh (isViewer = true) ---
-			// Trả về kiểu dữ liệu đúng nhưng rỗng để component con không bị lỗi
-			if (this.isViewer) {
-				switch (element.ElementType) {
-					case 'QUIZ_MULTIPLE_CHOICE': return []; // Trả về mảng rỗng
-					case 'QUIZ_MATCHING': return []; // Trả về mảng rỗng
-					case 'QUIZ_FILL_IN_BLANK': return {}; // Trả về object rỗng
-					default: return null; // Các trường hợp khác (single-choice, true-false) có thể nhận null
-				}
-			}
-
-			// --- Ở chế độ Soạn bài của Giáo viên (isViewer = false) ---
-			// Giữ nguyên logic cũ để giáo viên thấy đáp án đúng
-			let answerObject = null;
-			switch (element.ElementType) {
-				case 'QUIZ_SINGLE_CHOICE': answerObject = config.correctAnswer; break;
-				case 'QUIZ_MULTIPLE_CHOICE': answerObject = config.correctAnswers; break;
-				case 'QUIZ_TRUE_FALSE': answerObject = config.correctAnswer; break;
-				case 'QUIZ_FILL_IN_BLANK': {
-					const blanks = config.parts?.filter(item => item.type === 'blank');
-					const obj = {};
-					if (blanks) {
-						for (var item of blanks) {
-							obj[item.id] = item.acceptedAnswers?.[0];
-						}
+			},
+			getYoutubeEmbedUrl(url) {
+				if (!url || typeof url !== 'string') return null;
+				let videoId = null;
+				const patterns = [
+					/(?:https?:\/\/)?(?:www\.)?youtube\.com\/watch\?v=([a-zA-Z0-9_-]{11})/,
+					/(?:https?:\/\/)?youtu\.be\/([a-zA-Z0-9_-]{11})/,
+					/(?:https?:\/\/)?(?:www\.)?youtube\.com\/embed\/([a-zA-Z0-9_-]{11})/
+				];
+				for (const pattern of patterns) {
+					const match = url.match(pattern);
+					if (match && match[1]) {
+						videoId = match[1];
+						break;
 					}
-					answerObject = obj;
-					break;
 				}
-				case 'QUIZ_MATCHING': answerObject = config.correctPairs; break;
-			}
-			return answerObject;
-		},
-
-		getVisualsForType(elementType) {
-			const defaults = { label: 'Thành phần không xác định', icon: 'mdi-file-question-outline', color: '#4B5563' };
-			if (!elementType) return defaults;
-			const found = this.elementTypes.find(t => t.type === elementType);
-			return found || defaults;
-		},
+				return videoId ? `https://www.youtube.com/embed/${videoId}` : null;
+			},
+			getDriveFileId(url) {
+				if (!url) return null;
+				const match = url.match(/\/d\/([^/]+)\//);
+				return match ? match[1] : null;
+			},
+			getQuestionComponent(type) {
+				const map = {
+					'QUIZ_SINGLE_CHOICE': 'uc-question-single-choice',
+					'QUIZ_MULTIPLE_CHOICE': 'uc-question-multiple-choice',
+					'QUIZ_TRUE_FALSE': 'uc-question-true-false',
+					'QUIZ_FILL_IN_BLANK': 'uc-question-fill-in-blank',
+					'QUIZ_MATCHING': 'uc-question-matching',
+				};
+				return map[type] || 'div';
+			},
+	
+			// =================================================================
+			// == SỬA LỖI LOGIC TẠI ĐÂY                                      ==
+			// =================================================================
+			getAnswerForChild(element) {
+				const config = element.ElementData?.config;
+				if (!config) return null;
+	
+				// --- Ở chế độ Học bài của Học sinh (isViewer = true) ---
+				// Trả về kiểu dữ liệu đúng nhưng rỗng để component con không bị lỗi
+				if (this.isViewer) {
+					switch (element.ElementType) {
+						case 'QUIZ_MULTIPLE_CHOICE': return []; // Trả về mảng rỗng
+						case 'QUIZ_MATCHING': return []; // Trả về mảng rỗng
+						case 'QUIZ_FILL_IN_BLANK': return {}; // Trả về object rỗng
+						default: return null; // Các trường hợp khác (single-choice, true-false) có thể nhận null
+					}
+				}
+	
+				// --- Ở chế độ Soạn bài của Giáo viên (isViewer = false) ---
+				// Giữ nguyên logic cũ để giáo viên thấy đáp án đúng
+				let answerObject = null;
+				switch (element.ElementType) {
+					case 'QUIZ_SINGLE_CHOICE': answerObject = config.correctAnswer; break;
+					case 'QUIZ_MULTIPLE_CHOICE': answerObject = config.correctAnswers; break;
+					case 'QUIZ_TRUE_FALSE': answerObject = config.correctAnswer; break;
+					case 'QUIZ_FILL_IN_BLANK': {
+						const blanks = config.parts?.filter(item => item.type === 'blank');
+						const obj = {};
+						if (blanks) {
+							for (var item of blanks) {
+								obj[item.id] = item.acceptedAnswers?.[0];
+							}
+						}
+						answerObject = obj;
+						break;
+					}
+					case 'QUIZ_MATCHING': answerObject = config.correctPairs; break;
+				}
+				return answerObject;
+			},
+	
+			getVisualsForType(elementType) {
+				const defaults = { label: 'Thành phần không xác định', icon: 'mdi-file-question-outline', color: '#4B5563' };
+				if (!elementType) return defaults;
+				const found = this.elementTypes.find(t => t.type === elementType);
+				return found || defaults;
+			},
+		}
 	}
-}
 </script>

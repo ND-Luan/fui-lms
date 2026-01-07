@@ -1,17 +1,21 @@
 {
     "data": [
         {
-            "KhoiID_FromURL": "F_PARAM.KhoiID",
+            "KhoiID_FromURL": "parseInt(KhoiID)",
             "LopID_FromURL": "LopID",
             "AssignToClassID_FromURL": "parseInt(AssignToClassID)",
+            "AssignToStudentID_FromURL": "parseInt(AssignToStudentID)",
             "MonHocID_FromURL": "parseInt(MonHocID)",
             "loading": false,
-            "domHeaderLength": 0
+            "domHeaderLength": 0,
+            "AssignType": "AssignType",
+            "NienKhoa": "parseInt(localStorage.getItem('NienKhoa'))",
+            "keyComp": 0
         }
     ],
     "watch": {
-        "domHeaderLength": {
-            "EXE": "console.log('xxxx', vueData.domHeaderLength)"
+        "NienKhoa": {
+            "EXE": "console.log('NienKhoa',vueData.NienKhoa)"
         }
     },
     "controls": [
@@ -24,13 +28,28 @@
                         {
                             "el": "uc-assignment-grading-list",
                             "attr": {
-                                "v-if": "AssignToClassID_FromURL",
+                                "v-if": "AssignType =='CLASS'",
                                 ":khoiid": "parseInt(KhoiID_FromURL)",
                                 ":lopid": "LopID_FromURL",
-                                ":assigntoclassid": "parseInt(AssignToClassID_FromURL)",
+                                ":assigntoclassid": "AssignToClassID_FromURL",
                                 ":monhocid": "parseInt(MonHocID_FromURL)",
-                                "ref": "test"
-                            }
+                                "ref": "test",
+                                ":key": "keyComp"
+                            },
+                            "w": 12
+                        },
+                        {
+                            "el": "uc-assignment-grading-list-student",
+                            "attr": {
+                                "v-if": "AssignType  =='STUDENT'",
+                                ":khoiid": "parseInt(KhoiID_FromURL)",
+                                ":lopid": "LopID_FromURL",
+                                ":assigntoclassid": "AssignToClassID_FromURL",
+                                ":monhocid": "parseInt(MonHocID_FromURL)",
+                                "ref": "test",
+                                ":key": "keyComp"
+                            },
+                            "w": 12
                         }
                     ]
                 }

@@ -1,83 +1,4 @@
-const defColor = [
-    {
-        "status": "Not Meet",
-        "des": "<50%",
-        "color": "red",
-        "bgcolor": "red-lighten-5"
-    },
-    {
-        "status": "Meet",
-        "des": "50%-79%",
-        "color": "yellow-darken-3",
-        "bgcolor": "yellow-lighten-4"
-    },
-    {
-        "status": "Exceeded",
-        "des": ">=80%",
-        "color": "green",
-        "bgcolor": "green-lighten-5"
-    }
-]
-const libIconCotDiem = [
-    {
-        name: "Listening",
-        icon: "mdi mdi-headphones",
-    },
-    {
-        name: "Reading",
-        icon: "mdi mdi-book-open-variant-outline",
-    },
-    {
-        name: "Writing",
-        icon: "mdi mdi-lead-pencil",
-    },
-    {
-        name: "Speaking",
-        icon: "mdi mdi-account-voice",
-    },
-    {
-        name: "Language",
-        icon: "mdi mdi-account-school-outline"
-    },
-    {
-        name: "Total",
-        icon: "mdi mdi-star",
-    },
-    {
-        name: "default",
-        icon: "mdi mdi-set-none"
-    }
-]
-const libIconActivities = [
-    {
-        name: "EC Videos",
-        icon: "mdi mdi-video",
-    },
-    {
-        name: "My Journal",
-        icon: "mdi mdi-book-open-variant-outline",
-    },
-    {
-        name: "Hobbies",
-        icon: "mdi mdi-music",
-    },
-    {
-        name: "1:1 session",
-        icon: "mdi mdi-account-voice",
-    },
-    {
-        name: "DEAR",
-        icon: "mdi mdi-checkbook",
-    },
-    {
-        name: "Class Projects",
-        icon: "mdi mdi-account-group-outline",
-    },
-    {
-        name: "Total",
-        icon: "mdi mdi-star",
-    },
-]
+
 function processColor(arr, arrColor) {
     return arr.map(element => {
         // Xác định trạng thái dựa trên percent
@@ -108,7 +29,7 @@ function handleData() {
         console.log('CotDiem rỗng')
         return
     } else if (vueData.DSCotDiem[1].length <= 0) {
-          console.log('Theme rỗng')
+        console.log('Theme rỗng')
         return
     }
     //Bước 1: Xử lý gộp điểm point và convert
@@ -116,16 +37,17 @@ function handleData() {
         let isResultCB = item.MaCotDiem.includes('_TA2') ? 1 : 0
         return { ...item, isResultCB: isResultCB }
     })
-      console.log('mergedData11111', mergedData)
+    console.log('mergedData11111', mergedData)
     let dataResult = mergedData.filter(item => item.isResultCB === 0)
     let mergeDataResult = MergedDataResult(dataResult)
     let dataResultCB = mergedData.filter(item => item.isResultCB === 1)
     let mergeDataResultCB = MergedDataResult(dataResultCB)
     let dataIELTS = vueData.DSCotDiem[0].filter(item => item.MaCotDiem.includes('_IELTS'))
-    mergedData = [...mergeDataResult, ...mergeDataResultCB,...dataIELTS]
+    mergedData = [...mergeDataResult, ...mergeDataResultCB, ...dataIELTS]
     console.log('Data 3 loại điểm', mergedData)
     //Bước 3: Xử lý dữ liệu màu sắc, icon và filter attr trước khi render
     const handleDataScore = mergedData.map(item => {
+        let foundIELTS = dataIELTS.find(i => i.TenCotDiem_EN.includes(item.TenCotDiem_EN))
         let data = {
             label: item.TenCotDiem_VI,
             name: item.TenCotDiem_VI,
@@ -143,7 +65,8 @@ function handleData() {
             colorKQHT: 'purple-lighten-1',
             bgcolorKQHT: 'purple-lighten-5',
             Label_IELTS_VI: item.Label_IELTS_VI,
-            Label_IELTS_EN: item.Label_IELTS_EN
+            Label_IELTS_EN: item.Label_IELTS_EN,
+            Score_IELTS: foundIELTS ? foundIELTS.KetQuaDanhGia_VI : null
         }
         if (data.percent > 100) {
             data.percent = 100
@@ -170,9 +93,9 @@ function handleData() {
         //     data.bgcolor = 'grey-lighten-5'
         // }
         if (ketQuaDanhGia == 'meeting requirements') {
-             data.status= vueData.t('message.MeetingRequirements')
-            data.color= 'yellow-darken-3'
-            data.bgcolor= 'yellow-lighten-4'
+            data.status = vueData.t('message.MeetingRequirements')
+            data.color = 'yellow-darken-3'
+            data.bgcolor = 'yellow-lighten-4'
         }
         else if (ketQuaDanhGia == 'not meeting requirements') {
             data.status = vueData.t('message.NotMeetingRequirements')
@@ -198,14 +121,15 @@ function handleData() {
     let countMark = 0
     //OVERAL cấp 2
     if (vueData.HocSinhDetail.CapID == 2) {
-        let handleDataScoreExceptLanguage = handleDataScore.filter(item => item.label_EN != 'Language')
+        console.log('handleDataScore', handleDataScore)
+        let handleDataScoreExceptLanguage = handleDataScore
         for (let i = 0; i < handleDataScoreExceptLanguage.length - 1; i++) {
             percentTotal += parseFloat(handleDataScoreExceptLanguage[i].percent)
             countMark = i + 1
         }
         handleDataScore[handleDataScore.length - 1].percent = (percentTotal / countMark).toFixed(2)
         console.log(percentTotal, countMark, handleDataScore)
-        const handleDataTheme = vueData.DSCotDiem[1].filter(item => !(item.MaCotDiem.includes('_TST') || item.MaCotDiem.includes('_BNS_VNM') || item.MaCotDiem.includes('_BNS_EXP') )).map(item => {
+        const handleDataTheme = vueData.DSCotDiem[1].filter(item => !(item.MaCotDiem.includes('_TST') || item.MaCotDiem.includes('_BNS_VNM') || item.MaCotDiem.includes('_BNS_EXP'))).map(item => {
             let data = {
                 label: item.TenCotDiem_VI,
                 name: item.TenCotDiem_VI,
@@ -218,7 +142,7 @@ function handleData() {
                 bgcolor: 'red-lighten-5',
                 MaNhomCotDiem: item.MaNhomCotDiem,
                 label_EN: item.TenCotDiem_EN,
-                MaCotDiem:item.MaCotDiem
+                MaCotDiem: item.MaCotDiem
             }
             if (data.score >= 4 && data.score <= 7) {
                 data.color = 'yellow-darken-3'
@@ -245,14 +169,14 @@ function handleData() {
         console.log(' activities ', handleDataTheme)
     }
     //OVERAL cấp 3
-    else{
+    else {
         let handleDataScoreExceptLanguage = handleDataScore.filter(item => item.MaCotDiem.includes('_TA2_'))
         for (let i = 0; i < handleDataScoreExceptLanguage.length - 1; i++) {
             percentTotal += parseFloat(handleDataScoreExceptLanguage[i].percent)
             countMark = i + 1
         }
         handleDataScore[handleDataScore.length - 1].percent = (percentTotal / countMark).toFixed(2)
-        if(handleDataScore[handleDataScore.length - 1].percent == 'NaN' ){
+        if (handleDataScore[handleDataScore.length - 1].percent == 'NaN') {
             handleDataScore[handleDataScore.length - 1].percent = '-'
         }
         console.log(percentTotal, countMark, handleDataScore)
@@ -274,10 +198,10 @@ function handleData() {
             if (data.score >= 5 && data.score < 8) {
                 data.color = 'yellow-darken-3'
                 data.bgcolor = 'yellow-lighten-4'
-            }  else if (data.score >= 8) {
+            } else if (data.score >= 8) {
                 data.color = 'green'
                 data.bgcolor = 'green-lighten-5'
-            } else if (data.score < 1){
+            } else if (data.score < 1) {
                 data.color = 'grey'
                 data.bgcolor = 'grey-lighten-5'
             }
@@ -291,6 +215,7 @@ function handleData() {
         console.log(' activities ', handleDataTheme)
     }
     vueData.skills = handleDataScore
+    console.log(' vueData.skills', vueData.skills)
     //Xử lý tiêu đề Activities
     const uniqueTheme = [...new Set(vueData.DSCotDiem[1].map(x => x.MaNhomCotDiem))]
     const newTheme = uniqueTheme.map(i => {
@@ -571,3 +496,83 @@ function MergedDataResult(arr) {
     }, [])
     return data
 }
+const defColor = [
+    {
+        "status": "Not Meet",
+        "des": "<50%",
+        "color": "red",
+        "bgcolor": "red-lighten-5"
+    },
+    {
+        "status": "Meet",
+        "des": "50%-79%",
+        "color": "yellow-darken-3",
+        "bgcolor": "yellow-lighten-4"
+    },
+    {
+        "status": "Exceeded",
+        "des": ">=80%",
+        "color": "green",
+        "bgcolor": "green-lighten-5"
+    }
+]
+const libIconCotDiem = [
+    {
+        name: "Listening",
+        icon: "mdi mdi-headphones",
+    },
+    {
+        name: "Reading",
+        icon: "mdi mdi-book-open-variant-outline",
+    },
+    {
+        name: "Writing",
+        icon: "mdi mdi-lead-pencil",
+    },
+    {
+        name: "Speaking",
+        icon: "mdi mdi-account-voice",
+    },
+    {
+        name: "Language",
+        icon: "mdi mdi-account-school-outline"
+    },
+    {
+        name: "Total",
+        icon: "mdi mdi-star",
+    },
+    {
+        name: "default",
+        icon: "mdi mdi-set-none"
+    }
+]
+const libIconActivities = [
+    {
+        name: "EC Videos",
+        icon: "mdi mdi-video",
+    },
+    {
+        name: "My Journal",
+        icon: "mdi mdi-book-open-variant-outline",
+    },
+    {
+        name: "Hobbies",
+        icon: "mdi mdi-music",
+    },
+    {
+        name: "1:1 session",
+        icon: "mdi mdi-account-voice",
+    },
+    {
+        name: "DEAR",
+        icon: "mdi mdi-checkbook",
+    },
+    {
+        name: "Class Projects",
+        icon: "mdi mdi-account-group-outline",
+    },
+    {
+        name: "Total",
+        icon: "mdi mdi-star",
+    },
+]

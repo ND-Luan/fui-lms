@@ -335,26 +335,45 @@ function handleHeaders() {
             { title: 'Khen thưởng', colspan: 2 }
         ],
     ];
-    let headerDefault = Object.keys(vueData.dataDiem[0])
-    const header_ChuyenCap = [
-        "PhanLoai_TuyenThang",
-        "Flyers",
-        "DiemTA",
-        "DKHocTiep",
-        "PhoiHopCMHS",
-        "NhanXetGVCN_VePhuHuynh_HTML",
-        "NhanXetGVCN_VeHocSinh_HTML",
-        "DeXuat_NDCamKet",
-    ]
-    headerDefault = [...headerDefault, ...header_ChuyenCap]
-    console.log('headerDefault', headerDefault)
+    // let headerDefault = Object.keys(vueData.dataDiem[0])
+    // let keyData = Object.keys(vueData.dataDiem[0])
+    // let headerDefault = [...new Set(['STT', 'TenLop', 'SoDanhBo', 'HoTen', 'NgaySinh', 'Phai', ...keyData])]
+    // const header_ChuyenCap = [
+    //     "PhanLoai_TuyenThang",
+    //     "Flyers",
+    //     "DiemTA",
+    //     "DKHocTiep",
+    //     "PhoiHopCMHS",
+    //     "NhanXetGVCN_VePhuHuynh_HTML",
+    //     "NhanXetGVCN_VeHocSinh_HTML",
+    //     "DeXuat_NDCamKet",
+    // ]
+    // headerDefault = [...headerDefault, ...header_ChuyenCap]
+    // console.log('headerDefault', headerDefault)
+    const headerDefault = [
+        'STT', 'TenLop', 'HocSinhID', 'SoDanhBo', 'HoTen', 'NgaySinh', 'Phai',
+        'TVM', 'TVD', 'TOM', 'TOD', 'NNM', 'NND',
+        'SDM', 'SDD', 'KHM', 'KHD', 'THM', 'THD',
+        'CNM', 'CND', 'DDM', 'TDM', 'ANM', 'MTM',
+        'KTM', 'DTM',
+        'NL1', 'NL2', 'NL3', 'NL4', 'NL5', 'NL6', 'NL7', 'NL8', 'NL9', 'NL10',
+        'PC1', 'PC2', 'PC3', 'PC4', 'PC5',
+        'HoanThanhXuatSac', 'HoanThanhTot', 'HoanThanh', 'ChuaHoanThanh',
+        'KTCN', 'KTDX', 'ChuaLenLop',
+        'DanhGia', 'DanhHieu', 'KhenThuong',
+        'PhanLoai_TuyenThang', 'Flyers', 'DiemTA',
+        'DKHocTiep', 'PhoiHopCMHS',
+        'NhanXetGVCN_VePhuHuynh_HTML',
+        'NhanXetGVCN_VeHocSinh_HTML',
+        'DeXuat_NDCamKet'
+    ];
     let columnThongTinHocSinh = []
     const columnMapping = {
         STT: { width: 1, type: 'hidden' },
         HSLopID: { width: 1, type: 'hidden' },
         Khoi: { width: 1, type: 'hidden' },
         SoDanhBo: { width: 60, title: 'SoDB' },
-        HocSinhID: { width: 80 },
+        HocSinhID: { width: 80, title: "Mã học sinh" },
         HoTen: { width: 180, align: 'left' },
         TenLop: { width: 50, title: 'Lop' },
         UuDiem: { width: 600, title: 'Ưu điểm', align: 'left' },
@@ -485,9 +504,7 @@ function handleHeaders() {
 }
 function handleData() {
     for (var item of vueData.dataDiem) {
-        console.log('vueData.dataDiem_ChuyenCap', vueData.dataDiem_ChuyenCap)
         const objHocSinh = vueData.dataDiem_ChuyenCap.find(x => x.SoDanhBo === item.SoDanhBo)
-        console.log('sdb', item.SoDanhBo, item)
         let obj = {}
         if (objHocSinh) {
             obj.PhoiHopCMHS = objHocSinh.PhoiHopCMHS

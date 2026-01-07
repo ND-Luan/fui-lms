@@ -111,7 +111,7 @@
 .item-title {
     color: #1f2937;
     font-weight: 600;
-    font-size: 1rem;
+    font-size: 0.95rem;
 }
 
 .item-title {
@@ -211,6 +211,7 @@
     background-color: var(--bg-page);
     margin-bottom: 5px;
     height: auto;
+    font-size: 0.9rem;
   
 }
 
@@ -383,6 +384,14 @@
     color: #666;
     display: flex;
     align-items: center;
+   
+}
+
+.task-subject{
+     white-space: nowrap;      /* ép chữ 1 dòng */
+  overflow: hidden;         /* ẩn phần dư */
+  text-overflow: ellipsis;  /* hiện ... */
+  min-width: 0;   
 }
 
 .task-due-date {
@@ -432,4 +441,19 @@
 }
 .no-scroll {
     overflow: hidden;
+}
+
+
+.two-lines {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;   /* Số dòng tối đa */
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.three-lines {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;   /* Số dòng tối đa */
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }

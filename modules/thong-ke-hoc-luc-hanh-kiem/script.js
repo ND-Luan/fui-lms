@@ -31,8 +31,6 @@ function initSpread() {
 }
 function handleHeaders() {
     let headerDefault = Object.keys(vueData.dataDiem[0])
-    console.log('headerDefault', headerDefault)
-    const DSCotDiem = vueData.MonHoc_QLD.map(item => item.MonHocCode.toLowerCase())
     let columnThongTinHocSinh = []
     for (var key of headerDefault) {
         let column = {
@@ -57,5 +55,11 @@ function handleData() {
         vueData.DSHocSinh.push(item)
     }
 }
+function onChotBaoCao() {
+}
+function onExportExcel() {
+}
+vueData.onChotBaoCao = onChotBaoCao
+vueData.onExportExcel = onExportExcel
 vueData.initSpread = initSpread
 vueData.TongKet_GetDTBMonHocByKhoiLop = TongKet_GetDTBMonHocByKhoiLop

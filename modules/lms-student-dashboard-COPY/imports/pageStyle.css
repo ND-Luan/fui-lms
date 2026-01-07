@@ -1,0 +1,36 @@
+.v-list-subheader__text {
+    width: 100%;
+}
+
+/* Giữ width scrollbar cố định → không dịch layout */
+*::-webkit-scrollbar {
+    width: 6px;
+    background: transparent;
+    /* track ẩn */
+}
+
+/* Thanh kéo (thumb) mặc định ẩn hoàn toàn */
+*::-webkit-scrollbar-thumb {
+    background: rgba(0, 0, 0, 0);
+    border-radius: 4px;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+}
+
+/* Khi hover vào vùng scroll thì hiện thumb */
+*:hover::-webkit-scrollbar-thumb {
+    background: rgba(100, 100, 100, 0.5);
+    opacity: 1;
+}
+
+.v-alert {
+    padding: 8px;
+}
+
+.v-alert--density-default.v-alert--border-top {
+    padding-top: 16px !important;
+}
+
+.v-alert-title {
+    font-size: 1.2rem !important;
+}

@@ -1,4 +1,17 @@
 
+const isCheckKeyExist = (paramKey) => {
+    let flag = false
+    for (var hocSinh of vueData.DSHocSinh) {
+        for (var key in hocSinh) {
+            if (key === paramKey) {
+                console.log(key, paramKey)
+                flag = true
+                return flag
+            }
+        }
+    }
+    return flag
+}
 function exportExcel() {
     // 1. Dữ liệu mẫu (mảng object)
     const rawData = vueData.DSHocSinh
@@ -195,8 +208,8 @@ function renderDSHocSinh_QLD() {
     vueData.DSHocSinhQLD = _dsHocSinh
 }
 function initSpread() {
-    handleHeaders()
     handleData()
+    handleHeaders()
 }
 function handleHeaders() {
     if (!Array.isArray(vueData.dataDiem) || vueData.dataDiem.length === 0) {
@@ -204,49 +217,47 @@ function handleHeaders() {
         return;
     }
     let keys = [];
-    vueData.DSHocSinh.forEach(obj => {
-        Object.keys(obj).forEach(key => {
-            if (!keys.includes(key)) {
-                keys.push(key);
-            }
-        });
-    });
-    console.log('keys', keys)
     if (vueData.CapID === 2) {
         keys = [
             'STT', 'HocSinhID', 'HoTen', 'TenLop', 'NgaySinh',
             'GDDP', 'HDTN', 'HKTN', 'JA', 'LS-DL',
             'NT', 'AI', 'toan', 'tin', 'van', 'anh',
-            'gdcd', 'cn', 'td', 'DTB', 'HocLuc', 'KQRenLuyen',
-            'DanhHieu', 'Phep', 'KhongPhep', 'TongBuoiNghi',
+            'gdcd', 'cn', 'td',
+            // 'DTB',
+            'HocLuc', 'KQRenLuyen',
+            // 'DanhHieu',
+            'Phep', 'KhongPhep', 'TongBuoiNghi',
             'UuDiem', 'NhuocDiem', 'DeXuat', 'HocSinhLopID',
-            'NgayKhenThuong_EN', 'NgayKhenThuong_VI', 'SoQuyetDinhKT',
+            'SoQuyetDinhKT',
             'VaoSoKT'
         ]
     } else {
         keys = [
             "STT", "HocSinhID", "HoTen", "TenLop", "NgaySinh",
             "GDDP", "GDKT-PL", "gdqp", "HDTN", "JA", "toan", "ly", "hoa",
-            "sinh", "tin", "van", "su", "dia", "anh", "td", "DTB",
-            "HocLuc", "KQRenLuyen", "DanhHieu", "Phep", "KhongPhep",
+            "sinh", "tin", "van", "su", "dia", "anh", "td",
+            // "DTB",
+            "HocLuc", "KQRenLuyen",
+            // "DanhHieu",
+            "Phep", "KhongPhep",
             "TongBuoiNghi", "UuDiem", "NhuocDiem", "DeXuat",
-            "HocSinhLopID", "NgayKhenThuong_EN", "NgayKhenThuong_VI",
+            "HocSinhLopID",
             "SoQuyetDinhKT", "VaoSoKT"
         ]
     }
     let headerDefault = keys//Object.keys(vueData.dataDiem)
-    headerDefault = [...headerDefault, 'VaoSoKT', 'SoQuyetDinhKT', 'NgayKhenThuong_VI', 'NgayKhenThuong_EN']
+    headerDefault = [...headerDefault, 'NgayKhenThuong_VI', 'NgayKhenThuong_EN']
     let columnThongTinHocSinh = []
     const columnMapping = {
         STT: { width: 1, type: 'hidden' },
-        HocSinhID: { width: 80 },
-        HoTen: { width: 180, align: 'left' },
-        TenLop: { width: 50, title: 'Lop' },
+        HocSinhID: { width: 80, title: "Mã học sinh" },
+        HoTen: { width: 180, align: 'left', title: "Họ tên" },
+        TenLop: { width: 50, title: 'Lớp' },
         UuDiem: { width: 600, title: 'Ưu điểm', align: 'left' },
         NhuocDiem: { width: 450, title: 'Nhược điểm', align: 'left' },
         DeXuat: { width: 700, title: 'Đề xuất', align: 'left' },
         NgaySinh: { width: 100 },
-        DanhHieu: { width: 120, title: 'Danh hiệu' },
+        // DanhHieu: { width: 120, title: 'Danh hiệu' },
         DanhGia: { width: 130, title: 'Đánh giá' },
         DTB: { title: 'ĐTB' },
         Phep: { title: 'vP' },
@@ -262,7 +273,7 @@ function handleHeaders() {
             typeValue: 'KQRenLuyen'
         },
         VaoSoKT: { title: "Số vào sổ KT", width: 100 },
-        SoQuyetDinhKT: { title: "Số quyết định KT", width: 100 },
+        SoQuyetDinhKT: { title: "Số quyết định KT", width: 150 },
         NgayKhenThuong_VI: { title: "Ngày KT (VI)", width: 200 },
         NgayKhenThuong_EN: { title: "Ngày KT (EN)", width: 200 },
         HocSinhLopID: {
@@ -271,12 +282,13 @@ function handleHeaders() {
         },
         KhenThuongID: { width: 1, type: "hidden" }
     };
+    console.log('data', vueData.DSHocSinh[0])
     for (var key of headerDefault) {
         let column = {
             type: 'text',
-            title: key,
+            title: key.toLocaleUpperCase(),
             name: key,
-            width: 40,
+            width: 100,
             backGroundColor: null,
             wrap: true,
             align: "center",
@@ -284,6 +296,15 @@ function handleHeaders() {
             style: 'font-size:8px',
             ...columnMapping[key], // Áp dụng thuộc tính từ object ánh xạ
         };
+        if (key === 'HKTN') {
+            column = { title: 'KHTN', ...columnMapping[key], };
+        }
+        // if (key === 'hoa' && isCheckKeyExist('hoa')) {
+        //     column = { title: 'HOA', ...columnMapping[key], };
+        // }
+        // if (key === 'sinh' && isCheckKeyExist('sinh')) {
+        //     column = { title: 'SINH', ...columnMapping[key], };
+        // }
         columnThongTinHocSinh.push(column)
     }
     vueData.columnHeader = [...columnThongTinHocSinh]
@@ -345,7 +366,8 @@ function onSave() {
             // })
             ajaxCALL('lms/XetKetQuaRenLuyen_Upsert_JSON',
                 {
-                    json: vueData.DSHocSinh.map(x => ({ ...x, KQRL_Sau: x.KQRenLuyen }))
+                    json: vueData.DSHocSinh.map(x => ({ ...x, KQRL_Sau: x.KQRenLuyen })),
+                    NienKhoa: vueData.NienKhoa,
                 },
                 res => {
                     console.log('res', res)

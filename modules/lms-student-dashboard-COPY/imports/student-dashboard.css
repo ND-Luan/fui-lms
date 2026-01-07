@@ -1,7 +1,9 @@
 /* .v-overlay-container .v-toolbar-title {
 	min-width: fit-content;
 } */
-
+html{
+	overflow-y: clip;
+}
 .v-window {
 	width: 100%;
 }
@@ -950,4 +952,41 @@
 .v-overlay-container .v-card {
 	max-width: 100vw !important;
 	overflow-x: clip !important;
+}
+
+.hover-chip{
+    cursor: pointer;
+    transition: transform 0.5s ease, box-shadow 0.5s ease ;
+  /* shadow mặc định nhẹ */
+	border: thin lightgrey solid; 
+	border-radius: 20px;
+	font-size: 12px;
+}
+
+.hover-chip:hover{
+    transform: scale(1.05) ; /* phóng to 5% */
+  box-shadow: 0 4px 16px rgba(0,0,0,0.15) ; /* shadow đậm hơn */
+}
+
+.hover-chip.active{
+	    background-color: #217D46;
+    color: white;
+}
+
+.text-title-nhiem-vu {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;   /* số dòng giới hạn */
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.hover-card{
+    cursor: pointer;
+    transition: transform 0.5s ease;
+  /* shadow mặc định nhẹ */
+	border-radius: 20px;
+}
+
+.hover-card:hover{
+    transform: scale(1.02) ; /* phóng to 5% */
 }
