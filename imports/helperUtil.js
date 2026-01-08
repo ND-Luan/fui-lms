@@ -1,15 +1,4 @@
 const ColorEnum = {
-    ThamMy: "#FFB300",
-    NgonNgu: "#FB8C00",
-    NhanThuc: "#217D47",
-    TheChat: "#42A5F5",
-    TinhCamVaQuanHeXaHoi: "#5C6BC0",
-
-    VuotTroi: "#0091EA",
-    Dat: "#00ACC1",
-    ChuaDat: "#CD5D5B",
-    KhongNhanXet: "#607D8B",
-
     //0: Mở; 1: GVCN Lưu Tạm; 2 : GVCN Gửi BGH Chờ duyệt; 3: BGH: Reject -> Duyệt lại ; 4: BGH Duyệt
     TinhTrangThangChuDe: {
         Mo: "#546E7A",

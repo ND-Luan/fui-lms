@@ -20,7 +20,7 @@
 		},
 		data() {
 			return {
-				IsLanguage: JSON.parse(localStorage.getItem('IsLanguage'))
+				IsLanguage: localStorage.getItem('IsLanguage') ? JSON.parse(localStorage.getItem('IsLanguage')) : false
 			}
 		},
 		watch: {

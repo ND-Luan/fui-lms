@@ -4,10 +4,11 @@
 		<!-- NAVBAR -->
 		<v-toolbar border density="compact" class="bg-white border-sm" style="position: sticky;top: 0; z-index: 50;">
 			<template #title>
-				<span class="text-h5">{{ $t('message.ControlPanel') }}</span>
-				<v-btn class="ms-3" v-if="vueData.user.UserID == 'NA0000022'" @click="onHandleOpenChangeGV">Chọn
-					GV</v-btn>
-
+				<div class="d-flex align-center">
+					<span class="text-h6">{{ $t('message.ControlPanel') }}</span>
+					<v-btn class="ms-3" v-if="vueData.user.UserID == 'NA0000022'" @click="onHandleOpenChangeGV">Chọn
+						GV</v-btn>
+				</div>
 			</template>
 			<template #append>
 				<v-btn @click="OpenDashboard()">
@@ -16,12 +17,12 @@
 				<v-btn @click="OpenMyLiberies()">
 					<v-icon class="me-1 text-h6">mdi-library-shelves</v-icon> {{ $t('message.MyDocument') }}
 				</v-btn>
-				<v-btn-toggle v-model="toggle" color="primary" size="small">
-					<v-btn :value="false" :disabled="!toggle">
-						<v-img src="/_cdn/lhbs-lms/img_page_ph/icon_vietnam.png" width="30" />
+				<v-btn-toggle v-model="toggle" size="small">
+					<v-btn :value="false" :disabled="!toggle" :color="!toggle ? 'green' : 'white'">
+						<v-img src="/_cdn/lhbs-lms/img_page_ph/Viet.png" width="35" />
 					</v-btn>
-					<v-btn :value="true" :disabled="toggle">
-						<v-img src="/_cdn/lhbs-lms/img_page_ph/icon_english.png" width="30" />
+					<v-btn :value="true" :disabled="toggle" :color="toggle ? 'green' : 'white'">
+						<v-img src="/_cdn/lhbs-lms/img_page_ph/Anh.png" width="35" />
 					</v-btn>
 				</v-btn-toggle>
 			</template>
@@ -32,7 +33,7 @@
 			<div class="flex-1-0 mb-2 rounded bg-white">
 				<v-expansion-panels v-model="assignmentNeedGradingPanel" svariant="accordion" multiple>
 					<v-expansion-panel>
-						<v-expansion-panel-title class="d-flex pa-2">
+						<v-expansion-panel-title class="d-flex pa-2" style="min-height: 40px">
 							<span class="text-body-1 font-weight-medium">{{ $t('message.AssignmentsToGrade') }}</span>
 							<v-spacer></v-spacer>
 						</v-expansion-panel-title>
@@ -55,15 +56,15 @@
 			<div class="flex-1-0 w-100  bg-white rounded" v-for="mh in DSMonHocActive">
 				<v-card>
 					<v-toolbar color="white">
-						<v-toolbar-title style="margin-right: 20px;">
+						<v-toolbar-title style="margin-left: 8px; margin-right: 8px;">
 							<div class="d-flex w-100">
 								<span class="text-primary font-weight-medium" style="font-size: 16px !important">{{
 									$t('message.Subject') }}: {{
-										$i18n.locale == 'en' &&
-											teachingGroups.filter(item => item.MonHocName == mh.MonHocName)[0]?.MonHocName ==
-											'Ngoại ngữ' ?
-											'English' : teachingGroups.filter(item =>
-												item.MonHocName == mh.MonHocName)[0]?.MonHocName}}</span>
+									$i18n.locale == 'en' &&
+									teachingGroups.filter(item => item.MonHocName == mh.MonHocName)[0]?.MonHocName ==
+									'Ngoại ngữ' ?
+									'English' : teachingGroups.filter(item =>
+									item.MonHocName == mh.MonHocName)[0]?.MonHocName}}</span>
 								<v-spacer></v-spacer>
 
 								<v-menu transition="slide-y-transition">
@@ -77,8 +78,8 @@
 											v-for="KhoiItem in teachingGroups.filter(item => item.MonHocName == mh.MonHocName)"
 											:value="KhoiItem.KhoiID" :key="KhoiItem.KhoiID"
 											@click="OpenModalAddNoiDung(KhoiItem)">
-											<v-list-item-title>{{ $t('message.Grade') }} {{ KhoiItem.KhoiID
-											}}</v-list-item-title>
+											<v-list-item-title>{{ $t('message.Grade') }} {{
+												KhoiItem.KhoiID}}</v-list-item-title>
 										</v-list-item>
 									</v-list>
 								</v-menu>
@@ -91,7 +92,7 @@
 									<v-tab
 										v-for="KhoiItem in teachingGroups.filter(item => item.MonHocName == mh.MonHocName && item.weeks.length > 0)"
 										:value="KhoiItem.KhoiID" :key="KhoiItem.KhoiID">{{ $t('message.Grade') }} {{
-											KhoiItem.KhoiID }}
+										KhoiItem.KhoiID }}
 									</v-tab>
 								</v-tabs>
 							</div>
@@ -110,7 +111,7 @@
 												:model-value="KhoiItem.weeks?.map((k, index) => index)" multiple>
 												<p v-if="KhoiItem.weeks.length == 0">{{
 													$t('message.EmptyLessonAndAssignment')
-												}}</p>
+													}}</p>
 												<!-- Mỗi tuần là 1 expansion panel -->
 												<v-expansion-panel v-for="week in KhoiItem.weeks" :key="week.TuanHocID"
 													:model-value="KhoiItem.weeks?.map((k, index) => index)" multiple>
@@ -133,12 +134,12 @@
 																			<div class="class-info">
 																				<div class="class-name">{{
 																					classItem.TenLop
-																				}}</div>
+																					}}</div>
 																				<div class="class-meta mt-2">
 																					<span>
 																						{{ $t('message.ClassSize') }}:
 																						{{
-																							classItem.StudentCount }}
+																						classItem.StudentCount }}
 																						{{ $t('message.Students')
 																						}}</span>
 																					<span class="pending-tag"
@@ -147,7 +148,7 @@
 																							class="mr-1">mdi-alert-circle</v-icon>
 																						{{ getPendingCount(classItem) }}
 																						{{
-																							$t('message.NeedGrade') }}
+																						$t('message.NeedGrade') }}
 																					</span>
 																				</div>
 																			</div>
@@ -197,189 +198,189 @@
 		<uc-btn-with-dialog-add-bt v-model:isOpen="isShowModalAddNoiDung" v-if="isShowModalAddNoiDung" :KhoiItem />
 		<uc-my-liberies v-model:isOpen="isShowMyLiberies" :DSMonHocActive :teachingGroups v-if="isShowMyLiberies"
 			v-model:contentLibrary="contentLibrary" @CreateContent="(item) => { this.OpenModalAddNoiDung(item) }" />
-		<uc-change-user v-if="isShowModalChangeUser" v-model:isOpen="isShowModalChangeUser"
+		<uc-change-user v-if="isShowModalChangeUser" v-model:isOpen="isShowModalChangeUser" #f
 			:giaovienid="vueData.GiaoVienID_Selected" />
 		<!-- <uc-focus-task v-if="isShowModalFocusTask" v-model:isOpen="isShowModalFocusTask"></uc-focus-task> -->
 	</div>
 </template>
 
 <script>
-export default {
-	name: 'uc-lms-tc-dashboard-v2',
-	data() {
-		const toggle = JSON.parse(localStorage.getItem('IsLanguage')) ?? false
-		this.$i18n.locale = toggle ? "en" : "vi"
-		return {
-			isShowModalChangeUser: false,
-			activeTab: 'classes', x: null, vueData,
-			isShowModalAddNoiDung: false,
-			DSMonHocActive: [],
-			panel: [0],
-			panelChild: [0],
-			KhoiItem: {},
-			isShowMyLiberies: false,
-			assignmentNeedGradingPanel: [],
-			isOpen: false,
-			url: '',
-			toggle,
-			filterStatus: [],
-			statuses: {
-				'PENDING_GRADING': { color: 'warning', icon: 'mdi-file-clock-outline', iconColor: '#fb8c00', text: this.$i18n.locale == 'en' ? 'Need Grade' : 'Cần chấm', cardClass: 'warning' },
-				'OVERDUE': { color: 'error', icon: 'mdi-calendar-remove', iconColor: '#f44336', text: this.$i18n.locale == 'en' ? 'Over Due' : 'Quá hạn', cardClass: 'urgent' },
-				'UPCOMING': { color: 'primary', icon: 'mdi-calendar-arrow-right', iconColor: '#1976d2', text: this.$i18n.locale == 'en' ? 'Coming' : 'Sắp tới', cardClass: 'primary' }
+	export default {
+		name: 'uc-lms-tc-dashboard-v2',
+		data() {
+			const toggle = localStorage.getItem('IsLanguage') ? (localStorage.getItem('IsLanguage') == 'true' ? true : false) : false
+			this.$i18n.locale = toggle ? "en" : "vi"
+			return {
+				isShowModalChangeUser: false,
+				activeTab: 'classes', x: null, vueData,
+				isShowModalAddNoiDung: false,
+				DSMonHocActive: [],
+				panel: [0],
+				panelChild: [0],
+				KhoiItem: {},
+				isShowMyLiberies: false,
+				assignmentNeedGradingPanel: [],
+				isOpen: false,
+				url: '',
+				toggle,
+				filterStatus: [],
+				statuses: {
+					'PENDING_GRADING': { color: 'warning', icon: 'mdi-file-clock-outline', iconColor: '#fb8c00', text: this.$i18n.locale == 'en' ? 'Need Grade' : 'Cần chấm', cardClass: 'warning' },
+					'OVERDUE': { color: 'error', icon: 'mdi-calendar-remove', iconColor: '#f44336', text: this.$i18n.locale == 'en' ? 'Over Due' : 'Quá hạn', cardClass: 'urgent' },
+					'UPCOMING': { color: 'primary', icon: 'mdi-calendar-arrow-right', iconColor: '#1976d2', text: this.$i18n.locale == 'en' ? 'Coming' : 'Sắp tới', cardClass: 'primary' }
+				},
+				filterArray: [
+					{ title: this.$i18n.locale == 'en' ? 'Need Grade' : 'Cần chấm', value: 'PENDING_GRADING' },
+					{ title: this.$i18n.locale == 'en' ? 'Over Due' : 'Quá hạn', value: 'OVERDUE' },
+					{ title: this.$i18n.locale == 'en' ? 'Coming' : 'Sắp tới', value: 'UPCOMING' }
+				],
+				KhoiFilter: null,
+				LopFilter: null,
+				page: 1,
+				pageSize: 10,
+				isShowModalFocusTask: false
+			}
+		},
+		emits: ['view-class', 'grade-class', 'create-assignment'],
+		props: {
+			focusTasks: Array,
+			teachingGroups: Array,
+			schedule: Array,
+			activities: Array,
+			contentLibrary: Array,
+		},
+		computed: {
+			focusTaskFiltered() {
+				return this.focusTasks.concat(vueData.focusTasks_student).filter(task => {
+					// 1. Filter theo trạng thái (nhiều trạng thái)
+					if (this.filterStatus.length > 0 && !this.filterStatus.includes(task.Status)) {
+						return false
+					}
+	
+					// 2. Filter theo Khối
+					if (this.KhoiFilter && this.KhoiFilter != -1 && task.KhoiID !== this.KhoiFilter) {
+						return false
+					}
+	
+					// 3. Filter theo Lớp
+					if (this.LopFilter && task.LopID !== this.LopFilter) {
+						return false
+					}
+	
+					return true
+				});
 			},
-			filterArray: [
-				{ title: this.$i18n.locale == 'en' ? 'Need Grade' : 'Cần chấm', value: 'PENDING_GRADING' },
-				{ title: this.$i18n.locale == 'en' ? 'Over Due' : 'Quá hạn', value: 'OVERDUE' },
-				{ title: this.$i18n.locale == 'en' ? 'Coming' : 'Sắp tới', value: 'UPCOMING' }
-			],
-			KhoiFilter: null,
-			LopFilter: null,
-			page: 1,
-			pageSize: 10,
-			isShowModalFocusTask: false
-		}
-	},
-	emits: ['view-class', 'grade-class', 'create-assignment'],
-	props: {
-		focusTasks: Array,
-		teachingGroups: Array,
-		schedule: Array,
-		activities: Array,
-		contentLibrary: Array,
-	},
-	computed: {
-		focusTaskFiltered() {
-			return this.focusTasks.concat(vueData.focusTasks_student).filter(task => {
-				// 1. Filter theo trạng thái (nhiều trạng thái)
-				if (this.filterStatus.length > 0 && !this.filterStatus.includes(task.Status)) {
-					return false
-				}
-
-				// 2. Filter theo Khối
-				if (this.KhoiFilter && this.KhoiFilter != -1 && task.KhoiID !== this.KhoiFilter) {
-					return false
-				}
-
-				// 3. Filter theo Lớp
-				if (this.LopFilter && task.LopID !== this.LopFilter) {
-					return false
-				}
-
-				return true
-			});
-		},
-		DSKhoi() {
-			return this.focusTasks.reduce((acc, task) => {
-				if (task.KhoiID && !acc.some(x => x.value === task.KhoiID)) {
-					acc.push({ title: 'Khối ' + task.KhoiID, value: task.KhoiID });
-				}
-				return acc;
-			}, [{ title: 'Tất cả', value: -1 }]);
-		},
-		DSLop() {
-			return this.focusTasks.reduce((acc, task) => {
-				if (task.LopID && !acc.some(x => x.value === task.LopID)) {
-					acc.push({ title: task.TenLopHoacNhom, value: task.LopID, KhoiID: task.KhoiID });
-				}
-				return acc;
-			}, []).filter(item => {
-				if (!this.KhoiFilter) return true;
-				return this.KhoiFilter == -1 ? true : item.KhoiID == this.KhoiFilter;
-			});
-		},
-		pagedItems() {
-			const start = (this.page - 1) * this.pageSize;
-			return this.focusTaskFiltered.slice(start, start + this.focusTaskFiltered.length);
-		},
-		totalPages() {
-			return Math.ceil(this.focusTaskFiltered.length / this.focusTaskFiltered.length)
-		}
-	},
-	watch: {
-		activeTab: function (newVal) {
-			this.$nextTick(() => {
-				this.panel = [0]
-				this.panelChild = [0]
-			})
-		},
-		contentLibrary: function (newVal) {
-			console.log('contentLibrary changed', newVal)
-		},
-		toggle: function (val) {
-			localStorage.setItem('IsLanguage', val)
-			if (val) {
-				this.$i18n.locale = 'en'
-			}
-			else this.$i18n.locale = 'vi';
-		},
-		KhoiFilter: function (val) {
-			if (val) {
-				this.LopFilter = null
-				this.filterStatus = []
+			DSKhoi() {
+				return this.focusTasks.reduce((acc, task) => {
+					if (task.KhoiID && !acc.some(x => x.value === task.KhoiID)) {
+						acc.push({ title: 'Khối ' + task.KhoiID, value: task.KhoiID });
+					}
+					return acc;
+				}, [{ title: 'Tất cả', value: -1 }]);
+			},
+			DSLop() {
+				return this.focusTasks.reduce((acc, task) => {
+					if (task.LopID && !acc.some(x => x.value === task.LopID)) {
+						acc.push({ title: task.TenLopHoacNhom, value: task.LopID, KhoiID: task.KhoiID });
+					}
+					return acc;
+				}, []).filter(item => {
+					if (!this.KhoiFilter) return true;
+					return this.KhoiFilter == -1 ? true : item.KhoiID == this.KhoiFilter;
+				});
+			},
+			pagedItems() {
+				const start = (this.page - 1) * this.pageSize;
+				return this.focusTaskFiltered.slice(start, start + this.focusTaskFiltered.length);
+			},
+			totalPages() {
+				return Math.ceil(this.focusTaskFiltered.length / this.focusTaskFiltered.length)
 			}
 		},
-		LopFilter: function (val) {
-			if (val) {
-				this.filterStatus = []
-			}
-		}
-
-	},
-	created() {
-		if (this.focusTasks && this.focusTasks.length > 0) {
-			// this.assignmentNeedGradingPanel = [0]
-			let countMaxItemOfStatus = {
-				'PENDING_GRADING': 0,
-				'OVERDUE': 0,
-				'UPCOMING': 0
-			}
-		}
-		console.log('this.teachingGroups', this.teachingGroups)
-		this.DSMonHocActive = [...new Set(this.teachingGroups.map(item => item.MonHocName))].map(mh => ({ MonHocName: mh, activeTab: this.teachingGroups.filter(item => item.MonHocName == mh)[0].KhoiID }));
-	},
-	mounted() {
-		if (this.teachingGroups && this.teachingGroups.length > 0) {
-			this.activeTab = this.teachingGroups[0].KhoiID
-		}
-	},
-	methods: {
-		getPendingCount(classItem) {
-			if (!classItem.assignments) return 0;
-			return classItem.assignments.reduce((sum, a) => {
-				return sum + (a.PendingGradingCount || 0);
-			}, 0);
-		},
-		xemTinhTrang(assignment) {
-			openWindow({
-				title: "Sổ điểm Lớp học",
-				url: `/lms-teacher-gradebook?LopID=${assignment.LopID}&MonHocID=${assignment.MonHocID}`,
-				id: "WinGiaoBaiTap",
-				onclose: {
-					EXE: "vueData.initPage()"
+		watch: {
+			activeTab: function (newVal) {
+				this.$nextTick(() => {
+					this.panel = [0]
+					this.panelChild = [0]
+				})
+			},
+			contentLibrary: function (newVal) {
+				console.log('contentLibrary changed', newVal)
+			},
+			toggle: function (val) {
+				localStorage.setItem('IsLanguage', val)
+				if (val) {
+					this.$i18n.locale = 'en'
 				}
-			});
+				else this.$i18n.locale = 'vi';
+			},
+			KhoiFilter: function (val) {
+				if (val) {
+					this.LopFilter = null
+					this.filterStatus = []
+				}
+			},
+			LopFilter: function (val) {
+				if (val) {
+					this.filterStatus = []
+				}
+			}
+	
 		},
-		OpenModalAddNoiDung(KhoiItem) {
-			this.KhoiItem = { ...KhoiItem }
-			this.isShowModalAddNoiDung = true;
+		created() {
+			if (this.focusTasks && this.focusTasks.length > 0) {
+				// this.assignmentNeedGradingPanel = [0]
+				let countMaxItemOfStatus = {
+					'PENDING_GRADING': 0,
+					'OVERDUE': 0,
+					'UPCOMING': 0
+				}
+			}
+			console.log('this.teachingGroups', this.teachingGroups)
+			this.DSMonHocActive = [...new Set(this.teachingGroups.map(item => item.MonHocName))].map(mh => ({ MonHocName: mh, activeTab: this.teachingGroups.filter(item => item.MonHocName == mh)[0].KhoiID }));
 		},
-		OpenMyLiberies() {
-			this.isShowMyLiberies = true;
+		mounted() {
+			if (this.teachingGroups && this.teachingGroups.length > 0) {
+				this.activeTab = this.teachingGroups[0].KhoiID
+			}
 		},
-		OpenDashboard() {
-			openWindow({
-				url: '/lms-teacher-theo-doi-hoc-tap',
-				title: 'Theo dõi học tập'
-			})
-		},
-		onHandleOpenChangeGV() {
-			console.log('this.isShowModalChangeUser', this.isShowModalChangeUser)
-			this.isShowModalChangeUser = true
-		},
-		TestUIFocusTask() {
-			this.isShowModalFocusTask = true
+		methods: {
+			getPendingCount(classItem) {
+				if (!classItem.assignments) return 0;
+				return classItem.assignments.reduce((sum, a) => {
+					return sum + (a.PendingGradingCount || 0);
+				}, 0);
+			},
+			xemTinhTrang(assignment) {
+				openWindow({
+					title: "Sổ điểm Lớp học",
+					url: `/lms-teacher-gradebook?LopID=${assignment.LopID}&MonHocID=${assignment.MonHocID}`,
+					id: "WinGiaoBaiTap",
+					onclose: {
+						EXE: "vueData.initPage()"
+					}
+				});
+			},
+			OpenModalAddNoiDung(KhoiItem) {
+				this.KhoiItem = { ...KhoiItem }
+				this.isShowModalAddNoiDung = true;
+			},
+			OpenMyLiberies() {
+				this.isShowMyLiberies = true;
+			},
+			OpenDashboard() {
+				openWindow({
+					url: '/lms-teacher-theo-doi-hoc-tap',
+					title: 'Theo dõi học tập'
+				})
+			},
+			onHandleOpenChangeGV() {
+				console.log('this.isShowModalChangeUser', this.isShowModalChangeUser)
+				this.isShowModalChangeUser = true
+			},
+			TestUIFocusTask() {
+				this.isShowModalFocusTask = true
+			}
 		}
 	}
-}
 </script>

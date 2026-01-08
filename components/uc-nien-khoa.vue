@@ -90,6 +90,7 @@
 				this.isLoading = true
 	
 				vueData.NienKhoa = this.dsnienkhoacustom.filter(item => item.IsActive == 1)[0].NienKhoa
+				vueData.NienKhoaItem = this.dsnienkhoacustom.find(item => item.IsActive == 1)
 				localStorage.setItem("NienKhoa", vueData.NienKhoa)
 				this.isLoading = false
 				console.log('this.DSNienKhoa', this.DSNienKhoa)
@@ -111,12 +112,14 @@
 				if (res.data.length > 0) {
 					this.DSNienKhoa = res.data
 					vueData.NienKhoa = res.data.filter(item => item.IsActive == 1)[0].NienKhoa
+					vueData.NienKhoaItem = res.data.find(item => item.IsActive == 1)
 					localStorage.setItem("NienKhoa", vueData.NienKhoa)
 				}
 				this.isLoading = false
 			},
 			selectedNienKhoa(item) {
 				vueData.NienKhoa = item.NienKhoa
+				vueData.NienKhoaItem = item
 				localStorage.setItem("NienKhoa", vueData.NienKhoa)
 			}
 		}

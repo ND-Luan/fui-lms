@@ -746,7 +746,8 @@ $('document').ready(() => {
                 flat: true
             },
             VToolbar: {
-                color: "primary"
+                color: "primary",
+                density: "compact",
             },
             VTextField: {
                 density: "compact",
@@ -864,7 +865,11 @@ $('document').ready(() => {
             },
             VCard: {
                 VCardTitle: {
-                    class: 'pb-2 d-flex align-center',
+                    class: 'd-flex align-center px-2 py-2 text-primary',
+                    style: "font-size: 1.1rem"
+                },
+                VCardText: {
+                    style: "padding: 0 8px 8px"
                 }
             },
             VDialog: {
@@ -874,7 +879,17 @@ $('document').ready(() => {
                 variant: 'accordion'
             },
             VButton: {
-                variant: "outlined"
+                variant: "outlined",
+                color: "primary"
+            },
+            VChip: {
+                size: "small"
+            },
+            VRow: {
+                dense: true
+            },
+            VContainer: {
+                class: "pa-0"
             }
         }
     }

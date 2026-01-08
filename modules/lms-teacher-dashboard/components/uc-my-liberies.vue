@@ -76,7 +76,7 @@
 								</v-icon>
 								<div class="item-details">
 									<div class="item-title text-wrap break-words three-lines"
-										style="font-weight: 500; font-size: 0.875rem !important;">
+										style="font-weight: 400; font-size: 0.875rem !important;">
 										{{ item.Title }}
 									</div>
 									<div v-if="item.Instructions && item.Instructions.length > 0"
