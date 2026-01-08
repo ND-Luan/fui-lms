@@ -16,7 +16,8 @@ function onLoadKhoi_GetDSMonHoc(khoiId) {
     return new Promise(resolve => {
         ajaxCALL('lms/MonHoc_GetByKhoiID', {
             KhoiID: khoiId,
-            NienKhoa: vueData.NienKhoa
+            NienKhoa: vueData.NienKhoa,
+            HocKi: vueData.NienKhoaItem.HocKi
         }, res => resolve(res.data))
     })
 }

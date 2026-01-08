@@ -84,7 +84,7 @@ export default {
     methods: {
         async GET_EL_Teacher_GetMyClasses() {
             let params = {
-
+                HocKi: vueData.NienKhoaItem.HocKi
             }
             let response = await this.API_Promise('EL_Teacher_GetMyClasses', params)
             this.DSKhoi = response.reduce((result, item) => {
@@ -99,7 +99,8 @@ export default {
         async GET_EL_Teacher_Dashboard_Lop_Get_ByKhoiID() {
             let params = {
                 KhoiID: this.KhoiIDSelected,
-                NienKhoa: vueData.NienKhoa
+                NienKhoa: vueData.NienKhoa,
+                HocKi: vueData.NienKhoaItem.HocKi
             }
             let response = await this.API_Promise('EL_Teacher_Dashboard_Lop_Get_ByKhoiID', params)
             this.DSLop = response
@@ -108,7 +109,8 @@ export default {
         async GET_EL_Teacher_Dashboard_Assignment_Get_ByLopID() {
             let params = {
                 LopID: this.LopNhomIDSelected,
-                NienKhoa: vueData.NienKhoa
+                NienKhoa: vueData.NienKhoa,
+                HocKi: vueData.NienKhoaItem.HocKi
             }
             let response = await this.API_Promise('EL_Teacher_Dashboard_Assignment_Get_ByLopID', params)
             this.FocusTaskList = response

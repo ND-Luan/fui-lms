@@ -1,1 +1,338 @@
-{"data":[{"EXE":"IsCheck_NotRoleParent(vueData.user)"},{"Test":null,"CapID":"parseInt(capid)","LopItem":null,"ThangItem":null,"TitlePage":"getTitlePageByURL(window.location.pathname + window.location.search)","DSBaiTap_NhanXet":[],"DSLop":[],"DSMonHoc":[],"DSKhoi":[],"DSCap":[{"title":"Cấp 1","value":1},{"title":"Cấp 2","value":2},{"title":"Cấp 3","value":3}],"KhoiItem":null,"CapItem":null,"MonHocItem":null,"BaiTapItem":null,"DSKhoiFilter":[],"DSLopFilter":[],"DSHocSinh_NhanXet":[]},{"EL_Teacher_GetMyClasses":{"API":"lms/EL_Teacher_GetMyClasses","IN":{},"OUT":"DSLop","CALLBACK":[{"EXE":"vueData.handleGetKhoi();vueData.handleGetCap()"}]}},{"EL_Teacher_GetSubjectsByClass":{"API":"lms/EL_Teacher_GetSubjectsByClass","IN":{"LopID":"LopItem.LopID"},"OUT":"DSMonHoc"}},{"EL_Teacher_GetAssignmentsByClass":{"API":"lms/EL_Teacher_GetAssignmentsByClass","IN":{"LopID":"LopItem.LopID","MonHocID":"MonHocItem.MonHocID"},"OUT":"DSBaiTap"}},{"EL_PhuHuynh_XemYKien_ThongBaoLop_Get_ByAssignToClassID":{"API":"lms/EL_PhuHuynh_XemYKien_ThongBaoLop_Get_ByAssignToClassID","IN":{"AssignToClassID":"BaiTapItem.AssignToClassID"},"OUT":"DSHocSinh_NhanXet"}},{"items":[],"headers":[{"title":"Học sinh","key":"hocSinh","el":"uc-info-student","align":"center","attr":{":item":"item"}},{"title":"Phụ huynh xác nhận","key":"PhuHuynhXacNhan","align":"center","value":"PhuHuynhXacNhan"},{"title":"Thời gian phụ huynh xác nhận","align":"center","key":"ThoiGianXacNhan","value":"ThoiGianXacNhan","el":"span","innerHTML":[{"el":"span","innerHTML":"{{ item.ThoiGianXacNhan ? vueData.dayjs(item.ThoiGianXacNhan).format('HH:mm DD/MM/YYYY') : '-'}}"}]},{"title":"Lượt xem","key":"SoLanXem","value":"SoLanXem","align":"end"},{"title":"Ý kiến phụ huynh","value":"NoiDungPhuHuynh"}]},{"CALL":"EL_Teacher_GetMyClasses"}],"watch":{"NienKhoa":[{"EXE":""}],"CapItem":{"IF":"CapItem.value>0","THEN":{"EXE":"vueData.handleGetKhoiFilter(); vueData.KhoiItem=null; vueData.LopItem=null;vueData.MonHocItem = null"}},"KhoiItem":{"IF":"KhoiItem && KhoiItem.value>0","THEN":{"EXE":"vueData.handleGetLopFilter(); vueData.LopItem=null;vueData.MonHocItem = null"}},"LopItem":{"IF":"LopItem && LopItem.LopID.length>0","THEN":[{"EXE":"vueData.MonHocItem = null"},{"CALL":"EL_Teacher_GetSubjectsByClass"}]},"MonHocItem":{"IF":"MonHocItem && MonHocItem.MonHocID>0","THEN":[{"EXE":"vueData.BaiTapItem = null"},{"CALL":"EL_Teacher_GetAssignmentsByClass"}]},"BaiTapItem":{"IF":"BaiTapItem && BaiTapItem.AssignToClassID>0","THEN":[{"EXE":"vueData.DSHocSinh_NhanXet = []"},{"CALL":"EL_PhuHuynh_XemYKien_ThongBaoLop_Get_ByAssignToClassID"}]}},"controls":[{"prop":"fluid","rows":[{"prop":"class='pt-0'","cols":[{"el":"v-card","attr":{"class":"sticky-filter"},"innerHTML":[{"el":"v-card-title","attr":{"class":"text-primary px-0 pt-0"},"innerHTML":"{{TitlePage}}"},{"el":"v-card-text","attr":{"class":"pa-0"},"innerHTML":[{"el":"v-row","attr":{"dense":""},"innerHTML":[{"el":"v-col","innerHTML":[{"el":"v-select","attr":{"v-model":"CapItem","label":"Chọn cấp",":items":"DSCap","item-title":"title","item-value":"value",":return-object":true,":hide-details":true}}]},{"el":"v-col","innerHTML":[{"el":"v-select","attr":{"v-model":"KhoiItem","label":"Chọn khối",":items":"DSKhoiFilter","item-title":"title","item-value":"value",":return-object":true,":hide-details":true}}]},{"el":"v-col","innerHTML":[{"el":"v-select","attr":{"v-model":"LopItem","label":"Chọn lớp",":items":"DSLopFilter","item-title":"TenLop","item-value":"LopID",":return-object":true,":hide-details":true}}]},{"el":"v-col","innerHTML":[{"el":"v-select","attr":{"v-model":"MonHocItem","label":"Chọn môn học",":items":"DSMonHoc","item-title":"MonHocName","item-value":"MonHocID",":return-object":true,":hide-details":true}}]},{"el":"v-col","innerHTML":[{"el":"v-select","attr":{"v-model":"BaiTapItem","label":"Chọn bài tập",":items":"DSBaiTap","item-title":"AssignmentTitle","item-value":"AssignToClassID",":return-object":true,":hide-details":true}}]},{"el":"v-col","innerHTML":[{"el":"f-button","attr":{"label":"Làm mới","variant":"outlined","color":"primary",":action":[{"CALL":"EL_PhuHuynh_XemYKien_ThongBaoLop_Get_ByAssignToClassID"}]}}]}]}]}],"w":12},{"el":"f-table","attr":{"label":"Danh sách phản hồi phụ huynh",":items":"DSHocSinh_NhanXet",":headers":"headers"},"w":12}]}]}],"set":{}}
+{
+    "data": [
+        {
+            "EXE": "IsCheck_NotRoleParent(vueData.user)"
+        },
+        {
+            "Test": null,
+            "CapID": "parseInt(capid)",
+            "LopItem": null,
+            "ThangItem": null,
+            "TitlePage": "getTitlePageByURL(window.location.pathname + window.location.search)",
+            "DSBaiTap_NhanXet": [],
+            "DSLop": [],
+            "DSMonHoc": [],
+            "DSKhoi": [],
+            "DSCap": [
+                {
+                    "title": "Cấp 1",
+                    "value": 1
+                },
+                {
+                    "title": "Cấp 2",
+                    "value": 2
+                },
+                {
+                    "title": "Cấp 3",
+                    "value": 3
+                }
+            ],
+            "KhoiItem": null,
+            "CapItem": null,
+            "MonHocItem": null,
+            "BaiTapItem": null,
+            "DSKhoiFilter": [],
+            "DSLopFilter": [],
+            "DSHocSinh_NhanXet": []
+        },
+        {
+            "EL_Teacher_GetMyClasses": {
+                "API": "lms/EL_Teacher_GetMyClasses",
+                "IN": {
+                    "HocKi": "vueData.NienKhoaItem.HocKi"
+                },
+                "OUT": "DSLop",
+                "CALLBACK": [
+                    {
+                        "EXE": "vueData.handleGetKhoi();vueData.handleGetCap()"
+                    }
+                ]
+            }
+        },
+        {
+            "EL_Teacher_GetSubjectsByClass": {
+                "API": "lms/EL_Teacher_GetSubjectsByClass",
+                "IN": {
+                    "LopID": "LopItem.LopID",
+                    "HocKi": "vueData.NienKhoaItem.HocKi"
+                },
+                "OUT": "DSMonHoc"
+            }
+        },
+        {
+            "EL_Teacher_GetAssignmentsByClass": {
+                "API": "lms/EL_Teacher_GetAssignmentsByClass",
+                "IN": {
+                    "LopID": "LopItem.LopID",
+                    "MonHocID": "MonHocItem.MonHocID",
+                    "HocKi": "vueData.NienKhoaItem.HocKi"
+                },
+                "OUT": "DSBaiTap"
+            }
+        },
+        {
+            "EL_PhuHuynh_XemYKien_ThongBaoLop_Get_ByAssignToClassID": {
+                "API": "lms/EL_PhuHuynh_XemYKien_ThongBaoLop_Get_ByAssignToClassID",
+                "IN": {
+                    "AssignToClassID": "BaiTapItem.AssignToClassID"
+                },
+                "OUT": "DSHocSinh_NhanXet"
+            }
+        },
+        {
+            "items": [],
+            "headers": [
+                {
+                    "title": "Học sinh",
+                    "key": "hocSinh",
+                    "el": "uc-info-student",
+                    "align": "center",
+                    "attr": {
+                        ":item": "item"
+                    }
+                },
+                {
+                    "title": "Phụ huynh xác nhận",
+                    "key": "PhuHuynhXacNhan",
+                    "align": "center",
+                    "value": "PhuHuynhXacNhan"
+                },
+                {
+                    "title": "Thời gian phụ huynh xác nhận",
+                    "align": "center",
+                    "key": "ThoiGianXacNhan",
+                    "value": "ThoiGianXacNhan",
+                    "el": "span",
+                    "innerHTML": [
+                        {
+                            "el": "span",
+                            "innerHTML": "{{ item.ThoiGianXacNhan ? vueData.dayjs(item.ThoiGianXacNhan).format('HH:mm DD/MM/YYYY') : '-'}}"
+                        }
+                    ]
+                },
+                {
+                    "title": "Lượt xem",
+                    "key": "SoLanXem",
+                    "value": "SoLanXem",
+                    "align": "end"
+                },
+                {
+                    "title": "Ý kiến phụ huynh",
+                    "value": "NoiDungPhuHuynh"
+                }
+            ]
+        },
+        {
+            "CALL": "EL_Teacher_GetMyClasses"
+        }
+    ],
+    "watch": {
+        "NienKhoa": [
+            {
+                "EXE": ""
+            }
+        ],
+        "CapItem": {
+            "IF": "CapItem.value>0",
+            "THEN": {
+                "EXE": "vueData.handleGetKhoiFilter(); vueData.KhoiItem=null; vueData.LopItem=null;vueData.MonHocItem = null"
+            }
+        },
+        "KhoiItem": {
+            "IF": "KhoiItem && KhoiItem.value>0",
+            "THEN": {
+                "EXE": "vueData.handleGetLopFilter(); vueData.LopItem=null;vueData.MonHocItem = null"
+            }
+        },
+        "LopItem": {
+            "IF": "LopItem && LopItem.LopID.length>0",
+            "THEN": [
+                {
+                    "EXE": "vueData.MonHocItem = null"
+                },
+                {
+                    "CALL": "EL_Teacher_GetSubjectsByClass"
+                }
+            ]
+        },
+        "MonHocItem": {
+            "IF": "MonHocItem && MonHocItem.MonHocID>0",
+            "THEN": [
+                {
+                    "EXE": "vueData.BaiTapItem = null"
+                },
+                {
+                    "CALL": "EL_Teacher_GetAssignmentsByClass"
+                }
+            ]
+        },
+        "BaiTapItem": {
+            "IF": "BaiTapItem && BaiTapItem.AssignToClassID>0",
+            "THEN": [
+                {
+                    "EXE": "vueData.DSHocSinh_NhanXet = []"
+                },
+                {
+                    "CALL": "EL_PhuHuynh_XemYKien_ThongBaoLop_Get_ByAssignToClassID"
+                }
+            ]
+        }
+    },
+    "controls": [
+        {
+            "prop": "fluid",
+            "rows": [
+                {
+                    "prop": "class='pt-0'",
+                    "cols": [
+                        {
+                            "el": "v-card",
+                            "attr": {
+                                "class": "sticky-filter"
+                            },
+                            "innerHTML": [
+                                {
+                                    "el": "v-card-title",
+                                    "attr": {
+                                        "class": "text-primary px-0 pt-0"
+                                    },
+                                    "innerHTML": "{{TitlePage}}"
+                                },
+                                {
+                                    "el": "v-card-text",
+                                    "attr": {
+                                        "class": "pa-0"
+                                    },
+                                    "innerHTML": [
+                                        {
+                                            "el": "v-row",
+                                            "attr": {
+                                                "dense": ""
+                                            },
+                                            "innerHTML": [
+                                                {
+                                                    "el": "v-col",
+                                                    "innerHTML": [
+                                                        {
+                                                            "el": "v-select",
+                                                            "attr": {
+                                                                "v-model": "CapItem",
+                                                                "label": "Chọn cấp",
+                                                                ":items": "DSCap",
+                                                                "item-title": "title",
+                                                                "item-value": "value",
+                                                                ":return-object": true,
+                                                                ":hide-details": true
+                                                            }
+                                                        }
+                                                    ]
+                                                },
+                                                {
+                                                    "el": "v-col",
+                                                    "innerHTML": [
+                                                        {
+                                                            "el": "v-select",
+                                                            "attr": {
+                                                                "v-model": "KhoiItem",
+                                                                "label": "Chọn khối",
+                                                                ":items": "DSKhoiFilter",
+                                                                "item-title": "title",
+                                                                "item-value": "value",
+                                                                ":return-object": true,
+                                                                ":hide-details": true
+                                                            }
+                                                        }
+                                                    ]
+                                                },
+                                                {
+                                                    "el": "v-col",
+                                                    "innerHTML": [
+                                                        {
+                                                            "el": "v-select",
+                                                            "attr": {
+                                                                "v-model": "LopItem",
+                                                                "label": "Chọn lớp",
+                                                                ":items": "DSLopFilter",
+                                                                "item-title": "TenLop",
+                                                                "item-value": "LopID",
+                                                                ":return-object": true,
+                                                                ":hide-details": true
+                                                            }
+                                                        }
+                                                    ]
+                                                },
+                                                {
+                                                    "el": "v-col",
+                                                    "innerHTML": [
+                                                        {
+                                                            "el": "v-select",
+                                                            "attr": {
+                                                                "v-model": "MonHocItem",
+                                                                "label": "Chọn môn học",
+                                                                ":items": "DSMonHoc",
+                                                                "item-title": "MonHocName",
+                                                                "item-value": "MonHocID",
+                                                                ":return-object": true,
+                                                                ":hide-details": true
+                                                            }
+                                                        }
+                                                    ]
+                                                },
+                                                {
+                                                    "el": "v-col",
+                                                    "innerHTML": [
+                                                        {
+                                                            "el": "v-select",
+                                                            "attr": {
+                                                                "v-model": "BaiTapItem",
+                                                                "label": "Chọn bài tập",
+                                                                ":items": "DSBaiTap",
+                                                                "item-title": "AssignmentTitle",
+                                                                "item-value": "AssignToClassID",
+                                                                ":return-object": true,
+                                                                ":hide-details": true
+                                                            }
+                                                        }
+                                                    ]
+                                                },
+                                                {
+                                                    "el": "v-col",
+                                                    "innerHTML": [
+                                                        {
+                                                            "el": "f-button",
+                                                            "attr": {
+                                                                "label": "Làm mới",
+                                                                "variant": "outlined",
+                                                                "color": "primary",
+                                                                ":action": [
+                                                                    {
+                                                                        "CALL": "EL_PhuHuynh_XemYKien_ThongBaoLop_Get_ByAssignToClassID"
+                                                                    }
+                                                                ]
+                                                            }
+                                                        }
+                                                    ]
+                                                }
+                                            ]
+                                        }
+                                    ]
+                                }
+                            ],
+                            "w": 12
+                        },
+                        {
+                            "el": "f-table",
+                            "attr": {
+                                "label": "Danh sách phản hồi phụ huynh",
+                                ":items": "DSHocSinh_NhanXet",
+                                ":headers": "headers"
+                            },
+                            "w": 12
+                        }
+                    ]
+                }
+            ]
+        }
+    ],
+    "set": {}
+}

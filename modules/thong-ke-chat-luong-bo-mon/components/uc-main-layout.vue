@@ -74,6 +74,7 @@
 				this.DataThongKe = await ajaxCALLPromise("lms/ThongKe_ChatLuong_BoMon", {
 					MonHocID: this.tab,
 					NienKhoa: vueData.NienKhoa,
+					HocKi: vueData.NienKhoaItem.HocKi,
 					Semester: this.HocKi,
 					IsMonHoc_CD_D
 				})

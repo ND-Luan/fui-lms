@@ -162,7 +162,8 @@ export default {
 						ajaxCALL('lms/MonHoc_GetByKhoiID',
 							{
 								NienKhoa: vueData.NienKhoa,
-								KhoiID: KhoiID
+								KhoiID: KhoiID,
+								HocKi: vueData.NienKhoaItem.HocKi
 							},
 							res => {
 								const monHocTiengAnh = res.data.find(x => x.MonHocID === this.form.MonHocItem.MonHocID)

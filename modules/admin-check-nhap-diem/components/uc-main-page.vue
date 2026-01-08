@@ -146,6 +146,7 @@ export default {
 			this.DataTable = []
 			ajaxCALL('/lms/TienDo_NhapDiem', {
 				NienKhoa: vueData.NienKhoa,
+				HocKi: vueData.NienKhoaItem.HocKi,
 				CapID: this.CapID,
 				KhoiID: this.KhoiID
 			}, res => {

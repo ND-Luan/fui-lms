@@ -494,7 +494,7 @@ export default {
 			// 	this.classOptions = (res?.data || []).filter(c => !assignedLopIDs.includes(c.LopID));
 			// });
 			ajaxCALL("/lms/EL_Teacher_GetGroupedDashboard", {
-
+				HocKi: vueData.NienKhoaItem.HocKi
 			}, (res) => {
 
 				// Lọc bỏ các lớp có LopID nằm trong danh sách đã assigned

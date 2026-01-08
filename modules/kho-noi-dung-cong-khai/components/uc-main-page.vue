@@ -11,7 +11,7 @@
 					density="compact" :items="DSMonHoc.filter(mh => mh.KhoiID == FormData.KhoiID)"
 					:disabled="!FormData.KhoiID" style="min-width: 200px;max-width: fit-content"></v-select>
 				<v-btn variant="outlined" @click="getResourcePublic()" color="primary">{{ $t('message.Refresh')
-					}}</v-btn>
+				}}</v-btn>
 			</div>
 			<v-data-table :items="DataResourcePublic" :headers :hide-default-footer="true" class="custom-table">
 				<template v-slot:item.Preview="{ item }">
@@ -39,124 +39,125 @@
 </template>
 
 <script>
-	export default {
-		props: [],
-		data() {
-			this.$i18n.locale = (localStorage.getItem('IsLanguage') && localStorage.getItem('IsLanguage') == 'true') ? 'en' : 'vi'
-			return {
-				DSKhoi: [],
-				DSMonHoc: [],
-				FormData: {
-					KhoiID: null,
-					MonHocID: null
+export default {
+	props: [],
+	data() {
+		this.$i18n.locale = (localStorage.getItem('IsLanguage') && localStorage.getItem('IsLanguage') == 'true') ? 'en' : 'vi'
+		return {
+			DSKhoi: [],
+			DSMonHoc: [],
+			FormData: {
+				KhoiID: null,
+				MonHocID: null
+			},
+			DataResourcePublic: [],
+			headers: [
+				{
+					title: this.$t('message.Title'),
+					value: "Title"
 				},
-				DataResourcePublic: [],
-				headers: [
-					{
-						title: this.$t('message.Title'),
-						value: "Title"
-					},
-					{
-						title: this.$t('message.ContentType'),
-						key: "ResourceType",
-						width: 150,
-						align: 'center'
-					},
-					{
-						title: this.$t('message.Creator'),
-						value: "NguoiTao"
-					},
-					{
-						title: this.$t('message.PreviewContent'),
-						key: "Preview",
-						width: 200,
-						align: 'center'
-					},
-					{
-						title: this.$t('message.Status'),
-						key: "IsGetResource",
-						width: 150,
-						align: 'center'
-					},
-					{
-						title: this.$t('message.Actions'),
-						key: "actions",
-						width: 150,
-						align: 'center'
-					}
-				]
-			}
-		},
-		mounted() {
-			if (vueData.KhoiID && vueData.MonHocID) {
-				this.FormData.KhoiID = vueData.KhoiID
-				this.FormData.MonHocID = vueData.MonHocID
-			}
-			this.GetKhoiMonHoc()
-		},
-		computed: {},
-		watch: {
-			'FormData.KhoiID': function (val) {
-				if (val) {
-					this.FormData.MonHocID = null
+				{
+					title: this.$t('message.ContentType'),
+					key: "ResourceType",
+					width: 150,
+					align: 'center'
+				},
+				{
+					title: this.$t('message.Creator'),
+					value: "NguoiTao"
+				},
+				{
+					title: this.$t('message.PreviewContent'),
+					key: "Preview",
+					width: 200,
+					align: 'center'
+				},
+				{
+					title: this.$t('message.Status'),
+					key: "IsGetResource",
+					width: 150,
+					align: 'center'
+				},
+				{
+					title: this.$t('message.Actions'),
+					key: "actions",
+					width: 150,
+					align: 'center'
 				}
-			},
-			'FormData.MonHocID': function (val) {
-				if (val) {
+			]
+		}
+	},
+	mounted() {
+		if (vueData.KhoiID && vueData.MonHocID) {
+			this.FormData.KhoiID = vueData.KhoiID
+			this.FormData.MonHocID = vueData.MonHocID
+		}
+		this.GetKhoiMonHoc()
+	},
+	computed: {},
+	watch: {
+		'FormData.KhoiID': function (val) {
+			if (val) {
+				this.FormData.MonHocID = null
+			}
+		},
+		'FormData.MonHocID': function (val) {
+			if (val) {
+				this.getResourcePublic()
+			}
+		}
+	},
+	methods: {
+		GetKhoiMonHoc() {
+			let payload = {
+				NienKhoa: vueData.NienKhoa,
+				HocKi: vueData.NienKhoaItem.HocKi
+			}
+			ajaxCALL('/lms/EL_Teacher_GetKhoi_MonHoc_ByGiaoVienID', payload, res => {
+				this.DSKhoi = res.data[0].map(khoi => ({ title: 'Khối ' + khoi.KhoiID, value: khoi.KhoiID }))
+				this.DSMonHoc = res.data[1].map(mon => ({ title: mon.TenMonHoc_HienThi, value: mon.MonHocID, KhoiID: mon.KhoiID }))
+			})
+
+		},
+		getResourcePublic() {
+			if (!this.FormData.MonHocID && !this.FormData.KhoiID) return
+			this.DataResourcePublic = []
+			let payload = {
+				NienKhoa: vueData.NienKhoa,
+				MonHocID: this.FormData.MonHocID,
+				KhoiID: this.FormData.KhoiID
+			}
+			ajaxCALL('/lms/EL_Teacher_GetResourcePublic', payload, res => {
+				this.DataResourcePublic = res.data
+			})
+		},
+		PreviewContent(item) {
+			openWindow({
+				title: this.$t('message.PreviewDraftLesson'),
+				url: `/lms-tc-asm-preview?AssignmentID=${item.ResourceID || 0}`
+			})
+			console.log('item', item)
+		},
+		GetContent(item) {
+			if (!item.ResourceID) return
+			if (item.ResourceType == 'ASSIGNMENT') {
+				let payload = {
+					AssignmentID: item.ResourceID
+				}
+				ajaxCALL('/lms/EL_Teacher_Copy_ContentByAssignmentID', payload, res => {
 					this.getResourcePublic()
-				}
-			}
-		},
-		methods: {
-			GetKhoiMonHoc() {
+					Vue.$toast.success(this.$t('message.RetrievedSuccess'), { position: 'top' })
+				})
+			} else {
 				let payload = {
-					NienKhoa: vueData.NienKhoa
+					LessonID: item.ResourceID
 				}
-				ajaxCALL('/lms/EL_Teacher_GetKhoi_MonHoc_ByGiaoVienID', payload, res => {
-					this.DSKhoi = res.data[0].map(khoi => ({ title: 'Khối ' + khoi.KhoiID, value: khoi.KhoiID }))
-					this.DSMonHoc = res.data[1].map(mon => ({ title: mon.TenMonHoc_HienThi, value: mon.MonHocID, KhoiID: mon.KhoiID }))
+				ajaxCALL('/lms/EL_Teacher_Copy_ContentByLessonID', payload, res => {
+					this.getResourcePublic()
+					Vue.$toast.success(this.$t('message.RetrievedSuccess'), { position: 'top' })
 				})
-	
-			},
-			getResourcePublic() {
-				if (!this.FormData.MonHocID && !this.FormData.KhoiID) return
-				this.DataResourcePublic = []
-				let payload = {
-					NienKhoa: vueData.NienKhoa,
-					MonHocID: this.FormData.MonHocID,
-					KhoiID: this.FormData.KhoiID
-				}
-				ajaxCALL('/lms/EL_Teacher_GetResourcePublic', payload, res => {
-					this.DataResourcePublic = res.data
-				})
-			},
-			PreviewContent(item) {
-				openWindow({
-					title: this.$t('message.PreviewDraftLesson'),
-					url: `/lms-tc-asm-preview?AssignmentID=${item.ResourceID || 0}`
-				})
-				console.log('item', item)
-			},
-			GetContent(item) {
-				if (!item.ResourceID) return
-				if (item.ResourceType == 'ASSIGNMENT') {
-					let payload = {
-						AssignmentID: item.ResourceID
-					}
-					ajaxCALL('/lms/EL_Teacher_Copy_ContentByAssignmentID', payload, res => {
-						this.getResourcePublic()
-						Vue.$toast.success(this.$t('message.RetrievedSuccess'), { position: 'top' })
-					})
-				} else {
-					let payload = {
-						LessonID: item.ResourceID
-					}
-					ajaxCALL('/lms/EL_Teacher_Copy_ContentByLessonID', payload, res => {
-						this.getResourcePublic()
-						Vue.$toast.success(this.$t('message.RetrievedSuccess'), { position: 'top' })
-					})
-				}
 			}
-		},
-	}
+		}
+	},
+}
 </script>

@@ -61,7 +61,8 @@
                 "API": "lms/MonHoc_Get_ByLopID_BoMon",
                 "IN": {
                     "NienKhoa": "vueData.NienKhoa",
-                    "LopID": "vueData.LopItem.LopID"
+                    "LopID": "vueData.LopItem.LopID",
+                    "HocKi": "vueData.NienKhoaItem.HocKi"
                 },
                 "OUT": "DSMonHoc",
                 "CALLBACK": {
@@ -98,7 +99,8 @@
                 "API": "lms/CheckVaiTro_By_GiaoVienID_LopID_MonHocID",
                 "IN": {
                     "LopID": "vueData.LopItem.LopID",
-                    "MonHocID": "vueData.MonHocItem.MonHocID"
+                    "MonHocID": "vueData.MonHocItem.MonHocID",
+                    "HocKi": "vueData.NienKhoaItem.HocKi"
                 },
                 "OUT": "Respone_VaiTro",
                 "CALLBACK": {

@@ -1,1 +1,243 @@
-{"data":[{"CapID":"parseInt(capid)","keyComp":0,"DSKhoi":[],"KhoiID":null,"MonHocItem":null,"DSMonHoc":[],"DSHocSinh":[],"DSCotDiem":[],"MaCotDiem":null,"HocKi":"`HK1","DataThongKe":[],"headers":[],"DSHocKi":[{"TenHocKi":"Học kì 1","HocKi":"HK1"},{"TenHocKi":"Học kì 2","HocKi":"HK2"}],"TitlePage":"getTitlePageByURL(window.location.pathname + window.location.search)"},{"EXE":"initMaCotDiem()"},{"getKhoi":{"API":"lms/KhoiHocByCapHoc_Get","IN":{"CapID":"vueData.CapID"},"OUT":"DSKhoi"},"getMon":{"API":"lms/MonHoc_GetByKhoiID","IN":{"NienKhoa":"vueData.NienKhoa","KhoiID":"vueData.KhoiID"},"OUT":"DSMonHoc"},"getHocSinh":{"API":"lms/HocSinhBangDiem_Get_By_KhoiID_MonHocID","IN":{"KhoiID":"vueData.KhoiID","TemplateBangDiemID":"vueData.MonHocItem.TemplateBangDiemID"},"OUT":"DSCotDiem","CALLBACK":{"EXE":"renderHocSinh()"}},"ThongKeDiemTheoCap_MaCotDiem":{"API":"lms/ThongKeDiemTheoCap_MaCotDiem","IN":{"CapID":"vueData.CapID","MonHocID":"vueData.MonHocItem.MonHocID","MaCotDiem":"vueData.MaCotDiem","HocKi":"vueData.HocKi"},"OUT":"DataThongKe","CALLBACK":[{"EXE":"initHeaders()"}]}},{"CALL":"getKhoi"}],"watch":{"KhoiID":{"IF":"vueData.KhoiID > 0","THEN":[{"MonHocItem":null,"DSCotDiem":[],"DSHocSinh":[]},{"CALL":"getMon"}]},"MonHocItem":{"IF":"vueData.MonHocItem?.MonHocID > 0","THEN":[{"DSCotDiem":[],"DSHocSinh":[]},{"CALL":"getHocSinh"},{"CALL":"ThongKeDiemTheoCap_MaCotDiem"}]}},"controls":[{"prop":"fluid  class='pa-0'","rows":[{"prop":"v-row--no-gutters","cols":[{"el":"uc-page","innerHTML":[{"el":"template","attr":{"v-slot:filter":""},"innerHTML":"<uc-filter />"},{"el":"v-card","attr":{"class":"pt-0 mt-3 elevation-1 mb-2"},"innerHTML":[{"el":"v-card-title","attr":{"class":"d-flex text-primary"},"innerHTML":[{"el":"span","innerHTML":"Thống kê điểm các khối"}]},{"el":"v-card-text","innerHTML":[{"el":"v-data-table","attr":{":items":"DataThongKe",":headers":"headers",":hide-default-footer":true}}]}],"w":12},{"el":"v-card","innerHTML":[{"el":"v-card-title","attr":{"class":"d-flex text-primary"},"innerHTML":[{"el":"span","innerHTML":"Bảng điểm chi tiết môn học"},{"el":"v-chip","attr":{"v-if":"KhoiID > 0","class":"ml-2","color":"primary"},"innerHTML":"Khối {{KhoiID}}"},{"el":"v-chip","attr":{"v-if":"MonHocItem?.MonHocID > 0","class":"ml-2","color":"primary"},"innerHTML":"{{MonHocItem.MonHocName}}"},{"el":"v-chip","attr":{"v-if":"DSHocSinh.length > 0","class":"ml-2","color":"primary"},"innerHTML":"Tổng số học sinh: {{DSHocSinh.length}}"},{"el":"v-spacer"},{"el":"v-btn","attr":{"color":"primary","variant":"elevated",":disabled":"DSHocSinh.length === 0","v-on:click":"exportExcel()"},"innerHTML":"Export Excel"}]},{"el":"uc-jexcel","attr":{"v-if":"DSHocSinh.length > 0","class":"height-excel",":key":"keyComp",":columns":"columns",":data-source":"DSHocSinh",":freeze-columns":"freezeColumns"}},{"el":"uc-empty","attr":{"v-if":"DSHocSinh.length === 0"}}],"w":12}]}]}]}],"set":{}}
+{
+    "data": [
+        {
+            "CapID": "parseInt(capid)",
+            "keyComp": 0,
+            "DSKhoi": [],
+            "KhoiID": null,
+            "MonHocItem": null,
+            "DSMonHoc": [],
+            "DSHocSinh": [],
+            "DSCotDiem": [],
+            "MaCotDiem": null,
+            "HocKi": "`HK1",
+            "DataThongKe": [],
+            "headers": [],
+            "DSHocKi": [
+                {
+                    "TenHocKi": "Học kì 1",
+                    "HocKi": "HK1"
+                },
+                {
+                    "TenHocKi": "Học kì 2",
+                    "HocKi": "HK2"
+                }
+            ],
+            "TitlePage": "getTitlePageByURL(window.location.pathname + window.location.search)"
+        },
+        {
+            "EXE": "initMaCotDiem()"
+        },
+        {
+            "getKhoi": {
+                "API": "lms/KhoiHocByCapHoc_Get",
+                "IN": {
+                    "CapID": "vueData.CapID"
+                },
+                "OUT": "DSKhoi"
+            },
+            "getMon": {
+                "API": "lms/MonHoc_GetByKhoiID",
+                "IN": {
+                    "NienKhoa": "vueData.NienKhoa",
+                    "KhoiID": "vueData.KhoiID",
+                    "HocKi": "vueData.NienKhoaItem.HocKi"
+                },
+                "OUT": "DSMonHoc"
+            },
+            "getHocSinh": {
+                "API": "lms/HocSinhBangDiem_Get_By_KhoiID_MonHocID",
+                "IN": {
+                    "KhoiID": "vueData.KhoiID",
+                    "TemplateBangDiemID": "vueData.MonHocItem.TemplateBangDiemID"
+                },
+                "OUT": "DSCotDiem",
+                "CALLBACK": {
+                    "EXE": "renderHocSinh()"
+                }
+            },
+            "ThongKeDiemTheoCap_MaCotDiem": {
+                "API": "lms/ThongKeDiemTheoCap_MaCotDiem",
+                "IN": {
+                    "CapID": "vueData.CapID",
+                    "MonHocID": "vueData.MonHocItem.MonHocID",
+                    "MaCotDiem": "vueData.MaCotDiem",
+                    "HocKi": "vueData.HocKi"
+                },
+                "OUT": "DataThongKe",
+                "CALLBACK": [
+                    {
+                        "EXE": "initHeaders()"
+                    }
+                ]
+            }
+        },
+        {
+            "CALL": "getKhoi"
+        }
+    ],
+    "watch": {
+        "KhoiID": {
+            "IF": "vueData.KhoiID > 0",
+            "THEN": [
+                {
+                    "MonHocItem": null,
+                    "DSCotDiem": [],
+                    "DSHocSinh": []
+                },
+                {
+                    "CALL": "getMon"
+                }
+            ]
+        },
+        "MonHocItem": {
+            "IF": "vueData.MonHocItem?.MonHocID > 0",
+            "THEN": [
+                {
+                    "DSCotDiem": [],
+                    "DSHocSinh": []
+                },
+                {
+                    "CALL": "getHocSinh"
+                },
+                {
+                    "CALL": "ThongKeDiemTheoCap_MaCotDiem"
+                }
+            ]
+        }
+    },
+    "controls": [
+        {
+            "prop": "fluid  class='pa-0'",
+            "rows": [
+                {
+                    "prop": "v-row--no-gutters",
+                    "cols": [
+                        {
+                            "el": "uc-page",
+                            "innerHTML": [
+                                {
+                                    "el": "template",
+                                    "attr": {
+                                        "v-slot:filter": ""
+                                    },
+                                    "innerHTML": "<uc-filter />"
+                                },
+                                {
+                                    "el": "v-card",
+                                    "attr": {
+                                        "class": "pt-0 mt-3 elevation-1 mb-2"
+                                    },
+                                    "innerHTML": [
+                                        {
+                                            "el": "v-card-title",
+                                            "attr": {
+                                                "class": "d-flex text-primary"
+                                            },
+                                            "innerHTML": [
+                                                {
+                                                    "el": "span",
+                                                    "innerHTML": "Thống kê điểm các khối"
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            "el": "v-card-text",
+                                            "innerHTML": [
+                                                {
+                                                    "el": "v-data-table",
+                                                    "attr": {
+                                                        ":items": "DataThongKe",
+                                                        ":headers": "headers",
+                                                        ":hide-default-footer": true
+                                                    }
+                                                }
+                                            ]
+                                        }
+                                    ],
+                                    "w": 12
+                                },
+                                {
+                                    "el": "v-card",
+                                    "innerHTML": [
+                                        {
+                                            "el": "v-card-title",
+                                            "attr": {
+                                                "class": "d-flex text-primary"
+                                            },
+                                            "innerHTML": [
+                                                {
+                                                    "el": "span",
+                                                    "innerHTML": "Bảng điểm chi tiết môn học"
+                                                },
+                                                {
+                                                    "el": "v-chip",
+                                                    "attr": {
+                                                        "v-if": "KhoiID > 0",
+                                                        "class": "ml-2",
+                                                        "color": "primary"
+                                                    },
+                                                    "innerHTML": "Khối {{KhoiID}}"
+                                                },
+                                                {
+                                                    "el": "v-chip",
+                                                    "attr": {
+                                                        "v-if": "MonHocItem?.MonHocID > 0",
+                                                        "class": "ml-2",
+                                                        "color": "primary"
+                                                    },
+                                                    "innerHTML": "{{MonHocItem.MonHocName}}"
+                                                },
+                                                {
+                                                    "el": "v-chip",
+                                                    "attr": {
+                                                        "v-if": "DSHocSinh.length > 0",
+                                                        "class": "ml-2",
+                                                        "color": "primary"
+                                                    },
+                                                    "innerHTML": "Tổng số học sinh: {{DSHocSinh.length}}"
+                                                },
+                                                {
+                                                    "el": "v-spacer"
+                                                },
+                                                {
+                                                    "el": "v-btn",
+                                                    "attr": {
+                                                        "color": "primary",
+                                                        "variant": "elevated",
+                                                        ":disabled": "DSHocSinh.length === 0",
+                                                        "v-on:click": "exportExcel()"
+                                                    },
+                                                    "innerHTML": "Export Excel"
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            "el": "uc-jexcel",
+                                            "attr": {
+                                                "v-if": "DSHocSinh.length > 0",
+                                                "class": "height-excel",
+                                                ":key": "keyComp",
+                                                ":columns": "columns",
+                                                ":data-source": "DSHocSinh",
+                                                ":freeze-columns": "freezeColumns"
+                                            }
+                                        },
+                                        {
+                                            "el": "uc-empty",
+                                            "attr": {
+                                                "v-if": "DSHocSinh.length === 0"
+                                            }
+                                        }
+                                    ],
+                                    "w": 12
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ]
+        }
+    ],
+    "set": {}
+}

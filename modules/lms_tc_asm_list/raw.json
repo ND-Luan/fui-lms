@@ -40,7 +40,8 @@
                 "API": "lms/MonHoc_GetByKhoiID",
                 "IN": {
                     "KhoiID": "vueData.KhoiItem.KhoiID",
-                    "NienKhoa": "vueData.NienKhoa"
+                    "NienKhoa": "vueData.NienKhoa",
+                    "HocKi": "vueData.NienKhoaItem.HocKi"
                 },
                 "OUT": "DSMonHoc"
             },

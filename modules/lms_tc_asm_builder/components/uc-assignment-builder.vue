@@ -96,17 +96,12 @@
 					<v-divider class="mb-1"></v-divider>
 					<div class="d-flex flex-column ga-1 my-1">
 						<span class="text-subtitle-2">Phân quyền cho giáo viên quản lí</span>
-						<v-select v-model="GiaoVienPermissionSelected" 
-						label="Chọn giáo viên" 
-						:items="DSGiaoVien_Permission" 
-						item-title="HoTenGV" 
-						item-value="GiaoVienID"
-						multiple
-						chips>
-						<template #chip="{ item }">
+						<v-select v-model="GiaoVienPermissionSelected" label="Chọn giáo viên"
+							:items="DSGiaoVien_Permission" item-title="HoTenGV" item-value="GiaoVienID" multiple chips>
+							<template #chip="{ item }">
 								<v-chip color="blue">{{ item.title }}</v-chip>
 							</template>
-					</v-select>
+						</v-select>
 					</div>
 					<v-divider class="mb-1"></v-divider>
 					<div class="d-flex">
@@ -139,7 +134,8 @@
 					</div>
 					<div class="d-flex">
 						<v-combobox v-model="DSHocSinhSelected" return-object :items="mappedItems"
-							:label="$t('message.studentList')" density="compact" item-color="success" chips multiple variant="outlined">
+							:label="$t('message.studentList')" density="compact" item-color="success" chips multiple
+							variant="outlined">
 							<template #chip="{ item }">
 								<v-chip color="green">{{ item.title }}</v-chip>
 							</template>
@@ -188,538 +184,542 @@
 </template>
 
 <script>
-	export default {
-	    name: 'uc-assignment-builder',
-	    props: {
-	        initialAssignment: undefined,
-	        isEditMode: Boolean,
-	        onSave: { type: Function, default: () => { } }
-	    },
-	    data() {
-	        const toggle = JSON.parse(localStorage.getItem('IsLanguage')) ?? false
-	        this.$i18n.locale = toggle ? "en" : "vi"
-	        return {
-	            SelectedClasses: null,
-	            timeDialogVisible: false,
-	            dateDialogVisible: false,
-	            isOpenDialogForAssignToStudent: false,
-	            setting: {
-	                IsBlockCopy_Paste: false
-	            },
-	            vueData,
-	            loadingPage: {
-	                isLoading: false,
-	                text: 'Đang tải dữ liệu...'
-	            },
-	            assignment: {
-	                Title: '',
-	                Instructions: '',
-	                AssignmentConfig: { groups: [] }
-	            },
-	            selectedItem: null,
-	            fileAudio: null,
-	            classOptions: [],
-	            isOpenSheetAssignToClass: false,
-	            deadlines: {
-	                date: null,
-	                time: null
-	            },
-	            selectedClass: [],
-	            classAssigned: [],
-	            isLoadDSHocSinh: false,
-	            DSHocSinhByLopID: [],
-	            DSHocSinhSelected: [],
-				DSGiaoVien_Permission:[],
-				GiaoVienPermissionSelected:[]
-	        }
-	    },
-	    mounted() {
-	        ajaxCALL("/lms/EL_Teacher_GetLop_GiaoBai", {
-	            AssignmentID: vueData.assignment.AssignmentID,
-	            MonHocID: vueData.assignment.MonHocID,
-				ResourceType: 'ASSIGNMENT'
-	        }, (res) => {
-	            this.classOptions = res.data
-	            console.log("this.classOptions", this.classOptions)
-	        });
-	    },
-	    computed: {
-	        isIndeterminate: function () {
-	            return this.selectedClass.length != 0 && this.selectedClass.length !== this.classOptions.length
-	        },
-	        isAllSelected: function () {
-	            return this.selectedClass.length != 0 && this.selectedClass.length == this.classOptions.length
-	        },
-	        totalScoreAsm: function () {
-	            let total = 0
-	            this.assignment?.AssignmentConfig?.groups.forEach(group => {
-	                for (question of group.questions) {
-	                    total += question.points
-	                }
-	            })
-	            return total
-	        },
-	        mappedItems: function () {
-	            return this.DSHocSinhByLopID.filter(item => !this.selectedClass.includes(item.LopID)).map(item => { return { title: item.TenLop + ` - ` + item.Ho + ' ' + item.Ten, value: item.HocSinhID, ...item } })
-	        },
-	        DSHocSinhAssigned: function () {
-	            return this.DSHocSinhByLopID.filter(item => item.disabled)
-	        }
-	    },
-	    methods: {
-	        onRemarkQuestion() {
-	            let number = 0
-	            this.assignment?.AssignmentConfig?.groups.forEach((group) => {
-	                group.questions = group.questions.map((x) => {
-	                    number++ // tăng lần lượt 1, 2, 3, 4...
-	                    x.ordinalNumber = number
-	                    return x
-	                })
-	            })
-	        },
-	        async onOpenPreview() {
-	            const groups = this.assignment.AssignmentConfig.groups
-	            const { message, isNotChoose } = vueData.isCheckGroupHasAnswerQuestionNotChoose(groups)
-	            if (isNotChoose) {
-	                Vue.$toast.warning(message + ' chưa có đáp án. Vui lòng kiểm tra lại.', { position: "top" })
-	                return
-	            }
-	            await this.handleSave(true)
-	            openWindow({
-	                title: "Xem trước bài soạn",
-	                url: `/lms-tc-asm-preview?AssignmentID=${vueData.AssignmentID || 0}&AssignToClassID=${vueData.AssignToClassID || 0}`
-	            })
-	        },
-	        selectedAllClass() {
-	            if (this.isAllSelected) {
-	                this.selectedClass = []
-	            } else {
-	                this.selectedClass = this.classOptions.map(i => i.LopID)
-	            }
-	        },
-	        handleClickClass(item) {
-	            if (!this.selectedClass.includes(item.LopID)) {
-	                this.selectedClass.push(item.LopID)
-	            } else {
-	                let indexOfLopID = this.selectedClass.indexOf(item.LopID)
-	                this.selectedClass.splice(indexOfLopID, 1)
-	            }
-	        },
-	        openSheetAssignToClass() {
-	            const groups = this.assignment.AssignmentConfig.groups
-	            const { message, isNotChoose } = vueData.isCheckGroupHasAnswerQuestionNotChoose(groups)
-	            if (isNotChoose) {
-	                Vue.$toast.warning(message + ' chưa có đáp án. Vui lòng kiểm tra lại.', { position: "top" })
-	                return
-	            }
-	            this.isOpenSheetAssignToClass = true
-	        },
-	        openDialogAssignToStudent() {
-	            const groups = this.assignment.AssignmentConfig.groups
-	            const { message, isNotChoose } = vueData.isCheckGroupHasAnswerQuestionNotChoose(groups)
-	            if (isNotChoose) {
-	                Vue.$toast.warning(message + ' chưa có đáp án. Vui lòng kiểm tra lại.', { position: "top" })
-	                return
-	            }
-	            this.isOpenDialogForAssignToStudent = true
-	        },
-	        async onAssignToClassAndSave() {
-	            if (this.deadlines?.date == null || this.deadlines?.time == null) {
-	                Vue.$toast.error("Vui lòng nhập ngày giờ", { position: 'top' })
-	                return
-	            }
-	            if (this.selectedClass.length == 0) {
-	                Vue.$toast.error("Vui lòng chọn ít nhất 1 lớp để giao bài!", { position: 'top' })
-	                return
-	            }
-	            const d = { date: this.deadlines?.date, time: this.deadlines?.time };
-	            const due = this.getDue(d);
-	            // truyền true => isPushlish = true
-	            const groups = this.assignment.AssignmentConfig.groups
-	            const isNotFullQuiz = vueData.isCheckAllGroupFullQuiz(groups)
-	            await this.handleSave(true)
-	            await new Promise(resolve => setTimeout(resolve, 1000)) // thực sự delay 2s
-	
-	
-	            Vue.$toast.success("Lưu bài và giao bài thành công!", { position: 'top' });
-	            this.isOpenDialogForAssignToStudent = false
-	            // Quay về trang dashboard
-	
-	            window.open("/lms-teacher-dashboard", '_parent');
-	        },
-	        async onAssignToStudentAndSave() {
-	            if (this.deadlines?.date == null || this.deadlines?.time == null) {
-	                Vue.$toast.error("Vui lòng nhập ngày giờ", { position: 'top' })
-	                return
-	            }
-	            if (this.DSHocSinhSelected.length == 0 && this.selectedClass.length == 0) {
-	                Vue.$toast.error("Vui lòng chọn ít nhất 1 lớp hoặc 1 học sinh để giao bài!", { position: 'top' })
-	                return
-	            }
-	            this.isLoadDSHocSinh = true
-	            const d = { date: this.deadlines?.date, time: this.deadlines?.time };
-	            const due = this.getDue(d);
-	            // truyền true => isPushlish = true
-	            const groups = this.assignment.AssignmentConfig.groups
-	            const isNotFullQuiz = vueData.isCheckAllGroupFullQuiz(groups)
-	            await this.handleSave(true)
-	            await new Promise(resolve => setTimeout(resolve, 500)) // thực sự delay 2s
-	            if (this.DSHocSinhSelected.length > 0) {
-	                let isReponse = await new Promise((resolve, reject) => {
-	                    for (item of this.DSHocSinhSelected) {
-	                        const payload = [{
-	                            LopID: item.LopID,
-	                            HocSinhID: item.HocSinhID,
-	                            DueDate: due,
-	                            MaxScore: this.totalScoreAsm, // thêm nếu cần
-	                            Status: 1,
-	                            ResourceType: "ASSIGNMENT",
-	                            ResourceID: vueData.AssignmentID,
-	                            LimitAssigned: 1,
-	                            Is_Full_Quiz: !isNotFullQuiz ? 1 : 0
-	                        }]
-	
-	                        ajaxCALL("/lms/EL_Teacher_AssignToStudent", {
-	                            AssignmentID: vueData.AssignmentID,
-	                            JsonStudentItems: payload
-	                        });
-	                        console.log('payload----', item, ' nnn--- ', payload)
-	                    }
-	                    resolve()
-	                })
-	            }
-	            if (this.selectedClass.length > 0) {
-	                let isReponse = await new Promise((resolve, reject) => {
-	                    for (item of this.selectedClass) {
-	                        const payload = [{
-	                            LopID: item,
-	                            DueDate: due,
-	                            MaxScore: this.totalScoreAsm, // thêm nếu cần
-	                            Status: 1,
-	                            ResourceType: "ASSIGNMENT",
-	                            ResourceID: vueData.AssignmentID,
-	                            LimitAssigned: 1,
-	                            Is_Full_Quiz: !isNotFullQuiz ? 1 : 0
-	                        }]
-	
-	                        ajaxCALL("/lms/EL_Teacher_AssignToClasses_CLASS", {
-	                            AssignmentID: vueData.AssignmentID,
-	                            JsonClassItems: payload,
-								ListTeacherPermission: this.GiaoVienPermissionSelected.length> 0 ?  this.GiaoVienPermissionSelected.join(',') : ''
-	                        });
-	                        console.log('payload----', item, ' nnn--- ', payload)
-	                    }
-	                    resolve()
-	                })
-	            }
-	            Vue.$toast.success("Lưu bài và giao bài thành công!", { position: 'top' });
-	            this.isLoadDSHocSinh = false
-	            // Quay về trang dashboard
-	            window.open("/lms-teacher-dashboard", '_parent');
-	        },
-	        addComponent(componentInfo) {
-	            console.log('componentInfo', componentInfo)
-	            const newGroups = [...JSON.parse(JSON.stringify(this.assignment.AssignmentConfig.groups))];
-	            let ordinalNumber = 1;
-	            let previousQuestion = 1
-	            for (let i = 0; i < newGroups.length; i++) {
-	                if (newGroups[i].questions.length > 0) {
-	                    ordinalNumber += newGroups[i].questions.length;
-	                    previousQuestion = ordinalNumber
-	                }
-	                else ordinalNumber = previousQuestion
-	            }
-	
-	            const newQuestion = {
-	                id: `q_${Date.now()}`,
-	                type: componentInfo.type,
-	                label: componentInfo.label,
-	                skills: [],
-	                ordinalNumber,
-	                points: 1.0,
-	                gradingType: 'auto',
-	                config: {
-	                    media: {
-	                        type: "YOUTUBE", //DEFAULT
-	                        sourceYT: {
-	                            id: "",
-	                            name: "",
-	                            source: ""
-	                        },
-	                        sourceRecord: {
-	                            id: "",
-	                            name: "",
-	                            source: ""
-	                        },
-	                        sourceFiles: {
-	                            file: [],
-	                            image: []
-	                        }
-	                    },
-	                    isAdvanced: false,
-	                    questionText: ''
-	                }
-	            };
-	
-	            switch (componentInfo.type) {
-	                case 'QUIZ_SINGLE_CHOICE':
-	                    newQuestion.config.options = [{ id: `opt_1`, text: 'Lựa chọn A' }, { id: `opt_2`, text: 'Lựa chọn B' }, { id: `opt_3`, text: 'Lựa chọn C' }, { id: `opt_4`, text: 'Lựa chọn D' }];
-	                    newQuestion.config.correctAnswer = null;
-	                    break;
-	                case 'QUIZ_MULTIPLE_CHOICE':
-	                    newQuestion.config.options = [{ id: `opt_1`, text: 'Lựa chọn A' }, { id: `opt_2`, text: 'Lựa chọn B' }, { id: `opt_3`, text: 'Lựa chọn C' }, { id: `opt_5`, text: 'Lựa chọn D' }];
-	                    newQuestion.config.correctAnswers = [];
-	                    break;
-	                case 'QUIZ_TRUE_FALSE':
-	                    newQuestion.config.statement = "Mệnh đề cần xác định đúng/sai.";
-	                    newQuestion.config.correctAnswer = true;
-	                    break;
-	                case 'QUIZ_MULTIPLE_TRUE_FALSE':
-	                    newQuestion.config.options = [{ id: 'a', text: '', correctAnswer: null, inCorrectAnswer: null }]
-	                    break;
-	                case 'QUIZ_FILL_IN_BLANK':
-	                    newQuestion.config.parts = [
-	                        { type: 'text', value: 'Điền vào ' },
-	                        { type: 'blank', id: 'blank_1', acceptedAnswers: ['chỗ trống'] },
-	                        { type: 'text', value: ' này.' }
-	                    ];
-	                    break;
-	                case 'QUIZ_MATCHING':
-	                    newQuestion.config.columnA = []
-	                    newQuestion.config.columnB = []
-	                    newQuestion.config.correctPairs = []
-	                    break
-	                case 'QUIZ_MATCHING_V2':
-	                    newQuestion.config.columnA = []
-	                    newQuestion.config.columnB = []
-	                    newQuestion.config.correctPairs = []
-	                    break
-	                case 'ESSAY':
-	                    newQuestion.gradingType = 'manual';
-	                    // newQuestion.config.media = {
-	                    // 	"type": "IMAGE_GALLERY",
-	                    // 	"sources": []
-	                    // }
-	                    // console.log('newQuestion', newQuestion)
-	                    break;
-	                case 'SHORT_ANSWER':
-	                    newQuestion.gradingType = 'manual';
-	                    break;
-	                case 'FILE_UPLOAD':
-	                    newQuestion.gradingType = 'manual';
-	                    // newQuestion.config.media = {
-	                    // 	"type": "FILE_UPLOAD",
-	                    // 	"sources": ""
-	                    // }
-	                    break;
-	                case 'AUDIO_RESPONSE':
-	                    newQuestion.gradingType = 'manual';
-	                    // newQuestion.config.media = {
-	                    // 	"type": "AUDIO_RESPONSE",
-	                    // 	"sourceYT": "",
-	                    // 	"sourceIMG": "",
-	                    // 	"sourceRecord": "",
-	                    // }
-	                    break;
-	            }
-	
-	            if (newGroups.length > 0) {
-	                newGroups[newGroups.length - 1].questions.push(newQuestion);
-	            } else {
-	                newGroups.push({
-	                    id: `group_${Date.now()}`,
-	                    title: 'Phần 1',
-	                    description: '',
-	                    media: {
-	                        type: "YOUTUBE",
-	                        sourceYT: {
-	                            id: "",
-	                            source: "",
-	                            name: ""
-	                        },
-	                        sourceRecord: {
-	                            id: "",
-	                            source: "",
-	                            name: ""
-	                        },
-	                        sourceFiles: {
-	                            file: [],
-	                            image: []
-	                        }
-	                    },
-	                    questions: [newQuestion]
-	                });
-	            }
-	            this.updateGroups(newGroups);
-	            this.selectedItem = { type: 'question', groupIndex: newGroups.length - 1, qIndex: newGroups[newGroups.length - 1].questions.length - 1 };
-	        },
-	        updateGroups(newGroups) {
-	            this.assignment.AssignmentConfig.groups = newGroups.map(item => {
-	                if (!item.media) {
-	                    let media = {
-	                        type: "YOUTUBE",
-	                        sourceYT: {
-	                            id: "",
-	                            source: "",
-	                            name: ""
-	                        },
-	                        sourceRecord: {
-	                            id: "",
-	                            source: "",
-	                            name: ""
-	                        },
-	                        sourceFiles: {
-	                            file: [],
-	                            image: []
-	                        }
-	                    }
-	                    return { ...item, media }
-	                } else {
-	                    return item
-	                }
-	            });
-	        },
-	        async handleSave(isPublishing) {
-	            console.log('luu......')
-	            const groups = this.assignment.AssignmentConfig.groups
-	            const { message, isNotChoose } = vueData.isCheckGroupHasAnswerQuestionNotChoose(groups)
-	            if (isNotChoose) {
-	                Vue.$toast.warning(message + ' chưa có đáp án. Vui lòng kiểm tra lại.', { position: "top" })
-	                return
-	            }
-	            const isNotFullQuiz = vueData.isCheckAllGroupFullQuiz(groups)
-	            const payload = {
-	                assignment: this.assignment,
-	                isPublishing: isPublishing,
-	                Is_Full_Quiz: !isNotFullQuiz,
-	                setting: this.setting
-	            };
-	            console.log('payload', payload)
-	
-	            await this.onSave(payload);
-	        },
-	        // ==== Helpers hiển thị ====
-	        formattedDate(dateStr) {
-	            return dateStr ? dayjs(dateStr).format("DD/MM/YYYY") : "";
-	        },
-	        formattedTime(timeStr) {
-	            return timeStr ? dayjs(timeStr, "HH:mm").format("HH:mm") : "";
-	        },
-	        formatDate(dateStr) {
-	            if (!dateStr) return '—'
-	            const d = dayjs(dateStr)
-	            return d.isValid() ? d.format('DD/MM/YYYY HH:mm') : String(dateStr)
-	        },
-	        getDue(d) {
-	            if (!d.date || !d.time) return null;
-	
-	            const dateObj = dayjs(d.date); // parse ISO date
-	            const [hour, minute] = d.time.split(':').map(Number);
-	
-	            return dateObj
-	                .hour(hour)
-	                .minute(minute)
-	                .second(0)
-	                .format('YYYY-MM-DD HH:mm:ss');
-	        },
-	
-	        openDate() {
-	            if (!this.deadlines) this.deadlines = { date: null, time: null };
-	            this.dateDialogVisible = true;
-	        },
-	
-	        openTime() {
-	            if (!this.deadlines) this.deadlines = { date: null, time: null };
-	            this.timeDialogVisible = true;
-	        },
-	        loadDSHocSinhByDSLopID(DSLopID) {
-	            return new Promise((resolve, reject) => {
-	                ajaxCALL('/lms/HocSinhLop_GetByLopIDList', { DSLopID, AssignmentID: vueData.AssignmentID }, (res) => {
-	                    if (res && res.data) {
-	                        resolve(res.data.map(item => {
-	                            return {
-	                                ...item, isSelected: false, disabled: item.Is_Assigned == 1 ? true : false
-	                            }
-	                        }));
-	                    } else {
-	                        resolve([]);
-	                    }
-	                });
-	            });
-	        },
-	        loadDSHocSinhAssignedByLopID(LopID) {
-	
-	            return new Promise((resolve, reject) => {
-	                ajaxCALL('/lms/Teacher_GetDSHocSinh_AssignToStudent_ByLopID', { LopID, AssignmentID: vueData.AssignmentID }, (res) => {
-	                    if (res && res.data) {
-	                        resolve(res.data);
-	                    } else {
-	                        resolve([]);
-	                    }
-	                });
-	            });
-	        },
-			async loadDSGiaoVien_Permission() {
-	
-	           let data =  await new Promise((resolve, reject) => {
-	                ajaxCALL('/lms/EL_Teacher_GetTeacherByMonHocID', { MonHocID :  vueData.assignment.MonHocID, AssignmentID:vueData.AssignmentID}, (res) => {
-	                    if (res && res.data) {
-	                        resolve(res.data);
-	                    } else {
-	                        resolve([]);
-	                    }
-	                });
-	            })
-				this.DSGiaoVien_Permission = data
-	        },
-	    },
-	    watch: {
-	        initialAssignment: {
-	            handler(newVal) {
-	                if (newVal) {
-	                    this.assignment = JSON.parse(JSON.stringify(newVal));
-	                }
-	            },
-	            immediate: true,
-	            deep: true
-	        },
-	        selectedItem: function (item) {
-	            this.fileAudio = null
-	        },
-	        assignment: {
-	            handler(newVal) {
-	                if (newVal && this.isEditMode) {
-	                    vueData.AssignmentDataLog = _.cloneDeep(newVal);
-	                }
-	            },
-	            deep: true
-	        },
-	        selectedClass: {
-	            handler(newVal) {
-	                if (this.selectedClass.length > 0) {
-	                    this.DSHocSinhSelected = this.DSHocSinhSelected.filter(item => !this.selectedClass.includes(item.LopID))
-	                }
-	            },
-	            deep: true
-	        },
-	        isOpenDialogForAssignToStudent: {
-	            async handler(newVal) {
-	                if (newVal) {
-						this.GiaoVienPermissionSelected = []
-	                    let DSLop = JSON.stringify(this.classOptions.map(item => item.LopID))
-	                    this.DSHocSinhByLopID = await this.loadDSHocSinhByDSLopID(DSLop)
-	                    console.log('this.DSHocSinhByLopID', this.DSHocSinhByLopID)
-						this.loadDSGiaoVien_Permission()
-	                } else {
-	                    this.deadlines = {
-	                        date: null,
-	                        time: null
-	                    }
-	                }
-	
-	            },
-	            deep: true
-	        },
-	    }
+export default {
+	name: 'uc-assignment-builder',
+	props: {
+		initialAssignment: undefined,
+		isEditMode: Boolean,
+		onSave: { type: Function, default: () => { } }
+	},
+	data() {
+		const toggle = JSON.parse(localStorage.getItem('IsLanguage')) ?? false
+		this.$i18n.locale = toggle ? "en" : "vi"
+		return {
+			SelectedClasses: null,
+			timeDialogVisible: false,
+			dateDialogVisible: false,
+			isOpenDialogForAssignToStudent: false,
+			setting: {
+				IsBlockCopy_Paste: false
+			},
+			vueData,
+			loadingPage: {
+				isLoading: false,
+				text: 'Đang tải dữ liệu...'
+			},
+			assignment: {
+				Title: '',
+				Instructions: '',
+				AssignmentConfig: { groups: [] }
+			},
+			selectedItem: null,
+			fileAudio: null,
+			classOptions: [],
+			isOpenSheetAssignToClass: false,
+			deadlines: {
+				date: null,
+				time: null
+			},
+			selectedClass: [],
+			classAssigned: [],
+			isLoadDSHocSinh: false,
+			DSHocSinhByLopID: [],
+			DSHocSinhSelected: [],
+			DSGiaoVien_Permission: [],
+			GiaoVienPermissionSelected: []
+		}
+	},
+	mounted() {
+		ajaxCALL("/lms/EL_Teacher_GetLop_GiaoBai", {
+			AssignmentID: vueData.assignment.AssignmentID,
+			MonHocID: vueData.assignment.MonHocID,
+			ResourceType: 'ASSIGNMENT'
+		}, (res) => {
+			this.classOptions = res.data
+			console.log("this.classOptions", this.classOptions)
+		});
+	},
+	computed: {
+		isIndeterminate: function () {
+			return this.selectedClass.length != 0 && this.selectedClass.length !== this.classOptions.length
+		},
+		isAllSelected: function () {
+			return this.selectedClass.length != 0 && this.selectedClass.length == this.classOptions.length
+		},
+		totalScoreAsm: function () {
+			let total = 0
+			this.assignment?.AssignmentConfig?.groups.forEach(group => {
+				for (question of group.questions) {
+					total += question.points
+				}
+			})
+			return total
+		},
+		mappedItems: function () {
+			return this.DSHocSinhByLopID.filter(item => !this.selectedClass.includes(item.LopID)).map(item => { return { title: item.TenLop + ` - ` + item.Ho + ' ' + item.Ten, value: item.HocSinhID, ...item } })
+		},
+		DSHocSinhAssigned: function () {
+			return this.DSHocSinhByLopID.filter(item => item.disabled)
+		}
+	},
+	methods: {
+		onRemarkQuestion() {
+			let number = 0
+			this.assignment?.AssignmentConfig?.groups.forEach((group) => {
+				group.questions = group.questions.map((x) => {
+					number++ // tăng lần lượt 1, 2, 3, 4...
+					x.ordinalNumber = number
+					return x
+				})
+			})
+		},
+		async onOpenPreview() {
+			const groups = this.assignment.AssignmentConfig.groups
+			const { message, isNotChoose } = vueData.isCheckGroupHasAnswerQuestionNotChoose(groups)
+			if (isNotChoose) {
+				Vue.$toast.warning(message + ' chưa có đáp án. Vui lòng kiểm tra lại.', { position: "top" })
+				return
+			}
+			await this.handleSave(true)
+			openWindow({
+				title: "Xem trước bài soạn",
+				url: `/lms-tc-asm-preview?AssignmentID=${vueData.AssignmentID || 0}&AssignToClassID=${vueData.AssignToClassID || 0}`
+			})
+		},
+		selectedAllClass() {
+			if (this.isAllSelected) {
+				this.selectedClass = []
+			} else {
+				this.selectedClass = this.classOptions.map(i => i.LopID)
+			}
+		},
+		handleClickClass(item) {
+			if (!this.selectedClass.includes(item.LopID)) {
+				this.selectedClass.push(item.LopID)
+			} else {
+				let indexOfLopID = this.selectedClass.indexOf(item.LopID)
+				this.selectedClass.splice(indexOfLopID, 1)
+			}
+		},
+		openSheetAssignToClass() {
+			const groups = this.assignment.AssignmentConfig.groups
+			const { message, isNotChoose } = vueData.isCheckGroupHasAnswerQuestionNotChoose(groups)
+			if (isNotChoose) {
+				Vue.$toast.warning(message + ' chưa có đáp án. Vui lòng kiểm tra lại.', { position: "top" })
+				return
+			}
+			this.isOpenSheetAssignToClass = true
+		},
+		openDialogAssignToStudent() {
+			const groups = this.assignment.AssignmentConfig.groups
+			const { message, isNotChoose } = vueData.isCheckGroupHasAnswerQuestionNotChoose(groups)
+			if (isNotChoose) {
+				Vue.$toast.warning(message + ' chưa có đáp án. Vui lòng kiểm tra lại.', { position: "top" })
+				return
+			}
+			this.isOpenDialogForAssignToStudent = true
+		},
+		async onAssignToClassAndSave() {
+			if (this.deadlines?.date == null || this.deadlines?.time == null) {
+				Vue.$toast.error("Vui lòng nhập ngày giờ", { position: 'top' })
+				return
+			}
+			if (this.selectedClass.length == 0) {
+				Vue.$toast.error("Vui lòng chọn ít nhất 1 lớp để giao bài!", { position: 'top' })
+				return
+			}
+			const d = { date: this.deadlines?.date, time: this.deadlines?.time };
+			const due = this.getDue(d);
+			// truyền true => isPushlish = true
+			const groups = this.assignment.AssignmentConfig.groups
+			const isNotFullQuiz = vueData.isCheckAllGroupFullQuiz(groups)
+			await this.handleSave(true)
+			await new Promise(resolve => setTimeout(resolve, 1000)) // thực sự delay 2s
+
+
+			Vue.$toast.success("Lưu bài và giao bài thành công!", { position: 'top' });
+			this.isOpenDialogForAssignToStudent = false
+			// Quay về trang dashboard
+
+			window.open("/lms-teacher-dashboard", '_parent');
+		},
+		async onAssignToStudentAndSave() {
+			if (this.deadlines?.date == null || this.deadlines?.time == null) {
+				Vue.$toast.error("Vui lòng nhập ngày giờ", { position: 'top' })
+				return
+			}
+			if (this.DSHocSinhSelected.length == 0 && this.selectedClass.length == 0) {
+				Vue.$toast.error("Vui lòng chọn ít nhất 1 lớp hoặc 1 học sinh để giao bài!", { position: 'top' })
+				return
+			}
+			this.isLoadDSHocSinh = true
+			const d = { date: this.deadlines?.date, time: this.deadlines?.time };
+			const due = this.getDue(d);
+			// truyền true => isPushlish = true
+			const groups = this.assignment.AssignmentConfig.groups
+			const isNotFullQuiz = vueData.isCheckAllGroupFullQuiz(groups)
+			await this.handleSave(true)
+			await new Promise(resolve => setTimeout(resolve, 500)) // thực sự delay 2s
+			if (this.DSHocSinhSelected.length > 0) {
+				let isReponse = await new Promise((resolve, reject) => {
+					for (item of this.DSHocSinhSelected) {
+						const payload = [{
+							LopID: item.LopID,
+							HocSinhID: item.HocSinhID,
+							DueDate: due,
+							MaxScore: this.totalScoreAsm, // thêm nếu cần
+							Status: 1,
+							ResourceType: "ASSIGNMENT",
+							ResourceID: vueData.AssignmentID,
+							LimitAssigned: 1,
+							Is_Full_Quiz: !isNotFullQuiz ? 1 : 0
+						}]
+
+						ajaxCALL("/lms/EL_Teacher_AssignToStudent", {
+							AssignmentID: vueData.AssignmentID,
+							JsonStudentItems: payload
+						});
+						console.log('payload----', item, ' nnn--- ', payload)
+					}
+					resolve()
+				})
+			}
+			if (this.selectedClass.length > 0) {
+				let isReponse = await new Promise((resolve, reject) => {
+					for (item of this.selectedClass) {
+						const payload = [{
+							LopID: item,
+							DueDate: due,
+							MaxScore: this.totalScoreAsm, // thêm nếu cần
+							Status: 1,
+							ResourceType: "ASSIGNMENT",
+							ResourceID: vueData.AssignmentID,
+							LimitAssigned: 1,
+							Is_Full_Quiz: !isNotFullQuiz ? 1 : 0
+						}]
+
+						ajaxCALL("/lms/EL_Teacher_AssignToClasses_CLASS", {
+							AssignmentID: vueData.AssignmentID,
+							JsonClassItems: payload,
+							ListTeacherPermission: this.GiaoVienPermissionSelected.length > 0 ? this.GiaoVienPermissionSelected.join(',') : ''
+						});
+						console.log('payload----', item, ' nnn--- ', payload)
+					}
+					resolve()
+				})
+			}
+			Vue.$toast.success("Lưu bài và giao bài thành công!", { position: 'top' });
+			this.isLoadDSHocSinh = false
+			// Quay về trang dashboard
+			window.open("/lms-teacher-dashboard", '_parent');
+		},
+		addComponent(componentInfo) {
+			console.log('componentInfo', componentInfo)
+			const newGroups = [...JSON.parse(JSON.stringify(this.assignment.AssignmentConfig.groups))];
+			let ordinalNumber = 1;
+			let previousQuestion = 1
+			for (let i = 0; i < newGroups.length; i++) {
+				if (newGroups[i].questions.length > 0) {
+					ordinalNumber += newGroups[i].questions.length;
+					previousQuestion = ordinalNumber
+				}
+				else ordinalNumber = previousQuestion
+			}
+
+			const newQuestion = {
+				id: `q_${Date.now()}`,
+				type: componentInfo.type,
+				label: componentInfo.label,
+				skills: [],
+				ordinalNumber,
+				points: 1.0,
+				gradingType: 'auto',
+				config: {
+					media: {
+						type: "YOUTUBE", //DEFAULT
+						sourceYT: {
+							id: "",
+							name: "",
+							source: ""
+						},
+						sourceRecord: {
+							id: "",
+							name: "",
+							source: ""
+						},
+						sourceFiles: {
+							file: [],
+							image: []
+						}
+					},
+					isAdvanced: false,
+					questionText: ''
+				}
+			};
+
+			switch (componentInfo.type) {
+				case 'QUIZ_SINGLE_CHOICE':
+					newQuestion.config.options = [{ id: `opt_1`, text: 'Lựa chọn A' }, { id: `opt_2`, text: 'Lựa chọn B' }, { id: `opt_3`, text: 'Lựa chọn C' }, { id: `opt_4`, text: 'Lựa chọn D' }];
+					newQuestion.config.correctAnswer = null;
+					break;
+				case 'QUIZ_MULTIPLE_CHOICE':
+					newQuestion.config.options = [{ id: `opt_1`, text: 'Lựa chọn A' }, { id: `opt_2`, text: 'Lựa chọn B' }, { id: `opt_3`, text: 'Lựa chọn C' }, { id: `opt_5`, text: 'Lựa chọn D' }];
+					newQuestion.config.correctAnswers = [];
+					break;
+				case 'QUIZ_TRUE_FALSE':
+					newQuestion.config.statement = "Mệnh đề cần xác định đúng/sai.";
+					newQuestion.config.correctAnswer = true;
+					break;
+				case 'QUIZ_MULTIPLE_TRUE_FALSE':
+					newQuestion.config.options = [{ id: 'a', text: '', correctAnswer: null, inCorrectAnswer: null }]
+					break;
+				case 'QUIZ_FILL_IN_BLANK':
+					newQuestion.config.parts = [
+						{ type: 'text', value: 'Điền vào ' },
+						{ type: 'blank', id: 'blank_1', acceptedAnswers: ['chỗ trống'] },
+						{ type: 'text', value: ' này.' }
+					];
+					break;
+				case 'QUIZ_MATCHING':
+					newQuestion.config.columnA = []
+					newQuestion.config.columnB = []
+					newQuestion.config.correctPairs = []
+					break
+				case 'QUIZ_MATCHING_V2':
+					newQuestion.config.columnA = []
+					newQuestion.config.columnB = []
+					newQuestion.config.correctPairs = []
+					break
+				case 'ESSAY':
+					newQuestion.gradingType = 'manual';
+					// newQuestion.config.media = {
+					// 	"type": "IMAGE_GALLERY",
+					// 	"sources": []
+					// }
+					// console.log('newQuestion', newQuestion)
+					break;
+				case 'SHORT_ANSWER':
+					newQuestion.gradingType = 'manual';
+					break;
+				case 'FILE_UPLOAD':
+					newQuestion.gradingType = 'manual';
+					// newQuestion.config.media = {
+					// 	"type": "FILE_UPLOAD",
+					// 	"sources": ""
+					// }
+					break;
+				case 'AUDIO_RESPONSE':
+					newQuestion.gradingType = 'manual';
+					// newQuestion.config.media = {
+					// 	"type": "AUDIO_RESPONSE",
+					// 	"sourceYT": "",
+					// 	"sourceIMG": "",
+					// 	"sourceRecord": "",
+					// }
+					break;
+			}
+
+			if (newGroups.length > 0) {
+				newGroups[newGroups.length - 1].questions.push(newQuestion);
+			} else {
+				newGroups.push({
+					id: `group_${Date.now()}`,
+					title: 'Phần 1',
+					description: '',
+					media: {
+						type: "YOUTUBE",
+						sourceYT: {
+							id: "",
+							source: "",
+							name: ""
+						},
+						sourceRecord: {
+							id: "",
+							source: "",
+							name: ""
+						},
+						sourceFiles: {
+							file: [],
+							image: []
+						}
+					},
+					questions: [newQuestion]
+				});
+			}
+			this.updateGroups(newGroups);
+			this.selectedItem = { type: 'question', groupIndex: newGroups.length - 1, qIndex: newGroups[newGroups.length - 1].questions.length - 1 };
+		},
+		updateGroups(newGroups) {
+			this.assignment.AssignmentConfig.groups = newGroups.map(item => {
+				if (!item.media) {
+					let media = {
+						type: "YOUTUBE",
+						sourceYT: {
+							id: "",
+							source: "",
+							name: ""
+						},
+						sourceRecord: {
+							id: "",
+							source: "",
+							name: ""
+						},
+						sourceFiles: {
+							file: [],
+							image: []
+						}
+					}
+					return { ...item, media }
+				} else {
+					return item
+				}
+			});
+		},
+		async handleSave(isPublishing) {
+			console.log('luu......')
+			const groups = this.assignment.AssignmentConfig.groups
+			const { message, isNotChoose } = vueData.isCheckGroupHasAnswerQuestionNotChoose(groups)
+			if (isNotChoose) {
+				Vue.$toast.warning(message + ' chưa có đáp án. Vui lòng kiểm tra lại.', { position: "top" })
+				return
+			}
+			const isNotFullQuiz = vueData.isCheckAllGroupFullQuiz(groups)
+			const payload = {
+				assignment: this.assignment,
+				isPublishing: isPublishing,
+				Is_Full_Quiz: !isNotFullQuiz,
+				setting: this.setting
+			};
+			console.log('payload', payload)
+
+			await this.onSave(payload);
+		},
+		// ==== Helpers hiển thị ====
+		formattedDate(dateStr) {
+			return dateStr ? dayjs(dateStr).format("DD/MM/YYYY") : "";
+		},
+		formattedTime(timeStr) {
+			return timeStr ? dayjs(timeStr, "HH:mm").format("HH:mm") : "";
+		},
+		formatDate(dateStr) {
+			if (!dateStr) return '—'
+			const d = dayjs(dateStr)
+			return d.isValid() ? d.format('DD/MM/YYYY HH:mm') : String(dateStr)
+		},
+		getDue(d) {
+			if (!d.date || !d.time) return null;
+
+			const dateObj = dayjs(d.date); // parse ISO date
+			const [hour, minute] = d.time.split(':').map(Number);
+
+			return dateObj
+				.hour(hour)
+				.minute(minute)
+				.second(0)
+				.format('YYYY-MM-DD HH:mm:ss');
+		},
+
+		openDate() {
+			if (!this.deadlines) this.deadlines = { date: null, time: null };
+			this.dateDialogVisible = true;
+		},
+
+		openTime() {
+			if (!this.deadlines) this.deadlines = { date: null, time: null };
+			this.timeDialogVisible = true;
+		},
+		loadDSHocSinhByDSLopID(DSLopID) {
+			return new Promise((resolve, reject) => {
+				ajaxCALL('/lms/HocSinhLop_GetByLopIDList', { DSLopID, AssignmentID: vueData.AssignmentID }, (res) => {
+					if (res && res.data) {
+						resolve(res.data.map(item => {
+							return {
+								...item, isSelected: false, disabled: item.Is_Assigned == 1 ? true : false
+							}
+						}));
+					} else {
+						resolve([]);
+					}
+				});
+			});
+		},
+		loadDSHocSinhAssignedByLopID(LopID) {
+
+			return new Promise((resolve, reject) => {
+				ajaxCALL('/lms/Teacher_GetDSHocSinh_AssignToStudent_ByLopID', { LopID, AssignmentID: vueData.AssignmentID }, (res) => {
+					if (res && res.data) {
+						resolve(res.data);
+					} else {
+						resolve([]);
+					}
+				});
+			});
+		},
+		async loadDSGiaoVien_Permission() {
+
+			let data = await new Promise((resolve, reject) => {
+				ajaxCALL('/lms/EL_Teacher_GetTeacherByMonHocID', {
+					MonHocID: vueData.assignment.MonHocID,
+					AssignmentID: vueData.AssignmentID,
+					HocKi: vueData.NienKhoaItem.HocKi
+				}, (res) => {
+					if (res && res.data) {
+						resolve(res.data);
+					} else {
+						resolve([]);
+					}
+				});
+			})
+			this.DSGiaoVien_Permission = data
+		},
+	},
+	watch: {
+		initialAssignment: {
+			handler(newVal) {
+				if (newVal) {
+					this.assignment = JSON.parse(JSON.stringify(newVal));
+				}
+			},
+			immediate: true,
+			deep: true
+		},
+		selectedItem: function (item) {
+			this.fileAudio = null
+		},
+		assignment: {
+			handler(newVal) {
+				if (newVal && this.isEditMode) {
+					vueData.AssignmentDataLog = _.cloneDeep(newVal);
+				}
+			},
+			deep: true
+		},
+		selectedClass: {
+			handler(newVal) {
+				if (this.selectedClass.length > 0) {
+					this.DSHocSinhSelected = this.DSHocSinhSelected.filter(item => !this.selectedClass.includes(item.LopID))
+				}
+			},
+			deep: true
+		},
+		isOpenDialogForAssignToStudent: {
+			async handler(newVal) {
+				if (newVal) {
+					this.GiaoVienPermissionSelected = []
+					let DSLop = JSON.stringify(this.classOptions.map(item => item.LopID))
+					this.DSHocSinhByLopID = await this.loadDSHocSinhByDSLopID(DSLop)
+					console.log('this.DSHocSinhByLopID', this.DSHocSinhByLopID)
+					this.loadDSGiaoVien_Permission()
+				} else {
+					this.deadlines = {
+						date: null,
+						time: null
+					}
+				}
+
+			},
+			deep: true
+		},
 	}
+}
 </script>

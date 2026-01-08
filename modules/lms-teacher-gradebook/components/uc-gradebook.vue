@@ -57,7 +57,7 @@
 										<span v-bind="props">{{ header.AssignmentTitle }}</span>
 									</template>
 									<span>{{ $t('message.DueDate') }}: {{ formatDate(header.DueDate) }} | {{
-										$t('message.Maximum') }}: {{ header.MaxScore}}đ</span>
+										$t('message.Maximum') }}: {{ header.MaxScore }}đ</span>
 								</v-tooltip>
 							</th>
 							<th class="fixed-col-right score-col text-center">{{ $t('message.averageScore') }}</th>
@@ -97,138 +97,138 @@
 </template>
 
 <script>
-	export default {
-	    name: 'uc-gradebook',
-	    props: {
-	        initialLopId: Number,
-	        initialMonHocId: Number
-	    },
-	    data() {
-	        this.$i18n.locale = (localStorage.getItem('IsLanguage') && localStorage.getItem('IsLanguage') == 'true') ? 'en' : 'vi'
-	        return {
-	            loading: true,
-	            lopList: [], monHocList: [],
-	            selectedLopID: this.initialLopId || null,
-	            selectedMonHocID: this.initialMonHocId || null,
-	            assignmentHeaders: [],
-	            studentGrades: [],
-	            columnStats: [],
-	            vueData
-	        };
-	    },
-	    watch: {
-	        selectedLopID(newLopID, oldLopID) {
-	
-	            if (newLopID && newLopID !== oldLopID) {
-	                this.monHocList = [];
-	                this.selectedMonHocID = null;
-	                this.clearData();
-	                this.fetchSubjectsByClass(newLopID);
-	            }
-	        },
-	        selectedMonHocID(newMonHocID, oldMonHocID) {
-	            if (newMonHocID && newMonHocID !== oldMonHocID) {
-	                this.fetchData();
-	            }
-	        }
-	    },
-	    methods: {
-	        async initialize() {
-	            await this.fetchMyClasses();
-	
-	            if (this.selectedLopID && !this.selectedMonHocID) {
-	                await this.fetchSubjectsByClass(this.selectedLopID);
-	            }
-	            if (this.selectedLopID && this.selectedMonHocID) {
-	                this.selectedLopID = this.lopList.find(x => x.LopID == this.initialLopId)?.LopID ?? null;
-	                await this.fetchSubjectsByClass(this.selectedLopID);
-	                await this.fetchData();
-	            }
-	            this.loading = false;
-	        },
-	        async fetchMyClasses() {
-	            await ajaxCALL("lms/EL_Teacher_GetMyClasses", null, (res) => {
-	                this.lopList = res.data || [];
-	                if (!this.selectedLopID && this.lopList.length > 0) {
-	
-	                    this.selectedLopID = this.lopList.find(x => x.LopID == this.initialLopId)?.LopID ?? this.lopList[0].LopID;
-	                }
-	            });
-	        },
-	        async fetchSubjectsByClass(lopId) {
-	            await ajaxCALL("lms/EL_Teacher_GetSubjectsByClass", { LopID: lopId }, (res) => {
-	                this.monHocList = res.data || [];
-	
-	                if (!this.selectedMonHocID && this.monHocList.length > 0) {
-	
-	                    this.selectedMonHocID = this.monHocList.find(x => x.MonHocID == this.initialMonHocId)?.MonHocID ?? this.monHocList[0].MonHocID;
-	
-	                }
-	            });
-	        },
-	        async fetchData() {
-	            if (!this.selectedLopID || !this.selectedMonHocID) return;
-	            this.loading = true;
-	            await ajaxCALL("lms/EL_Teacher_GetGradebook", { LopID: this.selectedLopID, MonHocID: this.selectedMonHocID }, (res) => {
-	                if (res && res.data && res.data.length >= 3) {
-	                    this.assignmentHeaders = res.data[0];
-	                    this.studentGrades = res.data[1];
-	                    this.columnStats = res.data[2];
-	                } else {
-	                    this.clearData();
-	                }
-	            });
-	            this.loading = false;
-	        },
-	        async updateStudentScore(payload) {
-	            ajaxCALL("lms/EL_Teacher_UpdateQuickGrade", { SubmissionID: payload.submissionId, NewScore: payload.newScore }, (res) => {
-	                if (res.data && res.data[0] && res.data[0].Success) {
-	                    Toast.success({ text: "Cập nhật điểm thành công." });
-	                    this.fetchData();
-	                } else {
-	                    Toast.error({ text: "Cập nhật điểm thất bại." });
-	                }
-	            });
-	        },
-	        calculateStudentAverage(student) {
-	            let totalScore = 0;
-	            let count = 0;
-	            this.assignmentHeaders.forEach(header => {
-	                const cellData = student[header.AssignToClassID];
-	                if (cellData) {
-	                    try {
-	                        const data = JSON.parse(cellData);
-	                        if (data.status === 'GRADED' && typeof data.score === 'number') {
-	                            totalScore += data.score;
-	                            count++;
-	                        }
-	                    } catch (e) { }
-	                }
-	            });
-	            return count > 0 ? (totalScore / count).toFixed(2) : '';
-	        },
-	        getColumnAverage(assignToClassID) {
-	            const stat = this.columnStats.find(s => s.AssignToClassID === assignToClassID);
-	            return stat && stat.AverageScore != null ? stat.AverageScore.toFixed(2) : '';
-	        },
-	        exportToCSV() { /* Logic xuất Excel */ },
-	        formatDate(iso) {
-	            if (!iso) return '';
-	            return new Date(iso).toLocaleDateString('vi-VN');
-	        },
-	        clearData() {
-	            this.assignmentHeaders = [];
-	            this.studentGrades = [];
-	            this.columnStats = [];
-	        },
-	        test() {
-	            CALL('CallTest')
-	        }
-	    },
-	    mounted() {
-	        this.initialize();
-	    }
+export default {
+	name: 'uc-gradebook',
+	props: {
+		initialLopId: Number,
+		initialMonHocId: Number
+	},
+	data() {
+		this.$i18n.locale = (localStorage.getItem('IsLanguage') && localStorage.getItem('IsLanguage') == 'true') ? 'en' : 'vi'
+		return {
+			loading: true,
+			lopList: [], monHocList: [],
+			selectedLopID: this.initialLopId || null,
+			selectedMonHocID: this.initialMonHocId || null,
+			assignmentHeaders: [],
+			studentGrades: [],
+			columnStats: [],
+			vueData
+		};
+	},
+	watch: {
+		selectedLopID(newLopID, oldLopID) {
+
+			if (newLopID && newLopID !== oldLopID) {
+				this.monHocList = [];
+				this.selectedMonHocID = null;
+				this.clearData();
+				this.fetchSubjectsByClass(newLopID);
+			}
+		},
+		selectedMonHocID(newMonHocID, oldMonHocID) {
+			if (newMonHocID && newMonHocID !== oldMonHocID) {
+				this.fetchData();
+			}
+		}
+	},
+	methods: {
+		async initialize() {
+			await this.fetchMyClasses();
+
+			if (this.selectedLopID && !this.selectedMonHocID) {
+				await this.fetchSubjectsByClass(this.selectedLopID);
+			}
+			if (this.selectedLopID && this.selectedMonHocID) {
+				this.selectedLopID = this.lopList.find(x => x.LopID == this.initialLopId)?.LopID ?? null;
+				await this.fetchSubjectsByClass(this.selectedLopID);
+				await this.fetchData();
+			}
+			this.loading = false;
+		},
+		async fetchMyClasses() {
+			ajaxCALL("lms/EL_Teacher_GetMyClasses", { HocKi: vueData.NienKhoaItem.HocKi }, (res) => {
+				this.lopList = res.data || [];
+				if (!this.selectedLopID && this.lopList.length > 0) {
+
+					this.selectedLopID = this.lopList.find(x => x.LopID == this.initialLopId)?.LopID ?? this.lopList[0].LopID;
+				}
+			});
+		},
+		async fetchSubjectsByClass(lopId) {
+			await ajaxCALL("lms/EL_Teacher_GetSubjectsByClass", { LopID: lopId, HocKi: vueData.NienKhoaItem.HocKi }, (res) => {
+				this.monHocList = res.data || [];
+
+				if (!this.selectedMonHocID && this.monHocList.length > 0) {
+
+					this.selectedMonHocID = this.monHocList.find(x => x.MonHocID == this.initialMonHocId)?.MonHocID ?? this.monHocList[0].MonHocID;
+
+				}
+			});
+		},
+		async fetchData() {
+			if (!this.selectedLopID || !this.selectedMonHocID) return;
+			this.loading = true;
+			await ajaxCALL("lms/EL_Teacher_GetGradebook", { LopID: this.selectedLopID, MonHocID: this.selectedMonHocID }, (res) => {
+				if (res && res.data && res.data.length >= 3) {
+					this.assignmentHeaders = res.data[0];
+					this.studentGrades = res.data[1];
+					this.columnStats = res.data[2];
+				} else {
+					this.clearData();
+				}
+			});
+			this.loading = false;
+		},
+		async updateStudentScore(payload) {
+			ajaxCALL("lms/EL_Teacher_UpdateQuickGrade", { SubmissionID: payload.submissionId, NewScore: payload.newScore }, (res) => {
+				if (res.data && res.data[0] && res.data[0].Success) {
+					Toast.success({ text: "Cập nhật điểm thành công." });
+					this.fetchData();
+				} else {
+					Toast.error({ text: "Cập nhật điểm thất bại." });
+				}
+			});
+		},
+		calculateStudentAverage(student) {
+			let totalScore = 0;
+			let count = 0;
+			this.assignmentHeaders.forEach(header => {
+				const cellData = student[header.AssignToClassID];
+				if (cellData) {
+					try {
+						const data = JSON.parse(cellData);
+						if (data.status === 'GRADED' && typeof data.score === 'number') {
+							totalScore += data.score;
+							count++;
+						}
+					} catch (e) { }
+				}
+			});
+			return count > 0 ? (totalScore / count).toFixed(2) : '';
+		},
+		getColumnAverage(assignToClassID) {
+			const stat = this.columnStats.find(s => s.AssignToClassID === assignToClassID);
+			return stat && stat.AverageScore != null ? stat.AverageScore.toFixed(2) : '';
+		},
+		exportToCSV() { /* Logic xuất Excel */ },
+		formatDate(iso) {
+			if (!iso) return '';
+			return new Date(iso).toLocaleDateString('vi-VN');
+		},
+		clearData() {
+			this.assignmentHeaders = [];
+			this.studentGrades = [];
+			this.columnStats = [];
+		},
+		test() {
+			CALL('CallTest')
+		}
+	},
+	mounted() {
+		this.initialize();
 	}
+}
 </script>
 
 <style scoped></style>

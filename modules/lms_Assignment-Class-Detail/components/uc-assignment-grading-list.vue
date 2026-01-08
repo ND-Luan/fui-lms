@@ -120,8 +120,8 @@
 			</template>
 			<template v-slot:item.data-table-select="{ item, isSelected, toggleSelect }">
 				<v-checkbox :model-value="isSelected({ value: item })"
-					:disabled="(item.SubmissionID && [2, 3, 4].includes(item.SubmissionStatus)) "
-					@update:model-value="toggleSelect({ value: item })" /> 
+					:disabled="(item.SubmissionID && [2, 3, 4].includes(item.SubmissionStatus))"
+					@update:model-value="toggleSelect({ value: item })" />
 			</template>
 			<template v-slot:expanded-row="{ columns, item }">
 				<tr>
@@ -629,7 +629,7 @@ export default {
 			vueData.loading = false;
 		},
 		async fetchMyClasses() {
-			await ajaxCALL("lms/EL_Teacher_GetMyClasses", null, (res) => {
+			await ajaxCALL("lms/EL_Teacher_GetMyClasses", { HocKi: vueData.NienKhoaItem?.HocKi }, (res) => {
 				this.lopList = res.data || [];
 				if (this.lopList.length > 0) {
 					this.selectedLopID = this.lopList.find(x => x.LopID == this.lopid)?.LopID ?? this.lopList[0].LopID;
@@ -637,7 +637,7 @@ export default {
 			});
 		},
 		async fetchSubjectsByClass(lopId) {
-			await ajaxCALL("lms/EL_Teacher_GetSubjectsByClass", { LopID: lopId }, (res) => {
+			await ajaxCALL("lms/EL_Teacher_GetSubjectsByClass", { LopID: lopId, HocKi: vueData.NienKhoaItem.HocKi }, (res) => {
 				this.monHocList = res.data || [];
 				if (this.monHocList.length > 0) {
 					this.selectedMonHocID = this.monHocList.find(x => x.MonHocID == parseInt(this.monhocid))?.MonHocID ?? this.monHocList[0].MonHocID;
@@ -645,7 +645,7 @@ export default {
 			});
 		},
 		async fetchAssignmentsByClass(lopId, monHocId) {
-			await ajaxCALL("lms/EL_Teacher_GetAssignmentsByClass", { LopID: lopId, MonHocID: monHocId }, (res) => {
+			await ajaxCALL("lms/EL_Teacher_GetAssignmentsByClass", { LopID: lopId, MonHocID: monHocId, HocKi: vueData.NienKhoaItem.HocKi }, (res) => {
 				this.assignmentList = res.data || [];
 				if (this.assignmentList.length > 0) {
 
@@ -679,7 +679,8 @@ export default {
 		async fetchAssignmentStats(assignToClassID) {
 			await ajaxCALL("lms/EL_Teacher_GetAssignmentStats", {
 				AssignToClassID: assignToClassID,
-				AssignToStudentID: vueData.AssignToStudentID_FromURL
+				AssignToStudentID: vueData.AssignToStudentID_FromURL,
+				HocKi: vueData.NienKhoaItem?.HocKi
 			}, (res) => {
 				this.stats = res.data[0] || {};
 			});
@@ -687,7 +688,8 @@ export default {
 		async fetchMostIncorrectQuestions(assignToClassID) {
 			await ajaxCALL("lms/EL_Teacher_GetMostIncorrectQuestions", {
 				AssignToClassID: assignToClassID,
-				AssignToStudentID: vueData.AssignToStudentID_FromURL
+				AssignToStudentID: vueData.AssignToStudentID_FromURL,
+				HocKi: vueData.NienKhoaItem?.HocKi
 			}, (res) => {
 				this.mostIncorrect = res.data || [];
 			});
@@ -734,7 +736,8 @@ export default {
 		async fetchAssignmentStatsAssignToStudent(assignToClassID) {
 			await ajaxCALL("lms/EL_Teacher_GetAssignmentStats_AssignToStudent", {
 				AssignToClassID: assignToClassID,
-				AssignToStudentID: vueData.AssignToStudentID_FromURL
+				AssignToStudentID: vueData.AssignToStudentID_FromURL,
+				HocKi: vueData.NienKhoaItem?.HocKi
 			}, (res) => {
 				this.stats = res.data[0] || {};
 			});
@@ -742,7 +745,8 @@ export default {
 		async fetchMostIncorrectQuestionsAssignToStudent(assignToClassID) {
 			await ajaxCALL("lms/EL_Teacher_GetMostIncorrectQuestions_AssignToStudent", {
 				AssignToClassID: assignToClassID,
-				AssignToStudentID: vueData.AssignToStudentID_FromURL
+				AssignToStudentID: vueData.AssignToStudentID_FromURL,
+				HocKi: vueData.NienKhoaItem?.HocKi
 			}, (res) => {
 				this.mostIncorrect = res.data || [];
 			});
@@ -751,7 +755,8 @@ export default {
 			vueData.loading = true;
 			await ajaxCALL("lms/EL_Teacher_GetSubmissionStatusByStudent_AssignToStudent", {
 				AssignToClassID: assignToClassID,
-				AssignToStudentID: vueData.AssignToStudentID_FromURL
+				AssignToStudentID: vueData.AssignToStudentID_FromURL,
+				HocKi: vueData.NienKhoaItem?.HocKi
 			}, (res) => {
 				let handleData = res.data || [];
 				this.studentSubmissionsOriginal = res.data || [];

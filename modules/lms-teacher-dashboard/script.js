@@ -187,7 +187,7 @@ function processWeeklyScheduleForToday(weeklyScheduleData) {
  */
 function apiCall1() {
     return new Promise((resolve, reject) => {
-        ajaxCALL("lms/EL_Teacher_GetGroupedDashboard", null, response => {
+        ajaxCALL("lms/EL_Teacher_GetGroupedDashboard", { HocKi: vueData.NienKhoaItem.HocKi }, response => {
             processGroupedDashboardData(response);
             resolve();
         }, reject);
@@ -195,7 +195,7 @@ function apiCall1() {
 };
 function apiCall2() {
     return new Promise((resolve, reject) => {
-        ajaxCALL("lms/EL_Teacher_GetRecentActivities", { PageSize: 10 }, response => {
+        ajaxCALL("lms/EL_Teacher_GetRecentActivities", { PageSize: 10, HocKi: vueData.NienKhoaItem?.HocKi }, response => {
             vueData.activities = response.data;
             resolve();
         }, reject);
@@ -211,7 +211,7 @@ function apiCall3() {
 };
 function apiCall4() {
     return new Promise((resolve, reject) => {
-        ajaxCALL("lms/EL_Teacher_GetFocusTasks", null, function (response) {
+        ajaxCALL("lms/EL_Teacher_GetFocusTasks", { HocKi: vueData.NienKhoaItem?.HocKi }, function (response) {
             vueData.focusTasks = response.data;
             resolve();
         }, reject);

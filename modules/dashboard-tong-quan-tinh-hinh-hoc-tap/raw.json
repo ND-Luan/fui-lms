@@ -348,7 +348,8 @@
                     "API": "lms/MonHoc_GetByKhoiID",
                     "IN": {
                         "NienKhoa": "vueData.NienKhoa",
-                        "KhoiID": "vueData.Chart1_KhoiID"
+                        "KhoiID": "vueData.Chart1_KhoiID",
+                        "HocKi": "vueData.NienKhoaItem.HocKi"
                     },
                     "OUT": "DSMonHoc",
                     "CALLBACK": {
@@ -390,7 +391,8 @@
                     "API": "lms/MonHoc_GetByKhoiID",
                     "IN": {
                         "NienKhoa": "vueData.NienKhoa",
-                        "KhoiID": "vueData.ChartHistogram_KhoiID"
+                        "KhoiID": "vueData.ChartHistogram_KhoiID",
+                        "HocKi": "vueData.NienKhoaItem.HocKi"
                     },
                     "OUT": "DSMonHoc",
                     "CALLBACK": {
@@ -491,7 +493,8 @@
                     "API": "lms/MonHoc_GetByKhoiID",
                     "IN": {
                         "NienKhoa": "vueData.NienKhoa",
-                        "KhoiID": "vueData.Chart3_KhoiID"
+                        "KhoiID": "vueData.Chart3_KhoiID",
+                        "HocKi": "vueData.NienKhoaItem.HocKi"
                     },
                     "OUT": "DSMonHoc",
                     "CALLBACK": {

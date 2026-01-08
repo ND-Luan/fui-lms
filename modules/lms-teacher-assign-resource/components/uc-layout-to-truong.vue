@@ -246,7 +246,7 @@
 							<span class="text-body-1 font-weight-medium text-primary">Theo khối</span>
 							<v-spacer></v-spacer>
 							<v-btn color="success" variant="text" icon
-										@click="jsonToExcel({ data: Data_TiLeHoanThanh_Khoi })"><v-icon>mdi-microsoft-excel</v-icon></v-btn>
+								@click="jsonToExcel({ data: Data_TiLeHoanThanh_Khoi })"><v-icon>mdi-microsoft-excel</v-icon></v-btn>
 
 						</div>
 						<uc-chart-apex :options="ChartBar_TileHoanThanh_Khoi"
@@ -256,9 +256,9 @@
 					<v-card-text class="border pa-2 ma-2">
 						<div class="border-b pa-2 d-flex">
 							<span class="text-body-1 font-weight-medium text-primary">Theo lớp</span>
-								<v-spacer></v-spacer>
+							<v-spacer></v-spacer>
 							<v-btn color="success" variant="text" icon
-										@click="jsonToExcel({ data: Data_TiLeHoanThanh_Lop })"><v-icon>mdi-microsoft-excel</v-icon></v-btn>
+								@click="jsonToExcel({ data: Data_TiLeHoanThanh_Lop })"><v-icon>mdi-microsoft-excel</v-icon></v-btn>
 						</div>
 						<uc-chart-apex :options="ChartBar_TileHoanThanh_Lop"
 							v-if="ChartBar_TileHoanThanh_Lop.series.length > 0" />
@@ -698,8 +698,8 @@ export default {
 			MonID_TiLeHoanThanh_BT: null,
 			ChartBar_TileHoanThanh_Khoi,
 			ChartBar_TileHoanThanh_Lop,
-			Data_TiLeHoanThanh_Khoi:[],
-			Data_TiLeHoanThanh_Lop:[]
+			Data_TiLeHoanThanh_Khoi: [],
+			Data_TiLeHoanThanh_Lop: []
 		}
 	},
 	async mounted() {
@@ -1054,6 +1054,7 @@ export default {
 			const params = {
 				CapID: this.CapID,
 				NienKhoa: vueData.NienKhoa,
+				HocKi: vueData.NienKhoaItem.HocKi,
 				LopID: this.LopID
 			}
 			const response = await new Promise((rs, rj) => {
@@ -1115,7 +1116,7 @@ export default {
 				this.ChartBar_TileHoanThanh_Khoi = {
 					...this.ChartBar_TileHoanThanh_Khoi,
 					series: series_Chart5,
-					labels: response[1].filter(i => { if (this.KhoiID_TiLeHoanThanh_BT != 0)  return i.KhoiID == this.KhoiID_TiLeHoanThanh_BT; else return true }).map(item => item.TenKhoiHoc)
+					labels: response[1].filter(i => { if (this.KhoiID_TiLeHoanThanh_BT != 0) return i.KhoiID == this.KhoiID_TiLeHoanThanh_BT; else return true }).map(item => item.TenKhoiHoc)
 				}
 			}
 

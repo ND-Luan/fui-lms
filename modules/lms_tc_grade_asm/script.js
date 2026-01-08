@@ -7,7 +7,7 @@ function initPage() {
         return;
     }
     if (vueData.AssignType == 'CLASS') {
-        ajaxCALL("lms/EL_Teacher_GetSubmissionDetail", { SubmissionID: submissionId }, function (response) {
+        ajaxCALL("lms/EL_Teacher_GetSubmissionDetail", { SubmissionID: submissionId, HocKi: vueData.NienKhoaItem.HocKi }, function (response) {
             if (response && response.data && response.data.length >= 2 && response.data[0].length > 0) {
                 vueData.submissionData = response.data;
                 vueData.dataReady = true;
@@ -16,7 +16,7 @@ function initPage() {
             }
         });
     } else {
-        ajaxCALL("lms/EL_Teacher_GetSubmissionDetail_AssignToStudent", { SubmissionID: submissionId }, function (response) {
+        ajaxCALL("lms/EL_Teacher_GetSubmissionDetail_AssignToStudent", { SubmissionID: submissionId, HocKi: vueData.NienKhoaItem.HocKi }, function (response) {
             if (response && response.data && response.data.length >= 2 && response.data[0].length > 0) {
                 vueData.submissionData = response.data;
                 vueData.dataReady = true;

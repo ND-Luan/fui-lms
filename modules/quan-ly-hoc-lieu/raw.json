@@ -1,1 +1,456 @@
-{"data":[{"hocLieuList":[],"isLoading":false,"totalItems":0,"options":{"page":1,"itemsPerPage":100},"dialog":false,"editedItem":{},"DSKhoi":[{"id":0,"name":"Mầm non"},{"id":1,"name":"Lớp 1"},{"id":2,"name":"Lớp 2"},{"id":3,"name":"Lớp 3"},{"id":4,"name":"Lớp 4"},{"id":5,"name":"Lớp 5"},{"id":6,"name":"Lớp 6"},{"id":7,"name":"Lớp 7"},{"id":8,"name":"Lớp 8"},{"id":9,"name":"Lớp 9"},{"id":10,"name":"Lớp 10"},{"id":11,"name":"Lớp 11"},{"id":12,"name":"Lớp 12"}],"DSMon":[],"DSBoSach":[],"filterKhoiID":null,"filterMonHocID":null,"filterBoSachID":null},{"getHocLieu":{"API":"lms/FP_HocLieu_GetAll"},"saveHocLieu":{"API":"lms/FP_HocLieu_Save"},"deleteHocLieu":{"API":"lms/FP_HocLieu_Delete"},"getDSBoSach":{"API":"lms/FP_BoSach_GetList","OUT":"DSBoSach"},"getDSMon":{"API":"lms/MonHoc_GetByKhoiID","IN":{"KhoiID":"vueData.filterKhoiID","NienKhoa":"vueData.NienKhoa"},"OUT":"DSMon"}},{"CALL":"getDSBoSach"}],"watch":{"options":{"IF":"vueData.options","THEN":[{"EXE":"loadItems()"}],"deep":true},"filterKhoiID":{"IF":"vueData.filterKhoiID >= 0","THEN":[{"CALL":"getDSMon"},{"EXE":"loadItems()"}]},"filterMonHocID":{"EXE":"loadItems()"},"filterBoSachID":{"EXE":"loadItems()"}},"controls":[{"prop":"fluid class='pa-4'","rows":[{"cols":[{"el":"v-card","innerHTML":[{"el":"v-card-title","attr":{"class":"d-flex justify-space-between align-center"},"innerHTML":[{"el":"span","innerHTML":"Quản lý Học liệu"}]},{"el":"v-card-text","innerHTML":[{"el":"v-row","attr":{":dense":true},"innerHTML":[{"el":"v-col","attr":{"cols":"12","md":"4"},"innerHTML":[{"el":"v-select","attr":{"label":"Lọc theo Khối","v-model":"filterKhoiID",":items":"DSKhoi","item-title":"name","item-value":"id",":clearable":true,"density":"compact","variant":"outlined","hide-details":true}}]},{"el":"v-col","attr":{"cols":"12","md":"4"},"innerHTML":[{"el":"v-select","attr":{"label":"Lọc theo Môn","v-model":"filterMonHocID",":items":"DSMon","item-title":"MonHocName","item-value":"MonHocID",":clearable":true,"density":"compact","variant":"outlined","hide-details":true}}]},{"el":"v-col","attr":{"cols":"12","md":"4"},"innerHTML":[{"el":"v-select","attr":{"label":"Lọc theo Bộ sách","v-model":"filterBoSachID",":items":"DSBoSach","item-title":"TenBoSach","item-value":"BoSachID",":clearable":true,"density":"compact","variant":"outlined","hide-details":true}}]}]}]},{"el":"f-table","attr":{":headers":[{"title":"Tên học liệu","value":"TenHocLieu"},{"title":"Khối","value":"KhoiID"},{"title":"Bộ sách","value":"TenBoSach"},{"title":"Tình trạng","value":"TinhTrang"},{"el":"ctrl-update","value":"ctrl-update","key":"ctrl-update"}],":items":"hocLieuList",":update-form":[{"el":"v-text-field","attr":{"v-model":"TenHocLieu","label":"Tên học liệu"}},{"el":"v-select","attr":{"label":"Chọn khối","v-model":"KhoiID",":items":"vueData.DSKhoi","item-title":"name","item-value":"id","v-on:update:model-Value":" async (khoiid) => vueData.DSMon = await vueData.onLoadKhoi_GetDSMonHoc(khoiid)"},"w":6},{"el":"v-select","attr":{"label":"Chọn môn","v-model":"MonHocID",":items":"vueData.DSMon","item-title":"MonHocName","item-value":"MonHocID"},"w":6},{"el":"v-select","attr":{"label":"Chọn bộ sách","v-model":"BoSachID",":items":"vueData.DSBoSach","item-title":"TenBoSach","item-value":"BoSachID"},"w":6},{"el":"v-select","attr":{"label":"Chọn học kỳ","v-model":"HocKy",":items":[1,2]},"w":6},{"el":"v-select","attr":{"v-model":"TinhTrang","label":"Tình trạng",":items":["Public","Private"]},"w":3},{"el":"f-file-upload","attr":{":url":"vueData.v_Set.apiFile","v-on:update:model-Value":"(_file) => { ThumbnailURL = _file.Files[0].FILE_URL }","color":"primary"}},{"el":"v-img","attr":{"v-if":"ThumbnailURL","class":"position-relative",":src":"vueData.v_Set.urlReadFile + ThumbnailURL",":width":250},"innerHTML":[{"el":"v-btn","attr":{"class":"position-absolute","style":"top: 4px; right: 4px","icon":"mdi-close","variant":"tonal","color":"red","size":"small","v-on:click":"ThumbnailURL = null"}}]}],":update-api":{"default-item":{"HocLieuID":null,"TenHocLieu":null,"BoSachID":null,"MonHocID":null,"KhoiID":null,"HocKy":null,"ThumbnailURL":null,"TinhTrang":null},"edit-action":{"HocLieuID":"item.HocLieuID ?? 0","TenHocLieu":"item.TenHocLieu","BoSachID":"item.BoSachID","MonHocID":"item.MonHocID","KhoiID":"item.KhoiID","HocKy":"item.HocKy","ThumbnailURL":"item.ThumbnailURL","TinhTrang":"item.TinhTrang"},"new":{"API":"lms/FP_HocLieu_Save","IN":{"HocLieuID":"item.HocLieuID ?? 0","TenHocLieu":"item.TenHocLieu","BoSachID":"item.BoSachID","MonHocID":"item.MonHocID","KhoiID":"item.KhoiID","HocKy":"item.HocKy","ThumbnailURL":"item.ThumbnailURL","TinhTrang":"item.TinhTrang"},"MESS":"Thêm học liệu thành công","CALLBACK":{"EXE":"loadItems()"}},"edit":{"API":"lms/FP_HocLieu_Save","IN":{"HocLieuID":"item.HocLieuID ?? 0","TenHocLieu":"item.TenHocLieu","BoSachID":"item.BoSachID","MonHocID":"item.MonHocID","KhoiID":"item.KhoiID","HocKy":"item.HocKy","ThumbnailURL":"item.ThumbnailURL","TinhTrang":"item.TinhTrang"},"MESS":"Cập nhật học liệu thành công","CALLBACK":{"EXE":"loadItems()"}},"delete":{"API":"lms/FP_HocLieu_Delete","IN":{"HocLieuID":"item.HocLieuID"},"MESS":"Xóa học liệu thành công","CALLBACK":{"EXE":"loadItems()"}}}}}]}]}]},{"el":"uc-quan-ly-hoc-lieu-dialog","attr":{"v-model:is-open":"dialog",":item-data":"editedItem",":ds-bo-sach":"DSBoSach","@save":"save"}}],"set":{},"API":[{}],"EXE":["vueData.loadItems = loadItems;","vueData.editItem = editItem;","vueData.addItem = addItem;","vueData.deleteItem = deleteItem;","vueData.closeDialog = closeDialog;","vueData.save = save;","vueData.goToSoanThao = goToSoanThao;","CALL('getDSBoSach');","CALL('getDSMon');"]}
+{
+    "data": [
+        {
+            "hocLieuList": [],
+            "isLoading": false,
+            "totalItems": 0,
+            "options": {
+                "page": 1,
+                "itemsPerPage": 100
+            },
+            "dialog": false,
+            "editedItem": {},
+            "DSKhoi": [
+                {
+                    "id": 0,
+                    "name": "Mầm non"
+                },
+                {
+                    "id": 1,
+                    "name": "Lớp 1"
+                },
+                {
+                    "id": 2,
+                    "name": "Lớp 2"
+                },
+                {
+                    "id": 3,
+                    "name": "Lớp 3"
+                },
+                {
+                    "id": 4,
+                    "name": "Lớp 4"
+                },
+                {
+                    "id": 5,
+                    "name": "Lớp 5"
+                },
+                {
+                    "id": 6,
+                    "name": "Lớp 6"
+                },
+                {
+                    "id": 7,
+                    "name": "Lớp 7"
+                },
+                {
+                    "id": 8,
+                    "name": "Lớp 8"
+                },
+                {
+                    "id": 9,
+                    "name": "Lớp 9"
+                },
+                {
+                    "id": 10,
+                    "name": "Lớp 10"
+                },
+                {
+                    "id": 11,
+                    "name": "Lớp 11"
+                },
+                {
+                    "id": 12,
+                    "name": "Lớp 12"
+                }
+            ],
+            "DSMon": [],
+            "DSBoSach": [],
+            "filterKhoiID": null,
+            "filterMonHocID": null,
+            "filterBoSachID": null
+        },
+        {
+            "getHocLieu": {
+                "API": "lms/FP_HocLieu_GetAll"
+            },
+            "saveHocLieu": {
+                "API": "lms/FP_HocLieu_Save"
+            },
+            "deleteHocLieu": {
+                "API": "lms/FP_HocLieu_Delete"
+            },
+            "getDSBoSach": {
+                "API": "lms/FP_BoSach_GetList",
+                "OUT": "DSBoSach"
+            },
+            "getDSMon": {
+                "API": "lms/MonHoc_GetByKhoiID",
+                "IN": {
+                    "KhoiID": "vueData.filterKhoiID",
+                    "NienKhoa": "vueData.NienKhoa",
+                    "HocKi": "vueData.NienKhoaItem.HocKi"
+                },
+                "OUT": "DSMon"
+            }
+        },
+        {
+            "CALL": "getDSBoSach"
+        }
+    ],
+    "watch": {
+        "options": {
+            "IF": "vueData.options",
+            "THEN": [
+                {
+                    "EXE": "loadItems()"
+                }
+            ],
+            "deep": true
+        },
+        "filterKhoiID": {
+            "IF": "vueData.filterKhoiID >= 0",
+            "THEN": [
+                {
+                    "CALL": "getDSMon"
+                },
+                {
+                    "EXE": "loadItems()"
+                }
+            ]
+        },
+        "filterMonHocID": {
+            "EXE": "loadItems()"
+        },
+        "filterBoSachID": {
+            "EXE": "loadItems()"
+        }
+    },
+    "controls": [
+        {
+            "prop": "fluid class='pa-4'",
+            "rows": [
+                {
+                    "cols": [
+                        {
+                            "el": "v-card",
+                            "innerHTML": [
+                                {
+                                    "el": "v-card-title",
+                                    "attr": {
+                                        "class": "d-flex justify-space-between align-center"
+                                    },
+                                    "innerHTML": [
+                                        {
+                                            "el": "span",
+                                            "innerHTML": "Quản lý Học liệu"
+                                        }
+                                    ]
+                                },
+                                {
+                                    "el": "v-card-text",
+                                    "innerHTML": [
+                                        {
+                                            "el": "v-row",
+                                            "attr": {
+                                                ":dense": true
+                                            },
+                                            "innerHTML": [
+                                                {
+                                                    "el": "v-col",
+                                                    "attr": {
+                                                        "cols": "12",
+                                                        "md": "4"
+                                                    },
+                                                    "innerHTML": [
+                                                        {
+                                                            "el": "v-select",
+                                                            "attr": {
+                                                                "label": "Lọc theo Khối",
+                                                                "v-model": "filterKhoiID",
+                                                                ":items": "DSKhoi",
+                                                                "item-title": "name",
+                                                                "item-value": "id",
+                                                                ":clearable": true,
+                                                                "density": "compact",
+                                                                "variant": "outlined",
+                                                                "hide-details": true
+                                                            }
+                                                        }
+                                                    ]
+                                                },
+                                                {
+                                                    "el": "v-col",
+                                                    "attr": {
+                                                        "cols": "12",
+                                                        "md": "4"
+                                                    },
+                                                    "innerHTML": [
+                                                        {
+                                                            "el": "v-select",
+                                                            "attr": {
+                                                                "label": "Lọc theo Môn",
+                                                                "v-model": "filterMonHocID",
+                                                                ":items": "DSMon",
+                                                                "item-title": "MonHocName",
+                                                                "item-value": "MonHocID",
+                                                                ":clearable": true,
+                                                                "density": "compact",
+                                                                "variant": "outlined",
+                                                                "hide-details": true
+                                                            }
+                                                        }
+                                                    ]
+                                                },
+                                                {
+                                                    "el": "v-col",
+                                                    "attr": {
+                                                        "cols": "12",
+                                                        "md": "4"
+                                                    },
+                                                    "innerHTML": [
+                                                        {
+                                                            "el": "v-select",
+                                                            "attr": {
+                                                                "label": "Lọc theo Bộ sách",
+                                                                "v-model": "filterBoSachID",
+                                                                ":items": "DSBoSach",
+                                                                "item-title": "TenBoSach",
+                                                                "item-value": "BoSachID",
+                                                                ":clearable": true,
+                                                                "density": "compact",
+                                                                "variant": "outlined",
+                                                                "hide-details": true
+                                                            }
+                                                        }
+                                                    ]
+                                                }
+                                            ]
+                                        }
+                                    ]
+                                },
+                                {
+                                    "el": "f-table",
+                                    "attr": {
+                                        ":headers": [
+                                            {
+                                                "title": "Tên học liệu",
+                                                "value": "TenHocLieu"
+                                            },
+                                            {
+                                                "title": "Khối",
+                                                "value": "KhoiID"
+                                            },
+                                            {
+                                                "title": "Bộ sách",
+                                                "value": "TenBoSach"
+                                            },
+                                            {
+                                                "title": "Tình trạng",
+                                                "value": "TinhTrang"
+                                            },
+                                            {
+                                                "el": "ctrl-update",
+                                                "value": "ctrl-update",
+                                                "key": "ctrl-update"
+                                            }
+                                        ],
+                                        ":items": "hocLieuList",
+                                        ":update-form": [
+                                            {
+                                                "el": "v-text-field",
+                                                "attr": {
+                                                    "v-model": "TenHocLieu",
+                                                    "label": "Tên học liệu"
+                                                }
+                                            },
+                                            {
+                                                "el": "v-select",
+                                                "attr": {
+                                                    "label": "Chọn khối",
+                                                    "v-model": "KhoiID",
+                                                    ":items": "vueData.DSKhoi",
+                                                    "item-title": "name",
+                                                    "item-value": "id",
+                                                    "v-on:update:model-Value": " async (khoiid) => vueData.DSMon = await vueData.onLoadKhoi_GetDSMonHoc(khoiid)"
+                                                },
+                                                "w": 6
+                                            },
+                                            {
+                                                "el": "v-select",
+                                                "attr": {
+                                                    "label": "Chọn môn",
+                                                    "v-model": "MonHocID",
+                                                    ":items": "vueData.DSMon",
+                                                    "item-title": "MonHocName",
+                                                    "item-value": "MonHocID"
+                                                },
+                                                "w": 6
+                                            },
+                                            {
+                                                "el": "v-select",
+                                                "attr": {
+                                                    "label": "Chọn bộ sách",
+                                                    "v-model": "BoSachID",
+                                                    ":items": "vueData.DSBoSach",
+                                                    "item-title": "TenBoSach",
+                                                    "item-value": "BoSachID"
+                                                },
+                                                "w": 6
+                                            },
+                                            {
+                                                "el": "v-select",
+                                                "attr": {
+                                                    "label": "Chọn học kỳ",
+                                                    "v-model": "HocKy",
+                                                    ":items": [
+                                                        1,
+                                                        2
+                                                    ]
+                                                },
+                                                "w": 6
+                                            },
+                                            {
+                                                "el": "v-select",
+                                                "attr": {
+                                                    "v-model": "TinhTrang",
+                                                    "label": "Tình trạng",
+                                                    ":items": [
+                                                        "Public",
+                                                        "Private"
+                                                    ]
+                                                },
+                                                "w": 3
+                                            },
+                                            {
+                                                "el": "f-file-upload",
+                                                "attr": {
+                                                    ":url": "vueData.v_Set.apiFile",
+                                                    "v-on:update:model-Value": "(_file) => { ThumbnailURL = _file.Files[0].FILE_URL }",
+                                                    "color": "primary"
+                                                }
+                                            },
+                                            {
+                                                "el": "v-img",
+                                                "attr": {
+                                                    "v-if": "ThumbnailURL",
+                                                    "class": "position-relative",
+                                                    ":src": "vueData.v_Set.urlReadFile + ThumbnailURL",
+                                                    ":width": 250
+                                                },
+                                                "innerHTML": [
+                                                    {
+                                                        "el": "v-btn",
+                                                        "attr": {
+                                                            "class": "position-absolute",
+                                                            "style": "top: 4px; right: 4px",
+                                                            "icon": "mdi-close",
+                                                            "variant": "tonal",
+                                                            "color": "red",
+                                                            "size": "small",
+                                                            "v-on:click": "ThumbnailURL = null"
+                                                        }
+                                                    }
+                                                ]
+                                            }
+                                        ],
+                                        ":update-api": {
+                                            "default-item": {
+                                                "HocLieuID": null,
+                                                "TenHocLieu": null,
+                                                "BoSachID": null,
+                                                "MonHocID": null,
+                                                "KhoiID": null,
+                                                "HocKy": null,
+                                                "ThumbnailURL": null,
+                                                "TinhTrang": null
+                                            },
+                                            "edit-action": {
+                                                "HocLieuID": "item.HocLieuID ?? 0",
+                                                "TenHocLieu": "item.TenHocLieu",
+                                                "BoSachID": "item.BoSachID",
+                                                "MonHocID": "item.MonHocID",
+                                                "KhoiID": "item.KhoiID",
+                                                "HocKy": "item.HocKy",
+                                                "ThumbnailURL": "item.ThumbnailURL",
+                                                "TinhTrang": "item.TinhTrang"
+                                            },
+                                            "new": {
+                                                "API": "lms/FP_HocLieu_Save",
+                                                "IN": {
+                                                    "HocLieuID": "item.HocLieuID ?? 0",
+                                                    "TenHocLieu": "item.TenHocLieu",
+                                                    "BoSachID": "item.BoSachID",
+                                                    "MonHocID": "item.MonHocID",
+                                                    "KhoiID": "item.KhoiID",
+                                                    "HocKy": "item.HocKy",
+                                                    "ThumbnailURL": "item.ThumbnailURL",
+                                                    "TinhTrang": "item.TinhTrang"
+                                                },
+                                                "MESS": "Thêm học liệu thành công",
+                                                "CALLBACK": {
+                                                    "EXE": "loadItems()"
+                                                }
+                                            },
+                                            "edit": {
+                                                "API": "lms/FP_HocLieu_Save",
+                                                "IN": {
+                                                    "HocLieuID": "item.HocLieuID ?? 0",
+                                                    "TenHocLieu": "item.TenHocLieu",
+                                                    "BoSachID": "item.BoSachID",
+                                                    "MonHocID": "item.MonHocID",
+                                                    "KhoiID": "item.KhoiID",
+                                                    "HocKy": "item.HocKy",
+                                                    "ThumbnailURL": "item.ThumbnailURL",
+                                                    "TinhTrang": "item.TinhTrang"
+                                                },
+                                                "MESS": "Cập nhật học liệu thành công",
+                                                "CALLBACK": {
+                                                    "EXE": "loadItems()"
+                                                }
+                                            },
+                                            "delete": {
+                                                "API": "lms/FP_HocLieu_Delete",
+                                                "IN": {
+                                                    "HocLieuID": "item.HocLieuID"
+                                                },
+                                                "MESS": "Xóa học liệu thành công",
+                                                "CALLBACK": {
+                                                    "EXE": "loadItems()"
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "el": "uc-quan-ly-hoc-lieu-dialog",
+            "attr": {
+                "v-model:is-open": "dialog",
+                ":item-data": "editedItem",
+                ":ds-bo-sach": "DSBoSach",
+                "@save": "save"
+            }
+        }
+    ],
+    "set": {},
+    "API": [
+        {}
+    ],
+    "EXE": [
+        "vueData.loadItems = loadItems;",
+        "vueData.editItem = editItem;",
+        "vueData.addItem = addItem;",
+        "vueData.deleteItem = deleteItem;",
+        "vueData.closeDialog = closeDialog;",
+        "vueData.save = save;",
+        "vueData.goToSoanThao = goToSoanThao;",
+        "CALL('getDSBoSach');",
+        "CALL('getDSMon');"
+    ]
+}
