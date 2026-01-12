@@ -258,7 +258,7 @@ function convertDSHocSinh() {
                 //dùng cho formula để hiển thị
                 obj[cotDiemExist.MaCotDiem] = cotDiemExist?.KetQuaDanhGia_VI
             }
-            else if (cotDiemExist.LoaiCotDiem == 'Công thức' && cotDiemExist.Formula !== null && vueData.CapID == 1 && ['DiemTBCK_HK1', 'DiemTBCK_HK2', 'DanhHieu_HK1','DanhHieu_HK2'].includes(cotDiemExist.MaCotDiem)) {
+            else if (cotDiemExist.LoaiCotDiem == 'Công thức' && cotDiemExist.Formula !== null && vueData.CapID == 1 && ['DiemTBCK_HK1', 'DiemTBCK_HK2', 'DanhHieu_HK1', 'DanhHieu_HK2'].includes(cotDiemExist.MaCotDiem)) {
                 obj[cotDiemExist.MaCotDiem] = '=' + replaceFormula(columnsCotDiem, cotDiemExist.Formula, indexRow, vueData.freezeColumns)
             }
             //Có sử dụng hàm isGetResultTopic => chỉ dùng cho các môn tiếng Anh
@@ -531,7 +531,7 @@ function isGetResultTopic(cotDiem) {
     )
         &&
         (
-        !cotDiem.MaCotDiem.includes('DiemGK_') || !cotDiem.MaCotDiem.includes('DiemCK_') || !cotDiem.MaCotDiem.includes('DiemTBGK_') || !cotDiem.MaCotDiem.includes('DiemTBCK_')
+            !cotDiem.MaCotDiem.includes('DiemGK_') || !cotDiem.MaCotDiem.includes('DiemCK_') || !cotDiem.MaCotDiem.includes('DiemTBGK_') || !cotDiem.MaCotDiem.includes('DiemTBCK_')
         )
 }
 function isMonHocConvertWithStar(currentMonHocID) {
@@ -694,6 +694,13 @@ function InputMaxLenght(maxLength) {
         return value;
     }
 }
+function onKhoaCotDiem() {
+    if (!vueData.user.UserID === 'NA0000022') {
+        Vue.$toast.warning("Chức năng đang thực hiện", { position: "top" })
+        return
+    }
+}
+vueData.onKhoaCotDiem = onKhoaCotDiem
 vueData.isMonHocConvertWithStar = isMonHocConvertWithStar
 vueData.exportExcel = exportExcel
 vueData.reloadBangDiem = reloadBangDiem

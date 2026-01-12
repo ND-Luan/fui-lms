@@ -54,9 +54,9 @@
 																	<v-icon small class="mr-1"
 																		:style="{ color: DSMonHoc.find(x => x.MonHocName === key || (key == 'Giáo dục thể chất' && x.MonHocName == 'Thể dục'))?.Color ?? '#000000' }">
 																		{{DSMonHoc.find(x => x.MonHocName === key ||
-																		(key == 'Giáo dục thể chất' &&
-																		x.MonHocName == 'Thể dục'))?.Icon ||
-																		'mdi-book-open'}}
+																			(key == 'Giáo dục thể chất' &&
+																				x.MonHocName == 'Thể dục'))?.Icon ||
+																			'mdi-book-open'}}
 																	</v-icon>
 																	{{ key }}
 																</v-chip>
@@ -68,7 +68,7 @@
 																	:class="'bg-' + getBgColorMucDoDanhGia(value[Object.keys(value).find(it => it.endsWith('M'))])"
 																	v-if="value[Object.keys(value).find(it => it.endsWith('M'))]">
 																	{{value[Object.keys(value).find(it =>
-																	it.endsWith('M'))] ?? '-'}}
+																		it.endsWith('M'))] ?? '-'}}
 																</v-chip>
 																<v-chip color="green" size="small" variant="outlined"
 																	v-if="value[Object.keys(value).find(it => it.endsWith('S'))] && List_MonHoc_Change.includes(key)">
@@ -84,7 +84,7 @@
 																	style="background-color: #E8F5E9"
 																	v-if="value[Object.keys(value).find(it => it.endsWith('D'))] && !List_MonHoc_Change.includes(key)">
 																	{{value[Object.keys(value).find(it =>
-																	it.endsWith('D'))] ?? '-'}}
+																		it.endsWith('D'))] ?? '-'}}
 																</v-chip>
 															</v-col>
 														</v-row>
@@ -119,7 +119,7 @@
 																	<v-card class="note-paper" flat>
 																		<v-card-text>
 																			{{value[Object.keys(value).find(it =>
-																			it.endsWith('NX'))] ?? '-'}}
+																				it.endsWith('NX'))] ?? '-'}}
 																		</v-card-text>
 																	</v-card>
 																</div>
@@ -164,7 +164,7 @@
 																	<v-icon small class="mr-1"
 																		:style="{ color: DSMonHoc.find(x => x.MonHocName === key)?.Color ?? '#000000' }">
 																		{{DSMonHoc.find(x => x.MonHocName ===
-																		key)?.Icon || 'mdi-book-open'}}
+																			key)?.Icon || 'mdi-book-open'}}
 																	</v-icon>
 																	{{ key }}
 																</v-chip>
@@ -176,7 +176,7 @@
 																	size="small" variant="outlined"
 																	v-if="value[Object.keys(value).find(it => !it.endsWith('NX'))]">
 																	{{value[Object.keys(value).find(it =>
-																	!it.endsWith('NX'))] ?? '-'}}
+																		!it.endsWith('NX'))] ?? '-'}}
 																</v-chip>
 															</v-col>
 														</v-row>
@@ -201,7 +201,7 @@
 																	<v-card class="note-paper" flat>
 																		<v-card-text>
 																			{{value[Object.keys(value).find(it =>
-																			it.endsWith('NX'))] ?? '-'}}
+																				it.endsWith('NX'))] ?? '-'}}
 																		</v-card-text>
 																	</v-card>
 																</div>
@@ -248,7 +248,7 @@
 																	<v-icon small class="mr-1"
 																		:style="{ color: DSMonHoc.find(x => x.MonHocName === key)?.Color ?? '#000000' }">
 																		{{DSMonHoc.find(x => x.MonHocName ===
-																		key)?.Icon || 'mdi-book-open'}}
+																			key)?.Icon || 'mdi-book-open'}}
 																	</v-icon>
 																	{{ key }}
 																</v-chip>
@@ -260,7 +260,7 @@
 																	size="small" variant="outlined"
 																	v-if="value[Object.keys(value).find(it => !it.endsWith('NX'))]">
 																	{{value[Object.keys(value).find(it =>
-																	!it.endsWith('NX'))] ?? '-'}}
+																		!it.endsWith('NX'))] ?? '-'}}
 																</v-chip>
 															</v-col>
 														</v-row>
@@ -285,7 +285,7 @@
 																	<v-card class="note-paper" flat>
 																		<v-card-text>
 																			{{value[Object.keys(value).find(it =>
-																			it.endsWith('NX'))] ?? '-'}}
+																				it.endsWith('NX'))] ?? '-'}}
 																		</v-card-text>
 																	</v-card>
 																</div>
@@ -332,7 +332,7 @@
 																	<v-icon small class="mr-1"
 																		:style="{ color: DSMonHoc.find(x => x.MonHocName === key)?.Color ?? '#000000' }">
 																		{{DSMonHoc.find(x => x.MonHocName ===
-																		key)?.Icon || 'mdi-book-open'}}
+																			key)?.Icon || 'mdi-book-open'}}
 																	</v-icon>
 																	{{ key }}
 																</v-chip>
@@ -344,7 +344,7 @@
 																	size="small" variant="outlined"
 																	v-if="value[Object.keys(value).find(it => !it.endsWith('NX'))]">
 																	{{value[Object.keys(value).find(it =>
-																	!it.endsWith('NX'))] ?? '-'}}
+																		!it.endsWith('NX'))] ?? '-'}}
 																</v-chip>
 															</v-col>
 															<v-col class="d-flex justify-center" cols="2"> </v-col>
@@ -370,7 +370,7 @@
 																	<v-card class="note-paper" flat>
 																		<v-card-text>
 																			{{value[Object.keys(value).find(it =>
-																			it.endsWith('NX'))] ?? '-'}}
+																				it.endsWith('NX'))] ?? '-'}}
 																		</v-card-text>
 																	</v-card>
 																</div>
@@ -480,7 +480,7 @@
 											<v-icon class="mr-2"
 												:color="DSMonHoc.find(x => x.MonHocName === item.TenMon)?.Color">
 												{{DSMonHoc.find(x => x.MonHocName === item.TenMon)?.Icon ||
-												'mdi-book-open'}}
+													'mdi-book-open'}}
 											</v-icon>
 											{{ item.TenMon }}
 										</template>
@@ -525,7 +525,7 @@
 											<v-icon class="mr-2"
 												:color="DSMonHoc.find(x => x.MonHocName === item.TenMon)?.Color">
 												{{DSMonHoc.find(x => x.MonHocName === item.TenMon)?.Icon ||
-												'mdi-book-open'}}
+													'mdi-book-open'}}
 											</v-icon>
 											{{ item.TenMon }}
 										</template>
@@ -569,7 +569,7 @@
 											<v-icon class="mr-2"
 												:color="DSMonHoc.find(x => x.MonHocName === item.TenMon)?.Color">
 												{{DSMonHoc.find(x => x.MonHocName === item.TenMon)?.Icon ||
-												'mdi-book-open'}}
+													'mdi-book-open'}}
 											</v-icon>
 											{{ item.TenMon }}
 										</template>
@@ -633,7 +633,7 @@
 												<v-icon small class="mr-1"
 													:style="{ color: DSMonHoc.find(x => x.MonHocName === item.TenMon)?.Color ?? '#000000' }">
 													{{DSMonHoc.find(x => x.MonHocName === item.TenMon)?.Icon ||
-													'mdi-book-open'}}
+														'mdi-book-open'}}
 												</v-icon>
 												<p class="font-weight-medium">{{ item.TenMon }}</p>
 											</div>
@@ -687,7 +687,7 @@
 												<v-icon small class="mr-1"
 													:style="{ color: DSMonHoc.find(x => x.MonHocName === item.TenMon)?.Color ?? '#000000' }">
 													{{DSMonHoc.find(x => x.MonHocName === item.TenMon)?.Icon ||
-													'mdi-book-open'}}
+														'mdi-book-open'}}
 												</v-icon>
 												<p class="font-weight-medium">{{ item.TenMon }}</p>
 											</div>
@@ -742,7 +742,7 @@
 												<v-icon small class="mr-1"
 													:style="{ color: DSMonHoc.find(x => x.MonHocName === item.TenMon)?.Color ?? '#000000' }">
 													{{DSMonHoc.find(x => x.MonHocName === item.TenMon)?.Icon ||
-													'mdi-book-open'}}
+														'mdi-book-open'}}
 												</v-icon>
 												<p class="font-weight-medium">{{ item.TenMon }}</p>
 											</div>
@@ -907,710 +907,711 @@
 </template>
 
 <script>
-	export default {
-		props: [],
-		data() {
-			const { useI18n } = VueI18n
-			const { t } = useI18n()
-			return {
-				panel: [0],
-				panelC2_C3: [],
-				panelC1_KT_KN: [],
-				panelC1_NLC: [],
-				panelC1_PC: [],
-				panelC1_NLR: [],
-				GroupPanel: [0, 1, 2, 3],
-				tab: null,
-				DSHocKy: [],
-				DSMonHocGroup: [
-					{
-						MonHocGroup: 1,
-						Name_VI: t('message.Skill_Knowledge'),
-						Name_EN: '',
-						icon: '/_cdn/lhbs-lms/kienthuc_ki_nang_icon.png',
-						Color: "blue-lighten-5"
-					},
-					{
-						MonHocGroup: 2,
-						Name_VI: t('message.Common_Ability'),
-						Name_EN: '',
-						icon: '/_cdn/lhbs-lms/nang_luc_chung_icon.png',
-						Color: "red-lighten-5"
-					},
-					{
-						MonHocGroup: 3,
-						Name_VI: t('message.Quality'),
-						Name_EN: '',
-						icon: '/_cdn/lhbs-lms/pham_chat_icon.png',
-						Color: "yellow-lighten-5"
-					},
-					{
-						MonHocGroup: 4,
-						Name_VI: t('message.Personal_Ability'),
-						Name_EN: '',
-						icon: '/_cdn/lhbs-lms/nang_luc_rieng.png',
-						Color: "brown-lighten-5"
-					},
-				],
-				DSMonHoc: [],
-				DSMonHoc_ByGroup: [],
-				MonHocGroup_Obj: {},
-				DSMonHoc_NhomDiem: [],
-				DSNhomDiem: [],
-				MonHocSelected: null,
-				IsLoadingPage: false,
-				IsLoadingDSHocSinh: false,
-				lodash: _,
-				vueData,
-				IsLanguage: localStorage.getItem('IsLanguage') ? JSON.parse(localStorage.getItem('IsLanguage')) : false,
-				List_MonHoc_Change: [
-					"STEM",
-					"JA-GD Tài chính",
-					"AI - Robotics",
-					"GDKN-Vận động theo nhạc",
-					"GDKN-Cờ vua",
-					"GDKN-Ẩm thực nấu ăn"
-				],
-				groupKTKN: [],
-				groupNLR: [],
-				groupPC: [],
-				groupNLC: [],
-				ChuyenCan_KQCN_C1: {},
-				dataHK_1_C2_C3: {
-					Diem: [],
-					TongKet: {}
+export default {
+	props: [],
+	data() {
+		const { useI18n } = VueI18n
+		const { t } = useI18n()
+		return {
+			panel: [0],
+			panelC2_C3: [],
+			panelC1_KT_KN: [],
+			panelC1_NLC: [],
+			panelC1_PC: [],
+			panelC1_NLR: [],
+			GroupPanel: [0, 1, 2, 3],
+			tab: null,
+			DSHocKy: [],
+			DSMonHocGroup: [
+				{
+					MonHocGroup: 1,
+					Name_VI: t('message.Skill_Knowledge'),
+					Name_EN: '',
+					icon: '/_cdn/lhbs-lms/kienthuc_ki_nang_icon.png',
+					Color: "blue-lighten-5"
 				},
-				dataHK_2_C2_C3: {
-					Diem: [],
-					TongKet: {}
+				{
+					MonHocGroup: 2,
+					Name_VI: t('message.Common_Ability'),
+					Name_EN: '',
+					icon: '/_cdn/lhbs-lms/nang_luc_chung_icon.png',
+					Color: "red-lighten-5"
 				},
-				dataCN_C2_C3: {
-					Diem: [],
-					TongKet: {}
+				{
+					MonHocGroup: 3,
+					Name_VI: t('message.Quality'),
+					Name_EN: '',
+					icon: '/_cdn/lhbs-lms/pham_chat_icon.png',
+					Color: "yellow-lighten-5"
 				},
-				headers: [
-					{
-						title: "Tên môn",
-						value: "TenMon"
-					},
-					{
-						title: "KT thường xuyên",
-						value: "ktthuongxuyen",
-						align: "end"
-					},
-					{
-						title: "KT giữa kì",
-						value: "ktgiuaki",
-						align: "end",
-					},
-					{
-						title: "KT cuối kì",
-						value: "ktcuoiki",
-						align: "end",
-					},
-					{
-						title: "Điểm trung bình",
-						value: "dtb",
-						align: "end",
-						headerProps: {
-							class: "bg-light-green-lighten-4",
-						},
-						cellProps: {
-							class: "bg-light-green-lighten-4 font-weight-medium",
-							style: "font-size: 15px"
-						}
-					}
-				],
-				headersCaNam: [
-					{
-						title: "Tên môn",
-						value: "TenMon"
-					},
-					{
-						title: "Điểm trung bình",
-						value: "dtb",
-						align: "end",
-						headerProps: {
-							class: "bg-light-green-lighten-4",
-						},
-						cellProps: {
-							class: "bg-light-green-lighten-4 font-weight-medium",
-							style: "font-size: 15px"
-						}
-					}
-				],
-				initLoading: false
-			}
-		},
-		async mounted() {
-			// this.initLoading = true
-			await this.loadDSMonHoc()
-			await this.loadCongBoBangDiem()
-			// this.initLoading = false
-		},
-		watch: {
-			panelC2_C3: function (v) {
-				console.log('v', v)
+				{
+					MonHocGroup: 4,
+					Name_VI: t('message.Personal_Ability'),
+					Name_EN: '',
+					icon: '/_cdn/lhbs-lms/nang_luc_rieng.png',
+					Color: "brown-lighten-5"
+				},
+			],
+			DSMonHoc: [],
+			DSMonHoc_ByGroup: [],
+			MonHocGroup_Obj: {},
+			DSMonHoc_NhomDiem: [],
+			DSNhomDiem: [],
+			MonHocSelected: null,
+			IsLoadingPage: false,
+			IsLoadingDSHocSinh: false,
+			lodash: _,
+			vueData,
+			IsLanguage: localStorage.getItem('IsLanguage') ? JSON.parse(localStorage.getItem('IsLanguage')) : false,
+			List_MonHoc_Change: [
+				"STEM",
+				"JA-GD Tài chính",
+				"AI - Robotics",
+				"GDKN-Vận động theo nhạc",
+				"GDKN-Cờ vua",
+				"GDKN-Ẩm thực nấu ăn"
+			],
+			groupKTKN: [],
+			groupNLR: [],
+			groupPC: [],
+			groupNLC: [],
+			ChuyenCan_KQCN_C1: {},
+			dataHK_1_C2_C3: {
+				Diem: [],
+				TongKet: {}
 			},
-			'$i18n.locale': function (language) {
-				if (language === 'en') this.IsLanguage = true
-				else this.IsLanguage = false
-				this.updateDSMonHocGroup();
+			dataHK_2_C2_C3: {
+				Diem: [],
+				TongKet: {}
 			},
-			tab: async function (tab) {
-				if (tab) {
-					localStorage.setItem('Semester', tab)
-					if (vueData.HocSinhSelected.CapID === 1) {
-						this.DSMonHoc_NhomDiem = await this.loadHocSinhKQHT(tab)
+			dataCN_C2_C3: {
+				Diem: [],
+				TongKet: {}
+			},
+			headers: [
+				{
+					title: "Tên môn",
+					value: "TenMon"
+				},
+				{
+					title: "KT thường xuyên",
+					value: "ktthuongxuyen",
+					align: "end"
+				},
+				{
+					title: "KT giữa kì",
+					value: "ktgiuaki",
+					align: "end",
+				},
+				{
+					title: "KT cuối kì",
+					value: "ktcuoiki",
+					align: "end",
+				},
+				{
+					title: "Điểm trung bình",
+					value: "dtb",
+					align: "end",
+					headerProps: {
+						class: "bg-light-green-lighten-4",
+					},
+					cellProps: {
+						class: "bg-light-green-lighten-4 font-weight-medium",
+						style: "font-size: 15px"
 					}
-					this.loadHocSinhKQHT(tab)
 				}
-			}
+			],
+			headersCaNam: [
+				{
+					title: "Tên môn",
+					value: "TenMon"
+				},
+				{
+					title: "Điểm trung bình",
+					value: "dtb",
+					align: "end",
+					headerProps: {
+						class: "bg-light-green-lighten-4",
+					},
+					cellProps: {
+						class: "bg-light-green-lighten-4 font-weight-medium",
+						style: "font-size: 15px"
+					}
+				}
+			],
+			initLoading: false
+		}
+	},
+	async mounted() {
+		// this.initLoading = true
+		await this.loadDSMonHoc()
+		await this.loadCongBoBangDiem()
+		// this.initLoading = false
+	},
+	watch: {
+		panelC2_C3: function (v) {
+			console.log('v', v)
 		},
-		methods: {
-			loadCongBoBangDiem() {
-				return new Promise(resolve => {
-					ajaxCALL('lms/CongBoBangDiem_Get',
-						{
-							CapID: vueData.HocSinhSelected.CapID,
-							NienKhoa: vueData.NienKhoa
-						},
-						res => {
-							const data = res.data
-							if (vueData.HocSinhSelected.CapID === 1) {
-								this.DSHocKy = data.map(x => {
-									let name = ''
-									if (x.KyDanhGia === 1) name = "GHKI"
-									if (x.KyDanhGia === 2) name = "CHKI"
-									if (x.KyDanhGia === 3) name = "GHKII"
-									if (x.KyDanhGia === 4) name = "CN"
-									return {
-										id: x.KyDanhGia,
-										name: name
-									}
-								})
-							}
-							else {
-								this.DSHocKy = [{
-									id: 1,
-									name: `${this.$t('message.semester')} 1`
-								},
-								{
-									id: 2,
-									name: `${this.$t('message.semester')} 2`
-								},
-								{
-									id: 3,
-									name: `${this.$t('message.allYear')}`
-								}]
-							}
-	
-							console.log("data.length", data.length)
-							this.tab = 1//data.length
-							resolve()
-						})
-				})
-			},
-			loadDSMonHoc() {
-				return new Promise(resolve => {
-					ajaxCALL('lms/MonHoc_Get_ByCapID', {
-						CapID: vueData.HocSinhSelected.CapID
-					}, res => {
-						this.DSMonHoc = res.data
-						console.log("DsMonHoc", res.data)
-						resolve()
-					})
-				})
-	
-			},
-			loadHocSinhKQHT(code) {
-				if (!vueData.NienKhoa || !code) return
-				return new Promise(async resolve => {
-					ajaxCALL('solienlac/LMS_GetBangDiem', {
-						HocSinhID: vueData.HocSinhSelected.HocSinhID,
-						NamHoc: vueData.NienKhoa,
-						KyDanhGia: code,
-					}, res => {
-						if (vueData.HocSinhSelected.CapID === 1) {
-							const data = res.data[0] ?? {}
-							this.groupKTKN = this.fn_groupKTKN(data)
-							this.groupNLR = this.fn_groupNLR(data)
-							this.groupPC = this.fn_groupPC(data)
-							this.groupNLC = this.fn_groupNLC(data)
-	
-							this.ChuyenCan_KQCN_C1 = {
-								khongphep: data?.khongphep,
-								cophep: data?.cophep,
-								ditre: data?.ditre,
-								khoiid: data?.khoiid,
-								khenthuong: data?.khenthuong,
-								renluyenhe: data?.renluyenhe,
-							}
-							//Gọi thêm để lấy điểm còn thiếu từ bên a Chiến
-							ajaxCALL('lms/LMS_OutSLL_GetKetQuaHocTap_ByHocSinhID', {
-								LopID: vueData.HocSinhSelected.LopID,
-								KyDanhGia: this.tab,
-								NamHoc: vueData.NienKhoa,
-								HocSinhID: vueData.HocSinhSelected.HocSinhID,
-							}, res => {
-								const data = res.data
-								const newData = []
-								const uniqueMonHoc = [...new Set(data.map(x => x.MonHocCode))]
-								for (var monHocCode of uniqueMonHoc) {
-									const obj = {}
-									const arrFilterMaCotDiem = data.filter(x => x.MonHocCode === monHocCode)
-									for (var maCotDiem of arrFilterMaCotDiem) {
-										obj[maCotDiem.MaCotDiem] = maCotDiem.KetQuaDanhGia
-									}
-									obj.HocSinhID = arrFilterMaCotDiem[0]?.HocSinhID
-									obj.MonHocCode = monHocCode
-									obj.MonHocName = arrFilterMaCotDiem[0]?.MonHocName
-									newData.push(obj)
-								}
-								const monHocFilter_HocSinh = newData.filter(x => this.List_MonHoc_Change.includes(x.MonHocName))
-	
-								console.log("monHocFilter_HocSinh", monHocFilter_HocSinh)
-								let DiemSTEM = monHocFilter_HocSinh.find(x => x.MonHocName === 'STEM')?.DiemMonHoc
-								let DiemJA = monHocFilter_HocSinh.find(x => x.MonHocName === 'JA-GD Tài chính')?.DiemMonHoc
-								let DiemAI = monHocFilter_HocSinh.find(x => x.MonHocName === 'AI - Robotics')?.DiemMonHoc
-								let DiemGDKN_VDTN = monHocFilter_HocSinh.find(x => x.MonHocName === 'GDKN-Vận động theo nhạc')?.DiemMonHoc
-								let DiemGDKN_CV = monHocFilter_HocSinh.find(x => x.MonHocName === 'GDKN-Cờ vua')?.DiemMonHoc
-								let DiemGDKN_ATNA = monHocFilter_HocSinh.find(x => x.MonHocName === 'GDKN-Ẩm thực nấu ăn')?.DiemMonHoc
-	
-								let SaoSTEM = monHocFilter_HocSinh.find(x => x.MonHocName === 'STEM')?.QuyDoiSao
-								let SaoJA = monHocFilter_HocSinh.find(x => x.MonHocName === 'JA-GD Tài chính')?.QuyDoiSao
-								let SaoAI = monHocFilter_HocSinh.find(x => x.MonHocName === 'AI - Robotics')?.QuyDoiSao
-								let SaoGDKN_VDTN = monHocFilter_HocSinh.find(x => x.MonHocName === 'GDKN-Vận động theo nhạc')?.QuyDoiSao
-								let SaoGDKN_CV = monHocFilter_HocSinh.find(x => x.MonHocName === 'GDKN-Cờ vua')?.QuyDoiSao
-								let SaoGDKN_ATNA = monHocFilter_HocSinh.find(x => x.MonHocName === 'GDKN-Ẩm thực nấu ăn')?.QuyDoiSao
-	
-								let NhanXet_GDKN_ATNA = monHocFilter_HocSinh.find(x => x.MonHocName === 'GDKN-Ẩm thực nấu ăn')?.NhanXet
-	
-								this.groupKTKN = {
-									...this.groupKTKN,
-									"STEM": {
-										// STED: DiemSTEM,
-										STES: SaoSTEM,
-										STENX: this.groupKTKN['STEM']?.STENX
-									},
-									"JA-GD Tài chính": {
-										// JAD: DiemJA,
-										JAS: SaoJA,
-										JANX: this.groupKTKN['JA-GD Tài chính']?.JANX
-									},
-									"AI - Robotics": {
-										// AID: DiemAI,
-										AIS: SaoAI,
-										AINX: this.groupKTKN['AI - Robotics']?.AINX
-									},
-									"GDKN-Vận động theo nhạc": {
-										// KNND: DiemGDKN_VDTN,
-										KNNS: SaoGDKN_VDTN,
-										KNNNX: this.groupKTKN['GDKN-Vận động theo nhạc']?.KNNNX
-									},
-									"GDKN-Cờ vua": {
-										// KNCD: DiemGDKN_CV,
-										KNCS: SaoGDKN_CV,
-										KNCNX: this.groupKTKN['GDKN-Cờ vua']?.KNCNX
-									},
-									"GDKN-Ẩm thực nấu ăn": {
-										// KNCD: DiemGDKN_CV,
-										KNATNAS: SaoGDKN_ATNA,
-										KNATNANX: NhanXet_GDKN_ATNA
-									}
-								}
-								console.log("SaoGDKN_ATNA", SaoGDKN_ATNA)
-								console.log("NhanXet_GDKN_ATNA", NhanXet_GDKN_ATNA)
-								console.log("this.groupKTKN =>", this.groupKTKN)
-	
-								const groupKTKNLength = Object.keys(this.groupKTKN).length
-								const groupNLRLength = Object.keys(this.groupNLR).length
-								const groupPCLength = Object.keys(this.groupPC).length
-								const groupNLCLength = Object.keys(this.groupNLC).length
-	
-								// Lấy toàn bộ keys và kèm index gốc
-								const keys = Object.keys(this.groupKTKN);
-								const validIndexes = keys.reduce((acc, key, index) => {
-									const obj = this.groupKTKN[key];
-									const nxKey = Object.keys(obj).find(k => k.includes('NX'));
-									const nxValue = nxKey ? obj[nxKey] : null;
-	
-									if (nxValue !== "" && nxValue !== null && nxValue !== undefined) {
-										acc.push(index); // giữ index gốc
-									}
-	
-									return acc;
-								}, []);
-	
-								this.panelC1_KT_KN = validIndexes //Array.from({ length: groupKTKNLength }, (_, i) => i)
-								this.panelC1_NLR = Array.from({ length: groupNLRLength }, (_, i) => i)
-								this.panelC1_PC = Array.from({ length: groupPCLength }, (_, i) => i)
-								this.panelC1_NLC = Array.from({ length: groupNLCLength }, (_, i) => i)
-							})
-						} else {
-							this.panelC2_C3 = Array.from({ length: res.data[0].length }, (_, i) => i)
-							this.dataHK_1_C2_C3 = {
-								Diem: res.data[0],
-								TongKet: res.data[1][0] ?? {}
-							}
-							this.dataHK_2_C2_C3 = {
-								Diem: res.data[2],
-								TongKet: res.data[3][0] ?? {}
-							}
-							this.dataCN_C2_C3 = {
-								Diem: res.data[4],
-								TongKet: res.data[5][0] ?? {}
-							}
-						}
-						resolve()
-					})
-	
-				})
-			},
-			updateDSMonHocGroup() {
-				this.DSMonHocGroup = [
-					{
-						MonHocGroup: 1,
-						Name_VI: this.$t('message.Skill_Knowledge'),
-						Name_EN: '',
-						icon: '/_cdn/lhbs-lms/kienthuc_ki_nang_icon.png',
-					},
-					{
-						MonHocGroup: 2,
-						Name_VI: this.$t('message.Common_Ability'),
-						Name_EN: '',
-						icon: '/_cdn/lhbs-lms/nang_luc_chung_icon.png',
-					},
-					{
-						MonHocGroup: 3,
-						Name_VI: this.$t('message.Quality'),
-						Name_EN: '',
-						icon: '/_cdn/lhbs-lms/pham_chat_icon.png',
-					},
-					{
-						MonHocGroup: 4,
-						Name_VI: this.$t('message.Personal_Ability'),
-						Name_EN: '',
-						icon: '/_cdn/lhbs-lms/nang_luc_rieng.png',
-					},
-				];
-			},
-			updateDSHocKy() {
+		'$i18n.locale': function (language) {
+			if (language === 'en') this.IsLanguage = true
+			else this.IsLanguage = false
+			this.updateDSMonHocGroup();
+		},
+		tab: async function (tab) {
+			if (tab) {
+				localStorage.setItem('Semester', tab)
 				if (vueData.HocSinhSelected.CapID === 1) {
-					this.DSHocKy = [
-						{
-							...this.DSHocKy[0],
-							id: 1,
-							name: `${this.$t('message.midSesemter')} 1`
-						},
-						{
-							...this.DSHocKy[1],
-							id: 2,
-							name: `${this.$t('message.finalSesemter')} 2`
-						},
-						{
-							...this.DSHocKy[3],
-							id: 3,
-							name: `${this.$t('message.midSesemter')} 1`
-						},
-						{
-							...this.DSHocKy[4],
-							id: 4,
-							name: `${this.$t('message.finalSesemter')} 2`
-						}
-					]
+					this.DSMonHoc_NhomDiem = await this.loadHocSinhKQHT(tab)
 				}
-				else {
-					this.DSHocKy = [
-						{
-							...this.DSHocKy[0],
-							name: `${this.$t('message.semester')} 1`
-	
-						},
-						{
-							...this.DSHocKy[1],
-							name: `${this.$t('message.semester')} 2`
+				this.loadHocSinhKQHT(tab)
+			}
+		}
+	},
+	methods: {
+		loadCongBoBangDiem() {
+			return new Promise(resolve => {
+				ajaxCALL('lms/CongBoBangDiem_Get',
+					{
+						CapID: vueData.HocSinhSelected.CapID,
+						NienKhoa: vueData.NienKhoa
+					},
+					res => {
+						const data = res.data
+						if (vueData.HocSinhSelected.CapID === 1) {
+							this.DSHocKy = data.map(x => {
+								let name = ''
+								if (x.KyDanhGia === 1) name = "GHKI"
+								if (x.KyDanhGia === 2) name = "CHKI"
+								if (x.KyDanhGia === 3) name = "GHKII"
+								if (x.KyDanhGia === 4) name = "CN"
+								return {
+									id: x.KyDanhGia,
+									name: name
+								}
+							})
 						}
-					]
-				}
-			},
-			fn_groupKTKN({
-				TVM, TVD, TVNX, TOM, TOD, TONX, KHM,
-				KHD, KHNX, SDM, SDD, SDNX, NNM, NND,
-				NNNX, THM, THD, THNX, CNM, CND, CNNX,
-				DTM, DTD, DTNX, DDM, DDNX, ANM, ANNX,
-				MTM, MTNX, KTM, KTNX, TDM, TDNX, STENX,
-				JANX, AINX, KNHNX, KNNNX, KNCNX
-			}) {
-				let data = {}
-				if (vueData.HocSinhSelected.CapID === 1 && [1, 2, 3].includes(vueData.HocSinhSelected.KhoiID)) {
-					data = {
-						"Tiếng Việt": {
-							TVM,
-							TVD,
-							TVNX
-						},
-						"Toán": {
-							TOM,
-							TOD,
-							TONX
-						},
-						"Tự nhiên và Xã hội": {
-							KHM,
-							KHD,
-							KHNX
-						},
-						// Mẫn sửa Lịch sử/Địa lí => Lịch sử và Địa lí
-						"Lịch sử/Địa lí": {
-							SDM,
-							SDD,
-							SDNX
-						},
-						"Ngoại ngữ": {
-							NNM,
-							NND,
-							NNNX
-						},
-						"Tin học và Công nghệ (Tin học)": {
-							THM,
-							THD,
-							THNX
-						},
-						"Tin học và Công nghệ (Công nghệ)": {
-							CNM,
-							CND,
-							CNNX
-						},
-						// "": { DTM, DTD, DTNX },
-						"Đạo đức": {
-							DDM,
-							DDNX
-						},
-						// Mẫn sửa Âm nhạc => Nghệ thuật (Âm nhạc)
-						"Âm nhạc": {
-							ANM,
-							ANNX
-						},
-						// Mẫn sửa Mĩ thuật => Nghệ thuật (Mĩ thuật)
-						"Mĩ thuật": {
-							MTM,
-							MTNX
-						},
-						"Hoạt động trải nghiệm": {
-							KTM,
-							KTNX
-						},
-						//Mẫn sửa Thể dục => Giáo dục thể chất (01/10/2025)
-						"Giáo dục thể chất": {
-							TDM,
-							TDNX
-						},
-						"STEM": {
-							STENX
-						},
-						"JA-GD Tài chính": {
-							JANX
-						},
-						"AI - Robotics": {
-							AINX
-						},
-						"GDKN - Học tập TK21": {
-							KNHNX
-						},
-						"GDKN-Vận động theo nhạc": {
-							KNNNX
-						},
-						"GDKN-Cờ vua": {
-							KNCNX
+						else {
+							this.DSHocKy = [{
+								id: 1,
+								name: `${this.$t('message.semester')} 1`
+							},
+							{
+								id: 2,
+								name: `${this.$t('message.semester')} 2`
+							},
+							{
+								id: 3,
+								name: `${this.$t('message.allYear')}`
+							}]
 						}
-					}
-				} else {
-					data = {
-						"Tiếng Việt": {
-							TVM,
-							TVD,
-							TVNX
-						},
-						"Toán": {
-							TOM,
-							TOD,
-							TONX
-						},
-						"Khoa học": {
-							KHM,
-							KHD,
-							KHNX
-						},
-						// Mẫn sửa Lịch sử/Địa lí => Lịch sử và Địa lí
-						"Lịch sử/Địa lí": {
-							SDM,
-							SDD,
-							SDNX
-						},
-						"Ngoại ngữ": {
-							NNM,
-							NND,
-							NNNX
-						},
-						"Tin học và Công nghệ (Tin học)": {
-							THM,
-							THD,
-							THNX
-						},
-						"Tin học và Công nghệ (Công nghệ)": {
-							CNM,
-							CND,
-							CNNX
-						},
-						// "": { DTM, DTD, DTNX },
-						"Đạo đức": {
-							DDM,
-							DDNX
-						},
-						// Mẫn sửa Âm nhạc => Nghệ thuật (Âm nhạc)
-						"Âm nhạc": {
-							ANM,
-							ANNX
-						},
-						// Mẫn sửa Mĩ thuật => Nghệ thuật (Mĩ thuật)
-						"Mĩ thuật": {
-							MTM,
-							MTNX
-						},
-						"Hoạt động trải nghiệm": {
-							KTM,
-							KTNX
-						},
-						//Mẫn sửa Thể dục => Giáo dục thể chất (01/10/2025)
-						"Giáo dục thể chất": {
-							TDM,
-							TDNX
-						},
-						"STEM": {
-							STENX
-						},
-						"JA-GD Tài chính": {
-							JANX
-						},
-						"AI - Robotics": {
-							AINX
-						},
-						"GDKN - Học tập TK21": {
-							KNHNX
-						},
-						"GDKN-Vận động theo nhạc": {
-							KNNNX
-						},
-						"GDKN-Cờ vua": {
-							KNCNX
+
+						console.log("data.length", data.length)
+						this.tab = 2//data.length
+						resolve()
+					})
+			})
+		},
+		loadDSMonHoc() {
+			return new Promise(resolve => {
+				ajaxCALL('lms/MonHoc_Get_ByCapID', {
+					CapID: vueData.HocSinhSelected.CapID
+				}, res => {
+					this.DSMonHoc = res.data
+					console.log("DsMonHoc", res.data)
+					resolve()
+				})
+			})
+
+		},
+		loadHocSinhKQHT(code) {
+			if (!vueData.NienKhoa || !code) return
+			return new Promise(async resolve => {
+				ajaxCALL('diemc3/LMS_GetBangDiem', {
+					HocSinhID: vueData.HocSinhSelected.HocSinhID,
+					Khoi: vueData.HocSinhSelected.KhoiID,
+					NamHoc: vueData.NienKhoa,
+					KyDanhGia: code,
+				}, res => {
+					if (vueData.HocSinhSelected.CapID === 1) {
+						const data = res.data[0] ?? {}
+						this.groupKTKN = this.fn_groupKTKN(data)
+						this.groupNLR = this.fn_groupNLR(data)
+						this.groupPC = this.fn_groupPC(data)
+						this.groupNLC = this.fn_groupNLC(data)
+
+						this.ChuyenCan_KQCN_C1 = {
+							khongphep: data?.khongphep,
+							cophep: data?.cophep,
+							ditre: data?.ditre,
+							khoiid: data?.khoiid,
+							khenthuong: data?.khenthuong,
+							renluyenhe: data?.renluyenhe,
+						}
+						//Gọi thêm để lấy điểm còn thiếu từ bên a Chiến
+						ajaxCALL('lms/LMS_OutSLL_GetKetQuaHocTap_ByHocSinhID', {
+							LopID: vueData.HocSinhSelected.LopID,
+							KyDanhGia: this.tab,
+							NamHoc: vueData.NienKhoa,
+							HocSinhID: vueData.HocSinhSelected.HocSinhID,
+						}, res => {
+							const data = res.data
+							const newData = []
+							const uniqueMonHoc = [...new Set(data.map(x => x.MonHocCode))]
+							for (var monHocCode of uniqueMonHoc) {
+								const obj = {}
+								const arrFilterMaCotDiem = data.filter(x => x.MonHocCode === monHocCode)
+								for (var maCotDiem of arrFilterMaCotDiem) {
+									obj[maCotDiem.MaCotDiem] = maCotDiem.KetQuaDanhGia
+								}
+								obj.HocSinhID = arrFilterMaCotDiem[0]?.HocSinhID
+								obj.MonHocCode = monHocCode
+								obj.MonHocName = arrFilterMaCotDiem[0]?.MonHocName
+								newData.push(obj)
+							}
+							const monHocFilter_HocSinh = newData.filter(x => this.List_MonHoc_Change.includes(x.MonHocName))
+
+							console.log("monHocFilter_HocSinh", monHocFilter_HocSinh)
+							let DiemSTEM = monHocFilter_HocSinh.find(x => x.MonHocName === 'STEM')?.DiemMonHoc
+							let DiemJA = monHocFilter_HocSinh.find(x => x.MonHocName === 'JA-GD Tài chính')?.DiemMonHoc
+							let DiemAI = monHocFilter_HocSinh.find(x => x.MonHocName === 'AI - Robotics')?.DiemMonHoc
+							let DiemGDKN_VDTN = monHocFilter_HocSinh.find(x => x.MonHocName === 'GDKN-Vận động theo nhạc')?.DiemMonHoc
+							let DiemGDKN_CV = monHocFilter_HocSinh.find(x => x.MonHocName === 'GDKN-Cờ vua')?.DiemMonHoc
+							let DiemGDKN_ATNA = monHocFilter_HocSinh.find(x => x.MonHocName === 'GDKN-Ẩm thực nấu ăn')?.DiemMonHoc
+
+							let SaoSTEM = monHocFilter_HocSinh.find(x => x.MonHocName === 'STEM')?.QuyDoiSao
+							let SaoJA = monHocFilter_HocSinh.find(x => x.MonHocName === 'JA-GD Tài chính')?.QuyDoiSao
+							let SaoAI = monHocFilter_HocSinh.find(x => x.MonHocName === 'AI - Robotics')?.QuyDoiSao
+							let SaoGDKN_VDTN = monHocFilter_HocSinh.find(x => x.MonHocName === 'GDKN-Vận động theo nhạc')?.QuyDoiSao
+							let SaoGDKN_CV = monHocFilter_HocSinh.find(x => x.MonHocName === 'GDKN-Cờ vua')?.QuyDoiSao
+							let SaoGDKN_ATNA = monHocFilter_HocSinh.find(x => x.MonHocName === 'GDKN-Ẩm thực nấu ăn')?.QuyDoiSao
+
+							let NhanXet_GDKN_ATNA = monHocFilter_HocSinh.find(x => x.MonHocName === 'GDKN-Ẩm thực nấu ăn')?.NhanXet
+
+							this.groupKTKN = {
+								...this.groupKTKN,
+								"STEM": {
+									// STED: DiemSTEM,
+									STES: SaoSTEM,
+									STENX: this.groupKTKN['STEM']?.STENX
+								},
+								"JA-GD Tài chính": {
+									// JAD: DiemJA,
+									JAS: SaoJA,
+									JANX: this.groupKTKN['JA-GD Tài chính']?.JANX
+								},
+								"AI - Robotics": {
+									// AID: DiemAI,
+									AIS: SaoAI,
+									AINX: this.groupKTKN['AI - Robotics']?.AINX
+								},
+								"GDKN-Vận động theo nhạc": {
+									// KNND: DiemGDKN_VDTN,
+									KNNS: SaoGDKN_VDTN,
+									KNNNX: this.groupKTKN['GDKN-Vận động theo nhạc']?.KNNNX
+								},
+								"GDKN-Cờ vua": {
+									// KNCD: DiemGDKN_CV,
+									KNCS: SaoGDKN_CV,
+									KNCNX: this.groupKTKN['GDKN-Cờ vua']?.KNCNX
+								},
+								"GDKN-Ẩm thực nấu ăn": {
+									// KNCD: DiemGDKN_CV,
+									KNATNAS: SaoGDKN_ATNA,
+									KNATNANX: NhanXet_GDKN_ATNA
+								}
+							}
+							console.log("SaoGDKN_ATNA", SaoGDKN_ATNA)
+							console.log("NhanXet_GDKN_ATNA", NhanXet_GDKN_ATNA)
+							console.log("this.groupKTKN =>", this.groupKTKN)
+
+							const groupKTKNLength = Object.keys(this.groupKTKN).length
+							const groupNLRLength = Object.keys(this.groupNLR).length
+							const groupPCLength = Object.keys(this.groupPC).length
+							const groupNLCLength = Object.keys(this.groupNLC).length
+
+							// Lấy toàn bộ keys và kèm index gốc
+							const keys = Object.keys(this.groupKTKN);
+							const validIndexes = keys.reduce((acc, key, index) => {
+								const obj = this.groupKTKN[key];
+								const nxKey = Object.keys(obj).find(k => k.includes('NX'));
+								const nxValue = nxKey ? obj[nxKey] : null;
+
+								if (nxValue !== "" && nxValue !== null && nxValue !== undefined) {
+									acc.push(index); // giữ index gốc
+								}
+
+								return acc;
+							}, []);
+
+							this.panelC1_KT_KN = validIndexes //Array.from({ length: groupKTKNLength }, (_, i) => i)
+							this.panelC1_NLR = Array.from({ length: groupNLRLength }, (_, i) => i)
+							this.panelC1_PC = Array.from({ length: groupPCLength }, (_, i) => i)
+							this.panelC1_NLC = Array.from({ length: groupNLCLength }, (_, i) => i)
+						})
+					} else {
+						this.panelC2_C3 = Array.from({ length: res.data[0].length }, (_, i) => i)
+						this.dataHK_1_C2_C3 = {
+							Diem: res.data[0],
+							TongKet: res.data[1][0] ?? {}
+						}
+						this.dataHK_2_C2_C3 = {
+							Diem: res.data[2],
+							TongKet: res.data[3][0] ?? {}
+						}
+						this.dataCN_C2_C3 = {
+							Diem: res.data[4],
+							TongKet: res.data[5][0] ?? {}
 						}
 					}
-				}
-				return data
-			},
-			fn_groupNLC({ NL1, NL2, NL3, NLC1NX, NLC2NX, NLC3NX }) {
-				const data = {
-					"Năng lực-Tự chủ và tự học": {
-						NL1,
-						NLC1NX
+					resolve()
+				})
+
+			})
+		},
+		updateDSMonHocGroup() {
+			this.DSMonHocGroup = [
+				{
+					MonHocGroup: 1,
+					Name_VI: this.$t('message.Skill_Knowledge'),
+					Name_EN: '',
+					icon: '/_cdn/lhbs-lms/kienthuc_ki_nang_icon.png',
+				},
+				{
+					MonHocGroup: 2,
+					Name_VI: this.$t('message.Common_Ability'),
+					Name_EN: '',
+					icon: '/_cdn/lhbs-lms/nang_luc_chung_icon.png',
+				},
+				{
+					MonHocGroup: 3,
+					Name_VI: this.$t('message.Quality'),
+					Name_EN: '',
+					icon: '/_cdn/lhbs-lms/pham_chat_icon.png',
+				},
+				{
+					MonHocGroup: 4,
+					Name_VI: this.$t('message.Personal_Ability'),
+					Name_EN: '',
+					icon: '/_cdn/lhbs-lms/nang_luc_rieng.png',
+				},
+			];
+		},
+		updateDSHocKy() {
+			if (vueData.HocSinhSelected.CapID === 1) {
+				this.DSHocKy = [
+					{
+						...this.DSHocKy[0],
+						id: 1,
+						name: `${this.$t('message.midSesemter')} 1`
 					},
-					"Năng lực-Giao tiếp và hợp tác": {
-						NL2,
-						NLC2NX
+					{
+						...this.DSHocKy[1],
+						id: 2,
+						name: `${this.$t('message.finalSesemter')} 2`
 					},
-					"Năng lực-Giải quyết vấn đề và sáng tạo": {
-						NL3,
-						NLC3NX
+					{
+						...this.DSHocKy[3],
+						id: 3,
+						name: `${this.$t('message.midSesemter')} 1`
+					},
+					{
+						...this.DSHocKy[4],
+						id: 4,
+						name: `${this.$t('message.finalSesemter')} 2`
 					}
-				}
-				return data
-			},
-			fn_groupPC({ PC1, PC2, PC3, PC4, PC5, PC1NX, PC2NX, PC3NX, PC4NX, PC5NX }) {
-				const data = {
-					"Phẩm chất-Yêu nước": {
-						PC1,
-						PC1NX
+				]
+			}
+			else {
+				this.DSHocKy = [
+					{
+						...this.DSHocKy[0],
+						name: `${this.$t('message.semester')} 1`
+
 					},
-					"Phẩm chất-Nhân ái": {
-						PC2,
-						PC2NX
-					},
-					"Phẩm chất-Chăm chỉ": {
-						PC3,
-						PC3NX
-					},
-					"Phẩm chất-Trung thực": {
-						PC4,
-						PC4NX
-					},
-					"Phẩm chất-Trách nhiệm": {
-						PC5,
-						PC5NX
+					{
+						...this.DSHocKy[1],
+						name: `${this.$t('message.semester')} 2`
 					}
-				}
-				return data
-			},
-			fn_groupNLR({
-				NLR1, NLR2, NLR3, NLR4, NLR5,
-				NLR6, NLR7, NLR1NX, NLR2NX, NLR3NX,
-				NLR4NX, NLR5NX, NLR6NX, NLR7NX
-			}) {
-				data = {
-					"Năng lực-Ngôn ngữ": {
-						NLR1,
-						NLR1NX
-					},
-					"Năng lực-Tính toán": {
-						NLR2,
-						NLR2NX
-					},
-					"Năng lực-Khoa học": {
-						NLR3,
-						NLR3NX
-					},
-					"Năng lực-Công nghệ": {
-						NLR4,
-						NLR4NX
-					},
-					"Năng lực-Tin học": {
-						NLR5,
-						NLR5NX
-					},
-					"Năng lực-Thẩm mĩ": {
-						NLR6,
-						NLR6NX
-					},
-					"Năng lực-Thể chất": {
-						NLR7,
-						NLR7NX
-					}
-				}
-				return data
-			},
-			getColorChipDiem,
-			getColorMucDoDanhGia(MucDoDanhGia) {
-				let color = ''
-				if (MucDoDanhGia === 'T') color = 'success'
-				if (MucDoDanhGia === 'H') color = 'primary'
-				if (MucDoDanhGia == 'Đ') color = 'primary'
-				if (MucDoDanhGia == 'Ð') color = 'primary' // Thêm IF unicode tránh bị sai
-				if (MucDoDanhGia === 'C') color = 'amber'
-				return color
-			},
-			getBgColorMucDoDanhGia(MucDoDanhGia) {
-				let color = ''
-				if (MucDoDanhGia === 'T') color = 'green-lighten-5'
-				if (MucDoDanhGia === 'H') color = 'blue-lighten-5'
-				if (MucDoDanhGia == 'Đ') color = 'blue-lighten-5'
-				if (MucDoDanhGia == 'Ð') color = 'blue-lighten-5' // Thêm IF unicode tránh bị sai
-				if (MucDoDanhGia === 'C') color = 'amber-lighten-3'
-				return color
-			},
-			isCheckEmpty(valueList, value) {
-				let flag = false
-				if ((value[valueList.find(it => it.endsWith('NX'))] === '')) flag = true
-				return flag
+				]
 			}
 		},
-	}
+		fn_groupKTKN({
+			TVM, TVD, TVNX, TOM, TOD, TONX, KHM,
+			KHD, KHNX, SDM, SDD, SDNX, NNM, NND,
+			NNNX, THM, THD, THNX, CNM, CND, CNNX,
+			DTM, DTD, DTNX, DDM, DDNX, ANM, ANNX,
+			MTM, MTNX, KTM, KTNX, TDM, TDNX, STENX,
+			JANX, AINX, KNHNX, KNNNX, KNCNX
+		}) {
+			let data = {}
+			if (vueData.HocSinhSelected.CapID === 1 && [1, 2, 3].includes(vueData.HocSinhSelected.KhoiID)) {
+				data = {
+					"Tiếng Việt": {
+						TVM,
+						TVD,
+						TVNX
+					},
+					"Toán": {
+						TOM,
+						TOD,
+						TONX
+					},
+					"Tự nhiên và Xã hội": {
+						KHM,
+						KHD,
+						KHNX
+					},
+					// Mẫn sửa Lịch sử/Địa lí => Lịch sử và Địa lí
+					"Lịch sử/Địa lí": {
+						SDM,
+						SDD,
+						SDNX
+					},
+					"Ngoại ngữ": {
+						NNM,
+						NND,
+						NNNX
+					},
+					"Tin học và Công nghệ (Tin học)": {
+						THM,
+						THD,
+						THNX
+					},
+					"Tin học và Công nghệ (Công nghệ)": {
+						CNM,
+						CND,
+						CNNX
+					},
+					// "": { DTM, DTD, DTNX },
+					"Đạo đức": {
+						DDM,
+						DDNX
+					},
+					// Mẫn sửa Âm nhạc => Nghệ thuật (Âm nhạc)
+					"Âm nhạc": {
+						ANM,
+						ANNX
+					},
+					// Mẫn sửa Mĩ thuật => Nghệ thuật (Mĩ thuật)
+					"Mĩ thuật": {
+						MTM,
+						MTNX
+					},
+					"Hoạt động trải nghiệm": {
+						KTM,
+						KTNX
+					},
+					//Mẫn sửa Thể dục => Giáo dục thể chất (01/10/2025)
+					"Giáo dục thể chất": {
+						TDM,
+						TDNX
+					},
+					"STEM": {
+						STENX
+					},
+					"JA-GD Tài chính": {
+						JANX
+					},
+					"AI - Robotics": {
+						AINX
+					},
+					"GDKN - Học tập TK21": {
+						KNHNX
+					},
+					"GDKN-Vận động theo nhạc": {
+						KNNNX
+					},
+					"GDKN-Cờ vua": {
+						KNCNX
+					}
+				}
+			} else {
+				data = {
+					"Tiếng Việt": {
+						TVM,
+						TVD,
+						TVNX
+					},
+					"Toán": {
+						TOM,
+						TOD,
+						TONX
+					},
+					"Khoa học": {
+						KHM,
+						KHD,
+						KHNX
+					},
+					// Mẫn sửa Lịch sử/Địa lí => Lịch sử và Địa lí
+					"Lịch sử/Địa lí": {
+						SDM,
+						SDD,
+						SDNX
+					},
+					"Ngoại ngữ": {
+						NNM,
+						NND,
+						NNNX
+					},
+					"Tin học và Công nghệ (Tin học)": {
+						THM,
+						THD,
+						THNX
+					},
+					"Tin học và Công nghệ (Công nghệ)": {
+						CNM,
+						CND,
+						CNNX
+					},
+					// "": { DTM, DTD, DTNX },
+					"Đạo đức": {
+						DDM,
+						DDNX
+					},
+					// Mẫn sửa Âm nhạc => Nghệ thuật (Âm nhạc)
+					"Âm nhạc": {
+						ANM,
+						ANNX
+					},
+					// Mẫn sửa Mĩ thuật => Nghệ thuật (Mĩ thuật)
+					"Mĩ thuật": {
+						MTM,
+						MTNX
+					},
+					"Hoạt động trải nghiệm": {
+						KTM,
+						KTNX
+					},
+					//Mẫn sửa Thể dục => Giáo dục thể chất (01/10/2025)
+					"Giáo dục thể chất": {
+						TDM,
+						TDNX
+					},
+					"STEM": {
+						STENX
+					},
+					"JA-GD Tài chính": {
+						JANX
+					},
+					"AI - Robotics": {
+						AINX
+					},
+					"GDKN - Học tập TK21": {
+						KNHNX
+					},
+					"GDKN-Vận động theo nhạc": {
+						KNNNX
+					},
+					"GDKN-Cờ vua": {
+						KNCNX
+					}
+				}
+			}
+			return data
+		},
+		fn_groupNLC({ NL1, NL2, NL3, NLC1NX, NLC2NX, NLC3NX }) {
+			const data = {
+				"Năng lực-Tự chủ và tự học": {
+					NL1,
+					NLC1NX
+				},
+				"Năng lực-Giao tiếp và hợp tác": {
+					NL2,
+					NLC2NX
+				},
+				"Năng lực-Giải quyết vấn đề và sáng tạo": {
+					NL3,
+					NLC3NX
+				}
+			}
+			return data
+		},
+		fn_groupPC({ PC1, PC2, PC3, PC4, PC5, PC1NX, PC2NX, PC3NX, PC4NX, PC5NX }) {
+			const data = {
+				"Phẩm chất-Yêu nước": {
+					PC1,
+					PC1NX
+				},
+				"Phẩm chất-Nhân ái": {
+					PC2,
+					PC2NX
+				},
+				"Phẩm chất-Chăm chỉ": {
+					PC3,
+					PC3NX
+				},
+				"Phẩm chất-Trung thực": {
+					PC4,
+					PC4NX
+				},
+				"Phẩm chất-Trách nhiệm": {
+					PC5,
+					PC5NX
+				}
+			}
+			return data
+		},
+		fn_groupNLR({
+			NLR1, NLR2, NLR3, NLR4, NLR5,
+			NLR6, NLR7, NLR1NX, NLR2NX, NLR3NX,
+			NLR4NX, NLR5NX, NLR6NX, NLR7NX
+		}) {
+			data = {
+				"Năng lực-Ngôn ngữ": {
+					NLR1,
+					NLR1NX
+				},
+				"Năng lực-Tính toán": {
+					NLR2,
+					NLR2NX
+				},
+				"Năng lực-Khoa học": {
+					NLR3,
+					NLR3NX
+				},
+				"Năng lực-Công nghệ": {
+					NLR4,
+					NLR4NX
+				},
+				"Năng lực-Tin học": {
+					NLR5,
+					NLR5NX
+				},
+				"Năng lực-Thẩm mĩ": {
+					NLR6,
+					NLR6NX
+				},
+				"Năng lực-Thể chất": {
+					NLR7,
+					NLR7NX
+				}
+			}
+			return data
+		},
+		getColorChipDiem,
+		getColorMucDoDanhGia(MucDoDanhGia) {
+			let color = ''
+			if (MucDoDanhGia === 'T') color = 'success'
+			if (MucDoDanhGia === 'H') color = 'primary'
+			if (MucDoDanhGia == 'Đ') color = 'primary'
+			if (MucDoDanhGia == 'Ð') color = 'primary' // Thêm IF unicode tránh bị sai
+			if (MucDoDanhGia === 'C') color = 'amber'
+			return color
+		},
+		getBgColorMucDoDanhGia(MucDoDanhGia) {
+			let color = ''
+			if (MucDoDanhGia === 'T') color = 'green-lighten-5'
+			if (MucDoDanhGia === 'H') color = 'blue-lighten-5'
+			if (MucDoDanhGia == 'Đ') color = 'blue-lighten-5'
+			if (MucDoDanhGia == 'Ð') color = 'blue-lighten-5' // Thêm IF unicode tránh bị sai
+			if (MucDoDanhGia === 'C') color = 'amber-lighten-3'
+			return color
+		},
+		isCheckEmpty(valueList, value) {
+			let flag = false
+			if ((value[valueList.find(it => it.endsWith('NX'))] === '')) flag = true
+			return flag
+		}
+	},
+}
 </script>

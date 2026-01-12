@@ -1,57 +1,75 @@
 <template>
-	<v-card>
-		<v-card-title>
-			{{ pageTitle }} • {{ vueData.TitleCap }}
-		</v-card-title>
+	<div>
+		<v-card>
+			<v-card-title>
+				{{ pageTitle }} • {{ vueData.TitleCap }}
+			</v-card-title>
 
-		<v-card-text>
-			<uc-filter v-model="filter" @onRefresh="onRefresh" />
-		</v-card-text>
-		<v-divider />
-		<v-card-text class="d-flex mt-2">
-			<div>
-				<p>Tổng số học sinh: {{DSHocSinh.length}}</p>
-				*Lưu ý:
-			</div>
-			<v-spacer />
-			<v-menu>
-				<template v-slot:activator="{ props }">
-					<v-btn color="primary" v-bind="props" icon="" size="small" variant="outlined" />
-				</template>
-				<v-list>
-					<v-list-item title="Xuất Excel" @click="onExportExcel" />
-					<v-list-item title="Lưu tạm" @click="onLuuTam" />
-					<v-list-item title="Khóa cột điểm" @click="onKhoaCotDiem" />
-					<v-list-item title="Gửi BGH" @click="onGuiBGH" />
-					<!-- <v-list-item title="" /> -->
-				</v-list>
-			</v-menu>
-		</v-card-text>
-		<v-card-text>
-			<uc-jexcel v-if="hasStudents" :key="keyComp" v-model="vueData.instance" v-model:dataSource="DSHocSinh"
-				class="height-excel" :freeze-columns="freezeColumns" :columns="headers" :comments="comments"
-				:styleSheet="styleSheet" :nestedHeaders="shouldShowNestedHeaders ? nestedHeaders : []"
-				:rootDataSource="DSHocSinh_API" />
-			<uc-card-empty v-else />
-		</v-card-text>
-	</v-card>
+			<v-card-text>
+				<uc-filter v-model="filter" @onRefresh="onRefresh" />
+			</v-card-text>
+			<v-divider />
+			<v-card-text class="d-flex mt-2">
+				<div>
+					<p>Tổng số học sinh: {{DSHocSinh.length}}</p>
+					*Lưu ý:
+				</div>
+				<v-spacer />
+				<v-menu>
+					<template v-slot:activator="{ props }">
+						<v-btn color="primary" v-bind="props" icon="mdi-dots-vertical" size="small"
+							variant="outlined" />
+					</template>
+					<v-list>
+						<v-list-subheader>Thao tác</v-list-subheader>
+						<v-list-item title="Lưu tạm" @click="onLuuTam" prepend-icon="mdi-content-save-outline" />
+						<v-list-item title="Khóa cột điểm" @click="onOpenDialogKhoaCotDiem"
+							prepend-icon="mdi-lock-outline" />
+						<v-list-item title="Gửi BGH" @click="onGuiBGH" prepend-icon="mdi-send-outline" />
+						<v-divider />
+						<v-list-subheader>Khác</v-list-subheader>
+						<v-list-item title="Mẫu nhận xét" @click="onOpenMauNhanXet" />
+						<v-list-item title="Lấy điểm Test (Theme)" @click="onGetDiemTest" />
+						<v-divider />
+						<v-list-item title="Xuất Excel" @click="onExportExcel" />
+					</v-list>
+				</v-menu>
+			</v-card-text>
+			<v-card-text>
+				<uc-jexcel v-if="hasStudents" :key="keyComp" v-model="instance" v-model:dataSource="DSHocSinh"
+					class="height-excel" :freeze-columns="freezeColumns" :columns="headers" :comments="comments"
+					:styleSheet="styleSheet" :nestedHeaders="shouldShowNestedHeaders ? nestedHeaders : []"
+					:rootDataSource="DSHocSinh_API" @onChange="onChangeSheet" />
+				<uc-card-empty v-else />
+			</v-card-text>
+		</v-card>
+		<uc-dialog-khoa-cot-diem v-model="action.isShowDialogKhoaCotDiem" :filter :DSKhoaCotDiem_API
+			:DSCotDiem="DSCotDiem_ByMaNhomCotDiem" @onKhoaCotDiem="(cd) => onKhoaCotDiem(cd, true)" />
+		<uc-dialog-mau-nhan-xet v-model="action.isShowDialogMauNhanXet" :filter v-model:DSHocSinh="DSHocSinh" />
+	</div>
 </template>
 
 <script>
 	export default {
-		name: 'GradeEntryComponent',
-	
-		props: [],
-	
+		props: {},
 		data() {
 			return {
 				vueData,
+				action: {
+					isShowDialogKhoaCotDiem: false,
+					isShowDialogMauNhanXet: false
+				},
 				filter: {
 					KhoiItem: null,
 					LopItem: null,
 					MonHocItem: null,
 					MaNhomCotDiemItem: null
 				},
+	
+				dataBeforeInsertToDB: [],
+				editedCells: [],
+				DSKhoaCotDiem_API: [],
+				DSCotDiem_ByMaNhomCotDiem: [],
 				DSHocSinh_API: [],
 				DSHocSinh: [],
 				DataExcel: [],
@@ -131,7 +149,6 @@
 		watch: {
 			filter: {
 				handler(filter) {
-					console.log("watch", filter)
 					if (filter.KhoiItem === null ||
 						filter.LopItem === null ||
 						filter.MonHocItem === null ||
@@ -151,6 +168,7 @@
 			 */
 			async onRefresh() {
 				await this.fetchStudentData();
+				await this.getKhoaDSCotDiem()
 				this.processStudentList();
 				this.initFreezeColumn();
 				this.initHeader();
@@ -222,7 +240,12 @@
 					item => item.HocSinhID === firstStudent.HocSinhID
 				);
 	
-				window.DSCotDiem_ByMaNhomCotDiem = gradeColumns;
+				this.DSCotDiem_ByMaNhomCotDiem = gradeColumns.map(x => {
+					return {
+						title: x.TenCotDiem_VI,
+						value: x.MaCotDiem
+					}
+				});
 	
 				this.nestedHeaders = this.buildNestedHeaders(gradeColumns);
 				this.headers = [
@@ -324,15 +347,25 @@
 			 */
 			buildGradeColumns(gradeColumns) {
 				return gradeColumns.map(column => {
+					let title = this.isEnglishSubject ? column.TenHienThi_EN : column.TenHienThi_VI
+					let backGroundColor = column.HexBackground
+					let width = parseInt(column?.WidthCSS ?? 80)
+					const TinhTrangDaKhoa = this.DSKhoaCotDiem_API.find(x => x.MaCotDiem === column.MaCotDiem)?.TinhTrang
+					if (TinhTrangDaKhoa) {
+						title += ' (KHÓA)'
+						backGroundColor = '#c1c1c157'
+						width += 25
+					}
 					const columnConfig = {
-						title: this.isEnglishSubject ? column.TenHienThi_EN : column.TenHienThi_VI,
+						title,
 						name: column.MaCotDiem,
-						width: column.WidthCSS,
+						width,
 						typeValue: column.GiaTriCotDiem,
-						backGroundColor: column.HexBackground,
+						backGroundColor,
 						wrap: true,
 						readOnly: this.isColumnReadOnly(column)
 					};
+					console.log("columnConfig", columnConfig)
 	
 					return this.buildColumnByType(column.GiaTriCotDiem, columnConfig, column);
 				});
@@ -342,7 +375,8 @@
 			 * Kiểm tra cột có readonly không
 			 */
 			isColumnReadOnly(column) {
-				return column.LoaiCotDiem === this.FORMULA_COLUMN || this.isDisabled;
+				const TinhTrangDaKhoa = this.DSKhoaCotDiem_API.find(x => x.MaCotDiem === column.MaCotDiem)?.TinhTrang
+				return column.LoaiCotDiem === this.FORMULA_COLUMN || this.isDisabled || TinhTrangDaKhoa;
 			},
 	
 			/**
@@ -531,7 +565,7 @@
 				}
 	
 				// Kiểm tra kết quả chủ đề tiếng Anh
-				if (this.isEnglishSubject && isGetResultTopic(column)) {
+				if (this.isEnglishSubject && this.isGetResultTopic(column)) {
 					return true;
 				}
 	
@@ -549,7 +583,17 @@
 	
 				return false;
 			},
-	
+			isGetResultTopic(cotDiem) {
+				return (
+					this.filter.MaNhomCotDiemItem.MaNhomCotDiem.includes('DiemGK_') ||
+					this.filter.MaNhomCotDiemItem.MaNhomCotDiem.includes('DiemCK_')
+				)
+					&&
+					(
+						!cotDiem.MaCotDiem.includes('DiemGK_') || !cotDiem.MaCotDiem.includes('DiemCK_') ||
+						!cotDiem.MaCotDiem.includes('DiemTBGK_') || !cotDiem.MaCotDiem.includes('DiemTBCK_')
+					)
+			},
 			/**
 			 * Khởi tạo comment và style cho các ô
 			 */
@@ -636,17 +680,155 @@
 					rowIndex++;
 				});
 			},
+			validateSave(typeCell, value, min, max) {
+				if (value == null || value == '') return 0
+				if (typeCell === 'number' && (value < min || value > max)) return 1
+				else return 0
+			},
+			onChangeSheet(options) {
+				setTimeout(() => {
+					this.process(options)
+				}, 0)
+			},
+			process({ instance, cell, x, y, value, dataObjects }) {
+				const cellName = instance.getValueFromCoords(x, y);
+				// Nếu ô này chưa có trong danh sách thì thêm vào
+				if (!this.editedCells.some(c => c.x === x && c.y === y)) {
+					this.editedCells.push({ x, y, cellName, value });
+				} else {
+					// Nếu đã có, thì cập nhật lại giá trị mới
+					const index = this.editedCells.findIndex(c => c.x === x && c.y === y);
+					this.editedCells[index].value = value;
+				}
+			},
+			processBeforePushAPI() {
+				const dataBeforeInsertToDB = []
+				for (var i = 0; i < this.DSHocSinh.length; i++) {
+					const hocSinh = this.DSHocSinh[i]
+					for (var j = 0; j < this.DSHocSinh_API.length; j++) {
+						const exists = this.editedCells.find(cell => cell.x == j && cell.y == i)
+						if (!exists) continue
+						const currentJ = j - this.freezeColumns
+						const currentI = i
+						const cotDiem = this.DSHocSinh_API[currentJ]
+						const cellAdresss = jspreadsheet.helpers.getCellNameFromCoords(currentJ, currentI) // (j+3) là địa chỉ cột điểm đầu tiên, i là row
+						let giaTriCotDiem = hocSinh[cotDiem.MaCotDiem] //MaCotDiem
+						if (cotDiem.LoaiCotDiem === 'Công thức')
+							giaTriCotDiem = this.instance[0].records[currentI][currentJ]?.element?.innerHTML
+						if (cotDiem.GiaTriCotDiem === 'number') {
+							if (giaTriCotDiem === null || giaTriCotDiem === NaN || giaTriCotDiem === '') {
+								giaTriCotDiem = ''
+							}
+						}
+						let cotDiem_HS = {
+							HocSinhID: hocSinh.HocSinhID,
+							LopID: this.filter.LopItem.LopID,
+							NienKhoa: vueData.NienKhoa,
+							CotDiemID: cotDiem.CotDiemID,
+							KetQuaDanhGia_VI: giaTriCotDiem,
+							KetQuaDanhGia_EN: giaTriCotDiem,
+							KQHTID: this.DSHocSinh_API.find(x => x.HocSinhID === hocSinh.HocSinhID && x.MaCotDiem === cotDiem.MaCotDiem)?.KQHTID ?? 0
+						}
+						let typeColumn = cotDiem.GiaTriCotDiem
+						let value = cotDiem_HS.KetQuaDanhGia_VI
+						const min = cotDiem.DiemMin
+						const max = cotDiem.DiemMax
+						cotDiem_HS.IsError = this.validateSave(typeColumn, value, min, max)
+						if (cotDiem_HS.IsError === 1) {
+							this.instance[0].setStyle(cellAdresss, 'background-color', 'red')
+							Vue.$toast.error(`Cột điểm chỉ cho phép nhập thang điểm từ ${min} đến ${max}!`, { position: 'top' })
+							return undefined
+						}
+						cotDiem_HS.KetQuaDanhGia_VI = cotDiem_HS.KetQuaDanhGia_VI === NaN ? null : cotDiem_HS.KetQuaDanhGia_VI
+						dataBeforeInsertToDB.push(cotDiem_HS)
+					}
+				}
+				return dataBeforeInsertToDB
+			},
 			onExportExcel() {
 	
 			},
-			onLuuTam() {
+			async onLuuTam() {
+				let data = this.processBeforePushAPI()
+				if (!data) return
+				let validIndex = data.findIndex((item) => item.IsError === 1)
+				if (validIndex != -1) {
+					return Vue.$toast.error('Cột điểm chỉ cho phép nhập thang điểm 10!', { position: 'top' })
+				}
+				data = data.filter(x =>
+					(x.KQHTID && x.KQHTID > 0) || // Nếu KQHTID tồn tại và lớn hơn 0 thì giữ lại
+					(
+						x.KetQuaDanhGia_VI != null &&
+						x.KetQuaDanhGia_VI !== '' &&
+						!Number.isNaN(x.KetQuaDanhGia_VI)
+					) // Hoặc KetQuaDanhGia_VI hợp lệ thì giữ lại
+				);
 	
+				data = data.filter(x => !Number.isNaN(x.KetQuaDanhGia_VI)) //Filter thêm lần nữa khi có Công thức ko có tính được 'Error: #VALUE!'
+				await this.insData(data)
+				if ([2, 3].includes(vueData.CapID)) {
+					for (var cd of this.DSCotDiem_ByMaNhomCotDiem) {
+						await this.apiKhoaCotDiem(cd.value, false)
+					}
+					// this.updateTinhTrangC2_C3(1)
+				} else {
+					// this.updateTinhTrang()
+				}
+				await this.onRefresh()
 			},
-			onKhoaCotDiem() {
-	
+			onOpenDialogKhoaCotDiem() {
+				this.action.isShowDialogKhoaCotDiem = true
+			},
+			async onKhoaCotDiem(MaCotDiem, IsKhoaCotDiem) {
+				await this.apiKhoaCotDiem(MaCotDiem, IsKhoaCotDiem)
+				await this.onRefresh()
+			},
+			async apiKhoaCotDiem(MaCotDiem, IsKhoaCotDiem) {
+				return await ajaxCALLPromise("lms/KhoaCotDiem_Ins_And_Upd", {
+					LopID: this.filter.LopItem.LopID,
+					MonHocLopID: this.filter.MonHocItem.MonHocLopID,
+					MaCotDiem,
+					IsKhoaCotDiem
+				})
 			},
 			onGuiBGH() {
 	
+			},
+			onOpenMauNhanXet() {
+				this.action.isShowDialogMauNhanXet = true
+			},
+			onGetDiemTest() { },
+			async updateTinhTrang() {
+				ajaxCALLPromise("lms/KhoaCotDiem_Ins_And_Upd", {
+					LopID: this.filter.LopItem.LopID,
+					MonHocLopID: this.filter.MonHocLopItem.MonHocLopID,
+					// MaCotDiem: this.filter.LopItem.LopID,
+				})
+			},
+			async updateTinhTrangC2_C3(TinhTrang) {
+				// return await ajaxCALLPromise("lms/KQHT_MonHocLop_TinhTrang_Udp_C2_C3", {
+				// 	NienKhoa: vueData.NienKhoa,
+				// 	LopID: this.filter.LopItem.LopID,
+				// 	MonHocLopID: this.filter.MonHocItem.MonHocLopID,
+				// 	MaNhomCotDiem: this.filter.MaNhomCotDiemItem.MaNhomCotDiem,
+				// 	TinhTrang
+				// })
+			},
+			async insData(KetQuaObjArr) {
+				return await ajaxCALLPromise("lms/KQHT_MonHocLop_Ins", {
+					NienKhoa: vueData.NienKhoa,
+					MonHocLopID: this.filter.MonHocItem.MonHocLopID,
+					LopID: this.filter.LopItem.LopID,
+					MonHocID: this.filter.MonHocItem.MonHocID,
+					TemplateBangDiemID: this.filter.MonHocItem.TemplateBangDiemID,
+					KetQuaObjArr
+				})
+			},
+			async getKhoaDSCotDiem() {
+				this.DSKhoaCotDiem_API = await ajaxCALLPromise("lms/KhoaCotDiem_Get", {
+					LopID: this.filter.LopItem.LopID,
+					MonHocLopID: this.filter.MonHocItem.MonHocLopID
+				})
 			}
 		}
 	}

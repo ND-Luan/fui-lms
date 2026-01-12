@@ -4,7 +4,7 @@
 			<v-card-title class="d-flex bg-primary ChamBaiDialog" style="max-height: 48px">
 				<span class="text-white">{{ TitlePage }}</span>
 				<v-spacer></v-spacer>
-				<v-btn @click="onClose()" variant="text" icon="mdi-close"></v-btn>
+				<v-btn @click="onClose()" variant="text" icon="mdi-close" color="white"></v-btn>
 			</v-card-title>
 			<v-card-text class="pa-0 i">
 				<iframe class="position-absolute" :src="url" width="100%" allow="fullscreen" style="border:none;"

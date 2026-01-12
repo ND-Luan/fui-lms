@@ -137,7 +137,7 @@ export default {
 				}
 			]
 			return {
-				worksheets: worksheets,
+				worksheets,
 				contextMenu: function () { return false; },
 				onchange: this.changed,
 				onload: this.onLoad ? this.onLoad : this.onload,
@@ -225,6 +225,7 @@ export default {
 			this.$emit('addressCell', [x, y]);
 		},
 		onselection(instance, x1, y1, x2, y2, origin) {
+			// console.log(instance, x1, y1, x2, y2, origin)
 			//v5
 			// console.log(this.jExcelObj[0].getValueFromCoords(x1, y1))
 			// let cellName = jspreadsheet.helpers

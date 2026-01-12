@@ -568,7 +568,7 @@ export default {
 			console.log('this.selectedMonHocID ', this.selectedMonHocID)
 		},
 		async fetchSubjectsByClass(lopId) {
-			await ajaxCALL("lms/EL_Teacher_GetSubjectsByClass", { LopID: lopId, HocKi: vueData.NienKhoaItem.HocKi }, (res) => {
+			await ajaxCALL("lms/EL_Teacher_GetSubjectsByClass", { LopID: lopId, HocKi: vueData.NienKhoaItem?.HocKi }, (res) => {
 				this.monHocList = res.data || [];
 				if (this.monHocList.length > 0) {
 					this.selectedMonHocID = this.monHocList.find(x => x.MonHocID == parseInt(this.monhocid))?.MonHocID ?? this.monHocList[0].MonHocID;
@@ -576,7 +576,7 @@ export default {
 			});
 		},
 		async fetchAssignmentsByClass(lopId, monHocId) {
-			await ajaxCALL("lms/EL_Teacher_GetAssignmentsByClass_AssignToStudent", { KhoiID: this.selectedKhoiID, MonHocID: monHocId, HocKi: vueData.NienKhoaItem.HocKi }, (res) => {
+			await ajaxCALL("lms/EL_Teacher_GetAssignmentsByClass_AssignToStudent", { KhoiID: this.selectedKhoiID, MonHocID: monHocId, HocKi: vueData.NienKhoaItem?.HocKi }, (res) => {
 				this.assignmentList = res.data || [];
 				if (this.assignmentList.length > 0) {
 					console.log('this.assignmentList', this.assignmentList)
@@ -602,7 +602,7 @@ export default {
 		async fetchAssignmentStatsAssignToStudent(AssignToStudentID) {
 			await ajaxCALL("lms/EL_Teacher_GetAssignmentStats_AssignToStudent", {
 				AssignToStudentID: AssignToStudentID,
-				HocKi: vueData.NienKhoaItem.HocKi
+				HocKi: vueData.NienKhoaItem?.HocKi
 			}, (res) => {
 				this.stats = res.data[0] || {};
 			});
@@ -610,7 +610,7 @@ export default {
 		async fetchMostIncorrectQuestionsAssignToStudent(AssignToStudentID) {
 			await ajaxCALL("lms/EL_Teacher_GetMostIncorrectQuestions_AssignToStudent", {
 				AssignToStudentID: AssignToStudentID,
-				HocKi: vueData.NienKhoaItem.HocKi
+				HocKi: vueData.NienKhoaItem?.HocKi
 			}, (res) => {
 				this.mostIncorrect = res.data || [];
 			});
@@ -619,7 +619,7 @@ export default {
 			vueData.loading = true;
 			await ajaxCALL("lms/EL_Teacher_GetSubmissionStatusByStudent_AssignToStudent", {
 				AssignToStudentID: AssignToStudentID,
-				HocKi: vueData.NienKhoaItem.HocKi
+				HocKi: vueData.NienKhoaItem?.HocKi
 			}, (res) => {
 				let handleData = res.data || [];
 				this.studentSubmissionsOriginal = res.data || [];
@@ -696,7 +696,7 @@ export default {
 			return new Promise((resolve, reject) => {
 				ajaxCALL('lms/EL_Teacher_GetKhoi_MonHoc_ByGiaoVienID', {
 					NienKhoa: vueData.NienKhoa,
-					HocKi: vueData.NienKhoaItem.HocKi
+					HocKi: vueData.NienKhoaItem?.HocKi
 				}, res => {
 					resolve(res.data)
 				})

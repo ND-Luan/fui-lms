@@ -16,8 +16,8 @@
 			<v-list>
 				<v-list-subheader>Niên khóa</v-list-subheader>
 				<v-list-item v-for="(item, index) in DSNienKhoa" :key="index" :value="index"
-					:class="vueData.NienKhoa === item.NienKhoa ? 'bg-primary' : ''">
-					<v-list-item-title @click="selectedNienKhoa(item)"> {{ item.NienKhoa }}</v-list-item-title>
+					:class="vueData.NienKhoaItem.NienKhoaID === item.NienKhoaID ? 'bg-primary' : ''">
+					<v-list-item-title @click="selectedNienKhoa(item)"> {{ item.NienKhoa }} - HK{{item.HocKi}}</v-list-item-title>
 				</v-list-item>
 			</v-list>
 		</v-menu>
@@ -29,7 +29,7 @@
 			<v-list>
 				<v-list-subheader>Niên khóa</v-list-subheader>
 				<v-list-item v-for="(item, index) in DSNienKhoa" :key="index" :value="index"
-					:class="vueData.NienKhoa === item.NienKhoa ? 'bg-primary' : ''">
+					:class="vueData.NienKhoaItem.NienKhoaID === item.NienKhoaID ? 'bg-primary' : ''">
 					<v-list-item-title @click="()=> {selectedNienKhoa(item); sheet = false; }">
 						{{ item.NienKhoa }} • {{item.TenLop}}
 					</v-list-item-title>
@@ -114,6 +114,7 @@
 					vueData.NienKhoa = res.data.filter(item => item.IsActive == 1)[0].NienKhoa
 					vueData.NienKhoaItem = res.data.find(item => item.IsActive == 1)
 					localStorage.setItem("NienKhoa", vueData.NienKhoa)
+					localStorage.setItem("HocKi", vueData.NienKhoaItem.HocKi)
 				}
 				this.isLoading = false
 			},
@@ -121,6 +122,7 @@
 				vueData.NienKhoa = item.NienKhoa
 				vueData.NienKhoaItem = item
 				localStorage.setItem("NienKhoa", vueData.NienKhoa)
+				localStorage.setItem("HocKi", vueData.NienKhoaItem.HocKi)
 			}
 		}
 	}
