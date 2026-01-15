@@ -1,6 +1,6 @@
 <template>
 	<v-navigation-drawer v-model="isOpen" temporary location="end" width="400">
-		<v-list-item prepend-icon="" class="bg-white position-sticky top-0" style="z-index: 50;">
+		<v-list-item prepend-icon="" class="bg-white position-sticky top-0" style="z-index: 50; height: 50px">
 			<template #prepend>
 				<v-icon size="small">mdi-library-shelves</v-icon>
 			</template>
@@ -27,7 +27,7 @@
 		<v-divider></v-divider>
 		<div class="pa-2 d-flex ga-2" v-if="DSMonHoc.length > 0">
 			<v-spacer></v-spacer>
-			<v-btn color="pink" variant="tonal" size="small" @click="onOpenKhoNoiDung()"
+			<v-btn color="pink" variant="outlined" size="small" @click="onOpenKhoNoiDung()"
 				v-tooltip="$i18n.locale == 'en' ? 'Content Library' : 'Kho nội dung'">
 				<v-icon>mdi-archive-outline</v-icon>
 				<span class="text-subtitle-2" style="font-size: .775rem !important;">
@@ -36,7 +36,7 @@
 			</v-btn>
 			<v-menu transition="slide-y-transition">
 				<template v-slot:activator="{ props }">
-					<v-btn color="primary" variant="tonal" size="small" v-bind="props" v-tooltip="tooltipCreateContent">
+					<v-btn color="primary" variant="outlined" size="small" v-bind="props" v-tooltip="tooltipCreateContent">
 						<v-icon>mdi-plus</v-icon>
 						<span class="text-subtitle-2" style="font-size: .775rem !important;">{{
 							$t('message.CreateContent') }}</span>

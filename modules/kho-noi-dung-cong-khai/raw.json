@@ -3,7 +3,11 @@
         {
             "KhoiID": "parseInt(KhoiID)",
             "MonHocID": "parseInt(MonHocID)",
-            "NienKhoa": "parseInt(NienKhoa)"
+            "NienKhoa": "parseInt(NienKhoa)",
+            "NienKhoaItem": null
+        },
+        {
+            "EXE":"initPage()"
         }
     ],
     "watch": {},
@@ -17,7 +21,7 @@
                         {
                             "el": "uc-main-page",
                             "attr": {
-                                "v-if": "NienKhoa"
+                                "v-if": "NienKhoaItem"
                             }
                         }
                     ]

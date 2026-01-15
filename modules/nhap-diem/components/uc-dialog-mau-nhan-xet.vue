@@ -63,7 +63,8 @@
 		props: {
 			modelValue: Boolean,
 			filter: Object,
-			DSHocSinh: Array
+			DSHocSinh: Array,
+			onSubmit: Function
 		},
 		data() {
 			return {
@@ -182,11 +183,11 @@
 			async onSubmitTemplate() {
 				const _dsHs = this.DSHocSinh.map(hs => {
 					let findMap = this.HocSinhSelected.find(h => h.HocSinhID == hs.HocSinhID)
-					if (findMap) {
-						return findMap
-					} else return hs
+					if (findMap) return findMap
+					return hs
 				})
-				this.$emit("update:DSHocSinh", _dsHs)
+				console.log("onSubmitTemplate", _dsHs)
+				this.$emit("onSubmit", _dsHs)
 				this.handleCloseTemplate()
 			},
 			handleMappingVariable(obj, hs) {

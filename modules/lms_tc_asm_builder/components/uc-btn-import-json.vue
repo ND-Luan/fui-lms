@@ -1,7 +1,7 @@
 <template>
 	<v-dialog max-width="1200">
 		<template v-slot:activator="{ props: activatorProps }">
-			<v-btn v-bind="activatorProps" color="primary" variant="tonal" size="small">
+			<v-btn v-bind="activatorProps" color="primary" variant="outlined" size="small">
 				<v-icon start>mdi-code-json</v-icon>
 				Import JSON
 			</v-btn>
@@ -10,7 +10,7 @@
 		<template v-slot:default="{ isActive }">
 			<v-card>
 				<v-card-title class="d-flex justify-space-between align-center">
-					<span>🤖 Import JSON - AI Assistant</span>
+					<span class="text-h5">🤖 Import JSON - AI Assistant</span>
 					<v-btn icon="mdi-close" variant="text" @click="isActive.value = false"></v-btn>
 				</v-card-title>
 
@@ -196,16 +196,16 @@
 				</v-card-text>
 
 				<v-card-actions class="pa-4">
-					<v-btn @click="clearAll" variant="text" color="grey">
+					<v-btn @click="clearAll" color="black" variant="text" color="grey">
 						{{$t('message.DeleteAll')}}
 					</v-btn>
-					<v-btn @click="validateAndPreview" variant="tonal" color="primary" :loading="processing">
+					<v-btn @click="validateAndPreview" variant="outlined" color="primary" :loading="processing">
 						🔍 {{$t('message.Preview')}}
 					</v-btn>
 					<v-spacer></v-spacer>
 					<v-btn @click="isActive.value = false" variant="text">{{$t('message.Cancel')}}</v-btn>
 					<v-btn @click="handleImport(isActive)" color="primary" :disabled="validQuestions.length === 0"
-						variant="flat">
+						variant="outlined">
 						✅ Import {{ validQuestions.length }} {{$t('message.Question')}}
 					</v-btn>
 				</v-card-actions>

@@ -48,14 +48,14 @@
 			</v-chip>
 			<!-- Cột hành động -->
 			<div class="assignment-actions">
-				<v-btn size="small" variant="flat" color="primary" @click="chamBai(assignment)"
+				<v-btn size="small" variant="outlined" color="primary" @click="chamBai(assignment)"
 					class="font-weight-medium" v-if="assignment.ResourceType === 'ASSIGNMENT'">
 					{{
 						assignment.GradedCount == assignment.TotalStudentsInClass ? $t('message.ReviewGraded') :
 							$t('message.GradeNow')
 					}}
 				</v-btn>
-				<v-btn size="small" variant="flat" color="primary" @click="LearningProgress(assignment)"
+				<v-btn size="small" variant="outlined" color="primary" @click="LearningProgress(assignment)"
 					v-if="assignment.ResourceType === 'LESSON'" class="font-weight-medium">
 					{{ $t('message.ViewProgress') }}
 				</v-btn>
@@ -65,14 +65,14 @@
 		<div class="assignment-stats d-flex flex-wrap gap-2 flex-column flex-md-row" v-else>
 			<!-- Cột hành động -->
 			<div class="assignment-actions">
-				<v-btn size="small" variant="flat" color="primary" @click="chamBai(assignment)"
+				<v-btn size="small" variant="outlined" color="primary" @click="chamBai(assignment)"
 					class="font-weight-medium" v-if="assignment.ResourceType === 'ASSIGNMENT'">
 					{{
 						assignment.GradedCount == assignment.TotalStudentsInClass ? $t('message.ReviewGraded') :
 							$t('message.GradeNow')
 					}}
 				</v-btn>
-				<v-btn size="small" variant="flat" color="primary" @click="LearningProgress(assignment)"
+				<v-btn size="small" variant="outlined" color="primary" @click="LearningProgress(assignment)"
 					v-if="assignment.ResourceType === 'LESSON'" class="font-weight-medium">
 					{{ $t('message.ViewProgress') }}
 				</v-btn>

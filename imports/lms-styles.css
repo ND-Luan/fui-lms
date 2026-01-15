@@ -195,6 +195,13 @@
     max-height: calc(100vh - 230px) !important
 }
 
+.jss_content {
+    box-shadow: unset !important;
+}
+.jss_content {
+    padding: 0 !important;
+}
+
 .height-excel-tong-ket-hoc-ki .jss_content {
     max-height: calc(100vh - 150px) !important
 }

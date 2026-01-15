@@ -7,7 +7,7 @@
     <div class="pa-2" style="height: fit-content; " v-else>
         <div class="d-flex w-100  ga-2 h-100" style="height: 600px;">
             <div class=" d-flex flex-column rounded border h-100 elevation-1 bg-white" style="flex: 0 0 20%;">
-                <div class="border-b pa-2" style="min-height: fit-content;flex: 0 0 auto;">
+                <div class="pa-2" style="min-height: fit-content;flex: 0 0 auto;">
                     <v-select v-model="KhoiIDSelected" label="Khối" :items="DSKhoi" item-title="TenKhoi"
                         item-value="KhoiID"></v-select>
                 </div>
@@ -26,11 +26,11 @@
                 </div>
             </div>
             <div class=" d-flex flex-column rounded border pa-2 elevation-1 bg-white" style="flex: 1 0 70%; ">
-                <div class="w-100 d-flex mb-3" style="min-height: fit-content;flex: 0 0 auto;">
+                <div class="w-100 d-flex mb-3 align-center" style="min-height: fit-content;flex: 0 0 auto;">
                     <span class="text-subtitle-1 font-weight-medium my-2">Bài tập
                         cần chấm</span>
                     <v-spacer></v-spacer>
-                    <v-text-field label="Tìm kiếm " v-model="search" density="compact" style="max-width: 350px;"
+                    <v-text-field label="Tìm kiếm " v-model="search" density="compact" style="max-width: 350px; max-height: 36px"
                         prepend-inner-icon="mdi-magnify"></v-text-field>
                 </div>
                 <div style="flex: 1 1 100%; overflow-y: auto;overflow-x: hidden; scrollbar-width: thin;">

@@ -3,8 +3,30 @@
 		<div id="spreadsheet" class="w-100" ref="spreadsheet" :style="styleExcel"></div>
 	</div>
 </template>
+
+<style scoped>
+	/* Style cho filter cells được freeze */
+	::v-deep td.jss_column_filter.jss_freezed {
+		position: sticky !important;
+		z-index: 3 !important;
+		background-color: #fff;
+	}
+
+	/* Tính toán left position cho từng cột freeze */
+	::v-deep td.jss_column_filter.jss_freezed[data-x="0"] {
+		left: 0px !important;
+	}
+
+	::v-deep td.jss_column_filter.jss_freezed[data-x="1"] {
+		left: var(--column-0-width, 100px) !important;
+	}
+
+	::v-deep td.jss_column_filter.jss_freezed[data-x="2"] {
+		left: calc(var(--column-0-width, 100px) + var(--column-1-width, 100px)) !important;
+	}
+</style>
 <script>
-export default {
+	export default {
 	emits: ['onChange', 'update:modelValue', 'update:dataSource', 'update:minDimensions', 'rowData', 'addressCell'],
 	props: {
 		modelValue: {},
@@ -67,15 +89,15 @@ export default {
 		},
 		tableHeader: {
 			type: Boolean,
-			default: true, // mặc định vẫn hiện A,B,C nếu không truyền
+			default: true,
 		},
 		tableRowNumber: {
 			type: Boolean,
-			default: true, // mặc định vẫn hiện 1,2,3 nếu không truyền
+			default: true,
 		},
 		filters: {
 			type: Boolean,
-			default: false, // mặc định vẫn hiện 1,2,3 nếu không truyền
+			default: false,
 		},
 	},
 	data() {
@@ -93,20 +115,22 @@ export default {
 	},
 	mounted: function () {
 		const jExcelObj = jspreadsheet(this.$refs["spreadsheet"], this.jExcelOptions);
-		Object.assign(this, { jExcelObj }); // tucks all methods under jExcelObj object in component instance
+		Object.assign(this, { jExcelObj });
 		this.$emit('update:modelValue', jExcelObj)
 
-		// Đợi JSpreadsheet render xong, sau đó gắn sự kiện cuộn
-		// this.$nextTick(() => {
-		// 	const container = this.$refs.spreadsheet.querySelector('.jexcel_container');
-		// 	if (container) {
-		// 		container.addEventListener("scroll", this.handleScroll);
-		// 	}
-		// });
+		// Thêm class freeze cho filter cells sau khi table load xong
+		this.$nextTick(() => {
+			this.applyFreezeToFilterCells();
+			this.calculateColumnWidths();
+			
+			const container = this.$refs.spreadsheet.querySelector('.jexcel_container');
+			if (container) {
+				container.addEventListener("scroll", this.handleScroll);
+			}
+		});
 	},
 	computed: {
 		jExcelOptions() {
-			//Nếu sử dụng pagination thì off đi lazyLoading
 			let isLazyLoading = true
 			if (this.pagination) isLazyLoading = false
 
@@ -146,38 +170,92 @@ export default {
 		}
 	},
 	methods: {
+		// Hàm tính toán và set width cho các cột freeze
+		calculateColumnWidths() {
+			const container = this.$refs.spreadsheet;
+			if (!container) return;
+
+			let cumulativeLeft = 0;
+			
+			for (let i = 0; i < this.freezeColumns; i++) {
+				// Lấy width của cột hiện tại
+				const cell = container.querySelector(`td[data-x="${i}"]`);
+				if (cell) {
+					const width = cell.offsetWidth;
+					
+					// Set left position cho tất cả cells trong cột này (bao gồm cả filter)
+					const allCellsInColumn = container.querySelectorAll(`td[data-x="${i}"].jss_freezed`);
+					allCellsInColumn.forEach(cellItem => {
+						cellItem.style.left = `${cumulativeLeft}px`;
+					});
+					
+					cumulativeLeft += width;
+				}
+			}
+		},
+
+		// Hàm mới: Thêm class freeze cho filter cells
+		applyFreezeToFilterCells() {
+			const container = this.$refs.spreadsheet;
+			if (!container) return;
+
+			// Tìm tất cả các filter cells trong freezeColumns
+			for (let i = 0; i < this.freezeColumns; i++) {
+				const filterCells = container.querySelectorAll(`td.jss_column_filter[data-x="${i}"]`);
+				filterCells.forEach(cell => {
+					cell.classList.add("jss_freezed");
+					cell.style.position = 'sticky';
+					cell.style.zIndex = '3';
+					cell.style.backgroundColor = '#fff';
+				});
+			}
+		},
+		
 		handleScroll(event) {
 			const container = event.target;
 			const scrollLeft = container.scrollLeft;
-			// Lấy tất cả các cell trong các cột cố định
-			const freezeColumns = this.freezeColumns; // Số cột cần cố định
+			const freezeColumns = this.freezeColumns;
 
-			//Kiểm tra nếu có tồn tại nestedHeader
+			// Kiểm tra nếu có tồn tại nestedHeader
 			const columnNestHeader = container.querySelectorAll(`td[data-column="0,1,2"]`);
 			if (columnNestHeader.length > 0) {
 				columnNestHeader[0].classList.add("jss_freezed");
 			}
 
-			//Header bình thường để freezed
+			// Tính toán left position cho từng cột
+			let cumulativeLeft = 0;
+
+			// Header bình thường và filter cells để freezed
 			for (let i = 0; i < freezeColumns; i++) {
-				const columnCells = container.querySelectorAll(`td[data-x="${i}" ]`);
+				// Lấy width của cột để tính left
+				const firstCell = container.querySelector(`td[data-x="${i}"]`);
+				const columnWidth = firstCell ? firstCell.offsetWidth : 0;
+
+				// Xử lý các cell thông thường
+				const columnCells = container.querySelectorAll(`td[data-x="${i}"]`);
 				columnCells.forEach(cell => {
 					if (scrollLeft > 0) {
 						cell.classList.add("jss_freezed");
+						cell.style.left = `${cumulativeLeft}px`;
 					} else {
-						cell.classList.remove("jss_freezed");
+						// Giữ class freezed cho filter cells ngay cả khi scrollLeft = 0
+						if (!cell.classList.contains('jss_column_filter')) {
+							cell.classList.remove("jss_freezed");
+							cell.style.left = '';
+						}
 					}
 				});
+
+				cumulativeLeft += columnWidth;
 			}
 		},
+		
 		changed(instance, cell, x, y, value) {
 			if (this.isProgrammaticChange) return;
 
-			// Lấy dữ liệu từ bảng
 			const rawData = instance.getData();
 			const columns = this.columns.map(col => col.name);
 
-			// Chuyển dữ liệu thành mảng object
 			const dataObjects = rawData.map(row => {
 				const obj = {};
 				columns.forEach((colName, index) => {
@@ -186,14 +264,11 @@ export default {
 				return obj;
 			});
 
-			// console.log('dataObjects =>', dataObjects)
-
 			const rowObject = dataObjects[y];
 			const columnName = columns[x];
 			const cellValue = rowObject[columnName];
 			const rowData = instance.getRowData(y);
 
-			// Lọc dữ liệu phù hợp
 			const CD_HocSinhExist = this.rootDataSource.filter(
 				item => item.HocSinhID === rowObject?.HocSinhID && item.MaCotDiem === columnName
 			);
@@ -204,11 +279,9 @@ export default {
 					if (!isNaN(inputValue)) {
 						const newValue = item.HeSo * inputValue;
 						if (String(newValue) !== String(cellValue)) {
-							// ✅ Cập nhật trực tiếp không gây loop
 							instance.options.data[y][x] = newValue;
 							instance.records[y][x].innerHTML = newValue;
 
-							// Cập nhật lại dữ liệu emit ra ngoài
 							dataObjects[y][columnName] = newValue;
 							this.isProgrammaticChange = true;
 							instance.setValueFromCoords(x, y, newValue)
@@ -218,23 +291,28 @@ export default {
 				}
 			});
 
-			// Emit dữ liệu
 			this.$emit('update:dataSource', dataObjects);
 			this.$emit('onChange', { instance, cell, x, y, value, dataObjects });
 			this.$emit('rowData', rowData);
 			this.$emit('addressCell', [x, y]);
 		},
+		
 		onselection(instance, x1, y1, x2, y2, origin) {
 			// console.log(instance, x1, y1, x2, y2, origin)
-			//v5
-			// console.log(this.jExcelObj[0].getValueFromCoords(x1, y1))
-			// let cellName = jspreadsheet.helpers
-			// console.log(cellName)
 		},
+		
 		onload() {
 			// this.$nextTick(() => {
 			//     this.jExcelObj.setHeight(0, 45)
 			// })
+		}
+	},
+	
+	beforeUnmount() {
+		// Cleanup scroll listener
+		const container = this.$refs.spreadsheet?.querySelector('.jexcel_container');
+		if (container) {
+			container.removeEventListener("scroll", this.handleScroll);
 		}
 	}
 }

@@ -234,9 +234,10 @@ export default {
 				GiaoVienID: this.formData.GiaoVienID,
 				LopID: this.formData.LopID,
 				MonHocID: this.formData.MonHocID,
-				NienKhoa: vueData.NienKhoa,
+				NienKhoa: vueData.NienKhoaItem.NienKhoa,
 				CapID: this.CapID,
-				KhoiID: this.KhoiID
+				KhoiID: this.KhoiID,
+				HocKi: vueData.NienKhoaItem.HocKi
 			}
 			ajaxCALL('/lms/GiaoVienLop_Ins', payload, res => {
 				if (res) {

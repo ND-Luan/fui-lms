@@ -34,7 +34,7 @@
 						</v-col>
 					</v-row>
 				</v-form>
-				<v-btn @click="onRedirectToASM(selectedLibery)" color="success" variant="tonal" size="small"
+				<v-btn @click="onRedirectToASM(selectedLibery)" color="success" variant="outlined" size="small"
 					class="mt-2">{{ $t('message.ViewDetail') }} {{ formData.ResourceType == 'LESSON' ? ($i18n.locale ==
 						'en' ? 'lesson' : 'bài học') : ($i18n.locale == 'en' ? 'assignment' : 'bài tập') }}</v-btn>
 			</v-card-text>
@@ -88,7 +88,7 @@
 						<span>{{ item.MaxScore ?? '—' }}</span>
 					</template>
 					<template v-slot:item.actions="{ item }">
-						<v-btn style="font-weight: 500;" size="small" variant="tonal" color="primary"
+						<v-btn style="font-weight: 500;" size="small" variant="outlined" color="primary"
 							@click="editGiaoBaiTapDialog(item)">
 							{{ $t('message.EditContent') }}
 						</v-btn>

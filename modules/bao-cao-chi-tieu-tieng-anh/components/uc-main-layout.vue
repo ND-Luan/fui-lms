@@ -59,10 +59,10 @@
 				style="overflow-y: auto; scrollbar-width: thin; height: calc(100vh - 90px);">
 				<div class="d-flex flex-column ga-3">
 					<v-card v-for="lop in selectedKhoi?.DSLop" class="border d-flex flex-column" style="height: 500px;">
-						<v-card-title class="text-white d-flex" style="background-color: #217d46;">
-							{{ lop.TenLop }}
+						<v-card-title class="d-flex" style="background-color: #217d46;">
+							<span class="text-white">{{ lop.TenLop }}</span>
 							<v-spacer></v-spacer>
-							<span>Sỉ số: {{ lop.SiSo }} học sinh </span>
+							<span class="text-white">Sỉ số: {{ lop.SiSo }} học sinh </span>
 						</v-card-title>
 						<v-card-text class="flex-grow-2 pa-2 d-flex" style="overflow: hidden; position: relative;">
 							<div style="height: 100%; width: 100%; position: relative;">

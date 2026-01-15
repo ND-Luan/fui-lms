@@ -14,7 +14,7 @@
 				<v-btn @click="OpenDashboard()">
 					<v-icon class="me-1 text-h6">mdi-blinds-horizontal-closed</v-icon>{{ $t('message.Statistical') }}
 				</v-btn>
-				<v-btn @click="OpenMyLiberies()">
+				<v-btn @click="OpenMyLiberies()" class="me-1">
 					<v-icon class="me-1 text-h6">mdi-library-shelves</v-icon> {{ $t('message.MyDocument') }}
 				</v-btn>
 				<v-btn-toggle v-model="toggle" size="small">
@@ -69,7 +69,7 @@
 
 								<v-menu transition="slide-y-transition">
 									<template v-slot:activator="{ props }">
-										<v-btn color="primary" variant="tonal" size="small"
+										<v-btn color="primary" variant="outlined" size="small"
 											v-bind="props"><v-icon>mdi-plus</v-icon>{{ $t('message.CreateContent')
 											}}</v-btn>
 									</template>
@@ -153,7 +153,7 @@
 																				</div>
 																			</div>
 																			<div class="class-actions">
-																				<v-btn size="small" variant="tonal"
+																				<v-btn size="small" variant="outlined"
 																					color="purple"
 																					:text="$t('message.ViewGradebook')"
 																					@click.stop="xemTinhTrang(classItem)" />

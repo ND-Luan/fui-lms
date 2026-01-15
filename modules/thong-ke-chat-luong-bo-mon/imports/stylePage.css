@@ -6,3 +6,8 @@
  .table-bordered th {
      border: 1px solid #ccc !important;
  }
+
+ .text-wrap-tab .v-btn__content {
+     text-wrap: auto;
+     text-align: left;
+ }

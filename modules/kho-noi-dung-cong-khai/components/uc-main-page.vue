@@ -34,7 +34,7 @@
 				</template>
 			</v-data-table>
 		</v-card-text>
-
+		<uc-confirm-get-resource v-model:isOpen="isShowModalSelectWeek" :resource="resourceSelected" @finish-save="getResourcePublic"></uc-confirm-get-resource>
 	</v-card>
 </template>
 
@@ -84,7 +84,9 @@ export default {
 					width: 150,
 					align: 'center'
 				}
-			]
+			],
+			resourceSelected:{},
+			isShowModalSelectWeek:false
 		}
 	},
 	mounted() {
@@ -111,7 +113,7 @@ export default {
 		GetKhoiMonHoc() {
 			let payload = {
 				NienKhoa: vueData.NienKhoa,
-				HocKi: vueData.NienKhoaItem.HocKi
+				HocKi: vueData.NienKhoaItem?.HocKi
 			}
 			ajaxCALL('/lms/EL_Teacher_GetKhoi_MonHoc_ByGiaoVienID', payload, res => {
 				this.DSKhoi = res.data[0].map(khoi => ({ title: 'Khối ' + khoi.KhoiID, value: khoi.KhoiID }))
@@ -140,23 +142,9 @@ export default {
 		},
 		GetContent(item) {
 			if (!item.ResourceID) return
-			if (item.ResourceType == 'ASSIGNMENT') {
-				let payload = {
-					AssignmentID: item.ResourceID
-				}
-				ajaxCALL('/lms/EL_Teacher_Copy_ContentByAssignmentID', payload, res => {
-					this.getResourcePublic()
-					Vue.$toast.success(this.$t('message.RetrievedSuccess'), { position: 'top' })
-				})
-			} else {
-				let payload = {
-					LessonID: item.ResourceID
-				}
-				ajaxCALL('/lms/EL_Teacher_Copy_ContentByLessonID', payload, res => {
-					this.getResourcePublic()
-					Vue.$toast.success(this.$t('message.RetrievedSuccess'), { position: 'top' })
-				})
-			}
+			this.resourceSelected = item
+			this.isShowModalSelectWeek = true
+			
 		}
 	},
 }

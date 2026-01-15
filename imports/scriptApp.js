@@ -865,7 +865,7 @@ $('document').ready(() => {
             },
             VCard: {
                 VCardTitle: {
-                    class: 'd-flex align-center px-2 py-2 text-primary',
+                    class: 'd-flex align-center ga-2 px-2 py-2 text-primary',
                     style: "font-size: 1.1rem"
                 },
                 VCardText: {

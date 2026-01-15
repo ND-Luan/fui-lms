@@ -2,19 +2,69 @@
 	<div>
 		<v-card>
 			<v-card-title>
-				{{ pageTitle }} • {{ vueData.TitleCap }}
+				{{ pageTitle }} <span v-if="vueData.CapID">• Cấp {{ vueData.CapID }}</span>
+				<v-chip v-if="hasStudents" color="primary">
+					Tổng số học sinh: {{ DSHocSinh.length }}
+				</v-chip>
+				<v-chip v-if="hasStudents" color="tinhTrangStatus?.statusDetail?.color">
+					{{tinhTrangStatus?.statusDetail?.text}}
+				</v-chip>
 			</v-card-title>
 
 			<v-card-text>
 				<uc-filter v-model="filter" @onRefresh="onRefresh" />
 			</v-card-text>
+
 			<v-divider />
+
 			<v-card-text class="d-flex mt-2">
 				<div>
-					<p>Tổng số học sinh: {{DSHocSinh.length}}</p>
-					*Lưu ý:
+					<!-- Lưu ý Comment -->
+					<div>
+						<span class="text-caption">
+							*Lưu ý: Comment (Màu đỏ) trong ô nhập điểm là các ô điểm <b>Giáo viên khác</b> đã nhập
+						</span>
+					</div>
+
+					<!-- Thông báo từ chối -->
+					<div v-show="hasStudents && reasonReject.disabled" class="text-black text-body-2">
+						<p class="text-body-2 font-weight-medium">
+							{{ reasonReject.textPerson }}
+						</p>
+						<p>
+							Lý do từ chối:
+							<span class="text-red">{{ reasonReject.NoiDungNhanXet }}</span>
+						</p>
+					</div>
+
+					<!-- Quy tắc đổi sao -->
+					<div v-if="showStarConversionRule" class="text-caption">
+						<span>
+							<b class="text-primary">Quy tắc đổi sao:</b>
+							Điểm <v-icon start size="x-small" class="mb-1">mdi-greater-than-or-equal</v-icon>
+							9 là <b class="text-red">5</b>
+							<v-icon color="primary" start size="small" class="mb-1">mdi-star</v-icon>
+						</span>
+						<span>
+							; Điểm <v-icon start size="x-small" class="mb-1">mdi-greater-than-or-equal</v-icon>
+							7 là <b class="text-red">4</b>
+							<v-icon color="primary" start size="small" class="mb-1">mdi-star</v-icon>
+						</span>
+						<span>
+							; Điểm <v-icon start size="x-small" class="mb-1">mdi-greater-than-or-equal</v-icon>
+							5 là <b class="text-red">3</b>
+							<v-icon color="primary" start size="small" class="mb-1">mdi-star</v-icon>
+						</span>
+						<span>
+							; Còn lại là <b class="text-red">2</b>
+							<v-icon color="primary" start size="small" class="mb-1">mdi-star</v-icon>
+						</span>
+					</div>
 				</div>
+
 				<v-spacer />
+
+				<!-- Menu Actions -->
 				<v-menu>
 					<template v-slot:activator="{ props }">
 						<v-btn color="primary" v-bind="props" icon="mdi-dots-vertical" size="small"
@@ -29,36 +79,51 @@
 						<v-divider />
 						<v-list-subheader>Khác</v-list-subheader>
 						<v-list-item title="Mẫu nhận xét" @click="onOpenMauNhanXet" />
-						<v-list-item title="Lấy điểm Test (Theme)" @click="onGetDiemTest" />
+						<v-list-item v-if="showGetThemeTestButton" title="Lấy điểm Test (Theme)"
+							@click="onGetDiemTest" />
 						<v-divider />
 						<v-list-item title="Xuất Excel" @click="onExportExcel" />
 					</v-list>
 				</v-menu>
 			</v-card-text>
-			<v-card-text>
+			<!-- Jexcel Table -->
+			<v-card-text class="pa-0">
 				<uc-jexcel v-if="hasStudents" :key="keyComp" v-model="instance" v-model:dataSource="DSHocSinh"
-					class="height-excel" :freeze-columns="freezeColumns" :columns="headers" :comments="comments"
+					class="hExcel" :freeze-columns="freezeColumns" :columns="headers" :comments="comments"
 					:styleSheet="styleSheet" :nestedHeaders="shouldShowNestedHeaders ? nestedHeaders : []"
-					:rootDataSource="DSHocSinh_API" @onChange="onChangeSheet" />
+					:rootDataSource="DSHocSinh_API" @onChange="onChangeSheet" :filters="true" :search="true" />
 				<uc-card-empty v-else />
 			</v-card-text>
 		</v-card>
-		<uc-dialog-khoa-cot-diem v-model="action.isShowDialogKhoaCotDiem" :filter :DSKhoaCotDiem_API
-			:DSCotDiem="DSCotDiem_ByMaNhomCotDiem" @onKhoaCotDiem="(cd) => onKhoaCotDiem(cd, true)" />
-		<uc-dialog-mau-nhan-xet v-model="action.isShowDialogMauNhanXet" :filter v-model:DSHocSinh="DSHocSinh" />
+
+		<!-- Dialog Khóa Cột Điểm -->
+		<uc-dialog-khoa-cot-diem v-model="action.isShowDialogKhoaCotDiem" :filter="filter"
+			:DSKhoaCotDiem_API="DSKhoaCotDiem_API" :DSCotDiem="DSCotDiem_ByMaNhomCotDiem"
+			@onKhoaCotDiem="(cd) => onKhoaCotDiem(cd, true)" />
+
+		<!-- Dialog Mẫu Nhận Xét -->
+		<uc-dialog-mau-nhan-xet v-model="action.isShowDialogMauNhanXet" :filter="filter" :DSHocSinh="DSHocSinh"
+			@onSubmit="onXacNhanMauNhanXet" />
 	</div>
 </template>
 
 <script>
 	export default {
+		name: 'BangDiem',
+	
 		props: {},
+	
 		data() {
 			return {
 				vueData,
+	
+				// Actions
 				action: {
 					isShowDialogKhoaCotDiem: false,
 					isShowDialogMauNhanXet: false
 				},
+	
+				// Filter
 				filter: {
 					KhoiItem: null,
 					LopItem: null,
@@ -66,769 +131,371 @@
 					MaNhomCotDiemItem: null
 				},
 	
-				dataBeforeInsertToDB: [],
+				// Data
 				editedCells: [],
 				DSKhoaCotDiem_API: [],
 				DSCotDiem_ByMaNhomCotDiem: [],
 				DSHocSinh_API: [],
 				DSHocSinh: [],
-				DataExcel: [],
+	
+				// Tình trạng
+				tinhTrangStatus: {
+					isDisabled: false,
+					TinhTrang: null,
+					statusDetail: null
+				},
+	
+				// Jexcel Config
 				headers: [],
 				nestedHeaders: [],
 				freezeColumns: 3,
 				comments: {},
 				styleSheet: {},
 				instance: null,
-				keyComp: 0,
-				// Constants - Định nghĩa các hằng số
-				SUBJECT_IDS: {
-					ENGLISH_5: 5,
-					ENGLISH_46: 46,
-					ENGLISH_76: 76,
-					STEM_36: 36,
-					GROUP_101: 101
-				},
-				ENGLISH_SUBJECTS: [5, 46, 76],
-				GROUP_SUBJECTS: [101, 76],
-				COLUMN_TYPES: {
-					NUMBER: 'number',
-					TEXT: 'text',
-					ICO_STAR: 'ICO_Star',
-					DROPDOWN_TEXT: 'Dropdown_text',
-					DROPDOWN_THC: 'Dropdown_THC',
-					DROPDOWN_TDC: 'Dropdown_TDC',
-					DROPDOWN_CD_D: 'Dropdown_CD_D'
-				},
-				FORMULA_COLUMN: 'Công thức',
-				CENTER_ALIGN_COLUMNS: [
-					'MucDoDanhGia',
-					'DiemGK_HK2',
-					'DiemGK_HK1',
-					'DiemCK_HK1',
-					'Theme1_Result',
-					'Theme2_Result',
-					'Theme3_Result',
-					'Theme4_Result',
-					'Theme5_Result',
-					'Theme6_Result',
-					'Theme7_Result',
-					'Theme8_Result'
-				]
+				keyComp: 0
 			};
 		},
 	
 		computed: {
+			/**
+			 * Tiêu đề trang
+			 */
 			pageTitle() {
 				return this.vueData.TitlePage || 'Nhập điểm';
 			},
 	
+			/**
+			 * Kiểm tra có học sinh không
+			 */
 			hasStudents() {
 				return this.DSHocSinh?.length > 0;
 			},
 	
+			/**
+			 * ID môn học hiện tại
+			 */
 			currentSubjectId() {
 				return this.filter.MonHocItem?.MonHocID;
 			},
 	
+			/**
+			 * Kiểm tra môn Tiếng Anh
+			 */
 			isEnglishSubject() {
-				return this.ENGLISH_SUBJECTS.includes(this.currentSubjectId);
+				return BangDiemService.filter.isEnglishSubject(this.currentSubjectId);
 			},
 	
+			/**
+			 * Kiểm tra môn nhóm
+			 */
 			isGroupSubject() {
-				return this.GROUP_SUBJECTS.includes(this.currentSubjectId);
+				return BangDiemService.filter.isGroupSubject(this.currentSubjectId);
 			},
 	
+			/**
+			 * Kiểm tra bị disable
+			 */
 			isDisabled() {
-				return this.vueData.TinhTrang?.isDisabled ?? false;
+				return this.tinhTrangStatus?.isDisabled ?? false;
 			},
 	
+			/**
+			 * Hiển thị nested headers
+			 */
 			shouldShowNestedHeaders() {
 				return this.filter.MaNhomCotDiemItem?.MaNhomCotDiem === 'TatCa';
+			},
+	
+			/**
+			 * Thông tin từ chối
+			 */
+			reasonReject() {
+				const info = BangDiemService.utility.getReasonReject(
+					this.DSHocSinh_API,
+					this.vueData
+				);
+	
+				return {
+					...info,
+					textPerson: BangDiemService.utility.renderTextPersonReject(
+						info.TinhTrang,
+						this.vueData
+					)
+				};
+			},
+	
+			/**
+			 * Hiển thị quy tắc đổi sao
+			 */
+			showStarConversionRule() {
+				return BangDiemService.filter.isMonHocConvertWithStar(this.currentSubjectId) &&
+					this.filter.MaNhomCotDiemItem !== null;
+			},
+	
+			/**
+			 * Hiển thị nút lấy điểm Test
+			 */
+			showGetThemeTestButton() {
+				if (!this.filter.MaNhomCotDiemItem || this.currentSubjectId !== 76) {
+					return false;
+				}
+				const maNhom = this.filter.MaNhomCotDiemItem.MaNhomCotDiem;
+				return ['Theme_2', 'Theme_4', 'Theme_6', 'Theme_8'].includes(maNhom);
 			}
 		},
+	
 		watch: {
+			/**
+			 * Watch filter thay đổi
+			 */
 			filter: {
-				handler(filter) {
-					if (filter.KhoiItem === null ||
-						filter.LopItem === null ||
-						filter.MonHocItem === null ||
-						filter.MaNhomCotDiemItem === null
-					) {
-						this.DSHocSinh_API = []
-						this.DSHocSinh = []
-						this.keyComp++
+				handler(newFilter) {
+					if (!BangDiemService.filter.isValidFilter(newFilter)) {
+						this.resetData();
 					}
 				},
 				deep: true
 			}
 		},
+	
 		methods: {
 			/**
-			 * Refresh dữ liệu và khởi tạo lại bảng điểm
+			 * Reset dữ liệu
+			 */
+			resetData() {
+				this.DSHocSinh_API = [];
+				this.DSHocSinh = [];
+				this.headers = [];
+				this.nestedHeaders = [];
+				this.keyComp++;
+			},
+	
+			/**
+			 * Refresh dữ liệu
 			 */
 			async onRefresh() {
-				await this.fetchStudentData();
-				await this.getKhoaDSCotDiem()
-				this.processStudentList();
-				this.initFreezeColumn();
-				this.initHeader();
-				this.initData();
-				this.initComment_Style();
-				this.keyComp++
-			},
+				try {
+					const result = await BangDiemService.initialize(this.filter, this.vueData);
 	
-			/**
-			 * Lấy dữ liệu học sinh và điểm từ API
-			 */
-			async fetchStudentData() {
-				this.DSHocSinh_API = await ajaxCALLPromise(
-					"lms/HocSinhBangDiem_Get_ByMonHocID_MaNhom",
-					{
-						LopID: this.filter.LopItem.LopID,
-						MonHocID: this.currentSubjectId,
-						TemplateBangDiemID: this.filter.MonHocItem.TemplateBangDiemID,
-						MaNhomCotDiem: this.filter.MaNhomCotDiemItem.MaNhomCotDiem,
-					}
-				);
-			},
+					// Cập nhật data
+					this.DSHocSinh = result.students;
+					this.DSHocSinh_API = result.apiData;
+					this.headers = result.headers;
+					this.nestedHeaders = result.nestedHeaders;
+					this.freezeColumns = result.freezeColumns;
+					this.styleSheet = result.styleSheet;
+					this.comments = result.comments;
+					this.DSKhoaCotDiem_API = result.lockedColumns;
+					this.DSCotDiem_ByMaNhomCotDiem = result.DSCotDiem_ByMaNhomCotDiem;
 	
-			/**
-			 * Xử lý danh sách học sinh duy nhất từ dữ liệu API
-			 */
-			processStudentList() {
-				const uniqueStudentIds = [...new Set(this.DSHocSinh_API.map(x => x.HocSinhID))];
+					// Cập nhật Tình Trạng Status
+					this.tinhTrangStatus = result.tinhTrangStatus;
 	
-				this.DSHocSinh = uniqueStudentIds.map(id => {
-					const student = this.DSHocSinh_API.find(y => y.HocSinhID === id);
-					return {
-						Ho: student.Ho,
-						HocSinhID: student.HocSinhID,
-						NgaySinh: student.NgaySinh,
-						Nu: student.Nu,
-						SoDanhBo: student.SoDanhBo,
-						Ten: student.Ten,
-						TinhTrang: student.TinhTrang,
-					};
-				});
-			},
+					// Reset edited cells
+					this.editedCells = [];
 	
-			/**
-			 * Khởi tạo số cột cố định (freeze columns) dựa trên môn học
-			 */
-			initFreezeColumn() {
-				const subjectId = this.currentSubjectId;
-	
-				if (subjectId === this.SUBJECT_IDS.ENGLISH_5 || subjectId === this.SUBJECT_IDS.ENGLISH_46) {
-					this.freezeColumns = this.isEnglishSubject ? 4 : 3;
-				} else if (subjectId === this.SUBJECT_IDS.ENGLISH_76) {
-					this.freezeColumns = this.isEnglishSubject ? 5 : 3;
-				} else if (subjectId === this.SUBJECT_IDS.GROUP_101) {
-					this.freezeColumns = 4;
-				} else {
-					this.freezeColumns = 3;
+					// Re-render
+					this.keyComp++;
+				} catch (error) {
+					console.error('onRefresh error:', error);
+					Vue.$toast.error('Có lỗi xảy ra khi tải dữ liệu!', { position: 'top' });
 				}
-	
-				this.vueData.freezeColumns = this.freezeColumns;
 			},
 	
 			/**
-			 * Khởi tạo headers cho bảng jexcel
+			 * Xử lý thay đổi sheet
 			 */
-			initHeader() {
-				const firstStudent = fn_ProrityTinhTrang(this.DSHocSinh);
-				const gradeColumns = this.DSHocSinh_API.filter(
-					item => item.HocSinhID === firstStudent.HocSinhID
-				);
-	
-				this.DSCotDiem_ByMaNhomCotDiem = gradeColumns.map(x => {
-					return {
-						title: x.TenCotDiem_VI,
-						value: x.MaCotDiem
-					}
-				});
-	
-				this.nestedHeaders = this.buildNestedHeaders(gradeColumns);
-				this.headers = [
-					...this.buildStudentInfoColumns(),
-					...this.buildGradeColumns(gradeColumns)
-				];
-			},
-	
-			/**
-			 * Xây dựng nested headers cho các nhóm cột điểm
-			 */
-			buildNestedHeaders(gradeColumns) {
-				const groupNames = [...new Set(this.DSHocSinh_API.map(x => x.MaNhomCotDiem))];
-	
-				const nestedHeader = [{
-					title: 'Thông tin học sinh',
-					colspan: this.freezeColumns + (this.isGroupSubject ? 1 : 0)
-				}];
-	
-				groupNames.forEach(groupName => {
-					const matchingColumn = gradeColumns.find(col => col.MaNhomCotDiem === groupName);
-					const columnCount = gradeColumns.filter(col => col.MaNhomCotDiem === groupName).length;
-	
-					nestedHeader.push({
-						title: matchingColumn.TenNhomCotDiem_VI,
-						colspan: columnCount
-					});
-				});
-	
-				return [nestedHeader];
-			},
-	
-			/**
-			 * Xây dựng các cột thông tin học sinh
-			 */
-			buildStudentInfoColumns() {
-				const baseColumns = [
-					{
-						type: 'text',
-						title: 'Mã học sinh',
-						name: 'HocSinhID',
-						width: 100,
-						backGroundColor: null,
-						wrap: true,
-						readOnly: true
-					},
-					{
-						type: 'text',
-						title: 'Số Danh Bộ',
-						name: 'SoDanhBo',
-						width: 100,
-						backGroundColor: null,
-						wrap: true,
-						readOnly: true
-					},
-					{
-						type: 'text',
-						title: 'Họ tên học sinh',
-						name: 'HoVaTenHocSinh',
-						width: 200,
-						backGroundColor: null,
-						wrap: true,
-						align: "left",
-						readOnly: true
-					}
-				];
-	
-				if (this.isGroupSubject) {
-					baseColumns.push({
-						type: 'text',
-						title: 'Lớp chủ nhiệm',
-						name: 'TenLop',
-						width: 70,
-						backGroundColor: null,
-						wrap: true,
-						align: "left",
-						readOnly: true
-					});
-				}
-	
-				if (this.isEnglishSubject) {
-					baseColumns.push({
-						type: 'text',
-						title: 'English Name',
-						name: 'EnglishName',
-						width: 100,
-						backGroundColor: null,
-						wrap: true,
-						align: "left",
-						readOnly: true
-					});
-				}
-	
-				return baseColumns;
-			},
-	
-			/**
-			 * Xây dựng các cột điểm
-			 */
-			buildGradeColumns(gradeColumns) {
-				return gradeColumns.map(column => {
-					let title = this.isEnglishSubject ? column.TenHienThi_EN : column.TenHienThi_VI
-					let backGroundColor = column.HexBackground
-					let width = parseInt(column?.WidthCSS ?? 80)
-					const TinhTrangDaKhoa = this.DSKhoaCotDiem_API.find(x => x.MaCotDiem === column.MaCotDiem)?.TinhTrang
-					if (TinhTrangDaKhoa) {
-						title += ' (KHÓA)'
-						backGroundColor = '#c1c1c157'
-						width += 25
-					}
-					const columnConfig = {
-						title,
-						name: column.MaCotDiem,
-						width,
-						typeValue: column.GiaTriCotDiem,
-						backGroundColor,
-						wrap: true,
-						readOnly: this.isColumnReadOnly(column)
-					};
-					console.log("columnConfig", columnConfig)
-	
-					return this.buildColumnByType(column.GiaTriCotDiem, columnConfig, column);
-				});
-			},
-	
-			/**
-			 * Kiểm tra cột có readonly không
-			 */
-			isColumnReadOnly(column) {
-				const TinhTrangDaKhoa = this.DSKhoaCotDiem_API.find(x => x.MaCotDiem === column.MaCotDiem)?.TinhTrang
-				return column.LoaiCotDiem === this.FORMULA_COLUMN || this.isDisabled || TinhTrangDaKhoa;
-			},
-	
-			/**
-			 * Xây dựng cấu hình cột theo loại
-			 */
-			buildColumnByType(valueType, baseConfig, columnData) {
-				const columnBuilders = {
-					[this.COLUMN_TYPES.NUMBER]: () => ({
-						...baseConfig,
-						type: 'numeric',
-						decimal: '.',
-						autoWidth: true,
-						align: 'center'
-					}),
-	
-					[this.COLUMN_TYPES.TEXT]: () => ({
-						...baseConfig,
-						type: 'text',
-						align: this.shouldCenterAlign(columnData.MaCotDiem) ? 'center' : 'left'
-					}),
-	
-					[this.COLUMN_TYPES.ICO_STAR]: () => ({
-						...baseConfig,
-						type: 'html',
-						align: 'center'
-					}),
-	
-					[this.COLUMN_TYPES.DROPDOWN_TEXT]: () => ({
-						...baseConfig,
-						type: 'dropdown',
-						align: 'center',
-						source: [{ id: '1', name: 'Done' }, { id: '0', name: 'Not Yet' }]
-					}),
-	
-					[this.COLUMN_TYPES.DROPDOWN_THC]: () => ({
-						...baseConfig,
-						type: 'dropdown',
-						align: 'center',
-						source: ['T', 'H', 'C']
-					}),
-	
-					[this.COLUMN_TYPES.DROPDOWN_TDC]: () => ({
-						...baseConfig,
-						type: 'dropdown',
-						align: 'center',
-						source: ['T', 'Đ', 'C']
-					}),
-	
-					[this.COLUMN_TYPES.DROPDOWN_CD_D]: () => ({
-						...baseConfig,
-						type: 'dropdown',
-						align: 'center',
-						source: ['CĐ', 'Đ']
-					})
-				};
-	
-				const builder = columnBuilders[valueType];
-				return builder ? builder() : baseConfig;
-			},
-	
-			/**
-			 * Kiểm tra cột có cần căn giữa không
-			 */
-			shouldCenterAlign(columnCode) {
-				return this.CENTER_ALIGN_COLUMNS.some(col => columnCode.includes(col));
-			},
-	
-			/**
-			 * Khởi tạo dữ liệu cho bảng jexcel
-			 */
-			initData() {
-				const dataJexcel = [];
-				let rowIndex = 1;
-	
-				this.DSHocSinh.forEach(student => {
-					const gradeColumns = this.DSHocSinh_API.filter(
-						col => col.HocSinhID === student.HocSinhID
-					);
-	
-					if (gradeColumns.length === 0) return;
-	
-					const rowData = this.buildRowData(gradeColumns, rowIndex);
-					dataJexcel.push(rowData);
-					rowIndex++;
-				});
-	
-				this.DSHocSinh = dataJexcel;
-			},
-	
-			/**
-			 * Xây dựng dữ liệu cho một hàng
-			 */
-			buildRowData(gradeColumns, rowIndex) {
-				const firstColumn = gradeColumns[0];
-				const rowData = {
-					HocSinhID: firstColumn.HocSinhID,
-					HoVaTenHocSinh: `${firstColumn.Ho} ${firstColumn.Ten}`,
-					SoDanhBo: firstColumn.SoDanhBo
-				};
-	
-				if (this.isGroupSubject) {
-					rowData.TenLop = firstColumn.TenLop;
-				}
-	
-				if (this.isEnglishSubject) {
-					rowData.EnglishName = firstColumn.EnglishName;
-				}
-	
-				gradeColumns.forEach(column => {
-					rowData[column.MaCotDiem] = this.processColumnValue(column, gradeColumns, rowIndex);
-				});
-	
-				return rowData;
-			},
-	
-			/**
-			 * Xử lý giá trị của cột
-			 */
-			processColumnValue(column, allColumns, rowIndex) {
-				if (column.LoaiCotDiem !== this.FORMULA_COLUMN) {
-					return this.processNonFormulaValue(column);
-				}
-	
-				return this.processFormulaValue(column, allColumns, rowIndex);
-			},
-	
-			/**
-			 * Xử lý giá trị cột không phải công thức
-			 */
-			processNonFormulaValue(column) {
-				if (column.GiaTriCotDiem === this.COLUMN_TYPES.NUMBER) {
-					const value = column.KetQuaDanhGia_VI;
-					return (value === '' || value === null) ? null : parseFloat(value);
-				}
-	
-				let value = column.KetQuaDanhGia_VI;
-	
-				// Set default value cho cột Mức độ đánh giá
-				if (column.MaCotDiem.includes('MucDoDanhGia') && column.KQHTID === 0) {
-					if (!value) value = 'T';
-				}
-	
-				return value;
-			},
-	
-			/**
-			 * Xử lý giá trị cột có công thức
-			 */
-			processFormulaValue(column, allColumns, rowIndex) {
-				if (!column.Formula) {
-					return column.GiaTriCotDiem === this.COLUMN_TYPES.NUMBER
-						? parseFloat(column.KetQuaDanhGia_VI ?? 0)
-						: column.KetQuaDanhGia_VI;
-				}
-	
-				// Các trường hợp đặc biệt hiển thị giá trị đã tính
-				if (this.shouldDisplayCalculatedValue(column, allColumns)) {
-					return column.KetQuaDanhGia_VI;
-				}
-	
-				// Xây dựng chuỗi công thức
-				if (column.GiaTriCotDiem === this.COLUMN_TYPES.ICO_STAR) {
-					return parseFloat(column.KetQuaDanhGia_VI ?? 0);
-				}
-	
-				return '=' + replaceFormula(
-					this.headers.filter(h => h.typeValue),
-					column.Formula,
-					rowIndex,
-					this.freezeColumns
-				);
-			},
-	
-			/**
-			 * Kiểm tra có nên hiển thị giá trị đã tính không
-			 */
-			shouldDisplayCalculatedValue(column, allColumns) {
-				const groupCode = this.vueData.MaNhomCotDiemItem?.MaNhomCotDiem;
-	
-				// Kiểm tra cột tổng kết
-				if (['DiemTBCK_HK1', 'DiemTBCK_HK2'].includes(groupCode)) {
-					if (!['DiemTBCK_HK1', 'DiemTBCK_HK2'].includes(column.MaCotDiem) &&
-						!column.MaCotDiem.includes('DanhHieu')) {
-						return true;
-					}
-				}
-	
-				// Kiểm tra kết quả chủ đề tiếng Anh
-				if (this.isEnglishSubject && this.isGetResultTopic(column)) {
-					return true;
-				}
-	
-				// Kiểm tra môn STEM
-				if (groupCode?.includes('DiemCK') && this.currentSubjectId === this.SUBJECT_IDS.STEM_36) {
-					if (['TongDiem_CD1', 'TongDiem_CD2', 'TongDiem_CD3'].some(x => column.MaCotDiem.includes(x))) {
-						return true;
-					}
-				}
-	
-				// Trường hợp chỉ có 1 cột
-				if (allColumns.length === 1) {
-					return true;
-				}
-	
-				return false;
-			},
-			isGetResultTopic(cotDiem) {
-				return (
-					this.filter.MaNhomCotDiemItem.MaNhomCotDiem.includes('DiemGK_') ||
-					this.filter.MaNhomCotDiemItem.MaNhomCotDiem.includes('DiemCK_')
-				)
-					&&
-					(
-						!cotDiem.MaCotDiem.includes('DiemGK_') || !cotDiem.MaCotDiem.includes('DiemCK_') ||
-						!cotDiem.MaCotDiem.includes('DiemTBGK_') || !cotDiem.MaCotDiem.includes('DiemTBCK_')
-					)
-			},
-			/**
-			 * Khởi tạo comment và style cho các ô
-			 */
-			initComment_Style() {
-				const firstStudent = this.DSHocSinh[0];
-				if (!firstStudent) return;
-	
-				const gradeColumns = this.DSHocSinh_API.filter(
-					col => col.HocSinhID === firstStudent.HocSinhID
-				);
-	
-				this.styleSheet = {};
-				this.comments = {};
-	
-				this.applyBackgroundStyles(gradeColumns);
-				this.applyComments(gradeColumns);
-			},
-	
-			/**
-			 * Áp dụng style background cho các ô
-			 */
-			applyBackgroundStyles(gradeColumns) {
-				this.DSHocSinh.forEach((row, rowIndex) => {
-					gradeColumns.forEach((column, colIndex) => {
-						const cellAddress = jspreadsheet.helpers.getCellNameFromCoords(
-							colIndex + this.freezeColumns,
-							rowIndex
-						);
-	
-						// Áp dụng màu nền của cột
-						if (column.HexBackground) {
-							this.styleSheet[cellAddress] = `background-color: ${column.HexBackground}`;
-						}
-	
-						// Highlight các ô trống
-						const value = row[column.MaCotDiem];
-						if (value === null || value === '') {
-							this.styleSheet[cellAddress] = 'background-color: #ffff0052';
-						}
-					});
-				});
-			},
-	
-			/**
-			 * Áp dụng comments cho các ô
-			 */
-			applyComments(gradeColumns) {
-				this.DSHocSinh.forEach((row, rowIndex) => {
-					gradeColumns.forEach((column, colIndex) => {
-						const cellAddress = jspreadsheet.helpers.getCellNameFromCoords(
-							colIndex + this.freezeColumns,
-							rowIndex
-						);
-	
-						const commentData = this.DSHocSinh_API.find(
-							x => x.HocSinhID === row.HocSinhID &&
-								x.MaCotDiem === column.MaCotDiem &&
-								x.Is_Comment
-						);
-	
-						if (commentData) {
-							this.comments[cellAddress] = `Cột điểm do ${commentData.NhapDiemUser} đã nhập`;
-						}
-					});
-				});
-			},
-	
-			/**
-			 * Khởi tạo dữ liệu cho Excel export
-			 */
-			initExcel() {
-				this.DataExcel = [];
-				let rowIndex = 2;
-	
-				this.DSHocSinh.forEach(student => {
-					const gradeColumns = this.DSHocSinh_API.filter(
-						col => col.HocSinhID === student.HocSinhID
-					);
-	
-					if (gradeColumns.length === 0) return;
-	
-					const excelRow = this.buildRowData(gradeColumns, rowIndex);
-					this.DataExcel.push(excelRow);
-					rowIndex++;
-				});
-			},
-			validateSave(typeCell, value, min, max) {
-				if (value == null || value == '') return 0
-				if (typeCell === 'number' && (value < min || value > max)) return 1
-				else return 0
-			},
 			onChangeSheet(options) {
 				setTimeout(() => {
-					this.process(options)
-				}, 0)
+					this.processChange(options);
+				}, 0);
 			},
-			process({ instance, cell, x, y, value, dataObjects }) {
-				const cellName = instance.getValueFromCoords(x, y);
-				// Nếu ô này chưa có trong danh sách thì thêm vào
-				if (!this.editedCells.some(c => c.x === x && c.y === y)) {
-					this.editedCells.push({ x, y, cellName, value });
-				} else {
-					// Nếu đã có, thì cập nhật lại giá trị mới
-					const index = this.editedCells.findIndex(c => c.x === x && c.y === y);
-					this.editedCells[index].value = value;
-				}
-			},
-			processBeforePushAPI() {
-				const dataBeforeInsertToDB = []
-				for (var i = 0; i < this.DSHocSinh.length; i++) {
-					const hocSinh = this.DSHocSinh[i]
-					for (var j = 0; j < this.DSHocSinh_API.length; j++) {
-						const exists = this.editedCells.find(cell => cell.x == j && cell.y == i)
-						if (!exists) continue
-						const currentJ = j - this.freezeColumns
-						const currentI = i
-						const cotDiem = this.DSHocSinh_API[currentJ]
-						const cellAdresss = jspreadsheet.helpers.getCellNameFromCoords(currentJ, currentI) // (j+3) là địa chỉ cột điểm đầu tiên, i là row
-						let giaTriCotDiem = hocSinh[cotDiem.MaCotDiem] //MaCotDiem
-						if (cotDiem.LoaiCotDiem === 'Công thức')
-							giaTriCotDiem = this.instance[0].records[currentI][currentJ]?.element?.innerHTML
-						if (cotDiem.GiaTriCotDiem === 'number') {
-							if (giaTriCotDiem === null || giaTriCotDiem === NaN || giaTriCotDiem === '') {
-								giaTriCotDiem = ''
-							}
-						}
-						let cotDiem_HS = {
-							HocSinhID: hocSinh.HocSinhID,
-							LopID: this.filter.LopItem.LopID,
-							NienKhoa: vueData.NienKhoa,
-							CotDiemID: cotDiem.CotDiemID,
-							KetQuaDanhGia_VI: giaTriCotDiem,
-							KetQuaDanhGia_EN: giaTriCotDiem,
-							KQHTID: this.DSHocSinh_API.find(x => x.HocSinhID === hocSinh.HocSinhID && x.MaCotDiem === cotDiem.MaCotDiem)?.KQHTID ?? 0
-						}
-						let typeColumn = cotDiem.GiaTriCotDiem
-						let value = cotDiem_HS.KetQuaDanhGia_VI
-						const min = cotDiem.DiemMin
-						const max = cotDiem.DiemMax
-						cotDiem_HS.IsError = this.validateSave(typeColumn, value, min, max)
-						if (cotDiem_HS.IsError === 1) {
-							this.instance[0].setStyle(cellAdresss, 'background-color', 'red')
-							Vue.$toast.error(`Cột điểm chỉ cho phép nhập thang điểm từ ${min} đến ${max}!`, { position: 'top' })
-							return undefined
-						}
-						cotDiem_HS.KetQuaDanhGia_VI = cotDiem_HS.KetQuaDanhGia_VI === NaN ? null : cotDiem_HS.KetQuaDanhGia_VI
-						dataBeforeInsertToDB.push(cotDiem_HS)
-					}
-				}
-				return dataBeforeInsertToDB
-			},
-			onExportExcel() {
 	
+			/**
+			 * Process change
+			 */
+			processChange({ instance, cell, x, y, value }) {
+				const existingIndex = this.editedCells.findIndex(c => c.x === x && c.y === y);
+	
+				if (existingIndex === -1) {
+					// Thêm mới
+					this.editedCells.push({
+						x,
+						y,
+						cellName: instance.getValueFromCoords(x, y),
+						value
+					});
+				} else {
+					// Cập nhật
+					this.editedCells[existingIndex].value = value;
+				}
 			},
+	
+			/**
+			 * Lưu tạm
+			 */
 			async onLuuTam() {
-				let data = this.processBeforePushAPI()
-				if (!data) return
-				let validIndex = data.findIndex((item) => item.IsError === 1)
-				if (validIndex != -1) {
-					return Vue.$toast.error('Cột điểm chỉ cho phép nhập thang điểm 10!', { position: 'top' })
-				}
-				data = data.filter(x =>
-					(x.KQHTID && x.KQHTID > 0) || // Nếu KQHTID tồn tại và lớn hơn 0 thì giữ lại
-					(
-						x.KetQuaDanhGia_VI != null &&
-						x.KetQuaDanhGia_VI !== '' &&
-						!Number.isNaN(x.KetQuaDanhGia_VI)
-					) // Hoặc KetQuaDanhGia_VI hợp lệ thì giữ lại
-				);
+				try {
+					const success = await BangDiemService.saveData(
+						this.editedCells,
+						this.DSHocSinh,
+						this.DSHocSinh_API,
+						this.freezeColumns,
+						{ ...this.filter, NienKhoa: this.vueData.NienKhoa },
+						this.instance,
+						this.vueData
+					);
 	
-				data = data.filter(x => !Number.isNaN(x.KetQuaDanhGia_VI)) //Filter thêm lần nữa khi có Công thức ko có tính được 'Error: #VALUE!'
-				await this.insData(data)
-				if ([2, 3].includes(vueData.CapID)) {
-					for (var cd of this.DSCotDiem_ByMaNhomCotDiem) {
-						await this.apiKhoaCotDiem(cd.value, false)
+					if (!success) return;
+	
+					// Cập nhật tình trạng nếu cần
+					if ([2, 3].includes(this.vueData.CapID)) {
+						await BangDiemService.api.updateTinhTrangC2C3({
+							NienKhoa: this.vueData.NienKhoa,
+							LopID: this.filter.LopItem.LopID,
+							MonHocLopID: this.filter.MonHocItem.MonHocLopID,
+							MaNhomCotDiem: this.filter.MaNhomCotDiemItem.MaNhomCotDiem,
+							TinhTrang: 1
+						});
+					} else {
+						await BangDiemService.api.updateTinhTrang({
+							NienKhoa: this.vueData.NienKhoa,
+							MonHocLopID: this.filter.MonHocItem.MonHocLopID,
+							LopID: this.filter.LopItem.LopID,
+							TinhTrang: 1,
+							MaNhomCotDiem: this.filter.MaNhomCotDiemItem.MaNhomCotDiem
+						});
 					}
-					// this.updateTinhTrangC2_C3(1)
-				} else {
-					// this.updateTinhTrang()
-				}
-				await this.onRefresh()
-			},
-			onOpenDialogKhoaCotDiem() {
-				this.action.isShowDialogKhoaCotDiem = true
-			},
-			async onKhoaCotDiem(MaCotDiem, IsKhoaCotDiem) {
-				await this.apiKhoaCotDiem(MaCotDiem, IsKhoaCotDiem)
-				await this.onRefresh()
-			},
-			async apiKhoaCotDiem(MaCotDiem, IsKhoaCotDiem) {
-				return await ajaxCALLPromise("lms/KhoaCotDiem_Ins_And_Upd", {
-					LopID: this.filter.LopItem.LopID,
-					MonHocLopID: this.filter.MonHocItem.MonHocLopID,
-					MaCotDiem,
-					IsKhoaCotDiem
-				})
-			},
-			onGuiBGH() {
 	
+					Vue.$toast.success('Lưu dữ liệu thành công!', { position: 'top' });
+					await this.onRefresh();
+				} catch (error) {
+					console.error('onLuuTam error:', error);
+					Vue.$toast.error('Có lỗi xảy ra khi lưu dữ liệu!', { position: 'top' });
+				}
 			},
+	
+			/**
+			 * Gửi BGH
+			 */
+			async onGuiBGH() {
+				try {
+					// Lưu dữ liệu trước
+					const success = await BangDiemService.saveData(
+						this.editedCells,
+						this.DSHocSinh,
+						this.DSHocSinh_API,
+						this.freezeColumns,
+						{ ...this.filter, NienKhoa: this.vueData.NienKhoa },
+						this.instance,
+						this.vueData
+					);
+	
+					if (!success) return;
+	
+					// Gửi BGH
+					await BangDiemService.sendToBGH(this.filter, this.vueData);
+	
+					Vue.$toast.success('Gửi BGH thành công!', { position: 'top' });
+					await this.onRefresh();
+				} catch (error) {
+					console.error('onGuiBGH error:', error);
+					Vue.$toast.error('Có lỗi xảy ra khi gửi BGH!', { position: 'top' });
+				}
+			},
+	
+			/**
+			 * Mở dialog khóa cột điểm
+			 */
+			onOpenDialogKhoaCotDiem() {
+				this.action.isShowDialogKhoaCotDiem = true;
+			},
+	
+			/**
+			 * Khóa cột điểm
+			 */
+			async onKhoaCotDiem(cd, isLock) {
+				try {
+					await BangDiemService.api.toggleKhoaCotDiem({
+						LopID: this.filter.LopItem.LopID,
+						MonHocLopID: this.filter.MonHocItem.MonHocLopID,
+						MaCotDiem: cd,
+						IsKhoaCotDiem: isLock
+					});
+	
+					Vue.$toast.success(
+						`${isLock ? 'Khóa' : 'Mở khóa'} cột điểm thành công!`,
+						{ position: 'top' }
+					);
+	
+					await this.onRefresh();
+				} catch (error) {
+					console.error('onKhoaCotDiem error:', error);
+					Vue.$toast.error('Có lỗi xảy ra!', { position: 'top' });
+				}
+			},
+	
+			/**
+			 * Mở dialog mẫu nhận xét
+			 */
 			onOpenMauNhanXet() {
-				this.action.isShowDialogMauNhanXet = true
+				this.action.isShowDialogMauNhanXet = true;
 			},
-			onGetDiemTest() { },
-			async updateTinhTrang() {
-				ajaxCALLPromise("lms/KhoaCotDiem_Ins_And_Upd", {
-					LopID: this.filter.LopItem.LopID,
-					MonHocLopID: this.filter.MonHocLopItem.MonHocLopID,
-					// MaCotDiem: this.filter.LopItem.LopID,
-				})
+	
+			/**
+			 * Xác nhận mẫu nhận xét
+			 */
+			onXacNhanMauNhanXet(dshs) {
+				this.DSHocSinh = dshs;
+				this.keyComp++;
 			},
-			async updateTinhTrangC2_C3(TinhTrang) {
-				// return await ajaxCALLPromise("lms/KQHT_MonHocLop_TinhTrang_Udp_C2_C3", {
-				// 	NienKhoa: vueData.NienKhoa,
-				// 	LopID: this.filter.LopItem.LopID,
-				// 	MonHocLopID: this.filter.MonHocItem.MonHocLopID,
-				// 	MaNhomCotDiem: this.filter.MaNhomCotDiemItem.MaNhomCotDiem,
-				// 	TinhTrang
-				// })
+	
+			/**
+			 * Lấy điểm Test (Theme)
+			 */
+			async onGetDiemTest() {
+				try {
+					const updatedStudents = await BangDiemService.utility.getThemeTestScore(
+						this.filter,
+						this.DSHocSinh
+					);
+	
+					this.DSHocSinh = updatedStudents;
+					this.keyComp++;
+	
+					Vue.$toast.success('Lấy điểm Test thành công!', { position: 'top' });
+				} catch (error) {
+					console.error('onGetDiemTest error:', error);
+					Vue.$toast.error('Có lỗi xảy ra khi lấy điểm Test!', { position: 'top' });
+				}
 			},
-			async insData(KetQuaObjArr) {
-				return await ajaxCALLPromise("lms/KQHT_MonHocLop_Ins", {
-					NienKhoa: vueData.NienKhoa,
-					MonHocLopID: this.filter.MonHocItem.MonHocLopID,
-					LopID: this.filter.LopItem.LopID,
-					MonHocID: this.filter.MonHocItem.MonHocID,
-					TemplateBangDiemID: this.filter.MonHocItem.TemplateBangDiemID,
-					KetQuaObjArr
-				})
-			},
-			async getKhoaDSCotDiem() {
-				this.DSKhoaCotDiem_API = await ajaxCALLPromise("lms/KhoaCotDiem_Get", {
-					LopID: this.filter.LopItem.LopID,
-					MonHocLopID: this.filter.MonHocItem.MonHocLopID
-				})
+	
+			/**
+			 * Export Excel
+			 */
+			onExportExcel() {
+				try {
+					const exportData = BangDiemService.export.prepareExportData(
+						this.DSHocSinh,
+						this.DSCotDiem_ByMaNhomCotDiem,
+						this.instance,
+						this.freezeColumns,
+						this.filter
+					);
+	
+					const fileName = `Bang_Diem_Lop_${this.filter.LopItem.TenLop}_${this.filter.MonHocItem.MonHocName}.xlsx`;
+	
+					BangDiemService.export.exportExcel(
+						this.headers,
+						exportData,
+						fileName
+					);
+	
+					Vue.$toast.success('Xuất Excel thành công!', { position: 'top' });
+				} catch (error) {
+					console.error('onExportExcel error:', error);
+					Vue.$toast.error('Có lỗi xảy ra khi xuất Excel!', { position: 'top' });
+				}
 			}
 		}
 	}

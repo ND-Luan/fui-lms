@@ -1,28 +1,26 @@
 <template>
 	<div>
-		<v-card>
-			<v-card-text>
-				<v-row dense>
-					<v-col cols="3">
-						<v-select v-model="CapID" label="Chọn cấp" :items="DSCap" item-title="title"
-							item-value="value" />
-					</v-col>
-					<v-col cols="3">
-						<v-select v-model="HocKi" label="Chọn học kì" :items="DSHocKi" item-title="title"
-							item-value="textValue" />
-					</v-col>
-					<v-col class="d-flex ga-2">
-						<v-btn color="primary" text="Tìm kiếm" @click="onLoadThongKe" />
-						<v-btn color="primary" variant="tonal" text="Xuất Excel" @click="onExportExcel" />
-					</v-col>
-				</v-row>
-			</v-card-text>
+		<v-card class="pa-2">
+			<v-row dense>
+				<v-col cols="3">
+					<v-select v-model="CapID" label="Chọn cấp" :items="DSCap" item-title="title" item-value="value" />
+				</v-col>
+				<v-col cols="3">
+					<v-select v-model="HocKi" label="Chọn học kì" :items="DSHocKi" item-title="title"
+						item-value="textValue" />
+				</v-col>
+				<v-col class="d-flex ga-2">
+					<v-btn color="primary" text="Tìm kiếm" @click="onLoadThongKe" />
+					<v-btn color="primary" variant="tonal" text="Xuất Excel" @click="onExportExcel" />
+				</v-col>
+			</v-row>
 		</v-card>
 
 		<div class="d-flex flex-row">
 			<v-tabs v-model="tab" color="primary" direction="vertical">
 				<v-divider />
-				<v-tab v-for="mh in DSMonHoc" :text="mh.TenMonHoc_HienThi" :value="mh.MonHocID"></v-tab>
+				<v-tab class="text-none text-wrap-tab" v-for="mh in DSMonHoc" :text="mh.TenMonHoc_HienThi" :value="mh.MonHocID"
+					style="max-width: 200px"></v-tab>
 			</v-tabs>
 			<v-divider vertical />
 			<v-data-table class="table-bordered" :headers="HeaderThongKe" :items="DataThongKe" hide-default-footer

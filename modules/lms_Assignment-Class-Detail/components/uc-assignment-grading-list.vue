@@ -276,7 +276,7 @@
 				:style="{ display: displayHeaderChamBai === true ? 'flex !important' : 'none !important' }">
 				<span class="text-white">{{ $t('message.GradeAssignment') }}</span>
 				<v-spacer></v-spacer>
-				<v-btn class="text-white" @click="onClose()" icon="mdi-close"  " />
+				<v-btn class="text-white" @click="onClose()" icon="mdi-close" size="small" variant="text" />
 			</v-card-title>
 			<v-card-text class="pa-0 glass-Assignment" style="position: relative; height: 100vh;">
 				<iframe class="position-absolute grade-list" :src="url" width="100%" allow="fullscreen"
@@ -629,8 +629,7 @@
 				vueData.loading = false;
 			},
 			async fetchMyClasses() {
-				console.log('vueData.HocKi ?? 2', vueData.HocKi ?? 2)
-				await ajaxCALL("lms/EL_Teacher_GetMyClasses", { HocKi: vueData.HocKi ?? 2 }, (res) => {
+				await ajaxCALL("lms/EL_Teacher_GetMyClasses", { HocKi: vueData.NienKhoaItem.HocKi }, (res) => {
 					this.lopList = res.data || [];
 					if (this.lopList.length > 0) {
 						this.selectedLopID = this.lopList.find(x => x.LopID == this.lopid)?.LopID ?? this.lopList[0].LopID;
@@ -638,7 +637,7 @@
 				});
 			},
 			async fetchSubjectsByClass(lopId) {
-				await ajaxCALL("lms/EL_Teacher_GetSubjectsByClass", { LopID: lopId, HocKi: vueData.HocKi ?? 2 }, (res) => {
+				await ajaxCALL("lms/EL_Teacher_GetSubjectsByClass", { LopID: lopId, HocKi: vueData.NienKhoaItem.HocKi }, (res) => {
 					this.monHocList = res.data || [];
 					if (this.monHocList.length > 0) {
 						this.selectedMonHocID = this.monHocList.find(x => x.MonHocID == parseInt(this.monhocid))?.MonHocID ?? this.monHocList[0].MonHocID;
@@ -646,7 +645,7 @@
 				});
 			},
 			async fetchAssignmentsByClass(lopId, monHocId) {
-				await ajaxCALL("lms/EL_Teacher_GetAssignmentsByClass", { LopID: lopId, MonHocID: monHocId, HocKi: vueData.HocKi ?? 2 }, (res) => {
+				await ajaxCALL("lms/EL_Teacher_GetAssignmentsByClass", { LopID: lopId, MonHocID: monHocId, HocKi: vueData.NienKhoaItem.HocKi }, (res) => {
 					this.assignmentList = res.data || [];
 					if (this.assignmentList.length > 0) {
 	

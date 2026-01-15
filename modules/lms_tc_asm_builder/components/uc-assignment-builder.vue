@@ -20,12 +20,12 @@
 					<v-divider class="mt-1 mb-1 " />
 					<v-row dense>
 						<v-col cols="6">
-							<v-btn @click="onOpenPreview" color="teal" block variant="tonal">
+							<v-btn @click="onOpenPreview" variant="outlined" elevation="1" color="teal" block variant="tonal">
 								{{ $t('message.Preview') }}
 							</v-btn>
 						</v-col>
 						<v-col cols="6">
-							<v-btn @click="onRemarkQuestion" color="amber" block variant="tonal">
+							<v-btn @click="onRemarkQuestion" variant="outlined" elevation="1" color="amber" block variant="tonal">
 								{{ $t('message.SortNumber') }}
 							</v-btn>
 						</v-col>
@@ -54,12 +54,12 @@
 						<v-btn @click="onOpenPreview" text='Xem trước' color="teal" block />
 					</v-col> -->
 					<v-col :cols="!vueData.AssignToClassID ? 6 : 12">
-						<v-btn color="primary" block elevation="2" @click="handleSave(true)">
+						<v-btn color="primary" variant="outlined" block elevation="1" @click="handleSave(true)">
 							{{ $t('message.SaveAssignment') }}
 						</v-btn>
 					</v-col>
 					<v-col cols="6" v-if="!vueData.AssignToClassID">
-						<v-btn class="w-100" color="success" @click="openDialogAssignToStudent">
+						<v-btn class="w-100" variant="outlined" elevation="1" color="success" @click="openDialogAssignToStudent">
 							{{ $t('message.Assigned') }}
 						</v-btn>
 					</v-col>
