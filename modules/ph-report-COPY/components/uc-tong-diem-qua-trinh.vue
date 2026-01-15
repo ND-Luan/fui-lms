@@ -160,26 +160,13 @@ export default {
 	},
 	methods: {
 		async getData(semester) {
-			await ajaxCALL(
-				'lms/BangDiemHocKyHocSinh_Get',
-				{
-					HocSinhID: vueData.HocSinhSelected.HocSinhID,
-					Semester: semester
-				},
-				(res) => {
-					if (res && res.data) {
-						this.bangDiem = res.data;
-						if (this.bangDiem.length > 0) {
-							this.processBangDiem(this.bangDiem);
-						}
-					} else {
-						console.error("Invalid response: no data found.");
-					}
-				},
-				(error) => {
-					console.error(error);
-				}
-			);
+			this.bangDiem = await ajaxCALLPromise('lms/BangDiemHocKyHocSinh_Get', {
+				HocSinhID: vueData.HocSinhSelected.HocSinhID,
+				Semester: semester
+			})
+			if (this.bangDiem.length > 0) {
+				this.processBangDiem(this.bangDiem);
+			}
 		},
 		createHeader(dataHeader) {
 			if (this.isNhomCotDiem) {
