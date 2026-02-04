@@ -3,7 +3,7 @@
 		<v-row class="ma-0" dense>
 			<v-col cols="12" md="2">
 				<uc-assignment-component-library @add-component="addComponent"
-					style="height: calc(-157px + 100dvh); overflow: auto" />
+					style="height: calc(-223px + 100dvh); overflow: auto" />
 				<v-divider />
 				<p class="text-subtitle-2">
 					{{ $t('message.Setting') }}
@@ -19,14 +19,14 @@
 					</div>
 					<v-divider class="mt-1 mb-1 " />
 					<v-row dense>
-						<v-col cols="6">
-							<v-btn @click="onOpenPreview" variant="outlined" elevation="1" color="teal" block variant="tonal">
-								{{ $t('message.Preview') }}
+						<v-col cols="12">
+							<v-btn @click="onOpenPreview" variant="outlined"  color="teal" block>
+								<v-icon start class="me-1">mdi-eye-outline</v-icon>{{ $t('message.Preview') }}
 							</v-btn>
 						</v-col>
-						<v-col cols="6">
-							<v-btn @click="onRemarkQuestion" variant="outlined" elevation="1" color="amber" block variant="tonal">
-								{{ $t('message.SortNumber') }}
+						<v-col cols="12">
+							<v-btn @click="onRemarkQuestion" variant="outlined"  color="amber" block>
+								<v-icon start class="me-1">mdi-sync</v-icon>{{ $t('message.SortNumber') }}
 							</v-btn>
 						</v-col>
 					</v-row>
@@ -43,7 +43,7 @@
 
 			</v-col>
 			<v-col class="pa-0" cols="12" md="3">
-				<div style="height: calc(100dvh - 45px); overflow: auto;" class="position-relative pa-2">
+				<div style="height: calc(100dvh - 45px); overflow: auto;" class="position-relative ">
 					<uc-assignment-properties v-if="selectedItem" :assignment="assignment"
 						:groups="assignment.AssignmentConfig?.groups" :item="selectedItem"
 						@update:groups="updateGroups" />
@@ -54,13 +54,13 @@
 						<v-btn @click="onOpenPreview" text='Xem trước' color="teal" block />
 					</v-col> -->
 					<v-col :cols="!vueData.AssignToClassID ? 6 : 12">
-						<v-btn color="primary" variant="outlined" block elevation="1" @click="handleSave(true)">
-							{{ $t('message.SaveAssignment') }}
+						<v-btn color="primary" variant="outlined" block  @click="handleSave(true)">
+							<v-icon start class="me-1">mdi-content-save-outline</v-icon>{{ $t('message.SaveAssignment') }}
 						</v-btn>
 					</v-col>
 					<v-col cols="6" v-if="!vueData.AssignToClassID">
-						<v-btn class="w-100" variant="outlined" elevation="1" color="success" @click="openDialogAssignToStudent">
-							{{ $t('message.Assigned') }}
+						<v-btn class="w-100" variant="outlined"  color="success" @click="openDialogAssignToStudent">
+							<v-icon start class="me-1">mdi-clipboard-arrow-right-outline</v-icon>{{ $t('message.Assigned') }}
 						</v-btn>
 					</v-col>
 				</v-row>
@@ -230,6 +230,7 @@ export default {
 		}
 	},
 	mounted() {
+		console.log('vueData.NienKhoaItem',vueData.NienKhoaItem)
 		ajaxCALL("/lms/EL_Teacher_GetLop_GiaoBai", {
 			AssignmentID: vueData.assignment.AssignmentID,
 			MonHocID: vueData.assignment.MonHocID,
@@ -661,7 +662,7 @@ export default {
 				ajaxCALL('/lms/EL_Teacher_GetTeacherByMonHocID', {
 					MonHocID: vueData.assignment.MonHocID,
 					AssignmentID: vueData.AssignmentID,
-					HocKi: vueData.NienKhoaItem.HocKi
+					HocKi: vueData.HocKi
 				}, (res) => {
 					if (res && res.data) {
 						resolve(res.data);

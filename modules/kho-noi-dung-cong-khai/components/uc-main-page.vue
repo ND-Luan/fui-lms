@@ -1,7 +1,6 @@
 <template>
 	<v-card>
 		<v-card-title class="d-flex px-0 text-primary pt-0">
-			{{ $t('message.PublicContentLibrary') }}
 		</v-card-title>
 		<v-card-text class="pa-0 d-flex flex-column ga-2">
 			<div class="d-flex ga-2 flex-wrap">
@@ -10,25 +9,24 @@
 				<v-select v-model="FormData.MonHocID" :label="$t('message.Subject')" hide-details="auto"
 					density="compact" :items="DSMonHoc.filter(mh => mh.KhoiID == FormData.KhoiID)"
 					:disabled="!FormData.KhoiID" style="min-width: 200px;max-width: fit-content"></v-select>
-				<v-btn variant="outlined" @click="getResourcePublic()" color="primary">{{ $t('message.Refresh')
-				}}</v-btn>
+				<v-btn variant="outlined" @click="getResourcePublic()" color="primary"><v-icon start class="me-1">mdi-refresh</v-icon> {{ $t('message.Refresh')}}</v-btn>
 			</div>
 			<v-data-table :items="DataResourcePublic" :headers :hide-default-footer="true" class="custom-table">
 				<template v-slot:item.Preview="{ item }">
 					<v-btn v-if="item.ResourceType == 'ASSIGNMENT'" color="primary" @click="PreviewContent(item)"
-						variant="tonal" size="small">{{ $t('message.Preview') }}</v-btn>
+						variant="outlined" size="small"><v-icon start class="me-1">mdi-eye-outline</v-icon>{{ $t('message.Preview') }}</v-btn>
 				</template>
 				<template v-slot:item.ResourceType="{ item }">
-					<v-chip :color="item.ResourceType == 'ASSIGNMENT' ? 'blue' : 'green'">
+					<v-chip class="font-weight-medium" variant="text" :color="item.ResourceType == 'ASSIGNMENT' ? 'blue' : 'green'">
 						{{ item.ResourceType == 'ASSIGNMENT' ? $t('message.Assignment') : $t('message.Lesson') }}
 					</v-chip>
 				</template>
 				<template v-slot:item.actions="{ item }">
-					<v-btn color="orange" @click="GetContent(item)" variant="tonal" size="small"
-						:disabled="item.IsGetResource == 1">{{ $t('message.RetrieveContent') }}</v-btn>
+					<v-btn color="orange" @click="GetContent(item)" variant="outlined" size="small"
+						:disabled="item.IsGetResource == 1"><v-icon start class="me-1">mdi-download-outline</v-icon>{{ $t('message.RetrieveContent') }}</v-btn>
 				</template>
 				<template v-slot:item.IsGetResource="{ item }">
-					<v-chip :color="item.IsGetResource == 1 ? 'pink' : 'grey'">
+					<v-chip class="font-weight-medium" variant="text" :color="item.IsGetResource == 1 ? 'pink' : 'grey'">
 						{{ item.IsGetResource == 1 ? $t('message.ContentRetrieved') : $t('message.NotRetrieved') }}
 					</v-chip>
 				</template>

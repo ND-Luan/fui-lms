@@ -196,7 +196,7 @@ export default {
 			// console.log(assignmentID)
 			openWindow({
 				title: "Sổ điểm Lớp học",
-				url: `/lms-teacher-gradebook?LopID=${assignment.LopID}&MonHocID=${assignment.MonHocID}`,
+				url: `/lms-teacher-gradebook?LopID=${assignment.LopID}&MonHocID=${assignment.MonHocID}&HocKi=${vueData.HocKiItem.HocKi}`,
 				id: "WinGiaoBaiTap"
 			});
 		}

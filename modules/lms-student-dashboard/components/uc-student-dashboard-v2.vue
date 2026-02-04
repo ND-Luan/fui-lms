@@ -1,12 +1,12 @@
 <template>
 	<v-container fluid class="dashboard-bg pa-3 pb-0 h-100">
 		<!-- Header Card -->
-		<v-card class="mb-3 overflow-visible" elevation="2">
+		<v-card class="mb-3 overflow-visible" elevation="1">
 			<v-card-text class="pa-3">
 				<div class="d-flex align-center ga-2">
 					<div class="flex-grow-1">
 						<div class="d-flex align-center flex-wrap ga-2 mb-2">
-							<h1 class="dashboard-title" @click="test()">Tổng quan học tập</h1>
+							<h3 class="dashboard-title" @click="test()">Tổng quan học tập</h3>
 							<!-- <v-chip color="primary" size="small"
 								@click="openWindow({title : 'Học liệu số', url: '/kham-pha?capid=' + vueData.HocSinhChiTiet?.CapID + '&khoiid=' + vueData.HocSinhChiTiet?.KhoiID})">
 								<v-icon start size="small">mdi-book-open-page-variant</v-icon>

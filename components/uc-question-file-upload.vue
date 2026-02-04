@@ -63,7 +63,6 @@
 							v-tooltip="'Ý kiến của bạn'">
 						</v-btn>
 					</template>
-
 					<v-card :min-width="widthScreen < 650 ? null : 600" class="elevation-0" variant="outlined"
 						color="orange">
 						<v-card-title class="bg-orange-darken-1">Ý kiến của bạn</v-card-title>

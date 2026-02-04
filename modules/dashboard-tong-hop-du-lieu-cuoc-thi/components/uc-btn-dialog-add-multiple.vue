@@ -1,7 +1,7 @@
 <template>
 	<v-dialog fullscreen>
 		<template v-slot:activator="{ props: activatorProps }">
-			<v-btn v-bind="activatorProps" color="primary" text="Import" variant="flat"></v-btn>
+			<v-btn v-bind="activatorProps" color="primary" text="Import" variant="outlined"></v-btn>
 		</template>
 		<template v-slot:default="{ isActive }">
 			<v-card title="Import dữ liệu">

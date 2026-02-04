@@ -254,11 +254,32 @@ function convertDSHocSinh() {
                 if (cotDiemExist.MaCotDiem.includes('MucDoDanhGia') && cotDiemExist.KQHTID === 0) {
                     if (obj[cotDiemExist.MaCotDiem] === null || obj[cotDiemExist.MaCotDiem] === '') obj[cotDiemExist.MaCotDiem] = 'T'
                 }
-            } else if (cotDiemExist.LoaiCotDiem == 'Công thức' && cotDiemExist.Formula !== null && (vueData.MaNhomCotDiemItem.MaNhomCotDiem == 'DiemTBCK_HK1' || vueData.MaNhomCotDiemItem.MaNhomCotDiem == 'DiemTBCK_HK2') && (cotDiemExist.MaCotDiem !== 'DiemTBCK_HK1' && cotDiemExist.MaCotDiem !== 'DiemTBCK_HK2' && !cotDiemExist.MaCotDiem.includes('DanhHieu'))) {
+            } else if (cotDiemExist.LoaiCotDiem == 'Công thức' && cotDiemExist.Formula !== null && (
+                vueData.MaNhomCotDiemItem.MaNhomCotDiem == 'DiemTBGK_HK1'
+                || vueData.MaNhomCotDiemItem.MaNhomCotDiem == 'DiemTBCK_HK1'
+                || vueData.MaNhomCotDiemItem.MaNhomCotDiem == 'DiemTBGK_HK2'
+                || vueData.MaNhomCotDiemItem.MaNhomCotDiem == 'DiemTBCK_HK2'
+            ) && (
+                    cotDiemExist.MaCotDiem !== 'DiemTBGK_HK1'
+                    && cotDiemExist.MaCotDiem !== 'DiemTBCK_HK1'
+                    && cotDiemExist.MaCotDiem !== 'DiemTBGK_HK2'
+                    && cotDiemExist.MaCotDiem !== 'DiemTBCK_HK2'
+                    && !cotDiemExist.MaCotDiem.includes('DanhHieu'))) {
                 //dùng cho formula để hiển thị
                 obj[cotDiemExist.MaCotDiem] = cotDiemExist?.KetQuaDanhGia_VI
             }
-            else if (cotDiemExist.LoaiCotDiem == 'Công thức' && cotDiemExist.Formula !== null && vueData.CapID == 1 && ['DiemTBCK_HK1', 'DiemTBCK_HK2', 'DanhHieu_HK1', 'DanhHieu_HK2'].includes(cotDiemExist.MaCotDiem)) {
+            else if (cotDiemExist.LoaiCotDiem == 'Công thức' && cotDiemExist.Formula !== null && vueData.CapID == 1
+                && [
+                    'DiemTBGK_HK1',
+                    'DiemTBCK_HK1',
+                    'DiemTBGK_HK2',
+                    'DiemTBCK_HK2',
+                    'DanhHieuGK_HK1',
+                    'DanhHieuCK_HK2',
+                    'DanhHieuGK_HK1',
+                    'DanhHieuCK_HK2'
+                ].includes(cotDiemExist.MaCotDiem)
+            ) {
                 obj[cotDiemExist.MaCotDiem] = '=' + replaceFormula(columnsCotDiem, cotDiemExist.Formula, indexRow, vueData.freezeColumns)
             }
             //Có sử dụng hàm isGetResultTopic => chỉ dùng cho các môn tiếng Anh
@@ -318,7 +339,17 @@ function convertDSHocSinh() {
                 if (cotDiemExist.MaCotDiem.includes('MucDoDanhGia') && cotDiemExist.KQHTID === 0) {
                     if (obj[cotDiemExist.MaCotDiem] === null || obj[cotDiemExist.MaCotDiem] === '') obj[cotDiemExist.MaCotDiem] = 'T'
                 }
-            } else if (cotDiemExist.LoaiCotDiem == 'Công thức' && cotDiemExist.Formula !== null && (vueData.MaNhomCotDiemItem.MaNhomCotDiem == 'DiemTBCK_HK1' || vueData.MaNhomCotDiemItem.MaNhomCotDiem == 'DiemTBCK_HK2') && (cotDiemExist.MaCotDiem !== 'DiemTBCK_HK1' && cotDiemExist.MaCotDiem !== 'DiemTBCK_HK2' && !cotDiemExist.MaCotDiem.includes('DanhHieu'))) {
+            } else if (cotDiemExist.LoaiCotDiem == 'Công thức' && cotDiemExist.Formula !== null && (
+                vueData.MaNhomCotDiemItem.MaNhomCotDiem == 'DiemTBGK_HK1'
+                || vueData.MaNhomCotDiemItem.MaNhomCotDiem == 'DiemTBCK_HK1'
+                || vueData.MaNhomCotDiemItem.MaNhomCotDiem == 'DiemTBGK_HK2'
+                || vueData.MaNhomCotDiemItem.MaNhomCotDiem == 'DiemTBCK_HK2'
+            ) && (
+                    cotDiemExist.MaCotDiem !== 'DiemTBGK_HK1'
+                    && cotDiemExist.MaCotDiem !== 'DiemTBCK_HK1'
+                    && cotDiemExist.MaCotDiem !== 'DiemTBGK_HK2'
+                    && cotDiemExist.MaCotDiem !== 'DiemTBCK_HK2'
+                    && !cotDiemExist.MaCotDiem.includes('DanhHieu'))) {
                 //dùng cho formula để hiển thị
                 obj[cotDiemExist.MaCotDiem] = cotDiemExist?.KetQuaDanhGia_VI
             }

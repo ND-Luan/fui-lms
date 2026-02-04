@@ -14,9 +14,8 @@
 						<span class="font-weight-medium text-truncate" style="max-width: 38ch;">
 							{{ assignment.Title }}
 						</span>
-						<v-chip size="x-small" variant="tonal" color="primary">{{ monHocName }}</v-chip>
+						<v-chip size="small" class="pa-0 font-weight-medium" variant="text" color="primary">{{ monHocName }}</v-chip>
 					</div>
-
 					<v-divider vertical class="mx-2 d-none d-md-block"></v-divider>
 
 					<div class="d-flex align-center ga-2">
@@ -463,7 +462,7 @@
 				<div v-else class="all-questions-mode" style="overflow: auto;"
 					:style="{ height: draft?.SubmissionStatus <= 2 ? 'calc(100vh - 70px)' : 'calc(100vh - 111px)' }">
 					<!-- COMPACT PROGRESS (All mode) -->
-					<v-card class="my-2 mx-2" flat border style="position: sticky; top: 0px; z-index: 50;"
+					<v-card class="my-2 mx-2" flat border style="position: sticky; top: -2px; z-index: 50;"
 						v-if="draft?.SubmissionStatus !== 4 && draft?.SubmissionStatus !== 3">
 						<v-card-text class="py-2">
 							<div class="d-flex align-center flex-wrap ga-3">

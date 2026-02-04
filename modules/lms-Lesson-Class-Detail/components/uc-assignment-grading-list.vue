@@ -57,13 +57,13 @@
 					<div class="text-muted">{{ item.HocSinhID }}</div>
 				</template>
 				<template #item.HoTen="{ item }">
-					<div class="font-weight-medium text-secondary">{{ item.HoTen }}</div>
+					<div class="">{{ item.HoTen }}</div>
 				</template>
 				<template #item.SoDanhBo="{ item }">
 					<div class="font-weight-medium text-secondary">{{ item.SoDanhBo ?? item.SoTT }}</div>
 				</template>
 				<template #item.Status="{ item }">
-					<v-chip :color="statusColors[item.Status]" size="small" variant="flat" class="font-weight-medium">
+					<v-chip :color="statusColors[item.Status]" size="small" variant="text" class="font-weight-medium pa-0">
 						{{ statusTexts[item.Status] }}
 					</v-chip>
 				</template>

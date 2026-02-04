@@ -749,12 +749,14 @@ function questionsTypesLabel(type) {
     ]
     let objTypeFind = _.find(questionsComponents, (item) => item.type === type)
     if (objTypeFind) {
-        return { label_EN: objTypeFind.label_EN,label: objTypeFind.label, icon: objTypeFind.icon, kind: objTypeFind.kind, color: objTypeFind.kind === "quiz" ? "blue" : "warning" }
+        return { label_EN: objTypeFind.label_EN, label: objTypeFind.label, icon: objTypeFind.icon, kind: objTypeFind.kind, color: objTypeFind.kind === "quiz" ? "blue" : "warning" }
     } else {
         return undefined
     }
-}
-
+} 
+/***********************
+ * ajaxCallPromise
+ ***********************/
 function ajaxCALLPromise(url, params = null) {
     return new Promise(resolve => {
         ajaxCALL(url, params, res => {

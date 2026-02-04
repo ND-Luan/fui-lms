@@ -1,17 +1,16 @@
-function callAPIPushME() {
+async function callAPIPushME() {
     if (vueData.CapID === 1) {
         for (var item of vueData.items) {
             let plainText = `Nội dung nhận xét học sinh: ${item.HoTen}\n`
                 + `Năm học: ${vueData.NienKhoa}-${vueData.NienKhoa + 1} - Tháng ${vueData.ThangObj.Thang}\n`
                 + `Quý phụ huynh vui lòng xem nhận xét chi tiết tại: https://lms.lhbs.vn/ph-report?tab=0&HocSinhID=${item.HocSinhID}`
-            ajaxCALL(`student/LMS_SendMessageToME`,
-                {
-                    HocSinhID: item.HocSinhID,
-                    NoiDung: plainText
-                },
-                res => {
-                    Vue.$toast.success(`Đẩy ${item.HocSinhID} - ${item.HoTen} dữ liệu tháng sang ME`, { position: "top" })
-                })
+            const isSend = await ajaxCALLPromise(`student/LMS_SendMessageToME`, {
+                HocSinhID: item.HocSinhID,
+                NoiDung: plainText
+            })
+            if (isSend) {
+                Vue.$toast.success(`Đẩy ${item.HocSinhID} - ${item.HoTen} dữ liệu tháng sang ME`, { position: "top" })
+            }
         }
     }
     else if (vueData.CapID === 2 || vueData.CapID === 3) {
@@ -39,16 +38,46 @@ function callAPIPushME() {
                     + `\nXem chi tiết kết quả học tập: https://lms.lhbs.vn/ph-report?tab=0&HocSinhID=${item.HocSinhID}`
             }
             console.log("plainText", plainText)
-            ajaxCALL(`student/LMS_SendMessageToME`,
-                {
-                    HocSinhID: item.HocSinhID,
-                    NoiDung: plainText
-                },
-                res => {
-                    Vue.$toast.success(`Đẩy ${item.HocSinhID} - ${item.HoTen} dữ liệu tháng sang ME`, { position: "top" })
-                })
+            const isSend = await ajaxCALLPromise(`student/LMS_SendMessageToME`, {
+                HocSinhID: item.HocSinhID,
+                NoiDung: plainText
+            })
+            if (isSend) {
+                Vue.$toast.success(`Đẩy ${item.HocSinhID} - ${item.HoTen} dữ liệu tháng sang ME`, { position: "top" })
+            }
         }
     }
+}
+function processBeforePushME(item) {
+    let plainText = ''
+    if (vueData.CapID === 1) {
+        plainText = `Nội dung nhận xét học sinh: ${item.HoTen}\n`
+            + `Năm học: ${vueData.NienKhoa}-${vueData.NienKhoa + 1} - Tháng ${vueData.ThangObj.Thang}\n`
+            + `Quý phụ huynh vui lòng xem nhận xét chi tiết tại: https://lms.lhbs.vn/ph-report?tab=0&HocSinhID=${item.HocSinhID}`
+    }
+    else if (vueData.CapID === 2 || vueData.CapID === 3) {
+        //.filter(x => x.HocSinhID === 23300048) ==> Cháu a Tâm
+        // Tạo thẻ ảo
+        const container = document.createElement("div");
+        // Thay thẻ <br> và </p> bằng \n, bỏ <p>
+        const preProcessedHTML = html
+            .replace(/<br\s*\/?>/gi, '\n')
+            .replace(/<\/p>/gi, '\n')
+            .replace(/<p[^>]*>/gi, ''); // loại bỏ <p> nhưng giữ nội dung
+        container.innerHTML = preProcessedHTML;
+        if ([12, 5].includes(vueData.ThangObj.Thang)) {
+            plainText = `Kết quả học tập của học sinh: ${item.HoTen}\n` +
+                `Năm học: ${vueData.NienKhoa} - ${vueData.NienKhoa + 1} - Kỳ đánh giá: Tháng ${vueData.ThangObj.Thang} - Học kì ${vueData.ThangObj.HocKy}\n`
+                + `Ưu điểm: \n${item.UuDiem?.trim() || "-"} \nNhược điểm: \n${item.NhuocDiem?.trim() || "-"} \nĐề xuất: \n${item.DeXuat?.trim() || "-"} `
+                + `\nXem chi tiết kết quả học tập: https://lms.lhbs.vn/ph-report?tab=0&HocSinhID=${item.HocSinhID}`
+        } else {
+            plainText = `Kết quả học tập của học sinh: ${item.HoTen}\n` +
+                `Năm học: ${vueData.NienKhoa} - ${vueData.NienKhoa + 1} - Kỳ đánh giá: Tháng ${vueData.ThangObj.Thang} - Học kì ${vueData.ThangObj.HocKy}\n`
+                + `Học tập: \n${item.NoiDungKienThuc_HTML?.trim() || "-"} \nNề nếp: \n${item.NoiDungNangLuc_HTML?.trim() || "-"} \nMong muốn phối hợp: \n${item.NoiDungHoatDongKhac_HTML?.trim() || "-"} `
+                + `\nXem chi tiết kết quả học tập: https://lms.lhbs.vn/ph-report?tab=0&HocSinhID=${item.HocSinhID}`
+        }
+    }
+    return plainText
 }
 addEventListener('resize', () => {
     if (window.innerWidth < 1366) {
@@ -196,7 +225,7 @@ function renderHeaderTable() {
                 }
             ],
             "attr": {
-                "style": "padding: 10px"
+                "style": "padding: 10px; max-width: 250px;"
             },
         })
         columns.push({
@@ -216,7 +245,7 @@ function renderHeaderTable() {
                 }
             ],
             "attr": {
-                "style": "padding: 10px"
+                "style": "padding: 10px; max-width: 250px;"
             },
         })
         // columns.push({
@@ -412,7 +441,7 @@ function renderHeaderTable() {
                 "title": "Nhận xét",
                 "value": "NhanXet",
                 "attr": {
-                    style: "padding:10px;witdh: 300px;",
+                    style: "padding:10px; max-width: 250px;",
                     class: "d-flex flex-column ga-2"
                 }
             })
@@ -450,7 +479,7 @@ function renderHeaderTable() {
                 "title": "Nhận xét môn Toán",
                 "value": "NhanXetToan_HTML",
                 "attr": {
-                    style: "padding:10px;"
+                    style: "padding:10px; max-width: 250px;"
                 }
             })
             columns.push({
@@ -486,7 +515,7 @@ function renderHeaderTable() {
                 "title": "Nhận xét môn Tiếng Việt",
                 "value": "NhanXetTiengViet_HTML",
                 "attr": {
-                    style: "padding:10px;"
+                    style: "padding:10px; max-width: 250px;"
                 }
             })
             columns.push({
@@ -523,7 +552,7 @@ function renderHeaderTable() {
                 "title": "Nhận xét môn học khác",
                 "value": "NhanXetMonHocKhac_HTML",
                 "attr": {
-                    style: "padding:10px;"
+                    style: "padding:10px; max-width: 250px;"
                 }
             })
             columns.push({
@@ -559,7 +588,7 @@ function renderHeaderTable() {
                 "title": "Hoạt động giáo dục khác",
                 "value": "HoatDongGiaoDucKhac_HTML",
                 "attr": {
-                    style: "padding:10px;"
+                    style: "padding:10px; max-width: 250px;"
                 }
             })
             columns.push({
@@ -594,7 +623,7 @@ function renderHeaderTable() {
                 "title": "Phẩm chất - Năng lực",
                 "value": "PhamChatNangLuc_HTML",
                 "attr": {
-                    style: "padding:10px;"
+                    style: "padding:10px; max-width: 250px;"
                 }
             })
         }
@@ -808,7 +837,7 @@ function renderHeaderTable() {
                     "title": "Nhận xét",
                     "value": "ListThang_CuoiKiMobile",
                     "attr": {
-                        style: "padding:10px;witdh: 300px;",
+                        style: "padding:10px; max-width: 250px;",
                         class: "d-flex flex-column ga-2"
                     }
                 })
@@ -895,7 +924,7 @@ function renderHeaderTable() {
                     "title": "Nhận xét",
                     "value": "NoiDungHoatDongKhacMobile",
                     "attr": {
-                        style: "padding:10px;witdh: 300px;",
+                        style: "padding:10px; max-width: 250px;",
                         class: "d-flex flex-column ga-2"
                     }
                 })
@@ -919,7 +948,7 @@ function renderHeaderTable() {
                 "title": "Nhận xét",
                 "value": "NhanXet",
                 "attr": {
-                    style: "padding: 10px 0;",
+                    style: "padding: 10px 0; max-width: 250px;",
                     "class": "d-flex flex-column ga-2"
                 }
             })

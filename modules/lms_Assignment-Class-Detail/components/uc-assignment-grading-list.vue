@@ -1,5 +1,5 @@
 <template>
-	<v-card variant="tonal" color="primary" class="submission-stats-card">
+	<v-card variant="flat" class="submission-stats-card">
 		<div v-if="loading" class="pa-4">
 			<v-skeleton-loader type="card-avatar, article"></v-skeleton-loader>
 		</div>
@@ -9,13 +9,13 @@
 					<div>
 						<div class=" d-flex align-baseline ga-2">
 							<div class="text-overline">{{ $t('message.Statistics') }}:</div>
-							<div class="text-h6 font-weight-bold text-truncate" :title="assignmentTitle">
+							<div class="text-h6 font-weight-medium text-black" :title="assignmentTitle">
 								{{ assignmentTitle || $t('message.PleaseSelectAssignment') }}
 							</div>
 						</div>
 					</div>
-					<div class="mb-2">
-						<div class="text-overline">{{ $t('message.LimitAssigned') }}: <b>
+					<div class="mb-1">
+						<div class="text-overline">{{ $t('message.LimitAssigned') }}: <b class=" text-pink-darken-1">
 								{{ assignmentInfo?.LimitAssigned ?? 1 }}</b>
 						</div>
 					</div>
@@ -44,7 +44,8 @@
 								:disabled="!selectedMonHocID" />
 							<v-btn variant="outlined" color="primary"
 								@click="() => { this.loadAllDataForAssignment(this.selectedAssignToClassID) }"><v-icon
-									size="small">mdi-refresh</v-icon>{{ $t('message.Refresh') }}</v-btn>
+									start class="me-1" size="small">mdi-refresh</v-icon>{{ $t('message.Refresh')
+								}}</v-btn>
 						</v-col>
 					</v-row>
 				</v-col>
@@ -52,10 +53,10 @@
 				<!-- ======================================================= -->
 				<!-- == CỘT BÊN PHẢI: THỐNG KÊ GỌN                       	== -->
 				<!-- ======================================================= -->
-				<v-col cols="12" md="4" class="d-flex align-center justify-space-around ">
+				<v-col cols="12" md="4" class="d-flex align-center justify-space-evenly ">
 					<!-- Thống kê Tỉ lệ nộp bài -->
 					<div class="text-center">
-						<div class="text-overline mb-1">{{ $t('message.Submitted') }}</div>
+						<div class="text-overline mb-1" style="line-height: 1;">{{ $t('message.Submitted') }}</div>
 						<div class="d-flex align-baseline justify-center">
 							<div class="text-h4 font-weight-bold">{{ stats.SubmittedCount || 0 }}</div>
 							<div class="text-h6">/{{ stats.TotalStudents || 0 }}</div>
@@ -70,7 +71,7 @@
 
 					<!-- Thống kê Điểm Trung bình -->
 					<div class="text-center">
-						<div class="text-overline mb-1">{{ $t('message.averageScore') }}</div>
+						<div class="text-overline mb-1" style="line-height: 1;">{{ $t('message.averageScore') }}</div>
 						<div class="text-h4 font-weight-bold">{{ (stats.AverageScore || 0) }}</div>
 						<div class="text-caption">{{ $t('message.OnScaleOf') }} {{ stats.MaxScore || '-' }}</div>
 					</div>
@@ -88,17 +89,18 @@
 					v-if="assignmentInfo?.LimitAssigned > 1">*{{ $t('message.NoticeHighestScoreSubmission') }}</span>
 			</div>
 			<div class="d-flex flex-column flex-md-row justify-md-end w-100 ga-2">
-				<v-btn color="primary" variant="flat" :disabled="!studentSubmissions.length"
+				<v-btn color="primary" variant="outlined" :disabled="!studentSubmissions.length"
 					@click.stop="viewClassReport" :size="isMobile ? 'small' : 'default'">
-					{{ $t('message.ViewClassReport') }}
+					<v-icon class="me-1" start>mdi-chart-box-outline</v-icon>{{ $t('message.ViewClassReport') }}
 				</v-btn>
-				<v-btn color="primary" variant="flat" :disabled="!studentSubmissions.length"
+				<v-btn color="primary" variant="outlined" :disabled="!studentSubmissions.length"
 					@click.stop="onChamBaiAll()" :size="isMobile ? 'small' : 'default'">
-					{{ $t('message.GradeAllAssignments') }}
+					<v-icon class="me-1" start>mdi-clipboard-check-multiple-outline</v-icon>{{
+					$t('message.GradeAllAssignments') }}
 				</v-btn>
-				<v-btn color="amber" variant="tonal" :disabled="!DSSelectedFilter.length" @click.stop="RemindMultiple()"
-					:size="isMobile ? 'small' : 'default'">
-					Nhắc nhở ({{ DSSelectedFilter.length }} học sinh)
+				<v-btn color="amber" variant="outlined" :disabled="!DSSelectedFilter.length"
+					@click.stop="RemindMultiple()" :size="isMobile ? 'small' : 'default'">
+					<v-icon class="me-1" start>mdi-bell-ring-outline</v-icon>Nhắc nhở tất cả
 				</v-btn>
 				<v-text-field v-model="search" :label="$t('message.FindStudent')" prepend-inner-icon="mdi-magnify"
 					variant="outlined" density="compact" hide-details style="max-width: 300px;" />
@@ -107,9 +109,8 @@
 		</v-card-title>
 		<v-data-table v-model="studentSelected" class="table-custom" :headers="headers" :items="processedSubmissions"
 			:search="search" :items-per-page="-1" :mobile="isMobile" :loading="loading" :hide-default-footer="true"
-			@update:sort-by="false" style="max-height: calc(100dvh - 196px)" density="compact"
-			:show-expand="assignmentInfo?.LimitAssigned > 1 ? true : false" item-value="HocSinhID" show-select
-			return-object>
+			@update:sort-by="false" style="max-height: calc(100dvh - 197px)" density="compact"
+			:show-expand="assignmentInfo?.LimitAssigned > 1 ? true : false" item-value="HocSinhID" return-object>
 
 			<template v-slot:item.data-table-expand="{ internalItem, isExpanded, toggleExpand }">
 				<v-btn :append-icon="isExpanded(internalItem) ? 'mdi-chevron-up' : 'mdi-chevron-down'"
@@ -118,11 +119,11 @@
 					border slim @click=" toggleExpand(internalItem); console.log('internalItem', internalItem)"
 					:disabled="!internalItem.raw.SubmissionStatus"></v-btn>
 			</template>
-			<template v-slot:item.data-table-select="{ item, isSelected, toggleSelect }">
+			<!-- <template v-slot:item.data-table-select="{ item, isSelected, toggleSelect }">
 				<v-checkbox :model-value="isSelected({ value: item })"
 					:disabled="(item.SubmissionID && [2, 3, 4].includes(item.SubmissionStatus))"
 					@update:model-value="toggleSelect({ value: item })" />
-			</template>
+			</template> -->
 			<template v-slot:expanded-row="{ columns, item }">
 				<tr>
 					<td :colspan="columns.length" class="py-2">
@@ -141,13 +142,13 @@
 								<tbody>
 									<tr v-for="(obj, index) in getAllAssigned(item)">
 										<td class="py-2">
-											<v-chip size="small" variant="flat" color="deep-orange-lighten-1"
-												class="me-1" v-if="obj.Status !== 'NOT_SUBMITTED'">
+											<v-chip size="small" variant="text" color=""
+												class="me-1 font-weight-medium" v-if="obj.Status !== 'NOT_SUBMITTED'">
 												{{ $t('message.Attempt') }} {{ index + 1 }}
 											</v-chip>
 										</td>
 										<td class="py-2">
-											<v-chip :color="statusColors[item.Status]" size="small" variant="flat"
+											<v-chip :color="statusColors[item.Status]" size="small" variant="text"
 												class="font-weight-medium">
 												{{ statusTexts[item.Status] }}
 											</v-chip>
@@ -157,23 +158,27 @@
 											<span v-else class="text-medium-emphasis">—</span>
 										</td>
 										<td class="py-2">
-											<span class="font-weight-bold" :class="getScoreColor(obj.Score)">
+											<span class="font-weight-medium" :class="getScoreColor(obj.Score)">
 												{{ obj.Score != null ? obj.Score : '—' }}
 											</span>
-											<span class="font-weight-bold text-success"
+											<span class="font-weight-medium text-blue"
 												v-tooltip="$t('message.MaximumScore')">
 												/{{ stats.MaxScore || '-' }}
 											</span>
 										</td>
 										<td class="py-2 text-end ga-2">
-
-
-											<v-btn size="small" color="primary" variant="flat"
-												:disabled="!obj.SubmissionID || obj.SubmissionStatus == 1 || obj.SubmissionStatus == 0"
-												@click.stop="RedirectToGrade(obj)">
-												{{ obj.SubmissionStatus == 4 ? $t('message.ReviewGraded') :
-												$t('message.GradeAssignment') }}
-											</v-btn>
+											<v-tooltip location="top">
+												<template #activator="{ props }">
+													<v-btn v-bind="props" icon size="x-small" variant="text"
+														:color="actionColor(obj)" :disabled="isDisabled(obj)"
+														@click.stop="RedirectToGrade(obj)">
+														<v-icon size="18">
+															{{ actionIcon(obj) }}
+														</v-icon>
+													</v-btn>
+												</template>
+												<span>{{ actionTooltip(obj) }}</span>
+											</v-tooltip>
 										</td>
 									</tr>
 								</tbody>
@@ -183,15 +188,15 @@
 					</td>
 				</tr>
 			</template>
-
+			<template #item.SoDanhBo="{value}">{{value}} </template>
 			<template #item.HocSinhID="{ item }">
 				<div class="text-muted">{{ item.HocSinhID }}</div>
 			</template>
 			<template #item.HoTen="{ item }">
-				<div class="font-weight-medium text-secondary">{{ item.HoTen }}</div>
+				<div class="">{{ item.HoTen }}</div>
 			</template>
 			<template #item.Status="{ item }">
-				<v-chip :color="statusColors[item.Status]" size="small" variant="flat" class="font-weight-medium">
+				<v-chip :color="statusColors[item.Status]" size="small" variant="text" class="">
 					{{ statusTexts[item.Status] }}
 				</v-chip>
 			</template>
@@ -201,9 +206,11 @@
 						<span>{{ formatDate(item.SubmissionTime) }}</span>
 					</div>
 					<div class="d-flex ga-2">
-						<v-chip size="small" color="blue">Số lần truy cập: <span class="font-weight-medium ms-1"> {{
+						<v-chip size="small" variant="text">Số lần truy cập: <span
+								class="text-blue font-weight-medium ms-1"> {{
 								item.AccessTime ?? 'Chưa ghi nhận' }}</span></v-chip>
-						<v-chip size="small" color="success">Thời gian làm bài: <span class="font-weight-medium ms-1">
+						<v-chip size="small" variant="text">Thời gian làm bài: <span
+								class="text-success font-weight-medium ms-1">
 								{{ item.DurationTime ? secondsToMinuteSecond(item.DurationTime) : 'Chưa ghi nhận'
 								}}</span></v-chip>
 					</div>
@@ -214,15 +221,13 @@
 			<template #item.thongtinnopbai="{ item }">
 				<div class="d-flex flex-wrap ga-2">
 					<v-chip v-for="(obj, index) in getAllAssigned(item)" :key="index" :color="statusColors[obj.Status]"
-						size="small" variant="flat" class="font-weight-medium "
+						size="small" variant="text" class="font-weight-medium "
 						:class="obj.Status !== 'NOT_SUBMITTED' ? 'ps-0' : ''" style="min-height: fit-content;">
-						<v-chip size="small" variant="flat" color="deep-orange-lighten-1" class="me-1"
-							v-if="obj.Status !== 'NOT_SUBMITTED'">
-							Lần {{ index + 1 }}
+						<v-chip size="small" variant="text" color=""
+							class="me-1 font-weight-medium text-medium-emphasis" v-if="obj.Status !== 'NOT_SUBMITTED'">
+							Lần {{ index + 1 }}:
 						</v-chip>
-						{{
-						statusTexts[obj.Status]
-						}}
+						{{statusTexts[obj.Status]}}
 					</v-chip>
 				</div>
 
@@ -231,7 +236,7 @@
 				<span class="font-weight-bold" :class="getScoreColor(item.Score)">
 					{{ item.Score != null ? item.Score : '—' }}
 				</span>
-				<span class="font-weight-bold text-success" v-tooltip="$t('message.MaximumScore')">
+				<span class="font-weight-bold text-blue" v-tooltip="$t('message.MaximumScore')">
 					/ {{ item.MaxScore != null ? item.MaxScore : '—' }}
 				</span>
 			</template>
@@ -248,21 +253,51 @@
 			</template> -->
 			<template #item.actions="{ item }">
 				<div class="d-flex flex-wrap ga-2 justify-end">
-					<v-btn size="small" color="orange" variant="outlined" v-if="item.SubmissionStatus == 4"
-						@click.stop="ChamNhapStatus(item)">
-						Phúc khảo
-					</v-btn>
-					<v-btn size="small" color="primary" variant="flat"
-						:disabled="!item.SubmissionID || item.SubmissionStatus == 1 || item.SubmissionStatus == 0"
-						@click.stop="RedirectToGrade(item)">
-						{{ item.SubmissionStatus == 4 ? $t('message.ReviewGraded') : $t('message.GradeAssignment') }}
-					</v-btn>
-					<v-btn v-if="!isDisabledNhacNho"
-						:disabled="!item.SubmissionID || item.SubmissionStatus === 2 || item.SubmissionStatus === 3 || item.SubmissionStatus === 4"
-						color="amber" size="small" @click="onRemind(item)" variant="tonal" text='Nhắc nhở' />
+					<!-- Phúc khảo -->
+					<v-tooltip location="top">
+						<template #activator="{ props }">
+							<v-btn v-bind="props" size="x-small" color="info" variant="text" icon
+								v-if="item.SubmissionStatus == 4" @click.stop="ChamNhapStatus(item)">
+								<v-icon>mdi-autorenew</v-icon>
+							</v-btn>
+						</template>
+						<span>Phúc khảo</span>
+					</v-tooltip>
+					<!-- Chấm bài / Xem bài -->
+					<v-tooltip location="top">
+						<template #activator="{ props }">
+							<v-btn v-bind="props" size="x-small" variant="text"
+								:color="item.SubmissionStatus == 4 ? 'info' : 'primary'" icon
+								:disabled="!item.SubmissionID || item.SubmissionStatus == 1 || item.SubmissionStatus == 0"
+								@click.stop="RedirectToGrade(item)">
+								<v-icon size="18">
+									{{ item.SubmissionStatus == 4
+									? 'mdi-eye-outline'
+									: 'mdi-clipboard-check-outline'
+									}}
+								</v-icon>
+							</v-btn>
+						</template>
+
+						<span>
+							{{ item.SubmissionStatus == 4
+							? $t('message.ReviewGraded')
+							: $t('message.GradeAssignment')
+							}}
+						</span>
+					</v-tooltip>
+					<!-- Nhắc nhở -->
+					<v-tooltip location="top">
+						<template #activator="{ props }">
+							<v-btn v-bind="props" size="x-small" variant="text" color="amber" icon
+								:disabled="isDisableRemind(item)" @click="onRemind(item)">
+								<v-icon size="18">mdi-bell-alert-outline</v-icon>
+							</v-btn>
+						</template>
+						<span>Nhắc nhở</span>
+					</v-tooltip>
 				</div>
 			</template>
-
 			<template #no-data>
 				<div class="text-center pa-4 text-medium-emphasis">
 					{{ $t('message.PleaseSelectClassSubjectAssignment') }}
@@ -355,9 +390,8 @@
 				if (rate < 30) return 'error'; if (rate < 70) return 'warning'; return 'success';
 			},
 			DSSelectedFilter() {
-				return this.studentSelected.filter(i => this.processedSubmissions.filter(e =>
-					![2, 3, 4].includes(e.SubmissionStatus) && (!e.SubmissionStatus || e.SubmissionStatus == 1)).some(j => j.HocSinhID ==
-						i.HocSinhID))
+				return this.processedSubmissions.filter(e =>
+					![2, 3, 4].includes(e.SubmissionStatus) && (!e.SubmissionStatus || e.SubmissionStatus == 1))
 			}
 		},
 		watch: {
@@ -387,7 +421,7 @@
 				}
 			},
 			selectedAssignToClassID(newId, oldId) {
-				console.log('newId', newId)
+				// console.log('newId', newId)
 				if (newId && newId !== oldId) {
 					this.studentSelected = []
 					if (newId == -1) {
@@ -418,11 +452,40 @@
 			},
 			studentSelected: function (val) {
 				if (val) {
-					console.log('val', val)
+					// console.log('val', val)
 				}
 			}
 		},
 		methods: {
+			isDisabled(obj) {
+				return !obj.SubmissionID
+					|| obj.SubmissionStatus == 1
+					|| obj.SubmissionStatus == 0
+			},
+	
+			actionIcon(obj) {
+				return obj.SubmissionStatus == 4
+					? 'mdi-eye-outline' // Xem lại
+					: 'mdi-clipboard-check-outline' // Chấm bài
+			},
+	
+			actionTooltip(obj) {
+				return obj.SubmissionStatus == 4
+					? this.$t('message.ReviewGraded')
+					: this.$t('message.GradeAssignment')
+			},
+	
+			actionColor(obj) {
+				return obj.SubmissionStatus == 4
+					? 'info'
+					: 'primary'
+			},
+			isDisableRemind(item) {
+				if (!item.SubmissionID) return true
+	
+				// Không nhắc khi đã nộp / đang chấm / đã chấm
+				return [2, 3, 4].includes(item.SubmissionStatus)
+			},
 			onRemind(submission) {
 				confirm({
 					title: "Thông báo nhắc nhở làm bài",
@@ -435,12 +498,12 @@
 						})
 					}
 				})
-				console.log(submission)
+				// console.log(submission)
 			},
 			onStorageChange(event) {
 				if (event.key === 'IsShowHeader_ChamBai') {
 					this.displayHeaderChamBai = JSON.parse(event.newValue)
-					console.log("change", this.displayHeaderChamBai)
+					// console.log("change", this.displayHeaderChamBai)
 				}
 			},
 			onChamBaiAll() {
@@ -474,7 +537,7 @@
 							DSHocSinhGraded.push(hocSinh)
 						}
 	
-						console.log('DSHocSinhGraded', DSHocSinhGraded)
+						// console.log('DSHocSinhGraded', DSHocSinhGraded)
 						ajaxCALL("lms/EL_Teacher_PublishGrade_Multiple", {
 							Json_HocSinhSubmited: DSHocSinhGraded
 						}, res => {
@@ -491,12 +554,15 @@
 				let Score = 0
 	
 				for (var group of AsmConfig.groups) {
+					// console.log('group.questions', group.questions)
 					for (var question of group.questions) {
+	
 						let manualScore = 0
 						const answerData = answers[question.id]?.answerData
 	
 						//Nếu học sinh k trả lời bài thì return => ko cần tính cộng điểm
-						if (!answerData) continue
+						if (answerData == null) continue
+	
 	
 						if (question.type === "QUIZ_SINGLE_CHOICE") {
 							if (question.config.correctAnswer == answerData) {
@@ -619,7 +685,7 @@
 						this.fetchStudentSubmissionsAssignToStudent(assignToClassID)
 					]);
 				}
-				console.log('assignmentInfo', this.assignmentInfo)
+				// console.log('assignmentInfo', this.assignmentInfo)
 				const target = new Date(this.assignmentInfo.CreateTime);
 				const other = new Date("2025-11-26T00:00:00");
 	
@@ -651,7 +717,7 @@
 	
 						if (vueData.AssignToClassID_FromURL) {
 							this.selectedAssignToClassID = this.assignmentList.find(x => x.AssignToClassID == vueData.AssignToClassID_FromURL)?.AssignToClassID ?? this.assignmentList[0].AssignToClassID;
-							console.log('this.selectedAssignToClassID ', this.selectedAssignToClassID)
+							// console.log('this.selectedAssignToClassID ', this.selectedAssignToClassID)
 							if (this.selectedAssignToClassID == -1) {
 								vueData.AssignToStudentID_FromURL = this.assignmentList[0].AssignToStudentID;
 							}
@@ -666,7 +732,7 @@
 						{ title: this.$t('message.StudentName'), key: 'HoTen', sortable: false, width: 300 }, { title: this.$t('message.Status'), key: 'Status', sortable: true },
 						{ title: this.$t('message.SubmissionTime'), key: 'SubmissionTime', sortable: true },
 						{ title: this.$t('message.Score'), key: 'Score', sortable: true },
-						{ title: this.$t('message.GradeAssignment'), key: 'actions', sortable: false, align: 'end' }]
+						{ title: this.$t('message.Actions'), key: 'actions', sortable: false, align: 'end' }]
 					} else {
 						this.headers = [{ title: this.$t('message.StudentID'), key: 'HocSinhID', sortable: false, width: 100, align: 'center' },
 						{ title: this.$t('message.RegistrationNumber'), key: 'SoDanhBo', sortable: false, width: 130, align: 'center' },
@@ -728,7 +794,7 @@
 						AccessTime: item.AccessTime,
 						DurationTime: item.DurationTime
 					}))
-					console.log('this.studentSubmissions', this.studentSubmissions)
+					// console.log('this.studentSubmissions', this.studentSubmissions)
 				});
 				vueData.loading = false;
 			},
@@ -792,7 +858,7 @@
 			chamBai(item) {
 				const $this = this
 				openWindow({
-					title: "Chấm bài",
+					title: "Thao tác",
 					url: `https://lms.lhbs.vn/lms_tc_grade_asm?SubmissionID=${item.SubmissionID}`,
 					id: "WinBaoCaoNopBai00",
 					onclose: {

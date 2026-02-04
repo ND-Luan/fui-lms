@@ -13,16 +13,13 @@
 		</v-card>
 
 		<div v-else>
-			<div class="page-header mb-6">
+			<div class="page-header pa-3 mb-0">
 				<div class="d-flex align-center">
 					<div class="d-flex align-center">
-						<v-avatar variant="tonal" color="primary" size="56" class="mr-4">
-							<v-icon size="32">mdi-table-large</v-icon>
-						</v-avatar>
 						<div>
-							<div class="text-h5 font-weight-bold">
+							<div class="ms-4 text-h6 font-weight-bold">
 								{{ IsEnglish ? 'DetailedSubmissionReport' : 'Báo cáo chi tiết bài làm' }}</div>
-							<div class="text-body-2 text-medium-emphasis">
+							<div class="ms-4 text-body-2 text-medium-emphasis">
 								{{ IsEnglish ? 'Class' : 'Lớp' }}: {{ className }} - {{ $t('message.Assignment') }}: {{
 									assignmentTitle }}
 							</div>
@@ -50,10 +47,8 @@
 					<thead>
 						<tr>
 							<th class="fixed-col student-id-col">{{ IsEnglish ? 'Student Code' : 'Mã HS' }}</th>
+							<th class="fixed-col student-name-col">{{ IsEnglish ? 'Registration Number' : 'Số danh bộ'}}</th>
 							<th class="fixed-col student-name-col">{{ IsEnglish ? 'Student' : 'Học sinh' }}</th>
-							<th class="fixed-col student-name-col">{{ IsEnglish ? 'Registration Number' : 'Số danh bộ'
-							}}
-							</th>
 							<th v-for="(header, index) in questionHeaders" :key="header.QuestionID_InJSON"
 								class="text-center question-col">
 								<v-tooltip location="top">
@@ -73,12 +68,12 @@
 								@click="viewStudentSubmission(student)">
 								{{ student.HocSinhID }}
 							</td>
-							<td class="fixed-col student-name-col font-weight-medium student-name-link"
+                            <td class="fixed-col  ">
+                                {{ student.SoDanhBo }}
+                            </td>
+							<td class="fixed-col student-name-col  "
 								@click="viewStudentSubmission(student)">
 								{{ student.HoTen }}
-							</td>
-							<td class="fixed-col font-weight-medium ">
-								{{ student.SoDanhBo }}
 							</td>
 							<td v-for="header in questionHeaders" :key="header.QuestionID_InJSON" class="text-center">
 								<uc-cell-display :cell-data="student[header.QuestionID_InJSON]" />
@@ -231,7 +226,7 @@ export default {
 		},
 		exportToExcel() {
 			const headers = [
-				'Mã HS', 'Họ và tên', 'Số danh bộ',
+				'Mã HS','Số danh bộ', 'Họ và tên', 
 				...this.questionHeaders.map((h, i) => `Câu ${i + 1}`),
 				'Tổng điểm'
 			];

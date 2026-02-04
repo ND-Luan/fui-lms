@@ -1,5 +1,6 @@
 const urlParams = new URLSearchParams(window.location.search);
 function initPage() {
+    vueData.HocKi = localStorage.getItem('HocKi') ?? 1
     let IsLanguage = localStorage.getItem('IsLanguage') ? true : false;
     const assignmentId = urlParams.get('AssignmentID');
     // 👉 Xác định URL và params theo loại Assign

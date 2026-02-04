@@ -5,9 +5,9 @@
 				<span class="font-weight-bold" :class="scoreColor">{{ statusInfo.score.toFixed(2) }}</span>
 			</div>
 			<div v-else-if="statusInfo.status === 'PENDING'">
-				<v-btn size="x-small" variant="tonal" color="warning"
+				<v-btn size="x-small" variant="outlined" color="primary"
 					@click.stop="$emit('grade', statusInfo.submissionId)">
-					{{ $t('message.GradeAssignment') }}
+					<v-icon start class="me-1">mdi-clipboard-check-outline</v-icon>{{ $t('message.GradeAssignment') }}
 				</v-btn>
 			</div>
 			<div v-else class="text-medium-emphasis">

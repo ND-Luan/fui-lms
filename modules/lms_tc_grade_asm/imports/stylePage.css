@@ -1,3 +1,6 @@
+	*{
+		scrollbar-width: thin;
+	}
 	.v-number-input__control{
 		display: none;
 	}
@@ -16,10 +19,13 @@
 	/* All Questions Mode Styles */
 	.all-questions-mode {
 		max-width: 100%;
+		position: relative;
 	}
 
 	.progress-summary {
 		border: 1px solid #e8f5e9;
+		position: sticky;
+		bottom: 5px;
 	}
 
 	.questions-container {
@@ -188,8 +194,8 @@
 	}
 
 	.question-btn {
-		min-width: 50px !important;
-		height: 36px !important;
+		min-width: 34px !important;
+		height: 26px !important;
 	}
 
 	/* Content styles */
@@ -458,4 +464,9 @@
 .iframeFile img {
 	width: 354px;
 	height: 473px;
+}
+
+.container-scroll{
+	overflow-y: hidden !important;
+	height: 100vh;
 }

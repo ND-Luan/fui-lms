@@ -96,7 +96,7 @@
 										<td class="text-end" style="width: 150px !important;">{{
 											bt.SoLuongHocSinh_DaCham }}</td>
 										<td class="text-center" style="width: 200px !important;">
-											<v-btn color="primary" size="small" variant="tonal"
+											<v-btn color="primary" size="small" variant="outlined"
 												@click="onOpenStatusClass(bt)">
 												Xem tình trạng
 											</v-btn>

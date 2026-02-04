@@ -198,6 +198,7 @@
 .jss_content {
     box-shadow: unset !important;
 }
+
 .jss_content {
     padding: 0 !important;
 }
@@ -1189,4 +1190,11 @@
 
 :deep(.v-slider) {
     margin: 0 !important;
+}
+
+.v-list-subheader__text {
+    width: 100%;
+    display: flex;
+    align-items: center;
+
 }

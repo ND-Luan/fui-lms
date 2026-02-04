@@ -329,6 +329,10 @@ async function GET_EL_Teacher_GetFocusTasks_Student() {
         vueData.focusTasks_student = res.data
     })
 }
+async function Update_IsHided(AssignToClassID){
+     ajaxCALL('lms/EL_Teacher_Dashboard_Update_IsHided', {AssignToClassID}, res => {
+    })
+}
 vueData.callTest = callTest;
 // Đăng ký các hàm vào vueData để ALLDRAW có thể gọi
 vueData.initPage = initPage;

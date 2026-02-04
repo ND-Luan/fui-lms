@@ -27,7 +27,7 @@ export default {
 	},
 	computed: {
 		borderStyle() {
-			return `border-left: 6px solid ${this.color};`
+			return `border-left: 4px solid ${this.color};`
 		}
 	},
 }

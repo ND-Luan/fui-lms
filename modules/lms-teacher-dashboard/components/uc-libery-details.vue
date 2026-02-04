@@ -1,7 +1,7 @@
 <template>
 	<v-dialog v-model="isOpen" width="1000" persistent>
 		<v-card>
-			<v-card-title class="border-b d-flex pe-0 text-wrap">
+			<v-card-title class="border-b d-flex pe-0 text-wrap pa-0 card-title-libery-details">
 				{{ title }}
 				<v-spacer />
 				<v-btn icon="mdi-close" @click="CloseModal"></v-btn>
@@ -9,8 +9,9 @@
 			<v-card-text class="px-2 py-3">
 
 				<div class="d-flex mb-4 ga-2">
-					<v-chip color="primary">{{ $t('message.Grade') }} {{ formData.KhoiID }}</v-chip>
-					<v-chip color="primary">{{ formData.Tuan_HienThi }}</v-chip>
+					<v-chip class="pe-0" variant="text" color="#7C3AED">{{ $t('message.Grade') }} {{ formData.KhoiID
+						}}</v-chip>
+					<v-chip class="pa-0" variant="text" color="#7C3AED">{{ formData.Tuan_HienThi }}</v-chip>
 				</div>
 
 				<v-form ref="formData">
@@ -30,22 +31,25 @@
 						</v-col>
 						<v-col cols="12" md="12">
 							<v-checkbox v-model="formData.IsPublic"
-								:label="$i18n.locale == 'en' ? 'Public' : 'Công khai'" hide-details="auto" dense />
+								:label="$i18n.locale == 'en' ? 'Public' : 'Chia sẻ bài tập'" hide-details="auto"
+								dense />
 						</v-col>
 					</v-row>
 				</v-form>
 				<v-btn @click="onRedirectToASM(selectedLibery)" color="success" variant="outlined" size="small"
-					class="mt-2">{{ $t('message.ViewDetail') }} {{ formData.ResourceType == 'LESSON' ? ($i18n.locale ==
-						'en' ? 'lesson' : 'bài học') : ($i18n.locale == 'en' ? 'assignment' : 'bài tập') }}</v-btn>
+					class="mt-2"><v-icon class="me-1">mdi-file-document-outline</v-icon>{{ $t('message.ViewDetail') }}
+					{{ formData.ResourceType == 'LESSON' ? ($i18n.locale ==
+						'en' ? 'lesson' : 'bài học') : ($i18n.locale == 'en' ? 'assignment' : 'bài tập') }}
+				</v-btn>
 			</v-card-text>
-			<div class="d-flex border-t px-2 py-3 ga-2" style="flex-wrap: wrap;"
+			<div class="d-flex border-t px-2 pt-3 ga-2" style="flex-wrap: wrap;"
 				v-if="formData?.AssignedClassNames?.split(',').length > 0 && selectedLibery?.Is_AssignedToClass == 1">
 				<b>{{ $t('message.ListClassAssigned') }} {{ formData.ResourceType == 'LESSON' ? ($i18n.locale ==
 					'en' ? 'lesson' : 'bài học') : ($i18n.locale == 'en' ? 'assignment' : 'bài tập')
-				}}: </b>
-				<v-chip v-for="lop in formData?.AssignedClassNames?.split(',')" color="primary" size="small">
+				}} </b>
+				<!-- <v-chip v-for="lop in formData?.AssignedClassNames?.split(',')" color="primary" size="small">
 					{{ lop }}
-				</v-chip>
+				</v-chip> -->
 			</div>
 			<div class="mt-3"
 				v-if="selectedLibery?.AssignedClassNames?.length > 0 && formData.ResourceType != 'LESSON'">
@@ -64,7 +68,7 @@
 							</v-text-field>
 							<span v-if="!editDialog[getIndexToEdit(item)]">{{ formatDate(item.DueDate) }}</span>
 							<v-btn v-if="!editDialog[getIndexToEdit(item)]" icon="mdi-pencil" size="x-small"
-								variant="tonal" color="primary" @click="openEditAssignedDialog(item)" />
+								variant="text" color="primary" @click="openEditAssignedDialog(item)" />
 						</div>
 					</template>
 					<template v-slot:item.LimitAssigned="{ item }">
@@ -80,7 +84,7 @@
 							<span v-if="!editDialogLimitAssigned[getIndexToEdit(item)]">{{ item.LimitAssigned ?? '-'
 							}}</span>
 							<v-btn v-if="!editDialogLimitAssigned[getIndexToEdit(item)]" icon="mdi-pencil"
-								size="x-small" variant="tonal" color="primary" :disabled="!item.Is_Full_Quiz"
+								size="x-small" variant="text" color="primary" :disabled="!item.Is_Full_Quiz"
 								@click="openEditLimitAssigned(item)" />
 						</div>
 					</template>
@@ -90,7 +94,7 @@
 					<template v-slot:item.actions="{ item }">
 						<v-btn style="font-weight: 500;" size="small" variant="outlined" color="primary"
 							@click="editGiaoBaiTapDialog(item)">
-							{{ $t('message.EditContent') }}
+							<v-icon start class="me-1">mdi-pencil</v-icon>{{ $t('message.EditContent') }}
 						</v-btn>
 					</template>
 				</v-data-table>
@@ -103,42 +107,8 @@
 					<template v-slot:item.TenHoacLopNhom="{ item }">
 						<span @click="() => console.log('item', item)">{{ item.TenLopHoacNhom }}</span>
 					</template>
-					<!-- <template v-slot:item.DueDate="{ item, index }">
-						<div class="text-center d-flex ga-2 justify-center align-center">
-							<v-text-field v-if="editDialog[getIndexToEdit(item)]" :clearable="false" density="compact"
-								class="my-2" v-model="editData[getIndexToEdit(item)].DueDate" label="Hạn nộp"
-								type="datetime-local" variant="outlined" :min="getNow()">
-								<template v-slot:append-inner>
-									<v-icon @click="saveEditAssign(item)" color="success" icon="mdi-check" />
-								</template>
-							</v-text-field>
-							<span v-if="!editDialog[getIndexToEdit(item)]">{{ formatDate(item.DueDate) }}</span>
-							<v-btn v-if="!editDialog[getIndexToEdit(item)]" icon="mdi-pencil" size="x-small"
-								variant="tonal" color="primary" @click="openEditAssignedDialog(item)" />
-						</div>
-					</template>
-					<template v-slot:item.LimitAssigned="{ item }">
-						<div class="text-center d-flex ga-2 align-center justify-center w-100">
-							<v-text-field v-if="editDialogLimitAssigned[getIndexToEdit(item)]" :clearable="false"
-								density="compact" class="my-2"
-								v-model="editDataLimitAssigned[getIndexToEdit(item)].LimitAssigned"
-								label="Số lần cho phép nộp" variant="outlined">
-								<template v-slot:append-inner>
-									<v-icon @click="saveEditLimitAssigned(item)" color="success" icon="mdi-check" />
-								</template>
-							</v-text-field>
-							<span v-if="!editDialogLimitAssigned[getIndexToEdit(item)]">{{ item.LimitAssigned ?? '-'
-								}}</span>
-							<v-btn v-if="!editDialogLimitAssigned[getIndexToEdit(item)]" icon="mdi-pencil"
-								size="x-small" variant="tonal" color="primary" :disabled="!item.Is_Full_Quiz"
-								@click="openEditLimitAssigned(item)" />
-						</div>
-					</template>
-					<template v-slot:item.MaxScore="{ item }">
-						<span>{{ item.MaxScore ?? '—' }}</span>
-					</template> -->
 					<template v-slot:item.actions="{ item }">
-						<v-btn style="font-weight: 500;" size="small" variant="tonal" color="primary"
+						<v-btn style="font-weight: 500;" size="small" variant="outlined" color="primary"
 							@click="editGiaoBaiTapDialog(item)">
 							{{ $t('message.EditContent') }}
 						</v-btn>
@@ -150,32 +120,11 @@
 			</div>
 			<v-card-actions class="border-t">
 				<v-spacer></v-spacer>
-				<v-btn @click="onSave()" variant="text" color="primary">{{ $t('message.Update') }}</v-btn>
+				<v-btn @click="onSave()" variant="outlined" color="primary"><v-icon
+						class="me-1">mdi-content-save-outline</v-icon>{{
+							$t('message.Update') }}</v-btn>
 			</v-card-actions>
 		</v-card>
-		<!-- Dialog Sửa -->
-		<!-- <v-dialog v-model="editDialog" max-width="400">
-            <v-card>
-                <v-card-title class="text-h6">Sửa thông tin lớp</v-card-title>
-                <v-divider />
-                <v-card-text>
-                    <v-text-field class="my-2" v-model="editData.TenLop" label="Tên lớp" disabled variant="outlined" />
-                    <v-select v-model="editData.Status" :items="statusItems" item-title="text" item-value="value"
-                        label="Trạng thái" outlined>
-                    </v-select>
-                    <v-text-field class="my-2" v-model.number="editData.MaxScore" disabled label="Điểm tối đa"
-                        type="number" variant="outlined" />
-                    <v-text-field class="my-2" v-model="editData.DueDate" label="Hạn nộp" type="datetime-local"
-                        variant="outlined" :min="getNow()" />
-                </v-card-text>
-                <v-divider />
-                <v-card-actions>
-                    <v-spacer />
-                    <v-btn variant="text" @click="editDialog = false">Hủy</v-btn>
-                    <v-btn color="primary" @click="saveEditAssign">Lưu</v-btn>
-                </v-card-actions>
-            </v-card>
-        </v-dialog> -->
 	</v-dialog>
 
 </template>

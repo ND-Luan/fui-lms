@@ -284,6 +284,7 @@ function handleData() {
         ]
         vueData.defColorActivities = color
     }
+    console.log('vueData.DSCotDiem', vueData.DSCotDiem)
 }
 function handleDataNhomLop() {
     if (!vueData.DataNhomLop[0] || !vueData.DataNhomLop[0]?.HocSinhID) return

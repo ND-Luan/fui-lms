@@ -36,7 +36,7 @@
 
 				</v-row>
 			</v-card>
-			<div class="d-flex justify-end my-2" v-if="groupedResources.length != 0">
+			<div class="d-flex justify-end me-2 my-2" v-if="groupedResources.length != 0">
 				<v-btn variant="tonal" color="primary" size="small" prepend-icon="mdi-table-large"
 					@click="gradebookDialogVisible = true">
 					Xem sổ điểm
@@ -69,7 +69,7 @@
 						style="background-color: #00A651;min-height: 40px !important;height: 48px;">
 						<span class="text-body-2">{{ weekGroup.weekTitle }}</span>
 						<v-spacer></v-spacer>
-						<v-chip size="small" color="orange" class="mr-4 text-white" variant="elevated">
+						<v-chip size="small" color="#295F2D" class="mr-4 text-white font-weight-medium" variant="text">
 							Hoàn thành: {{ weekGroup.completedCount }}/{{ weekGroup.totalCount }}
 						</v-chip>
 					</v-expansion-panel-title>
@@ -77,16 +77,15 @@
 					<v-expansion-panel-text class="px-1">
 						<div class="assignment-row rounded-lg d-flex flex-column flex-sm-row"
 							v-for="assignment in weekGroup.items" :key="assignment.ResourceID"
-							:style="{ 'border-left': '7px ' + 'solid ' + getBgColor(assignment.ResourceType) }">
+							:style="{ 'border-left': '4px ' + 'solid ' + getBgColor(assignment.ResourceType) }">
 							<!-- Cột thông tin bài tập -->
 							<div class="assignment-details">
 								<div class="resource-title">
-									<v-chip size="x-small" label variant="flat"
+									<v-chip size="small" label variant="text" class="me-0 font-weight-medium"
 										:color="getTypeColor(assignment.ResourceType)">
 										{{ getNameType(assignment.ResourceType) }}
 									</v-chip>
 									{{ assignment.Title ?? assignment.LessonTitle }}
-
 								</div>
 								<div class="resource-meta">
 									Hạn nộp: {{ formatDate(assignment.DueDate) }}
@@ -95,16 +94,18 @@
 									v-if="assignment.LimitAssigned && assignment.LimitAssigned != 1">
 									Nộp lần: {{ assignment.LanNop }}
 								</v-chip>
-
 							</div>
-
 							<div class="d-flex align-center ga-2 resource-actions">
 								<v-chip :color="statusInfo(assignment).color"
 									:class="statusInfo(assignment).color == 'orange' ? 'text-white' : ''" size="small"
-									variant="flat" label>
+									class="pe-0 font-weight-medium" variant="text" label>
 									{{ statusInfo(assignment).text }}
 								</v-chip>
-								<v-btn size="small" color="primary" variant="tonal" @click="onOpenWindow(assignment)">
+								<v-btn size="small" :color="actionButtonColor(assignment)" variant="outlined"
+									@click="onOpenWindow(assignment)">
+									<v-icon start class="me-1">
+										{{ actionButtonIcon(assignment) }}
+									</v-icon>
 									{{ actionButtonText(assignment) }}
 								</v-btn>
 							</div>
@@ -119,135 +120,155 @@
 </template>
 
 <script>
-export default {
-	name: 'uc-subject-progress-detail',
-	props: {
-		monHocId: {
-			type: Number,
-			required: true
-		}
-	},
-	data() {
-		const { mobile } = Vuetify.useDisplay()
-		return {
-			loading: true,
-			stats: {},
-			resources: [],
-			gradebookDialogVisible: false,
-			mobile,
-			vueData,
-			showPanel: []
-		};
-	},
-	computed: {
-		completionRate() {
-			if (!this.stats.TotalResources || this.stats.TotalResources === 0) return 0;
-			return ((this.stats.CompletedResources || 0) / this.stats.TotalResources) * 100;
-		},
-		groupedResources() {
-			if (!this.resources) return [];
-
-			const grouped = this.resources.reduce((acc, item) => {
-				const weekKey = `${item.Tuan_HienThi || '[Chưa xếp tuần]'}`;
-				if (!acc[weekKey]) {
-					acc[weekKey] = { weekTitle: weekKey, items: [] };
-				}
-				acc[weekKey].items.push(item);
-				return acc;
-			}, {});
-
-			return Object.values(grouped).map(group => {
-				const completedCount = group.items.filter(i => ['COMPLETED', 'SUBMITTED', 'GRADED'].includes(i.StudentStatus)).length;
-				return { ...group, completedCount, totalCount: group.items.length };
-			});
-		},
-
-	},
-	watch: {
-		groupedResources(newVal) {
-			if (newVal.length > 0) this.showPanel = newVal.map((item, index) => index)
-			console.log('this.groupedResources', newVal)
-		}
-	},
-	methods: {
-		async fetchData() {
-			this.loading = true;
-			ajaxCALL("lms/EL_Student_GetSubjectProgressDetail", { MonHocID: this.monHocId }, (res) => {
-				if (res && res.data && res.data.length >= 2) {
-					this.resources = res.data[0] || [];
-					this.stats = res.data[1][0] || {};
-				} else {
-					this.stats = {};
-					this.resources = [];
-				}
-			});
-			this.loading = false;
-		},
-		formatDate(dateString) {
-			if (!dateString) return 'N/A';
-			return new Date(dateString).toLocaleDateString('vi-VN', {
-				day: '2-digit', month: '2-digit', year: 'numeric'
-			});
-		},
-		getTypeColor(type) {
-			const resourceType = (type || '')
-			if (resourceType.includes('ASSIGNMENT')) return 'blue';
-			if (resourceType.includes('LESSON')) return 'teal';
-
-		},
-		getBgColor(type) {
-			const resourceType = (type || '')
-			if (resourceType.includes('ASSIGNMENT')) return '#42A5F5';
-			if (resourceType.includes('LESSON')) return '#66BB6A';
-
-		},
-		getNameType(nameType) {
-			const name = (nameType || '')
-			if (name.includes('ASSIGNMENT')) return 'Bài Tập';
-			if (name.includes('LESSON')) return 'Bài Học';
-
-		},
-		onOpenWindow(item) {
-			let url = null
-			if (item.ResourceType === 'LESSON') {
-				url = `/lms-student-lesson-viewer?AssignToClassID=${item.AssignToClassID}`
-			} else {
-				url = `/lms-student-assignment?AssignToClassID=${item.AssignToClassID}&LanNop=${item.LanNop ?? 1}&Is_SendToClass=${item.Is_SendToClass}`
+	export default {
+		name: 'uc-subject-progress-detail',
+		props: {
+			monHocId: {
+				type: Number,
+				required: true
 			}
-			openWindow({
-				title: 'Xem lại ' + `${item.ResourceType === 'LESSON' ? 'bài học ' : 'bài tập '}` + item.Title,
-				url: url,
-				onclose: {
-				}
-			})
 		},
-		statusInfo(item) {
-			const scoreText = item.StudentScore != null ? `Kết quả: ${item.StudentScore}/${item.MaxScore} điểm` : 'Đã chấm';
-			const statusMap = {
-				'NOT_STARTED': { text: 'Chưa bắt đầu', color: 'grey' },
-				'IN_PROGRESS': { text: 'Đang thực hiện', color: 'orange' },
-				'COMPLETED': { text: 'Đã hoàn thành', color: 'success' },
-				'SUBMITTED': { text: 'Đã nộp', color: 'info' },
-				'GRADED': { text: scoreText, color: 'teal' }
+		data() {
+			const { mobile } = Vuetify.useDisplay()
+			return {
+				loading: true,
+				stats: {},
+				resources: [],
+				gradebookDialogVisible: false,
+				mobile,
+				vueData,
+				showPanel: []
 			};
-			return statusMap[item.StudentStatus] || statusMap['NOT_STARTED'];
 		},
-		actionButtonText(item) {
-			const status = item.StudentStatus;
-			if (['GRADED', 'SUBMITTED', 'COMPLETED'].includes(status)) {
-				return 'Xem lại';
+		computed: {
+			completionRate() {
+				if (!this.stats.TotalResources || this.stats.TotalResources === 0) return 0;
+				return ((this.stats.CompletedResources || 0) / this.stats.TotalResources) * 100;
+			},
+			groupedResources() {
+				if (!this.resources) return [];
+	
+				const grouped = this.resources.reduce((acc, item) => {
+					const weekKey = `${item.Tuan_HienThi || '[Chưa xếp tuần]'}`;
+					if (!acc[weekKey]) {
+						acc[weekKey] = { weekTitle: weekKey, items: [] };
+					}
+					acc[weekKey].items.push(item);
+					return acc;
+				}, {});
+	
+				return Object.values(grouped).map(group => {
+					const completedCount = group.items.filter(i => ['COMPLETED', 'SUBMITTED', 'GRADED'].includes(i.StudentStatus)).length;
+					return { ...group, completedCount, totalCount: group.items.length };
+				});
+			},
+	
+		},
+		watch: {
+			groupedResources(newVal) {
+				if (newVal.length > 0) this.showPanel = newVal.map((item, index) => index)
+				console.log('this.groupedResources', newVal)
 			}
-			return item.ResourceType === 'LESSON' ? 'Vào học' : 'Làm bài';
-		}
-	},
-	mounted() {
-
-		if (this.monHocId) {
-			this.fetchData();
-		} else {
-			console.error("MonHocID không được cung cấp!");
-			this.loading = false;
+		},
+		methods: {
+			actionButtonColor(item) {
+				const status = item.StudentStatus
+				if (['GRADED', 'SUBMITTED', 'COMPLETED'].includes(status)) {
+					return 'grey-darken-1'
+				}
+				if (item.ResourceType === 'LESSON') {
+					return 'indigo'
+				}
+				return 'primary' 
+			},
+			actionButtonIcon(item) {
+				const status = item.StudentStatus
+				if (['GRADED', 'SUBMITTED', 'COMPLETED'].includes(status)) {
+					return 'mdi-eye-outline'
+				}
+				if (item.ResourceType === 'LESSON') {
+					return 'mdi-book-open-page-variant-outline'
+				}
+				return 'mdi-pencil-outline'
+			},
+			async fetchData() {
+				this.loading = true;
+				ajaxCALL("lms/EL_Student_GetSubjectProgressDetail", { MonHocID: this.monHocId }, (res) => {
+					if (res && res.data && res.data.length >= 2) {
+						this.resources = res.data[0] || [];
+						this.stats = res.data[1][0] || {};
+					} else {
+						this.stats = {};
+						this.resources = [];
+					}
+				});
+				this.loading = false;
+			},
+			formatDate(dateString) {
+				if (!dateString) return 'N/A';
+				return new Date(dateString).toLocaleDateString('vi-VN', {
+					day: '2-digit', month: '2-digit', year: 'numeric'
+				});
+			},
+			getTypeColor(type) {
+				const resourceType = (type || '')
+				if (resourceType.includes('ASSIGNMENT')) return 'blue';
+				if (resourceType.includes('LESSON')) return 'teal';
+	
+			},
+			getBgColor(type) {
+				const resourceType = (type || '')
+				if (resourceType.includes('ASSIGNMENT')) return '#42A5F5';
+				if (resourceType.includes('LESSON')) return '#66BB6A';
+	
+			},
+			getNameType(nameType) {
+				const name = (nameType || '')
+				if (name.includes('ASSIGNMENT')) return 'Bài Tập';
+				if (name.includes('LESSON')) return 'Bài Học';
+	
+			},
+			onOpenWindow(item) {
+				let url = null
+				if (item.ResourceType === 'LESSON') {
+					url = `/lms-student-lesson-viewer?AssignToClassID=${item.AssignToClassID}`
+				} else {
+					url = `/lms-student-assignment?AssignToClassID=${item.AssignToClassID}&LanNop=${item.LanNop ?? 1}&Is_SendToClass=${item.Is_SendToClass}`
+				}
+				openWindow({
+					title: 'Xem lại ' + `${item.ResourceType === 'LESSON' ? 'bài học ' : 'bài tập '}` + item.Title,
+					url: url,
+					onclose: {
+					}
+				})
+			},
+			statusInfo(item) {
+				const scoreText = item.StudentScore != null ? `Kết quả: ${item.StudentScore}/${item.MaxScore} điểm` : 'Đã chấm';
+				const statusMap = {
+					'NOT_STARTED': { text: 'Chưa bắt đầu', color: 'grey' },
+					'IN_PROGRESS': { text: 'Đang thực hiện', color: 'orange' },
+					'COMPLETED': { text: 'Đã hoàn thành', color: 'success' },
+					'SUBMITTED': { text: 'Đã nộp', color: 'info' },
+					'GRADED': { text: scoreText, color: 'teal' }
+				};
+				return statusMap[item.StudentStatus] || statusMap['NOT_STARTED'];
+			},
+			actionButtonText(item) {
+				const status = item.StudentStatus;
+				if (['GRADED', 'SUBMITTED', 'COMPLETED'].includes(status)) {
+					return 'Xem lại';
+				}
+				return item.ResourceType === 'LESSON' ? 'Vào học' : 'Làm bài';
+			}
+		},
+		mounted() {
+	
+			if (this.monHocId) {
+				this.fetchData();
+			} else {
+				console.error("MonHocID không được cung cấp!");
+				this.loading = false;
+			}
 		}
 	}
-}
 </script>

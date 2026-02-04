@@ -26,7 +26,7 @@
 			</div>
 
 			<!-- CHIP TRẠNG THÁI -->
-			<v-chip :color="statusInfo.color" size="small" class="task-status-chip" variant="tonal">
+			<v-chip :color="statusInfo.color" size="small" class="task-status-chip font-weight-medium" variant="text">
 				{{ statusInfo.text }}
 			</v-chip>
 		</v-card-text>

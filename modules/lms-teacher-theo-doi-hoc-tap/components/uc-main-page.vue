@@ -117,7 +117,7 @@
 
 <script>
 export default {
-	props: [],
+	props: ['hocKi'],
 	data() {
 		const chartHeatmap = {
 			series: [],
@@ -335,7 +335,7 @@ export default {
 	},
 	methods: {
 		async fetchMyClasses() {
-			await ajaxCALL("lms/EL_Teacher_GetMyClasses", { HocKi: vueData.NienKhoaItem.HocKi }, (res) => {
+			await ajaxCALL("lms/EL_Teacher_GetMyClasses", { HocKi: this.hocKi }, (res) => {
 				this.lopList = res.data || [];
 
 				if (this.lopList.length > 0) {
@@ -344,7 +344,7 @@ export default {
 			});
 		},
 		async fetchSubjectsByClass(lopId) {
-			await ajaxCALL("lms/EL_Teacher_GetSubjectsByClass", { LopID: lopId, HocKi: vueData.NienKhoaItem.HocKi }, (res) => {
+			await ajaxCALL("lms/EL_Teacher_GetSubjectsByClass", { LopID: lopId, HocKi: this.hocKi }, (res) => {
 				this.monHocList = res.data || [];
 				if (this.monHocList.length > 0) {
 					this.selectedMonHocID = this.monHocList.find(x => x.MonHocID == parseInt(this.monhocid))?.MonHocID ??
@@ -395,7 +395,7 @@ export default {
 		async GET_BaoCaoLMS_PhanCap_TheoKhoi_Cap() {
 			ajaxCALL('lms/BaoCaoLMS_PhanCap_TheoKhoi_Cap', {
 				NienKhoa: vueData.NienKhoa,
-				HocKi: vueData.NienKhoaItem.HocKi
+				HocKi: this.hocKi
 			}, res => {
 				console.log(res)
 				this.CapList = res.data.reduce((result, item) => {

@@ -152,7 +152,7 @@ function renderHeaderTable() {
                 }
             ],
             "attr": {
-                "style": "padding: 10px"
+                "style": "padding: 10px; max-width: 250px;"
             },
         })
         columns.push({
@@ -172,7 +172,7 @@ function renderHeaderTable() {
                 }
             ],
             "attr": {
-                "style": "padding: 10px"
+                "style": "padding: 10px; max-width: 250px;"
             },
         })
         // columns.push({
@@ -377,7 +377,7 @@ function renderHeaderTable() {
                 "title": "Nhận xét",
                 "value": "NhanXet",
                 "attr": {
-                    style: "padding:10px;witdh: 300px;",
+                    style: "padding:10px; max-witdh: 250px;",
                     class: "d-flex flex-column ga-2"
                 }
             })
@@ -415,7 +415,7 @@ function renderHeaderTable() {
                 "title": "Nhận xét môn Toán",
                 "value": "NhanXetToan_HTML",
                 "attr": {
-                    style: "padding:10px;"
+                    style: "padding:10px; max-width: 250px"
                 }
             })
             columns.push({
@@ -451,7 +451,7 @@ function renderHeaderTable() {
                 "title": "Nhận xét môn Tiếng Việt",
                 "value": "NhanXetTiengViet_HTML",
                 "attr": {
-                    style: "padding:10px;"
+                    style: "padding:10px; max-width: 250px"
                 }
             })
             columns.push({
@@ -488,7 +488,7 @@ function renderHeaderTable() {
                 "title": "Nhận xét môn học khác",
                 "value": "NhanXetMonHocKhac_HTML",
                 "attr": {
-                    style: "padding:10px;"
+                    style: "padding:10px; max-width: 250px"
                 }
             })
             columns.push({
@@ -524,7 +524,7 @@ function renderHeaderTable() {
                 "title": "Hoạt động giáo dục khác",
                 "value": "HoatDongGiaoDucKhac_HTML",
                 "attr": {
-                    style: "padding:10px;"
+                    style: "padding:10px; max-width:250px"
                 }
             })
             columns.push({
@@ -559,7 +559,7 @@ function renderHeaderTable() {
                 "title": "Phẩm chất - Năng lực",
                 "value": "PhamChatNangLuc_HTML",
                 "attr": {
-                    style: "padding:10px;"
+                    style: "padding:10px; max-width:250px"
                 }
             })
         }
@@ -773,7 +773,7 @@ function renderHeaderTable() {
                     "title": "Nhận xét",
                     "value": "ListThang_CuoiKiMobile",
                     "attr": {
-                        style: "padding:10px;witdh: 300px;",
+                        style: "padding:10px; max-witdh: 250px;",
                         class: "d-flex flex-column ga-2"
                     }
                 })
@@ -802,7 +802,7 @@ function renderHeaderTable() {
                                         ":key": "'NoiDungKienThuc_HTML_' + item.HocSinhID",
                                         "v-model": "item.NoiDungKienThuc_HTML",
                                         ":spellcheck": "false",
-                                        style: "height: 100px;"
+                                        style: "min-height: 100px;"
                                     }
                                 }
                             ]
@@ -826,7 +826,7 @@ function renderHeaderTable() {
                                         ":key": "'NoiDungNangLuc_HTML_' + item.HocSinhID",
                                         "v-model": "item.NoiDungNangLuc_HTML",
                                         ":spellcheck": "false",
-                                        style: "height: 100px;"
+                                        style: "min-height: 100px;"
                                     }
                                 }
                             ]
@@ -850,7 +850,7 @@ function renderHeaderTable() {
                                         ":key": "'NoiDungHoatDongKhac_HTML_' + item.HocSinhID",
                                         "v-model": "item.NoiDungHoatDongKhac_HTML",
                                         ":spellcheck": "false",
-                                        style: "height: 100px;"
+                                        style: "min-height: 100px;"
                                     }
                                 }
                             ]
@@ -859,7 +859,7 @@ function renderHeaderTable() {
                     "title": "Nhận xét",
                     "value": "NoiDungHoatDongKhacMobile",
                     "attr": {
-                        style: "padding:10px;witdh: 300px;",
+                        style: "padding:10px; max-witdh: 250px;",
                         class: "d-flex flex-column ga-2"
                     }
                 })
@@ -884,7 +884,7 @@ function renderHeaderTable() {
                         "title": "Ưu điểm",
                         "value": "UuDiem",
                         "attr": {
-                            style: "padding:10px;",
+                            style: "padding:10px; max-width:250px",
                         }
                     }
                 )
@@ -905,7 +905,7 @@ function renderHeaderTable() {
                     "title": "Nhược điểm",
                     "value": "NhuocDiem",
                     "attr": {
-                        style: "padding:10px;"
+                        style: "padding:10px; max-width:250px;"
                     }
                 })
                 columns.push({
@@ -925,7 +925,7 @@ function renderHeaderTable() {
                     "title": "Đề xuất",
                     "value": "DeXuat",
                     "attr": {
-                        style: "padding:10px;"
+                        style: "padding:10px; max-width:250px"
                     }
                 })
             }
@@ -948,7 +948,7 @@ function renderHeaderTable() {
                         "title": "Về học tập",
                         "value": "NoiDungKienThuc",
                         "attr": {
-                            style: "padding:10px;",
+                            style: "padding:10px; min-width:100px",
                         }
                     }
                 )
@@ -962,14 +962,14 @@ function renderHeaderTable() {
                             "attr": {
                                 ":key": "'NoiDungNangLuc_HTML_' + item.HocSinhID",
                                 "v-model": "item.NoiDungNangLuc_HTML",
-                                ":spellcheck": "false"
+                                ":spellcheck": "false",
                             }
                         }
                     ],
                     "title": "Về nền nếp",
                     "value": "NoiDungNangLuc",
                     "attr": {
-                        style: "padding:10px;"
+                        style: "padding:10px; min-width:100px"
                     }
                 })
                 columns.push({
@@ -989,7 +989,7 @@ function renderHeaderTable() {
                     "title": "Mong muốn phối hợp",
                     "value": "NoiDungHoatDongKhac",
                     "attr": {
-                        style: "padding:10px;"
+                        style: "padding:10px; min-width:100px"
                     }
                 })
             }

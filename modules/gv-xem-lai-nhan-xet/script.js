@@ -122,7 +122,7 @@ function renderHeaderTable() {
                 }
             ],
             "attr": {
-                "style": "padding: 10px"
+                "style": "padding: 10px; max-width: 250px;"
             },
         })
         columns.push({
@@ -142,7 +142,7 @@ function renderHeaderTable() {
                 }
             ],
             "attr": {
-                "style": "padding: 10px"
+                "style": "padding: 10px; max-width: 250px;"
             },
         })
         // columns.push({
@@ -177,7 +177,7 @@ function renderHeaderTable() {
                                 el: "v-col",
                                 attr: {
                                     class: "d-flex flex-column ga-2",
-                                    ":cols": 6
+                                    ":cols": 4
                                 },
                                 innerHTML: [
                                     {
@@ -217,7 +217,7 @@ function renderHeaderTable() {
                                 el: "v-col",
                                 attr: {
                                     class: "d-flex flex-column ga-2",
-                                    ":cols": 6
+                                    ":cols": 4
                                 },
                                 innerHTML: [
                                     {
@@ -257,7 +257,7 @@ function renderHeaderTable() {
                                 el: "v-col",
                                 attr: {
                                     class: "d-flex flex-column ga-2",
-                                    ":cols": 6
+                                    ":cols": 4
                                 },
                                 innerHTML: [
                                     {
@@ -284,7 +284,7 @@ function renderHeaderTable() {
                                 el: "v-col",
                                 attr: {
                                     class: "d-flex flex-column ga-2",
-                                    ":cols": 6
+                                    ":cols": 4
                                 },
                                 innerHTML: [
                                     {
@@ -310,7 +310,7 @@ function renderHeaderTable() {
                                 el: "v-col",
                                 attr: {
                                     class: "d-flex flex-column ga-2",
-                                    ":cols": 6
+                                    ":cols": 4
                                 },
                                 innerHTML: [
                                     {
@@ -338,7 +338,7 @@ function renderHeaderTable() {
                 "title": "Nhận xét",
                 "value": "NhanXet",
                 "attr": {
-                    style: "padding:10px;witdh: 300px;",
+                    style: "padding:10px; max-witdh: 250px;",
                     class: "d-flex flex-column ga-2"
                 }
             })
@@ -376,7 +376,7 @@ function renderHeaderTable() {
                 "title": "Nhận xét môn Toán",
                 "value": "NhanXetToan_HTML",
                 "attr": {
-                    style: "padding:10px;"
+                    style: "padding:10px; max-width: 250px"
                 }
             })
             columns.push({
@@ -412,7 +412,7 @@ function renderHeaderTable() {
                 "title": "Nhận xét môn Tiếng Việt",
                 "value": "NhanXetTiengViet_HTML",
                 "attr": {
-                    style: "padding:10px;"
+                    style: "padding:10px; max-width:250px"
                 }
             })
             columns.push({
@@ -449,7 +449,7 @@ function renderHeaderTable() {
                 "title": "Nhận xét môn học khác",
                 "value": "NhanXetMonHocKhac_HTML",
                 "attr": {
-                    style: "padding:10px;"
+                    style: "padding:10px; max-width:250px"
                 }
             })
             columns.push({
@@ -485,7 +485,7 @@ function renderHeaderTable() {
                 "title": "Hoạt động giáo dục khác",
                 "value": "HoatDongGiaoDucKhac_HTML",
                 "attr": {
-                    style: "padding:10px;"
+                    style: "padding:10px; max-width:250px"
                 }
             })
             columns.push({
@@ -516,12 +516,13 @@ function renderHeaderTable() {
                             ":reverse": true
                         }
                     }
-                ], width: 280,
+                ],
                 "title": "Phẩm chất - Năng lực",
                 "value": "PhamChatNangLuc_HTML",
                 "attr": {
-                    style: "padding:10px;"
-                }
+                    style: "padding:10px; max-width: 250px"
+                },
+                width: 280,
             })
         }
     }
@@ -687,7 +688,14 @@ async function onExport() {
     const logoBase64 = await getBase64FromUrl(logoUrl)
     const content = []
     const lopItem = vueData.DSLop.find(x => x.LopID === vueData.LopID)
+    const PAGE_WIDTH = 595.28
+    const PAGE_MARGIN = 40 * 2
+    const CONTENT_WIDTH = PAGE_WIDTH - PAGE_MARGIN // ≈ 515px
+    function percentWidth(percent) {
+        return CONTENT_WIDTH * (percent / 100)
+    }
     for (var item of vueData.items) {
+        console.log(item.HoTen, item.SoSao_Toan, item.SoSao_TiengViet)
         const IMG = {
             image: 'logo',
             width: 64,
@@ -775,18 +783,22 @@ async function onExport() {
             }
             const CONTENT_SUBJECT_TOAN = [{
                 text: item.NhanXetToan_HTML,
+                alignment: 'justify',
                 border: [true, false, item.DiemToan === 0 || item.DiemToan === null ? true : true, true]
             }]
             const CONTENT_SUBJECT_TIENG_VIET = [{
                 text: item.NhanXetTiengViet_HTML,
+                alignment: 'justify',
                 border: [true, false, item.DiemTiengViet === 0 || item.DiemTiengViet === null ? true : true, true]
             }]
             const CONTENT_SUBJECT_MON_HOC_KHAC = [{
                 text: item.NhanXetMonHocKhac_HTML,
+                alignment: 'justify',
                 border: [true, false, true, true]
             }]
             const CONTENT_SUBJECT_HD_GD_KHAC = [{
                 text: item.HoatDongGiaoDucKhac_HTML,
+                alignment: 'justify',
                 border: [true, false, true, true]
             }]
             const CONTENT_SUBJECT_PC_NL = [{
@@ -797,7 +809,7 @@ async function onExport() {
                 text: [
                     'Sản phẩm\n học tập \n\n',
                     {
-                        text: item.SoSao_Toan
+                        text: item.SoSao_Toan,
                     }
                 ], alignment: "center",
                 border: [false, true, true, true]
@@ -806,13 +818,20 @@ async function onExport() {
                 text: [
                     'Sản phẩm\n học tập \n\n',
                     {
-                        text: item.SoSao_TiengViet
+                        text: item.SoSao_TiengViet,
                     }
                 ], alignment: "center",
                 border: [false, true, true, true]
             }
-            let toan_widths = item.DiemToan === 0 ? ['*'] : ['*', 100]
-            let tieng_viet_widths = item.DiemTiengViet === 0 ? ['*'] : ['*', 100]
+            const CONTENT_WIDTH = 515 // A4 - margin
+            let toan_widths =
+                Number(item.DiemToan ?? 0) > 0
+                    ? [CONTENT_WIDTH * 0.8, CONTENT_WIDTH * 0.2]
+                    : ['*']
+            let tieng_viet_widths =
+                Number(item.DiemTiengViet ?? 0) > 0
+                    ? [CONTENT_WIDTH * 0.8, CONTENT_WIDTH * 0.2]
+                    : ['*']
             // if (item.DiemToan > 0 || item.DiemToan !== null) {
             //     TITLE_SUBJECT_TOAN.push(TITLE_EMPTY)
             //     CONTENT_SUBJECT_TOAN.push(STAR_SUBJECT_TOAN)

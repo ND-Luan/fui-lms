@@ -1,6 +1,6 @@
 function goToDetailedGradingPage(payload) {
     if (payload) {
-        Toast.info({ text: `Mở trang chấm bài chi tiết...` });
+        Vue.$toast.success("Mở trang chấm bài chi tiết...", { position: 'top' });
         openWindow({
             title: "",
             id: "lms_tc_grade_asm",

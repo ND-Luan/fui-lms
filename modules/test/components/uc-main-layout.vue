@@ -1,30 +1,21 @@
 <template>
-	<GlobalLoading />
-	<GlobalApiErrorDialog />
-	<GlobalUiErrorSnackbar />
-	<GlobalStaleDataBanner />
-	<v-btn text="check" @click="getNienKhoa" />
-	<v-btn text="clear cache" @click="getNienKhoa_disableCache" />
-	<v-btn text="clear cache" @click="getNienKhoa_disableCache_withError" />
-	{{data}}
+	<Global>
+		<div>{{data}}</div>
+		<v-btn text="check" @click="getNienKhoa" />
+		<v-btn text="clear cache" @click="getNienKhoa_disableCache" />
+		<v-btn text="clear cache" @click="getNienKhoa_disableCache_withError" />
+	</Global>
 </template>
 
 <script>
 	export default {
-		props: {
-	
-		},
+		props: [],
 		data() {
-			return {
-				data: []
-			}
+			return { data: [] }
 		},
-		computed: {
-	
-		},
-		mounted() {
-			// this.getNienKhoa()
-		},
+		mounted() { },
+		computed: {},
+		watch: {},
 		methods: {
 			async getNienKhoa() {
 				this.data = await fetchPromise("lms/NienKhoa_Get", { params: 1 })

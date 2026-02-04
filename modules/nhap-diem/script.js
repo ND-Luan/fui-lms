@@ -35,7 +35,17 @@ const CONSTANTS = {
         'Theme_4': { nhom: 'S1_Final_TA2', cot: 'S1_Final_TA2_Point', target: 'Theme4_TST' },
         'Theme_6': { nhom: 'S2_Mid_TA2', cot: 'S2_Mid_TA2_Point', target: 'Theme6_TST' },
         'Theme_8': { nhom: 'S2_Final_TA2', cot: 'S2_Final_TA2_Point', target: 'Theme8_TST' }
-    }
+    },
+    TINH_TRANG: {
+        LUU_TAM: 1,
+        GUI_BGH: 2,
+        TU_CHOI_GVCN: 3,
+        DUYET_GVCN: 4,
+        TU_CHOI_TO_TRUONG: 5,
+        DUYET_TO_TRUONG: 6,
+        TU_CHOI_BGH: 7,
+        DUYET_BGH: 8
+    },
 };
 // ==================== API SERVICE ====================
 const ApiService = {
@@ -59,6 +69,21 @@ const ApiService = {
             ...params,
             IsSendToManager: true
         });
+    },
+    /**
+     * Cập nhật tình trạng Cấp 1 - Lưu tạm
+     */
+    async updateTinhTrangLuuTam(params) {
+        return await ajaxCALLPromise("lms/KQHT_MonHocLop_TinhTrang_Udp", {
+            ...params,
+            IsSendToManager: false
+        });
+    },
+    /**
+     * Lấy MonHocLop theo MonHocID
+     */
+    async getMonHocLopByMonHocID(params) {
+        return await ajaxCALLPromise("lms/MonHocLop_Select_By_MonHocID", params);
     },
     /**
      * Cập nhật tình trạng Cấp 2, Cấp 3
@@ -212,7 +237,7 @@ const DataProcessor = {
                 let giaTriCotDiem = hocSinh[cotDiem.MaCotDiem];
                 // Lấy giá trị từ công thức
                 if (cotDiem.LoaiCotDiem === CONSTANTS.FORMULA_COLUMN) {
-                    giaTriCotDiem = instance[0].records[currentI][currentJ]?.element?.innerHTML;
+                    giaTriCotDiem = instance[0].records[exists.y][exists.x]?.element?.innerHTML;
                 }
                 // Xử lý giá trị number
                 if (cotDiem.GiaTriCotDiem === 'number') {
@@ -469,13 +494,32 @@ const FormulaProcessor = {
         return KetQuaDanhGia_VI;
     },
     isCase_DiemTBCK(groupCode, maCotDiem) {
-        return ['DiemTBCK_HK1', 'DiemTBCK_HK2'].includes(groupCode) &&
-            !['DiemTBCK_HK1', 'DiemTBCK_HK2'].includes(maCotDiem) &&
+        return [
+            'DiemTBGK_HK1',
+            'DiemTBGK_HK2',
+            'DiemTBCK_HK1',
+            'DiemTBCK_HK2',
+        ].includes(groupCode) &&
+            ![
+                'DiemTBGK_HK1',
+                'DiemTBCK_HK2',
+                'DiemTBCK_HK1',
+                'DiemTBCK_HK2'
+            ].includes(maCotDiem) &&
             !maCotDiem.includes('DanhHieu');
     },
     isCase_Cap1_DanhHieu(maCotDiem, vueData) {
         return vueData.CapID === 1 &&
-            ['DiemTBCK_HK1', 'DiemTBCK_HK2', 'DanhHieu_HK1', 'DanhHieu_HK2'].includes(maCotDiem);
+            [
+                'DiemTBGK_HK1',
+                'DiemTBCK_HK1',
+                'DiemTBGK_HK2',
+                'DiemTBCK_HK2',
+                'DanhHieuGK_HK1',
+                'DanhHieuCK_HK1',
+                'DanhHieuGK_HK2',
+                'DanhHieuCK_HK2'
+            ].includes(maCotDiem);
     },
     isCase_EnglishThemeResult(column, isEnglish, filter) {
         return isEnglish && this.isGetResultTopic(column, filter);
@@ -687,6 +731,124 @@ const UtilityService = {
         });
     }
 };
+// ==================== TINH TRANG SERVICE ====================
+const TinhTrangService = {
+    /**
+     * Cập nhật tình trạng cho các môn NLPC liên quan (Cấp 1)
+     */
+    async updateTinhTrangNLPC(filter, vueData, tinhTrang = CONSTANTS.TINH_TRANG.LUU_TAM) {
+        const ListMonHoc = filter.MonHocItem?.List_MonHoc_NLPC_ID;
+        if (!ListMonHoc) {
+            console.log("⚠️ Không có môn NLPC liên quan");
+            return { success: true, count: 0 };
+        }
+        const monHocIDArray = ListMonHoc.split(",").map(id => id.trim()).filter(Boolean);
+        console.log(`🔄 Bắt đầu cập nhật tình trạng ${tinhTrang} cho ${monHocIDArray.length} môn NLPC`);
+        let successCount = 0;
+        let errorCount = 0;
+        const errors = [];
+        for (const monHocID of monHocIDArray) {
+            try {
+                const monHocLopList = await ApiService.getMonHocLopByMonHocID({
+                    MonHocID: monHocID,
+                    LopID: filter.LopItem.LopID,
+                    NienKhoa: vueData.NienKhoa
+                });
+                const MonHocLopID = monHocLopList[0]?.MonHocLopID;
+                if (!MonHocLopID) {
+                    console.warn(`⚠️ Không tìm thấy MonHocLopID cho MonHocID: ${monHocID}`);
+                    errorCount++;
+                    errors.push({ monHocID, error: 'MonHocLopID not found' });
+                    continue;
+                }
+                const apiMethod = tinhTrang === CONSTANTS.TINH_TRANG.GUI_BGH
+                    ? ApiService.updateTinhTrang
+                    : ApiService.updateTinhTrangLuuTam;
+                await apiMethod({
+                    NienKhoa: vueData.NienKhoa,
+                    MonHocLopID: MonHocLopID,
+                    LopID: filter.LopItem.LopID,
+                    TinhTrang: tinhTrang,
+                    MaNhomCotDiem: filter.MaNhomCotDiemItem.MaNhomCotDiem
+                });
+                successCount++;
+                console.log(`✅ Đã cập nhật tình trạng ${tinhTrang} cho MonHocID: ${monHocID}`);
+            } catch (error) {
+                errorCount++;
+                errors.push({ monHocID, error: error.message });
+                console.error(`❌ Lỗi khi cập nhật MonHocID ${monHocID}:`, error);
+            }
+        }
+        console.log(`📊 Kết quả: ${successCount}/${monHocIDArray.length} thành công`);
+        return {
+            success: errorCount === 0,
+            total: monHocIDArray.length,
+            successCount,
+            errorCount,
+            errors
+        };
+    },
+    /**
+     * Lưu tạm - Cập nhật tình trạng = 1
+     */
+    async saveDraft(filter, vueData) {
+        try {
+            console.log("💾 Bắt đầu lưu tạm...");
+            if ([2, 3].includes(vueData.CapID)) {
+                await ApiService.updateTinhTrangC2C3({
+                    NienKhoa: vueData.NienKhoa,
+                    LopID: filter.LopItem.LopID,
+                    MonHocLopID: filter.MonHocItem.MonHocLopID,
+                    MaNhomCotDiem: filter.MaNhomCotDiemItem.MaNhomCotDiem,
+                    TinhTrang: CONSTANTS.TINH_TRANG.LUU_TAM
+                });
+            } else {
+                await ApiService.updateTinhTrangLuuTam({
+                    NienKhoa: vueData.NienKhoa,
+                    MonHocLopID: filter.MonHocItem.MonHocLopID,
+                    LopID: filter.LopItem.LopID,
+                    TinhTrang: CONSTANTS.TINH_TRANG.LUU_TAM,
+                    MaNhomCotDiem: filter.MaNhomCotDiemItem.MaNhomCotDiem
+                });
+                await this.updateTinhTrangNLPC(filter, vueData, CONSTANTS.TINH_TRANG.LUU_TAM);
+            }
+            return { success: true };
+        } catch (error) {
+            console.error("❌ Lỗi khi lưu tạm:", error);
+            throw error;
+        }
+    },
+    /**
+     * Gửi BGH - Cập nhật tình trạng = 2
+     */
+    async sendToBGH(filter, vueData) {
+        try {
+            console.log("📤 Bắt đầu gửi BGH...");
+            if ([2, 3].includes(vueData.CapID)) {
+                await ApiService.updateTinhTrangC2C3({
+                    NienKhoa: vueData.NienKhoa,
+                    LopID: filter.LopItem.LopID,
+                    MonHocLopID: filter.MonHocItem.MonHocLopID,
+                    MaNhomCotDiem: filter.MaNhomCotDiemItem.MaNhomCotDiem,
+                    TinhTrang: CONSTANTS.TINH_TRANG.GUI_BGH
+                });
+            } else {
+                await ApiService.updateTinhTrang({
+                    NienKhoa: vueData.NienKhoa,
+                    MonHocLopID: filter.MonHocItem.MonHocLopID,
+                    LopID: filter.LopItem.LopID,
+                    TinhTrang: CONSTANTS.TINH_TRANG.GUI_BGH,
+                    MaNhomCotDiem: filter.MaNhomCotDiemItem.MaNhomCotDiem
+                });
+                await this.updateTinhTrangNLPC(filter, vueData, CONSTANTS.TINH_TRANG.LUU_TAM);
+            }
+            return { success: true };
+        } catch (error) {
+            console.error("❌ Lỗi khi gửi BGH:", error);
+            throw error;
+        }
+    }
+};
 // ==================== MAIN SERVICE ====================
 const BangDiemService = {
     constants: CONSTANTS,
@@ -698,6 +860,7 @@ const BangDiemService = {
     style: StyleService,
     export: ExportService,
     utility: UtilityService,
+    tinhTrang: TinhTrangService, // THÊM DÒNG NÀY
     /**
      * Khởi tạo dữ liệu bảng điểm hoàn chỉnh
      */
@@ -744,7 +907,9 @@ const BangDiemService = {
             const lockedColumns = await this.api.getKhoaCotDiem({
                 LopID: filter.LopItem.LopID,
                 MonHocLopID: filter.MonHocItem.MonHocLopID,
-                MaNhomCotDiem: filter.MaNhomCotDiemItem.MaNhomCotDiem
+                MaNhomCotDiem: filter.MaNhomCotDiemItem.MaNhomCotDiem,
+                Semester: filter.MaNhomCotDiemItem.Semester,
+                NienKhoa: vueData.NienKhoa
             });
             // 6. Build headers - Sử dụng tinhTrangStatus.isDisabled
             const firstStudent = fn_ProrityTinhTrang(students);
@@ -753,6 +918,7 @@ const BangDiemService = {
                 title: x.TenCotDiem_VI,
                 value: x.MaCotDiem
             }));
+            console.log("gradeColumns", gradeColumns)
             const headers = [
                 ...this.header.buildStudentInfoColumns(isGroup, isEnglish),
                 ...gradeColumns.map(col =>
@@ -770,6 +936,17 @@ const BangDiemService = {
                 freezeColumns,
                 isGroup
             );
+            //Build display columns with lock status
+            const displayColumns = DSCotDiem_ByMaNhomCotDiem.map(cotDiem => {
+                const lockedCol = lockedColumns.find(
+                    x => x.MaCotDiem === cotDiem.value && x.TinhTrang === true
+                );
+                return {
+                    title: cotDiem.title,
+                    value: cotDiem.value,
+                    isLocked: !!lockedCol
+                };
+            });
             // 7. Build data rows
             const dataRows = this.buildDataRows(
                 students,
@@ -792,6 +969,7 @@ const BangDiemService = {
                 comments,
                 apiData,
                 lockedColumns,
+                displayColumns,
                 DSCotDiem_ByMaNhomCotDiem,
                 tinhTrangStatus // Trả về tinhTrangStatus để component sử dụng
             };
@@ -854,6 +1032,10 @@ const BangDiemService = {
      * Lưu dữ liệu
      */
     async saveData(editedCells, DSHocSinh, DSHocSinh_API, freezeColumns, filter, instance, vueData) {
+        if (editedCells.length === 0) {
+            Vue.$toast.warning("Bạn chưa điều chỉnh hoặc nhập điểm", { position: "top" })
+            return
+        }
         const data = this.data.processBeforePushAPI(
             editedCells,
             DSHocSinh,
@@ -868,7 +1050,6 @@ const BangDiemService = {
             Vue.$toast.error('Cột điểm chỉ cho phép nhập thang điểm 10!', { position: 'top' });
             return false;
         }
-        console.log("data", data)
         await this.api.saveGradeData({
             NienKhoa: vueData.NienKhoa,
             MonHocLopID: filter.MonHocItem.MonHocLopID,
@@ -881,28 +1062,18 @@ const BangDiemService = {
         return true;
     },
     /**
-     * Gửi BGH
+     * Lưu tạm
+     */
+    async saveDraft(filter, vueData) {
+        return await this.tinhTrang.saveDraft(filter, vueData);
+    },
+    /**
+     * Gửi BGH - THAY THẾ METHOD CŨ
      */
     async sendToBGH(filter, vueData) {
-        if ([2, 3].includes(vueData.CapID)) {
-            await this.api.updateTinhTrangC2C3({
-                NienKhoa: vueData.NienKhoa,
-                LopID: filter.LopItem.LopID,
-                MonHocLopID: filter.MonHocItem.MonHocLopID,
-                MaNhomCotDiem: filter.MaNhomCotDiemItem.MaNhomCotDiem,
-                TinhTrang: 2
-            });
-        } else {
-            await this.api.updateTinhTrang({
-                NienKhoa: vueData.NienKhoa,
-                MonHocLopID: filter.MonHocItem.MonHocLopID,
-                LopID: filter.LopItem.LopID,
-                TinhTrang: 2,
-                MaNhomCotDiem: filter.MaNhomCotDiemItem.MaNhomCotDiem
-            });
-        }
+        return await this.tinhTrang.sendToBGH(filter, vueData);
     }
-};
+}
 // function convertDSHocSinh() {
 //     let headers = []
 //     let DSCotDiem_ByMaNhomCotDiem = []

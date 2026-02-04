@@ -27,7 +27,7 @@
 		<v-divider></v-divider>
 		<div class="pa-2 d-flex ga-2" v-if="DSMonHoc.length > 0">
 			<v-spacer></v-spacer>
-			<v-btn color="pink" variant="outlined" size="small" @click="onOpenKhoNoiDung()"
+			<v-btn color="brown" variant="outlined" size="small" @click="onOpenKhoNoiDung()"
 				v-tooltip="$i18n.locale == 'en' ? 'Content Library' : 'Kho nội dung'">
 				<v-icon>mdi-archive-outline</v-icon>
 				<span class="text-subtitle-2" style="font-size: .775rem !important;">
@@ -88,7 +88,7 @@
 								</div>
 								<v-spacer></v-spacer>
 								<div class="d-flex align-center ga-2">
-									<v-chip :color="statusInfo(item).color" variant="tonal" size="small">
+									<v-chip :color="statusInfo(item).color" class="font-weight-medium" variant="text" size="small">
 										{{ statusInfo(item).text }}
 									</v-chip>
 								</div>

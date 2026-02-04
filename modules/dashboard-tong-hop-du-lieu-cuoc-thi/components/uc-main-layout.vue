@@ -9,11 +9,11 @@
 					return-object />
 			</v-col>
 			<v-col class="d-flex ga-2">
-				<v-btn text="Tìm kiếm" color="primary" @click="onSearch" />
+				<v-btn variant= "outlined" text="Tìm kiếm" color="primary" @click="onSearch" />
 				<v-spacer />
 				<uc-btn-dialog-add @onLoadFinish="onSearch" :LopItem :CapID />
 				<uc-btn-dialog-add-multiple @onLoadFinish="onSearch" :LopItem :CapID />
-				<v-btn variant="tonal" text="Xuất excel" color="primary" @click="onExportExcel" />
+				<v-btn variant="outlined" text="Xuất excel" color="primary" @click="onExportExcel" />
 			</v-col>
 		</v-row>
 		<v-card>

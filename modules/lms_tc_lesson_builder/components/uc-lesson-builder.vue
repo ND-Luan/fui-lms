@@ -17,12 +17,13 @@
 			<uc-lesson-properties v-model:lesson-header="lesson" :element="selectedElement"
 				:index="selectedElementIndex" @update:element="updateElement" />
 			<div class="action-buttons">
-				<v-btn variant="text" block @click="handleSave(false)" class="mb-2">{{ $t('message.SaveDraft')
-				}}</v-btn>
-				<v-btn color="primary" variant="flat" block @click="handleSave(true)" class="mb-2">{{
-					$t('message.SaveAndPublish') }}</v-btn>
+				<v-btn variant="outlined" block @click="handleSave(false)" class="mb-2"><v-icon start class="me-1">mdi-file-edit-outline</v-icon>
+					{{ $t('message.SaveDraft')}}</v-btn>
+				<v-btn color="primary" variant="outlined" block @click="handleSave(true)" class="mb-2"><v-icon start class="me-1">mdi-content-save-outline</v-icon>
+					{{$t('message.SaveAndPublish') }}</v-btn>
 				<v-btn color="orange" variant="outlined" v-if="classOptions.length > 0" block
-					@click="openSheetAssignToClass()" class="mb-2">{{ $t('message.SaveAndAssign') }}</v-btn>
+					@click="openSheetAssignToClass()" class="mb-2"><v-icon start class="me-1">mdi-clipboard-arrow-right-outline</v-icon>
+					{{ $t('message.SaveAndAssign') }}</v-btn>
 			</div>
 		</div>
 		<v-bottom-sheet v-model="isOpenSheetAssignToClass" persistent inset>
@@ -230,11 +231,11 @@ export default {
 						MaxScore: 0, // thêm nếu cần
 						Status: 1,
 						ResourceType: "LESSON",
-						ResourceID: this.lessonID
+						ResourceID: vueData.lesson.LessonID
 					}]
 
 					ajaxCALL("/lms/EL_Teacher_Lesson_CLASS", {
-						AssignmentID: this.lessonID,
+						AssignmentID: vueData.lesson.LessonID,
 						JsonClassItems: payload
 					}, (res) => {
 						if (res.data || res.data[1]) {
@@ -242,7 +243,6 @@ export default {
 						}
 					});
 					console.log('payload----', item, ' nnn--- ', payload)
-					debugger
 				}
 				resolve()
 			})

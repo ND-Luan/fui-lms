@@ -43,20 +43,20 @@
 
 			<!-- Nút điều khiển ghi âm -->
 			<div class="d-flex align-center ga-2" v-if="isShowBtn">
-				<v-btn v-if="!readonly" color="primary" variant="tonal"
+				<v-btn v-if="!readonly" color="primary" variant="outlined"
 					:disabled="isRecording || !hasMicrophone || permissionDenied || checkingPermission"
 					@click="startRecording" :loading="checkingPermission" size="small">
 					<v-icon start>mdi-microphone</v-icon>
 					{{ IsEngLish ? 'Record' : 'Ghi âm' }}
 				</v-btn>
 
-				<v-btn v-if="!readonly" color="red" variant="tonal" :disabled="!isRecording" @click="handleStop"
+				<v-btn v-if="!readonly" color="red" variant="outlined" :disabled="!isRecording" @click="handleStop"
 					size="small">
 					<v-icon start>mdi-stop</v-icon>
 					{{ IsEngLish ? 'Stop' : 'Dừng' }}
 				</v-btn>
 
-				<v-btn v-if="showSaveButton" color="success" variant="tonal" :disabled="isSaveFile"
+				<v-btn v-if="showSaveButton" color="success" variant="outlined" :disabled="isSaveFile"
 					@click="$emit('handleSave')" size="small">
 					<v-icon start>mdi-content-save</v-icon>
 					{{ IsEngLish ? 'Save file' : 'Lưu file' }}

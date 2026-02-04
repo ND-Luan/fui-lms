@@ -1,97 +1,107 @@
 <template>
 	<div>
 		<v-card>
-			<v-card-title>
-				{{ pageTitle }} <span v-if="vueData.CapID">• Cấp {{ vueData.CapID }}</span>
-				<v-chip v-if="hasStudents" color="primary">
-					Tổng số học sinh: {{ DSHocSinh.length }}
+			<!-- Header -->
+			<v-card-title class="d-flex align-center flex-wrap ga-2">
+				<span>{{ pageTitle }}</span>
+				<span v-if="vueData.CapID">• Cấp {{ vueData.CapID }}</span>
+				<v-chip v-if="hasStudents" color="primary" size="small">
+					{{ DSHocSinh.length }} học sinh
 				</v-chip>
-				<v-chip v-if="hasStudents" color="tinhTrangStatus?.statusDetail?.color">
-					{{tinhTrangStatus?.statusDetail?.text}}
-				</v-chip>
+				<!-- Danh sách cột điểm -->
+				<div v-if="hasStudents && displayColumns.length > 0" >
+					<div class="d-flex flex-wrap ga-2 align-center">
+						<!-- Hiển thị 5 cột đầu tiên -->
+						<v-chip v-for="cotDiem in displayColumns.slice(0, 5)" :key="cotDiem.value"
+							:color="cotDiem.isLocked ? 'primary' : 'grey'"
+							:variant="cotDiem.isLocked ? 'flat' : 'outlined'" size="small" label>
+							<v-icon start v-if="cotDiem.isLocked" size="small" color="white">mdi-lock</v-icon>
+							<v-icon start v-else size="small" color="grey">mdi-lock-open-variant-outline</v-icon>
+							{{ cotDiem.title }}
+						</v-chip>
+
+						<!-- Menu cho các cột còn lại nếu > 5 -->
+						<v-menu v-if="displayColumns.length > 5" offset-y>
+							<template v-slot:activator="{ props }">
+								<v-chip v-bind="props" color="grey-lighten-1" variant="outlined" size="small" label>
+									+{{ displayColumns.length - 5 }} cột khác
+								</v-chip>
+							</template>
+							<v-list density="compact" max-height="300" class="overflow-y-auto">
+								<v-list-item v-for="cotDiem in displayColumns.slice(5)" :key="cotDiem.value">
+									<template v-slot:prepend>
+										<v-icon v-if="cotDiem.isLocked" size="small" start>mdi-lock</v-icon>
+										<v-icon v-else size="small" color="grey"
+											start>mdi-lock-open-variant-outline</v-icon>
+									</template>
+									<v-list-item-title>{{ cotDiem.title }}</v-list-item-title>
+								</v-list-item>
+							</v-list>
+						</v-menu>
+					</div>
+				</div>
 			</v-card-title>
 
+			<!-- Filter -->
 			<v-card-text>
 				<uc-filter v-model="filter" @onRefresh="onRefresh" />
 			</v-card-text>
-
 			<v-divider />
-
-			<v-card-text class="d-flex mt-2">
-				<div>
+			<v-card-text class="d-flex align-center ga-2">
+				<div class="d-flex ga-2 flex-wrap mt-2">
 					<!-- Lưu ý Comment -->
-					<div>
-						<span class="text-caption">
-							*Lưu ý: Comment (Màu đỏ) trong ô nhập điểm là các ô điểm <b>Giáo viên khác</b> đã nhập
-						</span>
-					</div>
-
-					<!-- Thông báo từ chối -->
-					<div v-show="hasStudents && reasonReject.disabled" class="text-black text-body-2">
-						<p class="text-body-2 font-weight-medium">
-							{{ reasonReject.textPerson }}
-						</p>
-						<p>
-							Lý do từ chối:
-							<span class="text-red">{{ reasonReject.NoiDungNhanXet }}</span>
-						</p>
-					</div>
-
+					<v-alert v-if="hasStudents" type="warning" variant="tonal" style="width: fit-content">
+						<div class="text-caption text-medium-emphasis">
+							Comment (Màu đỏ) trong ô nhập điểm là các ô điểm <b>Giáo viên khác</b> đã nhập
+						</div>
+					</v-alert>
 					<!-- Quy tắc đổi sao -->
-					<div v-if="showStarConversionRule" class="text-caption">
-						<span>
-							<b class="text-primary">Quy tắc đổi sao:</b>
-							Điểm <v-icon start size="x-small" class="mb-1">mdi-greater-than-or-equal</v-icon>
-							9 là <b class="text-red">5</b>
-							<v-icon color="primary" start size="small" class="mb-1">mdi-star</v-icon>
-						</span>
-						<span>
-							; Điểm <v-icon start size="x-small" class="mb-1">mdi-greater-than-or-equal</v-icon>
-							7 là <b class="text-red">4</b>
-							<v-icon color="primary" start size="small" class="mb-1">mdi-star</v-icon>
-						</span>
-						<span>
-							; Điểm <v-icon start size="x-small" class="mb-1">mdi-greater-than-or-equal</v-icon>
-							5 là <b class="text-red">3</b>
-							<v-icon color="primary" start size="small" class="mb-1">mdi-star</v-icon>
-						</span>
-						<span>
-							; Còn lại là <b class="text-red">2</b>
-							<v-icon color="primary" start size="small" class="mb-1">mdi-star</v-icon>
-						</span>
-					</div>
+					<v-alert v-if="showStarConversionRule" type="info" variant="tonal" density="compact">
+						<div class="text-caption">
+							<b>Quy tắc đổi sao:</b>
+							Điểm ≥9 = 5⭐, ≥7 = 4⭐, ≥5 = 3⭐, còn lại = 2⭐
+						</div>
+					</v-alert>
+					<!-- Thông báo từ chối -->
+					<v-alert v-if="hasStudents && reasonReject.disabled" type="warning" variant="tonal"
+						density="compact" class="mb-2">
+						<div class="text-body-2 font-weight-medium">{{ reasonReject.textPerson }}</div>
+						<div class="text-body-2">
+							Lý do: <span class="font-weight-medium">{{ reasonReject.NoiDungNhanXet }}</span>
+						</div>
+					</v-alert>
 				</div>
-
 				<v-spacer />
-
 				<!-- Menu Actions -->
-				<v-menu>
+				<v-menu location="bottom end">
 					<template v-slot:activator="{ props }">
 						<v-btn color="primary" v-bind="props" icon="mdi-dots-vertical" size="small"
 							variant="outlined" />
 					</template>
-					<v-list>
+					<v-list density="compact">
 						<v-list-subheader>Thao tác</v-list-subheader>
 						<v-list-item title="Lưu tạm" @click="onLuuTam" prepend-icon="mdi-content-save-outline" />
 						<v-list-item title="Khóa cột điểm" @click="onOpenDialogKhoaCotDiem"
 							prepend-icon="mdi-lock-outline" />
-						<v-list-item title="Gửi BGH" @click="onGuiBGH" prepend-icon="mdi-send-outline" />
-						<v-divider />
+						<!-- <v-list-item title="Gửi BGH" @click="onGuiBGH" prepend-icon="mdi-send-outline" /> -->
+						<v-divider class="my-1" />
+
 						<v-list-subheader>Khác</v-list-subheader>
-						<v-list-item title="Mẫu nhận xét" @click="onOpenMauNhanXet" />
-						<v-list-item v-if="showGetThemeTestButton" title="Lấy điểm Test (Theme)"
-							@click="onGetDiemTest" />
-						<v-divider />
-						<v-list-item title="Xuất Excel" @click="onExportExcel" />
+						<v-list-item v-if="filter.MonHocItem?.MonHocID === 5" title="Mẫu nhận xét"
+							@click="onOpenMauNhanXet" prepend-icon="mdi-comment-text-outline" />
+						<v-list-item v-if="showGetThemeTestButton" title="Lấy điểm Test (Theme)" @click="onGetDiemTest"
+							prepend-icon="mdi-download-outline" />
+						<v-list-item title="Xuất Excel" @click="onExportExcel" prepend-icon="mdi-file-excel-outline" />
 					</v-list>
 				</v-menu>
 			</v-card-text>
+
 			<!-- Jexcel Table -->
 			<v-card-text class="pa-0">
 				<uc-jexcel v-if="hasStudents" :key="keyComp" v-model="instance" v-model:dataSource="DSHocSinh"
 					class="hExcel" :freeze-columns="freezeColumns" :columns="headers" :comments="comments"
 					:styleSheet="styleSheet" :nestedHeaders="shouldShowNestedHeaders ? nestedHeaders : []"
-					:rootDataSource="DSHocSinh_API" @onChange="onChangeSheet" :filters="true" :search="true" />
+					:rootDataSource="DSHocSinh_API" @onChange="onChangeSheet" :filters="true" />
 				<uc-card-empty v-else />
 			</v-card-text>
 		</v-card>
@@ -137,6 +147,7 @@
 				DSCotDiem_ByMaNhomCotDiem: [],
 				DSHocSinh_API: [],
 				DSHocSinh: [],
+				displayColumns: [],
 	
 				// Tình trạng
 				tinhTrangStatus: {
@@ -267,6 +278,7 @@
 				this.DSHocSinh = [];
 				this.headers = [];
 				this.nestedHeaders = [];
+				this.displayColumns = [];
 				this.keyComp++;
 			},
 	
@@ -287,6 +299,7 @@
 					this.comments = result.comments;
 					this.DSKhoaCotDiem_API = result.lockedColumns;
 					this.DSCotDiem_ByMaNhomCotDiem = result.DSCotDiem_ByMaNhomCotDiem;
+					this.displayColumns = result.displayColumns;
 	
 					// Cập nhật Tình Trạng Status
 					this.tinhTrangStatus = result.tinhTrangStatus;
@@ -315,8 +328,8 @@
 			 * Process change
 			 */
 			processChange({ instance, cell, x, y, value }) {
-				const existingIndex = this.editedCells.findIndex(c => c.x === x && c.y === y);
-	
+				const existingIndex = this.editedCells.findIndex(c => c.x == x && c.y == y);
+				console.log("cell, x, y, value", cell, x, y, value)
 				if (existingIndex === -1) {
 					// Thêm mới
 					this.editedCells.push({
@@ -332,10 +345,11 @@
 			},
 	
 			/**
-			 * Lưu tạm
-			 */
+			* Lưu tạm
+			*/
 			async onLuuTam() {
 				try {
+					// 1. Lưu dữ liệu điểm
 					const success = await BangDiemService.saveData(
 						this.editedCells,
 						this.DSHocSinh,
@@ -348,24 +362,8 @@
 	
 					if (!success) return;
 	
-					// Cập nhật tình trạng nếu cần
-					if ([2, 3].includes(this.vueData.CapID)) {
-						await BangDiemService.api.updateTinhTrangC2C3({
-							NienKhoa: this.vueData.NienKhoa,
-							LopID: this.filter.LopItem.LopID,
-							MonHocLopID: this.filter.MonHocItem.MonHocLopID,
-							MaNhomCotDiem: this.filter.MaNhomCotDiemItem.MaNhomCotDiem,
-							TinhTrang: 1
-						});
-					} else {
-						await BangDiemService.api.updateTinhTrang({
-							NienKhoa: this.vueData.NienKhoa,
-							MonHocLopID: this.filter.MonHocItem.MonHocLopID,
-							LopID: this.filter.LopItem.LopID,
-							TinhTrang: 1,
-							MaNhomCotDiem: this.filter.MaNhomCotDiemItem.MaNhomCotDiem
-						});
-					}
+					// 2. Cập nhật tình trạng (bao gồm cả NLPC nếu là Cấp 1)
+					await BangDiemService.saveDraft(this.filter, this.vueData);
 	
 					Vue.$toast.success('Lưu dữ liệu thành công!', { position: 'top' });
 					await this.onRefresh();

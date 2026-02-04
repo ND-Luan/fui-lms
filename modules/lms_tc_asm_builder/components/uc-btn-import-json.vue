@@ -196,7 +196,7 @@
 				</v-card-text>
 
 				<v-card-actions class="pa-4">
-					<v-btn @click="clearAll" color="black" variant="text" color="grey">
+					<v-btn @click="clearAll" color="black" variant="text" >
 						{{$t('message.DeleteAll')}}
 					</v-btn>
 					<v-btn @click="validateAndPreview" variant="outlined" color="primary" :loading="processing">

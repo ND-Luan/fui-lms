@@ -1,1 +1,1 @@
-{"data":[{"imggSRC":"`https://drive.google.com/thumbnail?id=1FbTU3912DC1pqhXLchwylY6O1sMkotu6&sz=w10000"}],"watch":{},"controls":[{"prop":"fluid grid-list-md","rows":[{"prop":"","cols":[{"el":"uc-img-view","attr":{":img":"imggSRC"}}]}]}],"set":{}}
+{"data":[],"watch":{},"controls":[{"prop":"fluid grid-list-md","rows":[{"prop":"","cols":[{"el":"uc-main-layout"}]}]}],"set":{}}

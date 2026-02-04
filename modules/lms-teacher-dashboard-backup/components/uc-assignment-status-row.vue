@@ -1,5 +1,5 @@
 <template>
-	<div class="assignment-row" :class="getBgColor(assignment.ResourceType)">
+	<div :class="[getBgColor(assignment.ResourceType),'assignment-row']">
 		<!-- Cột thông tin bài tập -->
 		<div class="assignment-details">
 			<div class="assignment-title">

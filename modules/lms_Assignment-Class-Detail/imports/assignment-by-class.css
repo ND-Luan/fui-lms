@@ -121,3 +121,26 @@
 .table-custom .v-data-table-headers--mobile{
     display: none;
 }
+
+.submission-stats-card {
+    border-radius: 12px;
+    background: #f5f7fa;
+    border-bottom: 1px solid #dde5e1;
+}
+.submission-stats-card .text-overline {
+    color: #4f7f6a;
+}
+
+.submission-stats-card .text-h6,
+.submission-stats-card .text-h4 {
+    color: #1f7a4d;
+}
+
+.stats-row .v-col {
+    padding-top: 8px;
+    padding-bottom: 8px;
+}
+
+.submission-stats-card .avg-score {
+    color: #1976d2;
+}

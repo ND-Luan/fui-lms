@@ -7,15 +7,15 @@
 
 		<div v-else>
 			<!-- Header & Bộ lọc -->
-			<div class="page-header d-flex justify-space-between align-center mb-6">
+			<div class="page-header d-flex justify-space-between align-center py-3 mb-0">
 
 				<!-- ============================================= -->
 				<!-- == KHỐI BÊN TRÁI: TIÊU ĐỀ                 == -->
 				<!-- ============================================= -->
-				<div class="header-title-group d-flex align-center">
-					<v-icon size="40" class="mr-4" color="primary">mdi-table-large-plus</v-icon>
+				<div class="header-title-group d-flex align-center px-2">
+					<!-- <v-icon size="40" class="mr-4" color="primary">mdi-table-large-plus</v-icon> -->
 					<div>
-						<div class="text-h5 font-weight-bold">{{ $t('message.ClassGradebook') }}</div>
+						<!-- <div class="text-h6 font-weight-bold">{{ $t('message.ClassGradebook') }}</div> -->
 						<!-- Sử dụng v-if để chỉ hiển thị khi có lựa chọn -->
 						<div v-if="selectedClassName" class="text-body-2 text-medium-emphasis text-truncate"
 							:title="selectedClassName">
@@ -29,11 +29,11 @@
 				<!-- ============================================= -->
 				<div class="header-filters d-flex align-center ga-3">
 					<v-select :label="$t('message.class')" :items="lopList" item-title="TenLop" item-value="LopID"
-						v-model="selectedLopID" variant="outlined" density="compact" hide-details clearable
+						v-model="selectedLopID" variant="outlined" density="compact" hide-details 
 						style="min-width: 200px;" />
 					<v-select :label="$t('message.Subject')" :items="monHocList" item-title="MonHocName"
 						item-value="MonHocID" v-model="selectedMonHocID" variant="outlined" density="compact"
-						hide-details :disabled="!selectedLopID" clearable style="min-width: 200px;" />
+						hide-details :disabled="!selectedLopID"  style="min-width: 200px;" />
 					<!-- <v-btn color="primary" @click="exportToCSV" prepend-icon="mdi-file-excel-outline"
                         :disabled="!studentGrades.length || loading" :loading="exporting" variant="flat">
                         Xuất Excel
@@ -72,7 +72,7 @@
 						<tr v-for="student in studentGrades" :key="student.HocSinhID">
 							<td class="fixed-col student-col text-medium-emphasis">{{ student.HocSinhID }}</td>
 							<td class="fixed-col student-col text-medium-emphasis">{{ student.SoDanhBo }}</td>
-							<td class="fixed-col student-col font-weight-medium">{{ student.HoTen }}</td>
+							<td class="fixed-col student-col ">{{ student.HoTen }}</td>
 							<td v-for="header in assignmentHeaders" :key="header.AssignToClassID" class="text-center">
 								<uc-gradebook-cell :cell-data="student[header.AssignToClassID]"
 									@grade="vueData.goToDetailedGradingPage" @update-score="updateStudentScore" />
@@ -101,7 +101,8 @@ export default {
 	name: 'uc-gradebook',
 	props: {
 		initialLopId: Number,
-		initialMonHocId: Number
+		initialMonHocId: Number,
+		initialHocKi: Number,
 	},
 	data() {
 		this.$i18n.locale = (localStorage.getItem('IsLanguage') && localStorage.getItem('IsLanguage') == 'true') ? 'en' : 'vi'
@@ -113,7 +114,8 @@ export default {
 			assignmentHeaders: [],
 			studentGrades: [],
 			columnStats: [],
-			vueData
+			vueData,
+			selectedClassName:''
 		};
 	},
 	watch: {
@@ -147,7 +149,7 @@ export default {
 			this.loading = false;
 		},
 		async fetchMyClasses() {
-			ajaxCALL("lms/EL_Teacher_GetMyClasses", { HocKi: vueData.NienKhoaItem.HocKi }, (res) => {
+			ajaxCALL("lms/EL_Teacher_GetMyClasses", { HocKi: this.initialHocKi }, (res) => {
 				this.lopList = res.data || [];
 				if (!this.selectedLopID && this.lopList.length > 0) {
 
@@ -156,7 +158,8 @@ export default {
 			});
 		},
 		async fetchSubjectsByClass(lopId) {
-			await ajaxCALL("lms/EL_Teacher_GetSubjectsByClass", { LopID: lopId, HocKi: vueData.NienKhoaItem.HocKi }, (res) => {
+			if(!lopId) return
+			await ajaxCALL("lms/EL_Teacher_GetSubjectsByClass", { LopID: lopId, HocKi: this.initialHocKi }, (res) => {
 				this.monHocList = res.data || [];
 
 				if (!this.selectedMonHocID && this.monHocList.length > 0) {
@@ -183,10 +186,10 @@ export default {
 		async updateStudentScore(payload) {
 			ajaxCALL("lms/EL_Teacher_UpdateQuickGrade", { SubmissionID: payload.submissionId, NewScore: payload.newScore }, (res) => {
 				if (res.data && res.data[0] && res.data[0].Success) {
-					Toast.success({ text: "Cập nhật điểm thành công." });
+					Vue.$toast.success( "Cập nhật điểm thành công.",{position:'top'});
 					this.fetchData();
 				} else {
-					Toast.error({ text: "Cập nhật điểm thất bại." });
+					Vue.$toast.error( "Cập nhật điểm thất bại.",{position:'top'});
 				}
 			});
 		},
@@ -226,6 +229,7 @@ export default {
 		}
 	},
 	mounted() {
+		console.log('initialLopId', this.initialLopId);
 		this.initialize();
 	}
 }

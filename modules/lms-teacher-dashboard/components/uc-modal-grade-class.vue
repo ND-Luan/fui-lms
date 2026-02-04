@@ -8,7 +8,7 @@
 			</v-card-title>
 			<v-card-text class="pa-0 i">
 				<iframe class="position-absolute" :src="url" width="100%" allow="fullscreen" style="border:none;"
-					:style="{ 'height': gradeAssignment ? 'calc(100dvh)' : 'calc(100dvh - 64px)' }"></iframe>
+					:style="{ 'height': gradeAssignment ? 'calc(100dvh)' : 'calc(100dvh - 47px)' }"></iframe>
 			</v-card-text>
 		</v-card>
 	</v-dialog>

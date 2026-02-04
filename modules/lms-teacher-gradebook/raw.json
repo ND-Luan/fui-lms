@@ -3,7 +3,8 @@
         {
             "LopID": "parseInt(LopID)",
             "MonHocID": "parseInt(MonHocID)",
-            "AssignType": "AssignType"
+            "AssignType": "AssignType",
+            "HocKi":"parseInt(HocKi)"
         },
         {
             "CallTest": {
@@ -29,7 +30,8 @@
                             "el": "uc-gradebook",
                             "attr": {
                                 ":initial-lop-id": "LopID",
-                                ":initial-mon-hoc-id": "MonHocID"
+                                ":initial-mon-hoc-id": "MonHocID",
+                                ":initial-hoc-ki":"HocKi"
                             }
                         }
                     ]

@@ -37,18 +37,19 @@
 		<v-row class="ma-0">
 			<v-col cols="3" v-if="!mobile">
 				<v-card class="question-nav" sticky top="80px">
-					<div class="d-flex justify-space-between align-center text-subtitle-1 font-weight-medium">
+					<div class="d-flex justify-space-between align-center text-subtitle-1 font-weight-medium cursor-pointer"
+						@click="navCollapsed = !navCollapsed">
 						{{ $t('message.AssignmentStructure') }}
-						<v-btn icon size="small" @click="navCollapsed = !navCollapsed">
+						<v-btn icon size="small" @click.stop="navCollapsed = !navCollapsed">
 							<v-icon>{{ navCollapsed ? 'mdi-chevron-down' : 'mdi-chevron-up' }}</v-icon>
 						</v-btn>
 					</div>
 					<v-divider />
 					<v-expand-transition>
-						<div v-show="!navCollapsed" style="height: calc(100vh - 129px); overflow: auto;">
-							<div v-for="(group, groupIndex) in assignment.groups" :key="group.id" class="mb-2">
-								<v-list-item @click="toggleGroupCollapse(groupIndex)" class="group-header-item pa-2"
-									density="compact">
+						<div v-show="!navCollapsed" style="height: 450px; overflow: auto;">
+							<div v-for="(group, groupIndex) in assignment.groups" :key="group.id">
+								<v-list-item @click="toggleGroupCollapse(groupIndex)"
+									class="group-header-item pa-2 py-0" density="compact">
 									<template v-slot:prepend>
 										<v-icon size="20" class="group-toggle-icon">
 											{{ groupCollapsed[groupIndex] ? 'mdi-chevron-right' :
@@ -71,7 +72,7 @@
 												@click="navigateToQuestion(groupIndex, questionIndexInGroup, q.id)"
 												:color="getGradingIconColor(q.id)"
 												:variant="isActiveQuestion(groupIndex, questionIndexInGroup) ? 'elevated' : 'tonal'"
-												class="question-btn" size="small">
+												class="question-btn" size="x-small">
 												<v-icon size="16">{{ getGradingStatusIcon(q.id) }}</v-icon>
 												{{ getGlobalQuestionNumber(groupIndex, questionIndexInGroup) }}
 											</v-btn>
@@ -82,11 +83,63 @@
 						</div>
 					</v-expand-transition>
 				</v-card>
+
+				<div class="TongKet border-t pt-2">
+					<!-- View Mode Toggle (same as taker) -->
+					<div class="d-flex flex-wrap">
+						<div class="text-subtitle-1 font-weight-medium py-1">
+							<v-icon left color="primary">mdi-clipboard-check-outline</v-icon>
+							{{ $t('message.SummaryAndGeneralComments') }}
+						</div>
+						<v-spacer></v-spacer>
+						<v-btn-toggle v-model="viewMode" color="primary" variant="outlined" density="compact" divided
+							mandatory>
+							<v-btn value="single" size="x-small">
+								<v-icon size="16">mdi-numeric-1-box</v-icon>
+								<span class="ml-1 d-none d-sm-inline">
+									{{ IsEngLish ? 'Single' : 'Từng câu' }}
+								</span>
+							</v-btn>
+							<v-btn value="all" size="x-small">
+								<v-icon size="16">mdi-view-list</v-icon>
+								<span class="ml-1 d-none d-sm-inline">{{ IsEngLish ? 'All' : 'Tất cả'
+								}}</span>
+							</v-btn>
+						</v-btn-toggle>
+					</div>
+
+					<!-- Overall Grading Summary -->
+					<v-card class="mb-2">
+						<v-card-text class="pa-0">
+							<v-row dense>
+
+								<v-col cols="12">
+									<label class="font-weight-medium mb-2 d-block">{{ $t('message.FinalScore')
+									}}</label>
+									<div class="d-flex align-center">
+										<v-number-input v-model="gradingSummary.totalScore" label="Điểm"
+											:max="assignment.MaxScore" :min="0" variant="outlined" density="compact"
+											hide-details style="max-width: 100px;" control-variant="stacked" inset>
+										</v-number-input>
+										<span class="text-h6 ml-2 text-primary"> / {{ assignment.MaxScore }}</span>
+										<span class="ml-1 text-caption">{{ $t('message.points') }}</span>
+									</div>
+								</v-col>
+								<v-col cols="12">
+									<label class="font-weight-medium mb-2 d-block">{{ $t('message.OverallComment')
+									}}</label>
+									<v-textarea v-model="gradingSummary.teacherComment" hide-details
+										:placeholder="$t('message.EnterGeneralFeedback')" auto-grow :rows="2" />
+								</v-col>
+							</v-row>
+						</v-card-text>
+					</v-card>
+				</div>
 			</v-col>
 			<v-divider vertical />
-			<v-col :cols="mobile ? 12 : 6" style="height: calc(100dvh - 64px); overflow: auto" class="pa-2">
+			<v-col :cols="mobile ? 12 : 9" style="height: calc(100dvh - 64px); overflow: auto" class="pa-2">
 				<!-- Single Question Mode -->
-				<div v-if="viewMode === 'single'">
+				<div v-if="viewMode === 'single'" class="h-100 position-relative d-flex flex-column">
 					<v-card v-if="currentQuestion?.config" class="question-content-card w-100 px-2">
 						<div class="d-flex justify-space-between align-center px-0">
 							<v-card class="group-header-card mb-2 w-100" flat border>
@@ -157,7 +210,8 @@
 									{{ IsEngLish ? questionsTypesLabel(currentQuestion.type).label_EN :
 										questionsTypesLabel(currentQuestion.type)?.label }}
 								</v-chip>
-								<v-chip color="primary" variant="elevated" class="progress-chip" size="small">
+								<v-chip color="white" text-color="primary" variant="elevated" size="small"
+									class="progress-chip status-badge points-chip-mobile">
 									{{ currentQuestion.points }} {{ $t('message.points') }}
 								</v-chip>
 							</div>
@@ -214,128 +268,62 @@
 
 						<!-- Single Mode Action Bar -->
 						<v-divider></v-divider>
-						<v-card-actions class="pa-4 d-flex justify-space-between">
-							<v-btn @click="prevQuestion" :disabled="globalQuestionNumber === 1" variant="text">
-								<v-icon start>mdi-chevron-left</v-icon>{{ $t('message.back') }}
-							</v-btn>
 
-							<div class="d-flex align-center ga-2"
-								v-if="![0, 1, 4].includes(submission?.SubmissionStatus)">
-								<v-btn @click="saveGrading(false)" color="grey-darken-1" variant="outlined"
-									:loading="isSaving" size="small">
-									<v-icon start>mdi-content-save-outline</v-icon>
-									{{ IsEngLish ? "Draft Grading" : "Chấm nháp" }}
-								</v-btn>
-								<v-menu location="top" scroll-strategy="close" open-on-click
-									:close-on-content-click="false" offset="4">
-									<template v-slot:activator="{ props }">
-										<v-btn v-bind="props" color="warning" size="small" variant="elevated"
-											:loading="isSaving">
-											<v-icon start>mdi-reload-alert</v-icon>
-											{{ IsEngLish ? "Request Resubmission" : "Yêu cầu nộp lại bài" }}
-										</v-btn>
-									</template>
-									<v-card>
-										<v-card-title class="border-b bg-warning text-body-2">
-											{{ IsEngLish ? "Reason for Requesting Resubmission" : `Lý do yêu cầu nộp lại
-											bài`
-											}}</v-card-title>
-										<v-card-text class="pa-1">
-											<v-textarea label="Lý do" v-model="Reason" :rows="2" variant="outlined"
-												hide-details="auto" dense placeholder="Nhập lý do..." />
-										</v-card-text>
-										<v-card-actions class="border-t py-0">
-											<v-spacer></v-spacer>
-											<v-btn variant="text" size="small" @click="YeuCauLamLaiBai()"
-												color="warning">{{
-													$t('message.confirm') }}</v-btn>
-										</v-card-actions>
-									</v-card>
-								</v-menu>
-
-								<v-btn @click="saveGrading(true)" color="success" size="small" variant="elevated"
-									:loading="isSaving">
-									<v-icon start>mdi-send-check</v-icon>
-									{{ IsEngLish ? "Complete grade and public" : "Hoàn tất & Trả bài" }}
-								</v-btn>
-
-
-							</div>
-
-							<v-btn @click="nextQuestion" :disabled="globalQuestionNumber === totalQuestions"
-								variant="text">
-								{{ $t('message.next') }}
-								<v-icon end>mdi-chevron-right</v-icon>
-							</v-btn>
-						</v-card-actions>
 					</v-card>
+					<v-spacer></v-spacer>
+					<div
+						class="position-sticky bottom-0 d-flex justify-space-between bg-white pa-3 border rounded-lg mb-2">
+						<v-btn @click="prevQuestion" :disabled="globalQuestionNumber === 1" variant="text">
+							<v-icon start>mdi-chevron-left</v-icon>{{ $t('message.back') }}
+						</v-btn>
+
+						<div class="d-flex align-center ga-2" v-if="![0, 1, 4].includes(submission?.SubmissionStatus)">
+							<v-btn @click="saveGrading(false)" color="grey-darken-1" variant="outlined"
+								:loading="isSaving" size="small">
+								<v-icon start>mdi-content-save-outline</v-icon>
+								{{ IsEngLish ? "Draft Grading" : "Chấm nháp" }}
+							</v-btn>
+							<v-menu location="top" scroll-strategy="close" open-on-click :close-on-content-click="false"
+								offset="4">
+								<template v-slot:activator="{ props }">
+									<v-btn v-bind="props" color="warning" size="small" variant="elevated"
+										:loading="isSaving">
+										<v-icon start>mdi-reload-alert</v-icon>
+										{{ IsEngLish ? "Request Resubmission" : "Yêu cầu nộp lại bài" }}
+									</v-btn>
+								</template>
+								<v-card>
+									<v-card-title class="border-b bg-warning text-body-2">
+										{{ IsEngLish ? "Reason for Requesting Resubmission" : `Lý do yêu cầu nộp lại
+										bài`
+										}}</v-card-title>
+									<v-card-text class="pa-1">
+										<v-textarea label="Lý do" v-model="Reason" :rows="2" variant="outlined"
+											hide-details="auto" dense placeholder="Nhập lý do..." />
+									</v-card-text>
+									<v-card-actions class="border-t py-0">
+										<v-spacer></v-spacer>
+										<v-btn variant="text" size="small" @click="YeuCauLamLaiBai()" color="warning">{{
+											$t('message.confirm') }}</v-btn>
+									</v-card-actions>
+								</v-card>
+							</v-menu>
+							<v-btn @click="saveGrading(true)" color="success" size="small" variant="elevated"
+								:loading="isSaving">
+								<v-icon start>mdi-send-check</v-icon>
+								{{ IsEngLish ? "Complete grade and public" : "Hoàn tất & Trả bài" }}
+							</v-btn>
+						</div>
+						<v-btn @click="nextQuestion" :disabled="globalQuestionNumber === totalQuestions" variant="text">
+							{{ $t('message.next') }}
+							<v-icon end>mdi-chevron-right</v-icon>
+						</v-btn>
+					</div>
 				</div>
 
 				<!-- All Questions Mode -->
 				<div v-else class="all-questions-mode">
-					<!-- Progress Summary -->
-					<v-card class="mb-2 progress-summary" flat border>
-						<v-card-text class="py-2">
-							<div class="d-flex justify-space-between align-center flex-wrap ga-2">
-								<div class="d-flex align-center ga-2 flex-wrap">
-									<div class="progress-stats">
-										<span class="text-subtitle-2 text-medium-emphasis">{{
-											$t('message.GradingProgress') }}:</span>
-										<span class="text-h6 ml-1">{{ gradedCount }}/{{ totalQuestions }}</span>
-									</div>
-									<v-progress-linear :model-value="(gradedCount / totalQuestions) * 100"
-										color="success" height="6" rounded
-										class="progress-bar-inline"></v-progress-linear>
-									<span class="text-caption text-medium-emphasis">
-										{{ Math.round((gradedCount / totalQuestions) * 100) }}%
-									</span>
-								</div>
 
-								<div class="d-flex flex-wrap align-center ga-2"
-									v-if="![0, 1, 4].includes(submission?.SubmissionStatus)">
-									<v-btn @click="saveGrading(false)" color="grey-darken-1" variant="outlined"
-										size="small" :loading="isSaving">
-										<v-icon start size="16">mdi-content-save-outline</v-icon>
-										{{ IsEngLish ? "Draft Grading" : "Chấm nháp" }}
-									</v-btn>
-									<v-menu location="bottom" scroll-strategy="close" open-on-click
-										:close-on-content-click="false" offset="4">
-										<template v-slot:activator="{ props }">
-											<v-btn v-bind="props" color="warning" size="small" variant="elevated"
-												:loading="isSaving">
-												<v-icon start>mdi-reload-alert</v-icon>
-												{{ IsEngLish ? "Request Resubmission" : "Yêu cầu nộp lại bài" }}
-											</v-btn>
-										</template>
-										<v-card>
-											<v-card-title class="border-b bg-warning text-body-2">
-												{{
-													IsEngLish ? "Reason for Requesting Resubmission" : `Lý do yêu cầu nộp
-												lại
-												bài`
-												}}</v-card-title>
-											<v-card-text class="pa-1">
-												<v-textarea label="Lý do" v-model="Reason" :rows="2" variant="outlined"
-													hide-details="auto" dense placeholder="Nhập lý do..." />
-											</v-card-text>
-											<v-card-actions class="border-t py-0">
-												<v-spacer></v-spacer>
-												<v-btn variant="text" size="small" @click="YeuCauLamLaiBai()"
-													color="warning">{{
-														$t('message.confirm') }}</v-btn>
-											</v-card-actions>
-										</v-card>
-									</v-menu>
-									<v-btn @click="saveGrading(true)" color="success" size="small" variant="elevated"
-										:loading="isSaving">
-										<v-icon start size="16">mdi-send-check</v-icon>
-										{{ IsEngLish ? "Complete grade and public" : "Hoàn tất & Trả bài" }}
-									</v-btn>
-
-								</div>
-							</div>
-						</v-card-text>
-					</v-card>
 
 					<!-- All Questions List -->
 					<div class="questions-container">
@@ -545,18 +533,70 @@
 							</div>
 						</div>
 					</div>
+
+					<!-- Progress Summary -->
+					<v-card class="mb-2 progress-summary border" flat border>
+						<v-card-text class="py-2">
+							<div class="d-flex justify-space-between align-center flex-wrap ga-2">
+								<div class="d-flex align-center ga-2 flex-wrap">
+									<div class="progress-stats">
+										<span class="text-subtitle-2 text-medium-emphasis">{{
+											$t('message.GradingProgress') }}:</span>
+										<span class="text-h6 ml-1">{{ gradedCount }}/{{ totalQuestions }}</span>
+									</div>
+									<v-progress-linear :model-value="(gradedCount / totalQuestions) * 100"
+										color="success" height="6" rounded
+										class="progress-bar-inline"></v-progress-linear>
+									<span class="text-caption text-medium-emphasis">
+										{{ Math.round((gradedCount / totalQuestions) * 100) }}%
+									</span>
+								</div>
+
+								<div class="d-flex flex-wrap align-center ga-2"
+									v-if="![0, 1, 4].includes(submission?.SubmissionStatus)">
+									<v-btn @click="saveGrading(false)" color="grey-darken-1" variant="outlined"
+										size="small" :loading="isSaving">
+										<v-icon start size="16">mdi-content-save-outline</v-icon>
+										{{ IsEngLish ? "Draft Grading" : "Chấm nháp" }}
+									</v-btn>
+									<v-btn @click="handleOpenModalRequireResend" color="warning" size="small"
+										variant="elevated" :loading="isSaving">
+										<v-icon start>mdi-reload-alert</v-icon>
+										{{ IsEngLish ? "Request Resubmission" : "Yêu cầu nộp lại bài" }}
+									</v-btn>
+									<!-- <v-menu location="bottom" scroll-strategy="close" open-on-click
+										:close-on-content-click="false" offset="4">
+										<template v-slot:activator="{ props }">
+											<v-btn v-bind="props" color="warning" size="small" variant="elevated"
+												:loading="isSaving">
+												<v-icon start>mdi-reload-alert</v-icon>
+												{{ IsEngLish ? "Request Resubmission" : "Yêu cầu nộp lại bài" }}
+											</v-btn>
+										</template>
+										
+									</v-menu> -->
+									<v-btn @click="saveGrading(true)" color="success" size="small" variant="elevated"
+										:loading="isSaving">
+										<v-icon start size="16">mdi-send-check</v-icon>
+										{{ IsEngLish ? "Complete grade and public" : "Hoàn tất & Trả bài" }}
+									</v-btn>
+
+								</div>
+							</div>
+						</v-card-text>
+					</v-card>
 				</div>
 			</v-col>
-			<v-divider vertical />
-			<v-col cols="3" v-if="!mobile">
-				<!-- View Mode Toggle (same as taker) -->
-				<div class="text-subtitle-1 font-weight-medium">
+			<!-- <v-divider vertical /> -->
+			<!-- <v-col cols="3" v-if="!mobile"> -->
+			<!-- View Mode Toggle (same as taker) -->
+			<!-- <div class="text-subtitle-1 font-weight-medium">
 					<v-icon left color="primary">mdi-clipboard-check-outline</v-icon>
 					{{ $t('message.SummaryAndGeneralComments') }}
 				</div>
-				<v-divider class="my-2" />
-				<!-- Overall Grading Summary -->
-				<v-card class="mb-2">
+				<v-divider class="my-2" /> -->
+			<!-- Overall Grading Summary -->
+			<!-- <v-card class="mb-2">
 					<v-card-text class="pa-0">
 						<v-row dense>
 							<v-col cols="12">
@@ -593,10 +633,36 @@
 							</v-col>
 						</v-row>
 					</v-card-text>
-				</v-card>
+				</v-card> -->
 
-			</v-col>
+			<!-- </v-col> -->
 		</v-row>
+		<v-dialog v-model="IsOpenModal_Require_Resend" max-width="600px">
+			<v-card>
+				<v-card-title class="d-flex  border-b bg-primary text-body-2 py-0">
+					<span class="text-white">
+						{{
+							IsEngLish ? "Reason for Requesting Resubmission" : `Lí do yêu cầu nộp
+						lại
+						bài`
+						}}
+					</span>
+					<v-spacer></v-spacer>
+					<v-btn class="text-white" icon="mdi-close" variant="text" size="small"
+						@click="handleCloseModalRequireResend"></v-btn>
+				</v-card-title>
+				<v-card-text class="pa-1 py-2">
+					<v-textarea label="Lí do" v-model="Reason" :rows="2" variant="outlined" hide-details="auto" dense
+						placeholder="Nhập lí do..." density="compact" />
+				</v-card-text>
+				<v-card-actions class="border-t py-0">
+					<v-spacer></v-spacer>
+					<v-btn variant="outlined" size="small" @click="YeuCauLamLaiBai()" color="primary"
+						prepend-icon="mdi-content-save-outline">{{
+							$t('message.confirm') }}</v-btn>
+				</v-card-actions>
+			</v-card>
+		</v-dialog>
 	</div>
 </template>
 
@@ -627,7 +693,8 @@ export default {
 			isSaving: false,
 			isLoading: false,
 			vueData,
-			mobile
+			mobile,
+			IsOpenModal_Require_Resend: false
 		}
 	},
 	mounted() {
@@ -783,20 +850,16 @@ export default {
 			setTimeout(() => { this.isSaving = false; }, 200);
 		},
 		updateGrading(questionId, newGradingData) {
-			console.log('udpee', questionId, newGradingData)
 			const newGrading = { ...this.gradingData };
 			const currentAnswer = newGrading[questionId] || {};
 			newGrading[questionId] = { ...currentAnswer, grading: newGradingData };
 			this.gradingData = newGrading;
 			// Avoid tight recursive update loop
-			console.log('this.submission', this.submission)
 			if (this.submission.SubmissionStatus <= 3) {
 				setTimeout(() => {
 					this.calculateTotalScore();
 				}, 0);
 			}
-
-
 		},
 		async calculateTotalScore() {
 			let total = 0;
@@ -929,6 +992,12 @@ export default {
 				}
 			})
 
+		},
+		handleOpenModalRequireResend() {
+			this.IsOpenModal_Require_Resend = true
+		},
+		handleCloseModalRequireResend() {
+			this.IsOpenModal_Require_Resend = false
 		}
 	},
 	watch: {

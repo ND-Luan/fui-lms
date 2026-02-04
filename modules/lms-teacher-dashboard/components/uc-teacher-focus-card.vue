@@ -17,18 +17,22 @@
 						</span> <span v-if="task.TenLopHoacNhom">• {{ task.TenLopHoacNhom }}</span>
 						<v-spacer></v-spacer>
 						<div class="d-flex flex-wrap flex-md-nowrap justify-center mb-1">
-							<v-chip size="x-small" color="success" prepend-icon="mdi-file-upload-outline" class="ma-1">
+							<v-chip variant="text" size="x-small" color="success" prepend-icon="mdi-file-upload-outline" class="me-0 pe-2">
 								{{ $t('message.Submitted') }}:{{ task.SubmittedCount }}/{{ task.TotalStudents }}
 							</v-chip>
-							<v-chip :color="statusInfo.color" size="x-small" variant="tonal" class="ma-1">
+							<v-chip :color="statusInfo.color" size="x-small" variant="text" class="me-0 pa-0">
 								{{ statusInfo.text }}
 							</v-chip>
 						</div>
 					</div>
 					<div v-if="task.DueDate" class="task-due-date text-caption d-flex align-center"
 						:class="dueDateInfo.colorClass">
-						<v-icon size="14" class="mr-1">mdi-calendar-clock</v-icon>
-						{{ formatDate(task.DueDate) }} ({{ dueDateInfo.text }})
+						<div>
+							<v-icon size="14" class="mr-1">mdi-calendar-clock</v-icon>
+							{{ formatDate(task.DueDate) }} ({{ dueDateInfo.text }})
+						</div>
+						<v-spacer></v-spacer>
+						<v-btn v-tooltip=" task.IsHided ? 'Hiện bài tập' : 'Ẩn bài tập'" size="x-small" :icon=" task.IsHided ? 'mdi-eye-outline' : 'mdi-eye-off-outline'" @click.stop="handleHide(task)"></v-btn>
 					</div>
 				</div>
 			</div>
@@ -38,7 +42,7 @@
 						<span class="text-white">Giao Bài Tập Theo {{ task?.AssignType == 'STUDENT' ? 'Học Sinh'
 							: 'Lớp' }}</span>
 						<v-spacer></v-spacer>
-						<v-btn @click="onClose()" variant="text" icon="mdi-close"></v-btn>
+						<v-btn class="text-white" @click="onClose()" variant="text" icon="mdi-close"></v-btn>
 					</v-card-title>
 					<v-card-text class="pa-0 e">
 						<iframe class="position-absolute focus-task" :src="url" width="100%" allow="fullscreen"
@@ -146,7 +150,12 @@ export default {
 					document.getElementsByClassName('ChamBaiDialog')[0].style.setProperty("display", "flex", "important");
 				}
 			}
-		}
+		},
+		handleHide(task) {
+			task.IsHided = !task.IsHided
+			this.Update_IsHided(task.AssignToClassID)
+		},
+		Update_IsHided
 
 	}
 }

@@ -293,6 +293,7 @@ $('document').ready(() => {
                     GradeAllAssignments: "Grade All Assignments",
                     FindStudent: "Find Student",
                     GradeAssignment: "Grade Assignment",
+                    Actions:"Actions",
                     NoticeHighestScoreSubmission: "Note: The system records the submission with the highest score",
                     PleaseSelectClassSubjectAssignment: "Please select Class, Subject, and Assignment to view data.",
                     MaximumScore: "Maximum Score",
@@ -409,6 +410,8 @@ $('document').ready(() => {
                     PreviewDraftLesson: "Preview draft lesson",
                     RetrievedSuccess: "Content retrieved successfully!",
                     Statistical: "Statistical",
+                    HomeworkGiver: "Homework giver",
+                    Classname: "Classname"
                 }
             },
             vi: {
@@ -587,6 +590,7 @@ $('document').ready(() => {
                     GradeAllAssignments: "Chấm tất cả bài",
                     FindStudent: "Tìm học sinh",
                     GradeAssignment: "Chấm bài",
+                    Actions:"Thao tác",
                     NoticeHighestScoreSubmission: "Chú ý: Hệ thống ghi nhận lần nộp bài được chấm điểm cao nhất",
                     PleaseSelectClassSubjectAssignment: "Vui lòng chọn Lớp, Môn và Bài tập để xem dữ liệu.",
                     MaximumScore: "Điểm tối đa",
@@ -686,7 +690,7 @@ $('document').ready(() => {
                     NoContent: "Không có nội dung...",
                     Save: "Lưu",
                     LoadingGradebookData: "Đang tải dữ liệu sổ điểm...",
-                    ClassGradebook: "Sổ điểm Lớp học",
+                    ClassGradebook: "Sổ điểm lớp học",
                     FullName: "Họ tên",
                     Maximum: "Tối đa",
                     SelectClassSubjectNotice: "Vui lòng chọn Lớp và Môn học để xem dữ liệu.",
@@ -701,6 +705,8 @@ $('document').ready(() => {
                     PreviewDraftLesson: "Xem trước bài soạn",
                     RetrievedSuccess: "Lấy nội dung thành công!",
                     Statistical: "Thống kê",
+                    HomeworkGiver: "Người giao bài",
+                    Classname: "Tên lớp"
                 }
             }
         }
@@ -789,6 +795,12 @@ $('document').ready(() => {
             },
             VList: {
                 density: "compact",
+                VListSubheader: {
+                    style: "padding-inline-start: calc(8px + var(--indent-padding)) !important;"
+                },
+                VListItem: {
+                    style: "padding-inline: 8px"
+                }
             },
             VTabs: {
                 color: 'primary',
@@ -880,13 +892,18 @@ $('document').ready(() => {
             },
             VButton: {
                 variant: "outlined",
-                color: "primary"
+                color: "primary",
+                size: "small"
             },
             VChip: {
-                size: "small"
+                size: "small",
+                label: true
             },
             VRow: {
                 dense: true
+            },
+            VAlert: {
+                density: "compact"
             },
             VContainer: {
                 class: "pa-0"

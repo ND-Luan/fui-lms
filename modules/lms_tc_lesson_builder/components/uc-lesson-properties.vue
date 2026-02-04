@@ -37,8 +37,10 @@
 							:style="{ 'word-break': 'auto-phrase' }" />
 					</div>
 					<div v-else-if="element.ElementType === 'IMAGE'">
-						<v-btn @click="$refs.inputImage.click()" :text="$t('message.UploadImage')" color="primary"
-							variant="elevated" />
+						<v-btn color="primary" variant="outlined" @click="$refs.inputImage.click()">
+							<v-icon start class="me-1">mdi-upload</v-icon>
+							{{ $t('message.UploadImage') }}
+						</v-btn>
 						<input ref="inputImage" type="file" @change="(e) => handleChangeFile(e, element.ElementType)"
 							style="display: none" />
 						<div class="d-flex ga-2">
@@ -66,8 +68,10 @@
 						<div class="d-flex ga-2">
 							<v-text-field v-model="element.ElementData.source"
 								:placeholder="$t('message.PasteVideoLink')" />
-							<v-btn @click="$refs.inputYoutube.click()" :text="$t('message.UploadVideo')" color="primary"
-								variant="elevated" />
+							<v-btn color="primary" variant="outlined" @click="$refs.inputYoutube.click()">
+								<v-icon start class="me-1">mdi-upload</v-icon>
+								{{ $t('message.UploadVideo') }}
+							</v-btn>
 						</div>
 						<p class="text-caption">
 							{{ $t('message.VideoNote') }}
@@ -80,8 +84,10 @@
 							allowfullscreen></iframe>
 					</div>
 					<div v-else-if="element.ElementType === 'FILE'">
-						<v-btn @click="$refs.inputFile.click()" :text="$t('message.UploadFile')" color="primary"
-							variant="elevated" />
+						<v-btn color="primary" variant="outlined" @click="$refs.inputFile.click()">
+							<v-icon start class="me-1">mdi-upload</v-icon>
+							{{ $t('message.UploadFile') }}
+						</v-btn>
 						<input ref="inputFile" type="file" @change="(e) => handleChangeFile(e, element.ElementType)"
 							style="display: none" />
 						<div class="d-flex ga-2">
@@ -99,8 +105,8 @@
 					<div v-else-if="element.ElementType === 'HTML'" class="d-flex flex-column ga-2">
 						<div class="d-flex">
 							<v-spacer></v-spacer>
-							<v-btn variant="tonal" color="primary" @click="onOpenModalImportFromHocLieu()">
-								{{ $t('message.ImportFromLibrary') }}
+							<v-btn variant="outlined" color="primary" @click="onOpenModalImportFromHocLieu()">
+								<v-icon start class="me-1">mdi-database-import-outline</v-icon>{{ $t('message.ImportFromLibrary') }}
 							</v-btn>
 						</div>
 						<v-checkbox v-model="element.ElementData.IsHTML" label="HTML" />

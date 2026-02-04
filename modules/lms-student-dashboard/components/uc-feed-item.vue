@@ -15,21 +15,21 @@
 		<!-- Nút hành động chỉ hiển thị cho loại GRADED (DESKTOP)-->
 		<template v-slot:append>
 			<div v-if="feed.FeedType === 'GRADED' && !isMobile" class="d-flex align-center ga-2">
-				<v-btn v-if='feed.Is_SendToClass == true' size="small" variant="tonal" @click.stop="onViewSummaryClick">
-					Xem điểm
+				<v-btn v-if='feed.Is_SendToClass == true' size="small" variant="outlined" @click.stop="onViewSummaryClick">
+					<v-icon start class="me-1">mdi-clipboard-text-outline</v-icon> Xem điểm
 				</v-btn>
-				<v-btn size="small" variant="flat" color="primary" @click.stop="onViewDetailsClick">
-					Xem chi tiết
+				<v-btn size="small" variant="outlined" color="primary" @click.stop="onViewDetailsClick">
+					<v-icon start class="me-1">mdi-eye-outline</v-icon> Xem chi tiết
 				</v-btn>
-				<v-btn v-if="feed.Is_MaxAssigned == 0" size="small" variant="tonal" @click.stop="onResubmitAssignment">
-					Làm lại
+				<v-btn v-if="feed.Is_MaxAssigned == 0" size="small" variant="outlined" @click.stop="onResubmitAssignment">
+					<v-icon start class="me-1">mdi-replay</v-icon>Làm lại
 				</v-btn>
-				<v-btn size="small" color="primary" variant="tonal" @click.stop="onOpenLeaderboard">
-					Bảng xếp hạng
+				<v-btn size="small" color="primary" variant="outlined" @click.stop="onOpenLeaderboard">
+					<v-icon start class="me-1">mdi-trophy-outline</v-icon> Bảng xếp hạng
 				</v-btn>
 			</div>
 			<div v-else-if="feed.FeedType === 'SUBMITTED' && !isMobile" class="d-flex align-center ga-2">
-				<v-btn v-if="feed.Is_MaxAssigned == 0" size="small" variant="tonal" @click.stop="onResubmitAssignment">
+				<v-btn v-if="feed.Is_MaxAssigned == 0" size="small" variant="outlined" @click.stop="onResubmitAssignment">
 					Làm lại
 				</v-btn>
 			</div>
@@ -37,7 +37,7 @@
 
 		<!-- MOBILE: Sử dụng Menu dropdown cho GRADED -->
 		<div v-if="feed.FeedType === 'GRADED' && isMobile" class="mobile-actions-container">
-			<v-btn size="small" variant="flat" color="primary" @click.stop="onViewDetailsClick"
+			<v-btn size="small" variant="outlined" color="primary" @click.stop="onViewDetailsClick"
 				class="mobile-primary-btn">
 				<v-icon size="18" class="mr-1">mdi-eye</v-icon>
 				CHI TIẾT

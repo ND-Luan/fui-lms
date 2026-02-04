@@ -21,7 +21,7 @@
 			<!-- Cột 2 -->
 			<div class="flex-md-6 flex-sm-12  d-flex flex-column align-end ga-2">
 				<div class="d-flex align-center ga-2">
-					<v-chip :color="statusInfo.color" variant="tonal" size="small">
+					<v-chip :color="statusInfo.color" class="font-weight-medium" variant="text" size="small">
 						{{ statusInfo.text }}
 					</v-chip>
 					<v-menu location="bottom">

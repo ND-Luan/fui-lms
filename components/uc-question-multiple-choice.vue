@@ -97,98 +97,101 @@
 </template>
 
 <script>
-export default {
-	name: 'uc-question-multiple-choice',
-	props: {
-		question: { type: Object, required: true },
-		answer: { type: Array, default: () => [] },
-		readonly: { type: Boolean, default: false },
-		grading: { type: Object, default: null },
-		isGrade: { type: Boolean, default: false },
-		submissionstatus: { type: Number, default: -1 },
-		isShowBtnComment: { type: Boolean, default: true }
-	},
-	emits: ['answer-change', 'grading-change'],
-	data() {
-		this.$i18n.locale = (localStorage.getItem('IsLanguage') && localStorage.getItem('IsLanguage') == 'true') ? 'en' : 'vi'
-		return { internalAnswer: this.answer ? [...this.answer] : [], menu: false, widthScreen: null }
-	},
-	computed: {
-		isGraded() { return this.grading && this.isGrade; },
-		guideText() { return this.question?.config?.submissionNote || this.question?.config?.instruction || '' },
-		displayScore() {
-			// Ưu tiên manualScore, rồi autoScore, nếu trống thì mặc định 0
-			const s = this.grading?.manualScore ?? this.grading?.autoScore ?? 0;
-			return typeof s === 'number' ? s : 0;
+	export default {
+		name: 'uc-question-multiple-choice',
+		props: {
+			question: { type: Object, required: true },
+			answer: { type: Array, default: () => [] },
+			readonly: { type: Boolean, default: false },
+			grading: { type: Object, default: null },
+			isGrade: { type: Boolean, default: false },
+			submissionstatus: { type: Number, default: -1 },
+			isShowBtnComment: { type: Boolean, default: true }
 		},
-		effectiveMaxPoints() {
-			return this.question?.points ?? 0;
+		emits: ['answer-change', 'grading-change'],
+		data() {
+			this.$i18n.locale = (localStorage.getItem('IsLanguage') && localStorage.getItem('IsLanguage') == 'true') ? 'en' : 'vi'
+			return { internalAnswer: this.answer ? [...this.answer] : [], menu: false, widthScreen: null }
 		},
-		scoreChipColor() {
-			const s = this.displayScore;
-			const max = this.effectiveMaxPoints;
-			if (s <= 0) return 'error'; // 0 điểm if (max && s>= max) return 'success'; // đạt tối đa
-			return 'primary'; // điểm trung gian
-		}
-	},
-	mounted() {
-		this.widthScreen = window.innerWidth
-		if (this.isGrade) {
-			console.log('mounted', this.answer)
-			console.log('www', this.question.config.correctAnswers)
-			console.log('www', this.totalScore())
-			const ok = _.isEqual(_.sortBy(this.question.config.correctAnswers), _.sortBy(this.internalAnswer))
-			this.$emit('grading-change', { ...this.grading, manualScore: this.totalScore() });
-		}
-		window.addEventListener('resize', () => { this.handleResize() })
-	},
-	watch: {
-		internalAnswer(newVal) { if (!this.isGrade) this.$emit('answer-change', newVal); },
-		answer(newVal) {
-			if (JSON.stringify(this.internalAnswer) !== JSON.stringify(newVal)) {
-				this.internalAnswer = [...(newVal || [])];
+		computed: {
+			isGraded() { return this.grading && this.isGrade; },
+			guideText() { return this.question?.config?.submissionNote || this.question?.config?.instruction || '' },
+			displayScore() {
+				// Ưu tiên manualScore, rồi autoScore, nếu trống thì mặc định 0
+				const s = this.grading?.manualScore ?? this.grading?.autoScore ?? 0;
+				return typeof s === 'number' ? s : 0;
+			},
+			effectiveMaxPoints() {
+				return this.question?.points ?? 0;
+			},
+			scoreChipColor() {
+				const s = this.displayScore;
+				const max = this.effectiveMaxPoints;
+				if (s <= 0) return 'error'; // 0 điểm if (max && s>= max) return 'success'; // đạt tối đa
+				return 'primary'; // điểm trung gian
 			}
+		},
+		mounted() {
+			this.widthScreen = window.innerWidth
+			if (this.isGrade) {
+				console.log('mounted', this.answer)
+				console.log('www', this.question.config.correctAnswers)
+				console.log('www', this.totalScore())
+				const ok = _.isEqual(_.sortBy(this.question.config.correctAnswers), _.sortBy(this.internalAnswer))
+				this.$emit('grading-change', { ...this.grading, manualScore: this.totalScore() });
+			}
+			window.addEventListener('resize', () => { this.handleResize() })
+		},
+		watch: {
+			internalAnswer(newVal) { if (!this.isGrade) this.$emit('answer-change', newVal); },
+			answer(newVal) {
+				if (JSON.stringify(this.internalAnswer) !== JSON.stringify(newVal)) {
+					this.internalAnswer = [...(newVal || [])];
+				}
+			}
+		},
+		methods: {
+			handleResize() {
+				this.widthScreen = window.innerWidth;
+			},
+			totalScore() {
+				if (!this.isGrade) return 0;
+				let c = 0;
+				const totalCorrect = this.question.config.correctAnswers.length;
+				this.question.config.correctAnswers.forEach(opt => {
+					if (this.answer.includes(opt)) c++;
+				});
+				const rawScore = (c / totalCorrect) * this.question.points;
+				// làm tròn 2 chữ số sau dấu phẩy
+				return Math.round(rawScore * 100) / 100;
+			},
+			isSelected(optionId) { return this.internalAnswer.includes(optionId) },
+			isOptionCorrect(optionId) {
+				return (this.question.config.correctOptionIds || this.question.config.correctAnswers || []).includes(optionId);
+			},
+			getOptionTextClass(optionId) {
+				if (!this.isGraded) return this.isSelected(optionId) ? 'font-weight-bold' : '';
+				const selected = this.isSelected(optionId), correct = this.isOptionCorrect(optionId);
+				if (selected && correct) return 'font-weight-bold';
+				if (!selected && correct) return 'font-italic correct-answer-hint';
+				return 'text-disabled';
+			},
+			onStudentCommentInput(val) {
+				this.grading.comment = val
+				this.$emit('grading-change', { ...this.grading, comment: val })
+			},
+			updateTeacherComment(val) { this.$emit('grading-change', { ...this.grading, teacherComment: val }); }
 		}
-	},
-	methods: {
-		handleResize() {
-			this.widthScreen = window.innerWidth;
-		},
-		totalScore() {
-			if (!this.isGrade) return 0;
-			let c = 0;
-			this.question.config.correctAnswers.forEach(opt => {
-				if (this.answer.includes(opt)) c++;
-			});
-			return (c / this.question.config.correctAnswers.length) * this.question.points;
-		},
-		isSelected(optionId) { return this.internalAnswer.includes(optionId) },
-		isOptionCorrect(optionId) {
-			return (this.question.config.correctOptionIds || this.question.config.correctAnswers || []).includes(optionId);
-		},
-		getOptionTextClass(optionId) {
-			if (!this.isGraded) return this.isSelected(optionId) ? 'font-weight-bold' : '';
-			const selected = this.isSelected(optionId), correct = this.isOptionCorrect(optionId);
-			if (selected && correct) return 'font-weight-bold';
-			if (!selected && correct) return 'font-italic correct-answer-hint';
-			return 'text-disabled';
-		},
-		onStudentCommentInput(val) {
-			this.grading.comment = val
-			this.$emit('grading-change', { ...this.grading, comment: val })
-		},
-		updateTeacherComment(val) { this.$emit('grading-change', { ...this.grading, teacherComment: val }); }
 	}
-}
 </script>
 
 <style scoped>
-.correct-answer-hint {
-	font-style: italic;
-	color: green;
-}
+	.correct-answer-hint {
+		font-style: italic;
+		color: green;
+	}
 
-.text-disabled {
-	color: grey;
-}
+	.text-disabled {
+		color: grey;
+	}
 </style>

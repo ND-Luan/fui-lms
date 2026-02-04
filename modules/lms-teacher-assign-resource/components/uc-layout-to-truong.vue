@@ -58,7 +58,7 @@
 					<v-card-title class="d-flex flex-wrap" style="height: fit-content">
 						<span>Biểu đồ học tập - Cấp {{ CapID }}</span>
 						<v-spacer></v-spacer>
-						<v-btn variant="tonal" color="primary" size="small" text='Xem chi tiết'
+						<v-btn variant="outlined" color="primary" size="small" text='Xem chi tiết'
 							@click="onOpenChiTietCapMon_BaiTap()" />
 					</v-card-title>
 					<v-card-text>
@@ -124,11 +124,11 @@
 			</v-col>
 			<v-col md="8" cols="12">
 				<v-card class="mx-auto border fill-height" style="min-height: 600px">
-					<v-card-item>
+					<v-card-item class="pa-0">
 						<v-card-title class="d-flex flex-wrap" style="height: fit-content">
 							<span>Thống kê số lượng bài học - Cấp {{ CapID }}</span>
 							<v-spacer></v-spacer>
-							<v-btn variant="tonal" color="primary" text='Xem chi tiết' size="small"
+							<v-btn variant="outlined" color="primary" text='Xem chi tiết' size="small"
 								@click="onOpenChiTietCapMon_BaiHoc()" />
 						</v-card-title>
 					</v-card-item>
@@ -138,7 +138,7 @@
 			</v-col>
 			<v-col md="4" cols="12">
 				<v-card class="mx-auto border fill-height" style="min-height: 600px">
-					<v-card-title class="d-flex border-b flex-wrap" style="height: fit-content">
+					<v-card-title class="d-flex border-b flex-wrap pa-0" style="height: fit-content">
 						<span>Số lượng bài học giáo viên tạo</span>
 						<v-spacer />
 						<v-btn color="success" variant="text" icon
@@ -198,7 +198,7 @@
 			<v-col cols="12">
 				<v-card>
 					<v-card-title class="d-flex flex-wrap ga-2" style="height: fit-content">
-						<span class="text-primary">Tỉ lệ điểm đạt được của bài tập theo lớp / khối</span>
+						<span class="text-primary">Tỉ lệ điểm đạt được của bài tập theo khối / lớp</span>
 						<v-spacer></v-spacer>
 						<v-select v-model="KhoiID_Chart4" color="primary" label="Khối" :items="DSKhoi"
 							item-value="KhoiID" item-title="TenKhoiHoc" style="max-width: 200px;">
@@ -253,8 +253,8 @@
 							v-if="ChartBar_TileHoanThanh_Khoi.series.length > 0" />
 						<uc-empty v-else></uc-empty>
 					</v-card-text>
-					<v-card-text class="border pa-2 ma-2">
-						<div class="border-b pa-2 d-flex">
+					<v-card-text class="border pa-2 ma-2 pt-0">
+						<div class="border-b pa-2 d-flex align-center">
 							<span class="text-body-1 font-weight-medium text-primary">Theo lớp</span>
 							<v-spacer></v-spacer>
 							<v-btn color="success" variant="text" icon

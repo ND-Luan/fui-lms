@@ -451,3 +451,112 @@
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
+
+.assignment-meta {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    font-size: 13px;
+}
+
+.meta-item {
+    font-weight: 500;
+}
+
+/* Theo lớp */
+.type-class {
+    color: #4CAF50;
+}
+
+/* Theo học sinh */
+.type-student {
+    color: #7E57C2;
+}
+
+/* Chapter */
+.chapter {
+    color: orange;
+}
+
+.assignment-meta {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    font-size: 13px;
+}
+
+.meta-item {
+    /* padding: 2px 8px; */
+    border-radius: 8px;
+    font-weight: 500;
+    line-height: 1.4;
+}
+
+/* Theo lớp */
+.assign-class {
+    color: #2e7d32;
+}
+
+/* Theo học sinh */
+.assign-student {
+    color: #5e35b1;
+}
+
+/* Chapter */
+.chapter {
+    color: #ef6c00;
+}
+
+.assignment-status {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    font-size: 13px;
+}
+
+.status-item {
+    padding: 3px 8px;
+    border-radius: 8px;
+    font-weight: 500;
+}
+
+/* tương đương color="info" + tonal */
+.status-info {
+    color: #0288d1;
+    background-color: #e1f5fe;
+}
+
+/* tương đương flat green */
+.status-success {
+    color: #2e7d32;
+    background-color: #e8f5e9;
+}
+
+.assignment-status {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    font-size: 13px;
+}
+
+.status-item {
+    padding: 3px 8px;
+    border-radius: 8px;
+    font-weight: 500;
+    line-height: 1.4;
+}
+
+/* info tonal */
+.status-info {
+    color: #0288d1;
+    background-color: #e1f5fe;
+}
+
+/* success flat */
+.status-success {
+    color: #2e7d32;
+}
+
+.card-title-libery-details{
+    padding: 0px 8px !important;
+}

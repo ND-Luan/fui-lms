@@ -4,10 +4,10 @@
         <!-- Dialog -->
         <v-dialog v-model="dialog" max-width="600px" persistent>
             <v-card>
-                <v-card-title class="bg-primary d-flex">
-                    <span class="text-white">Chọn Nhóm Kỹ Năng</span>
+                <v-card-title class="bg-primary d-flex py-0">
+                    <span class="text-white">Chọn nhóm kĩ năng</span>
                     <v-spacer></v-spacer>
-                    <v-btn icon variant="text" @click="$emit('update:dialog', false)"><v-icon>mdi-close</v-icon></v-btn>
+                    <v-btn class="text-white" icon variant="text" @click="$emit('update:dialog', false)"><v-icon>mdi-close</v-icon></v-btn>
                 </v-card-title>
 
                 <v-card-text class="pt-6">
@@ -55,10 +55,8 @@
 
                 <v-card-actions class="pa-4">
                     <v-spacer></v-spacer>
-                    <v-btn color="grey" variant="text" @click="closeDialog">
-                        Hủy
-                    </v-btn>
-                    <v-btn color="primary" variant="elevated" :disabled="!selectedGroup" @click="applySkill">
+                  
+                    <v-btn prepend-icon="mdi-content-save-outline" color="primary" variant="outlined" :disabled="!selectedGroup" @click="applySkill">
                         Áp dụng
                     </v-btn>
                 </v-card-actions>

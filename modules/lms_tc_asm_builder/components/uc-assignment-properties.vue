@@ -3,7 +3,7 @@
 		<div class="d-flex align-center text-subtitle-1 font-weight-medium flex-wrap ga-2">
 			{{ $t('message.Attribute') }}
 			<div class="ml-2" v-if="item.type === 'question' && globalQuestionNumber !== 0">
-				<v-chip v-if="isQuestionTextField === false" label color="primary"
+				<v-chip v-if="isQuestionTextField === false" label variant="outlined" color="primary"
 					@click="isQuestionTextField = true; $nextTick(() => { $refs.questionInput.focus() });">
 					{{ $t('message.Question') }} {{ selectedQuestionData.ordinalNumber }} <v-icon
 						end>mdi-pencil-circle</v-icon>
@@ -17,7 +17,7 @@
 			<v-spacer></v-spacer>
 			<div class="d-flex">
 				<v-spacer></v-spacer>
-				<v-btn v-if="item.type === 'group'" variant="tonal" color="primary"
+				<v-btn v-if="item.type === 'group'" variant="outlined" color="primary"
 					@click="onOpenModalImportFromHocLieu()">Import từ kho
 					học liệu</v-btn>
 				<v-btn v-else icon variant="text" @click="onOpenModalKiNang()"><v-icon>mdi-cog-outline</v-icon></v-btn>
