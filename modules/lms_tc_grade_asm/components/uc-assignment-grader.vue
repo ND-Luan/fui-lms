@@ -222,7 +222,8 @@
 								}}:</b>
 								<!-- Question text -->
 								<uc-latex-view class="flex-column ms-2" style="align-items: flex-start !important;"
-									:content="currentQuestion.config.questionText" />
+									:content="currentQuestion.config.questionText" 
+									:escape-html="false"/>
 							</div>
 						</div>
 						<!-- YOUTUBE, RECORD_AUDIO, IMAGE, FILE -->
@@ -424,7 +425,8 @@
 
 											<uc-latex-view class="flex-column px-2"
 												style="align-items: start !important;"
-												:content="question.config.questionText" />
+												:content="question.config.questionText" 
+												:escape-html="false"/>
 										</div>
 
 										<!-- Mobile layout -->

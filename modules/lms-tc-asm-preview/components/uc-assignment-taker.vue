@@ -151,8 +151,10 @@
 													currentGroup.questions.length }} câu hỏi</span>
 												<span class="mx-2">•</span>
 												<span class="text-caption text-medium-emphasis">
-													Tối đa {{currentGroup.questions.reduce((sum, q) => sum +
-														q.points, 0)
+													Tối đa {{
+														lodash.round(
+															currentGroup.questions.reduce((sum, q) => sum + q.points, 0)
+														, 2)
 													}} điểm
 												</span>
 											</div>
@@ -219,6 +221,7 @@
 									</b>
 									<uc-latex-view class="question-text body-respondsive-fs flex-column ga-2"
 										v-model:content="question.config.questionText"
+										:escape-html="false"
 										style="align-items: unset !important" />
 								</div>
 								<!-- Media -->
@@ -286,6 +289,7 @@
 								</b>
 								<uc-latex-view class="question-text body-respondsive-fs flex-column ga-2"
 									v-model:content="currentQuestion.config.questionText"
+									:escape-html="false"
 									style="align-items: unset !important" />
 							</div>
 							<!-- Media -->
@@ -442,6 +446,7 @@
 												</b>
 												<uc-latex-view class="question-text-compact flex-grow-1 flex-column"
 													v-model:content="question.config.questionText"
+													:escape-html="false"
 													style="align-items: unset !important;" />
 											</div>
 										</div>
@@ -510,6 +515,7 @@
 												<uc-latex-view
 													class="question-text-compact flex-column flex-grow-1 justify-center"
 													v-model:content="question.config.questionText"
+													:escape-html="false"
 													style="align-items: unset !important;font-size: 0.85rem;" />
 											</div>
 
@@ -608,7 +614,8 @@ export default {
 			submissionstatus: 1,
 			answeredQuestions: null,
 			isGrade: false,
-			isUpdate: false
+			isUpdate: false,
+			lodash: _
 		}
 	},
 	computed: {

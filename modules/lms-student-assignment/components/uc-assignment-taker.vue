@@ -305,6 +305,7 @@
 										Câu {{ getGlobalQuestionNumberByQuestionId(question.id) }}:
 									</b>
 									<uc-latex-view class="question-text body-respondsive-fs flex-column ga-2"
+									:escape-html="false"
 										v-model:content="question.config.questionText" />
 								</div>
 
@@ -378,6 +379,7 @@
 										Câu {{ getGlobalQuestionNumberByQuestionId(currentQuestion.id) }}:
 									</b>
 									<uc-latex-view class="question-text body-respondsive-fs flex-column ga-2"
+									:escape-html="false"
 										v-model:content="currentQuestion.config.questionText" />
 								</div>
 
@@ -590,6 +592,7 @@
 												</b>
 												<uc-latex-view class="question-text-compact flex-grow-1 flex-column"
 													v-model:content="question.config.questionText"
+													:escape-html="false"
 													style="align-items: flex-start !important;" />
 											</div>
 										</div>
@@ -626,6 +629,7 @@
 												<uc-latex-view
 													class="question-text-compact flex-column flex-grow-1 justify-center"
 													v-model:content="question.config.questionText"
+													:escape-html="false"
 													style="align-items: flex-start !important;font-size: 0.85rem;" />
 											</div>
 

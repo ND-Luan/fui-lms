@@ -20,12 +20,12 @@
 					<v-divider class="mt-1 mb-1 " />
 					<v-row dense>
 						<v-col cols="12">
-							<v-btn @click="onOpenPreview" variant="outlined"  color="teal" block>
+							<v-btn @click="onOpenPreview" variant="outlined" color="teal" block>
 								<v-icon start class="me-1">mdi-eye-outline</v-icon>{{ $t('message.Preview') }}
 							</v-btn>
 						</v-col>
 						<v-col cols="12">
-							<v-btn @click="onRemarkQuestion" variant="outlined"  color="amber" block>
+							<v-btn @click="onRemarkQuestion" variant="outlined" color="amber" block>
 								<v-icon start class="me-1">mdi-sync</v-icon>{{ $t('message.SortNumber') }}
 							</v-btn>
 						</v-col>
@@ -54,13 +54,15 @@
 						<v-btn @click="onOpenPreview" text='Xem trước' color="teal" block />
 					</v-col> -->
 					<v-col :cols="!vueData.AssignToClassID ? 6 : 12">
-						<v-btn color="primary" variant="outlined" block  @click="handleSave(true)">
-							<v-icon start class="me-1">mdi-content-save-outline</v-icon>{{ $t('message.SaveAssignment') }}
+						<v-btn color="primary" variant="outlined" block @click="handleSave(true)">
+							<v-icon start class="me-1">mdi-content-save-outline</v-icon>{{ $t('message.SaveAssignment')
+							}}
 						</v-btn>
 					</v-col>
 					<v-col cols="6" v-if="!vueData.AssignToClassID">
-						<v-btn class="w-100" variant="outlined"  color="success" @click="openDialogAssignToStudent">
-							<v-icon start class="me-1">mdi-clipboard-arrow-right-outline</v-icon>{{ $t('message.Assigned') }}
+						<v-btn class="w-100" variant="outlined" color="success" @click="openDialogAssignToStudent">
+							<v-icon start class="me-1">mdi-clipboard-arrow-right-outline</v-icon>{{
+								$t('message.Assigned') }}
 						</v-btn>
 					</v-col>
 				</v-row>
@@ -230,7 +232,7 @@ export default {
 		}
 	},
 	mounted() {
-		console.log('vueData.NienKhoaItem',vueData.NienKhoaItem)
+		console.log('vueData.NienKhoaItem', vueData.NienKhoaItem)
 		ajaxCALL("/lms/EL_Teacher_GetLop_GiaoBai", {
 			AssignmentID: vueData.assignment.AssignmentID,
 			MonHocID: vueData.assignment.MonHocID,
@@ -254,7 +256,7 @@ export default {
 					total += question.points
 				}
 			})
-			return total
+			return _.round(total, 2)
 		},
 		mappedItems: function () {
 			return this.DSHocSinhByLopID.filter(item => !this.selectedClass.includes(item.LopID)).map(item => { return { title: item.TenLop + ` - ` + item.Ho + ' ' + item.Ten, value: item.HocSinhID, ...item } })
