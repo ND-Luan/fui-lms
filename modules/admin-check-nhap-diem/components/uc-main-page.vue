@@ -59,7 +59,7 @@
 						</div>
 						<div class="d-flex ga-2">
 							<v-chip color='pink' v-for="(mnd, index1) in item[c]" size="x-small"
-								@click="(e) => { mndItem = mnd; isDialogTinhTrangDiem = true; console.log('mnd', mnd) }">
+								@click="(e) => { mndItem = mnd; isDialogTinhTrangDiem = true;}">
 								<p class="text-pink">
 									{{ mnd.TenTinhTrang }} - {{ mnd.MaNhomCotDiem }}
 								</p>

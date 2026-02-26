@@ -49,7 +49,7 @@
 						<tr>
 							<th class="fixed-col student-col">{{ $t('message.StudentID') }}</th>
 							<th class="fixed-col student-col">{{ $t('message.RegistrationNumber') }}</th>
-							<th class="fixed-col student-col">{{ $t('message.FullName') }}</th>
+							<th class="fixed-col student-col-name">{{ $t('message.FullName') }}</th>
 							<th v-for="header in assignmentHeaders" :key="header.AssignToClassID"
 								class="assignment-header text-center">
 								<v-tooltip location="top">
@@ -72,7 +72,7 @@
 						<tr v-for="student in studentGrades" :key="student.HocSinhID">
 							<td class="fixed-col student-col text-medium-emphasis">{{ student.HocSinhID }}</td>
 							<td class="fixed-col student-col text-medium-emphasis">{{ student.SoDanhBo }}</td>
-							<td class="fixed-col student-col ">{{ student.HoTen }}</td>
+							<td class="fixed-col student-col-name ">{{ student.HoTen }}</td>
 							<td v-for="header in assignmentHeaders" :key="header.AssignToClassID" class="text-center">
 								<uc-gradebook-cell :cell-data="student[header.AssignToClassID]"
 									@grade="vueData.goToDetailedGradingPage" @update-score="updateStudentScore" />

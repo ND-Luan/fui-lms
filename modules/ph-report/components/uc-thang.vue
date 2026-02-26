@@ -11,9 +11,9 @@
 						</v-avatar>
 					</template>
 					<template v-slot:append>
-						<v-chip v-if="thang.Is_Viewed" :color="thang.MauTinhTrang">
+						<v-chip v-if="thang.Is_Viewed" variant="text" class="font-weight-medium" :color="thang.MauTinhTrang">
 							{{ $t('message.announced') }}</v-chip>
-						<v-chip v-else>{{ $t('message.notYetAnnounced') }}</v-chip>
+						<v-chip variant="text" class="font-weight-medium" v-else>{{ $t('message.notYetAnnounced') }}</v-chip>
 					</template>
 				</v-list-item>
 				<v-divider inset v-if="index !== vueData.DSHocTapThang.length - 1"></v-divider>

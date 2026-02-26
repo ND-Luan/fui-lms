@@ -360,12 +360,12 @@ body,
 }
 
 /* === CONTENT CONTAINERS === */
-.container,
+/* .container,
 .v-container {
   max-width: 1200px !important;
   margin: 0 auto !important;
   padding: var(--lhbs-space-3) !important;
-}
+} */
 
 /* === CONTENT BOXES (Like in the image) === */
 .content-box,

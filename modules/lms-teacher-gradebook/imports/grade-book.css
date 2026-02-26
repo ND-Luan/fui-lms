@@ -64,6 +64,11 @@
  }
 
  .student-col {
+ 	width: 100px;
+ 	min-width: 100px;
+ }
+
+ .student-col-name {
  	width: 220px;
  	min-width: 220px;
  }

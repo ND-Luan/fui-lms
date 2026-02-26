@@ -17,7 +17,8 @@
 				<v-list-subheader>Niên khóa</v-list-subheader>
 				<v-list-item v-for="(item, index) in DSNienKhoa" :key="index" :value="index"
 					:class="vueData.NienKhoaItem.NienKhoaID === item.NienKhoaID ? 'bg-primary' : ''">
-					<v-list-item-title @click="selectedNienKhoa(item)"> {{ item.NienKhoa }} - HK{{item.HocKi}}</v-list-item-title>
+					<v-list-item-title @click="selectedNienKhoa(item)"> {{ item.NienKhoa }} -
+						HK{{item.HocKi}}</v-list-item-title>
 				</v-list-item>
 			</v-list>
 		</v-menu>
@@ -29,7 +30,7 @@
 			<v-list>
 				<v-list-subheader>Niên khóa</v-list-subheader>
 				<v-list-item v-for="(item, index) in DSNienKhoa" :key="index" :value="index"
-					:class="vueData.NienKhoaItem.NienKhoaID === item.NienKhoaID ? 'bg-primary' : ''">
+					:class="vueData.NienKhoaItem.NienKhoa === item.NienKhoa ? 'bg-primary' : ''">
 					<v-list-item-title @click="()=> {selectedNienKhoa(item); sheet = false; }">
 						{{ item.NienKhoa }} • {{item.TenLop}}
 					</v-list-item-title>
@@ -73,6 +74,9 @@
 		watch: {
 			dsnienkhoacustom: function (v) {
 				this.DSNienKhoa = v
+			},
+			"vueData.NienKhoaItem.NienKhoaID": function (x) {
+				console.log(x)
 			}
 		},
 		async mounted() {

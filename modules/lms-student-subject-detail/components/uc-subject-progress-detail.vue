@@ -12,7 +12,7 @@
 		</div>
 
 		<div v-else>
-			<v-card class="summary-card  pa-2" variant="tonal" color="primary">
+			<v-card class="summary-card  pa-2" variant="tonal" color="#00917f">
 				<v-row dense>
 					<v-col cols="12" md="12" class="d-flex align-center ga-2">
 						<v-avatar :color="stats.Color || 'grey'" :size="mobile ? 32 : 64" class="mr-4">
@@ -37,7 +37,7 @@
 				</v-row>
 			</v-card>
 			<div class="d-flex justify-end me-2 my-2" v-if="groupedResources.length != 0">
-				<v-btn variant="tonal" color="primary" size="small" prepend-icon="mdi-table-large"
+				<v-btn variant="outlined" color="primary" size="small" prepend-icon="mdi-table-large"
 					@click="gradebookDialogVisible = true">
 					Xem sổ điểm
 				</v-btn>

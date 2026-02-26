@@ -37,12 +37,15 @@
 				<v-btn @click="localStorageSetItem(item)" text="Xem chi tiết" variant="tonal" color="primary" />
 			</template>
 			<template #item.TinhTrangKQHT="{item}">
-				<v-chip :color="item.TinhTrangKQHT === 0 ? 'green' : 'red' ">
-					{{item.TenTinhTrangKQHT ? item.TenTinhTrangKQHT : 'Không có'}}
+				<v-chip v-if="item.isExistInKQHT" :color="renderColorTinhTrang(item.TinhTrangKQHT)">
+					{{ item.TenTinhTrangKQHT ?? 'Không có' }}
+				</v-chip>
+				<v-chip v-else color="warning">
+					Chưa có trong KQHT
 				</v-chip>
 			</template>
 			<template #item.TinhTrangQLHS="{item}">
-				<v-chip :color="item.TinhTrangQLHS === 0 ? 'green' : 'red'">
+				<v-chip :color="renderColorTinhTrang(item.TinhTrangQLHS)">
 					{{item.TenTinhTrangQLHS ? item.TenTinhTrangQLHS : 'Không có'}}
 				</v-chip>
 			</template>
@@ -113,6 +116,12 @@
 			TitlePage: function () { return getTitlePageByURL(window.location.pathname + window.location.search) }
 		},
 		watch: {
+			"vueData.NienKhoa": function (nk) {
+				this.getKhoi()
+				this.KhoiItem = null
+				this.LopItem = null
+				this.items = []
+			},
 			KhoiItem: function (KhoiItem) {
 				if (!KhoiItem) return
 				this.LopItem = null
@@ -122,7 +131,7 @@
 			LopItem: function (LopItem) {
 				if (!LopItem) return
 				this.items = []
-				this.getHocSinh()
+				this.getHocSinh(true)
 			}
 		},
 		methods: {
@@ -140,13 +149,13 @@
 			async getHocSinh(forceRefresh = false) {
 				this.DSHocSinhSelected = []
 				const [DSHocSinhLop, DSHocSinh_LMS, DSHocSinhLop_LMS] = await fetchBatchPromise([
-					{ url: 'lms/HocSinhLop_Get', params: { LopID: this.LopItem?.LopID } },
-					{ url: 'student/LMS_GetHocSinh', params: { LopID: this.LopItem?.LopID } },
-					{ url: 'student/LMS_GetHocSinhLop', params: { LopID: this.LopItem?.LopID } }
+					{ url: 'lms/HocSinhLop_Get', params: { LopID: this.LopItem?.LopID, NienKhoa: vueData.NienKhoa } },
+					{ url: 'student/LMS_GetHocSinh', params: { LopID: this.LopItem?.LopID, NienKhoa: vueData.NienKhoa } },
+					{ url: 'student/LMS_GetHocSinhLop', params: { LopID: this.LopItem?.LopID, NienKhoa: vueData.NienKhoa } }
 				], { forceRefresh });
 	
 				this.items = this.renderDSHocSinh(DSHocSinhLop, DSHocSinh_LMS, DSHocSinhLop_LMS)
-				console.log("ote,s", this.items)
+				console.log("items", this.items)
 			},
 			renderDSHocSinh(DSHocSinhLop, DSHocSinh_LMS, DSHocSinhLop_LMS) {
 				const eduBotHocSinhLop = []
@@ -163,6 +172,9 @@
 					let obj = {}
 					const hocSinh = DSHocSinhLop.find(x => x.HocSinhID === id)
 					const hocSinhLMS = eduBotHocSinhLop.find(x => x.HocSinhID === id)
+	
+					obj.isExistInKQHT = !!hocSinh // ← thêm dòng này
+	
 					if (hocSinh) {
 						//KQHT
 						const _hs = DSHocSinhLop.find(x => x.HocSinhID === hocSinh.HocSinhID)
@@ -175,7 +187,9 @@
 						obj.NgaySinh = _hs.NgaySinh
 						obj.Nu = _hs.Nu
 						obj.TinhTrangKQHT = _hs?.TinhTrang
-						obj.TenTinhTrangKQHT = _hs?.TenTinhTrang
+						obj.TenTinhTrangKQHT = _hs?.TinhTrang === 2
+							? "Nghỉ học (Tốt nghiệp)"
+							: _hs?.TenTinhTrang
 						obj.EnglishName = _hs?.EnglishName
 					}
 					if (hocSinhLMS) {
@@ -190,7 +204,9 @@
 						obj.NgaySinh = _hs.NgaySinh
 						obj.Nu = _hs.Nu
 						obj.TinhTrangQLHS = _hs?.TinhTrang
-						obj.TenTinhTrangQLHS = _hs?.TenTinhTrang
+						obj.TenTinhTrangQLHS = _hs?.TinhTrang === 2
+							? "Nghỉ học (Tốt nghiệp)"
+							: _hs?.TenTinhTrang
 					}
 					items.push({
 						...obj,
@@ -224,10 +240,11 @@
 			async insHocSinh() {
 				const x = await fetchPromise("lms/IO_IN_HocSinh_Ins", {
 					HocSinhObjArr: this.DSHocSinhSelected.map(x => ({ ...x, TinhTrang: x.TinhTrangQLHS, TenTinhTrang: x.TenTinhTrangQLHS }))
-				})
+				}, { forceRefresh: true })
 				const y = await fetchPromise("lms/IO_IN_HocSinhLop_Ins", {
 					HocSinhLopObjArr: this.DSHocSinhSelected.map(x => ({ ...x, TinhTrang: x.TinhTrangQLHS, TenTinhTrang: x.TenTinhTrangQLHS }))
-				})
+				}, { forceRefresh: true })
+	
 				await this.getHocSinh(true)
 			},
 			onOpenModalEditProfile(item) {
@@ -244,6 +261,13 @@
 					title: 'Xem chi tiết ' + item.HoTen,
 					url: `/ph-report?HocSinhID=${item.HocSinhID}`
 				})
+			},
+			renderColorTinhTrang(TinhTrang) {
+				let color = ''
+				if (TinhTrang === 0) color = 'green'
+				else if (TinhTrang === 1) color = 'red'
+				else if (TinhTrang === 2) color = 'success'
+				return color
 			}
 		},
 	}

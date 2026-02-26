@@ -6,7 +6,7 @@
 			<template #title>
 				<div class="d-flex align-center">
 					<span class="text-h6">{{ $t('message.ControlPanel') }}</span>
-					<v-btn class="ms-3" v-if="vueData.user.UserID == 'NA0000022'" @click="onHandleOpenChangeGV">
+					<v-btn class="ms-3" v-if="vueData.user.UserID == 'NA0000022' || vueData.user.UserID == 'NV0000134' " @click="onHandleOpenChangeGV">
 						Chọn GV
 					</v-btn>
 				</div>
@@ -34,7 +34,7 @@
 			<div class="flex-1-0 mb-2 rounded bg-white">
 				<v-expansion-panels v-model="assignmentNeedGradingPanel" variant="accordion" multiple>
 					<v-expansion-panel >
-						<v-expansion-panel-title class="pa-2">
+						<v-expansion-panel-title class="pa-2" style="min-height: 38px">
 							<span class="text-body-1 font-weight-medium">{{ $t('message.AssignmentsToGrade') }}</span>
 						</v-expansion-panel-title>
 						<v-expansion-panel-text>
@@ -48,8 +48,8 @@
 			<div class="flex-1-0 w-100  bg-white rounded" v-for="mh in DSMonHocActive">
 				<v-card>
 					<v-toolbar color="white">
-						<v-toolbar-title style="margin-left: 8px; margin-right: 8px;">
-							<div class="d-flex w-100">
+						<v-toolbar-title style="margin-left: 8px; margin-right: 8px; min-height: 38px; display: grid " class="align-center">
+							<div class="d-flex w-100" >
 								<span class="text-primary font-weight-medium" style="font-size: 16px !important">{{
 									$t('message.Subject') }}: {{
 										$i18n.locale == 'en' &&
@@ -108,7 +108,7 @@
 												<v-expansion-panel v-for="week in KhoiItem.weeks" :key="week.TuanHocID"
 													:model-value="KhoiItem.weeks?.map((k, index) => index)" multiple>
 													<v-expansion-panel-title class="week-group-header text-white"
-														style="background-color: #009688; min-height: 45px !important">
+														style="background-color: #009688; min-height: 38px !important; padding: 0 8px !important">
 														{{ week.Tuan_HienThi }}
 													</v-expansion-panel-title>
 													<v-expansion-panel-text>
@@ -120,7 +120,7 @@
 																:key="classItem.LopID" class="mb-1">
 																<div v-if="classItem.LopID != -1">
 																	<v-expansion-panel-title
-																		style="background-color: #f1f1f1;"
+																		style="background-color: #f1f1f1; line-height: 10px; height:10px"
 																		class="px-3 py-0">
 																		<div class="class-row-header">
 																			<div class="class-info">
@@ -145,12 +145,14 @@
 																				</div>
 																			</div>
 																			<div class="class-actions">
-																				<v-btn size="small" variant="outlined"
-																					color="purple"
-																					@click.stop="xemTinhTrang(classItem)">
-																					<v-icon start>mdi-table-eye</v-icon>
-																					{{ $t('message.ViewGradebook') }}
-																				</v-btn>
+																				<v-tooltip location="top">
+																					<template #activator="{ props }">
+																						<v-btn v-bind="props" icon size="small" variant="text" color="purple" @click.stop="xemTinhTrang(classItem)">
+																							<v-icon>mdi-table-eye</v-icon>
+																						</v-btn>
+																					</template>
+																					<span>{{ $t('message.ViewGradebook') }}</span>
+																				</v-tooltip>
 																			</div>
 																		</div>
 																	</v-expansion-panel-title>

@@ -8,8 +8,7 @@
 					<v-menu v-model="menu" :close-on-content-click="false" location="end" v-if="isMobile">
 						<template v-slot:activator="{ props }">
 							<v-btn icon v-bind="props">
-								<v-avatar color="brown" size="large" :image="avatarStudent">
-								</v-avatar>
+								<v-avatar color="brown" size="large" :image="avatarStudent" />
 							</v-btn>
 						</template>
 

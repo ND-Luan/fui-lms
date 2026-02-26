@@ -34,7 +34,6 @@
 		props: [],
 		data() {
 			return {
-				NamHoc: 2025,
 				DataHocSinhEdubot: [],
 				loadingFetch: false,
 				loadingSync: false
@@ -50,7 +49,7 @@
 				this.loadingFetch = true
 				this.loadingSync = false
 				const result = await new Promise((resolve) => {
-					ajaxCALL(`https://tapi.lhbs.vn/student/LMS_GetLop?NamHoc=${this.NamHoc}`, null, res => {
+					ajaxCALL(`https://tapi.lhbs.vn/student/LMS_GetLop?NamHoc=${vueData.NienKhoa}`, null, res => {
 						resolve(res.data)
 					}, err => { console.log('ee', err) })
 				}).then(data => {

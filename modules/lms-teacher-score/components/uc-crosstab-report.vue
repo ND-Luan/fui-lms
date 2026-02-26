@@ -47,7 +47,7 @@
 					<thead>
 						<tr>
 							<th class="fixed-col student-id-col">{{ IsEnglish ? 'Student Code' : 'Mã HS' }}</th>
-							<th class="fixed-col student-name-col">{{ IsEnglish ? 'Registration Number' : 'Số danh bộ'}}</th>
+							<th class="fixed-col text-center student-name-col">{{ IsEnglish ? 'Registration Number' : 'Số danh bộ'}}</th>
 							<th class="fixed-col student-name-col">{{ IsEnglish ? 'Student' : 'Học sinh' }}</th>
 							<th v-for="(header, index) in questionHeaders" :key="header.QuestionID_InJSON"
 								class="text-center question-col">
@@ -68,8 +68,8 @@
 								@click="viewStudentSubmission(student)">
 								{{ student.HocSinhID }}
 							</td>
-                            <td class="fixed-col  ">
-                                {{ student.SoDanhBo }}
+                            <td class="fixed-col text-center  text-medium-emphasis">
+                                {{ student.SoDanhBo ?? student.SoTT  }}
                             </td>
 							<td class="fixed-col student-name-col  "
 								@click="viewStudentSubmission(student)">
@@ -239,11 +239,11 @@ export default {
 			this.studentResults.forEach(student => {
 				const row = [
 					student.HocSinhID,
+					student.SoDanhBo ?? student.SoTT,
 					`${student.HoTen}`,
-					student.SoDanhBo,
 					...this.questionHeaders.map(h => {
 						const cellData = student[h.QuestionID_InJSON];
-						if (!cellData) return 'N/A';
+						if (!cellData) return '-';
 						try {
 							const data = JSON.parse(cellData);
 							switch (data.status) {
@@ -252,10 +252,10 @@ export default {
 								case 'GRADED': return data.score;
 								case 'PENDING': return this.IsEnglish ? 'Waiting grade' : 'Chờ chấm';
 								case 'NOT_ANSWERED': return this.IsEnglish ? 'Not complete' : 'Không làm';
-								default: return 'N/A';
+								default: return '-';
 							}
 						} catch (e) {
-							return 'N/A';
+							return '-';
 						}
 					}),
 					student.FinalScore

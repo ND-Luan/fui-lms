@@ -53,6 +53,7 @@ function initPage() {
                 assignmentData.AssignmentConfig = asmDefault;
             }
             vueData.assignment = assignmentData;
+            console.log(" vueData.assignment ", vueData.assignment )
             vueData.dataReady = true;
         });
     } else {

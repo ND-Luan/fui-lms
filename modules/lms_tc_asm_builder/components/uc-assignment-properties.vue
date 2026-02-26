@@ -18,8 +18,7 @@
 			<div class="d-flex">
 				<v-spacer></v-spacer>
 				<v-btn v-if="item.type === 'group'" variant="outlined" color="primary"
-					@click="onOpenModalImportFromHocLieu()">Import từ kho
-					học liệu</v-btn>
+					@click="onOpenModalImportFromHocLieu()"><v-icon start class="me-1">mdi-download</v-icon> Import từ kho học liệu</v-btn>
 				<v-btn v-else icon variant="text" @click="onOpenModalKiNang()"><v-icon>mdi-cog-outline</v-icon></v-btn>
 			</div>
 		</div>
@@ -69,10 +68,9 @@
 						</div>
 					</v-col>
 					<v-col cols="6">
-						<v-text-field :model-value="selectedQuestionData.points"
-							@update:model-value="updateQuestion('points', parseFloat($event) || 0)"
-							:label="$t('message.Score')" type="number" min="0" step="0.25" variant="outlined"
-							density="compact" :clearable="false" />
+						<v-text-field :model-value="selectedQuestionData.points" @update:model-value="onPointInput"
+							:label="$t('message.Score')" type="text" variant="outlined" density="compact"
+							:clearable="false" />
 					</v-col>
 					<v-col cols="6">
 						<v-select :model-value="selectedQuestionData.gradingType || 'auto'"
@@ -200,9 +198,9 @@
 						</v-btn>
 					</div>
 					<v-btn small @click="addPart('text')" variant="tonal" class="mr-2 mt-2">{{ $t('message.AddText')
-					}}</v-btn>
+						}}</v-btn>
 					<v-btn small @click="addPart('blank')" variant="tonal" class="mt-2">{{ $t('message.AddBlank')
-					}}</v-btn>
+						}}</v-btn>
 				</div>
 				<!-- QUIZ_MATCHING -->
 				<div v-else-if="selectedQuestionData.type === 'QUIZ_MATCHING'">
@@ -290,177 +288,191 @@
 </template>
 
 <script>
-export default {
-	name: 'uc-assignment-properties',
-	props: { groups: { type: Array, default: () => [] }, item: Object, assignment: Object },
-	emits: ['update:groups', 'update:item'],
-	data() {
-		this.$i18n.locale = (localStorage.getItem('IsLanguage') && localStorage.getItem('IsLanguage') == 'true') ? 'en' : 'vi'
-		return {
-			vueData,
-			window,
-			fileRecordAudio: null,
-			loadingPage: {
-				isLoading: false,
-				text: "Đang tải dữ liệu..."
+	export default {
+		name: 'uc-assignment-properties',
+		props: { groups: { type: Array, default: () => [] }, item: Object, assignment: Object },
+		emits: ['update:groups', 'update:item'],
+		data() {
+			this.$i18n.locale = (localStorage.getItem('IsLanguage') && localStorage.getItem('IsLanguage') == 'true') ? 'en' : 'vi'
+			return {
+				vueData,
+				window,
+				fileRecordAudio: null,
+				loadingPage: {
+					isLoading: false,
+					text: "Đang tải dữ liệu..."
+				},
+				isSaveFile: false,
+				isQuestionTextField: false,
+				isShowModalImportFromHocLieu: false,
+				isShowModalSkill: false,
+				skills: new Map()
+			}
+		},
+		watch: {},
+		computed: {
+			selectedGroupData() {
+				if (!this.item || this.item.type !== 'group') return null;
+				let mapGroup = this.groups[this.item.groupIndex]
+				if (!mapGroup.advancedFeatures) {
+					this.groups[this.item.groupIndex].advancedFeatures = {
+						isShuffleQuestions: false,
+						isShuffleAnswers: false
+					}
+				}
+				return mapGroup;
 			},
-			isSaveFile: false,
-			isQuestionTextField: false,
-			isShowModalImportFromHocLieu: false,
-			isShowModalSkill: false,
-			skills: new Map()
-		}
-	},
-	watch: {},
-	computed: {
-		selectedGroupData() {
-			if (!this.item || this.item.type !== 'group') return null;
-			let mapGroup = this.groups[this.item.groupIndex]
-			if (!mapGroup.advancedFeatures) {
-				this.groups[this.item.groupIndex].advancedFeatures = {
-					isShuffleQuestions: false,
-					isShuffleAnswers: false
+			selectedQuestionData() {
+				if (!this.item || this.item.type !== 'question') return null;
+				return this.groups[this.item.groupIndex]?.questions?.[this.item.qIndex];
+			},
+			globalQuestionNumber() {
+				if (!this.item || this.item.type !== 'question') return 0;
+				let n = 1;
+				for (let i = 0; i < this.item.groupIndex; i++) {
+					n += this.groups[i].questions.length;
 				}
+				return n + this.item.qIndex;
+			},
+			IsEngLish: function () {
+				return this.$i18n.locale == 'en'
 			}
-			return mapGroup;
 		},
-		selectedQuestionData() {
-			if (!this.item || this.item.type !== 'question') return null;
-			return this.groups[this.item.groupIndex]?.questions?.[this.item.qIndex];
-		},
-		globalQuestionNumber() {
-			if (!this.item || this.item.type !== 'question') return 0;
-			let n = 1;
-			for (let i = 0; i < this.item.groupIndex; i++) {
-				n += this.groups[i].questions.length;
-			}
-			return n + this.item.qIndex;
-		},
-		IsEngLish: function () {
-			return this.$i18n.locale == 'en'
-		}
-	},
-	methods: {
-		isAutoGradable(type) { return type.startsWith('QUIZ_'); },
-		// Handle emit từ uc-media cho group
-		handleGroupMediaUpdate(updatedData) {
-			if (!this.item || this.item.type !== 'group') return;
-			const ng = this.groups;
-			const media = updatedData.media
-
-			ng[this.item.groupIndex] = {
-				...ng[this.item.groupIndex],
-				media: {
-					...ng[this.item.groupIndex].media,
-					sourceYT: media.sourceYT,
-					sourceRecord: media.sourceRecord,
-					sourceFiles: {
-						file: media.sourceFiles.file ?? [],
-						image: media.sourceFiles.image ?? [],
+		methods: {
+			onPointInput(value) {
+				const normalized = this.normalizeNumberInput(value);
+				this.updateQuestion('points', normalized);
+			},
+	
+			normalizeNumberInput(value) {
+				if (value === null || value === undefined) return 0;
+	
+				const normalized = String(value).replace(',', '.');
+				const num = parseFloat(normalized);
+	
+				return isNaN(num) ? 0 : num;
+			},
+	
+			isAutoGradable(type) { return type.startsWith('QUIZ_'); },
+			// Handle emit từ uc-media cho group
+			handleGroupMediaUpdate(updatedData) {
+				if (!this.item || this.item.type !== 'group') return;
+				const ng = this.groups;
+				const media = updatedData.media
+	
+				ng[this.item.groupIndex] = {
+					...ng[this.item.groupIndex],
+					media: {
+						...ng[this.item.groupIndex].media,
+						sourceYT: media.sourceYT,
+						sourceRecord: media.sourceRecord,
+						sourceFiles: {
+							file: media.sourceFiles.file ?? [],
+							image: media.sourceFiles.image ?? [],
+						}
 					}
-				}
-			};
-			this.updateGroups(ng);
-		},
-		// Handle emit từ uc-media cho question
-		handleQuestionMediaUpdate(updatedData) {
-			if (!this.item || this.item.type !== 'question') return;
-			const ng = this.groups;
-			const media = updatedData.media
-
-			const keysToRemove = ["sourceYT", "sourceRecord", "sourceFiles"]; //Này bị thêm do phần cấu trúc uc-media, xóa đi cho gọn json, media đã thêm vào config, phần này bị dư ra
-
-			keysToRemove.forEach(key => {
-				if (ng[this.item.groupIndex].questions[this.item.qIndex].config.hasOwnProperty(key)) {
-					delete ng[this.item.groupIndex].questions[this.item.qIndex].config[key];
-				}
-			});
-
-			ng[this.item.groupIndex].questions[this.item.qIndex] = {
-				...ng[this.item.groupIndex].questions[this.item.qIndex],
-				config: {
-					...ng[this.item.groupIndex].questions[this.item.qIndex].config,
-					sourceYT: media.sourceYT,
-					sourceRecord: media.sourceRecord,
-					sourceFiles: {
-						file: media.sourceFiles.file,
-						image: media.sourceFiles.image,
+				};
+				this.updateGroups(ng);
+			},
+			// Handle emit từ uc-media cho question
+			handleQuestionMediaUpdate(updatedData) {
+				if (!this.item || this.item.type !== 'question') return;
+				const ng = this.groups;
+				const media = updatedData.media
+	
+				const keysToRemove = ["sourceYT", "sourceRecord", "sourceFiles"]; //Này bị thêm do phần cấu trúc uc-media, xóa đi cho gọn json, media đã thêm vào config, phần này bị dư ra
+	
+				keysToRemove.forEach(key => {
+					if (ng[this.item.groupIndex].questions[this.item.qIndex].config.hasOwnProperty(key)) {
+						delete ng[this.item.groupIndex].questions[this.item.qIndex].config[key];
 					}
+				});
+	
+				ng[this.item.groupIndex].questions[this.item.qIndex] = {
+					...ng[this.item.groupIndex].questions[this.item.qIndex],
+					config: {
+						...ng[this.item.groupIndex].questions[this.item.qIndex].config,
+						sourceYT: media.sourceYT,
+						sourceRecord: media.sourceRecord,
+						sourceFiles: {
+							file: media.sourceFiles.file,
+							image: media.sourceFiles.image,
+						}
+					}
+				};
+				this.updateGroups(ng);
+			},
+	
+			updateGroups(newGroups) {
+				this.$emit('update:groups', newGroups);
+			},
+			updateItem(key, value) {
+				const ng = JSON.parse(JSON.stringify(this.groups));
+				if (this.item.type === 'group') {
+					ng[this.item.groupIndex][key] = value;
 				}
-			};
-			this.updateGroups(ng);
-		},
-
-		updateGroups(newGroups) {
-			this.$emit('update:groups', newGroups);
-		},
-		updateItem(key, value) {
-			const ng = JSON.parse(JSON.stringify(this.groups));
-			if (this.item.type === 'group') {
-				ng[this.item.groupIndex][key] = value;
-			}
-			this.updateGroups(ng);
-		},
-		updateQuestion(key, value) { const ng = JSON.parse(JSON.stringify(this.groups)); ng[this.item.groupIndex].questions[this.item.qIndex][key] = value; this.updateGroups(ng); },
-		updateQuestionConfig(key, value) { const ng = JSON.parse(JSON.stringify(this.groups)); ng[this.item.groupIndex].questions[this.item.qIndex].config[key] = value; this.updateGroups(ng); },
-		updateOptionText(optionIndex, text) { const ng = JSON.parse(JSON.stringify(this.groups)); ng[this.item.groupIndex].questions[this.item.qIndex].config.options[optionIndex].text = text; this.updateGroups(ng); },
-		addOption() { const ng = JSON.parse(JSON.stringify(this.groups)); const opts = ng[this.item.groupIndex].questions[this.item.qIndex].config.options; opts.push({ id: `opt_${Date.now()}`, text: 'Lựa chọn mới' }); this.updateGroups(ng); },
-		removeOption(optionIndex) {
-			console.log('optionIndex', optionIndex)
-			const ng = JSON.parse(JSON.stringify(this.groups));
-			ng[this.item.groupIndex].questions[this.item.qIndex].config.options.splice(optionIndex, 1);
-			this.updateGroups(ng);
-		},
-		updatePart(partIndex, key, value) { const ng = JSON.parse(JSON.stringify(this.groups)); ng[this.item.groupIndex].questions[this.item.qIndex].config.parts[partIndex][key] = value; this.updateGroups(ng); },
-		addPart(type) { const ng = JSON.parse(JSON.stringify(this.groups)); const parts = ng[this.item.groupIndex].questions[this.item.qIndex].config.parts; if (type === 'text') { parts.push({ type: 'text', value: ' ' }); } else { parts.push({ type: 'blank', id: `blank_${Date.now()}`, acceptedAnswers: [] }); } this.updateGroups(ng); },
-		removePart(partIndex) { const ng = JSON.parse(JSON.stringify(this.groups)); ng[this.item.groupIndex].questions[this.item.qIndex].config.parts.splice(partIndex, 1); this.updateGroups(ng); },
-		addPair() {
-			const newIndex = Date.now();
-			const aId = `a${newIndex}`; const bId = `b${newIndex}`;
-			const newA = [...this.selectedQuestionData.config.columnA, { id: aId, text: '' }];
-			const newB = [...this.selectedQuestionData.config.columnB, { id: bId, text: '' }];
-			const newPairs = [...this.selectedQuestionData.config.correctPairs, { from: aId, to: bId }];
-			this.selectedQuestionData.config = { ...this.selectedQuestionData.config, columnA: newA, columnB: newB, correctPairs: newPairs };
-		},
-		removePair(index) {
-			if (this.selectedQuestionData.config.columnA.length > 1) {
-				const newA = [...this.selectedQuestionData.config.columnA]; newA.splice(index, 1);
-				const newB = [...this.selectedQuestionData.config.columnB]; newB.splice(index, 1);
-				const newPairs = [...this.selectedQuestionData.config.correctPairs]; newPairs.splice(index, 1);
+				this.updateGroups(ng);
+			},
+			updateQuestion(key, value) { const ng = JSON.parse(JSON.stringify(this.groups)); ng[this.item.groupIndex].questions[this.item.qIndex][key] = value; this.updateGroups(ng); },
+			updateQuestionConfig(key, value) { const ng = JSON.parse(JSON.stringify(this.groups)); ng[this.item.groupIndex].questions[this.item.qIndex].config[key] = value; this.updateGroups(ng); },
+			updateOptionText(optionIndex, text) { const ng = JSON.parse(JSON.stringify(this.groups)); ng[this.item.groupIndex].questions[this.item.qIndex].config.options[optionIndex].text = text; this.updateGroups(ng); },
+			addOption() { const ng = JSON.parse(JSON.stringify(this.groups)); const opts = ng[this.item.groupIndex].questions[this.item.qIndex].config.options; opts.push({ id: `opt_${Date.now()}`, text: 'Lựa chọn mới' }); this.updateGroups(ng); },
+			removeOption(optionIndex) {
+				console.log('optionIndex', optionIndex)
+				const ng = JSON.parse(JSON.stringify(this.groups));
+				ng[this.item.groupIndex].questions[this.item.qIndex].config.options.splice(optionIndex, 1);
+				this.updateGroups(ng);
+			},
+			updatePart(partIndex, key, value) { const ng = JSON.parse(JSON.stringify(this.groups)); ng[this.item.groupIndex].questions[this.item.qIndex].config.parts[partIndex][key] = value; this.updateGroups(ng); },
+			addPart(type) { const ng = JSON.parse(JSON.stringify(this.groups)); const parts = ng[this.item.groupIndex].questions[this.item.qIndex].config.parts; if (type === 'text') { parts.push({ type: 'text', value: ' ' }); } else { parts.push({ type: 'blank', id: `blank_${Date.now()}`, acceptedAnswers: [] }); } this.updateGroups(ng); },
+			removePart(partIndex) { const ng = JSON.parse(JSON.stringify(this.groups)); ng[this.item.groupIndex].questions[this.item.qIndex].config.parts.splice(partIndex, 1); this.updateGroups(ng); },
+			addPair() {
+				const newIndex = Date.now();
+				const aId = `a${newIndex}`; const bId = `b${newIndex}`;
+				const newA = [...this.selectedQuestionData.config.columnA, { id: aId, text: '' }];
+				const newB = [...this.selectedQuestionData.config.columnB, { id: bId, text: '' }];
+				const newPairs = [...this.selectedQuestionData.config.correctPairs, { from: aId, to: bId }];
 				this.selectedQuestionData.config = { ...this.selectedQuestionData.config, columnA: newA, columnB: newB, correctPairs: newPairs };
+			},
+			removePair(index) {
+				if (this.selectedQuestionData.config.columnA.length > 1) {
+					const newA = [...this.selectedQuestionData.config.columnA]; newA.splice(index, 1);
+					const newB = [...this.selectedQuestionData.config.columnB]; newB.splice(index, 1);
+					const newPairs = [...this.selectedQuestionData.config.correctPairs]; newPairs.splice(index, 1);
+					this.selectedQuestionData.config = { ...this.selectedQuestionData.config, columnA: newA, columnB: newB, correctPairs: newPairs };
+				}
+			},
+			updateShuffleQuestions(id, val) {
+				this.groups[this.item.groupIndex].advancedFeatures.isShuffleQuestions = val
+				this.$emit('update:groups', this.groups);
+			},
+			updateShuffleAnswers(id, val) {
+				this.groups[this.item.groupIndex].advancedFeatures.isShuffleAnswers = val
+				this.$emit('update:groups', this.groups);
+			},
+			onOpenModalImportFromHocLieu() {
+				this.isShowModalImportFromHocLieu = true
+			},
+			bindingImport(val) {
+				this.groups[this.item.groupIndex].questions = [...this.groups[this.item.groupIndex].questions, val]
+			},
+			onOpenModalKiNang() {
+				this.isShowModalSkill = true
+			},
+			handleSubmitSkill(val) {
+				let SkillsNotDuplicate = val.filter(i => !this.selectedQuestionData.skills.map(e => e.KyNang_MonHoc_ChiTietID).includes(i.KyNang_MonHoc_ChiTietID))
+				this.selectedQuestionData.skills = [...this.selectedQuestionData.skills, ...SkillsNotDuplicate]
+				val.forEach(i => {
+					this.skills.set(i.KyNang_MonHoc_ChiTietID, i.TenKyNang)
+				})
+			},
+			removeChip(index) {
+				this.groups[this.item.groupIndex]?.questions[this.item.qIndex].skills.splice(index, 1)
+				this.$emit('update:groups', this.groups);
+			},
+			getSkillLabel(skill) {
+				return this.skills.get(skill.KyNang_MonHoc_ChiTietID) || skill.TenKyNang;
 			}
-		},
-		updateShuffleQuestions(id, val) {
-			this.groups[this.item.groupIndex].advancedFeatures.isShuffleQuestions = val
-			this.$emit('update:groups', this.groups);
-		},
-		updateShuffleAnswers(id, val) {
-			this.groups[this.item.groupIndex].advancedFeatures.isShuffleAnswers = val
-			this.$emit('update:groups', this.groups);
-		},
-		onOpenModalImportFromHocLieu() {
-			this.isShowModalImportFromHocLieu = true
-		},
-		bindingImport(val) {
-			this.groups[this.item.groupIndex].questions = [...this.groups[this.item.groupIndex].questions, val]
-		},
-		onOpenModalKiNang() {
-			this.isShowModalSkill = true
-		},
-		handleSubmitSkill(val) {
-			let SkillsNotDuplicate = val.filter(i => !this.selectedQuestionData.skills.map(e => e.KyNang_MonHoc_ChiTietID).includes(i.KyNang_MonHoc_ChiTietID))
-			this.selectedQuestionData.skills = [...this.selectedQuestionData.skills, ...SkillsNotDuplicate]
-			val.forEach(i => {
-				this.skills.set(i.KyNang_MonHoc_ChiTietID, i.TenKyNang)
-			})
-		},
-		removeChip(index) {
-			this.groups[this.item.groupIndex]?.questions[this.item.qIndex].skills.splice(index, 1)
-			this.$emit('update:groups', this.groups);
-		},
-		getSkillLabel(skill) {
-			return this.skills.get(skill.KyNang_MonHoc_ChiTietID) || skill.TenKyNang;
 		}
 	}
-}
 </script>

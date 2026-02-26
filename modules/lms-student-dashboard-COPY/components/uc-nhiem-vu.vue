@@ -1,262 +1,193 @@
 <template>
-
-	<!-- <div class="pa-2">
-		<v-switch v-model="version" label="Version" color="green"></v-switch>
-	</div> -->
-	<v-list class="py-0" v-if="!version" :density="vueData.density" style="background-color: #f5f5f5;">
-		<v-list-subheader class=" px-1">
-			<div class="d-flex align-center w-100 ">
-				Danh sách nhiệm vụ
-				<v-spacer />
-				<!-- Nút refresh -->
+	<div class="nv">
+		<!-- Header -->
+		<div class="nv__header">
+			<div class="nv__header-left">
+				<div class="nv__header-icon">
+					<v-icon size="18" color="white">mdi-lightning-bolt</v-icon>
+				</div>
+				<div>
+					<div class="nv__header-title">Nhiệm Vụ</div>
+					<div class="nv__header-count">{{ DSNhiemVu_Filter.length }} nhiệm vụ</div>
+				</div>
+			</div>
+			<div class="nv__header-actions">
 				<v-btn size="small" variant="text" icon="mdi-refresh" @click="onRefresh" />
-				<v-badge :model-value="!IsBtnDot" color="red" location="top right" dot :offset-x="5" :offset-y="5">
+
+				<!-- Mobile only: bottom sheet filter -->
+				<v-badge class="d-sm-none" :model-value="!IsBtnDot" color="red" location="top right" dot :offset-x="5"
+					:offset-y="5">
 					<uc-bts-mon-hoc v-model:monHocSelected="monHocSelected" :NienKhoa="NienKhoa" size="small"
-						icon="mdi-filter-outline" variant="text" />
+						icon="mdi-filter-variant" variant="tonal" color="primary" />
 				</v-badge>
 			</div>
-		</v-list-subheader>
+		</div>
 
-		<!-- DANH SÁCH NHIỆM VỤ SAU FILTER -->
-		<template v-for="(nv, idx) in DSNhiemVu_Filter" :key="idx">
-			<v-list-item @click="onRedirect(nv)" class="px-2 mx-2 rounded bg-white mb-2">
-				<v-list-item-title class="text-subtitle-1 font-weight-medium" @click="onRedirect(nv)"
-					style="white-space: unset !important">
-					{{ nv.Title }}
-				</v-list-item-title>
-				<v-list-item-subtitle class="d-flex flex-column ga-1">
-					<div class="d-flex ga-2 align-center">
-						<v-chip size="small" color="blue" label>{{ nv.TenMonHoc_HienThi }}</v-chip>
-						<div class="text-caption" v-if="nv.ResourceType === 'ASSIGNMENT'">
-							<v-icon>mdi-clock-alert-outline</v-icon>
-							<span>{{
-								nv.DueDate
-							}}</span>
-						</div>
-					</div>
-					<v-chip size="small" class="opacity-100" color="primary" style="width: fit-content">GV: {{
-						nv.HoTenNguoiGiao }}</v-chip>
-				</v-list-item-subtitle>
-				<template #prepend>
-					<v-icon :color="nv.Color" class="opacity-100">{{ nv.Icon }}</v-icon>
-				</template>
-				<!-- <template #append>
-					<v-menu>
-						<template v-slot:activator="{ props }">
-							<v-btn color="primary" v-bind="props" icon="mdi-book" size="small" variant="tonal" />
-						</template>
-
-						<v-list :density="vueData.density">
-							<v-list-item title="Xem điểm" @click="onXemDiem(nv)" />
-							<v-list-item title="Xem chi tiết" @click="onXemChiTiet(nv)" />
-							<v-list-item title="Xếp hạng" @click="onXepHang(nv)" />
-						</v-list>
-					</v-menu>
-				</template> -->
-			</v-list-item>
-
-			<!-- <v-divider inset v-if="idx !== DSNhiemVu_Filter.length - 1" /> -->
-		</template>
-	</v-list>
-	<div v-else class="px-2 pb-2" style="height: calc(100vh - 48px); background-color: #fbfbfb;">
-		<div class="d-flex flex-wrap ga-2 my-2">
-			<div @click="selectedMonHoc = null" class="hover-chip px-2 py-1 d-flex justify-center" :key="null"
-				:class="{ active: selectedMonHoc === null }">
-				<v-icon icon="mdi-server-plus" start></v-icon>
+		<!-- Desktop only: chip filter (hidden on mobile) -->
+		<div class="nv__chips d-none d-sm-flex">
+			<div class="nv__chip" :class="{ 'nv__chip--active': selectedMonHoc === null }"
+				@click="selectedMonHoc = null">
+				<v-icon size="13" start>mdi-view-grid</v-icon>
 				Tất cả
+				<span class="nv__chip-badge">{{ DSNhiemVu.length }}</span>
 			</div>
-			<div v-for="(mh, index) in DSMonHoc" @click="selectedMonHoc = mh.MonHocID"
-				class="hover-chip px-2 py-1 d-flex justify-center" :key="mh.MonHocID"
-				:class="{ active: selectedMonHoc === mh.MonHocID }">
-				<v-icon :color="mh.Color" :icon="mh.Icon" start></v-icon>
+			<div v-for="mh in DSMonHoc" :key="mh.MonHocID" class="nv__chip"
+				:class="{ 'nv__chip--active': selectedMonHoc === mh.MonHocID }" @click="selectedMonHoc = mh.MonHocID">
+				<v-icon :color="selectedMonHoc === mh.MonHocID ? 'white' : mh.Color" size="13" start>{{ mh.Icon }}
+				</v-icon>
 				{{ mh.TenMonHoc_HienThi }}
+				<span class="nv__chip-badge">{{ countByMonHoc(mh.MonHocID) }}</span>
 			</div>
 		</div>
-		<v-row dense>
-			<v-col v-for="nv in DSNhiemVu_Filter_V2" cols="12" sm="6" md="3">
-				<v-card class="elevation-0 rounded-0 hover-card" @click="onRedirect(nv)"
-					:style="[{ 'background-color': nv.ResourceType == 'ASSIGNMENT' ? '#c8e6ff94' : 'rgb(216 237 217)' }]">
-					<v-card-title class="d-flex  pa-1"
-						:class="[nv.ResourceType == 'ASSIGNMENT' ? 'bg-blue' : 'bg-success']"
-						style="height: 60px; padding-bottom: 4px !important;">
-						<span class="text-subtitle-2 font-weight-medium text-wrap text-title-nhiem-vu">{{ nv.Title
-						}}</span>
-						<v-spacer></v-spacer>
-						<v-chip color="white" class="task-status-chip" label variant="tonal" size="small"
-							style="width: fit-content;">{{
-								statusInfo(nv).text
-							}}</v-chip>
-					</v-card-title>
-					<v-card-text class="py-2">
-						<div class="d-flex flex-column">
-							<span class="text-caption">Môn học:</span>
-							<span class="text-body-2 font-weight-medium">{{ nv.TenMonHoc_HienThi }}</span>
-						</div>
-						<div class="d-flex flex-column mt-1">
-							<span class="text-caption">Giáo viên giao bài:</span>
-							<span class="text-body-2 font-weight-medium">{{ nv.HoTenNguoiGiao }}</span>
-						</div>
-						<div class="d-flex flex-column mt-1">
-							<span class="text-caption">Hạn nộp:</span>
-							<span class="text-body-2 font-weight-medium">
-								<span>{{
-									nv.DueDate ?? '-'
-								}}</span>
-							</span>
-						</div>
-					</v-card-text>
 
-					<!-- <v-card-actions class="border-t py-1">
-						<v-spacer></v-spacer>
-						<v-btn size="small" color="green" text="Bắt đầu" variant="text"></v-btn>
-					</v-card-actions> -->
-				</v-card>
-			</v-col>
-		</v-row>
+		<!-- Empty state -->
+		<div v-if="DSNhiemVu_Filter.length === 0" class="nv__empty">
+			<v-icon size="52" color="grey-lighten-2">mdi-lightning-bolt-outline</v-icon>
+			<div class="nv__empty-title">Không có nhiệm vụ</div>
+			<div class="nv__empty-sub">Bạn đã hoàn thành tất cả!</div>
+		</div>
+
+		<!-- Danh sách -->
+		<div class="nv__list" style="min-height: calc(100dvh)">
+			<v-row dense>
+				<v-col v-for="(nv, idx) in DSNhiemVu_Filter" :key="idx" cols="12" sm="6" lg="4">
+					<div class="nv__card" :class="'nv__card--' + nv.ResourceType.toLowerCase()" @click="onRedirect(nv)">
+
+						<!-- Left color bar -->
+						<div class="nv__card-bar"
+							:style="{ background: nv.Color || (nv.ResourceType === 'ASSIGNMENT' ? '#1976D2' : '#388E3C') }">
+						</div>
+
+						<!-- Icon -->
+						<div class="nv__card-icon"
+							:style="{ background: (nv.Color || (nv.ResourceType === 'ASSIGNMENT' ? '#1976D2' : '#388E3C')) + '18' }">
+							<v-icon :color="nv.Color || (nv.ResourceType === 'ASSIGNMENT' ? '#1976D2' : '#388E3C')"
+								size="22">{{ nv.Icon }}</v-icon>
+						</div>
+
+						<!-- Content -->
+						<div class="nv__card-content">
+							<div class="nv__card-title">{{ nv.Title }}</div>
+							<div class="nv__card-meta">
+								<span class="nv__card-subject">{{ nv.TenMonHoc_HienThi }}</span>
+								<span class="nv__card-dot">·</span>
+								<span class="nv__card-teacher">{{ nv.HoTenNguoiGiao }}</span>
+							</div>
+							<div class="nv__card-footer">
+								<span class="nv__badge"
+									:class="nv.ResourceType === 'ASSIGNMENT' ? 'nv__badge--assignment' : 'nv__badge--lesson'">
+									{{ nv.ResourceType === 'ASSIGNMENT' ? 'Bài tập' : 'Bài học' }}
+								</span>
+								<span class="nv__badge" :class="'nv__badge--' + (statusInfo(nv).key || 'default')">
+									{{ statusInfo(nv).text }}
+								</span>
+								<span v-if="nv.DueDate && nv.ResourceType === 'ASSIGNMENT'" class="nv__due"
+									:class="dueDateInfo(nv).colorClass">
+									<v-icon size="11">mdi-clock-outline</v-icon>
+									{{ dueDateInfo(nv).text }}
+								</span>
+							</div>
+						</div>
+
+						<!-- Arrow -->
+						<v-icon size="16" color="grey-lighten-1" class="nv__card-arrow">mdi-chevron-right</v-icon>
+					</div>
+				</v-col>
+			</v-row>
+		</div>
 	</div>
 </template>
 
-
-
 <script>
-export default {
-	props: {
-		NienKhoa: Number
-	},
-
-	data() {
-		return {
-			DSNhiemVu: [],
-			monHocSelected: [],
-			vueData,
-			version: true,
-			DSMonHoc: [],
-			selectedMonHoc: null
-		};
-	},
-
-	async mounted() {
-		this.DSMonHoc = await ajaxCALLPromise(
-			"lms/EL_Student_Get_MonHoc_ByHocSinhID",
-			{
+	export default {
+		props: {
+			NienKhoa: Number
+		},
+		data() {
+			return {
+				DSNhiemVu: [],
+				monHocSelected: [],
+				vueData,
+				DSMonHoc: [],
+				selectedMonHoc: null
+			};
+		},
+		async mounted() {
+			this.DSMonHoc = await ajaxCALLPromise('lms/EL_Student_Get_MonHoc_ByHocSinhID', {
 				HocSinhID: vueData.user.UserID,
 				NienKhoa: this.NienKhoa
-			}
-		);
-		this.onRefresh();
-	},
-
-	computed: {
-		// Kiểm tra xem đã chọn FULL chưa
-		IsBtnDot() {
-			const uniqueMonHocInNV = [
-				...new Set(this.DSNhiemVu.map(x => x.MonHocID))
-			];
-
-			const selectedIDs = this.monHocSelected.map(x => x.MonHocID);
-
-			return selectedIDs.length === uniqueMonHocInNV.length;
+			});
+			this.onRefresh();
 		},
-
-		// FILTER NHIỆM VỤ THEO MONHOCSELECTED
-		DSNhiemVu_Filter() {
-			if (!this.monHocSelected || this.monHocSelected.length === 0) {
-				return this.DSNhiemVu;
-			}
-
-			const selectedIDs = this.monHocSelected.map(x => x.MonHocID);
-
-			return this.DSNhiemVu.filter(nv =>
-				selectedIDs.includes(nv.MonHocID)
-			);
+		computed: {
+			IsBtnDot() {
+				const uniqueMonHocInNV = [...new Set(this.DSNhiemVu.map(x => x.MonHocID))];
+				const selectedIDs = this.monHocSelected.map(x => x.MonHocID);
+				return selectedIDs.length === uniqueMonHocInNV.length;
+			},
+			DSNhiemVu_Filter() {
+				let list = this.DSNhiemVu;
+				if (this.monHocSelected && this.monHocSelected.length > 0) {
+					const selectedIDs = this.monHocSelected.map(x => x.MonHocID);
+					list = list.filter(nv => selectedIDs.includes(nv.MonHocID));
+				}
+				if (this.selectedMonHoc) {
+					list = list.filter(nv => nv.MonHocID === this.selectedMonHoc);
+				}
+				return list;
+			},
 		},
-
-		// FILTER NHIỆM VỤ THEO MONHOCSELECTED
-		DSNhiemVu_Filter_V2() {
-			if (!this.selectedMonHoc || this.selectedMonHoc.length === 0) {
-				return this.DSNhiemVu;
-			}
-
-
-			return this.DSNhiemVu.filter(nv =>
-				nv.MonHocID == this.selectedMonHoc
-			);
-		}
-	},
-
-	methods: {
-		onRedirect(nv) {
-			console.log('this.task.', nv)
-			const type = (nv.ResourceType || '').toLowerCase();
-			const id = nv.ResourceID;
-			const Is_SendToClass = nv.Is_SendToClass
-			if (type && id) {
+		methods: {
+			countByMonHoc(id) {
+				return this.DSNhiemVu.filter(nv => nv.MonHocID === id).length;
+			},
+			onRedirect(nv) {
+				const type = (nv.ResourceType || '').toLowerCase();
+				const id = nv.ResourceID;
+				if (!type || !id) return;
 				if (type === 'assignment') {
 					openWindow({
 						title: nv.Title,
-						url: `/lms-student-assignment?AssignToClassID=${id}&Is_SendToClass=${Is_SendToClass}`,
+						url: `/lms-student-assignment?AssignToClassID=${id}&Is_SendToClass=${nv.Is_SendToClass}`,
 						id: 'StudentDoASM' + id,
-						onclose: {
-							"EXE": "vueData.initPage()"
-						}
-					})
-
+						onclose: { EXE: 'vueData.initPage()' }
+					});
 				} else if (type === 'lesson') {
 					openWindow({
 						title: nv.Title,
 						url: `/lms-student-lesson-viewer?AssignToClassID=${id}`,
-						onclose: {
-							"EXE": "vueData.initPage()"
-						}
-					})
+						onclose: { EXE: 'vueData.initPage()' }
+					});
 				}
-			}
-		},
-
-		async onRefresh() {
-			this.DSNhiemVu = await ajaxCALLPromise(
-				"lms/EL_Student_Get_NhiemVu_ByHocSinhID",
-				{
+			},
+			async onRefresh() {
+				this.DSNhiemVu = await ajaxCALLPromise('lms/EL_Student_Get_NhiemVu_ByHocSinhID', {
 					NienKhoa: this.NienKhoa,
 					HocSinhID: vueData.user.UserID
-				}
-			);
-		},
-		onXemDiem() { },
-		onXemChiTiet() { },
-		onXepHang() { },
-		statusInfo(nv) {
-			const statuses = {
-				'OVERDUE': { color: 'error', text: 'Quá hạn', cardClass: 'urgent' },
-				'IN_PROGRESS': { color: 'warning', text: nv.ResourceType === 'ASSIGNMENT' ? 'Đang làm' : 'Đang học', cardClass: 'warning' },
-				'NOT_STARTED': { color: 'success', text: 'Bắt đầu', cardClass: 'normal' },
-				'RESUBMIT': { color: 'warning', text: 'Nộp bài lại', cardClass: 'normal' },
-			};
-			return statuses[nv.Status] || statuses['NOT_STARTED'];
-		},
-		dueDateInfo(nv) {
-			if (!nv.DueDate) return { text: '', colorClass: '' };
-			const now = new Date();
-			const dueDate = new Date(nv.DueDate);
-			const diffSeconds = Math.floor((dueDate - now) / 1000);
-			if (diffSeconds < 0) return { text: 'đã quá hạn', colorClass: 'text-error' };
-			const diffMinutes = Math.floor(diffSeconds / 60);
-			if (diffMinutes < 60) return { text: `còn ${diffMinutes} phút`, colorClass: 'text-warning-darken-2' };
-			const diffHours = Math.floor(diffMinutes / 60);
-			if (diffHours < 24) return { text: `còn ${diffHours} giờ`, colorClass: 'text-warning-darken-2' };
-			const timeDiff = dueDate.getTime() - now.getTime();
-			const daysDiff = Math.ceil(timeDiff / (1000 * 3600 * 24));
-			return { text: `còn ${daysDiff} ngày`, colorClass: 'text-success-darken-1' };
-		},
-		colorType(nv) {
-			if (nv.ResourceType === 'ASSIGNMENT') {
-				return 'blue';
-			} else if (nv.ResourceType === 'LESSON') {
-				return 'green';
-			} else {
-				return 'grey';
-			}
+				});
+			},
+			statusInfo(nv) {
+				const statuses = {
+					'OVERDUE': { key: 'overdue', text: 'Quá hạn' },
+					'IN_PROGRESS': { key: 'inprogress', text: nv.ResourceType === 'ASSIGNMENT' ? 'Đang làm' : 'Đang học' },
+					'NOT_STARTED': { key: 'notstarted', text: 'Chưa bắt đầu' },
+					'RESUBMIT': { key: 'resubmit', text: 'Nộp lại' },
+				};
+				return statuses[nv.Status] || statuses['NOT_STARTED'];
+			},
+			dueDateInfo(nv) {
+				if (!nv.DueDate) return { text: '', colorClass: '' };
+				const now = new Date();
+				const due = new Date(nv.DueDate);
+				const diff = Math.floor((due - now) / 1000);
+				if (diff < 0) return { text: 'Đã quá hạn', colorClass: 'nv__due--overdue' };
+				const mins = Math.floor(diff / 60);
+				if (mins < 60) return { text: `còn ${mins} phút`, colorClass: 'nv__due--urgent' };
+				const hrs = Math.floor(mins / 60);
+				if (hrs < 24) return { text: `còn ${hrs} giờ`, colorClass: 'nv__due--urgent' };
+				const days = Math.ceil((due - now) / 86400000);
+				return { text: `còn ${days} ngày`, colorClass: 'nv__due--ok' };
+			},
 		}
 	}
-}
 </script>

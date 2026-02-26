@@ -167,6 +167,13 @@ let staleDataState = {
         this.retryCallback = null;
     }
 }
+
+function stableStringify(obj) {
+    if (!obj) return '';
+    return JSON.stringify(obj, Object.keys(obj).sort());
+}
+
+const STALE_TTL = 30 * 60 * 1000; // 30 phút
 /*****************************************
  * API CACHE
  *****************************************/
@@ -175,7 +182,7 @@ const apiCache = {
     staleStore: new Map(), // ← Lưu cache đã hết hạn
 
     createKey(url, params) {
-        return `${url}::${JSON.stringify(params)}`;
+        return `${url}::${stableStringify(params)}`;
     },
 
     set(url, params, data, ttl = 5 * 60 * 1000) {
@@ -214,16 +221,17 @@ const apiCache = {
     // ← THÊM MỚI: Lấy cache cũ (kể cả đã hết hạn)
     getStale(url, params) {
         const key = this.createKey(url, params);
-
-        // Thử lấy từ staleStore
         const stale = this.staleStore.get(key);
 
-        if (stale) {
-            console.log(`🕰️ Stale cache found: ${key}`);
-            return stale.data;
+        if (!stale) return null;
+
+        if (Date.now() - stale.expiry > STALE_TTL) {
+            this.staleStore.delete(key);
+            return null;
         }
 
-        return null;
+        console.log(`🕰️ Stale cache found: ${key}`);
+        return stale.data;
     },
 
     invalidate(urlPattern) {
@@ -351,18 +359,20 @@ async function cacheMiddleware(ctx, next) {
 // Loading middleware - Chỉ hiển thị loading khi không phải từ cache
 // ← CẬP NHẬT loadingMiddleware để hỗ trợ skip
 async function loadingMiddleware(ctx, next) {
-    // ← THÊM: Skip loading nếu được đánh dấu
-    if (ctx.options?._skipLoading) {
+    // ✅ silent hoặc _skipLoading đều không hiện loading
+    if (ctx.options?.silent === true || ctx.options?._skipLoading === true) {
         return await next();
     }
 
     loadingState.count++;
-    loadingState.text = ctx.options?.loadingText || 'Đang xử lý...';
+    loadingState.text = ctx.options?.loadingText ?? 'Đang xử lý...';
 
     try {
         await next();
     } finally {
-        loadingState.count--;
+        if (ctx.options?.silent !== true) {
+            loadingState.count = Math.max(0, loadingState.count - 1);
+        }
     }
 }
 // Error middleware - Bắt và hiển thị lỗi
@@ -566,8 +576,10 @@ async function fetchBatchPromise(apiCalls, options = {}) {
 
             // Delay nhỏ
             if (options.cacheDelay !== false) {
-                loadingState.count++;
-                loadingState.text = options.loadingText || 'Đang xử lý...';
+                if (options.silent !== true) {
+                    loadingState.count++;
+                    loadingState.text = options.loadingText ?? 'Đang xử lý...';
+                }
                 await new Promise(r => setTimeout(r, options.cacheDelayMs || 100));
                 loadingState.count--;
             }
@@ -581,8 +593,10 @@ async function fetchBatchPromise(apiCalls, options = {}) {
             console.log('💾 Batch cache hit!');
 
             if (options.cacheDelay !== false) {
-                loadingState.count++;
-                loadingState.text = options.loadingText || 'Đang xử lý...';
+                if (options.silent !== true) {
+                    loadingState.count++;
+                    loadingState.text = options.loadingText ?? 'Đang xử lý...';
+                }
                 await new Promise(r => setTimeout(r, options.cacheDelayMs || 100));
                 loadingState.count--;
             }
@@ -594,8 +608,10 @@ async function fetchBatchPromise(apiCalls, options = {}) {
     }
 
     // Gọi API
-    loadingState.count++;
-    loadingState.text = options.loadingText || 'Đang xử lý...';
+    if (options.silent !== true) {
+        loadingState.count++;
+        loadingState.text = options.loadingText ?? 'Đang xử lý...';
+    }
 
     try {
         const results = await Promise.all(
@@ -603,8 +619,9 @@ async function fetchBatchPromise(apiCalls, options = {}) {
                 const { url, params = {}, opts = {} } = call;
                 return fetchPromise(url, params, {
                     ...opts,
-                    _skipLoading: true,
-                    forceRefresh: forceRefresh // ← THÊM: Truyền forceRefresh xuống từng API
+                    silent: options.silent === true,
+                    _skipLoading: true, // internal safety
+                    forceRefresh
                 });
             })
         );

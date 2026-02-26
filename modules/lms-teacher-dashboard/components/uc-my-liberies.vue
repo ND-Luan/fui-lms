@@ -60,7 +60,7 @@
 					<v-expansion-panel v-for="(week, index) in KhoiItem.weeks" :key="index"
 						class="mb-1 custom-panel-liberies">
 						<v-expansion-panel-title class="text-body-2 text-white "
-							style="background-color: #00A651; min-height: 30px !important ; height: 30px;">
+							style="background-color: #009688; min-height: 30px !important ; height: 30px;">
 							<div>
 							</div>
 							{{ week.title }}

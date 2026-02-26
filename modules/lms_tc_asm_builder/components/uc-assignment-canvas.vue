@@ -24,12 +24,12 @@
 							<v-icon>mdi-file</v-icon>
 						</v-chip>
 					</div>
-					<v-chip color="primary" class="ml-2" v-if="renderPointInGroup(group) > 0" size="small">
-						{{ $t('message.Total') }} {{renderPointInGroup(group)}} {{ $t('message.Score') }}
+					<v-chip variant="text" color="primary" class="ml-1 font-weight-medium" v-if="renderPointInGroup(group) > 0" size="small">
+						{{ $t('message.Total') }} {{ $t('message.Score') }}: {{renderPointInGroup(group)}}
 					</v-chip>
 					<v-spacer />
 					<uc-btn-import-json v-model:questions="group.questions" :targetGroupIndex="groupIndex" />
-					<v-chip class="ml-2" size="small" color="primary" variant="tonal">
+					<v-chip class="ml-2 font-weight-medium" size="small" color="primary" variant="text">
 						{{ group.questions.length }} {{ $t('message.Question') }}
 					</v-chip>
 					<v-btn icon size="small" variant="text" @click.stop="removeGroup(groupIndex)">
@@ -94,6 +94,7 @@
 								</v-list-item-title>
 								<v-list-item-subtitle>
 									<uc-latex-view v-model:content="question.config.questionText" class="flex-column"
+										:escapeHtml="false"
 										style="-webkit-box-orient: unset; word-break: break-word; line-height: 1.25rem !important; align-items: unset !important; display: table !important;" />
 								</v-list-item-subtitle>
 							</v-list-item>
@@ -201,7 +202,7 @@
 				const newGroups = [...this.groups];
 				newGroups.push({
 					id: `group_${Date.now()}`,
-					title: `${this.$i18n.locale == 'en' ? 'Section':'Phần'} ${newGroups.length + 1}`,
+					title: `${this.$i18n.locale == 'en' ? 'Section' : 'Phần'} ${newGroups.length + 1}`,
 					description: '',
 					media: {
 						type: "YOUTUBE",
@@ -243,10 +244,17 @@
 			},
 			renderPointInGroup(group) {
 				let total = 0
-				for (question of group.questions) {
-					total += question?.points ?? 0
+	
+				for (const question of group.questions) {
+					total += Number(question?.points ?? 0)
 				}
-				return total
+	
+				return this.formatNumber(total, 2)
+			},
+	
+			formatNumber(value, decimals = 2) {
+				if (isNaN(value)) return (0).toFixed(decimals)
+				return Number(value).toFixed(decimals)
 			},
 			// Drag & Drop handlers for questions
 			handleQuestionDragStart(event, groupIndex, qIndex) {

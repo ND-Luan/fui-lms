@@ -65,12 +65,15 @@
 
 				<!-- TO (Cột B) -->
 				<div class="mobile-to" @click="openMobileDialog(itemA)">
-					<div v-if="itemA.dropArray?.length" class="jigsaw1" :class="{
+					<div v-if="itemA.dropArray?.length" class="jigsaw1 d-flex align-center" style="background-color: #ffffff !important; border:solid 1px #217d46" :class="{
 						'correct-match': showResult && isCorrectPair(itemA.id, itemA.dropArray[0].id),
 						'incorrect-match': showResult && !isCorrectPair(itemA.id, itemA.dropArray[0].id)
 					}">
 						<span class="l"></span>
 						<span class="text">{{ itemA.dropArray[0].text }}</span>
+						<v-btn size="small" color="error" variant="text" @click.stop="handleRemoveAnswer(itemA)">
+							Xóa
+						</v-btn>
 					</div>
 					<div v-else class="mobile-placeholder">
 						<v-icon small>mdi-plus</v-icon> Chọn đáp án
@@ -79,7 +82,7 @@
 			</div>
 
 			<!-- Hướng dẫn -->
-			<div class="pa-4 text-center text-grey">
+			<div class="pt-4 pb-0 text-center text-grey">
 				<p class="text-caption">Nhấn vào ô đáp án để chọn</p>
 			</div>
 		</div>
@@ -88,7 +91,7 @@
 		<v-dialog v-model="mobileDialog" max-width="400" persistent>
 			<v-card>
 				<v-card-title class="bg-primary text-white text-subtitle-1">
-					Chọn đáp án cho: <strong class="ml-1">"{{ selectedLeftItem?.text }}"</strong>
+					<span class="text-white">Chọn đáp án cho: <strong class="ml-1">"{{ selectedLeftItem?.text }}"</strong></span>
 				</v-card-title>
 				<v-card-text class="pt-4">
 					<v-list density="compact">
@@ -139,24 +142,30 @@
 		<div class="mt-2">
 			<div class="text-end" v-if="!isGrade && submissionstatus < 2 && isShowBtnComment">
 				<v-menu v-model="menu" :close-on-content-click="false" scroll-strategy="close" location="start">
-					<template v-slot:activator="{ props }">
-						<v-btn color="orange-darken-1" v-bind="props" icon="mdi-notebook-edit-outline" size="small"
-							v-tooltip="'Ý kiến của bạn'">
-						</v-btn>
+					<template #activator="{ props: menuProps }">
+						<v-tooltip location="top">
+							<template #activator="{ props: tooltipProps }">
+								<v-btn v-bind="{ ...menuProps, ...tooltipProps }" icon="mdi-notebook-edit-outline" size="small"
+									variant="text" color="primary" />
+							</template>
+							<span>Ý kiến của bạn</span>
+						</v-tooltip>
 					</template>
-					<v-card :min-width="widthScreen < 650 ? null : 600" class="elevation-0" variant="outlined"
-						color="orange">
-						<v-card-title class="bg-orange-darken-1">Ý kiến của bạn</v-card-title>
+					<v-card :min-width="widthScreen < 650 ? null : 600" variant="outlined" class="elevation-0">
+						<v-card-title class="px-4 py-3" style="background-color:#E3F2FD; color:#1565C0; font-weight:600;">
+							Ý kiến của bạn
+						</v-card-title>
 						<v-list>
 							<v-list-item>
-								<v-textarea :model-value="grading?.comment || ''"
-									@update:model-value="onStudentCommentInput" rows="2" dense hide-details
-									variant="outlined" placeholder="Nhập ý kiến của bạn" />
+								<v-textarea :model-value="grading?.comment || ''" @update:model-value="onStudentCommentInput" rows="2"
+									hide-details variant="outlined" placeholder="Nhập ý kiến của bạn" />
 							</v-list-item>
 						</v-list>
 						<v-card-actions class="border-t py-0">
-							<v-spacer></v-spacer>
-							<v-btn text color="orange-darken-1" @click="menu = false">Đóng</v-btn>
+							<v-spacer />
+							<v-btn variant="text" color="primary" @click="menu = false">
+								Đóng
+							</v-btn>
 						</v-card-actions>
 					</v-card>
 				</v-menu>
@@ -332,6 +341,7 @@ export default {
 		// === MOBILE ===
 		openMobileDialog(itemA) {
 			if (this.readonly || this.isGrade || this.submissionstatus >= 2) return;
+			if(this.columnB.length == 0) return 
 			this.selectedLeftItem = itemA;
 			this.mobileDialog = true;
 		},
@@ -423,6 +433,11 @@ export default {
 		},
 		updateTeacherComment(val) {
 			this.$emit("grading-change", { ...this.grading, teacherComment: val });
+		},
+		handleRemoveAnswer(itemA){
+			this.columnB.push(itemA.dropArray[0])
+			itemA.dropArray = []
+			this.selectedLeftItem = {...itemA}
 		}
 	}
 }

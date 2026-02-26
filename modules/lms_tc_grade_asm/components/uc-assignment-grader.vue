@@ -53,7 +53,7 @@
 									<template v-slot:prepend>
 										<v-icon size="20" class="group-toggle-icon">
 											{{ groupCollapsed[groupIndex] ? 'mdi-chevron-right' :
-												'mdi-chevron-down'
+											'mdi-chevron-down'
 											}}
 										</v-icon>
 									</template>
@@ -103,7 +103,7 @@
 							<v-btn value="all" size="x-small">
 								<v-icon size="16">mdi-view-list</v-icon>
 								<span class="ml-1 d-none d-sm-inline">{{ IsEngLish ? 'All' : 'Tất cả'
-								}}</span>
+									}}</span>
 							</v-btn>
 						</v-btn-toggle>
 					</div>
@@ -115,7 +115,7 @@
 
 								<v-col cols="12">
 									<label class="font-weight-medium mb-2 d-block">{{ $t('message.FinalScore')
-									}}</label>
+										}}</label>
 									<div class="d-flex align-center">
 										<v-number-input v-model="gradingSummary.totalScore" label="Điểm"
 											:max="assignment.MaxScore" :min="0" variant="outlined" density="compact"
@@ -127,7 +127,7 @@
 								</v-col>
 								<v-col cols="12">
 									<label class="font-weight-medium mb-2 d-block">{{ $t('message.OverallComment')
-									}}</label>
+										}}</label>
 									<v-textarea v-model="gradingSummary.teacherComment" hide-details
 										:placeholder="$t('message.EnterGeneralFeedback')" auto-grow :rows="2" />
 								</v-col>
@@ -139,7 +139,7 @@
 			<v-divider vertical />
 			<v-col :cols="mobile ? 12 : 9" style="height: calc(100dvh - 64px); overflow: auto" class="pa-2">
 				<!-- Single Question Mode -->
-				<div v-if="viewMode === 'single'" class="h-100 position-relative d-flex flex-column">
+				<div v-if="viewMode === 'single'" class="position-relative d-flex flex-column">
 					<v-card v-if="currentQuestion?.config" class="question-content-card w-100 px-2">
 						<div class="d-flex justify-space-between align-center px-0">
 							<v-card class="group-header-card mb-2 w-100" flat border>
@@ -157,7 +157,7 @@
 													<span class="mx-2">•</span>
 													<span class="text-caption text-medium-emphasis">
 														Tối đa {{currentGroup.questions.reduce((sum, q) => sum +
-															q.points, 0)
+														q.points, 0)
 														}} điểm
 													</span>
 												</div>
@@ -205,10 +205,11 @@
 						<v-divider />
 						<div class="d-flex flex-column ga-2 mt-2">
 							<div class="d-flex align-center ga-2 justify-end">
-								<v-chip v-if="questionsTypesLabel(currentQuestion.type)" size="small"
+								<v-chip variant="text" class="font-weight-medium"
+									v-if="questionsTypesLabel(currentQuestion.type)" size="small"
 									:color="questionsTypesLabel(currentQuestion.type).color">
 									{{ IsEngLish ? questionsTypesLabel(currentQuestion.type).label_EN :
-										questionsTypesLabel(currentQuestion.type)?.label }}
+									questionsTypesLabel(currentQuestion.type)?.label }}
 								</v-chip>
 								<v-chip color="white" text-color="primary" variant="elevated" size="small"
 									class="progress-chip status-badge points-chip-mobile">
@@ -219,11 +220,10 @@
 								<!-- Question text for desktop -->
 								<b class="font-weight-bold" style="flex: none;">{{ $t('message.Question') }} {{
 									globalQuestionNumber
-								}}:</b>
+									}}:</b>
 								<!-- Question text -->
 								<uc-latex-view class="flex-column ms-2" style="align-items: flex-start !important;"
-									:content="currentQuestion.config.questionText" 
-									:escape-html="false"/>
+									:content="currentQuestion.config.questionText" :escape-html="false" />
 							</div>
 						</div>
 						<!-- YOUTUBE, RECORD_AUDIO, IMAGE, FILE -->
@@ -236,9 +236,9 @@
 									allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
 									allowfullscreen></iframe>
 							</div>
-							<uc-wave-audio-player v-if="currentQuestion.config.media.sourceRecord.source.length > 0"
+							<uc-wave-audio-player v-else-if="currentQuestion.config.media.sourceRecord.source.length > 0"
 								v-model:audioUrl="currentQuestion.config.media.sourceRecord.source" />
-							<div v-if="currentQuestion.config.media.sourceFiles.image.length > 0">
+							<div v-else-if="currentQuestion.config.media.sourceFiles.image.length > 0">
 								<v-img v-for="file in currentQuestion.config.media.sourceFiles.image"
 									:src="'https://drive.google.com/thumbnail?id=' + getDriveFileId(file.source) + '&sz=w1000'"
 									:lazy-src="'https://drive.google.com/thumbnail?id=' + getDriveFileId(file.source) + '&sz=w1000'"
@@ -250,8 +250,8 @@
 									</template>
 								</v-img>
 							</div>
-							<div v-if="currentQuestion.config.media.sourceFiles.file.length > 0">
-								<iframe v-for="file in currentQuestion.config.media.sourceFiles" :src="file.source"
+							<div v-else-if="currentQuestion.config.media.sourceFiles.file.length > 0">
+								<iframe v-for="file in currentQuestion.config.media.sourceFiles.file" :src="file.source"
 									style="width: 100%; height: 400px;"></iframe>
 							</div>
 						</div>
@@ -335,7 +335,7 @@
 								<v-card-text class="py-2">
 									<div class="d-flex justify-space-between align-center">
 										<div class="d-flex align-center ga-2">
-											<div class="group-icon-wrapper ">
+											<div class="">
 												<v-icon color="primary" size="20">mdi-folder-text-outline</v-icon>
 											</div>
 											<div class="group-info">
@@ -347,7 +347,7 @@
 													<span class="mx-2">•</span>
 													<span class="text-caption text-medium-emphasis">{{
 														$t('message.MaximumScore') }} {{
-															group.questions.reduce((sum, q) => sum + q.points, 0)}}
+														group.questions.reduce((sum, q) => sum + q.points, 0)}}
 													</span>
 												</div>
 											</div>
@@ -407,13 +407,14 @@
 														{{ getGradingStatusIcon(question.id) }}
 													</v-icon>
 													{{ $t('message.Question') }} {{
-														getGlobalQuestionNumberByQuestionId(question.id) }}:
+													getGlobalQuestionNumberByQuestionId(question.id) }}:
 												</b>
 												<div class="d-flex align-center ga-2 justify-end">
-													<v-chip v-if="questionsTypesLabel(question.type)" size="small"
+													<v-chip variant="text" class="font-weight-medium"
+														v-if="questionsTypesLabel(question.type)" size="small"
 														:color="questionsTypesLabel(question.type).color">
 														{{ IsEngLish ? questionsTypesLabel(question.type)?.label_EN :
-															questionsTypesLabel(question.type)?.label }}
+														questionsTypesLabel(question.type)?.label }}
 													</v-chip>
 													<v-chip color="white" text-color="primary" variant="elevated"
 														size="small"
@@ -425,8 +426,7 @@
 
 											<uc-latex-view class="flex-column px-2"
 												style="align-items: start !important;"
-												:content="question.config.questionText" 
-												:escape-html="false"/>
+												:content="question.config.questionText" :escape-html="false" />
 										</div>
 
 										<!-- Mobile layout -->
@@ -482,7 +482,7 @@
 													</v-card>
 												</v-container>
 											</div>
-											<div v-if="question.config.media.sourceRecord.length > 0">
+											<div v-else-if="question.config.media.sourceRecord.length > 0">
 												<uc-wave-audio-player
 													v-if="question.config.media.sourceRecord.length > 0"
 													v-model:audioUrl="question.config.media.sourceRecord" />
@@ -503,7 +503,7 @@
 												</v-container>
 											</div>
 
-											<div v-if="question.config.media.sourceFiles.image.length > 0">
+											<div v-else-if="question.config.media.sourceFiles.image.length > 0">
 												<v-img v-for="file in question.config.media.sourceFiles.image"
 													:src="'https://drive.google.com/thumbnail?id=' + getDriveFileId(file.source) + '&sz=w1000'"
 													:lazy-src="'https://drive.google.com/thumbnail?id=' + getDriveFileId(file.source) + '&sz=w1000'"
@@ -515,8 +515,8 @@
 													</template>
 												</v-img>
 											</div>
-											<div v-if="question.config.media.sourceFiles.files?.length > 0">
-												<iframe v-for="file in question.config.media.sourceFiles.files"
+											<div v-else-if="question.config.media.sourceFiles.file?.length > 0">
+												<iframe v-for="file in question.config.media.sourceFiles.file"
 													:src="file.source" style="width: 100%; height: 400px;"></iframe>
 											</div>
 										</div>
@@ -644,7 +644,7 @@
 				<v-card-title class="d-flex  border-b bg-primary text-body-2 py-0">
 					<span class="text-white">
 						{{
-							IsEngLish ? "Reason for Requesting Resubmission" : `Lí do yêu cầu nộp
+						IsEngLish ? "Reason for Requesting Resubmission" : `Lí do yêu cầu nộp
 						lại
 						bài`
 						}}
@@ -661,7 +661,7 @@
 					<v-spacer></v-spacer>
 					<v-btn variant="outlined" size="small" @click="YeuCauLamLaiBai()" color="primary"
 						prepend-icon="mdi-content-save-outline">{{
-							$t('message.confirm') }}</v-btn>
+						$t('message.confirm') }}</v-btn>
 				</v-card-actions>
 			</v-card>
 		</v-dialog>
@@ -669,348 +669,336 @@
 </template>
 
 <script>
-export default {
-	name: 'uc-assignment-grader',
-	props: {
-		submissionData: Array,
-		onSaveGradingDraft: { type: Function, default: () => { } },
-		onPublishGrades: { type: Function, default: () => { } },
-		onOpenPublishDialog: { type: Function, default: () => { } }
-	},
-	data() {
-		this.$i18n.locale = (localStorage.getItem('IsLanguage') && localStorage.getItem('IsLanguage') == 'true') ? 'en' : 'vi'
-		const { mobile } = Vuetify.useDisplay()
-		return {
-			Reason: "",
-			viewMode: 'all', // 'single' or 'all'
-			navCollapsed: false,
-			groupCollapsed: {},
-			currentGroupIndex: 0,
-			currentQuestionIndexInGroup: 0,
-			assignment: null,
-			submission: null,
-			studentAnswers: {},
-			gradingData: {},
-			gradingSummary: { totalScore: null, teacherComment: '' },
-			isSaving: false,
-			isLoading: false,
-			vueData,
-			mobile,
-			IsOpenModal_Require_Resend: false
-		}
-	},
-	mounted() {
-		if (this.mobile) {
-			this.viewMode = 'all'
-		}
-	},
-	computed: {
-
-		totalQuestions() {
-			if (!this.assignment?.groups) return 0;
-			return this.assignment.groups.reduce((total, group) => total + group.questions.length, 0);
+	export default {
+		name: 'uc-assignment-grader',
+		props: {
+			submissionData: Array,
+			onSaveGradingDraft: { type: Function, default: () => { } },
+			onPublishGrades: { type: Function, default: () => { } },
+			onOpenPublishDialog: { type: Function, default: () => { } }
 		},
-		currentGroup() { return this.assignment?.groups?.[this.currentGroupIndex]; },
-		currentQuestion() { return this.currentGroup?.questions?.[this.currentQuestionIndexInGroup]; },
-		globalQuestionNumber() {
-			if (!this.assignment?.groups) return 1;
-			return this.getGlobalQuestionNumber(this.currentGroupIndex, this.currentQuestionIndexInGroup);
+		data() {
+			this.$i18n.locale = (localStorage.getItem('IsLanguage') && localStorage.getItem('IsLanguage') == 'true') ? 'en' : 'vi'
+			const { mobile } = Vuetify.useDisplay()
+			return {
+				Reason: "",
+				viewMode: 'all', // 'single' or 'all'
+				navCollapsed: false,
+				groupCollapsed: {},
+				currentGroupIndex: 0,
+				currentQuestionIndexInGroup: 0,
+				assignment: null,
+				submission: null,
+				studentAnswers: {},
+				gradingData: {},
+				gradingSummary: { totalScore: null, teacherComment: '' },
+				isSaving: false,
+				isLoading: false,
+				vueData,
+				mobile,
+				IsOpenModal_Require_Resend: false
+			}
 		},
-		allQuestions() {
-			return this.assignment?.groups?.flatMap(group => group.questions) || [];
+		mounted() {
+			if (this.mobile) {
+				this.viewMode = 'all'
+			}
 		},
-		gradedCount() {
-			return this.allQuestions.filter(q => this.isQuestionGraded(q.id)).length;
+		computed: {
+	
+			totalQuestions() {
+				if (!this.assignment?.groups) return 0;
+				return this.assignment.groups.reduce((total, group) => total + group.questions.length, 0);
+			},
+			currentGroup() { return this.assignment?.groups?.[this.currentGroupIndex]; },
+			currentQuestion() { return this.currentGroup?.questions?.[this.currentQuestionIndexInGroup]; },
+			globalQuestionNumber() {
+				if (!this.assignment?.groups) return 1;
+				return this.getGlobalQuestionNumber(this.currentGroupIndex, this.currentQuestionIndexInGroup);
+			},
+			allQuestions() {
+				return this.assignment?.groups?.flatMap(group => group.questions) || [];
+			},
+			gradedCount() {
+				return this.allQuestions.filter(q => this.isQuestionGraded(q.id)).length;
+			},
+			IsEngLish: function () {
+				return this.$i18n.locale == 'en'
+			}
 		},
-		IsEngLish: function () {
-			return this.$i18n.locale == 'en'
-		}
-	},
-	methods: {
-		async processData(data) {
-			this.isLoading = true
-			let promise = await new Promise((resolve, reject) => {
-				if (!data || !data[0] || !data[1]) return;
-				const assignmentConfig = data[0][0];
-				if (assignmentConfig && (typeof assignmentConfig.AssignmentConfig === 'string' || typeof
-					assignmentConfig.AssignmentConfig === 'object')) {
-					assignmentConfig.groups = JSON.parse(assignmentConfig.AssignmentConfig)?.groups || [];
-				}
-				this.assignment = assignmentConfig;
-				const submissionData = data[1][0];
-				console.log('submissionData', submissionData)
-				console.log('assignmentConfig', assignmentConfig)
-				this.submission = submissionData;
-				console.log('this.submission', this.submission)
-				if (submissionData && submissionData?.SubmissionContent) {
-					const content = JSON.parse(submissionData.SubmissionContent);
-
-					// ====================================================================
-					// == BẮT ĐẦU ĐOẠN CODE CẦN THÊM VÀO ==================================
-					// ====================================================================
-
-					const rawAnswers = content.answers || {};
-					const allQuestions = this.assignment?.groups?.flatMap(group => group.questions) || [];
-
-					// Duyệt qua từng câu trả lời để chuẩn hóa
-					for (const questionId in rawAnswers) {
-						const questionConfig = allQuestions.find(q => q.id === questionId);
-						const answerObject = rawAnswers[questionId];
-
-						if (questionConfig && answerObject && answerObject.answerData) {
-							const type = questionConfig.type;
-							const isArrayType = ['FILE_UPLOAD', 'AUDIO_RESPONSE'];
-
-							// Nếu là loại câu hỏi yêu cầu mảng nhưng answerData không phải mảng,
-							// hãy bọc nó trong một mảng.
-							if (isArrayType.includes(type) && !Array.isArray(answerObject.answerData)) {
-								answerObject.answerData = [answerObject.answerData];
+		methods: {
+			async processData(data) {
+				this.isLoading = true
+				let promise = await new Promise((resolve, reject) => {
+					if (!data || !data[0] || !data[1]) return;
+					const assignmentConfig = data[0][0];
+					if (assignmentConfig && (typeof assignmentConfig.AssignmentConfig === 'string' || typeof
+						assignmentConfig.AssignmentConfig === 'object')) {
+						assignmentConfig.groups = JSON.parse(assignmentConfig.AssignmentConfig)?.groups || [];
+					}
+					this.assignment = assignmentConfig;
+					const submissionData = data[1][0];
+					console.log('submissionData', submissionData)
+					console.log('assignmentConfig', assignmentConfig)
+					this.submission = submissionData;
+					console.log('this.submission', this.submission)
+					if (submissionData && submissionData?.SubmissionContent) {
+						const content = JSON.parse(submissionData.SubmissionContent);
+						const rawAnswers = content.answers || {};
+						const allQuestions = this.assignment?.groups?.flatMap(group => group.questions) || [];
+	
+						// Duyệt qua từng câu trả lời để chuẩn hóa
+						for (const questionId in rawAnswers) {
+							const questionConfig = allQuestions.find(q => q.id === questionId);
+							const answerObject = rawAnswers[questionId];
+	
+							if (questionConfig && answerObject && answerObject.answerData) {
+								const type = questionConfig.type;
+								const isArrayType = ['FILE_UPLOAD', 'AUDIO_RESPONSE'];
+	
+								// Nếu là loại câu hỏi yêu cầu mảng nhưng answerData không phải mảng,
+								// hãy bọc nó trong một mảng.
+								if (isArrayType.includes(type) && !Array.isArray(answerObject.answerData)) {
+									answerObject.answerData = [answerObject.answerData];
+								}
 							}
 						}
+	
+						this.studentAnswers = JSON.parse(JSON.stringify(content.answers || {}));
+						this.gradingData = JSON.parse(JSON.stringify(content.answers || {}));
 					}
-
-					// ====================================================================
-					// == KẾT THÚC ĐOẠN CODE CẦN THÊM VÀO ===================================
-					// ====================================================================
-
-					this.studentAnswers = JSON.parse(JSON.stringify(content.answers || {}));
-					this.gradingData = JSON.parse(JSON.stringify(content.answers || {}));
+					this.gradingSummary.totalScore = submissionData?.Score || 0;
+					console.log('submissionData?.Score', submissionData?.Score)
+					this.gradingSummary.teacherComment = submissionData?.TeacherComment || '';
+					if (this.assignment?.groups) {
+						const initialCollapsed = {};
+						this.assignment.groups.forEach((group, index) => { initialCollapsed[index] = false });
+						this.groupCollapsed = initialCollapsed;
+					}
+					resolve()
+				})
+				this.isLoading = false
+			},
+	
+			isQuestionGraded(questionId) {
+				const grading = this.gradingData[questionId]?.grading;
+				return grading && (grading.manualScore !== null && grading.manualScore !== undefined);
+			},
+	
+			getGroupGradedCount(group) {
+				return group.questions.filter(q => this.isQuestionGraded(q.id)).length;
+			},
+			//Hiện tại đang sử dụng cho File Upload
+			updateAnswer(questionId, newAnswer) {
+				console.log('udp')
+				this.gradingData[questionId] = {
+					...this.gradingData[questionId],
+					answerData: newAnswer
 				}
-
-
-				this.gradingSummary.totalScore = submissionData?.Score || 0;
-				console.log('submissionData?.Score', submissionData?.Score)
-				this.gradingSummary.teacherComment = submissionData?.TeacherComment || '';
-				if (this.assignment?.groups) {
-					const initialCollapsed = {};
-					this.assignment.groups.forEach((group, index) => { initialCollapsed[index] = false });
-					this.groupCollapsed = initialCollapsed;
+				this.saveGrading(false)
+			},
+			async saveGrading(isPublishing) {
+				const $this = this
+				let listQuestions = _.flatten(this.assignment.groups.map(q => { return [...q.questions] }))
+				this.isSaving = true;
+				console.log('this.submission', this.submission)
+				// if(!this.gradingSummary.totalScore){
+				// }
+				// await this.calculateTotalScore();
+				const payload = {
+					SubmissionID: this.submission.SubmissionID,
+					Score: this.gradingSummary.totalScore,
+					TeacherComment: this.gradingSummary.teacherComment,
+					SubmissionContent: JSON.stringify({ answers: this.gradingData })
+				};
+				if (isPublishing) {
+					//Hàm warning những câu chưa chấm
+					let messageQuestionsNotGrade = this.onHandleQuestionNotGrade(listQuestions)
+					confirm({
+						title: messageQuestionsNotGrade.length > 0 ? (`${this.IsEngLish ? 'There are still ungraded questions. Do you want to confirm and return the assignment?' : "Còn các câu hỏi chưa được chấm. Thầy/Cô xác nhận hoàn tất và trả bài?"}`) : (`${this.IsEngLish ? 'Confirm grading completion and return the assignment to the student?' : "Xác nhận hoàn tất chấm bài và trả bài cho học sinh?"}`),
+						message: messageQuestionsNotGrade.length > 0 ? (`${this.IsEngLish ? "List of Ungraded Questions" : "Danh sách câu chưa chấm"}: ` + messageQuestionsNotGrade) : "",
+						action: () => {
+							this.onPublishGrades(payload);
+						}
+					})
+				} else {
+					this.onSaveGradingDraft(payload);
 				}
-				resolve()
-			})
-			this.isLoading = false
-		},
-
-		isQuestionGraded(questionId) {
-			const grading = this.gradingData[questionId]?.grading;
-			return grading && (grading.manualScore !== null && grading.manualScore !== undefined);
-		},
-
-		getGroupGradedCount(group) {
-			return group.questions.filter(q => this.isQuestionGraded(q.id)).length;
-		},
-		//Hiện tại đang sử dụng cho File Upload
-		updateAnswer(questionId, newAnswer) {
-			console.log('udp')
-			this.gradingData[questionId] = {
-				...this.gradingData[questionId],
-				answerData: newAnswer
-			}
-			this.saveGrading(false)
-		},
-		async saveGrading(isPublishing) {
-			const $this = this
-			let listQuestions = _.flatten(this.assignment.groups.map(q => { return [...q.questions] }))
-			this.isSaving = true;
-			console.log('this.submission', this.submission)
-			// if(!this.gradingSummary.totalScore){
-			// }
-			// await this.calculateTotalScore();
-			const payload = {
-				SubmissionID: this.submission.SubmissionID,
-				Score: this.gradingSummary.totalScore,
-				TeacherComment: this.gradingSummary.teacherComment,
-				SubmissionContent: JSON.stringify({ answers: this.gradingData })
-			};
-			// console.log('payload', payload)
-			if (isPublishing) {
-				//Hàm warning những câu chưa chấm
-				let messageQuestionsNotGrade = this.onHandleQuestionNotGrade(listQuestions)
+				setTimeout(() => { this.isSaving = false; }, 200);
+			},
+			async saveGradingTEST(isPublishing) {
+				let listQuestions = _.flatten(this.assignment.groups.map(q => { return [...q.questions] }))
+				this.isSaving = true;
+				await this.calculateTotalScore();
+				console.log('saveGradingTEST', this.gradingSummary)
+				const payload = {
+					SubmissionID: this.submission.SubmissionID,
+					Score: this.gradingSummary.totalScore,
+					TeacherComment: this.gradingSummary.teacherComment,
+					SubmissionContent: JSON.stringify({ answers: this.gradingData })
+				};
+				setTimeout(() => { this.isSaving = false; }, 200);
+			},
+			updateGrading(questionId, newGradingData) {
+				const newGrading = { ...this.gradingData };
+				const currentAnswer = newGrading[questionId] || {};
+				newGrading[questionId] = { ...currentAnswer, grading: newGradingData };
+				this.gradingData = newGrading;
+				// Avoid tight recursive update loop
+				if (this.submission.SubmissionStatus <= 3) {
+					setTimeout(() => {
+						this.calculateTotalScore();
+					}, 0);
+				}
+			},
+			async calculateTotalScore() {
+				let total = 0;
+				await this.allQuestions.forEach(q => {
+					const grade = this.gradingData[q.id]?.grading;
+					if (grade) {
+						// total += parseFloat(grade.autoScore || 0) + parseFloat(grade.manualScore || 0);
+						total += parseFloat(grade.manualScore || 0);
+					}
+				});
+				this.gradingSummary.totalScore = parseFloat(total);
+			},
+			getGradingStatusIcon(questionId, question) {
+				const grading = this.gradingData[questionId]?.grading;
+				if (!grading || (grading.manualScore === null || grading.manualScore === undefined)) return 'mdi-help-circle-outline';
+				if (grading.isCorrect === true || grading.manualScore === this.getQuestionById(questionId)?.points) return 'mdi-check-circle';
+				if (grading.isCorrect === false || grading.manualScore === 0) return 'mdi-close-circle';
+				return 'mdi-minus-circle';
+			},
+			getGradingIconColor(questionId) {
+				const grading = this.gradingData[questionId]?.grading;
+				if (!grading || (grading.manualScore === null || grading.manualScore === undefined)) return 'grey';
+				if (grading.isCorrect === true || grading.manualScore === this.getQuestionById(questionId)?.points) return 'success';
+				if (grading.isCorrect === false || grading.manualScore === 0) return 'error';
+				return 'warning';
+			},
+			getQuestionById(questionId) { return this.allQuestions.find(q => q.id === questionId); },
+			isActiveQuestion(groupIndex, questionIndexInGroup) { return this.currentGroupIndex === groupIndex && this.currentQuestionIndexInGroup === questionIndexInGroup; },
+			getQuestionComponent(type) {
+				const map = {
+					'QUIZ_SINGLE_CHOICE': 'uc-question-single-choice',
+					'QUIZ_MULTIPLE_CHOICE': 'uc-question-multiple-choice',
+					'QUIZ_TRUE_FALSE': 'uc-question-true-false',
+					'QUIZ_FILL_IN_BLANK': 'uc-question-fill-in-blank',
+					'QUIZ_MATCHING': 'uc-question-matching',
+					'SHORT_ANSWER': 'uc-question-short-answer',
+					'ESSAY': 'uc-question-essay',
+					'FILE_UPLOAD': 'uc-question-file-upload',
+					'AUDIO_RESPONSE': 'uc-question-audio-response',
+					'QUIZ_MULTIPLE_TRUE_FALSE': 'uc-question-multiple-true-false'
+				};
+				return map[type] || 'div';
+			},
+			getSubmissionStatusColor() {
+				if (this.submission?.SubmissionStatus == 0 && this.submission?.Reason) {
+					return 'warning';
+				}
+				switch (this.submission?.SubmissionStatus) {
+					case 4:
+						return 'success';
+					case 2:
+						return 'info';
+					case 3:
+						return 'purple';
+					default: return 'grey';
+				}
+			},
+			getSubmissionStatusText() {
+				if (this.submission?.SubmissionStatus == 0 && this.submission?.Reason) return this.IsEngLish ? 'RequestResubmission' : 'Yêu cầu nộp lại bài';
+				switch (this.submission?.SubmissionStatus) {
+					case 4: return this.IsEngLish ? 'Complete Grade & Public' : 'Đã chấm bài và trả bài'; case 2: return this.IsEngLish ? 'Submitted' : 'Đã nộp'; case 3: return this.IsEngLish ? 'Draft Graded' : 'Đã chấm nháp';
+	
+					default: return this.IsEngLish ? 'Not submitted' : 'Chưa nộp';
+				}
+			},
+			toggleGroupCollapse(groupIndex) { this.groupCollapsed = { ...this.groupCollapsed, [groupIndex]: !this.groupCollapsed[groupIndex] }; },
+			navigateToQuestion(groupIndex, questionIndexInGroup, id) {
+				if (this.viewMode == 'all') {
+					var element = document.getElementById(id);
+					element.scrollIntoView({
+						behavior: "smooth", // cuộn mượt 
+						block: "start",// vị trí hiển thị: start | center | end | nearest 
+					});
+				}
+				this.currentGroupIndex = groupIndex;
+				this.currentQuestionIndexInGroup = questionIndexInGroup;
+				if (this.groupCollapsed[groupIndex]) { this.toggleGroupCollapse(groupIndex); }
+	
+			},
+			prevQuestion() { if (this.currentQuestionIndexInGroup > 0) { this.currentQuestionIndexInGroup--; } else if (this.currentGroupIndex > 0) { this.currentGroupIndex--; this.currentQuestionIndexInGroup = this.assignment.groups[this.currentGroupIndex].questions.length - 1; } },
+			nextQuestion() {
+				if (!this.assignment || !this.assignment.groups) return;
+				const currentGroup = this.assignment.groups[this.currentGroupIndex];
+				if (this.currentQuestionIndexInGroup < currentGroup.questions.length - 1) { this.currentQuestionIndexInGroup++; } else if (this.currentGroupIndex < this.assignment.groups.length - 1) { this.currentGroupIndex++; this.currentQuestionIndexInGroup = 0; }
+			},
+			getGlobalQuestionNumber(groupIndex, questionIndexInGroup) {
+				if (!this.assignment?.groups) return 1;
+				let number = 1;
+				for (let i = 0; i < groupIndex; i++) { number += this.assignment.groups[i].questions.length; }
+				return number + questionIndexInGroup;
+			},
+			getDriveFileId(url) {
+				const match = url?.match(/\/d\/([^/]+)\//);
+				return match ? match[1] : null;
+			},
+			formatDate(dateString) { if (!dateString) return 'Chưa có thông tin'; const date = new Date(dateString); return date.toLocaleString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }); },
+			onHandleQuestionNotGrade(listQuestions) {
+				//Lấy id những câu hỏi có manualScore = null
+				let listQuestionsNotGrade = _.keys(_.pickBy(this.gradingData, (value) => { return value.grading.manualScore == null }))
+				//Xử lấy show các câu hỏi chưa chấm
+				let getNumberQuestionNotGrade = _.reduce(listQuestions, (result, q, index) => {
+					if (listQuestionsNotGrade.includes(q.id)) result.push(`${this.IsEngLish ? 'Question' : 'Câu'}: ` + (index + 1))
+					return result
+				}, [])
+				return getNumberQuestionNotGrade.length > 0 ? getNumberQuestionNotGrade.join(', ') : ''
+			},
+			getGlobalQuestionNumberByQuestionId(questionId) {
+				if (!this.allQuestions) return 0;
+				const index = this.allQuestions.findIndex(q => q.id === questionId);
+				return index + 1;
+			},
+			questionsTypesLabel,
+			renderUrlYoutube,
+			YeuCauLamLaiBai() {
+				const $this = this
+				if (!$this.Reason) {
+					Vue.$toast.warning(`${this.IsEngLish ? 'Please enter the reason' : 'Vui lòng nhập lý do!'} `, { position: "top" })
+					return
+				}
 				confirm({
-					title: messageQuestionsNotGrade.length > 0 ? (`${this.IsEngLish ? 'There are still ungraded questions. Do you want to confirm and return the assignment?' : "Còn các câu hỏi chưa được chấm. Thầy/Cô xác nhận hoàn tất và trả bài?"}`) : (`${this.IsEngLish ? 'Confirm grading completion and return the assignment to the student?' : "Xác nhận hoàn tất chấm bài và trả bài cho học sinh?"}`),
-					message: messageQuestionsNotGrade.length > 0 ? (`${this.IsEngLish ? "List of Ungraded Questions" : "Danh sách câu chưa chấm"}: ` + messageQuestionsNotGrade) : "",
+					title: `${this.IsEngLish ? 'Confirm requesting the student to resubmit the assignment?' : 'Xác nhận yêu cầu học sinh nộp lại bài tập?'} `,
 					action: () => {
-						this.onPublishGrades(payload);
+						ajaxCALL("/lms/EL_Teacher_YeuCauNopBaiLai", {
+							SubmissionID: $this.submission?.SubmissionID,
+							Reason: $this.Reason
+						}, res => {
+							Vue.$toast.success(`${this.IsEngLish ? 'Successfully requested the student to resubmit the assignment!' : 'Yêu cầu học sinh nộp lại bài tập thành công!'} `, { position: "top" })
+							vueData.initPage()
+						})
 					}
 				})
-			} else {
-				this.onSaveGradingDraft(payload);
-			}
-			setTimeout(() => { this.isSaving = false; }, 200);
-		},
-		async saveGradingTEST(isPublishing) {
-			let listQuestions = _.flatten(this.assignment.groups.map(q => { return [...q.questions] }))
-			this.isSaving = true;
-			await this.calculateTotalScore();
-			console.log('saveGradingTEST', this.gradingSummary)
-			const payload = {
-				SubmissionID: this.submission.SubmissionID,
-				Score: this.gradingSummary.totalScore,
-				TeacherComment: this.gradingSummary.teacherComment,
-				SubmissionContent: JSON.stringify({ answers: this.gradingData })
-			};
-			setTimeout(() => { this.isSaving = false; }, 200);
-		},
-		updateGrading(questionId, newGradingData) {
-			const newGrading = { ...this.gradingData };
-			const currentAnswer = newGrading[questionId] || {};
-			newGrading[questionId] = { ...currentAnswer, grading: newGradingData };
-			this.gradingData = newGrading;
-			// Avoid tight recursive update loop
-			if (this.submission.SubmissionStatus <= 3) {
-				setTimeout(() => {
-					this.calculateTotalScore();
-				}, 0);
+	
+			},
+			handleOpenModalRequireResend() {
+				this.IsOpenModal_Require_Resend = true
+			},
+			handleCloseModalRequireResend() {
+				this.IsOpenModal_Require_Resend = false
 			}
 		},
-		async calculateTotalScore() {
-			let total = 0;
-			await this.allQuestions.forEach(q => {
-				const grade = this.gradingData[q.id]?.grading;
-				if (grade) {
-					// total += parseFloat(grade.autoScore || 0) + parseFloat(grade.manualScore || 0);
-					total += parseFloat(grade.manualScore || 0);
-				}
-			});
-			this.gradingSummary.totalScore = parseFloat(total);
-		},
-		getGradingStatusIcon(questionId, question) {
-			const grading = this.gradingData[questionId]?.grading;
-			if (!grading || (grading.manualScore === null || grading.manualScore === undefined)) return 'mdi-help-circle-outline';
-			if (grading.isCorrect === true || grading.manualScore === this.getQuestionById(questionId)?.points) return 'mdi-check-circle';
-			if (grading.isCorrect === false || grading.manualScore === 0) return 'mdi-close-circle';
-			return 'mdi-minus-circle';
-		},
-		getGradingIconColor(questionId) {
-			const grading = this.gradingData[questionId]?.grading;
-			if (!grading || (grading.manualScore === null || grading.manualScore === undefined)) return 'grey';
-			if (grading.isCorrect === true || grading.manualScore === this.getQuestionById(questionId)?.points) return 'success';
-			if (grading.isCorrect === false || grading.manualScore === 0) return 'error';
-			return 'warning';
-		},
-		getQuestionById(questionId) { return this.allQuestions.find(q => q.id === questionId); },
-		isActiveQuestion(groupIndex, questionIndexInGroup) { return this.currentGroupIndex === groupIndex && this.currentQuestionIndexInGroup === questionIndexInGroup; },
-		getQuestionComponent(type) {
-			const map = {
-				'QUIZ_SINGLE_CHOICE': 'uc-question-single-choice',
-				'QUIZ_MULTIPLE_CHOICE': 'uc-question-multiple-choice',
-				'QUIZ_TRUE_FALSE': 'uc-question-true-false',
-				'QUIZ_FILL_IN_BLANK': 'uc-question-fill-in-blank',
-				'QUIZ_MATCHING': 'uc-question-matching',
-				'SHORT_ANSWER': 'uc-question-short-answer',
-				'ESSAY': 'uc-question-essay',
-				'FILE_UPLOAD': 'uc-question-file-upload',
-				'AUDIO_RESPONSE': 'uc-question-audio-response',
-				'QUIZ_MULTIPLE_TRUE_FALSE': 'uc-question-multiple-true-false'
-			};
-			return map[type] || 'div';
-		},
-		getSubmissionStatusColor() {
-			if (this.submission?.SubmissionStatus == 0 && this.submission?.Reason) {
-				return 'warning';
+		watch: {
+			submissionData: {
+				handler: 'processData',
+				immediate: true,
+			},
+			mobile: function (val) {
+				if (val) this.viewMode = 'all'
+				else this.viewMode = 'single'
 			}
-			switch (this.submission?.SubmissionStatus) {
-				case 4:
-					return 'success';
-				case 2:
-					return 'info';
-				case 3:
-					return 'purple';
-				default: return 'grey';
-			}
-		},
-		getSubmissionStatusText() {
-			if (this.submission?.SubmissionStatus == 0 && this.submission?.Reason) return this.IsEngLish ? 'RequestResubmission' : 'Yêu cầu nộp lại bài';
-			switch (this.submission?.SubmissionStatus) {
-				case 4: return this.IsEngLish ? 'Complete Grade & Public' : 'Đã chấm bài và trả bài'; case 2: return this.IsEngLish ? 'Submitted' : 'Đã nộp'; case 3: return this.IsEngLish ? 'Draft Graded' : 'Đã chấm nháp';
-
-				default: return this.IsEngLish ? 'Not submitted' : 'Chưa nộp';
-			}
-		},
-		toggleGroupCollapse(groupIndex) { this.groupCollapsed = { ...this.groupCollapsed, [groupIndex]: !this.groupCollapsed[groupIndex] }; },
-		navigateToQuestion(groupIndex, questionIndexInGroup, id) {
-			if (this.viewMode == 'all') {
-				var element = document.getElementById(id);
-				element.scrollIntoView({
-					behavior: "smooth", // cuộn mượt 
-					block: "start",// vị trí hiển thị: start | center | end | nearest 
-				});
-			}
-			this.currentGroupIndex = groupIndex;
-			this.currentQuestionIndexInGroup = questionIndexInGroup;
-			if (this.groupCollapsed[groupIndex]) { this.toggleGroupCollapse(groupIndex); }
-
-		},
-		prevQuestion() { if (this.currentQuestionIndexInGroup > 0) { this.currentQuestionIndexInGroup--; } else if (this.currentGroupIndex > 0) { this.currentGroupIndex--; this.currentQuestionIndexInGroup = this.assignment.groups[this.currentGroupIndex].questions.length - 1; } },
-		nextQuestion() {
-			if (!this.assignment || !this.assignment.groups) return;
-			const currentGroup = this.assignment.groups[this.currentGroupIndex];
-			if (this.currentQuestionIndexInGroup < currentGroup.questions.length - 1) { this.currentQuestionIndexInGroup++; } else if (this.currentGroupIndex < this.assignment.groups.length - 1) { this.currentGroupIndex++; this.currentQuestionIndexInGroup = 0; }
-		},
-		getGlobalQuestionNumber(groupIndex, questionIndexInGroup) {
-			if (!this.assignment?.groups) return 1;
-			let number = 1;
-			for (let i = 0; i < groupIndex; i++) { number += this.assignment.groups[i].questions.length; }
-			return number + questionIndexInGroup;
-		},
-		getDriveFileId(url) {
-			const match = url?.match(/\/d\/([^/]+)\//);
-			return match ? match[1] : null;
-		},
-		formatDate(dateString) { if (!dateString) return 'Chưa có thông tin'; const date = new Date(dateString); return date.toLocaleString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }); },
-		onHandleQuestionNotGrade(listQuestions) {
-			//Lấy id những câu hỏi có manualScore = null
-			let listQuestionsNotGrade = _.keys(_.pickBy(this.gradingData, (value) => { return value.grading.manualScore == null }))
-			//Xử lấy show các câu hỏi chưa chấm
-			let getNumberQuestionNotGrade = _.reduce(listQuestions, (result, q, index) => {
-				if (listQuestionsNotGrade.includes(q.id)) result.push(`${this.IsEngLish ? 'Question' : 'Câu'}: ` + (index + 1))
-				return result
-			}, [])
-			return getNumberQuestionNotGrade.length > 0 ? getNumberQuestionNotGrade.join(', ') : ''
-		},
-		getGlobalQuestionNumberByQuestionId(questionId) {
-			if (!this.allQuestions) return 0;
-			const index = this.allQuestions.findIndex(q => q.id === questionId);
-			return index + 1;
-		},
-		questionsTypesLabel,
-		renderUrlYoutube,
-		YeuCauLamLaiBai() {
-			const $this = this
-			if (!$this.Reason) {
-				Vue.$toast.warning(`${this.IsEngLish ? 'Please enter the reason' : 'Vui lòng nhập lý do!'} `, { position: "top" })
-				return
-			}
-			confirm({
-				title: `${this.IsEngLish ? 'Confirm requesting the student to resubmit the assignment?' : 'Xác nhận yêu cầu học sinh nộp lại bài tập?'} `,
-				action: () => {
-					ajaxCALL("/lms/EL_Teacher_YeuCauNopBaiLai", {
-						SubmissionID: $this.submission?.SubmissionID,
-						Reason: $this.Reason
-					}, res => {
-						Vue.$toast.success(`${this.IsEngLish ? 'Successfully requested the student to resubmit the assignment!' : 'Yêu cầu học sinh nộp lại bài tập thành công!'} `, { position: "top" })
-						vueData.initPage()
-					})
-				}
-			})
-
-		},
-		handleOpenModalRequireResend() {
-			this.IsOpenModal_Require_Resend = true
-		},
-		handleCloseModalRequireResend() {
-			this.IsOpenModal_Require_Resend = false
-		}
-	},
-	watch: {
-		submissionData: {
-			handler: 'processData',
-			immediate: true,
-		},
-		mobile: function (val) {
-			if (val) this.viewMode = 'all'
-			else this.viewMode = 'single'
 		}
 	}
-}
 </script>

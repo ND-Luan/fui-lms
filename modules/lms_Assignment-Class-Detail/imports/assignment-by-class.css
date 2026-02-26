@@ -126,6 +126,7 @@
     border-radius: 12px;
     background: #f5f7fa;
     border-bottom: 1px solid #dde5e1;
+    min-height: unset;
 }
 .submission-stats-card .text-overline {
     color: #4f7f6a;
@@ -143,4 +144,9 @@
 
 .submission-stats-card .avg-score {
     color: #1976d2;
+}
+
+.stats-header-row {
+    padding-top: 4px;
+    padding-bottom: 4px;
 }

@@ -30,7 +30,6 @@ function onSelectedHocSinh(item, options = { IsSelect: false }) {
     //Không có HocSinh lấy default
     if (!item.HocSinhID) {
         const existHocSinhInSchool = vueData.DSHocSinh.find(x => x.Khoi >= 1)
-        console.log('existHocSinhInSchool', existHocSinhInSchool)
         if (existHocSinhInSchool) {
             _hocSinhID = existHocSinhInSchool.HocSinhID
         }
@@ -47,9 +46,13 @@ function onSelectedHocSinh(item, options = { IsSelect: false }) {
             NienKhoa: vueData.NienKhoa
         }, data => {
             vueData.HocSinhSelected = { ...item, ...data }
-            if (vueData.HocSinhSelected.NienKhoaHoc.length > 0) {
-                vueData.HocSinhSelected.NienKhoaHoc = JSON.parse(vueData.HocSinhSelected.NienKhoaHoc)
-                vueData.DSNienKhoa = vueData.HocSinhSelected.NienKhoaHoc
+            ajaxCALL("diemc3/LMS_GetLichSuLopHocSinh", {
+                HocSinhID: vueData.HocSinhSelected.HocSinhID
+            }, res => {
+                vueData.DSNienKhoa = res.data//.filter(x => x.NienKhoa > 2023) //Chỉ lấy niên khóa 2023 trở lên
+            })
+            if (vueData.HocSinhSelected.NienKhoaHoc?.length > 0) {
+                vueData.HocSinhSelected.NienKhoaHoc = JSON.parse(vueData.HocSinhSelected?.NienKhoaHoc)
             }
             let url = new URL(window.location.href);
             // console.log('vueData.HocSinhSelected script', vueData.HocSinhSelected)

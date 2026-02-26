@@ -21,7 +21,7 @@
 			<div class="d-flex ga-4 justify-center">
 				<v-sheet class=" pa-4 d-flex flex-column justify-center align-center border-thin rounded cursor-pointer"
 					style="min-width: 100px" @click="onActive(false)" :class="IsLanguage ? '' : 'bg-primary'">
-					<v-img src="/_cdn/lhbs-lms/img_page_ph/icon_vietnam.png" width="30" />
+					<v-img src="/_cdn/lhbs-lms/img_page_ph/icon_vietnam_old.png" width="30" />
 					<p class=" mt-2">{{ $t('message.vietNam') }}</p>
 				</v-sheet>
 				<v-sheet class=" pa-4 d-flex flex-column justify-center align-center border-thin rounded cursor-pointer"

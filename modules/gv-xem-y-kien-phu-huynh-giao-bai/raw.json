@@ -39,7 +39,7 @@
             "EL_Teacher_GetMyClasses": {
                 "API": "lms/EL_Teacher_GetMyClasses",
                 "IN": {
-                    "HocKi": "vueData.NienKhoaItem.HocKi"
+                    "HocKi": "vueData.NienKhoaItem?.HocKi"
                 },
                 "OUT": "DSLop",
                 "CALLBACK": [
@@ -121,16 +121,14 @@
                     "value": "NoiDungPhuHuynh"
                 }
             ]
-        },
-        {
-            "CALL": "EL_Teacher_GetMyClasses"
         }
+        
     ],
     "watch": {
-        "NienKhoa": [
+        "NienKhoaItem": [
             {
-                "EXE": ""
-            }
+            "CALL": "EL_Teacher_GetMyClasses"
+        }
         ],
         "CapItem": {
             "IF": "CapItem.value>0",

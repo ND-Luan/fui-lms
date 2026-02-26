@@ -470,3 +470,15 @@
 	overflow-y: hidden !important;
 	height: 100vh;
 }
+
+.question-card-all.question-correct {
+	background-color: #e8f5e9;
+	/* xanh nhạt */
+	border-left: 4px solid #4caf50;
+}
+
+.question-card-all.question-wrong {
+	background-color: #fdecea;
+	/* đỏ nhạt */
+	border-left: 4px solid #f44336;
+}

@@ -1,21 +1,21 @@
 <template>
-	<v-card variant="tonal" color="primary" class="submission-stats-card">
+	<v-card variant="flat" class="submission-stats-card">
 		<div v-if="loading" class="pa-4">
 			<v-skeleton-loader type="card-avatar, article"></v-skeleton-loader>
 		</div>
-		<v-card-text v-else class="pa-2">
-			<v-row align="center">
+		<v-card-text v-else class="pa-1">
+			<v-row align="center" dense class="stats-header-row">
 				<v-col cols="12" md="8" class="border-e-md ">
 					<div>
 						<div class=" d-flex align-baseline ga-2">
 							<div class="text-overline">{{ $t('message.Statistics') }}:</div>
-							<div class="text-h6 font-weight-bold text-truncate" :title="assignmentTitle">
+							<div class="text-subtitle-1 font-weight-medium text-black" :title="assignmentTitle">
 								{{ assignmentTitle || $t('message.PleaseSelectAssignment') }}
 							</div>
 						</div>
 					</div>
 					<div class="mb-1">
-						<div class="text-overline">{{ $t('message.LimitAssigned') }}: <b>
+						<div class="text-overline">{{ $t('message.LimitAssigned') }}: <b class="text-pink-darken-1">
 								{{ assignmentInfo?.LimitAssigned ?? 1 }}</b>
 						</div>
 					</div>
@@ -57,10 +57,10 @@
 				<v-col cols="12" md="4" class="d-flex align-center justify-space-around ">
 					<!-- Thống kê Tỉ lệ nộp bài -->
 					<div class="text-center">
-						<div class="text-overline mb-1">{{ $t('message.Submitted') }}</div>
+						<div class="text-overline"  style="color:black">{{ $t('message.Submitted') }}</div>
 						<div class="d-flex align-baseline justify-center">
 							<div class="text-h4 font-weight-bold">{{ stats.SubmittedCount || 0 }}</div>
-							<div class="text-h6">/{{ stats.TotalStudents || 0 }}</div>
+							<div class="text-h6" style="color:black">/{{ stats.TotalStudents || 0 }}</div>
 						</div>
 						<v-progress-linear :model-value="completionRate" :color="completionColor" height="8" rounded
 							class="my-2 mx-auto" style="width: 120px;" />
@@ -72,7 +72,7 @@
 
 					<!-- Thống kê Điểm Trung bình -->
 					<div class="text-center">
-						<div class="text-overline mb-1">{{ $t('message.averageScore') }}</div>
+						<div class="text-overline"  style="color:black">{{ $t('message.averageScore') }}</div>
 						<div class="text-h4 font-weight-bold">{{ (stats.AverageScore || 0) }}</div>
 						<div class="text-caption">{{ $t('message.OnScaleOf') }} {{ stats.MaxScore || '-' }}</div>
 					</div>
@@ -90,16 +90,17 @@
 					v-if="assignmentInfo?.LimitAssigned > 1">*{{ $t('message.NoticeHighestScoreSubmission') }}</span>
 			</div>
 			<div class="d-flex flex-column flex-md-row justify-md-end w-100 ga-2">
-				<v-btn color="primary" variant="flat" :disabled="!studentSubmissions.length"
+				<!-- <v-btn color="primary" variant="flat" :disabled="!studentSubmissions.length"
 					@click.stop="viewClassReport" :size="isMobile ? 'small' : 'default'">
 					{{ $t('message.ViewClassReport') }}
-				</v-btn>
+				</v-btn> -->
 				<!-- <v-btn color="primary" variant="flat" :disabled="!studentSubmissions.length"
 					@click.stop="onChamBaiAll()" :size="isMobile ? 'small' : 'default'">
 					{{ $t('message.GradeAllAssignments') }}
 				</v-btn> -->
-				<v-text-field v-model="search" :label="$t('message.FindStudent')" prepend-inner-icon="mdi-magnify"
-					variant="outlined" density="compact" hide-details style="max-width: 300px;" />
+				<v-text-field class="text-grey-darken-1" v-model="search" :label="$t('message.FindStudent')"
+					prepend-inner-icon="mdi-magnify" variant="outlined" density="compact" hide-details
+					style="max-width: 300px;" />
 			</div>
 
 		</v-card-title>
@@ -174,7 +175,9 @@
 					</td>
 				</tr>
 			</template>
-			<template #item.TenLop="{item, value}">{{item.TenLop}}</template>
+			<template #item.TenLop="{item, value}">
+				<div class="text-muted">{{item.TenLop}}</div>
+				</template>
 			<template #item.HocSinhID="{ item }">
 				<div class="text-muted">{{ item.HocSinhID }}</div>
 			</template>
@@ -182,7 +185,7 @@
 				<div class="">{{ item.HoTen }}</div>
 			</template>
 			<template #item.Status="{ item }">
-				<v-chip :color="statusColors[item.Status]" size="small" variant="flat" class="">
+				<v-chip :color="statusColors[item.Status]" size="small" variant="text" class="font-weight-medium">
 					{{ statusTexts[item.Status] }}
 				</v-chip>
 			</template>
@@ -239,11 +242,21 @@
 				<i class="text-primary">Hệ thống ghi nhận lần nộp bài được chấm điểm cao nhất</i>
 			</template> -->
 			<template #item.actions="{ item }">
-				<v-btn size="small" color="primary" variant="flat"
-					:disabled="!item.SubmissionID || item.SubmissionStatus == 1 || item.SubmissionStatus == 0"
-					@click.stop="RedirectToGrade(item)">
-					{{ item.SubmissionStatus == 4 ? $t('message.ReviewGraded') : $t('message.GradeAssignment') }}
-				</v-btn>
+				<v-tooltip location="top">
+					<template #activator="{ props }">
+						<v-btn v-bind="props" icon size="small" variant="text" color="primary"
+							:disabled="!item.SubmissionID || item.SubmissionStatus == 1 || item.SubmissionStatus == 0"
+							@click.stop="RedirectToGrade(item)">
+							<v-icon>
+								{{ getGradeActionIcon(item.SubmissionStatus) }}
+							</v-icon>
+						</v-btn>
+					</template>
+
+					<span>
+						{{ getGradeActionTooltip(item.SubmissionStatus) }}
+					</span>
+				</v-tooltip>
 			</template>
 			<template #no-data>
 				<div class="text-center pa-4 text-medium-emphasis">
@@ -403,6 +416,17 @@
 			}
 		},
 		methods: {
+			getGradeActionIcon(status) {
+				return status === 4
+					? 'mdi-eye-outline'
+					: 'mdi-clipboard-check-outline'
+			},
+	
+			getGradeActionTooltip(status) {
+				return status === 4
+					? this.$t('message.ReviewGraded')
+					: this.$t('message.GradeAssignment')
+			},
 			onChamBaiAll() {
 				const $this = this
 				confirm({

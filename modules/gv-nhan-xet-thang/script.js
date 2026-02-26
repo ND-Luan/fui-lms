@@ -242,7 +242,7 @@ function renderHeaderTable() {
                                         }
                                     },
                                     {
-                                        "el": "v-btn",
+                                        "__el": "v-btn",
                                         "attr": {
                                             "v-if": "vueData.user.UserID  == 'NA0000022'",
                                             "color": "primary",

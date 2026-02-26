@@ -69,25 +69,30 @@
 		<!-- 4) Ý kiến học sinh -->
 		<div class="text-end" v-if="!isGrade && submissionstatus < 2 && isShowBtnComment">
 			<v-menu v-model="menu" :close-on-content-click="false" scroll-strategy="close" location="start">
-				<template v-slot:activator="{ props }">
-					<v-btn color="orange-darken-1" v-bind="props" icon="mdi-notebook-edit-outline" size="small"
-						v-tooltip="'Ý kiến của bạn'">
-					</v-btn>
+				<template #activator="{ props: menuProps }">
+					<v-tooltip location="top">
+						<template #activator="{ props: tooltipProps }">
+							<v-btn v-bind="{ ...menuProps, ...tooltipProps }" icon="mdi-notebook-edit-outline" size="small"
+								variant="text" color="primary" />
+						</template>
+						<span>Ý kiến của bạn</span>
+					</v-tooltip>
 				</template>
-
-				<v-card :min-width="widthScreen < 650 ? null : 600" class="elevation-0" variant="outlined"
-					color="orange">
-					<v-card-title class="bg-orange-darken-1">Ý kiến của bạn</v-card-title>
+				<v-card :min-width="widthScreen < 650 ? null : 600" variant="outlined" class="elevation-0">
+					<v-card-title class="px-4 py-3" style="background-color:#E3F2FD; color:#1565C0; font-weight:600;">
+						Ý kiến của bạn
+					</v-card-title>
 					<v-list>
 						<v-list-item>
-							<v-textarea :model-value="grading?.comment || ''"
-								@update:model-value="onStudentCommentInput" rows="2" dense hide-details
-								variant="outlined" placeholder="Nhập ý kiến của bạn" />
+							<v-textarea :model-value="grading?.comment || ''" @update:model-value="onStudentCommentInput" rows="2"
+								hide-details variant="outlined" placeholder="Nhập ý kiến của bạn" />
 						</v-list-item>
 					</v-list>
 					<v-card-actions class="border-t py-0">
-						<v-spacer></v-spacer>
-						<v-btn text color="orange-darken-1" @click="menu = false">Đóng</v-btn>
+						<v-spacer />
+						<v-btn variant="text" color="primary" @click="menu = false">
+							Đóng
+						</v-btn>
 					</v-card-actions>
 				</v-card>
 			</v-menu>

@@ -1,31 +1,27 @@
 <template>
 	<div>
 		<v-card>
-			<v-card-title class="d-flex ga-2 border rounded">
-				Theo dõi tình hình học tập
-
-			</v-card-title>
 			<v-card-text class="mt-3 pa-0">
 				<v-row>
 					<v-col v-for="cap in Object.keys(CapList)">
 						<v-card class="border rounded ">
-							<v-card-title class="d-flex flex-column border-b text-white"
-								style="background-color: rgb(36 151 244);">
-								<div class="w-100 text-center text-body-1" style="font-weight: 500 !important;">
+							<v-card-title class="d-flex flex-column border-b" style="background-color:#E3F2FD;">
+								<div class="w-100 text-center text-body-1 cap-title">
 									Cấp {{ cap }}
 								</div>
-								<div class="w-100 text-center text-body-2" style="font-weight: 500 !important;">
-									Tổng số bài tập: {{ CapList[cap].TongBaiTap }}
+								<div class="w-100 text-center text-body-2 cap-sub" style="color: black">
+									Tổng số bài tập:
+									<span class="cap-total">
+										{{ CapList[cap].TongBaiTap }}
+									</span>
 								</div>
 							</v-card-title>
 							<v-card-text class="d-flex justify-center">
 								<uc-chart-apex v-if="CapList[cap].optionsChartPie"
 									:options="CapList[cap].optionsChartPie" :key='cap' />
 							</v-card-text>
-
 						</v-card>
 					</v-col>
-
 				</v-row>
 
 
@@ -37,7 +33,7 @@
 						item-title="TenLop" item-value="LopID"></v-select>
 					<v-select v-model="selectedMonHocID" label="Môn học" style="max-width:200px" :items="monHocList"
 						item-title="MonHocName" item-value="MonHocID"></v-select>
-					<v-btn @click="refresh()" color="primary" variant="outlined">Làm mới</v-btn>
+					<v-btn @click="refresh()" color="primary" variant="outlined"><v-icon start class="me-1">mdi-reload</v-icon>Làm mới</v-btn>
 				</div>
 				<v-data-table :headers="headers" :items="DataTable" item-value="HocSinhID" hide-default-footer
 					show-expand :items-per-page="-1">
@@ -72,10 +68,10 @@
 													</span>
 												</div>
 
-												<v-btn variant="tonal" color="primary" :loading="isLoadingNhanXet"
-													@click="getNhanXet(item, item.OptionsData)">Chọn để hiển thị nhận
-													xét từ
-													AI</v-btn>
+												<v-btn variant="outlined" color="primary" :loading="isLoadingNhanXet"
+													@click="getNhanXet(item, item.OptionsData)">
+													<v-icon start class="me-1">mdi-robot-outline</v-icon> Chọn để hiển thị nhận xét từ AI
+													</v-btn>
 											</div>
 										</v-col>
 									</v-row>

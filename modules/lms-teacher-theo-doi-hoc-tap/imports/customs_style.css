@@ -1,0 +1,15 @@
+.cap-title {
+    color: #1565C0;
+    font-weight: 600;
+}
+
+.cap-sub {
+    color: #1565C0;
+    font-weight: 500;
+}
+
+.cap-total {
+    color: #2E7D32;
+    /* ví dụ: xanh lá nhấn số */
+    font-weight: 700;
+}

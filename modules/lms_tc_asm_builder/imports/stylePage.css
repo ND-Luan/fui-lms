@@ -411,3 +411,7 @@
      max-width: 100%;
      min-width: 50px;
  }
+
+ .invisible-chip {
+     visibility: hidden;
+ }

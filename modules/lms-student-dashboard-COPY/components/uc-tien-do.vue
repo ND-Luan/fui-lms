@@ -1,117 +1,249 @@
 <template>
-	<v-list>
-		<v-list-subheader>Tiến độ môn học</v-list-subheader>
-		<div class="px-2">
-			<v-expansion-panels v-model="panel" class="rounded-sm">
-				<v-expansion-panel v-for="td in DSTienDo" class="mb-3">
-					<v-expansion-panel-title class="pa-2" style="background-color: rgb(229 229 229);">
-						<div class="d-flex algin-center w-100">
-							<span class="text-subtitle-5 font-weight-medium text-no-wrap">
-								<v-icon class="mr-2" :color="td.Color">{{ td.Icon }}</v-icon> {{ td.MonHocName }}
-							</span>
-							<v-spacer />
-							<!-- <v-progress-linear :model-value="calc_progress(td)" color="teal-lighten-3" height="15"
-								rounded bg-color="rgba(255, 255, 255, 0.3)" class="border ma-0"
-								style="max-width: 200px">
-								<template v-slot:default="{ value }">
-									<strong>{{ Math.ceil(calc_progress(td)) }}%</strong>
-								</template></v-progress-linear> -->
-							<div class="progress-label d-flex align-center" style="white-space: nowrap;">
-								{{ Math.round(calc_progress(td)) }}% hoàn thành
-							</div>
-						</div>
-					</v-expansion-panel-title>
-					<v-expansion-panel-text class="border">
-						<v-list :density="vueData.density">
-							<v-list-subheader>
-								<div class="d-flex align-center">
-									<p>Danh sách bài tập & bài học</p>
-									<v-spacer />
-									<v-btn size="small" color="primary" variant="tonal">Xem sổ điểm</v-btn>
-								</div>
-							</v-list-subheader>
-							<template v-for="(ct, idx) in DetailMonHoc.DanhSachChiTiet">
-								<v-list-item @click="onOpenWindow(ct)">
-									<v-list-item-title>{{ ct.Title }}</v-list-item-title>
-									<v-list-item-subtitle>
-										{{ ct.Tuan_HienThi }}
-										<span v-if="ct.DueDate">• Hạn nộp: {{ formatDate(ct.DueDate) }}</span>
-									</v-list-item-subtitle>
-									<template #append>
-										<v-chip size="small" v-if="ct.StudentScore">Điểm: {{ ct.StudentScore }}</v-chip>
-									</template>
-									<template #prepend>
-										<v-icon v-if="ct.ResourceType === 'ASSIGNMENT'"
-											color="primary">mdi-book</v-icon>
-										<v-icon v-else color="green">mdi-book-open-variant</v-icon>
-									</template>
-								</v-list-item>
-								<v-divider v-if="idx !== DetailMonHoc.DanhSachChiTiet.length - 1" />
-							</template>
-						</v-list>
-					</v-expansion-panel-text>
+	<div class="td-wrap">
 
-				</v-expansion-panel>
-			</v-expansion-panels>
+		<!-- ── HEADER ── -->
+		<div class="td-header">
+			<div class="td-header-left">
+				<div class="td-header-icon">
+					<v-icon size="16" color="white">mdi-chart-line</v-icon>
+				</div>
+				<div>
+					<div class="td-header-title">Tiến Độ Môn Học</div>
+					<div class="td-header-sub">{{ DSTienDo.length }} môn học</div>
+				</div>
+			</div>
+
+			<!-- Overall mini stats -->
+			<div class="td-overall" v-if="DSTienDo.length">
+				<div class="td-overall-pct">{{ overallPct }}%</div>
+				<div class="td-overall-label">hoàn thành</div>
+			</div>
 		</div>
 
-	</v-list>
+		<!-- ── LOADING ── -->
+		<div v-if="isLoading" class="td-loading-list">
+			<div v-for="n in 4" :key="n" class="td-card-skel">
+				<div class="td-skel td-skel--icon"></div>
+				<div class="td-skel-body">
+					<div class="td-skel td-skel--title"></div>
+					<div class="td-skel td-skel--bar"></div>
+				</div>
+				<div class="td-skel td-skel--pct"></div>
+			</div>
+		</div>
+
+		<!-- ── EMPTY ── -->
+		<div v-else-if="!DSTienDo.length" class="td-empty">
+			<v-icon size="44" color="grey-lighten-2">mdi-book-off-outline</v-icon>
+			<div class="td-empty-title">Chưa có dữ liệu tiến độ</div>
+		</div>
+
+		<!-- ── MÔN HỌC LIST ── -->
+		<v-row v-else class="td-list ma-0 px-2">
+			<v-col v-for="(td, idx) in DSTienDo" :key="td.MonHocID" :cols="openIdx === idx ? 12 : 12"
+				:sm="openIdx === idx ? 12 : 6" :lg="openIdx === idx ? 12 : 4" class="pa-2"
+				style="transition: all .25s ease">
+				<div class="td-card" :class="{ 'td-card--open': openIdx === idx }"
+					:style="{ '--mon-color': td.Color || 'rgb(var(--v-theme-primary))' }">
+					<!-- Card header — click to expand -->
+					<div class="td-card-header" @click="togglePanel(idx, td)">
+						<!-- Left accent bar -->
+						<div class="td-card-accent"></div>
+
+						<!-- Icon -->
+						<div class="td-card-icon">
+							<v-icon size="18" :color="td.Color || 'primary'">{{ td.Icon || 'mdi-book-outline' }}
+							</v-icon>
+						</div>
+
+						<!-- Info -->
+						<div class="td-card-info">
+							<div class="td-card-name">{{ td.MonHocName }}</div>
+							<div class="td-card-stats">
+								<span class="td-card-done">{{ td.CompletedTasks }}/{{ td.TotalTasks }} nhiệm vụ</span>
+								<!-- Progress bar -->
+								<div class="td-bar-wrap">
+									<div class="td-bar" :style="{ width: calcProgress(td) + '%' }"></div>
+								</div>
+							</div>
+						</div>
+
+						<!-- Percent + chevron -->
+						<div class="td-card-right">
+							<div class="td-pct-ring">
+								<svg viewBox="0 0 36 36" class="td-ring-svg">
+									<circle cx="18" cy="18" r="14" fill="none" stroke-width="3" class="td-ring-track" />
+									<circle cx="18" cy="18" r="14" fill="none" stroke-width="3" class="td-ring-fg"
+										stroke-linecap="round" :stroke-dasharray="calcProgress(td) * 0.88+ '88'"
+										transform="rotate(-90 18 18)" />
+								</svg>
+								<span class="td-pct-num">{{ Math.round(calcProgress(td)) }}</span>
+							</div>
+							<v-icon size="16" class="td-chevron" :class="{ 'td-chevron--open': openIdx === idx }">
+								mdi-chevron-down
+							</v-icon>
+						</div>
+					</div>
+
+					<!-- ── DETAIL PANEL ── -->
+					<div class="td-detail" :class="{ 'td-detail--open': openIdx === idx }">
+						<div class="td-detail-inner">
+
+							<!-- Detail loading -->
+							<div v-if="detailLoading" class="td-detail-loading">
+								<div class="td-mini-spinner"></div>
+								<span>Đang tải…</span>
+							</div>
+
+							<template v-else>
+								<!-- Tổng kết -->
+								<div class="td-summary-row" v-if="DetailMonHoc.Tong">
+									<div class="td-sum-chip td-sum-chip--done">
+										<v-icon size="12">mdi-check-circle-outline</v-icon>
+										{{ DetailMonHoc.Tong.CompletedTasks ?? td.CompletedTasks }} hoàn thành
+									</div>
+									<div class="td-sum-chip td-sum-chip--pending">
+										<v-icon size="12">mdi-clock-outline</v-icon>
+										{{ (td.TotalTasks - td.CompletedTasks) }} còn lại
+									</div>
+									<v-spacer />
+									<v-btn size="x-small" color="primary" variant="tonal" class="td-gradebook-btn">
+										<v-icon size="12" start>mdi-book-open-page-variant</v-icon>
+										Sổ điểm
+									</v-btn>
+								</div>
+
+								<!-- List bài tập / bài học -->
+								<div class="td-items-list">
+									<div v-for="(ct, cidx) in DetailMonHoc.DanhSachChiTiet"
+										:key="ct.AssignToClassID + '_' + cidx" class="td-item"
+										@click="onOpenWindow(ct)">
+										<!-- Type icon -->
+										<div class="td-item-icon"
+											:class="ct.ResourceType === 'ASSIGNMENT' ? 'td-item-icon--assign' : 'td-item-icon--lesson'">
+											<v-icon size="13">
+												{{ ct.ResourceType === 'ASSIGNMENT' ? 'mdi-pencil-box-outline' :
+												'mdi-play-circle-outline' }}
+											</v-icon>
+										</div>
+
+										<div class="td-item-body">
+											<div class="td-item-title">{{ ct.Title }}</div>
+											<div class="td-item-meta">
+												<span v-if="ct.Tuan_HienThi">{{ ct.Tuan_HienThi }}</span>
+												<span v-if="ct.DueDate" class="td-item-due">
+													<v-icon size="10">mdi-calendar-clock</v-icon>
+													{{ formatDate(ct.DueDate) }}
+												</span>
+											</div>
+										</div>
+
+										<div class="td-item-right">
+											<div v-if="ct.StudentScore !== null && ct.StudentScore !== undefined"
+												class="td-item-score">
+												{{ ct.StudentScore }}
+											</div>
+											<div v-else class="td-item-score td-item-score--empty">—</div>
+											<v-icon size="13" color="grey-lighten-2">mdi-chevron-right</v-icon>
+										</div>
+									</div>
+
+									<!-- Empty detail -->
+									<div v-if="!DetailMonHoc.DanhSachChiTiet.length" class="td-detail-empty">
+										Chưa có bài tập hoặc bài học
+									</div>
+								</div>
+							</template>
+						</div>
+					</div>
+
+				</div>
+			</v-col>
+		</v-row>
+
+	</div>
 </template>
 
 <script>
 	export default {
-		props: {
-			NienKhoa: Number
-		},
-		data() {
-			return {
-				panel: [],
-				DSTienDo: [],
-				DetailMonHoc: {
-					DanhSachChiTiet: [],
-					Tong: []
-				},
-				vueData
-			}
-		},
-		async mounted() {
+	props: {
+		NienKhoa: Number
+	},
+	data() {
+		return {
+			isLoading: false,
+			detailLoading: false,
+			openIdx: null,
+			DSTienDo: [],
+			DetailMonHoc: {
+				DanhSachChiTiet: [],
+				Tong: null
+			},
+			vueData
+		}
+	},
+	computed: {
+		overallPct() {
+			if (!this.DSTienDo.length) return 0
+			const total     = this.DSTienDo.reduce((s, t) => s + (t.TotalTasks     || 0), 0)
+			const completed = this.DSTienDo.reduce((s, t) => s + (t.CompletedTasks || 0), 0)
+			if (!total) return 0
+			return Math.round((completed / total) * 100)
+		}
+	},
+	async mounted() {
+		this.isLoading = true
+		try {
 			this.DSTienDo = await ajaxCALLPromise("lms/EL_Student_Get_TienDo_ByHocSinhID", {
 				HocSinhID: vueData.user.UserID,
 				NienKhoa: this.NienKhoa
 			})
-		}, computed: {}, watch: {
-			panel: function (panel) {
-				if (panel === null) return
-				const MonHoc = this.DSTienDo.find((_, idx) => idx === panel)
-				this.onLoadDetailMonHoc(MonHoc?.MonHocID ?? 0)
-				console.log("panel", panel)
+		} finally {
+			this.isLoading = false
+		}
+	},
+	methods: {
+		calcProgress(td) {
+			if (!td?.TotalTasks) return 0
+			return Math.min((td.CompletedTasks / td.TotalTasks) * 100, 100)
+		},
+
+		async togglePanel(idx, td) {
+			if (this.openIdx === idx) {
+				this.openIdx = null
+				return
+			}
+			this.openIdx = idx
+			this.DetailMonHoc.DanhSachChiTiet = []
+			this.DetailMonHoc.Tong = null
+			this.detailLoading = true
+			try {
+				const res = await ajaxCALLPromise("lms/EL_Student_GetSubjectProgressDetail", {
+					MonHocID: td.MonHocID
+				})
+				this.DetailMonHoc.DanhSachChiTiet = res[0] ?? []
+				this.DetailMonHoc.Tong            = res[1]?.[0] ?? null
+			} finally {
+				this.detailLoading = false
 			}
 		},
-		methods: {
-			calc_progress(td) {
-				if (!td?.TotalTasks || td?.TotalTasks === 0) return 0;
-				return (td?.CompletedTasks / td?.TotalTasks) * 100;
-			},
-			onOpenWindow(ct) {
-				let url = null
-				if (ct.ResourceType === 'LESSON') url = `/lms-student-lesson-viewer?AssignToClassID=${ct.AssignToClassID}`
-				else url = `/lms-student-assignment?AssignToClassID=${ct.AssignToClassID}`
-				openWindow({
-					title: 'Xem lại ' + `${ct.ResourceType === 'LESSON' ? 'bài học ' : 'bài tập '}` + ct.Title,
-					url: url,
-				})
-			},
-			async onLoadDetailMonHoc(id) {
-				const DetailMonHoc = await ajaxCALLPromise("lms/EL_Student_GetSubjectProgressDetail", {
-					MonHocID: id
-				})
-				this.DetailMonHoc.DanhSachChiTiet = DetailMonHoc[0]
-				this.DetailMonHoc.Tong = DetailMonHoc[1][0]
-			},
-			formatDate(dateString) {
-				if (!dateString) return '';
-				return new Date(dateString).toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' });
-			}
+
+		onOpenWindow(ct) {
+			const isLesson = ct.ResourceType === 'LESSON'
+			openWindow({
+				title: `Xem lại ${isLesson ? 'bài học' : 'bài tập'} ${ct.Title}`,
+				url: isLesson
+					? `/lms-student-lesson-viewer?AssignToClassID=${ct.AssignToClassID}`
+					: `/lms-student-assignment?AssignToClassID=${ct.AssignToClassID}`
+			})
 		},
+
+		formatDate(dateString) {
+			if (!dateString) return ''
+			return new Date(dateString).toLocaleDateString('vi-VN', {
+				day: '2-digit', month: '2-digit', year: 'numeric'
+			})
+		}
 	}
-</script>
+}
+</script> 

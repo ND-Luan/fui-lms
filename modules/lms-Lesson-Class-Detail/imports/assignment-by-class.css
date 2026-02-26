@@ -1,9 +1,9 @@
-
 /* ======================================================= */
 /* == STYLING CHUNG CHO TRANG                           == */
 /* ======================================================= */
 .page-container {
-    background-color: #f3f4f6; /* Nền xám rất nhạt */
+    background-color: #f3f4f6;
+    /* Nền xám rất nhạt */
     padding: 6px !important;
 }
 
@@ -16,7 +16,8 @@
     border: 1px solid #e5e7eb;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
     padding: 24px;
-    margin-bottom: 24px; /* Khoảng cách với bảng bên dưới */
+    margin-bottom: 24px;
+    /* Khoảng cách với bảng bên dưới */
 }
 
 .filters-column {
@@ -26,6 +27,7 @@
 .header-title-group .text-h6 {
     color: #111827;
 }
+
 .header-title-group .text-body-2 {
     color: #6b7280;
 }
@@ -43,6 +45,7 @@
     box-shadow: none !important;
     border: 1px solid #e5e7eb !important;
 }
+
 :deep(.v-field__outline) {
     display: none;
 }
@@ -56,32 +59,40 @@
 
 .stat-item {
     flex: 1;
-    padding: 0 16px; /* Thêm padding ngang */
+    padding: 0 16px;
+    /* Thêm padding ngang */
 }
+
 .stat-item:first-child {
     padding-left: 0;
 }
+
 .stat-item:last-child {
     padding-right: 0;
 }
+
 .stat-item .text-overline {
     color: #6b7280;
     font-size: 0.75rem !important;
     font-weight: 500;
 }
+
 .stat-item .stat-ratio {
     font-size: 0.9rem;
     color: #374151;
 }
+
 .stat-item .stat-ratio strong {
     font-weight: 600;
 }
+
 .stat-item .stat-value {
     color: #111827;
     font-size: 2.25rem;
     font-weight: 700;
     line-height: 1.2;
 }
+
 .v-progress-linear {
     margin-top: 8px;
 }
@@ -105,19 +116,61 @@
     color: #6b7280;
     font-size: 0.8rem;
 }
+
 .text-secondary {
     color: #374151;
 }
+
 .score-bad {
     color: #ef4444 !important;
 }
+
 .score-average {
     color: #f97316 !important;
 }
+
 .score-good {
     color: #16a34a !important;
 }
 
-.table-custom .v-data-table-headers--mobile{
+.table-custom .v-data-table-headers--mobile {
     display: none;
+}
+
+
+.submission-stats-card {
+    border-radius: 12px;
+    background: #f5f7fa;
+    border-bottom: 1px solid #dde5e1;
+    min-height: unset;
+}
+
+/* Container scroll cho bảng */
+.table-scroll-wrapper {
+    height: calc(100vh - 180px);
+    /* chỉnh theo layout thực tế */
+    overflow-y: auto;
+}
+
+/* Sticky phần title "Danh sách học sinh" */
+.table-title-sticky {
+    position: sticky;
+    top: 0;
+    z-index: 5;
+    background: white;
+    border-bottom: 1px solid #eee;
+}
+
+/* Sticky header của v-data-table */
+.table-custom thead th {
+    position: sticky;
+    top: 48px;
+    /* bằng chiều cao v-card-title */
+    z-index: 4;
+    background: white;
+}
+
+/* Tránh header bị trong suốt */
+.table-custom thead {
+    background: white;
 }
