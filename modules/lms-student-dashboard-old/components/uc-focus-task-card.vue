@@ -15,6 +15,10 @@
 			<!-- THÔNG TIN CHÍNH -->
 			<div class="task-info">
 				<div class="task-title">{{ task.Title }}</div>
+				<div class="task-meta">
+					<v-icon size="14" class="mr-1">mdi-book-open-variant</v-icon>
+					{{ task.MonHocName }}
+				</div>
 				<div v-if="task.DueDate && typeInfo.isAssignment" class="task-due-date" :class="dueDateInfo.colorClass">
 					<v-icon size="14" class="mr-1">mdi-calendar-clock</v-icon>
 					Hạn nộp: {{ formatDate(task.DueDate) }} ({{ dueDateInfo.text }})
@@ -22,7 +26,7 @@
 			</div>
 
 			<!-- CHIP TRẠNG THÁI -->
-			<v-chip :color="statusInfo.color" size="small" class="task-status-chip" variant="tonal">
+			<v-chip :color="statusInfo.color" size="small" class="task-status-chip font-weight-medium" variant="text">
 				{{ statusInfo.text }}
 			</v-chip>
 		</v-card-text>
@@ -44,7 +48,8 @@ export default {
 				return {
 					isAssignment: true,
 					icon: 'mdi-pencil-ruler',
-					color: '#1976D2' // Primary
+					color: '#1976D2', // Primary,,
+					Reason: this.task?.Reason ?? ''
 				};
 			}
 			return {
@@ -57,7 +62,8 @@ export default {
 			const statuses = {
 				'OVERDUE': { color: 'error', text: 'Quá hạn', cardClass: 'urgent' },
 				'IN_PROGRESS': { color: 'warning', text: this.task.ResourceType === 'ASSIGNMENT' ? 'Đang làm' : 'Đang học', cardClass: 'warning' },
-				'NOT_STARTED': { color: this.typeInfo.isAssignment ? 'primary' : 'success', text: 'Bắt đầu', cardClass: 'normal' }
+				'NOT_STARTED': { color: this.typeInfo.isAssignment ? 'primary' : 'success', text: 'Bắt đầu', cardClass: 'normal' },
+				'RESUBMIT': { color: 'warning', text: 'Nộp bài lại', cardClass: 'normal' },
 			};
 			return statuses[this.task.Status] || statuses['NOT_STARTED'];
 		},
@@ -78,18 +84,21 @@ export default {
 	},
 	methods: {
 		goToResource() {
+			console.log('this.task.', this.task)
 			const type = (this.task.ResourceType || '').toLowerCase();
 			const id = this.task.ResourceID;
+			const Is_SendToClass = this.task.Is_SendToClass
 			if (type && id) {
 				if (type === 'assignment') {
 					openWindow({
 						title: this.task.Title,
-						url: `/lms-student-assignment?AssignToClassID=${id}`,
-						id: 'StudentDoASM',
+						url: `/lms-student-assignment?AssignToClassID=${id}&Is_SendToClass=${Is_SendToClass}`,
+						id: 'StudentDoASM' + id,
 						onclose: {
 							"EXE": "vueData.initPage()"
 						}
 					})
+
 				} else if (type === 'lesson') {
 					openWindow({
 						title: this.task.Title,
@@ -103,10 +112,18 @@ export default {
 		},
 		formatDate(dateString) {
 			if (!dateString) return '';
+			console.log('dateString', dateString)
 			const date = new Date(dateString);
-			return date.toLocaleString('vi-VN', {
-				hour: '2-digit', minute: '2-digit', day: '2-digit', month: '2-digit'
-			});
+			console.log('date', date)
+			return date.toLocaleString('vi-VN'
+				, {
+					hour: "2-digit",
+					minute: "2-digit",
+					day: "2-digit",
+					month: "2-digit",
+					year: "numeric"
+				}
+			);
 		}
 	}
 }

@@ -1,13 +1,19 @@
 /* .v-overlay-container .v-toolbar-title {
 	min-width: fit-content;
 } */
+html{
+	overflow-y: clip;
+}
+.v-window {
+	width: 100%;
+}
 
 .v-overlay-container .v-toolbar-title {
-    min-width: 0;
-    max-width: 100%;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+	min-width: 0;
+	max-width: 100%;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
 }
 
 
@@ -16,273 +22,277 @@
 
 
 .modern-card.v-card {
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1) !important;
+	border-radius: 8px !important;
+	box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1) !important;
+	border: 1px solid #e0e0e0;
 }
 
 .empty-state-card {
-    background: #f8f9fa;
-    border-radius: 8px;
-    border: 1px dashed #d0d0d0;
-    padding: 32px 16px;
-    text-align: center;
+	background: #f8f9fa;
+	border-radius: 8px;
+	border: 1px dashed #d0d0d0;
+	padding: 32px 16px;
+	text-align: center;
 }
 
 .empty-state-icon {
-    width: 48px;
-    height: 48px;
-    border-radius: 50%;
-    background: #4caf50;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin: 0 auto 16px;
+	width: 48px;
+	height: 48px;
+	border-radius: 50%;
+	background: #4caf50;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	margin: 0 auto 16px;
 }
 
 .empty-state-title {
-    font-size: 1rem;
-    font-weight: 500;
-    color: #424242;
-    margin-bottom: 4px;
+	font-size: 1rem;
+	font-weight: 500;
+	color: #424242;
+	margin-bottom: 4px;
 }
 
 .empty-state-subtitle {
-    font-size: 0.9rem;
-    color: #4caf50;
-    font-weight: 500;
-    margin: 0;
+	font-size: 0.9rem;
+	color: #4caf50;
+	font-weight: 500;
+	margin: 0;
 }
 
 .subjects-container {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-    padding: 8px !important;
+	display: flex;
+	flex-wrap: wrap;
+	gap: 12px;
+	padding: 16px !important;
 }
 
 /* ============= uc-week-calendar.vue ============= */
 
 .modern-card.v-card {
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1) !important;
+	border-radius: 8px !important;
+	box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1) !important;
+	border: 1px solid #e0e0e0;
 }
 
 .week-calendar {
-    display: grid;
-    grid-template-columns: repeat(7, 1fr);
-    gap: 4px;
-    padding: 12px;
+	display: grid;
+	grid-template-columns: repeat(7, 1fr);
+	gap: 4px;
+	padding: 12px;
 }
 
 .day-cell {
-    padding: 8px 4px;
-    border-radius: 6px;
-    text-align: center;
-    background: #f5f5f5;
-    border: 1px solid #e0e0e0;
-    transition: all 0.2s ease;
-    cursor: pointer;
+	padding: 8px 4px;
+	border-radius: 6px;
+	text-align: center;
+	background: #f5f5f5;
+	border: 1px solid #e0e0e0;
+	transition: all 0.2s ease;
+	cursor: pointer;
 }
 
 .day-cell:hover {
-    background: #fff;
-    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+	background: #fff;
+	box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
 }
 
 .day-cell.is-today {
-    background: #1976d2;
-    color: white;
-    font-weight: 600;
-    border-color: #1976d2;
+	background: #1976d2;
+	color: white;
+	font-weight: 600;
+	border-color: #1976d2;
 }
 
 .day-name {
-    font-size: 0.7rem;
-    font-weight: 500;
-    text-transform: uppercase;
-    opacity: 0.8;
-    margin-bottom: 2px;
+	font-size: 0.7rem;
+	font-weight: 500;
+	text-transform: uppercase;
+	opacity: 0.8;
+	margin-bottom: 2px;
 }
 
 .day-number {
-    font-size: 1.1rem;
-    font-weight: 600;
-    margin-bottom: 4px;
+	font-size: 1.1rem;
+	font-weight: 600;
+	margin-bottom: 4px;
 }
 
 .task-dots {
-    display: flex;
-    justify-content: center;
-    gap: 2px;
-    margin-top: 4px;
-    height: 6px;
+	display: flex;
+	justify-content: center;
+	gap: 2px;
+	margin-top: 4px;
+	height: 6px;
 }
 
 .task-dot {
-    width: 4px;
-    height: 4px;
-    background: #fb8c00;
-    border-radius: 50%;
+	width: 4px;
+	height: 4px;
+	background: #fb8c00;
+	border-radius: 50%;
 }
 
 .day-cell.is-today .task-dot {
-    background: rgba(255, 255, 255, 0.8);
+	background: rgba(255, 255, 255, 0.8);
 }
 
 /* ============= uc-focus-task-card.vue ============= */
 .focus-card {
-    cursor: pointer;
-    transition: all 0.2s ease;
-    border-left-width: 4px;
-    border-left-style: solid;
+	cursor: pointer;
+	transition: all 0.2s ease;
+	border-left-width: 4px;
+	border-left-style: solid;
 }
 
 .focus-card:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1) !important;
+	transform: translateY(-3px);
+	box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1) !important;
 }
 
 .focus-card-content {
-    display: flex;
-    align-items: center;
-    gap: 12px;
+	display: flex;
+	align-items: center;
+	gap: 12px;
 }
 
 .task-status-icon {
-    flex-shrink: 0;
+	flex-shrink: 0;
 }
 
 .task-info {
-    flex-grow: 1;
+	flex-grow: 1;
 }
 
 .task-status-chip {
-    flex-shrink: 0;
-    font-weight: bold;
+	flex-shrink: 0;
+	font-weight: bold;
 }
 
 .focus-card.urgent {
-    border-left-color: #F44336;
+	border-left-color: #F44336;
 }
 
 .focus-card.warning {
-    border-left-color: #FB8C00;
+	border-left-color: #FB8C00;
 }
 
 .focus-card.primary {
-    border-left-color: #1976D2;
+	border-left-color: #1976D2;
 }
 
 .task-title {
-    font-weight: 600;
-    line-height: 1.3;
-    margin-bottom: 4px;
+	font-weight: 600;
+	line-height: 1.3;
+	margin-bottom: 4px;
 }
 
 .task-meta {
-    font-size: 0.85rem;
-    color: #616161;
+	font-size: 0.85rem;
+	color: #616161;
 }
 
 .task-due-date {
-    font-size: 0.8rem;
-    font-weight: 500;
-    margin-top: 6px;
+	font-size: 0.8rem;
+	font-weight: 500;
+	margin-top: 6px;
 }
 
 .text-error {
-    color: #f44336 !important;
+	color: #f44336 !important;
 }
 
 .text-warning {
-    color: #fb8c00 !important;
+	color: #fb8c00 !important;
 }
 
 .text-success {
-    color: #4caf50 !important;
+	color: #4caf50 !important;
 }
 
 .focus-card.v-card {
-    cursor: pointer;
-    transition: all 0.2s ease;
-    border-radius: 8px !important;
-    position: relative;
-    background: white !important;
-    border: 1px solid #e0e0e0;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1) !important;
+	cursor: pointer;
+	transition: all 0.2s ease;
+	border-radius: 8px !important;
+	position: relative;
+	background: white !important;
+	border: 1px solid #e0e0e0;
+	box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1) !important;
 }
 
 .focus-card::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 4px;
-    height: 100%;
+	content: '';
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 4px;
+	height: 100%;
 }
 
 .focus-card.urgent::before {
-    background: #f44336;
+	background: #f44336;
 }
 
 .focus-card.warning::before {
-    background: #fb8c00;
+	background: #fb8c00;
 }
 
 .focus-card.primary::before {
-    background: #1976d2;
+	background: #1976d2;
 }
 
 .focus-card:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15) !important;
+	transform: translateY(-1px);
+	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15) !important;
 }
 
 .focus-card-content {
-    display: flex;
-    align-items: center;
-    padding: 16px !important;
-    gap: 12px;
+	display: flex;
+	align-items: center;
+	padding: 16px !important;
+	gap: 12px;
 }
 
 .task-status-icon {
-    width: 40px;
-    height: 40px;
-    border-radius: 8px;
-    background: #f5f5f5;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
+	width: 40px;
+	height: 40px;
+	border-radius: 8px;
+	background: #f5f5f5;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	flex-shrink: 0;
 }
 
 .task-info {
-    flex: 1;
-    min-width: 0;
+	flex: 1;
+	min-width: 0;
 }
 
 .task-title {
-    font-weight: 600;
-    font-size: 0.95rem;
-    line-height: 1.3;
-    margin-bottom: 4px;
-    color: #1a1a1a;
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
+	font-weight: 600;
+	font-size: 0.95rem;
+	line-height: 1.3;
+	margin-bottom: 4px;
+	color: #1a1a1a;
+	display: -webkit-box;
+	-webkit-line-clamp: 2;
+	-webkit-box-orient: vertical;
+	overflow: hidden;
 }
 
 .task-meta {
-    font-size: 0.8rem;
-    color: #666;
-    display: flex;
-    align-items: center;
+	font-size: 0.8rem;
+	color: #666;
+	display: flex;
+	align-items: center;
 }
 
 .task-status-chip.v-chip {
-    font-weight: 600 !important;
-    flex-shrink: 0;
-    border-radius: 4px !important;
-    font-size: 0.75rem !important;
+	font-weight: 600 !important;
+	flex-shrink: 0;
+	border-radius: 4px !important;
+	font-size: 0.75rem !important;
 }
 
 /* ======================================================= */
@@ -290,338 +300,334 @@
 /* ======================================================= */
 
 .focus-card {
-    cursor: pointer;
-    transition: all 0.2s ease-in-out;
-    position: relative;
-    /* Bắt buộc để định vị dải băng góc */
-    overflow: hidden;
-    /* Bắt buộc để cắt phần thừa của dải băng */
-    border-width: 1px;
+	cursor: pointer;
+	transition: all 0.2s ease-in-out;
+	position: relative;
+	/* Bắt buộc để định vị dải băng góc */
+	overflow: hidden;
+	/* Bắt buộc để cắt phần thừa của dải băng */
+	border-width: 1px;
 }
 
 .focus-card:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
-    border-color: #1976D2;
-    /* Vuetify primary color */
+	transform: translateY(-4px);
+	box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+	border-color: #1976D2;
+	/* Vuetify primary color */
 }
 
 /* --- Dải băng góc (Corner Ribbon/Banner) --- */
 .corner-banner {
-    position: absolute;
-    top: 18px;
-    /* Điều chỉnh vị trí dọc */
-    right: -32px;
-    /* Điều chỉnh vị trí ngang */
-    width: 120px;
-    padding: 4px 0;
-    background-color: #FB8C00;
-    /* Màu cam (Warning) */
-    color: white;
-    text-align: center;
-    font-size: 0.7rem;
-    font-weight: 600;
-    text-transform: uppercase;
-    transform: rotate(45deg);
-    /* Xoay 45 độ */
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-    line-height: 1.2;
+	position: absolute;
+	top: 18px;
+	/* Điều chỉnh vị trí dọc */
+	right: -32px;
+	/* Điều chỉnh vị trí ngang */
+	width: 120px;
+	padding: 4px 0;
+	background-color: #FB8C00;
+	/* Màu cam (Warning) */
+	color: white;
+	text-align: center;
+	font-size: 0.7rem;
+	font-weight: 600;
+	text-transform: uppercase;
+	transform: rotate(45deg);
+	/* Xoay 45 độ */
+	box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+	line-height: 1.2;
 }
 
 /* Thay đổi màu dải băng theo trạng thái */
 .corner-banner.urgent {
-    background-color: #D32F2F;
-    /* Màu đỏ (Error) */
+	background-color: #D32F2F;
+	/* Màu đỏ (Error) */
 }
 
 .corner-banner.warning {
-    background-color: #FFA000;
-    /* Màu vàng (Warning) */
+	background-color: #FFA000;
+	/* Màu vàng (Warning) */
 }
 
 /* --- Nội dung bên trong Card --- */
 .focus-card-content {
-    display: flex;
-    align-items: center;
-    gap: 16px;
-    /* Khoảng cách giữa các phần tử */
+	display: flex;
+	align-items: center;
+	gap: 16px;
+	/* Khoảng cách giữa các phần tử */
 }
 
 .task-type-icon {
-    flex-shrink: 0;
-    width: 48px;
-    height: 48px;
-    border-radius: 50%;
-    /* Bo tròn icon */
-    display: flex;
-    align-items: center;
-    justify-content: center;
+	flex-shrink: 0;
+	width: 48px;
+	height: 48px;
+	border-radius: 50%;
+	/* Bo tròn icon */
+	display: flex;
+	align-items: center;
+	justify-content: center;
 }
 
 .task-info {
-    flex-grow: 1;
-    /* Cho phép phần thông tin chiếm hết không gian còn lại */
-    min-width: 0;
-    /* Fix lỗi text overflow */
+	flex-grow: 1;
+	/* Cho phép phần thông tin chiếm hết không gian còn lại */
+	min-width: 0;
+	/* Fix lỗi text overflow */
 }
 
 .task-title {
-    font-weight: 600;
-    font-size: 1rem;
-    color: #212121;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    /* Thêm dấu ... nếu tiêu đề quá dài */
+	font-weight: 600;
+	font-size: 1rem;
+	color: #212121;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	/* Thêm dấu ... nếu tiêu đề quá dài */
 }
 
 .task-meta,
 .task-due-date {
-    font-size: 0.8rem;
-    color: #616161;
-    display: flex;
-    align-items: center;
-    margin-top: 4px;
+	font-size: 0.8rem;
+	color: #616161;
+	display: flex;
+	align-items: center;
+	margin-top: 4px;
 }
 
 .task-status-chip {
-    flex-shrink: 0;
-    font-weight: 500;
+	flex-shrink: 0;
+	font-weight: 500;
 }
 
 /* ============= uc-subject-progress-bar.vue ============= */
 
 .subject-progress-card.v-card {
-    border-radius: 8px !important;
-    background: #1976d2 !important;
-    color: white;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    min-width: 200px;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1) !important;
-    border: none;
+	border-radius: 8px !important;
+	background: #1976d2 !important;
+	color: white;
+	cursor: pointer;
+	transition: all 0.2s ease;
+	min-width: 200px;
+	box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1) !important;
+	border: none;
 }
 
 .subject-progress-card:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 2px 8px rgba(25, 118, 210, 0.3) !important;
+	transform: translateY(-1px);
+	box-shadow: 0 2px 8px rgba(25, 118, 210, 0.3) !important;
 }
 
 .subject-progress-content {
-    padding: 16px;
+	padding: 16px;
 }
 
 .subject-info {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 12px;
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	margin-bottom: 12px;
 }
 
 .subject-name {
-    font-weight: 600;
-    font-size: 0.95rem;
-    flex: 1;
+	font-weight: 600;
+	font-size: 0.95rem;
+	flex: 1;
 }
 
 .subject-stats.v-chip {
-    background-color: rgba(255, 255, 255, 0.2) !important;
-    color: white !important;
-    font-weight: 500 !important;
-    border-radius: 4px !important;
-    font-size: 0.75rem !important;
-}
-
-.subject-progress {
-    margin-bottom: 8px;
+	background-color: rgba(255, 255, 255, 0.2) !important;
+	color: #0D47A1 !important;
+	font-weight: 500 !important;
+	border-radius: 4px !important;
+	font-size: 0.75rem !important;
 }
 
 .progress-label {
-    font-size: 0.75rem;
-    opacity: 0.9;
-    text-align: center;
-    font-weight: 500;
+	font-size: 0.75rem;
+	opacity: 0.9;
+	text-align: center;
+	font-weight: 500;
 }
 
 /* ============= uc-feed-item.vue ============= */
 
 .feed-item.v-list-item {
-    border-radius: 6px !important;
-    margin-bottom: 8px;
-    transition: all 0.2s ease;
-    cursor: pointer;
-    background: white !important;
-    border: 1px solid #e0e0e0;
-    padding: 12px !important;
+	border-radius: 6px !important;
+	margin-bottom: 8px;
+	transition: all 0.2s ease;
+	cursor: pointer;
+	background: white !important;
+	border: 1px solid #e0e0e0;
+	padding: 12px !important;
 }
 
 .feed-item:hover {
-    background: #f8f9fa !important;
-    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+	background: #f8f9fa !important;
+	box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
 }
 
 .feed-avatar {
-    width: 36px;
-    height: 36px;
-    border-radius: 8px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+	width: 36px;
+	height: 36px;
+	border-radius: 8px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
 }
 
 .feed-title {
-    font-size: 0.9rem !important;
-    line-height: 1.4 !important;
-    color: #1a1a1a !important;
-    margin-bottom: 4px !important;
-    font-weight: 500 !important;
+	font-size: 0.9rem !important;
+	line-height: 1.4 !important;
+	color: #1a1a1a !important;
+	margin-bottom: 4px !important;
+	font-weight: 500 !important;
 }
 
 .feed-time {
-    font-size: 0.75rem !important;
-    color: #666 !important;
-    display: flex !important;
-    align-items: center !important;
-    font-weight: 400 !important;
+	font-size: 0.75rem !important;
+	color: #666 !important;
+	display: flex !important;
+	align-items: center !important;
+	font-weight: 400 !important;
 }
 
 .week-calendar {
-    display: grid;
-    grid-template-columns: repeat(7, 1fr);
-    gap: 8px;
-    padding: 8px;
+	display: grid;
+	grid-template-columns: repeat(7, 1fr);
+	gap: 8px;
+	padding: 8px;
 }
 
 .day-cell {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: 8px 4px;
-    border-radius: 8px;
-    background-color: #f5f5f5;
-    min-height: 80px;
-    transition: background-color 0.2s;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	padding: 8px 4px;
+	border-radius: 8px;
+	background-color: #f5f5f5;
+	min-height: 80px;
+	transition: background-color 0.2s;
 }
 
 .day-cell.is-today {
-    background-color: #1976D2;
-    color: white;
-    font-weight: bold;
+	background-color: #1976D2;
+	color: white;
+	font-weight: bold;
 }
 
 /* (MỚI) Thêm cursor pointer cho những ngày có nhiệm vụ */
 .day-cell.has-tasks {
-    cursor: pointer;
+	cursor: pointer;
 }
 
 .day-cell.has-tasks:not(.is-today):hover {
-    background-color: #e0e0e0;
+	background-color: #e0e0e0;
 }
 
 .day-name {
-    font-size: 0.75rem;
-    font-weight: 500;
-    text-transform: uppercase;
-    opacity: 0.8;
+	font-size: 0.75rem;
+	font-weight: 500;
+	text-transform: uppercase;
+	opacity: 0.8;
 }
 
 .day-number {
-    font-size: 1.2rem;
-    font-weight: 700;
+	font-size: 1.2rem;
+	font-weight: 700;
 }
 
 .task-dots {
-    display: flex;
-    justify-content: center;
-    gap: 4px;
-    margin-top: 6px;
-    height: 6px;
+	display: flex;
+	justify-content: center;
+	gap: 4px;
+	margin-top: 6px;
+	height: 6px;
 }
 
 .task-dot {
-    width: 6px;
-    height: 6px;
-    background-color: #FB8C00;
-    border-radius: 50%;
+	width: 6px;
+	height: 6px;
+	background-color: #FB8C00;
+	border-radius: 50%;
 }
 
 .day-cell.is-today .task-dot {
-    background-color: white;
+	background-color: white;
 }
 
 .task-list-popup {
-    border-radius: 8px;
+	border-radius: 8px;
 }
 
 
 /* Tạo một vùng bọc cho icon, giúp dễ dàng căn chỉnh và thêm hiệu ứng */
 .achievement-icon-wrapper {
-    display: inline-block;
-    cursor: pointer;
-    padding: 2px;
+	display: inline-block;
+	cursor: pointer;
+	padding: 2px;
 }
 
 
 .achievement-grid-container {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 4px 8px;
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 4px 8px;
 }
 
 /* Style cho chính hình ảnh của huy hiệu */
 .achievement-icon {
-    transition: all 0.2s ease-in-out;
-    filter: drop-shadow(0px 2px 4px rgba(0, 0, 0, 0.2));
+	transition: all 0.2s ease-in-out;
+	filter: drop-shadow(0px 2px 4px rgba(0, 0, 0, 0.2));
 }
 
 /* Hiệu ứng phóng to và sáng hơn khi hover vào icon */
 .achievement-icon-wrapper:hover .achievement-icon {
-    transform: scale(1.15);
-    filter: drop-shadow(0px 4px 8px rgba(0, 0, 0, 0.3));
+	transform: scale(1.15);
+	filter: drop-shadow(0px 4px 8px rgba(0, 0, 0, 0.3));
 }
 
 :global(.achievement-tooltip) {
-    padding: 8px 12px !important;
-    background: rgba(30, 30, 30, 0.9) !important;
-    border-radius: 8px !important;
-    max-width: 250px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+	padding: 8px 12px !important;
+	background: rgba(30, 30, 30, 0.9) !important;
+	border-radius: 8px !important;
+	max-width: 250px;
+	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
 }
 
 
 .feed-item {
-    border: 1px solid #eee;
-    border-radius: 12px;
+	border: 1px solid #eee;
+	border-radius: 12px;
 }
 
 .feed-avatar {
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin-right: 16px;
+	width: 40px;
+	height: 40px;
+	border-radius: 50%;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	margin-right: 16px;
 }
 
 .feed-title {
-    font-size: 0.95rem;
-    line-height: 1.4;
-    white-space: normal;
+	font-size: 0.95rem;
+	line-height: 1.4;
+	white-space: normal;
 }
 
 .feed-title :deep(strong) {
-    font-weight: 600;
-    color: #1976D2;
+	font-weight: 600;
+	color: #1976D2;
 }
 
 .feed-time {
-    font-size: 0.8rem;
-    color: #757575;
-    display: flex;
-    align-items: center;
+	font-size: 0.8rem;
+	color: #757575;
+	display: flex;
+	align-items: center;
 }
 
 /* ======================================================= */
@@ -629,23 +635,23 @@
 /* ======================================================= */
 
 :root {
-    --dashboard-bg-color: #F0F8F7;
-    --card-bg-color: #FFFFFF;
-    --text-primary-color: #2F394C;
-    --text-secondary-color: #6B7280;
-    --primary-accent-color: #00A99D;
-    --border-color: #E5E7EB;
+	--dashboard-bg-color: #F0F8F7;
+	--card-bg-color: #FFFFFF;
+	--text-primary-color: #2F394C;
+	--text-secondary-color: #6B7280;
+	--primary-accent-color: #00A99D;
+	--border-color: #E5E7EB;
 
-    /* Bảng màu cho các widget header */
-    --color-header-blue: #3B82F6;
-    --color-header-green: #10B981;
-    --color-header-purple: #8B5CF6;
-    --color-header-orange: #F97316;
-    --color-header-amber: #F59E0B;
+	/* Bảng màu cho các widget header */
+	--color-header-blue: #3B82F6;
+	--color-header-green: #10B981;
+	--color-header-purple: #8B5CF6;
+	--color-header-orange: #F97316;
+	--color-header-amber: #F59E0B;
 }
 
 .dashboard-bg {
-    background-color: var(--dashboard-bg-color);
+	background-color: var(--dashboard-bg-color);
 }
 
 /* ======================================================= */
@@ -653,16 +659,16 @@
 /* ======================================================= */
 
 .dashboard-title {
-    font-size: clamp(1rem, 2vw + 1rem, 2rem);
-    font-weight: 700;
-    color: var(--text-primary-color);
-    line-height: 1.2;
+	font-size: clamp(1rem, 2vw + 1rem, 2rem);
+	font-weight: 700;
+	color: var(--text-primary-color);
+	line-height: 1.2;
 }
 
 .dashboard-subtitle {
-    font-size: clamp(0.5rem, 2vw + 0.5rem, 1rem);
-    color: var(--text-secondary-color);
-    margin-top: 8px;
+	font-size: clamp(0.5rem, 2vw + 0.5rem, 1rem);
+	color: var(--text-secondary-color);
+	margin-top: 8px;
 }
 
 /* ======================================================= */
@@ -671,73 +677,65 @@
 
 /* Bỏ các h2 cũ đi */
 .text-h6 {
-    display: none;
-}
-
-.container-widget {
-    border-radius: 8px;
-    border-radius: 8px;
-    background-color: var(--card-bg-color);
+	display: none;
 }
 
 .widget-header {
-    display: flex;
-    align-items: center;
-    padding: 12px 16px;
-    border-top-left-radius: 8px;
-    border-top-right-radius: 8px;
-    color: white;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+	display: flex;
+	align-items: center;
+	padding: 12px 16px;
+	border-radius: 8px;
+	color: white;
+	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
 }
-
 
 /* Màu nền cho từng widget */
 .widget-header-blue {
-    background: linear-gradient(45deg, #00a1de, #00a1de);
+	background: linear-gradient(45deg, #00a1de, #00a1de);
 }
 
 .widget-header-green {
-    background: linear-gradient(45deg, #10B981, #34D399);
+	background: linear-gradient(45deg, #10B981, #34D399);
 }
 
 .widget-header-dark-green {
-    background: linear-gradient(45deg, #42ae18, #42ae18);
+	background: linear-gradient(45deg, #42ae18, #42ae18);
 }
 
 .widget-header-purple {
-    background: linear-gradient(45deg, #8d33aa, #8d33aa);
+	background: linear-gradient(45deg, #8d33aa, #8d33aa);
 }
 
 .widget-header-orange {
-    background: linear-gradient(45deg, #f39317, #f39317);
+	background: linear-gradient(45deg, #f39317, #f39317);
 }
 
 .widget-header-amber {
-    background: linear-gradient(45deg, #F59E0B, #FBBF24);
+	background: linear-gradient(45deg, #F59E0B, #FBBF24);
 }
 
 .widget-icon {
-    margin-right: 12px;
-    font-size: 24px !important;
-    /* Icon to hơn */
+	margin-right: 12px;
+	font-size: 24px !important;
+	/* Icon to hơn */
 }
 
 .widget-title {
-    font-size: 1.25rem;
-    font-weight: 700;
-    /* Đậm hơn */
-    color: white;
+	font-size: 1.25rem;
+	font-weight: 700;
+	/* Đậm hơn */
+	color: white;
 }
 
 .widget-header .v-icon {
-    margin-right: 12px;
-    font-size: 22px !important;
+	margin-right: 12px;
+	font-size: 22px !important;
 }
 
 .widget-header h2 {
-    font-size: 1.1rem;
-    font-weight: 600;
-    color: white;
+	font-size: 1.1rem;
+	font-weight: 600;
+	color: white;
 }
 
 /* ======================================================= */
@@ -745,17 +743,12 @@
 /* ======================================================= */
 
 .modern-card {
-    background-color: var(--card-bg-color) !important;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05) !important;
-    margin-top: 0;
-    /* padding-top: 24px !important; */
-}
-
-.user-card-custom {
-    border: 1px solid rgba(0, 0, 0, 0.08);
-    background: rgba(255, 255, 255, 0.95);
-    border-radius: 12px;
-    min-width: fit-content;
+	background-color: var(--card-bg-color) !important;
+	border: 1px solid var(--border-color) !important;
+	border-radius: 16px !important;
+	box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05) !important;
+	margin-top: 0;
+	/* padding-top: 24px !important; */
 }
 
 /* ======================================================= */
@@ -765,1725 +758,235 @@
 /* --- Nhiệm vụ & Thành tích (Layout 2 cột) --- */
 /* Cần một header riêng cho 2 widget này vì cấu trúc HTML cũ */
 .dashboard-bg>.v-row:first-of-type h2.text-h6 {
-    display: flex;
-    align-items: center;
-    padding: 16px 20px;
-    border-radius: 16px;
-    color: white;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-    font-size: 1.25rem;
-    font-weight: 700;
+	display: flex;
+	align-items: center;
+	padding: 16px 20px;
+	border-radius: 16px;
+	color: white;
+	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+	font-size: 1.25rem;
+	font-weight: 700;
 }
 
 .dashboard-bg>.v-row:first-of-type h2.text-h6 .v-icon {
-    color: white !important;
-    margin-right: 12px;
-    font-size: 24px !important;
+	color: white !important;
+	margin-right: 12px;
+	font-size: 24px !important;
 }
 
 /* Ghi đè màu nền cho từng header */
 .dashboard-bg>.v-row:first-of-type h2.text-h6:has(.v-icon[color="orange"]) {
-    background: linear-gradient(45deg, #F97316, #FB923C);
+	background: linear-gradient(45deg, #F97316, #FB923C);
 }
 
 .dashboard-bg>.v-row:first-of-type h2.text-h6:has(.v-icon[color="amber"]) {
-    background: linear-gradient(45deg, #F59E0B, #FBBF24);
+	background: linear-gradient(45deg, #F59E0B, #FBBF24);
 }
 
 /* Điều chỉnh lại khoảng cách cho card bên dưới */
 .dashboard-bg>.v-row:first-of-type .v-row,
 .dashboard-bg>.v-row:first-of-type .achievement-grid-container {
-    margin-top: 16px;
+	margin-top: 16px;
 }
 
 /* --- Lịch trong tuần (uc-week-calendar) --- */
 /* Bọc uc-week-calendar trong v-card để có nền trắng */
 .uc-week-calendar {
-    border-radius: 16px;
+	border-radius: 16px;
 }
 
 .uc-week-calendar .day-cell {
-    background-color: #F0F8F7;
+	background-color: #F0F8F7;
 }
 
 .uc-week-calendar .day-cell.is-today {
-    background-color: var(--primary-accent-color);
-    color: white;
+	background-color: var(--primary-accent-color);
+	color: white;
 }
 
 /* --- Các widget khác (Bảng tin, Tiến độ) giữ nguyên style cũ --- */
 .subjects-container {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
+	display: flex;
+	flex-wrap: wrap;
+	gap: 16px;
 }
 
 .feed-list {
-    padding: 8px !important;
-}
-
-.feed-list .feed-item:last-child {
-    margin-bottom: 0px !important;
+	padding: 8px !important;
 }
 
 .empty-feed-state {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: 48px 24px;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	padding: 48px 24px;
 }
 
 .empty-feed-text {
-    margin-top: 16px;
-    color: var(--text-secondary-color);
+	margin-top: 16px;
+	color: var(--text-secondary-color);
 }
 
 .feed-item {
-    border: 1px solid #f3efef;
-    border-radius: 12px;
-    transition: all 0.2s ease;
+	border: 1px solid #f3efef;
+	border-radius: 12px;
+	transition: all 0.2s ease;
 }
 
 .feed-item:hover {
-    background-color: #f9f9f9;
-    border-color: #ddd;
+	background-color: #f9f9f9;
+	border-color: #ddd;
 }
 
 .feed-avatar {
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin-right: 16px;
+	width: 40px;
+	height: 40px;
+	border-radius: 50%;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	margin-right: 16px;
 }
 
 .feed-title {
-    font-size: 0.95rem;
-    line-height: 1.4;
-    white-space: normal;
+	font-size: 0.95rem;
+	line-height: 1.4;
+	white-space: normal;
 }
 
 .feed-title :deep(strong) {
-    font-weight: 600;
-    color: #1976D2;
+	font-weight: 600;
+	color: #1976D2;
 }
 
 .feed-time {
-    font-size: 0.8rem;
-    color: #757575;
-    display: flex;
-    align-items: center;
+	font-size: 0.8rem;
+	color: #757575;
+	display: flex;
+	align-items: center;
 }
 
 /*********** FIX LỖI KÉO NGANG TRÊN IOS  **********/
 /* 0) Chặn pan ngang mức root trên thiết bị cảm ứng (iOS thân thiện với clip) */
 @media (hover: none) and (pointer: coarse) {
 
-    html,
-    body {
-        max-width: 100%;
-        overflow-x: clip;
-    }
+	html,
+	body {
+		max-width: 100%;
+		overflow-x: clip;
+	}
 
-    #mainContainer {
-        overflow-x: clip;
-    }
+	#mainContainer {
+		overflow-x: clip;
+	}
 }
 
 /* 1) HEADER: buộc flex co đúng & đẩy avatar sang phải mà không làm tràn */
 .dashboard-title {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    min-width: 0;
-    /* QUAN TRỌNG */
-    overflow: hidden;
-    word-break: break-word;
-    /* khi tiêu đề dài */
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	min-width: 0;
+	/* QUAN TRỌNG */
+	overflow: hidden;
+	word-break: break-word;
+	/* khi tiêu đề dài */
 }
 
 .dashboard-title .v-spacer {
-    display: none;
+	display: none;
 }
 
 /* tránh spacer gây ép rộng */
 .dashboard-title .v-btn {
-    margin-left: auto;
-    flex: 0 0 auto;
-    /* avatar không chiếm thêm */
+	margin-left: auto;
+	flex: 0 0 auto;
+	/* avatar không chiếm thêm */
 }
 
 .dashboard-title .v-avatar,
 .dashboard-title .v-responsive,
 .dashboard-title .v-img,
 .dashboard-title img {
-    max-width: 100%;
+	max-width: 100%;
 }
 
 /* Nếu vẫn cần ellipsis cho text trong H1 mà bạn không sửa template:
    ép text ở H1 co lại bằng cách tạo vùng flex ảo cuối dòng */
 .dashboard-title::after {
-    content: "";
-    flex: 1 1 auto;
-    min-width: 0;
+	content: "";
+	flex: 1 1 auto;
+	min-width: 0;
 }
 
 /* 2) SUBJECT CARD: bỏ min-width cứng khi ở thiết bị cảm ứng để không vượt viewport */
 @media (hover: none) and (pointer: coarse) {
-    .subject-progress-card {
-        min-width: 0 !important;
-        width: 100% !important;
-        max-width: 100% !important;
-    }
+	.subject-progress-card {
+		min-width: 0 !important;
+		width: 100% !important;
+		max-width: 100% !important;
+	}
 
-    .subjects-container {
-        min-width: 0;
-    }
+	.subjects-container {
+		min-width: 0;
+	}
 }
 
 /* 3) CALENDAR: an toàn khi zoom (nếu rounding làm rộng hơn 100%) */
 .week-calendar {
-    min-width: 0;
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
+	min-width: 0;
+	overflow-x: auto;
+	-webkit-overflow-scrolling: touch;
 }
 
 /* 4) FLEX SHRINK FIX: cho cột/row của Vuetify co đúng (tránh đẩy tràn khi zoom) */
 .v-row,
 .v-col {
-    min-width: 0;
+	min-width: 0;
 }
 
 /* 5) OVERLAY/ CARD trong overlay (phòng trường hợp dialog/tooltip gây tràn) */
 .v-overlay-container .v-overlay__content,
 .v-overlay-container .v-sheet,
 .v-overlay-container .v-card {
-    max-width: 100vw !important;
-    overflow-x: clip !important;
+	max-width: 100vw !important;
+	overflow-x: clip !important;
 }
 
-.image {
-    position: relative;
-}
-
-.image.image_resized {
-    max-width: 100%;
-    display: block;
-    box-sizing: border-box;
-}
-
-
-.image-style-align-left {
-    float: left;
-    margin-right: var(--ck-image-style-spacing);
-}
-
-.image-style-align-center {
-    margin-left: auto;
-    margin-right: auto;
-}
-
-.image-style-align-right {
-    float: right;
-    margin-left: var(--ck-image-style-spacing);
-}
-
-.image {
-    display: table;
-    clear: both;
-    text-align: center;
-    margin: 1em auto;
-}
-
-.image.image_resized img {
-    width: 100%;
-}
-
-.image img {
-    display: block;
-    margin: 0 auto;
-    max-width: 100%;
-    min-width: 50px;
-}
-
-
-
-
-/* 12/03 LeaderBoard */
-
-.app-container {
-    max-width: 600px;
-    margin: 0 auto;
-    background: linear-gradient(180deg, #42ae18 0%, #3AA5B0 100%);
-    overflow: auto;
-    scrollbar-width: thin;
-    border-radius: 8px;
-}
-
-.header-section {
-    color: white;
-}
-
-.top-three-container {
-    display: flex;
-    justify-content: center;
-    align-items: flex-end;
-    gap: 36px;
-    margin-top: 16px;
-    padding: 0 8px;
-    width: 550px;
-}
-
-.top-student {
-    text-align: center;
-    position: relative;
-}
-
-.top-student.rank-1 {
-    margin-bottom: 20px;
-}
-
-.student-avatar {
-    width: 70px;
-    height: 70px;
-    border-radius: 50%;
-    border: 4px solid white;
-    position: relative;
-    overflow: hidden;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-}
-
-.rank-1 .student-avatar {
-    width: 85px;
-    height: 85px;
-}
-
-.rank-badge {
-    position: absolute;
-    top: -8px;
-    left: 8%;
-    z-index: 5;
-    transform: translateX(-50%);
-    width: 32px;
-    height: 32px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: bold;
-    color: white;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
-}
-
-.rank-1 .rank-badge {
-    background: #FFC107;
-    width: 36px;
-    height: 36px;
-}
-
-.rank-2 .rank-badge {
-    background: #B0BEC5;
-}
-
-.rank-3 .rank-badge {
-    background: #FF9800;
-}
-
-.student-name {
-    color: white;
-    font-weight: 600;
-    font-size: 13px;
-    margin-top: 8px;
-}
-
-.student-school {
-    color: rgba(255, 255, 255, 0.85);
-    font-size: 12px;
-    margin-top: 2px;
-}
-
-.student-score {
-    color: white;
-    font-weight: 700;
-    font-size: 16px;
-    margin-top: 4px;
-}
-
-.leaderboard-list {
-    background: white;
-    border-radius: 24px 24px 0 0;
-    margin-top: 15px;
-    padding: 16px 16px;
-    min-height: 400px;
-}
-
-.list-item {
-    display: flex;
-    align-items: center;
-    padding: 12px;
-    margin-bottom: 12px;
-    border-radius: 16px;
-    background: #F8F9FA;
-    transition: all 0.2s;
-}
-
-.list-item:hover {
-    background: #F0F1F3;
-    transform: translateX(4px);
-}
-
-.rank-number {
-    width: 32px;
-    height: 32px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: 700;
-    font-size: 16px;
-    color: #78909C;
-    margin-right: 12px;
-}
-
-.list-avatar {
-    width: 48px;
-    height: 48px;
-    border-radius: 50%;
-    margin-right: 12px;
-    overflow: hidden;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-}
-
-.student-info {
-    flex: 1;
-}
-
-.list-student-name {
-    font-weight: 600;
-    font-size: 13px;
-    color: #263238;
-    margin-bottom: 2px;
-}
-
-.list-student-school {
-    font-size: 13px;
-    color: #78909C;
-}
-
-.list-score {
-    font-weight: 700;
-    font-size: 16px;
-    color: #263238;
-}
-
-.tab-button {
-    background: rgba(255, 255, 255, 0.3);
-    border: none;
-    border-radius: 20px;
-    padding: 10px 24px;
-    color: white;
-    font-weight: 600;
-    font-size: 14px;
+.hover-chip{
     cursor: pointer;
-    transition: all 0.3s;
-    margin: 0 6px;
+    transition: transform 0.5s ease, box-shadow 0.5s ease ;
+  /* shadow mặc định nhẹ */
+	border: thin lightgrey solid; 
+	border-radius: 20px;
+	font-size: 12px;
 }
 
-.tab-button.active {
-    background: white;
-    color: #4DB8C4;
+.hover-chip:hover{
+    transform: scale(1.05) ; /* phóng to 5% */
+  box-shadow: 0 4px 16px rgba(0,0,0,0.15) ; /* shadow đậm hơn */
 }
 
-.tabs-container {
-    display: flex;
-    justify-content: center;
-    margin-top: 20px;
-}
-
-.avatar-img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-}
-
-.subtitle-dialog-text {
-    font-size: 14px;
-    font-weight: 500;
-    color: #edededd6;
-}
-
-
-/* Achievement UI */
-.app-container-achievement {
-    width: 600px;
-    margin: 0 auto;
-    background: white;
-    overflow: auto;
-    scrollbar-width: thin;
-    border-radius: 8px;
-}
-
-.header-section-achievement {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    padding: 20px 0px;
-    color: white;
-    position: relative;
-}
-
-.header-content {
-    text-align: center;
-    padding: 16px 0;
-}
-
-.header-title {
-    font-size: 24px;
-    font-weight: 600;
-    margin-bottom: 8px;
-}
-
-.header-subtitle {
-    font-size: 14px;
-    opacity: 0.9;
-}
-
-.stats-container {
-    display: flex;
-    justify-content: space-around;
-    padding: 20px;
-    background: white;
-    margin: -30px 16px 0;
-    border-radius: 16px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-    position: relative;
-    z-index: 2;
-}
-
-.stat-item {
-    text-align: center;
-}
-
-.stat-number {
-    font-size: 28px;
-    font-weight: 700;
-    color: #667eea;
-}
-
-.stat-label {
-    font-size: 13px;
-    color: #78909C;
-    margin-top: 4px;
-}
-
-.achievements-container {
-    padding: 24px 16px;
-}
-
-.section-title {
-    font-size: 18px;
-    font-weight: 600;
-    color: #263238;
-    margin-bottom: 16px;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-}
-
-.achievement-card {
-    background: white;
-    border-radius: 16px;
-    padding: 16px;
-    margin-bottom: 12px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
-    border: 2px solid transparent;
-    transition: all 0.3s;
-    display: flex;
-    align-items: center;
-    gap: 16px;
-    position: relative;
-    overflow: hidden;
-}
-
-.achievement-card:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
-    border-color: currentColor;
-}
-
-.achievement-icon-container {
-    width: 60px;
-    height: 60px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-    position: relative;
-    z-index: 1;
-}
-
-.achievement-icon {
-    font-size: 30px;
+.hover-chip.active{
+	    background-color: #217D46;
     color: white;
 }
 
-.achievement-content {
-    flex: 1;
+.text-title-nhiem-vu {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;   /* số dòng giới hạn */
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
-.achievement-title {
-    font-weight: 600;
-    font-size: 16px;
-    color: #263238;
-    margin-bottom: 4px;
-}
-
-.achievement-description {
-    font-size: 13px;
-    color: #78909C;
-    margin-bottom: 8px;
-}
-
-.achievement-points {
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
-    background: #FFF3E0;
-    color: #F57C00;
-    padding: 4px 12px;
-    border-radius: 12px;
-    font-size: 12px;
-    font-weight: 600;
-}
-
-.achievement-badge {
-    position: absolute;
-    top: 8px;
-    right: 8px;
-    background: rgba(255, 255, 255, 0.9);
-    padding: 4px 8px;
-    border-radius: 8px;
-    font-size: 11px;
-    font-weight: 600;
-    color: #667eea;
-}
-
-.filter-tabs {
-    display: flex;
-    gap: 8px;
-    padding: 16px;
-    overflow-x: auto;
-    background: white;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-}
-
-.filter-chip {
-    padding: 8px 16px;
-    border-radius: 20px;
-    background: #F5F7FA;
-    border: 2px solid transparent;
-    color: #78909C;
-    font-size: 14px;
-    font-weight: 500;
+.hover-card{
     cursor: pointer;
-    white-space: nowrap;
-    transition: all 0.3s;
+    transition: transform 0.5s ease;
+  /* shadow mặc định nhẹ */
+	border-radius: 20px;
 }
 
-.filter-chip.active {
-    background: #667eea;
-    color: white;
-    border-color: #667eea;
-}
-
-.empty-state {
-    text-align: center;
-    padding: 60px 20px;
-    color: #B0BEC5;
-}
-
-.empty-icon {
-    font-size: 80px;
-    margin-bottom: 16px;
-    opacity: 0.5;
-}
-
-@media (max-width: 959px) {
-    .mobile-actions-container {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        margin-top: 12px;
-        width: 100%;
-    }
-
-    .mobile-primary-btn {
-        flex: 1;
-        height: 36px !important;
-        font-weight: 500;
-    }
-
-    .mobile-menu-btn {
-        flex-shrink: 0;
-        width: 36px !important;
-        height: 36px !important;
-    }
-
-    .mobile-action-menu {
-        min-width: 180px;
-    }
-
-    .mobile-action-menu .v-list-item {
-        min-height: 48px;
-        cursor: pointer;
-    }
-
-    .mobile-action-menu .v-list-item:hover {
-        background-color: rgba(0, 0, 0, 0.04);
-    }
-}
-
-/* ============================================================
-   ACHIEVEMENT CARD - MOBILE RESPONSIVE STYLES
-   ============================================================ */
-
-/* Base styles - Desktop */
-.app-container-achievement {
-    width: 100%;
-    max-width: 600px;
-    margin: 0 auto;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    overflow: auto;
-    scrollbar-width: thin;
-    border-radius: 8px;
-    min-height: 100dvh;
-}
-
-.header-section-achievement {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    padding: 20px 24px 28px;
-    color: white;
-    position: relative;
-}
-
-.header-content {
-    text-align: center;
-    padding: 16px 0;
-}
-
-.header-title {
-    font-size: 28px;
-    font-weight: 700;
-    margin-bottom: 8px;
-}
-
-.header-subtitle {
-    font-size: 15px;
-    opacity: 0.9;
-}
-
-.stats-container {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 16px;
-    padding: 24px 20px;
-    background: white;
-    margin: -20px 20px 0;
-    border-radius: 16px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-    position: relative;
-    z-index: 2;
-}
-
-.stat-item {
-    text-align: center;
-    padding: 12px 8px;
-}
-
-.stat-number {
-    font-size: 32px;
-    font-weight: 700;
-    color: #667eea;
-    line-height: 1;
-    margin-bottom: 6px;
-}
-
-.stat-label {
-    font-size: 13px;
-    color: #78909C;
-    margin-top: 4px;
-    font-weight: 500;
-}
-
-.filter-tabs {
-    display: flex;
-    gap: 10px;
-    padding: 24px 20px 16px;
-    overflow-x: auto;
-    background: transparent;
-    box-shadow: none;
-    -webkit-overflow-scrolling: touch;
-}
-
-.filter-tabs::-webkit-scrollbar {
-    display: none;
-}
-
-.filter-chip {
-    padding: 10px 20px;
-    border-radius: 20px;
-    background: white;
-    border: 2px solid transparent;
-    color: #666;
-    font-size: 14px;
-    font-weight: 500;
-    cursor: pointer;
-    white-space: nowrap;
-    transition: all 0.3s;
-    flex-shrink: 0;
-}
-
-.filter-chip.active {
-    background: white;
-    color: #667eea;
-    border-color: #667eea;
-    box-shadow: 0 2px 8px rgba(102, 126, 234, 0.2);
-}
-
-.achievements-container {
-    padding: 0 20px 24px;
-}
-
-.section-title {
-    font-size: 18px;
-    font-weight: 600;
-    color: white;
-    margin-bottom: 16px;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 0 4px;
-}
-
-.achievement-card {
-    background: white;
-    border-radius: 16px;
-    padding: 16px;
-    margin-bottom: 12px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-    border-left: 4px solid;
-    transition: all 0.3s;
-    display: flex;
-    align-items: center;
-    gap: 14px;
-    position: relative;
-    overflow: hidden;
-    cursor: pointer;
-}
-
-.achievement-card:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
-}
-
-.achievement-icon-container {
-    width: 52px;
-    height: 52px;
-    border-radius: 12px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-    position: relative;
-    z-index: 1;
-}
-
-.achievement-icon {
-    font-size: 26px;
-    color: white;
-}
-
-.achievement-content {
-    flex: 1;
-    min-width: 0;
-}
-
-.achievement-title {
-    font-weight: 600;
-    font-size: 15px;
-    color: #263238;
-    margin-bottom: 4px;
-    line-height: 1.3;
-}
-
-.achievement-description {
-    font-size: 13px;
-    color: #78909C;
-    margin-bottom: 6px;
-    line-height: 1.4;
-}
-
-.achievement-points {
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
-    background: #FFF3E0;
-    color: #F57C00;
-    padding: 4px 12px;
-    border-radius: 12px;
-    font-size: 13px;
-    font-weight: 600;
-}
-
-.achievement-badge {
-    position: absolute;
-    top: 10px;
-    right: 10px;
-    background: rgba(255, 255, 255, 0.95);
-    padding: 3px 10px;
-    border-radius: 12px;
-    font-size: 11px;
-    font-weight: 600;
-    color: white;
-    background: linear-gradient(135deg, #FFD700, #FFA500);
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-
-.empty-state {
-    text-align: center;
-    padding: 60px 20px;
-    color: #666;
-    background: white;
-    border-radius: 16px;
-}
-
-.empty-icon {
-    font-size: 56px;
-    margin-bottom: 16px;
-    opacity: 0.5;
-}
-
-/* ============================================================
-   MOBILE RESPONSIVE STYLES - Below 620px
-   ============================================================ */
-
-@media (max-width: 620px) {
-
-    /* Container */
-    .app-container-achievement {
-        border-radius: 0;
-        max-width: 100%;
-    }
-
-    /* Header Section */
-    .header-section-achievement {
-        padding: 12px 16px 20px;
-        border-radius: 0;
-    }
-
-    .header-content {
-        padding: 8px 0;
-    }
-
-    .header-title {
-        font-size: 20px;
-        margin-bottom: 4px;
-    }
-
-    .header-subtitle {
-        font-size: 13px;
-    }
-
-    /* Statistics Container */
-    .stats-container {
-        gap: 10px;
-        padding: 16px 12px;
-        margin: -16px 12px 0;
-        border-radius: 12px;
-    }
-
-    .stat-item {
-        padding: 8px 4px;
-    }
-
-    .stat-number {
-        font-size: 24px;
-        margin-bottom: 4px;
-    }
-
-    .stat-label {
-        font-size: 11px;
-    }
-
-    /* Filter Tabs */
-    .filter-tabs {
-        gap: 6px;
-        padding: 16px 12px 12px;
-    }
-
-    .filter-chip {
-        padding: 6px 12px;
-        font-size: 12px;
-        border-radius: 16px;
-    }
-
-    /* Achievements Container */
-    .achievements-container {
-        padding: 0 12px 16px;
-    }
-
-    .section-title {
-        font-size: 15px;
-        margin-bottom: 12px;
-        gap: 6px;
-    }
-
-    /* Achievement Card */
-    .achievement-card {
-        padding: 12px;
-        gap: 10px;
-        margin-bottom: 10px;
-        border-radius: 12px;
-        border-left-width: 3px;
-    }
-
-    /* Mobile: Replace hover with active (tap) effect */
-    .achievement-card:hover {
-        transform: none;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-    }
-
-    .achievement-card:active {
-        transform: scale(0.98);
-        box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
-    }
-
-    .achievement-icon-container {
-        width: 44px;
-        height: 44px;
-        border-radius: 10px;
-    }
-
-    .achievement-icon {
-        font-size: 22px;
-    }
-
-    .achievement-title {
-        font-size: 13px;
-    }
-
-    .achievement-description {
-        font-size: 11px;
-        margin-bottom: 4px;
-    }
-
-    .achievement-points {
-        padding: 3px 10px;
-        font-size: 11px;
-        border-radius: 10px;
-    }
-
-    .achievement-badge {
-        top: 8px;
-        right: 8px;
-        font-size: 10px;
-        padding: 2px 8px;
-        border-radius: 10px;
-    }
-
-    /* Empty State */
-    .empty-state {
-        padding: 48px 16px;
-        border-radius: 12px;
-    }
-
-    .empty-icon {
-        font-size: 48px;
-    }
-}
-
-/* ============================================================
-   EXTRA SMALL MOBILE - Below 360px
-   ============================================================ */
-
-@media (max-width: 360px) {
-    .header-title {
-        font-size: 18px;
-    }
-
-    .stats-container {
-        gap: 6px;
-        padding: 12px 8px;
-    }
-
-    .stat-number {
-        font-size: 22px;
-    }
-
-    .stat-label {
-        font-size: 10px;
-    }
-
-    .achievement-card {
-        padding: 10px;
-        gap: 8px;
-    }
-
-    .achievement-icon-container {
-        width: 40px;
-        height: 40px;
-    }
-
-    .achievement-icon {
-        font-size: 20px;
-    }
-
-    .achievement-title {
-        font-size: 12px;
-    }
-
-    .achievement-description {
-        font-size: 10px;
-    }
-}
-
-/* ============================================================
-   LANDSCAPE MODE ON MOBILE
-   ============================================================ */
-
-@media (max-width: 900px) and (max-height: 500px) {
-    .header-section-achievement {
-        padding: 8px 16px 16px;
-    }
-
-    .stats-container {
-        padding: 12px 16px;
-        margin: -12px 16px 0;
-    }
-
-    .stat-item {
-        padding: 6px 4px;
-    }
-
-    .achievements-container {
-        padding: 0 16px 12px;
-    }
-
-    .achievement-card {
-        padding: 10px 12px;
-        margin-bottom: 8px;
-    }
-}
-
-/* ============================================================
-   SCROLLBAR STYLING FOR MOBILE
-   ============================================================ */
-
-@media (max-width: 620px) {
-    .app-container-achievement {
-        scrollbar-width: none;
-        /* Firefox */
-        -ms-overflow-style: none;
-        /* IE and Edge */
-    }
-
-    .app-container-achievement::-webkit-scrollbar {
-        display: none;
-        /* Chrome, Safari, Opera */
-    }
-
-    .filter-tabs {
-        scrollbar-width: none;
-        -ms-overflow-style: none;
-    }
-
-    .filter-tabs::-webkit-scrollbar {
-        display: none;
-    }
-}
-
-/* ============================================================
-   VUETIFY DIALOG MOBILE OVERRIDE
-   ============================================================ */
-
-@media (max-width: 620px) {
-
-    /* Fullscreen dialog on mobile */
-    .v-dialog.v-overlay--active .v-overlay__content {
-        width: 100% !important;
-        max-width: 100% !important;
-        height: 100% !important;
-        max-height: 100% !important;
-        margin: 0 !important;
-        border-radius: 0 !important;
-    }
-
-    /* Remove dialog padding on mobile */
-    .v-dialog .v-card {
-        border-radius: 0 !important;
-    }
-}
-
-/* ============================================================
-   TOUCH INTERACTIONS
-   ============================================================ */
-
-@media (hover: none) and (pointer: coarse) {
-
-    /* Better tap targets for touch devices */
-    .filter-chip {
-        min-height: 36px;
-        min-width: 60px;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-    }
-
-    .achievement-card {
-        min-height: 70px;
-    }
-
-    /* Prevent text selection on tap */
-    .achievement-card,
-    .filter-chip,
-    .stat-item {
-        -webkit-tap-highlight-color: transparent;
-        -webkit-touch-callout: none;
-        -webkit-user-select: none;
-        user-select: none;
-    }
-}
-
-/* ============================================================
-   DARK MODE SUPPORT (Optional)
-   ============================================================ */
-
-@media (prefers-color-scheme: dark) {
-    .app-container-achievement {
-        background: linear-gradient(135deg, #4a5568 0%, #2d3748 100%);
-    }
-
-    .stats-container,
-    .achievement-card,
-    .empty-state {
-        background: #2d3748;
-        color: #e2e8f0;
-    }
-
-    .achievement-title {
-        color: #e2e8f0;
-    }
-
-    .achievement-description {
-        color: #a0aec0;
-    }
-
-    .stat-label {
-        color: #a0aec0;
-    }
-
-    .filter-chip {
-        background: #4a5568;
-        color: #e2e8f0;
-    }
-
-    .filter-chip.active {
-        background: #667eea;
-        color: white;
-    }
-}
-
-/* ============================================================
-   LEADERBOARD - MOBILE RESPONSIVE ADDITIONS
-   Thêm đoạn này vào cuối file CSS hiện tại
-   ============================================================ */
-
-/* Override base styles để responsive hơn */
-.app-container {
-    width: 100%;
-    max-width: 600px;
-}
-
-.top-three-container {
-    max-width: 550px;
-    margin-left: auto;
-    margin-right: auto;
-}
-
-/* ============================================================
-   MOBILE STYLES - Below 620px
-   ============================================================ */
-
-@media (max-width: 620px) {
-
-    /* Container */
-    .app-container {
-        border-radius: 0;
-        max-width: 100%;
-    }
-
-    .app-container.mobile {
-        border-radius: 0;
-    }
-
-    /* Header Section */
-    .header-section {
-        padding: 16px 12px 20px;
-    }
-
-    .header-section.mobile {
-        padding: 16px 12px 20px;
-    }
-
-    .mobile-header {
-        gap: 8px;
-    }
-
-    .assignment-title {
-        font-size: 18px;
-        font-weight: 500;
-        margin: 8px 0 0;
-        line-height: 1.3;
-    }
-
-    .assignment-title.mobile {
-        font-size: 16px;
-        margin: 4px 0 0;
-    }
-
-    .subtitle-dialog-text {
-        font-size: 14px;
-        line-height: 1.4;
-    }
-
-    .subtitle-dialog-text.mobile {
-        font-size: 12px;
-    }
-
-    /* Top Three Container */
-    .top-three-container {
-        gap: 16px;
-        margin-top: 12px;
-        padding: 0 4px;
-        width: 100%;
-    }
-
-    .top-three-container.mobile {
-        gap: 16px;
-        margin-top: 12px;
-        padding: 0 4px;
-    }
-
-    .top-student.rank-1 {
-        margin-bottom: 12px;
-    }
-
-    .top-student.rank-1.mobile {
-        margin-bottom: 12px;
-    }
-
-    /* Student Avatar */
-    .student-avatar {
-        width: 56px;
-        height: 56px;
-        border-width: 3px;
-    }
-
-    .student-avatar.mobile {
-        width: 56px;
-        height: 56px;
-        border-width: 3px;
-    }
-
-    .rank-1 .student-avatar {
-        width: 68px;
-        height: 68px;
-        border-width: 3px;
-    }
-
-    .rank-1 .student-avatar.mobile {
-        width: 68px;
-        height: 68px;
-        border-width: 3px;
-    }
-
-    /* Rank Badge */
-    .rank-badge {
-        width: 26px;
-        height: 26px;
-        top: -6px;
-        font-size: 12px;
-    }
-
-    .rank-badge.mobile {
-        width: 26px;
-        height: 26px;
-        top: -6px;
-        font-size: 12px;
-    }
-
-    .rank-1 .rank-badge {
-        width: 30px;
-        height: 30px;
-    }
-
-    .rank-1 .rank-badge.mobile {
-        width: 30px;
-        height: 30px;
-    }
-
-    /* Student Info */
-    .student-name {
-        font-size: 11px;
-        margin-top: 6px;
-        max-width: 70px;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
-    }
-
-    .student-name.mobile {
-        font-size: 11px;
-        margin-top: 6px;
-        max-width: 70px;
-    }
-
-    .student-score {
-        font-size: 14px;
-        margin-top: 2px;
-    }
-
-    .student-score.mobile {
-        font-size: 14px;
-        margin-top: 2px;
-    }
-
-    /* Leaderboard List */
-    .leaderboard-list {
-        border-radius: 20px 20px 0 0;
-        padding: 12px 12px;
-        margin-top: 12px;
-        min-height: 300px;
-    }
-
-    .leaderboard-list.mobile {
-        border-radius: 20px 20px 0 0;
-        padding: 12px 12px;
-        margin-top: 12px;
-        min-height: 300px;
-    }
-
-    /* List Item */
-    .list-item {
-        padding: 10px;
-        margin-bottom: 10px;
-        border-radius: 12px;
-    }
-
-    .list-item.mobile {
-        padding: 10px;
-        margin-bottom: 10px;
-        border-radius: 12px;
-    }
-
-    /* Mobile: Replace hover with active */
-    .list-item:hover {
-        background: #F8F9FA;
-        transform: none;
-    }
-
-    .list-item.mobile:active {
-        transform: scale(0.98);
-        background: #E8EAED;
-    }
-
-    /* Rank Number */
-    .rank-number {
-        width: 28px;
-        height: 28px;
-        font-size: 14px;
-        margin-right: 10px;
-    }
-
-    .rank-number.mobile {
-        width: 28px;
-        height: 28px;
-        font-size: 14px;
-        margin-right: 10px;
-    }
-
-    /* List Avatar */
-    .list-avatar {
-        width: 40px;
-        height: 40px;
-        margin-right: 10px;
-    }
-
-    .list-avatar.mobile {
-        width: 40px;
-        height: 40px;
-        margin-right: 10px;
-    }
-
-    /* Student Info in List */
-    .list-student-name {
-        font-size: 12px;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
-    }
-
-    .list-student-name.mobile {
-        font-size: 12px;
-    }
-
-    .list-score {
-        font-size: 14px;
-    }
-
-    .list-score.mobile {
-        font-size: 14px;
-    }
-
-    /* Scrollbar */
-    .app-container {
-        scrollbar-width: none;
-        -ms-overflow-style: none;
-    }
-
-    .app-container::-webkit-scrollbar {
-        display: none;
-    }
-
-    .app-container.mobile::-webkit-scrollbar {
-        display: none;
-    }
-}
-
-/* ============================================================
-   EXTRA SMALL MOBILE - Below 360px
-   ============================================================ */
-
-@media (max-width: 360px) {
-
-    .top-three-container,
-    .top-three-container.mobile {
-        gap: 12px;
-    }
-
-    .student-avatar,
-    .student-avatar.mobile {
-        width: 50px;
-        height: 50px;
-    }
-
-    .rank-1 .student-avatar,
-    .rank-1 .student-avatar.mobile {
-        width: 60px;
-        height: 60px;
-    }
-
-    .student-name,
-    .student-name.mobile {
-        font-size: 10px;
-        max-width: 60px;
-    }
-
-    .list-item,
-    .list-item.mobile {
-        padding: 8px;
-    }
-
-    .list-avatar,
-    .list-avatar.mobile {
-        width: 36px;
-        height: 36px;
-        margin-right: 8px;
-    }
-
-    .rank-number,
-    .rank-number.mobile {
-        width: 24px;
-        height: 24px;
-        font-size: 12px;
-        margin-right: 8px;
-    }
-
-    .assignment-title.mobile {
-        font-size: 14px;
-    }
-
-    .subtitle-dialog-text.mobile {
-        font-size: 11px;
-    }
-}
-
-/* ============================================================
-   LANDSCAPE MODE - Mobile Landscape
-   ============================================================ */
-
-@media (max-width: 900px) and (max-height: 500px) {
-
-    .header-section,
-    .header-section.mobile {
-        padding: 12px;
-    }
-
-    .top-three-container,
-    .top-three-container.mobile {
-        margin-top: 8px;
-        gap: 20px;
-    }
-
-    .leaderboard-list,
-    .leaderboard-list.mobile {
-        margin-top: 8px;
-        min-height: 200px;
-    }
-
-    .list-item,
-    .list-item.mobile {
-        padding: 8px;
-        margin-bottom: 8px;
-    }
-}
-
-/* ============================================================
-   VUETIFY DIALOG OVERRIDE FOR LEADERBOARD
-   ============================================================ */
-
-@media (max-width: 620px) {
-
-    /* Fullscreen dialog on mobile */
-    .v-dialog:has(.app-container) .v-overlay__content {
-        width: 100% !important;
-        max-width: 100% !important;
-        height: 100% !important;
-        max-height: 100% !important;
-        margin: 0 !important;
-        border-radius: 0 !important;
-    }
-}
-
-/* ============================================================
-   TOUCH INTERACTIONS FOR LEADERBOARD
-   ============================================================ */
-
-@media (hover: none) and (pointer: coarse) {
-
-    /* Better tap targets */
-    .list-item {
-        min-height: 64px;
-    }
-
-    /* Prevent text selection on tap */
-    .list-item,
-    .top-student,
-    .student-name,
-    .student-score {
-        -webkit-tap-highlight-color: transparent;
-        -webkit-touch-callout: none;
-        -webkit-user-select: none;
-        user-select: none;
-    }
-
-    /* Active state for better feedback */
-    .list-item:active {
-        background: #E8EAED !important;
-        transform: scale(0.98);
-    }
-}
-
-/* ============================================================
-   FIX POTENTIAL OVERFLOW ISSUES
-   ============================================================ */
-
-@media (max-width: 620px) {
-
-    /* Ensure no horizontal overflow */
-    .app-container,
-    .header-section,
-    .top-three-container,
-    .leaderboard-list {
-        max-width: 100vw;
-    }
-
-    /* Fix flex items */
-    .top-student {
-        flex: 0 1 auto;
-        min-width: 0;
-    }
-
-    .student-info {
-        flex: 1;
-        min-width: 0;
-        overflow: hidden;
-    }
-
-    /* Text truncation */
-    .list-student-name,
-    .student-name {
-        display: block;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-    }
-
-    .assignment-title {
-        display: -webkit-box;
-        -webkit-line-clamp: 2;
-        -webkit-box-orient: vertical;
-        overflow: hidden;
-        word-break: break-word;
-    }
-}
-
-/* ============================================================
-   PERFORMANCE OPTIMIZATIONS
-   ============================================================ */
-
-@media (max-width: 620px) {
-
-    /* Use GPU acceleration for animations */
-    .list-item,
-    .achievement-card {
-        transform: translateZ(0);
-        will-change: transform;
-    }
-
-    /* Smooth scrolling */
-    .app-container,
-    .leaderboard-list {
-        -webkit-overflow-scrolling: touch;
-        scroll-behavior: smooth;
-    }
-}
-
-/* ============================================================
-   ACCESSIBILITY IMPROVEMENTS
-   ============================================================ */
-
-@media (max-width: 620px) {
-
-    /* Larger tap targets for accessibility */
-    .list-item {
-        min-height: 60px;
-    }
-
-    /* Better contrast for text */
-    .student-name,
-    .list-student-name {
-        text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
-    }
-
-    /* Focus states for keyboard navigation */
-    .list-item:focus-visible {
-        outline: 2px solid #42ae18;
-        outline-offset: 2px;
-    }
-}
-
-.v-toolbar-title {
-    min-width: fit-content !important;
+.hover-card:hover{
+    transform: scale(1.02) ; /* phóng to 5% */
 }

@@ -41,7 +41,7 @@ async function checkRedirectRole() {
             } else if (user.GroupID === 3) {
                 //Học sinh
                 // redirect('/lms-student-dashboard')
-                window.location.href = '/lms-student-dashboard-COPY'
+                window.location.href = '/lms-student-dashboard'
                 setTimeout(() => {
                     vueData.IsLoadPage = true
                 }, 100)

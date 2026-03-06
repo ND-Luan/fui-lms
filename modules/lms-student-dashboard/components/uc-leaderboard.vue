@@ -1,199 +1,180 @@
 <template>
-	<v-dialog v-model="isOpen">
-		<div class="app-container">
-			<!-- Header -->
-			<div class="header-section rounded pb-0">
-				<div class="d-flex px-2">
+	<v-dialog :model-value="isOpen" @update:model-value="$emit('update:isOpen', $event)" :width="mobile ? '95%' : 480"
+		:max-height="mobile ? '95dvh' : '88vh'" scrollable>
+		<div class="lb-shell">
 
-					<div class="w-100 d-flex flex-column">
-						<h4 style=" font-size: 18px; font-weight: 500; margin: 8px 0 0;">{{
-							assignmentInfo.Title }}
-						</h4>
-						<span class="subtitle-dialog-text">Môn học: {{ assignmentInfo.TenMonHoc_HienThi }}</span>
-						<span class="subtitle-dialog-text">Giáo viên: {{ students[0].HoTenGV ?? '-' }}</span>
-					</div>
-
-					<v-spacer></v-spacer>
-					<v-btn icon="mdi-close" variant="text" color="white" size="small"
-						@click="$emit('update:isOpen', false)"></v-btn>
+			<!-- ══ HEADER ══ -->
+			<div class="lb-header">
+				<div class="lb-header-bg">
+					<div class="lb-orb lb-orb--1"></div>
+					<div class="lb-orb lb-orb--2"></div>
+					<div class="lb-grid"></div>
 				</div>
 
-				<!-- Top 3 Students -->
-				<div class="top-three-container">
+				<button class="lb-close" @click="$emit('update:isOpen', false)">
+					<v-icon size="16" color="white">mdi-close</v-icon>
+				</button>
+
+				<div class="lb-header-content">
+					<div class="lb-eyebrow">
+						<v-icon size="12">mdi-podium</v-icon>
+						Bảng xếp hạng
+					</div>
+					<h2 class="lb-title">{{ overview.Title || '…' }}</h2>
+					<div class="lb-meta">
+						<span v-if="overview.TenMonHoc_HienThi">
+							<v-icon size="11">mdi-book-outline</v-icon>
+							{{ overview.TenMonHoc_HienThi }}
+						</span>
+						<span v-if="students[0]?.HoTenGV">
+							<v-icon size="11">mdi-account-tie-outline</v-icon>
+							{{ students[0].HoTenGV }}
+						</span>
+						<span v-if="students.length">
+							<v-icon size="11">mdi-account-group-outline</v-icon>
+							{{ students.length }} học sinh
+						</span>
+					</div>
+				</div>
+
+				<!-- ── PODIUM ── -->
+				<div class="lb-podium" v-if="!loading && students.length >= 3">
+
 					<!-- Rank 2 -->
-					<div class="top-student rank-2 d-flex flex-column align-center justify-center">
-						<div class="rank-badge">2</div>
-						<div class="student-avatar">
-							<img :src="vueData.v_Set.urlAvatarHocSinh + students[1].HocSinhID" class="avatar-img"
-								:alt="students[1].HoTen">
+					<div class="lb-pod lb-pod--2">
+						<div class="lb-pod-badge lb-pod-badge--2">2</div>
+						<div class="lb-pod-av-wrap lb-pod-av-wrap--2">
+							<img :src="avatarUrl(students[1].HocSinhID)" class="lb-pod-av" :alt="students[1].HoTen" />
 						</div>
-						<div class="student-name">{{ students[1].HoTen }}</div>
-						<!-- <div class="student-school">{{ students[1].school }}</div> -->
-						<div class="student-score">{{ students[1].Score }}</div>
+						<div class="lb-pod-name">{{ shortName(students[1].HoTen) }}</div>
+						<div class="lb-pod-score lb-pod-score--2">{{ students[1].Score }}</div>
+						<div class="lb-pod-bar lb-pod-bar--2"></div>
 					</div>
 
 					<!-- Rank 1 -->
-					<div class="top-student rank-1 d-flex flex-column align-center justify-center">
-						<div class="rank-badge">
-							<v-icon color="white" size="20">mdi-crown</v-icon>
+					<div class="lb-pod lb-pod--1">
+						<div class="lb-pod-badge lb-pod-badge--1">
+							<v-icon size="13" color="#78350f">mdi-crown</v-icon>
 						</div>
-						<div class="student-avatar">
-							<img :src="vueData.v_Set.urlAvatarHocSinh + students[0].HocSinhID" class="avatar-img"
-								:alt="students[0].HoTen">
+						<div class="lb-pod-av-wrap lb-pod-av-wrap--1">
+							<img :src="avatarUrl(students[0].HocSinhID)" class="lb-pod-av" :alt="students[0].HoTen" />
+							<div class="lb-pod-ring"></div>
 						</div>
-						<div class="student-name">{{ students[0].HoTen }}</div>
-						<!-- <div class="student-school">{{ students[0].school }}</div> -->
-						<div class="student-score">{{ students[0].Score }}</div>
+						<div class="lb-pod-name lb-pod-name--1">{{ shortName(students[0].HoTen) }}</div>
+						<div class="lb-pod-score lb-pod-score--1">{{ students[0].Score }}</div>
+						<div class="lb-pod-bar lb-pod-bar--1"></div>
 					</div>
 
 					<!-- Rank 3 -->
-					<div class="top-student rank-3 d-flex flex-column align-center justify-center">
-						<div class="rank-badge">3</div>
-						<div class="student-avatar">
-							<img :src="vueData.v_Set.urlAvatarHocSinh + students[2].HocSinhID" class="avatar-img"
-								:alt="students[2].HoTen">
+					<div class="lb-pod lb-pod--3">
+						<div class="lb-pod-badge lb-pod-badge--3">3</div>
+						<div class="lb-pod-av-wrap lb-pod-av-wrap--3">
+							<img :src="avatarUrl(students[2].HocSinhID)" class="lb-pod-av" :alt="students[2].HoTen" />
 						</div>
-						<div class="student-name">{{ students[2].HoTen }}</div>
-						<!-- <div class="student-school">{{ students[2].school }}</div> -->
-						<div class="student-score">{{ students[2].Score }}</div>
+						<div class="lb-pod-name">{{ shortName(students[2].HoTen) }}</div>
+						<div class="lb-pod-score lb-pod-score--3">{{ students[2].Score }}</div>
+						<div class="lb-pod-bar lb-pod-bar--3"></div>
+					</div>
+				</div>
+
+				<!-- Loading skeleton podium -->
+				<div class="lb-podium lb-podium--skel" v-else-if="loading">
+					<div class="lb-skel-pod lb-skel-pod--2"></div>
+					<div class="lb-skel-pod lb-skel-pod--1"></div>
+					<div class="lb-skel-pod lb-skel-pod--3"></div>
+				</div>
+			</div>
+
+			<!-- ══ LIST rank 4+ ══ -->
+			<div class="lb-list">
+
+				<!-- Loading rows skeleton -->
+				<template v-if="loading">
+					<div v-for="n in 4" :key="n" class="lb-row-skel">
+						<div class="lb-skel lb-skel--rank"></div>
+						<div class="lb-skel lb-skel--av"></div>
+						<div class="lb-skel lb-skel--name"></div>
+						<div class="lb-skel lb-skel--score"></div>
+					</div>
+				</template>
+
+				<!-- Empty -->
+				<div v-else-if="!loading && remainingStudents.length === 0 && students.length >= 3" class="lb-empty">
+					<v-icon size="20" color="grey-lighten-2">mdi-check-decagram</v-icon>
+					Chỉ có {{ students.length }} học sinh tham gia
+				</div>
+
+				<!-- Rows -->
+				<div v-else v-for="(student, idx) in remainingStudents" :key="student.HocSinhID" class="lb-row"
+					:class="{ 'lb-row--me': isMe(student) }" :style="{ animationDelay: (idx * 0.035 + 0.1) + 's' }">
+					<div class="lb-row-rank">{{ idx + 4 }}</div>
+
+					<img :src="avatarUrl(student.HocSinhID)" class="lb-row-av" :alt="student.HoTen" />
+
+					<div class="lb-row-info">
+						<div class="lb-row-name">{{ student.HoTen }}</div>
+						<div class="lb-row-time" v-if="student.SubmissionTime_HienThi">
+							{{ student.SubmissionTime_HienThi }}
+						</div>
+					</div>
+
+					<div class="lb-row-right">
+						<div class="lb-bar-wrap">
+							<div class="lb-bar" :style="{ width: scorePct(student.Score) + '%' }"></div>
+						</div>
+						<div class="lb-row-score">{{ student.Score }}</div>
 					</div>
 				</div>
 			</div>
 
-			<!-- List của học sinh từ rank 4 trở đi -->
-			<div class="leaderboard-list">
-				<div v-for="(student, index) in remainingStudents" :key="student.id" class="list-item">
-					<div class="rank-number">{{ index + 4 }}</div>
-					<div class="list-avatar">
-						<img :src="vueData.v_Set.urlAvatarHocSinh + student.HocSinhID" class="avatar-img"
-							:alt="student.HoTen">
-					</div>
-					<div class="student-info">
-						<div class="list-student-name">{{ student.HoTen }}</div>
-						<!-- <div class="list-student-school">{{ student.school }}</div> -->
-					</div>
-					<div class="list-score">{{ student.Score }}</div>
-				</div>
-			</div>
 		</div>
 	</v-dialog>
 </template>
 
 <script>
-export default {
-	props: ['isOpen', 'AssignToClassID'],
-	data() {
-		return {
-			filterTab: 'all',
-			activeTab: 'week',
-			students: [
-				{
-					id: 1,
-					name: 'Kiara',
-					school: 'Davidson Academy',
-					score: 98,
-					image: 'https://i.pravatar.cc/150?img=5'
-				},
-				{
-					id: 2,
-					name: 'Courtney',
-					school: 'Walter Payton College',
-					score: 95,
-					image: 'https://i.pravatar.cc/150?img=1'
-				},
-				{
-					id: 3,
-					name: 'Esther',
-					school: 'Davidson Academy',
-					score: 93,
-					image: 'https://i.pravatar.cc/150?img=9'
-				},
-				{
-					id: 4,
-					name: 'Wade Warren',
-					school: 'Stuyvesant High School',
-					score: 92,
-					image: 'https://i.pravatar.cc/150?img=12'
-				},
-				{
-					id: 5,
-					name: 'Kathryn Murphy',
-					school: 'Davidson Academy',
-					score: 84,
-					image: 'https://i.pravatar.cc/150?img=20'
-				},
-				{
-					id: 6,
-					name: 'Arlene McCoy',
-					school: 'Walter Payton College',
-					score: 82,
-					image: 'https://i.pravatar.cc/150?img=25'
-				},
-				{
-					id: 7,
-					name: 'Darlene Robertson',
-					school: 'Davidson Academy',
-					score: 80,
-					image: 'https://i.pravatar.cc/150?img=32'
-				},
-				{
-					id: 8,
-					name: 'Alfred Murdok',
-					school: 'Davidson Academy',
-					score: 78,
-					image: 'https://i.pravatar.cc/150?img=15'
-				},
-			],
-			assignmentInfo: {},
-			vueData
-		}
-	},
-	mounted() {
-		if (this.AssignToClassID) {
-			this.GET_EL_Student_GetScoreClasss_ByAssignToClassID()
-		}
-	},
-	computed: {
-		remainingStudents() {
-			return this.students.slice(3);
+	export default {
+		name: 'uc-leaderboard',
+		props: {
+			isOpen: Boolean,
+			loading: Boolean,
+			data: Object,   // { overview: {...}, students: [...] }
 		},
-	},
-	watch: {},
-	methods: {
-		getRankClass(rank) {
-			if (rank === 1) return 'rank-1 text-white';
-			if (rank === 2) return 'rank-2 text-white';
-			if (rank === 3) return 'rank-3 text-white';
-			return 'bg-blue-lighten-4 text-primary';
+		emits: ['update:isOpen'],
+		data() {
+			const { mobile } = Vuetify.useDisplay();
+			return { mobile, vueData };
 		},
-		getRankIcon(rank) {
-			if (rank === 1) return 'mdi-trophy';
-			if (rank === 2) return 'mdi-medal';
-			if (rank === 3) return 'mdi-medal';
-			return 'mdi-numeric-' + rank;
+		computed: {
+			overview() {
+				return this.data?.overview ?? {};
+			},
+			students() {
+				return this.data?.students ?? [];
+			},
+			remainingStudents() {
+				return this.students.slice(3);
+			},
+			maxScore() {
+				if (!this.students.length) return 1;
+				return Math.max(...this.students.map(s => Number(s.Score) || 0)) || 1;
+			},
 		},
-		getAvatarColor(index) {
-			const colors = ['amber', 'blue', 'green', 'purple', 'pink', 'teal', 'orange', 'indigo', 'cyan', 'lime'];
-			return colors[index % colors.length];
+		methods: {
+			avatarUrl(id) {
+				return vueData.v_Set.urlAvatarHocSinh + id;
+			},
+			shortName(fullName) {
+				if (!fullName) return '';
+				const parts = fullName.trim().split(' ');
+				if (parts.length <= 2) return fullName;
+				return parts[parts.length - 1] + ' ' + parts[0][0] + '.';
+			},
+			scorePct(score) {
+				return Math.round((Number(score) / this.maxScore) * 100);
+			},
+			isMe(student) {
+				return student.HocSinhID === vueData?.user?.UserID;
+			},
 		},
-		getProgress(score) {
-			return Math.round((score / 1000) * 100);
-		},
-		getProgressColor(score) {
-			if (score >= 900) return 'success';
-			if (score >= 800) return 'primary';
-			if (score >= 700) return 'warning';
-			return 'error';
-		},
-		GET_EL_Student_GetScoreClasss_ByAssignToClassID() {
-			const params = {
-				AssignToClassID: this.AssignToClassID
-			}
-			ajaxCALL('lms/EL_Student_GetScoreClasss_ByAssignToClassID', params, res => {
-				this.assignmentInfo = res.data[0][0]
-				this.students = res.data[1]
-			})
-		}
-	},
-}
+	}
 </script>

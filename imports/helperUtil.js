@@ -291,10 +291,10 @@ function IsCheck_NotRoleParent(user) {
         confirm({
             title: "Bạn không có quyền truy cập",
             action: function () {
-                redirect('/lms-student-dashboard-COPY')
+                redirect('/lms-student-dashboard')
             },
             cancel: function () {
-                redirect('/lms-student-dashboard-COPY')
+                redirect('/lms-student-dashboard')
             },
         })
         return
