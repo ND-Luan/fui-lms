@@ -17,7 +17,7 @@
 				item-title="TenNhomCotDiem_VI" item-value="MaNhomCotDiem" return-object :disabled="!form.MonHocItem" />
 		</v-col>
 		<v-col cols="6" sm="6" md="4" lg="2">
-			<v-btn text="Làm mới" @click="onRefreshFilter" variant="tonal" color="primary" />
+			<v-btn @click="onRefreshFilter" variant="outlined" color="primary" ><v-icon start>mdi-reload</v-icon>Làm mới</v-btn>
 		</v-col>
 	</v-row>
 </template>
@@ -106,17 +106,23 @@
 				this.$emit("onRefresh")
 			},
 			async getKhoi() {
-				this.DSKhoi = await ajaxCALLPromise("lms/KhoiHocByCapHoc_Get", { CapID: vueData.CapID })
+				this.DSKhoi = await ajaxCALLPromise("lms/KhoiHocByCapHoc_Get", {
+					CapID: vueData.CapID,
+					HocKi: vueData.NienKhoaItem.HocKi,
+					NienKhoa: vueData.NienKhoa
+				})
 			},
 			async getLop() {
 				this.DSLop = await ajaxCALLPromise("lms/Lop_Get_ByKhoiID", {
 					KhoiID: this.form.KhoiItem.KhoiID,
-					NienKhoa: vueData.NienKhoa
+					NienKhoa: vueData.NienKhoa,
+					HocKi: vueData.NienKhoaItem.HocKi,
 				})
 			},
 			async getMonHoc() {
 				this.DSMonHoc = await ajaxCALLPromise("lms/MonHoc_Get_ByLopID", {
 					NienKhoa: vueData.NienKhoa,
+					HocKi: vueData.NienKhoaItem.HocKi,
 					LopID: this.form.LopItem.LopID
 				})
 			},

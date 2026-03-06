@@ -126,7 +126,7 @@
 						<v-card-title class="text-primary d-flex align-center">
 							Tương quan điểm giữa kì và cuối kì
 							<v-spacer></v-spacer>
-							<v-btn color="primary" variant="tonal" @click="onLoadChart({
+							<v-btn color="primary" variant="outlined"  prepend-icon= "mdi-chart-line" @click="onLoadChart({
 								NienKhoa: vueData.NienKhoa,
 								KhoiID: khoiid,
 								MonHocID: monhocid

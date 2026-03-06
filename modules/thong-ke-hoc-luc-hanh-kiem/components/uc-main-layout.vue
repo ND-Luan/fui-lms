@@ -5,7 +5,11 @@
 				THỐNG KÊ HỌC TẬP & RÈN LUYỆN
 				<div v-if="BaoCaoItem?.IsChotBaoCao" class="text-caption">
 					<span class="text-red">Thời điểm chốt:</span>
-					[{{BaoCaoItem?.NguoiChot}}] {{BaoCaoItem.HoTenNguoiChot}} • {{BaoCaoItem.NgayChot}}
+					<span class="text-black">
+						[{{ BaoCaoItem?.NguoiChot }}]
+						{{ BaoCaoItem.HoTenNguoiChot }} •
+						{{ BaoCaoItem.NgayChot }}
+					</span>
 				</div>
 			</v-card-title>
 			<v-card-text class="pa-2">
@@ -15,11 +19,17 @@
 							item-value="value" />
 					</v-col>
 					<v-col class="d-flex ga-2">
-						<v-btn @click="onSearch" text="Tìm kiếm" color="primary" :disabled="!HocKi" />
-						<v-btn @click="onExportExcel" text="Xuất Excel" color="green"
-							:disabled="!HocKi || vueData.DSHocSinh.length === 0" />
-						<v-btn @click="onChotBaoCao" text="Chốt báo cáo" color="amber"
-							:disabled="!HocKi || !BaoCaoItem || BaoCaoItem?.IsChotBaoCao" />
+						<v-btn @click="onSearch" color="primary" variant="outlined" prepend-icon="mdi-magnify" :disabled="!HocKi">
+							Tìm kiếm
+						</v-btn>
+						<v-btn @click="onExportExcel" color="green" variant="outlined" prepend-icon="mdi-file-excel"
+							:disabled="!HocKi || vueData.DSHocSinh.length === 0">
+							Xuất Excel
+						</v-btn>
+						<v-btn @click="onChotBaoCao" color="amber" variant="outlined" prepend-icon="mdi-check-circle"
+							:disabled="!HocKi || !BaoCaoItem || BaoCaoItem?.IsChotBaoCao">
+							Chốt báo cáo
+						</v-btn>
 					</v-col>
 				</v-row>
 			</v-card-text>

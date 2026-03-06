@@ -123,7 +123,15 @@
 		},
 		computed: {
 			isGraded() { return this.grading && this.isGrade; },
-			isCorrect() { return (this.isGraded || this.submissionstatus == 4) ? (this.answer === this.question.config.correctAnswer) : false; },
+			isCorrect() {
+				// console.log('answer:', this.answer, typeof this.answer);
+				// console.log('correctAnswer:', this.question.config.correctAnswer, typeof this.question.config.correctAnswer);
+				// console.log('equal?', this.answer === this.question.config.correctAnswer);
+	
+				return (this.isGraded || this.submissionstatus == 4)
+					? (this.answer === this.question.config.correctAnswer)
+					: false;
+			},
 			guideText() { return this.question?.config?.submissionNote || this.question?.config?.instruction || '' },
 			displayScore() {
 				// Ưu tiên manualScore, rồi autoScore, nếu trống thì mặc định 0

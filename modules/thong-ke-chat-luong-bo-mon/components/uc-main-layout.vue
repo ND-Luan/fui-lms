@@ -10,8 +10,8 @@
 						item-value="textValue" />
 				</v-col>
 				<v-col class="d-flex ga-2">
-					<v-btn color="primary" text="Tìm kiếm" @click="onLoadThongKe" />
-					<v-btn color="primary" variant="tonal" text="Xuất Excel" @click="onExportExcel" />
+					<v-btn color="primary" variant="outlined" prepend-icon="mdi-magnify" text="Tìm kiếm" @click="onLoadThongKe" />
+					<v-btn color="primary" variant="outlined" prepend-icon="mdi-file-excel" text="Xuất file Excel" @click="onExportExcel" />
 				</v-col>
 			</v-row>
 		</v-card>

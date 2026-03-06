@@ -129,6 +129,7 @@
 		<!-- ── LEADERBOARD MODAL ── -->
 		<uc-leaderboard v-model:isOpen="leaderboardModal.visible" :data="leaderboardModal.data" />
 
+		<uc-iframe-window ref="iframeWindow" />
 	</div>
 </template>
 
@@ -207,16 +208,14 @@
 	
 			// ─── Xem điểm → mở summary modal ───
 			async onXemDiem(hd) {
+				console.log("hd", hd)
 				this.summaryModal.visible = true;
 				this.summaryModal.loading = true;
 				this.summaryModal.data = null;
 	
 				try {
-					const res = await ajaxCALLPromise('lms/EL_Student_Get_SummaryBaiLam', {
-						LanNop: hd.LanNop,
-						Is_SendToClass: hd.Is_SendToClass,
-						AssignID: hd.AssignID,
-						AssignToClassID: hd.AssignToClassID,
+					const res = await ajaxCALLPromise('lms/EL_Student_GetSubmissionSummary', {
+						SubmissionID: hd.ObjectID
 					});
 					// API trả về: [ [overviewItem], [detail1, detail2, ...] ]
 					this.summaryModal.data = {
@@ -234,10 +233,9 @@
 			// ─── Navigate to chi tiết từ summary modal ───
 			onNavigateToDetails(assignToClassID) {
 				this.summaryModal.visible = false;
-				openWindow({
+				this.$refs.iframeWindow.openWindow({
 					title: 'Chi tiết bài làm',
 					url: `/lms-student-assignment?AssignToClassID=${assignToClassID}&tab=detail`,
-					id: 'ChiTiet' + assignToClassID,
 				});
 			},
 	
@@ -246,10 +244,10 @@
 				url += hd.Is_SendToClass
 					? `&AssignToClassID=${hd.AssignID}`
 					: `&AssignToStudentID=${hd.AssignID}`;
-				openWindow({
+	
+				this.$refs.iframeWindow.openWindow({
 					title: 'Chi tiết - ' + hd.Title,
 					url,
-					id: 'ChiTiet' + hd.AssignToClassID,
 				});
 			},
 	

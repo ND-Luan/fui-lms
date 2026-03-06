@@ -1,12 +1,12 @@
 <template>
 	<v-card>
-		<v-card-title class="text-primary px-0 pt-0 my-3">
+		<v-card-title class="px-0 pt-0 my-3">
 			{{ getTitlePageByURL(urlPage) }}
 		</v-card-title>
 		<v-card-title class="px-0">
 			<v-row dense class="px-0">
 				<v-col cols="12" md="3" lg="3">
-					<v-select label="Chọn khối" v-model="KhoiID" :items="DSKhoi" item-title="title"
+					<v-select label="Chọn khối"  v-model="KhoiID" :items="DSKhoi" item-title="title"
 						item-value="value" />
 				</v-col>
 				<v-col cols="12" md="5" lg="5">
@@ -18,7 +18,7 @@
 						item-value="value" />
 				</v-col>
 				<v-col cols="12" md="3" lg="2">
-					<v-btn variant='outlined' color="primary" @click="ThongKe_TiLeDat_TA2_GET()"
+					<v-btn variant='outlined' color="primary" prepend-icon="mdi-chart-line" @click="ThongKe_TiLeDat_TA2_GET()"
 						:disabled='!HocKyValue || List_LopID.length === 0'>Xem thống kê</v-btn>
 				</v-col>
 			</v-row>

@@ -20,7 +20,7 @@
 					item-title="TenNhomCotDiem_VI" item-value="MaNhomCotDiem" :return-object="true" />
 			</v-col>
 			<v-col>
-				<f-button label="Làm mới" variant="outlined" :action="action" color="primary" />
+				<f-button label="Làm mới" variant="outlined" prepend-icon="mdi-refresh" :action="action" color="primary" />
 			</v-col>
 		</v-row>
 	</v-card>

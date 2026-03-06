@@ -14,7 +14,7 @@
 						<v-card-title class="text-primary d-flex align-center">
 							Điểm tiến bộ cuối kì so với giữa kì
 							<v-spacer></v-spacer>
-							<v-btn color="primary" variant="tonal" @click="
+							<v-btn color="primary" variant="outlined" prepend-icon="mdi-database @click="
 								onLoadChart3({
 									NienKhoa: vueData.NienKhoa,
 									CapID: capid,
@@ -136,7 +136,7 @@
 						<v-card-title class="text-primary d-flex align-center">
 							Điểm trung bình IELTS
 							<v-spacer></v-spacer>
-							<v-btn color="primary" variant="tonal" @click="onLoadChart({
+							<v-btn color="primary" variant="outlined" prepend-icon="mdi-chart-line" @click="onLoadChart({
 								NienKhoa: vueData.NienKhoa,
 								KhoiID: khoiid,
 								MonHocID: monhocid,

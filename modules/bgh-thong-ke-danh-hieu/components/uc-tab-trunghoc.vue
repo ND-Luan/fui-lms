@@ -4,19 +4,23 @@
 			<div>
 				<span class="text-primary">TRUNG HỌC</span>
 				<div v-if="BaoCaoItem?.IsChotBaoCao" class="text-caption">
-					<span class="text-red">Thời điểm chốt:</span> [{{BaoCaoItem.NguoiChot}}]
+					<span class="text-red">Thời điểm chốt:</span> 
+					<span class="text-black">
+					[{{BaoCaoItem.NguoiChot}}]
 					{{BaoCaoItem.HoTenNguoiChot}} -
 					{{BaoCaoItem.NgayChot}}
+					</span>
 				</div>
 			</div>
 			<v-spacer></v-spacer>
-			<div class="d-flex ga-2">
-				<v-select v-model="HocKi" label="Chọn học kì" :items="DSHocKi" style="min-width: 200px;"></v-select>
-				<v-btn @click="getHocLucHangKiem(2)" color="primary" variant="outlined" :disabled="!HocKi">
+			<div class="d-flex ga-2 align-center">
+				<v-select v-model="HocKi" label="Chọn học kì" :items="DSHocKi" style="min-width: 200px;" />
+				<v-btn color="primary" variant="outlined" prepend-icon="mdi-refresh" :disabled="!HocKi"
+					@click="getHocLucHangKiem(2)">
 					Làm mới
 				</v-btn>
-				<v-btn @click="onChotBaoCao" color="primary" variant="outlined"
-					:disabled="!HocKi || !BaoCaoItem || BaoCaoItem?.IsChotBaoCao">
+				<v-btn color="success" variant="outlined" prepend-icon="mdi-lock-check"
+					:disabled="!HocKi || !BaoCaoItem || BaoCaoItem?.IsChotBaoCao" @click="onChotBaoCao">
 					Chốt báo cáo
 				</v-btn>
 			</div>

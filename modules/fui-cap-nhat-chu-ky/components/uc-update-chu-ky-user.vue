@@ -15,7 +15,7 @@
 		<v-col cols="12">
 			<p class="text-primary text-title font-weight-medium">Cập nhật hình ảnh</p>
 			<f-file-upload class="mt-2" :url="vueData.v_Set.apiFile" @input="handleUploadFile" color="primary"
-				variant="tonal"></f-file-upload>
+				variant="outlined"></f-file-upload>
 			<v-img class="mt-2" :src="vueData.v_Set.urlReturnFile+ '/FileData/' +  vueData.ChuKyObj?.HinhAnhChuKy"
 				:width="200" />
 		</v-col>

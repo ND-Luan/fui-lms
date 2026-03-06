@@ -6,14 +6,18 @@
 					<v-select v-model="HocKi" label="Chọn học kì" :items="DSHocKi" item-title="title"
 						item-value="value" />
 				</v-col>
-				<v-col>
-					<v-btn color="primary" variant="tonal" @click="onLoad(HocKi, NienKhoa)">Tìm kiếm</v-btn>
-					<v-btn color="primary" variant="tonal" :disabled="items.length === 0" @click="onExportExcel">
-						Xuất excel
+				<v-col class="d-flex ga-2">
+					<v-btn color="primary" variant="outlined" prepend-icon="mdi-magnify" @click="onLoad(HocKi, NienKhoa)">
+						Tìm kiếm
 					</v-btn>
-					<v-btn color="primary" variant="tonal"
-						:disabled="!BaoCaoItem || items.length === 0 || BaoCaoItem?.IsChotBaoCao"
-						@click="onChotBaoCao">Chốt báo cáo</v-btn>
+					<v-btn color="primary" variant="outlined" prepend-icon="mdi-file-excel" :disabled="items.length === 0"
+						@click="onExportExcel">
+						Xuất file excel
+					</v-btn>
+					<v-btn color="success" variant="outlined" prepend-icon="mdi-lock-check"
+						:disabled="!BaoCaoItem || items.length === 0 || BaoCaoItem?.IsChotBaoCao" @click="onChotBaoCao">
+						Chốt báo cáo
+					</v-btn>
 				</v-col>
 			</v-row>
 		</v-card-text>

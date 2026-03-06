@@ -9,9 +9,9 @@
 					<v-col cols="3"><v-select v-model="LopItem" label="Chọn lớp" :items="DSLop" item-title="TenLop"
 							item-value="LopID" return-object /></v-col>
 					<v-col class="d-flex ga-2">
-						<v-btn @click="getHocSinh()" text="Làm mới" variant="outlined" color="primary" />
-						<v-btn @click="insHocSinh()" text="Cập nhật DS học sinh" variant="outlined" color="teal"
-							:disabled="DSHocSinhSelected.length === 0" />
+						<v-btn @click="getHocSinh()" variant="outlined" color="primary" ><V-icon start>mdi-reload</V-icon>Làm mới</v-btn>
+						<v-btn @click="insHocSinh()" variant="outlined" color="teal"
+							:disabled="DSHocSinhSelected.length === 0" ><V-icon start>mdi-sync</V-icon>Cập nhật DS học sinh</v-btn>
 					</v-col>
 				</v-row>
 			</v-card-text>

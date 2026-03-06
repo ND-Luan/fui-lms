@@ -13,7 +13,7 @@
 						<v-select v-model="HocKyValue" label="Học kì" :items="DSKiHoc"></v-select>
 					</v-col>
 					<v-col class="d-flex ga-2">
-						<v-btn variant='outlined' color="primary" @click="GET_BaoCao_Cambridge_C2">
+						<v-btn variant='outlined' prepend-icon="mdi-chart-line" color="primary" @click="GET_BaoCao_Cambridge_C2">
 							Xem thống kê
 						</v-btn>
 						<v-btn :disabled="DataSheet?.length === 0" variant="outlined" color="success"

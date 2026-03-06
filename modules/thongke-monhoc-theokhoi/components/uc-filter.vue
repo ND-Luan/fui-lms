@@ -16,7 +16,7 @@
 				item-value="MonHocID" :return-object="true" />
 		</v-col>
 		<v-col>
-			<f-button label="Làm mới" variant="tonal" color="primary" :action="action" />
+			<f-button label="Làm mới" prepend-icon="mdi-refresh"  variant="outlined" color="primary" :action="action" />
 		</v-col>
 	</v-row>
 </template>

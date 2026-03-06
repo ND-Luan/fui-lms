@@ -126,11 +126,13 @@
 						<v-card-title class="text-primary d-flex align-center">
 							Tương quan điểm giữa kì và cuối kì
 							<v-spacer></v-spacer>
-							<v-btn color="primary" variant="tonal" @click="onLoadChart({
-								NienKhoa: vueData.NienKhoa,
-								KhoiID: khoiid,
-								MonHocID: monhocid
-							})">Xem biểu đồ</v-btn>
+							<v-btn color="primary" variant="outlined" prepend-icon="mdi-chart-line" @click="onLoadChart({
+							    NienKhoa: vueData.NienKhoa,
+							    KhoiID: khoiid,
+							    MonHocID: monhocid
+							  })">
+								Xem biểu đồ
+							</v-btn>
 						</v-card-title>
 						<v-card-text>
 							<uc-chart-apex :options="Chart_DiemTrungBinh" />

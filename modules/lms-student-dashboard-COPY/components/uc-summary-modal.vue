@@ -30,8 +30,8 @@
 							<svg viewBox="0 0 120 120" class="smd-ring-svg">
 								<circle cx="60" cy="60" r="50" fill="none" stroke-width="8" class="smd-ring-bg" />
 								<circle cx="60" cy="60" r="50" fill="none" stroke-width="8" class="smd-ring-fg"
-									:stroke="scoreColor" stroke-linecap="round"
-									:stroke-dasharray="scorePct * 3.14+ '314'" transform="rotate(-90 60 60)" />
+									:stroke="scoreColor" stroke-linecap="round" :stroke-dasharray="strokeDasharray"
+									transform="rotate(-90 60 60)" />
 							</svg>
 							<div class="smd-ring-inner">
 								<span class="smd-score-num" :style="{ color: scoreColor }">
@@ -140,6 +140,9 @@
 			return { mobile };
 		},
 		computed: {
+			strokeDasharray() {
+				return `${(this.scorePct / 100) * 314} 314`
+			},
 			scorePct() {
 				const ov = this.summaryData?.overview;
 				if (!ov || !ov.MaxScore) return 0;

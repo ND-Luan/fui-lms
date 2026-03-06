@@ -22,7 +22,7 @@
                         item-value="HocSinhID" hide-details />
                 </v-col>
                 <v-col cols="12" md="2" class="d-flex align-end">
-                    <v-btn color="primary" variant="outlined" class="w-100" :disabled="HocSinhID == null"
+                    <v-btn color="primary" variant="outlined" prepend-icon="mdi-chart-line" class="w-100" :disabled="HocSinhID == null"
                         @click="ReloadData">
                         Xem biểu đồ
                     </v-btn>

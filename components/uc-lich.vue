@@ -8,29 +8,29 @@
 
 <script>
 	export default {
-	  props: {
-	    HocSinh: Object,
-	    inline: {
-	      type: Boolean,
-	      default: false
-	    }
-	  },
-	  data() {
-	    return {
-	      isMobile: false
-	    }
-	  },
-	  mounted() {
-	    this.checkMobile()
-	    window.addEventListener('resize', this.checkMobile)
-	  },
-	  beforeUnmount() {
-	    window.removeEventListener('resize', this.checkMobile)
-	  },
-	  methods: {
-	    checkMobile() {
-	      this.isMobile = window.innerWidth < 960
-	    }
-	  }
+		props: {
+			HocSinh: Object,
+			inline: {
+				type: Boolean,
+				default: false
+			}
+		},
+		data() {
+			return {
+				isMobile: false
+			}
+		},
+		mounted() {
+			this.checkMobile()
+			window.addEventListener('resize', this.checkMobile)
+		},
+		beforeUnmount() {
+			window.removeEventListener('resize', this.checkMobile)
+		},
+		methods: {
+			checkMobile() {
+				this.isMobile = window.innerWidth < 960
+			}
+		}
 	}
 </script>

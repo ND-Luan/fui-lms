@@ -2,8 +2,8 @@
 	<v-card>
 		<v-card-title class="text-h5 border-md rounded border-primary">
 			<span class="text-uppercase text-primary me-3">Cấu hình chỉ tiêu tiếng Anh 2</span> <v-progress-circular
-				color="green" indeterminate v-if="!vueData.NienKhoa" /> <v-chip v-if="vueData.NienKhoa" color="success"
-				class="font-weight-bold">{{ vueData.NienKhoa }}</v-chip>
+				color="green" indeterminate v-if="!vueData.NienKhoa" /> <v-chip v-if="vueData.NienKhoa" color="success" variant="text"
+				class="font-weight-medium">{{ vueData.NienKhoa }}</v-chip>
 		</v-card-title>
 		<div class="w-100 px-3 d-flex flex-column align-center justify-center border-s-xl border-primary elevation-1 mt-3 rounded-s-lg ga-2"
 			style="min-height: 100px;">
@@ -13,7 +13,7 @@
 				<v-spacer></v-spacer>
 				<v-btn variant="text"  @click="onExportExcel()" color="green" icon="mdi-microsoft-excel"></v-btn>
 
-				<v-btn color="primary" @click="onSave()"
+				<v-btn color="primary" @click="onSave()" prepend-icon="mdi-content-save" variant="outlined"
 					:disabled="vueData.DSLop.length == 0 || vueData.columnHeader == 0" :loading="isLoadingSave">Lưu chỉ
 					tiêu</v-btn>
 			</div>

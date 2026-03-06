@@ -10,7 +10,7 @@
 						</v-select>
 					</v-col>
 					<v-col cols="6" md="2">
-						<v-btn color="primary" variant="tonal" @click="onLoadChart({
+						<v-btn color="primary" variant="outlined"  prepend-icon= "mdi-chart-line" @click="onLoadChart({
 							NienKhoa: vueData.NienKhoa,
 							CapID: capid,
 							MonHocID: form.MonHocItem.MonHocID,

@@ -7,7 +7,7 @@
 				<v-select label="Chọn cấp" v-model="CapID" :items="DSCap" style="width: 200px;"></v-select>
 				<v-select label="Chọn khối" v-model="KhoiID" :items="DSKhoi" item-title="TenKhoiHoc" item-value="KhoiID"
 					style="width: 200px;"></v-select>
-				<v-btn variant="outlined" @click="getData()">Làm mới</v-btn>
+				<v-btn prepend-icon="mdi-refresh" variant="outlined" @click="getData()">Làm mới</v-btn>
 			</div>
 		</v-card-title>
 		<v-card-text>
@@ -20,7 +20,7 @@
 				<v-select :items="DSMonHocOriginal" item-title="TenMonHoc_HienThi" item-value="MonHocID"
 					label="Môn học " v-model="formData.MonHocID" style="max-width: 200px;" density="compact"
 					hide-details="auto"></v-select>
-				<v-btn variant="outlined" @click="addGiaoVienLop()">Thêm</v-btn>
+				<v-btn prepend-icon="mdi-plus" variant="outlined" @click="addGiaoVienLop()">Thêm</v-btn>
 			</div>
 			<div class="d-flex my-3" style="background-color: aliceblue;">
 				<div class="pa-3  d-flex flex-column ga-2">

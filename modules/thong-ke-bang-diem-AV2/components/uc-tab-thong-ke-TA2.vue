@@ -18,7 +18,7 @@
 						item-value="value" />
 				</v-col>
 				<v-col cols="12" md="3" lg="2">
-					<v-btn variant='outlined' color="primary" @click="ThongKe_TiLeDat_TA2_GET()"
+					<v-btn variant='outlined' prepend-icon="mdi-chart-line" color="primary" @click="ThongKe_TiLeDat_TA2_GET()"
 						:disabled='!HocKyValue || List_LopID.length === 0'>Xem thống kê</v-btn>
 				</v-col>
 			</v-row>

@@ -61,16 +61,20 @@
 			</div>
 
 			<!-- Thành tích -->
-			<div class="sp-item" @click="onOpenThanhTich">
-				<div class="sp-item-icon sp-item-icon--amber">
-					<v-icon size="18" color="white">mdi-trophy-outline</v-icon>
-				</div>
-				<div class="sp-item-body">
-					<div class="sp-item-title">Thành tích</div>
-					<div class="sp-item-sub">Huy hiệu & danh hiệu</div>
-				</div>
-				<v-icon size="16" class="sp-item-arrow">mdi-chevron-right</v-icon>
-			</div>
+			<uc-achievement-card :HocSinh="HocSinh">
+				<template #activator="{ activatorProps }">
+					<div class="sp-item" v-bind="activatorProps">
+						<div class="sp-item-icon sp-item-icon--amber">
+							<v-icon size="18" color="white">mdi-trophy-outline</v-icon>
+						</div>
+						<div class="sp-item-body">
+							<div class="sp-item-title">Thành tích</div>
+							<div class="sp-item-sub">Huy hiệu & danh hiệu</div>
+						</div>
+						<v-icon size="16" class="sp-item-arrow">mdi-chevron-right</v-icon>
+					</div>
+				</template>
+			</uc-achievement-card>
 		</div>
 
 		<!-- ── FOOTER ── -->
@@ -87,35 +91,38 @@
 
 <script>
 	export default {
-	props: {
-		NienKhoa: Number
-	},
-	data() {
-		return {
-			HocSinh: null,
-			vueData
-		}
-	},
-	mounted() {
-		this.onLoadDetailHocSinh()
-	},
-	methods: {
-		onLogout() {
-			redirect("https://login.lhbs.vn/")
+		props: {
+			NienKhoa: Number
 		},
-		onOpenHocLieuSo() {
-			openWindow({
-				title: "Học liệu số",
-				url: `/kham-pha?capid=${this.HocSinh?.CapID}&khoiid=${this.HocSinh?.KhoiID}`
-			})
+		data() {
+			return {
+				HocSinh: null,
+				isOpenAchievment: false,
+				vueData
+			}
 		},
-		onOpenThanhTich() {},
-		async onLoadDetailHocSinh() {
-			this.HocSinh = await ajaxCALLPromise("lms/HocSinh_Detail_GetBy_HocSinhID", {
-				HocSinhID: vueData.user.UserID,
-				NienKhoa: this.NienKhoa
-			})
+		mounted() {
+			this.onLoadDetailHocSinh()
+		},
+		methods: {
+			onLogout() {
+				redirect("https://login.lhbs.vn/")
+			},
+			onOpenHocLieuSo() {
+				openWindow({
+					title: "Học liệu số",
+					url: `/kham-pha?capid=${this.HocSinh?.CapID}&khoiid=${this.HocSinh?.KhoiID}`
+				})
+			},
+			onOpenThanhTich() {
+				//  this.isOpenAchievment = true 
+			},
+			async onLoadDetailHocSinh() {
+				this.HocSinh = await ajaxCALLPromise("lms/HocSinh_Detail_GetBy_HocSinhID", {
+					HocSinhID: vueData.user.UserID,
+					NienKhoa: this.NienKhoa
+				})
+			}
 		}
 	}
-}
-</script> 
+</script>

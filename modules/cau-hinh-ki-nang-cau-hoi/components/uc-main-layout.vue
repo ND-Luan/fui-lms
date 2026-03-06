@@ -38,7 +38,7 @@
 							<span>{{ index + 1 }}</span>
 						</template>
 						<template v-slot:item.Detail="{ item }">
-							<v-btn @click="onOpenDetail(item)" size="small" variant="tonal" color="primary">
+							<v-btn @click="onOpenDetail(item)" size="small" prepend-icon="mdi-eye" variant="outlined" color="primary">
 								Chi tiết
 							</v-btn>
 						</template>

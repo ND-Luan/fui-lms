@@ -38,12 +38,12 @@
 							<span>{{ index + 1 }}</span>
 						</template>
 						<template v-slot:item.Detail="{ item }">
-							<v-btn @click="onOpenDetail(item)" size="small" variant="tonal" color="primary">
+							<v-btn prepend-icon="mdi-eye" @click="onOpenDetail(item)" size="small" variant="outlined"  color="primary">
 								Chi tiết
 							</v-btn>
 						</template>
 						<template v-slot:item.SoLuongMau="{ item }">
-							<v-chip color="success" size="small">{{ item.SoLuongMau }} mẫu</v-chip>
+							<v-chip color="success" variant="text" class="fon-weight-medium" size="small">{{ item.SoLuongMau }} mẫu</v-chip>
 						</template>
 
 						<template v-slot:item.Actions="{ item }">

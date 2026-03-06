@@ -1,5 +1,5 @@
 <template>
-    <v-toolbar color="primary" style="position: sticky;
+    <v-toolbar color="white" style="position: sticky;
     top: 0;
     z-index: 1000;
     padding-top: 0px !important;">

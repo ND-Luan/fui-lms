@@ -14,7 +14,7 @@
 						<v-card-title class="text-primary d-flex align-center">
 							Điểm tiến bộ cuối kì so với giữa kì
 							<v-spacer></v-spacer>
-							<v-btn color="primary" variant="tonal" @click="
+							<v-btn color="primary" prepend-icon="mdi-database" variant="outlined" @click="
 								onLoadChart3({
 									NienKhoa: vueData.NienKhoa,
 									CapID: capid,
@@ -137,7 +137,7 @@
 						<v-card-title class="text-primary d-flex align-center">
 							Tương quan điểm giữa kì và cuối kì
 							<v-spacer></v-spacer>
-							<v-btn color="primary" variant="tonal" @click="onLoadChart({
+							<v-btn color="primary" variant="outlined" prepend-icon="mdi-chart-line" @click="onLoadChart({
 								NienKhoa: vueData.NienKhoa,
 								KhoiID: khoiid,
 								MonHocID: monhocid
@@ -153,7 +153,7 @@
 						<v-card-title class="text-primary d-flex align-center">
 							Tỉ lệ học sinh đạt và chưa đạt
 							<v-spacer></v-spacer>
-							<v-btn color="primary" variant="tonal" @click="onLoadChart2({
+							<v-btn color="primary" variant="outlined" prepend-icon="mdi-chart-line" @click="onLoadChart2({
 								NienKhoa: vueData.NienKhoa,
 								KhoiID: khoiid,
 								LopID: 0,

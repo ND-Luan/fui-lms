@@ -10,9 +10,12 @@
 					<v-select v-model="CacNienKhoaSoSanh" label="Chọn niên khóa của năm học trước"
 						:items="DSNienKhoaCoThe" item-title="title" item-value="value" multiple chips closable-chips />
 				</v-col>
-				<v-col>
-					<v-btn color="primary" variant="tonal" @click="onLoad">Tìm kiếm</v-btn>
-					<v-btn color="primary" variant="tonal" :disabled="DSMonHoc.length === 0" @click="onExportExcel">
+				<v-col class="d-flex ga-2">
+					<v-btn color="primary" variant="outlined" prepend-icon="mdi-magnify" @click="onLoad">
+						Tìm kiếm
+					</v-btn>
+					<v-btn color="primary" variant="outlined" prepend-icon="mdi-file-excel" :disabled="DSMonHoc.length === 0"
+						@click="onExportExcel">
 						Xuất excel
 					</v-btn>
 				</v-col>

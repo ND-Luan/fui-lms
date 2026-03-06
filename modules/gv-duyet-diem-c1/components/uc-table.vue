@@ -9,14 +9,18 @@
 					:items-per-page="-1" hide-default-footer>
 					<template #item.TenMonHoc_HienThi="{item}">
 						{{item.TenMonHoc_HienThi}}
-						<v-chip v-if="item.TinhTrang" class="ml-2" :color="item.MauTinhTrang"
+						<v-chip v-if="item.TinhTrang" variant="text" class="ml-2 font-weight-medium" :color="item.MauTinhTrang"
 							size="small">{{item.TenTinhTrang}}
 						</v-chip>
 					</template>
-					<template #item.log="{item}">
-						<v-btn v-if="item.Count_Log_Diem > 0" @click="redirectLog(item)">
-							<v-icon>mdi-history</v-icon>
-						</v-btn>
+					<template #item.log="{ item }">
+						<v-tooltip text="Lịch sử chỉnh sửa" location="top">
+							<template #activator="{ props }">
+								<v-btn v-if="item.Count_Log_Diem > 0" v-bind="props" icon variant="text" @click="redirectLog(item)">
+									<v-icon>mdi-history</v-icon>
+								</v-btn>
+							</template>
+						</v-tooltip>
 					</template>
 				</v-data-table-virtual>
 			</v-card>

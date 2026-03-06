@@ -20,7 +20,7 @@
 							item-value="value" />
 					</v-col>
 					<v-col cols="12" md="3">
-						<v-btn text="Lưu" color="primary" @click="onSave" :loading="loading"
+						<v-btn text="Lưu" variant="outlined" color="primary" @click="onSave" :loading="loading"
 							prepend-icon="mdi-content-save" />
 					</v-col>
 				</v-row>

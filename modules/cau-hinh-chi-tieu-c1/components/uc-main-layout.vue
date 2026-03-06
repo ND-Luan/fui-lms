@@ -14,7 +14,7 @@
 							item-value="value" density="compact" hide-details />
 					</v-col>
 					<v-col cols="2">
-						<v-btn text='Lưu' color="primary" @click="onSave" :loading="loading" block />
+						<v-btn text='Lưu' prepend-icon="mdi-content-save" variant="outlined" color="primary" @click="onSave" :loading="loading" block />
 					</v-col>
 				</v-row>
 			</div>

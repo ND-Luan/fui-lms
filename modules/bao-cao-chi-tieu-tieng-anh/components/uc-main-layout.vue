@@ -13,11 +13,11 @@
 				</v-card>
 			</v-col>
 			<v-col class="border pa-0 rounded" md="3">
-				<v-toolbar color="#217d46">
+				<v-toolbar color="white">
 					<v-tabs class="border-t" v-model="tabs" grow>
 						<v-tab v-for="cap in DSCap" :value="cap.value" :key="cap.value"
-							:style="{ 'background-color': tabs == cap.value ? 'darkseagreen' : '' }">
-							<span class="font-weight-medium text-white">{{ cap.title }}</span>
+							:style="{ 'background-color': tabs == cap.value ? '#E3F2FD' : '' }">
+							<span style="color: #064E3B" class="font-weight-medium">{{ cap.title }}</span>
 						</v-tab>
 					</v-tabs>
 				</v-toolbar>
@@ -37,13 +37,13 @@
 											<div class="d-flex align-center border-b pb-1">
 												<span class="font-weight-medium">Khối {{ khoi.KhoiID }}</span>
 												<v-spacer></v-spacer>
-												<v-chip color="pink" size="small">{{ khoi.TongHocSinh
+												<v-chip variant="text" class="font-weight-medium" color="info" size="small">{{ khoi.TongHocSinh
 												}} học sinh</v-chip>
 											</div>
 										</template>
 										<template #subtitle>
 											<div class="d-flex flex-wrap mt-1 align-center ga-1">
-												Lớp: <v-chip size="small" color="primary" v-for="lop in khoi.DSLop">{{
+												Lớp: <v-chip variant="text" class="font-weight-medium" size="small" color="primary" v-for="lop in khoi.DSLop">{{
 													lop.TenLop }}</v-chip>
 											</div>
 
@@ -59,7 +59,7 @@
 				style="overflow-y: auto; scrollbar-width: thin; height: calc(100vh - 90px);">
 				<div class="d-flex flex-column ga-3">
 					<v-card v-for="lop in selectedKhoi?.DSLop" class="border d-flex flex-column" style="height: 500px;">
-						<v-card-title class="d-flex" style="background-color: #217d46;">
+						<v-card-title class="d-flex" style="background-color: #009688;">
 							<span class="text-white">{{ lop.TenLop }}</span>
 							<v-spacer></v-spacer>
 							<span class="text-white">Sỉ số: {{ lop.SiSo }} học sinh </span>

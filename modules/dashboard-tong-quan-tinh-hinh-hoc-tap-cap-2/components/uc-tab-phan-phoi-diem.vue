@@ -16,7 +16,7 @@
 							item-title="TenCotDiem_VI" item-value="MaCotDiem" :loading="isLoadingMaCotDiem"></v-select>
 					</v-col>
 					<v-col>
-						<v-btn color="primary" variant="tonal" @click="onLoadChart({
+						<v-btn color="primary" variant="outlined"  prepend-icon= "mdi-chart-line" @click="onLoadChart({
 							NienKhoa: vueData.NienKhoa,
 							KhoiID: form.KhoiID,
 							MonHocID: form.MonHocItem.MonHocID,

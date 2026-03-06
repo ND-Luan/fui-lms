@@ -9,13 +9,13 @@
 							item-value="KhoiID" return-object />
 					</v-col>
 					<v-col class="d-flex ga-2" cols="3">
-						<v-btn text="Làm mới" @click="onRefresh" variant="outlined" color="primary" />
-						<uc-btn-dialog-add v-model:DSNhom="itemNhoms" text="Thêm học sinh" variant="outlined"
+						<v-btn text="Làm mới" prepend-icon="mdi-refresh" @click="onRefresh" variant="outlined" color="primary" />
+						<uc-btn-dialog-add v-model:DSNhom="itemNhoms" prepend-icon="mdi-plus" text="Thêm học sinh" variant="outlined"
 							color="teal" @onSubmitFinish="onRefresh(true)" :disabled="NhomDetail === null"
 							:NhomDetail_Child="NhomDetail" />
-						<v-btn :text="textChuyenNhom" @click="onOpenDialogChange" variant="outlined" color="blue"
+						<v-btn :text="textChuyenNhom" prepend-icon="mdi-swap-horizontal" @click="onOpenDialogChange" variant="outlined" color="blue"
 							:disabled="NhomDetail === null" />
-						<v-btn text="Cập nhật số thứ tự" @click="onUpdateSTT" variant="outlined" color="green"
+						<v-btn text="Cập nhật số thứ tự" prepend-icon="mdi-sort-numeric-ascending" @click="onUpdateSTT" variant="outlined" color="green"
 							:disabled="NhomDetail === null" />
 					</v-col>
 				</v-row>
@@ -156,6 +156,8 @@
 					const itemHS = this.itemHocSinhs.find(x => x.HocSinhID === itemHS_Calen.HocSinhID)
 					arr.push({ ...itemHS, SoTT: itemHS_Calen?.STT || 0 })
 				}
+				console.log("arr", arr)
+	
 				for (var item of arr) {
 					await fetchPromise("lms/SoTT_Udp_ByHSNhomID", {
 						HSNhomID: item.HSNhomID,
@@ -164,7 +166,7 @@
 				}
 	
 				Vue.$toast.success("Cập nhật số thứ tự thành công!", { position: "top" })
-				this.onRefresh(true)
+				await this.onRefresh(true)
 			},
 			onChangeNhomHocSinh(item) {
 				this.HocSinhDetail = _.cloneDeep(item)

@@ -10,12 +10,14 @@
 						</v-select>
 					</v-col>
 					<v-col>
-						<v-btn color="primary" variant="tonal" @click="onLoadChart({
-							NienKhoa: vueData.NienKhoa,
-							CapID: capid,
-							MonHocID: form.MonHocItem.MonHocID,
-							MaNhomDiem: form.MaNhomCotDiem
-						})">Xem biểu đồ</v-btn>
+						<v-btn color="primary" variant="outlined" prepend-icon="mdi-chart-line" @click="onLoadChart({
+						    NienKhoa: vueData.NienKhoa,
+						    CapID: capid,
+						    MonHocID: form.MonHocItem?.MonHocID,
+						    MaNhomDiem: form.MaNhomCotDiem
+						  })">
+							Xem biểu đồ
+						</v-btn>
 					</v-col>
 				</v-row>
 			</v-card-text>

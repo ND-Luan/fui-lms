@@ -8,12 +8,14 @@
 						item-value="LopID" :loading="isLoadingLop"></v-select>
 				</v-col>
 				<v-col>
-					<v-btn color="primary" variant="tonal" @click="onLoadChart({
-						NienKhoa: vueData.NienKhoa,
-						KhoiID: khoiid,
-						LopID: form.LopID,
-						MonHocID: monhocid
-					})">Xem biểu đồ</v-btn>
+					<v-btn color="primary" variant="outlined" prepend-icon="mdi-chart-line" @click="onLoadChart({
+					    NienKhoa: vueData.NienKhoa,
+					    KhoiID: khoiid,
+					    LopID: form.LopID,
+					    MonHocID: monhocid
+					  })">
+						Xem biểu đồ
+					</v-btn>
 				</v-col>
 			</v-row>
 		</v-card-text>

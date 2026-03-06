@@ -1,6 +1,6 @@
 <template>
 	<div>
-		<v-row class="ma-0" dense>
+		<v-row class="ma-0 mt-1" dense>
 			<v-col cols="3">
 				<v-select v-model="CapID" label="Chọn cấp" :items="DSCap" item-value="value" item-title="title" />
 			</v-col>
@@ -9,11 +9,15 @@
 					return-object />
 			</v-col>
 			<v-col class="d-flex ga-2">
-				<v-btn variant= "outlined" text="Tìm kiếm" color="primary" @click="onSearch" />
-				<v-spacer />
-				<uc-btn-dialog-add @onLoadFinish="onSearch" :LopItem :CapID />
-				<uc-btn-dialog-add-multiple @onLoadFinish="onSearch" :LopItem :CapID />
-				<v-btn variant="outlined" text="Xuất excel" color="primary" @click="onExportExcel" />
+			<v-btn variant="outlined" color="primary" prepend-icon="mdi-magnify" @click="onSearch">
+				Tìm kiếm
+			</v-btn>
+			<v-spacer />
+			<uc-btn-dialog-add @onLoadFinish="onSearch" :LopItem :CapID />
+			<uc-btn-dialog-add-multiple @onLoadFinish="onSearch" :LopItem :CapID />
+			<v-btn variant="outlined" color="success" prepend-icon="mdi-file-excel" @click="onExportExcel">
+				Xuất Excel
+			</v-btn>
 			</v-col>
 		</v-row>
 		<v-card>

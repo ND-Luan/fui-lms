@@ -5,13 +5,32 @@
 			<v-card-title class="d-flex align-center flex-wrap ga-2">
 				<span>{{ pageTitle }}</span>
 				<span v-if="vueData.CapID">• Cấp {{ vueData.CapID }}</span>
-				<v-chip v-if="hasStudents" color="primary" size="small">
+				<v-chip v-if="hasStudents" color="primary" variant="text" class="font-weight-medium" size="small">
 					{{ DSHocSinh.length }} học sinh
 				</v-chip>
 				<!-- Danh sách cột điểm -->
-				<div v-if="hasStudents && displayColumns.length > 0" >
-					<div class="d-flex flex-wrap ga-2 align-center">
-						<!-- Hiển thị 5 cột đầu tiên -->
+				<div v-if="hasStudents && displayColumns.length > 0">
+					<!-- Đã khóa hết: hiển thị gọn -->
+					<v-menu v-if="isAllColumnsLocked" v-model="action.showAllLockedColumns" offset-y>
+						<template v-slot:activator="{ props }">
+							<v-chip v-bind="props" color="primary" variant="flat" size="small" label
+								style="cursor:pointer">
+								<v-icon start size="small" color="white">mdi-lock</v-icon>
+								{{ displayColumns.length }}/{{ displayColumns.length }} cột đã khóa
+							</v-chip>
+						</template>
+						<v-list density="compact" max-height="300" class="overflow-y-auto">
+							<v-list-item v-for="cotDiem in displayColumns" :key="cotDiem.value">
+								<template v-slot:prepend>
+									<v-icon size="small" start>mdi-lock</v-icon>
+								</template>
+								<v-list-item-title>{{ cotDiem.title }}</v-list-item-title>
+							</v-list-item>
+						</v-list>
+					</v-menu>
+
+					<!-- Chưa khóa hết: hiển thị như cũ -->
+					<div v-else class="d-flex flex-wrap ga-2 align-center">
 						<v-chip v-for="cotDiem in displayColumns.slice(0, 5)" :key="cotDiem.value"
 							:color="cotDiem.isLocked ? 'primary' : 'grey'"
 							:variant="cotDiem.isLocked ? 'flat' : 'outlined'" size="small" label>
@@ -20,7 +39,6 @@
 							{{ cotDiem.title }}
 						</v-chip>
 
-						<!-- Menu cho các cột còn lại nếu > 5 -->
 						<v-menu v-if="displayColumns.length > 5" offset-y>
 							<template v-slot:activator="{ props }">
 								<v-chip v-bind="props" color="grey-lighten-1" variant="outlined" size="small" label>
@@ -72,32 +90,33 @@
 					</v-alert>
 				</div>
 				<v-spacer />
+				<v-btn v-if="!isAllColumnsLocked" @click="onLuuTam" color="grey" variant="outlined"
+					:disabled="isDisabled" >
+					<v-icon start>mdi-content-save</v-icon>
+					Lưu tạm
+				</v-btn>
+				<v-btn v-if="!isAllColumnsLocked" @click="onOpenDialogKhoaCotDiem" color="teal" variant="outlined"
+					:disabled="isDisabled">
+					<v-icon start>mdi-lock</v-icon>
+					Khóa cột điểm
+				</v-btn>
 				<!-- Menu Actions -->
 				<v-menu location="bottom end">
 					<template v-slot:activator="{ props }">
-						<v-btn color="primary" v-bind="props" icon="mdi-dots-vertical" size="small"
-							variant="outlined" />
+						<v-btn color="primary" v-bind="props" variant="text" icon="mdi-dots-vertical"></v-btn>
 					</template>
 					<v-list density="compact">
-						<v-list-subheader>Thao tác</v-list-subheader>
-						<v-list-item title="Lưu tạm" @click="onLuuTam" prepend-icon="mdi-content-save-outline" />
-						<v-list-item title="Khóa cột điểm" @click="onOpenDialogKhoaCotDiem"
-							prepend-icon="mdi-lock-outline" />
-						<!-- <v-list-item title="Gửi BGH" @click="onGuiBGH" prepend-icon="mdi-send-outline" /> -->
-						<v-divider class="my-1" />
-
-						<v-list-subheader>Khác</v-list-subheader>
 						<v-list-item v-if="filter.MonHocItem?.MonHocID === 5" title="Mẫu nhận xét"
-							@click="onOpenMauNhanXet" prepend-icon="mdi-comment-text-outline" />
-						<v-list-item v-if="showGetThemeTestButton" title="Lấy điểm Test (Theme)" @click="onGetDiemTest"
-							prepend-icon="mdi-download-outline" />
-						<v-list-item title="Xuất Excel" @click="onExportExcel" prepend-icon="mdi-file-excel-outline" />
+							@click="onOpenMauNhanXet" />
+						<v-list-item v-if="showGetThemeTestButton" title="Lấy điểm Test (Theme)"
+							@click="onGetDiemTest" />
+						<v-list-item title="Xuất Excel" @click="onExportExcel" />
 					</v-list>
 				</v-menu>
 			</v-card-text>
 
 			<!-- Jexcel Table -->
-			<v-card-text class="pa-0">
+			<v-card-text class="pa-0 fontSizeCustom">
 				<uc-jexcel v-if="hasStudents" :key="keyComp" v-model="instance" v-model:dataSource="DSHocSinh"
 					class="hExcel" :freeze-columns="freezeColumns" :columns="headers" :comments="comments"
 					:styleSheet="styleSheet" :nestedHeaders="shouldShowNestedHeaders ? nestedHeaders : []"
@@ -130,7 +149,8 @@
 				// Actions
 				action: {
 					isShowDialogKhoaCotDiem: false,
-					isShowDialogMauNhanXet: false
+					isShowDialogMauNhanXet: false,
+					showAllLockedColumns: false // <-- thêm
 				},
 	
 				// Filter
@@ -207,9 +227,17 @@
 			 * Kiểm tra bị disable
 			 */
 			isDisabled() {
+				if (!this.hasStudents) return true;
+				if (this.isAllColumnsLocked) return true;
 				return this.tinhTrangStatus?.isDisabled ?? false;
 			},
-	
+			/**
+			* Kiểm tra tất cả cột điểm đã khóa chưa
+			*/
+			isAllColumnsLocked() {
+				if (!this.displayColumns.length) return false;
+				return this.displayColumns.every(col => col.isLocked);
+			},
 			/**
 			 * Hiển thị nested headers
 			 */
@@ -406,9 +434,14 @@
 			 * Mở dialog khóa cột điểm
 			 */
 			onOpenDialogKhoaCotDiem() {
+				const isSaved = this.DSHocSinh_API.some(hs => hs.KQHTID);
+				if (!isSaved) {
+					Vue.$toast.warning('Chưa có dữ liệu được lưu. Vui lòng lưu tạm trước khi khóa cột điểm!', { position: 'top' });
+					return;
+				}
+	
 				this.action.isShowDialogKhoaCotDiem = true;
 			},
-	
 			/**
 			 * Khóa cột điểm
 			 */

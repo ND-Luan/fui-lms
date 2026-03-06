@@ -13,12 +13,14 @@
 							:loading="isLoadingMaNhomCotDiem"></v-select>
 					</v-col>
 					<v-col cols="12" md="2">
-						<v-btn color="primary" variant="tonal" @click="onLoadChart({
-							NienKhoa: vueData.NienKhoa,
-							KhoiID: form.KhoiID,
-							MonHocID: form.MonHocItem.MonHocID,
-							MaCotDiem: form.MaCotDiem
-						})">Xem biểu đồ</v-btn>
+						<v-btn color="primary" variant="outlined" prepend-icon="mdi-chart-line" @click="onLoadChart({
+						    NienKhoa: vueData.NienKhoa,
+						    KhoiID: form.KhoiID,
+						    MonHocID: form.MonHocItem.MonHocID,
+						    MaCotDiem: form.MaCotDiem
+						  })">
+							Xem biểu đồ
+						</v-btn>
 					</v-col>
 				</v-row>
 			</v-card-text>

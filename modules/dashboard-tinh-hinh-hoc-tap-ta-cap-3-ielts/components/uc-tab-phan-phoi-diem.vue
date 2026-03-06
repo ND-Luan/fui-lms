@@ -14,7 +14,7 @@
 							item-title="TenCotDiem_VI" item-value="MaCotDiem" :loading="isLoadingMaCotDiem"></v-select>
 					</v-col> -->
 					<v-col cols="12" md="3">
-						<v-btn color="primary" variant="tonal" @click="onLoadChart({
+						<v-btn color="primary" variant="outlined" prepend-icon="mdi-chart-line" @click="onLoadChart({
 							NienKhoa: vueData.NienKhoa,
 							KhoiID: form.KhoiID,
 							MonHocID: monhocid,
@@ -69,7 +69,7 @@
 					<v-card-title class="d-flex text-primary">
 						Phân phối điểm theo lớp
 						<v-spacer></v-spacer>
-						<v-btn color="primary" variant="tonal" @click="onLoadChartBoxPlot()">Xem biểu đồ</v-btn>
+						<v-btn color="primary" variant="outlined" prepend-icon="mdi-chart-line" @click="onLoadChartBoxPlot()">Xem biểu đồ</v-btn>
 					</v-card-title>
 					<v-card-text>
 						<v-row>

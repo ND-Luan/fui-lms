@@ -12,8 +12,6 @@
 					<div class="td-header-sub">{{ DSTienDo.length }} môn học</div>
 				</div>
 			</div>
-
-			<!-- Overall mini stats -->
 			<div class="td-overall" v-if="DSTienDo.length">
 				<div class="td-overall-pct">{{ overallPct }}%</div>
 				<div class="td-overall-label">hoàn thành</div>
@@ -40,41 +38,32 @@
 
 		<!-- ── MÔN HỌC LIST ── -->
 		<v-row v-else class="td-list ma-0 px-2">
-			<v-col v-for="(td, idx) in DSTienDo" :key="td.MonHocID" :cols="openIdx === idx ? 12 : 12"
-				:sm="openIdx === idx ? 12 : 6" :lg="openIdx === idx ? 12 : 4" class="pa-2"
-				style="transition: all .25s ease">
+			<v-col v-for="(td, idx) in DSTienDo" :key="td.MonHocID" cols="12" :sm="openIdx === idx ? 12 : 6"
+				:lg="openIdx === idx ? 12 : 4" class="pa-2" style="transition: all .25s ease">
 				<div class="td-card" :class="{ 'td-card--open': openIdx === idx }"
 					:style="{ '--mon-color': td.Color || 'rgb(var(--v-theme-primary))' }">
-					<!-- Card header — click to expand -->
+					<!-- Card header -->
 					<div class="td-card-header" @click="togglePanel(idx, td)">
-						<!-- Left accent bar -->
 						<div class="td-card-accent"></div>
-
-						<!-- Icon -->
 						<div class="td-card-icon">
 							<v-icon size="18" :color="td.Color || 'primary'">{{ td.Icon || 'mdi-book-outline' }}
 							</v-icon>
 						</div>
-
-						<!-- Info -->
 						<div class="td-card-info">
 							<div class="td-card-name">{{ td.MonHocName }}</div>
 							<div class="td-card-stats">
 								<span class="td-card-done">{{ td.CompletedTasks }}/{{ td.TotalTasks }} nhiệm vụ</span>
-								<!-- Progress bar -->
 								<div class="td-bar-wrap">
 									<div class="td-bar" :style="{ width: calcProgress(td) + '%' }"></div>
 								</div>
 							</div>
 						</div>
-
-						<!-- Percent + chevron -->
 						<div class="td-card-right">
 							<div class="td-pct-ring">
 								<svg viewBox="0 0 36 36" class="td-ring-svg">
 									<circle cx="18" cy="18" r="14" fill="none" stroke-width="3" class="td-ring-track" />
 									<circle cx="18" cy="18" r="14" fill="none" stroke-width="3" class="td-ring-fg"
-										stroke-linecap="round" :stroke-dasharray="calcProgress(td) * 0.88+ '88'"
+										stroke-linecap="round" :stroke-dasharray="calcProgress(td) * 0.88 + ' 88'"
 										transform="rotate(-90 18 18)" />
 								</svg>
 								<span class="td-pct-num">{{ Math.round(calcProgress(td)) }}</span>
@@ -89,14 +78,12 @@
 					<div class="td-detail" :class="{ 'td-detail--open': openIdx === idx }">
 						<div class="td-detail-inner">
 
-							<!-- Detail loading -->
 							<div v-if="detailLoading" class="td-detail-loading">
 								<div class="td-mini-spinner"></div>
 								<span>Đang tải…</span>
 							</div>
 
 							<template v-else>
-								<!-- Tổng kết -->
 								<div class="td-summary-row" v-if="DetailMonHoc.Tong">
 									<div class="td-sum-chip td-sum-chip--done">
 										<v-icon size="12">mdi-check-circle-outline</v-icon>
@@ -104,21 +91,21 @@
 									</div>
 									<div class="td-sum-chip td-sum-chip--pending">
 										<v-icon size="12">mdi-clock-outline</v-icon>
-										{{ (td.TotalTasks - td.CompletedTasks) }} còn lại
+										{{ td.TotalTasks - td.CompletedTasks }} còn lại
 									</div>
 									<v-spacer />
-									<v-btn size="x-small" color="primary" variant="tonal" class="td-gradebook-btn">
+									<!-- ✅ Nút Sổ điểm: truyền đúng môn & mở dialog -->
+									<v-btn size="x-small" color="primary" variant="tonal" class="td-gradebook-btn"
+										@click.stop="openGradebook(td)">
 										<v-icon size="12" start>mdi-book-open-page-variant</v-icon>
 										Sổ điểm
 									</v-btn>
 								</div>
 
-								<!-- List bài tập / bài học -->
 								<div class="td-items-list">
 									<div v-for="(ct, cidx) in DetailMonHoc.DanhSachChiTiet"
 										:key="ct.AssignToClassID + '_' + cidx" class="td-item"
 										@click="onOpenWindow(ct)">
-										<!-- Type icon -->
 										<div class="td-item-icon"
 											:class="ct.ResourceType === 'ASSIGNMENT' ? 'td-item-icon--assign' : 'td-item-icon--lesson'">
 											<v-icon size="13">
@@ -126,7 +113,6 @@
 												'mdi-play-circle-outline' }}
 											</v-icon>
 										</div>
-
 										<div class="td-item-body">
 											<div class="td-item-title">{{ ct.Title }}</div>
 											<div class="td-item-meta">
@@ -137,7 +123,6 @@
 												</span>
 											</div>
 										</div>
-
 										<div class="td-item-right">
 											<div v-if="ct.StudentScore !== null && ct.StudentScore !== undefined"
 												class="td-item-score">
@@ -148,7 +133,6 @@
 										</div>
 									</div>
 
-									<!-- Empty detail -->
 									<div v-if="!DetailMonHoc.DanhSachChiTiet.length" class="td-detail-empty">
 										Chưa có bài tập hoặc bài học
 									</div>
@@ -161,89 +145,104 @@
 			</v-col>
 		</v-row>
 
+		<!-- ✅ Dialog nhận props từ state nội bộ -->
+		<uc-student-gradebook-dialog v-model:visible="gradebookVisible" :mon-hoc-id="gradebookMonHocId"
+			:subject-name="gradebookMonHocName" />
+
 	</div>
 </template>
 
 <script>
 	export default {
-	props: {
-		NienKhoa: Number
-	},
-	data() {
-		return {
-			isLoading: false,
-			detailLoading: false,
-			openIdx: null,
-			DSTienDo: [],
-			DetailMonHoc: {
-				DanhSachChiTiet: [],
-				Tong: null
-			},
-			vueData
-		}
-	},
-	computed: {
-		overallPct() {
-			if (!this.DSTienDo.length) return 0
-			const total     = this.DSTienDo.reduce((s, t) => s + (t.TotalTasks     || 0), 0)
-			const completed = this.DSTienDo.reduce((s, t) => s + (t.CompletedTasks || 0), 0)
-			if (!total) return 0
-			return Math.round((completed / total) * 100)
-		}
-	},
-	async mounted() {
-		this.isLoading = true
-		try {
-			this.DSTienDo = await ajaxCALLPromise("lms/EL_Student_Get_TienDo_ByHocSinhID", {
-				HocSinhID: vueData.user.UserID,
-				NienKhoa: this.NienKhoa
-			})
-		} finally {
-			this.isLoading = false
-		}
-	},
-	methods: {
-		calcProgress(td) {
-			if (!td?.TotalTasks) return 0
-			return Math.min((td.CompletedTasks / td.TotalTasks) * 100, 100)
+		props: {
+			NienKhoa: Number
 		},
-
-		async togglePanel(idx, td) {
-			if (this.openIdx === idx) {
-				this.openIdx = null
-				return
+		data() {
+			return {
+				isLoading: false,
+				detailLoading: false,
+				openIdx: null,
+				DSTienDo: [],
+				DetailMonHoc: {
+					DanhSachChiTiet: [],
+					Tong: null
+				},
+				// ── Gradebook dialog state ──
+				gradebookVisible: false,
+				gradebookMonHocId: null,
+				gradebookMonHocName: '',
+				vueData
 			}
-			this.openIdx = idx
-			this.DetailMonHoc.DanhSachChiTiet = []
-			this.DetailMonHoc.Tong = null
-			this.detailLoading = true
+		},
+		computed: {
+			overallPct() {
+				if (!this.DSTienDo.length) return 0
+				const total = this.DSTienDo.reduce((s, t) => s + (t.TotalTasks || 0), 0)
+				const completed = this.DSTienDo.reduce((s, t) => s + (t.CompletedTasks || 0), 0)
+				if (!total) return 0
+				return Math.round((completed / total) * 100)
+			}
+		},
+		async mounted() {
+			this.isLoading = true
 			try {
-				const res = await ajaxCALLPromise("lms/EL_Student_GetSubjectProgressDetail", {
-					MonHocID: td.MonHocID
+				this.DSTienDo = await ajaxCALLPromise('lms/EL_Student_Get_TienDo_ByHocSinhID', {
+					HocSinhID: vueData.user.UserID,
+					NienKhoa: this.NienKhoa
 				})
-				this.DetailMonHoc.DanhSachChiTiet = res[0] ?? []
-				this.DetailMonHoc.Tong            = res[1]?.[0] ?? null
 			} finally {
-				this.detailLoading = false
+				this.isLoading = false
 			}
 		},
-
-		onOpenWindow(ct) {
-			const isLesson = ct.ResourceType === 'LESSON'
-			openWindow({
-				title: `Xem lại ${isLesson ? 'bài học' : 'bài tập'} ${ct.Title}`,
-				url: isLesson
-					? `/lms-student-lesson-viewer?AssignToClassID=${ct.AssignToClassID}`
-					: `/lms-student-assignment?AssignToClassID=${ct.AssignToClassID}`
-			})
-		},
-
-		formatDate(dateString) {
-			if (!dateString) return ''
-			return new Date(dateString).toLocaleDateString('vi-VN', {
-				day: '2-digit', month: '2-digit', year: 'numeric'
-			})
+		methods: {
+			calcProgress(td) {
+				if (!td?.TotalTasks) return 0
+				return Math.min((td.CompletedTasks / td.TotalTasks) * 100, 100)
+			},
+	
+			async togglePanel(idx, td) {
+				if (this.openIdx === idx) {
+					this.openIdx = null
+					return
+				}
+				this.openIdx = idx
+				this.DetailMonHoc.DanhSachChiTiet = []
+				this.DetailMonHoc.Tong = null
+				this.detailLoading = true
+				try {
+					const res = await ajaxCALLPromise('lms/EL_Student_GetSubjectProgressDetail', {
+						MonHocID: td.MonHocID
+					})
+					this.DetailMonHoc.DanhSachChiTiet = res[0] ?? []
+					this.DetailMonHoc.Tong = res[1]?.[0] ?? null
+				} finally {
+					this.detailLoading = false
+				}
+			},
+	
+			// ✅ Mở dialog sổ điểm cho môn đang xem
+			openGradebook(td) {
+				this.gradebookMonHocId = td.MonHocID
+				this.gradebookMonHocName = td.MonHocName
+				this.gradebookVisible = true
+			},
+	
+			onOpenWindow(ct) {
+				const isLesson = ct.ResourceType === 'LESSON'
+				openWindow({
+					title: `Xem lại ${isLesson ? 'bài học' : 'bài tập'} ${ct.Title}`,
+					url: isLesson
+						? `/lms-student-lesson-viewer?AssignToClassID=${ct.AssignToClassID}`
+						: `/lms-student-assignment?AssignToClassID=${ct.AssignToClassID}`
+				})
+			},
+	
+			formatDate(dateString) {
+				if (!dateString) return ''
+				return new Date(dateString).toLocaleDateString('vi-VN', {
+					day: '2-digit', month: '2-digit', year: 'numeric'
+				})
+			}
 		}
 	}
-}
-</script> 
+</script>

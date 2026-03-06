@@ -1,3 +1,7 @@
 .hExcel .jss_content {
-    max-height: calc(100vh - 193px) !important;
+    max-height: calc(100vh - 151px) !important
+}
+
+.fontSizeCustom {
+    font-size: .8rem !important;
 }

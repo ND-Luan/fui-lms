@@ -95,6 +95,7 @@
 				</v-col>
 			</v-row>
 		</div>
+		<uc-iframe-window ref="iframeWindow" />
 	</div>
 </template>
 
@@ -146,17 +147,20 @@
 				const id = nv.ResourceID;
 				if (!type || !id) return;
 				if (type === 'assignment') {
-					openWindow({
+					this.$refs.iframeWindow.openWindow({
 						title: nv.Title,
 						url: `/lms-student-assignment?AssignToClassID=${id}&Is_SendToClass=${nv.Is_SendToClass}`,
-						id: 'StudentDoASM' + id,
-						onclose: { EXE: 'vueData.initPage()' }
+						onclose: () => {
+							this.onRefresh();
+						}
 					});
 				} else if (type === 'lesson') {
-					openWindow({
+					this.$refs.iframeWindow.openWindow({
 						title: nv.Title,
 						url: `/lms-student-lesson-viewer?AssignToClassID=${id}`,
-						onclose: { EXE: 'vueData.initPage()' }
+						onclose: () => {
+							this.onRefresh();
+						}
 					});
 				}
 			},

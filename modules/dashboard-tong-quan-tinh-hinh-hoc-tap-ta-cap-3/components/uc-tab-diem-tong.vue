@@ -11,7 +11,7 @@
 						label="Chọn học kì"></v-select>
 				</v-col>
 				<v-col cols="12" md="3" sm="12">
-					<v-btn color="primary" variant="tonal" @click="onLoadChart({
+					<v-btn color="primary" variant="outlined" prepend-icon="mdi-chart-line" @click="onLoadChart({
 						NienKhoa: vueData.NienKhoa,
 						KhoiID: khoiid,
 						LopID: form.LopID,

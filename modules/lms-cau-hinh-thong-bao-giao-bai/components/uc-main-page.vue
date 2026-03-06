@@ -25,8 +25,8 @@
 							</v-row>
 						</v-form>
 						<div class="w-100 pt-2 d-flex justify-end ga-2 border-t mt-2">
-							<v-btn color="primary" variant="outlined" @click="handleClearData">Làm mới</v-btn>
-							<v-btn color="success" variant="outlined" @click="handleSave">
+							<v-btn color="primary" prepend-icon="mdi-refresh" variant="outlined" @click="handleClearData">Làm mới</v-btn>
+							<v-btn color="success" variant="outlined" :prepend-icon="isEdit ? 'mdi-content-save' : 'mdi-plus'" @click="handleSave">
 								{{ isEdit ? 'Cập nhật' : 'Thêm mới' }}
 							</v-btn>
 						</div>

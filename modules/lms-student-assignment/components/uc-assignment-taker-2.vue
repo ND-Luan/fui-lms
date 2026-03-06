@@ -105,7 +105,8 @@
 										<v-icon start size="16">{{ saveStatusIcon }}</v-icon>{{ saveStatus }}
 									</v-chip>
 
-									<v-btn v-if="!isSubmitted" variant="outlined" color="success" size="small" @click="handleSubmit">
+									<v-btn v-if="!isSubmitted" variant="outlined" color="success" size="small"
+										@click="handleSubmit">
 										<v-icon start>mdi-check-all</v-icon>Nộp bài
 									</v-btn>
 
@@ -126,9 +127,8 @@
 				<!-- All Questions Mode - Virtual scroll cho danh sách dài -->
 				<div v-else class="all-questions-mode" style="overflow: auto;" :style="contentCardStyle">
 					<!-- Progress Bar -->
-					<AssignmentProgress v-show="shouldShowProgress" class="my-2 mx-2"
-						:answered-count="answeredCount" :total-questions="totalQuestions"
-						:progress-percent="progressPercent" :save-status="saveStatus"
+					<AssignmentProgress v-show="shouldShowProgress" class="my-2 mx-2" :answered-count="answeredCount"
+						:total-questions="totalQuestions" :progress-percent="progressPercent" :save-status="saveStatus"
 						:save-status-color="saveStatusColor" :save-status-icon="saveStatusIcon"
 						:is-submitted="isSubmitted" :is-graded="isGraded" @submit="handleSubmit" />
 
@@ -209,23 +209,27 @@
 				if (!this.assignmentData?.[0]?.[0]) return null;
 	
 				const config = this.assignmentData[0][0];
-				// Cache parsed config
+				const submissionStatus = this.assignmentData[1]?.[0]?.SubmissionStatus;
+	
+				// Xóa cache cũ nếu đã graded để parse lại với HadAnswer
+				if (submissionStatus == 4 && config._cachedGroups?.[0]?.questions?.[0]?.config?.correctAnswer === null) {
+					delete config._cachedGroups;
+				}
+	
 				if (!config._cachedGroups) {
-					if (config && typeof config.AssignmentConfig === 'string' && !config.groups) {
-						try {
-							const parsedConfig = JSON.parse(config.AssignmentConfig);
-							if(this.assignmentData[1][0].SubmissionStatus == 4){
-								parsedConfig = JSON.parse(config.AssignmentConfig_HadAnswer);
-							}
-							config._cachedGroups = parsedConfig.groups || [];
-							config.groups = config._cachedGroups;
-						} catch (e) {
-							console.error('Error parsing AssignmentConfig:', e);
-							config._cachedGroups = [];
-							config.groups = [];
+					try {
+						let parsedConfig;
+						if (submissionStatus == 4 && config.AssignmentConfig_HadAnswer) {
+							parsedConfig = JSON.parse(config.AssignmentConfig_HadAnswer); // có đáp án
+						} else {
+							parsedConfig = JSON.parse(config.AssignmentConfig); // không có đáp án
 						}
-					} else {
-						config._cachedGroups = config.groups || [];
+						config._cachedGroups = parsedConfig.groups || [];
+						config.groups = config._cachedGroups;
+					} catch (e) {
+						console.error('Error parsing AssignmentConfig:', e);
+						config._cachedGroups = [];
+						config.groups = [];
 					}
 				} else {
 					config.groups = config._cachedGroups;

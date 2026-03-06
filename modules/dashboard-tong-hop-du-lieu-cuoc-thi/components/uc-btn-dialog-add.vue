@@ -1,7 +1,9 @@
 <template>
 	<v-dialog max-width="800">
 		<template v-slot:activator="{ props: activatorProps }">
-			<v-btn v-bind="activatorProps" color="primary" text="Tạo" variant="flat"></v-btn>
+		<v-btn v-bind="activatorProps" color="primary" variant="outlined" prepend-icon="mdi-plus">
+			Tạo
+		</v-btn>
 		</template>
 		<template v-slot:default="{ isActive }">
 			<v-card>
