@@ -1,6 +1,6 @@
 <template>
-	<v-dialog :model-value="isOpen" @update:model-value="$emit('update:isOpen', $event)" :width="mobile ? '95%' : 480"
-		:max-height="mobile ? '95dvh' : '88vh'" scrollable>
+	<v-dialog :model-value="isOpen" @update:model-value="$emit('update:isOpen', $event)" :width="isMobile ? '95%' : 480"
+		:max-height="isMobile ? '95dvh' : '88vh'" scrollable>
 		<div class="lb-shell">
 
 			<!-- ══ HEADER ══ -->
@@ -137,13 +137,10 @@
 		props: {
 			isOpen: Boolean,
 			loading: Boolean,
-			data: Object,   // { overview: {...}, students: [...] }
+			data: Object,    
+			isMobile: Boolean
 		},
-		emits: ['update:isOpen'],
-		data() {
-			const { mobile } = Vuetify.useDisplay();
-			return { mobile, vueData };
-		},
+		emits: ['update:isOpen'], 
 		computed: {
 			overview() {
 				return this.data?.overview ?? {};

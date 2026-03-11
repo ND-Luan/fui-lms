@@ -62,7 +62,7 @@
 					</div>
 
 					<!-- FOOTER -->
-					<div class="sidebar-footer">Version 2.1</div>
+					<div class="sidebar-footer">Version {{version}}</div>
 
 				</v-navigation-drawer>
 
@@ -134,6 +134,8 @@
 			avatarStudent: String,
 			studentInfoDetail: Object,
 			subjectProgress: Array,
+			version: String,
+			isMobile: Boolean
 		},
 		data() {
 			return {
@@ -147,12 +149,9 @@
 					{ icon: "mdi-trophy-outline", title: "Thành tích", activeKey: 6, desktopOnly: true },
 					{ icon: "mdi-logout", title: "Đăng xuất", activeKey: 7, desktopOnly: true },
 				],
-				isMobile: false,
+				 
 			}
-		},
-		mounted() {
-			this.isMobile = this.$vuetify.display.mobile
-		},
+		}, 
 		computed: {
 			desktopMenu() {
 				return this.menu.filter(i => !i.mobileOnly)
@@ -163,12 +162,7 @@
 			currentPageTitle() {
 				return this.menu.find(i => i.activeKey === this.activeKey)?.title ?? 'Tổng quan'
 			},
-		},
-		watch: {
-			"$vuetify.display.mobile"(isMobile) {
-				this.isMobile = isMobile
-			},
-		},
+		}, 
 		methods: {
 			updateActiveKey(activeKey) {
 				this.$emit('update:activeKey', activeKey)

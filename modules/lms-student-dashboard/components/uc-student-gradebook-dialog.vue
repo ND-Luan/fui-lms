@@ -107,7 +107,8 @@
 		props: {
 			visible: { type: Boolean, default: false },
 			monHocId: { type: Number, default: null },
-			subjectName: { type: String, default: '' }
+			subjectName: { type: String, default: '' },
+			isMobile: Boolean
 		},
 		emits: ['update:visible'],
 	

@@ -125,7 +125,7 @@
 										<div class="td-item-right">
 											<div v-if="ct.StudentScore !== null && ct.StudentScore !== undefined"
 												class="td-item-score">
-												{{ ct.StudentScore }}
+												{{ ct.StudentScore }} / {{ct.MaxScore}}
 											</div>
 											<div v-else class="td-item-score td-item-score--empty">—</div>
 											<v-icon size="13" color="grey-lighten-2">mdi-chevron-right</v-icon>
@@ -145,7 +145,7 @@
 		</v-row>
 
 		<uc-student-gradebook-dialog v-model:visible="gradebookVisible" :mon-hoc-id="gradebookMonHocId"
-			:subject-name="gradebookMonHocName" />
+			:subject-name="gradebookMonHocName" :isMobile />
 		<uc-iframe-window ref="iframeWindow" />
 	</div>
 </template>
@@ -155,6 +155,7 @@
 		props: {
 			NienKhoa: Number,
 			HocSinh: Object,
+			isMobile: Boolean
 		},
 		data() {
 			return {
@@ -242,8 +243,8 @@
 				this.$refs.iframeWindow.openWindow({
 					title: `Xem lại ${isLesson ? 'bài học' : 'bài tập'} ${ct.Title}`,
 					url: isLesson
-						? `/lms-student-lesson-viewer?AssignToClassID=${ct.AssignToClassID}`
-						: `/lms-student-assignment?AssignToClassID=${ct.AssignToClassID}`
+						? `/lms-student-lesson-viewer?AssignToClassID=${ct.AssignToClassID}&HocSinhID=${this.HocSinh.HocSinhID}`
+						: `/lms-student-assignment?AssignToClassID=${ct.AssignToClassID}&HocSinhID=${this.HocSinh.HocSinhID}`
 				})
 			},
 	

@@ -4,7 +4,7 @@
 		<div class="nv__header">
 			<div class="nv__header-left">
 				<div class="nv__header-icon">
-					<v-icon size="18" color="white">mdi-lightning-bolt</v-icon>
+					<v-icon size="18" color="white">mdi-format-list-checkbox</v-icon>
 				</div>
 				<div>
 					<div class="nv__header-title">Nhiệm Vụ</div>
@@ -103,7 +103,8 @@
 	export default {
 		props: {
 			NienKhoa: Number,
-			HocSinh: Object
+			HocSinh: Object,
+			isMobile: Boolean
 		},
 		data() {
 			return {

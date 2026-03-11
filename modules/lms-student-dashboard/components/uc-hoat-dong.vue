@@ -5,7 +5,7 @@
 		<div class="hd__header">
 			<div class="hd__header-left">
 				<div class="hd__header-icon">
-					<v-icon size="18" color="white">mdi-timeline-clock</v-icon>
+					<v-icon size="18" color="white">mdi-history</v-icon>
 				</div>
 				<div>
 					<div class="hd__header-title">Hoạt Động</div>
@@ -142,7 +142,8 @@
 									</button>
 								</template>
 
-								<button v-if="hd.FeedType === 'GRADED'" class="hd__action-btn hd__action-btn--rank" @click.stop="onXepHang(hd)">
+								<button v-if="hd.FeedType === 'GRADED'" class="hd__action-btn hd__action-btn--rank"
+									@click.stop="onXepHang(hd)">
 									<v-icon size="12">mdi-podium</v-icon>
 									Xếp hạng
 								</button>
@@ -197,6 +198,14 @@
 								</div>
 							</div>
 
+
+							<!-- Actions — LESSON -->
+							<div v-if="hd.ResourceType === 'LESSON'" class="hd__item-actions">
+								<button class="hd__action-btn hd__action-btn--continue" @click.stop="onXemBaiHoc(hd)">
+									<v-icon size="12">mdi-play-circle-outline</v-icon>
+									Xem bài học
+								</button>
+							</div>
 						</div>
 					</div>
 				</div>
@@ -210,10 +219,10 @@
 
 		<!-- ── SUMMARY MODAL ── -->
 		<uc-summary-modal v-model:visible="summaryModal.visible" :loading="summaryModal.loading"
-			:summary-data="summaryModal.data" @navigate-to-details="onNavigateToDetails" />
+			:summary-data="summaryModal.data" @navigate-to-details="onNavigateToDetails" :isMobile />
 
 		<!-- ── LEADERBOARD MODAL ── -->
-		<uc-leaderboard v-model:isOpen="leaderboardModal.visible" :data="leaderboardModal.data" />
+		<uc-leaderboard v-model:isOpen="leaderboardModal.visible" :data="leaderboardModal.data" :isMobile />
 
 		<uc-iframe-window ref="iframeWindow" />
 	</div>
@@ -224,6 +233,7 @@
 		props: {
 			NienKhoa: Number,
 			HocSinh: Object,
+			isMobile: Boolean
 		},
 		data() {
 			return {
@@ -415,6 +425,16 @@
 					url,
 					onclose: () => { $this.loadData(); },
 				});
+			},
+			onXemBaiHoc(hd) {
+				const assignToClassID = hd.AssignID // ← dùng AssignID, không phải ObjectID
+				if (!assignToClassID) return Vue.$toast?.error('Không tìm thấy thông tin bài học.')
+	
+				this.$refs.iframeWindow.openWindow({
+					title: 'Bài học - ' + hd.Title,
+					url: `/lms-student-lesson-viewer?AssignToClassID=${assignToClassID}&HocSinhID=${this.HocSinh?.HocSinhID}`,
+					onclose: () => { this.loadData() }
+				})
 			},
 			getFeedColor(type) {
 				return {

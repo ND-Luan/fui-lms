@@ -1,9 +1,9 @@
 <template>
 	<!-- INLINE mode (không dùng activator) -->
-	<uc-achievement-card-desktop v-if="!isMobile && inline" :HocSinh="HocSinh" />
+	<uc-achievement-card-desktop v-if="!isMobileCmp && inline" :HocSinh="HocSinh" />
 
 	<!-- DIALOG mode desktop -->
-	<template v-else-if="!isMobile && !inline">
+	<template v-else-if="!isMobileCmp && !inline">
 		<slot name="activator" :activatorProps="{ onClick: () => $emit('update:isOpen', true) }" />
 		<uc-achievement-card-desktop v-model:isOpen="isOpen" :HocSinh="HocSinh"
 			@update:isOpen="$emit('update:isOpen', $event)" />
@@ -23,23 +23,14 @@
 		props: {
 			HocSinh: { type: Object },
 			isOpen: { type: Boolean, default: false },
-			inline: { type: Boolean, default: true }   // ✅ mặc định true = giữ behavior cũ
+			inline: { type: Boolean, default: true },
+			isMobile: { type: Boolean, default: null }, // ← nhận từ cha
 		},
 		emits: ['update:isOpen'],
-		data() {
-			return { windowWidth: window.innerWidth }
-		},
-		computed: {
-			isMobile() { return this.windowWidth < 768 }
-		},
-		mounted() {
-			window.addEventListener('resize', this.onResize)
-		},
-		beforeUnmount() {
-			window.removeEventListener('resize', this.onResize)
-		},
-		methods: {
-			onResize() { this.windowWidth = window.innerWidth }
+		computed: { 
+			isMobileCmp() {
+				return this.isMobile ?? this.$vuetify.display.mobile
+			}
 		}
 	}
 </script>

@@ -1,6 +1,6 @@
 <template>
-	<v-dialog :model-value="visible" @update:model-value="closeDialog" :width="mobile ? '95%' : 680"
-		:max-height="mobile ? '95dvh' : '88vh'" scrollable>
+	<v-dialog :model-value="visible" @update:model-value="closeDialog" :width="isMobile ? '95%' : 680"
+		:max-height="isMobile ? '95dvh' : '88vh'" scrollable>
 		<!-- ── LOADING ── -->
 		<v-card v-if="loading" class="smd-card smd-card--loading" rounded="xl" elevation="0">
 			<div class="smd-loading-body">
@@ -132,12 +132,9 @@
 			visible: Boolean,
 			loading: Boolean,
 			summaryData: Object,
+			isMobile: Boolean
 		},
 		emits: ['update:visible', 'navigate-to-details'],
-		data() {
-			const { mobile } = Vuetify.useDisplay();
-			return { mobile };
-		},
 		computed: {
 			strokeDasharray() {
 				return `${(this.scorePct / 100) * 314} 314`

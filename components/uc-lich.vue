@@ -1,5 +1,5 @@
 <template>
-	<component :is="isMobile ? 'uc-lich-mobile' : 'uc-lich-desktop'" :HocSinh="HocSinh" :inline="inline">
+	<component :is="isMobile ? 'uc-lich-mobile' : 'uc-lich-desktop'" :HocSinh="HocSinh" :inline="inline" :isMobile>
 		<template v-if="$slots.activator" #activator="{ activatorProps }">
 			<slot name="activator" :activator-props="activatorProps" />
 		</template>
@@ -13,24 +13,8 @@
 			inline: {
 				type: Boolean,
 				default: false
-			}
+			},
+			isMobile: Boolean
 		},
-		data() {
-			return {
-				isMobile: window.innerWidth < 960  // ← tính ngay, không để false
-			}
-		},
-		mounted() {
-			this.checkMobile()
-			window.addEventListener('resize', this.checkMobile)
-		},
-		beforeUnmount() {
-			window.removeEventListener('resize', this.checkMobile)
-		},
-		methods: {
-			checkMobile() {
-				this.isMobile = window.innerWidth < 960
-			}
-		}
 	}
 </script>

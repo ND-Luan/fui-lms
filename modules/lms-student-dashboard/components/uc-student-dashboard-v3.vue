@@ -1,27 +1,28 @@
 <template>
 	<uc-navigation-drawer v-model:activeKey="activeKey" v-model:activeMonHocID="activeMonHocID"
-		:studentInfoDetail="studentInfoDetail" :avatarStudent="avatarStudent" :subjectProgress="subjectProgress">
+		:studentInfoDetail="studentInfoDetail" :avatarStudent="avatarStudent" :subjectProgress="subjectProgress"
+		:version :isMobile>
 		<!-- Nội dung chính -->
 		<div v-if="activeKey === 0 && NienKhoa && studentInfoDetail?.HocSinhID">
-			<uc-nhiem-vu :NienKhoa :HocSinh="studentInfoDetail" />
+			<uc-nhiem-vu :NienKhoa :HocSinh="studentInfoDetail" :isMobile />
 		</div>
 		<div v-if="activeKey === 1 && NienKhoa && studentInfoDetail?.HocSinhID">
-			<uc-hoat-dong :NienKhoa :HocSinh="studentInfoDetail" />
+			<uc-hoat-dong :NienKhoa :HocSinh="studentInfoDetail" :isMobile />
 		</div>
 		<div v-if="activeKey === 2 && NienKhoa && studentInfoDetail?.HocSinhID">
-			<uc-tien-do :NienKhoa :HocSinh="studentInfoDetail" />
+			<uc-tien-do :NienKhoa :HocSinh="studentInfoDetail" :isMobile />
 		</div>
 		<div v-if="activeKey === 3 && NienKhoa && studentInfoDetail?.HocSinhID">
-			<uc-ca-nhan :NienKhoa :HocSinh="studentInfoDetail" />
+			<uc-ca-nhan :NienKhoa :HocSinh="studentInfoDetail" :version :isMobile />
 		</div>
 		<div v-if="activeKey === 4 && NienKhoa && studentInfoDetail?.HocSinhID">
-			<uc-lich :HocSinh="studentInfoDetail" :NienKhoa :inline="true" />
+			<uc-lich :HocSinh="studentInfoDetail" :NienKhoa :inline="true" :isMobile />
 		</div>
 		<div v-if="activeKey === 5 && NienKhoa && studentInfoDetail?.HocSinhID">
-			<uc-hoc-lieu-so :HocSinh="studentInfoDetail" />
+			<uc-hoc-lieu-so :HocSinh="studentInfoDetail" :isMobile />
 		</div>
 		<uc-achievement-card v-if="activeKey === 6 && NienKhoa && studentInfoDetail?.HocSinhID"
-			:HocSinh="studentInfoDetail" :inline="true" />
+			:HocSinh="studentInfoDetail" :inline="true" :isMobile />
 	</uc-navigation-drawer>
 </template>
 <script>
@@ -44,6 +45,7 @@
 				NienKhoa: null,
 				isFromLinkParent: false,
 				hocSinhIDFromUrl: null,
+				version: "2.3"
 			}
 		},
 		mounted() {

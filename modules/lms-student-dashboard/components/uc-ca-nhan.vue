@@ -83,7 +83,7 @@
 				<v-icon size="16" color="error">mdi-logout</v-icon>
 				<span>Đăng xuất</span>
 			</div>
-			<div class="sp-version">v2.1</div>
+			<div class="sp-version">v{{version}}</div>
 		</div>
 
 	</div>
@@ -94,6 +94,7 @@
 		props: {
 			NienKhoa: Number,
 			HocSinh: Object,
+			version: String
 		},
 		data() {
 			return {
