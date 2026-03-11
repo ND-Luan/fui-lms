@@ -25,7 +25,7 @@ function initPage() {
     if (!validateAssignmentIDs(AssignToClassID, AssignToStudentID)) {
         return;
     }
-    loadAssignmentData(AssignToClassID);
+    loadAssignmentData(AssignToClassID, AssignToStudentID);
 }
 function initializeParams() {
     vueData.LanNop = urlParams.get('LanNop') ? parseInt(urlParams.get('LanNop')) : 1;
@@ -48,14 +48,23 @@ function validateAssignmentIDs(classID, studentID) {
 // ===========================
 // DATA LOADING
 // ===========================
-function loadAssignmentData(AssignToClassID) {
+function loadAssignmentData(AssignToClassID, AssignToStudentID) {
     const endpoint = vueData.Is_SendToClass === 'false'
         ? "lms/EL_Student_GetAssignmentDetail_AssignToStudent"
         : "lms/EL_Student_GetAssignmentDetail";
     const params = {
-        [vueData.Is_SendToClass === 'false' ? 'AssignToStudentID' : 'AssignToClassID']: parseInt(AssignToClassID),
+        [vueData.Is_SendToClass == 'false' ? 'AssignToStudentID' : 'AssignToClassID']: (vueData.Is_SendToClass === 'false' ? parseInt(AssignToStudentID) : parseInt(AssignToClassID)),
+        HocSinhID: vueData.HocSinhDetail.HocSinhID,
         LanNop: vueData.LanNop ?? 1
     };
+    if (vueData.Is_SendToClass != 'false' && !AssignToClassID) {
+        Vue.$toast.error("Không tìm thấy AssignToClassID bài tập trên URL.", { position: "top" });
+        return
+    }
+    if (vueData.Is_SendToClass == 'false' && !AssignToStudentID) {
+        Vue.$toast.error("Không tìm thấy AssignToStudentID bài tập trên URL.", { position: "top" });
+        return
+    }
     ajaxCALL(endpoint, params, async (response) => {
         await processAssignmentResponse(response);
         vueData.keyComp++;
@@ -215,8 +224,8 @@ async function saveDraft(payload) {
         ? "lms/EL_Student_SaveSubmission_AssignToStudent"
         : "lms/EL_Student_SaveSubmission";
     const params = vueData.Is_SendToClass === 'false'
-        ? { ...payload, Is_Resubmit: vueData.Is_Resubmit ?? 0, AssignToStudentID: parseInt(urlParams.get('AssignToClassID')) }
-        : { ...payload, Is_Resubmit: vueData.Is_Resubmit ?? 0 };
+        ? { ...payload, Is_Resubmit: vueData.Is_Resubmit ?? 0, AssignToStudentID: parseInt(urlParams.get('AssignToStudentID')), HocSinhID: vueData.HocSinhDetail.HocSinhID }
+        : { ...payload, Is_Resubmit: vueData.Is_Resubmit ?? 0, HocSinhID: vueData.HocSinhDetail.HocSinhID };
     return new Promise(resolve => {
         ajaxCALL(endpoint, params, async (response) => {
             await handleSaveResponse(response);
@@ -235,6 +244,7 @@ function saveAssignmentConfig(submissionID) {
     return new Promise(resolve => {
         ajaxCALL('/lms/EL_Student_Save_AssignmentConfig', {
             SubmissionID: submissionID,
+            HocSinhID: vueData.HocSinhDetail.HocSinhID,
             AssignmentConfig: JSON.stringify(vueData.AssignmentConfigAfterShuffle)
         }, res => {
             initPage();
@@ -247,8 +257,8 @@ function submitAssignment(payload) {
         ? "lms/EL_Student_SaveSubmission_AssignToStudent"
         : "lms/EL_Student_SaveSubmission";
     const params = vueData.Is_SendToClass === 'false'
-        ? { ...payload, Is_Resubmit: vueData.Is_Resubmit, AssignToStudentID: parseInt(urlParams.get('AssignToClassID')) }
-        : { ...payload, Is_Resubmit: vueData.Is_Resubmit };
+        ? { ...payload, Is_Resubmit: vueData.Is_Resubmit, AssignToStudentID: parseInt(urlParams.get('AssignToStudentID')), HocSinhID: vueData.HocSinhDetail.HocSinhID }
+        : { ...payload, Is_Resubmit: vueData.Is_Resubmit, HocSinhID: vueData.HocSinhDetail.HocSinhID };
     ajaxCALL(endpoint, params,
         () => {
             Vue.$toast.success("Nộp bài thành công!", { position: "top" });
@@ -282,7 +292,8 @@ function insertSubmissionForResubmit() {
     const payload = {
         AssignToClassID: vueData.assignmentData[0][0].AssignToClassID,
         SubmissionContent: JSON.stringify({ answers: {} }),
-        SubmissionStatus: SUBMISSION_STATUS.DRAFT
+        SubmissionStatus: SUBMISSION_STATUS.DRAFT,
+        HocSinhID: vueData.HocSinhDetail.HocSinhID
     };
     ajaxCALL("lms/EL_Student_InsertSubmission", payload, (response) => {
         urlParams.delete('Is_Resubmit');

@@ -1,0 +1,382 @@
+/**
+ * Grade Management System - All Utilities
+ * Tất cả helper functions tập trung trong 1 file
+ */
+// ════════════════════════════════════════════════════════════════
+// CONFIGURATION & CONSTANTS
+// ════════════════════════════════════════════════════════════════
+const GRADE_CONFIG = {
+    FREEZE_COLS: 5,
+    IELTS_SKILLS: ['Listening', 'Reading', 'Writing', 'Speaking'],
+    SEMESTER_OPTIONS: [
+        { key: 'S1_Mid', label: 'HK1 - Giữa kì' },
+        { key: 'S1_Final', label: 'HK1 - Cuối kì' },
+        { key: 'S2_Mid', label: 'HK2 - Giữa kì' },
+        { key: 'S2_Final', label: 'HK2 - Cuối kì' },
+    ],
+    SCORE_TYPES_CAP2: [
+        { key: 'HK', label: 'Điểm HK' },
+    ],
+    SCORE_TYPES_CAP3: [
+        { key: 'HK', label: 'Điểm HK' },
+        { key: 'TA2', label: 'Điểm TA2 + IELTS' },
+    ],
+    VALID_COT_DIEM_SUFFIXES: [
+        'Listening_Point', 'Listening_Conv',
+        'Language_Point', 'Language_Conv',
+        'Reading_Point', 'Reading_Conv',
+        'Writing_Point', 'Writing_Conv',
+        'Speaking_Point', 'Speaking_Conv',
+        'Total_Point', 'Total_Conv',
+        'TA2_Listening_Point', 'TA2_Listening_Conv',
+        'TA2_Reading_Point', 'TA2_Reading_Conv',
+        'TA2_Writing_Point', 'TA2_Writing_Conv',
+        'TA2_Speaking_Point', 'TA2_Speaking_Conv',
+        'TA2_Avg_Point', 'TA2_Avg_Conv',
+        'TA2_Point',
+        'IELTS_Listening_Conv',
+        'IELTS_Reading_Conv',
+        'IELTS_Writing_Conv',
+        'IELTS_Speaking_Conv',
+        'IELTS_Band_Conv',
+    ],
+    API_ENDPOINTS: {
+        CLASSES: 'lms/NhomAV_Get',
+        STUDENTS_BY_CLASS: 'lms/HocSinhNhom_Get_ByNhomID',
+        TEMPLATE_COLS: 'lms/HocSinhBangDiem_Get_ByMonHocID_MaNhom',
+        SKILL_CONFIG: 'lms/ThietLap_KiNang_Get',
+        IELTS_CONFIG: 'lms/ThietLap_KiNang_IELTS_Get',
+        SAVE_GRADES: 'lms/KQHT_MonHocLop_Ins',
+    },
+    MON_HOC_ID: 76,
+    DEFAULT_TEMPLATE_SCORE_ORDER: 14,
+}
+// ════════════════════════════════════════════════════════════════
+// GRADE CALCULATION HELPERS
+// ════════════════════════════════════════════════════════════════
+/**
+ * Chuyển đổi index cột sang ký tự (0→A, 1→B, ..., 26→AA)
+ */
+function colIndexToLetter(index) {
+    let letter = ''
+    let n = index + 1
+    while (n > 0) {
+        const rem = (n - 1) % 26
+        letter = String.fromCharCode(65 + rem) + letter
+        n = Math.floor((n - 1) / 26)
+    }
+    return letter
+}
+/**
+ * Tính chiều rộng cột dựa trên độ dài tiêu đề
+ */
+function getColumnWidth(title, colType, options = {}) {
+    const { minWidth = 60, maxWidth = 400, charWidth = 8, padding = 24, extraForNumeric = 20 } = options
+    if (!title) return `${minWidth}px`
+    const base = title.length * charWidth + padding
+    const w = colType === 'numeric' ? base + extraForNumeric : base
+    return `${Math.ceil(Math.min(Math.max(w, minWidth), maxWidth) / 10) * 10}px`
+}
+/**
+ * Xử lý công thức: thay tên cột bằng tọa độ (e.g. S2_Mid_TA2_Listening_Point → C2)
+ */
+function resolveFormula(formula, allColDefs, rowIndex) {
+    if (!formula) return ''
+    let f = formula.replace(/\bIIF\b/g, 'IF')
+    f = f.replace(/\b([A-Za-z][A-Za-z0-9]*(?:_[A-Za-z0-9]+)+)\b/g, match => {
+        const found = allColDefs.find(c => c.key === match)
+        return found ? `${found.colLetter}${rowIndex}` : match
+    })
+    return `=${f}`
+}
+/**
+ * Evaluate formula string với valueMap (dùng trong eTest apply, không dùng jspreadsheet)
+ * Hỗ trợ IF/IIF, thay tên cột → giá trị thực rồi eval
+ */
+function evaluateFormulaString(formula, valueMap) {
+    if (!formula) return null
+    try {
+        let expr = formula
+            .replace(/\bIIF\b/g, 'IF')
+            .replace(/\bIF\s*\(/g, '_IF(')
+        const sortedKeys = Object.keys(valueMap).sort((a, b) => b.length - a.length)
+        for (const key of sortedKeys) {
+            const val = valueMap[key]
+            const safeVal = (val === null || val === undefined || val === '')
+                ? 'null'
+                : (typeof val === 'string' ? `"${val}"` : val)
+            expr = expr.replace(
+                new RegExp(`\\b${key.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`, 'g'),
+                safeVal
+            )
+        }
+        const _IF = (condition, trueVal, falseVal) => condition ? trueVal : falseVal
+        // eslint-disable-next-line no-new-func
+        const result = new Function('_IF', `"use strict"; return (${expr})`)(_IF)
+        return result ?? null
+    } catch (e) {
+        console.warn('[evaluateFormulaString] error:', formula, e)
+        return null
+    }
+}
+/**
+ * Build valueMap cho 1 row từ scoreDescs + allUpdates + ws
+ * Pass 1: lấy giá trị thực, bỏ qua formula string (bắt đầu bằng '=')
+ * Pass 2: evaluate các cột trung gian có _formulaTemplate
+ */
+function buildValueMapForRow(scoreDescs, rowIdx, allUpdates, ws, FREEZE_COLS) {
+    const valueMap = {}
+    // Pass 1: lấy giá trị thực
+    scoreDescs.forEach((sd, si) => {
+        if (!sd.key) return
+        const ci = FREEZE_COLS + si
+        let val = allUpdates[rowIdx]?.[ci] ?? ws.getValueFromCoords(ci, rowIdx) ?? null
+        if (typeof val === 'string' && val.startsWith('=')) val = null
+        valueMap[sd.key] = val
+    })
+    // Pass 2: evaluate các cột trung gian (Avg_Point, v.v.)
+    scoreDescs.forEach((sd) => {
+        if (!sd.key || !sd._formulaTemplate) return
+        if (valueMap[sd.key] !== null && valueMap[sd.key] !== undefined) return
+        const resolved = evaluateFormulaString(sd._formulaTemplate, valueMap)
+        if (resolved !== null && resolved !== undefined) valueMap[sd.key] = resolved
+    })
+    return valueMap
+}
+/**
+ * Lấy số câu từ cấu hình dựa trên mã cột và ID nhóm
+ */
+function getSoCau(thietLapList, nhomID, maCotDiem) {
+    const row = thietLapList.find(t =>
+        t.MaCotDiem === maCotDiem &&
+        t.Enable !== false &&
+        t.List_NhomID.split(',').map(s => s.trim()).includes(String(nhomID))
+    )
+    return row ? row.SoCau : null
+}
+/**
+ * Tạo bảng định nghĩa cột từ danh sách desc
+ */
+function buildColDefs(descs) {
+    return descs.map((d, i) => ({
+        key: d.key,
+        colLetter: colIndexToLetter(i),
+        index: i,
+    }))
+}
+// ════════════════════════════════════════════════════════════════
+// IELTS BAND SCORE CALCULATIONS
+// ════════════════════════════════════════════════════════════════
+/**
+ * Lấy band score từ bảng chuyển đổi dựa trên số câu đúng (Listening/Reading)
+ */
+function getBandScoreFromTable(thietLapList, kiNang, soCauDung) {
+    if (soCauDung === null || soCauDung === undefined || soCauDung === '') return null
+    const num = Number(soCauDung)
+    if (isNaN(num)) return null
+    const row = thietLapList.find(t =>
+        t.TenKiNang === kiNang &&
+        num >= t.MinCorrectAns &&
+        num <= t.MaxCorrectAns
+    )
+    return row ? row.BandScore : null
+}
+/**
+ * Tính IELTS Band cho Writing/Speaking từ điểm kỹ năng (thang 10)
+ * Công thức: MROUND((2/3)*diemKiNang + (1/3) + 0.25, 0.5)
+ * Dùng integer math để tránh floating point
+ */
+function calcWritingSpeakingBand(diemKiNang) {
+    if (diemKiNang === null || diemKiNang === undefined || diemKiNang === '') return null
+    const val = Number(diemKiNang)
+    if (isNaN(val)) return null
+    // Nhân 1000 để tránh floating point, sau đó MROUND với 500 (= 0.5 * 1000)
+    const raw1000 = Math.round(((2 / 3) * val + (1 / 3) + 0.25) * 1000)
+    return Math.floor(raw1000 / 500 + 0.5) * 500 / 1000
+}
+/**
+ * Tính Overall Band từ danh sách band scores có giá trị (không bắt buộc đủ 4 kỹ năng)
+ * Quy tắc IELTS: <0.25→floor | <0.75→floor+0.5 | >=0.75→ceil
+ */
+function calcOverallBandFromAvailable(scores) {
+    const valid = scores.filter(v => v !== null && v !== undefined && v !== '' && !isNaN(Number(v))).map(Number)
+    if (!valid.length) return null
+    const avg = valid.reduce((a, b) => a + b, 0) / valid.length
+    const dec = avg - Math.floor(avg)
+    if (dec < 0.25) return Math.floor(avg)
+    else if (dec < 0.75) return Math.floor(avg) + 0.5
+    else return Math.ceil(avg)
+}
+/**
+ * Tính Overall Band từ đúng 4 kỹ năng (dùng cho IELTS_OVERALL formula trong jspreadsheet)
+ * Trả null nếu thiếu bất kỳ kỹ năng nào
+ */
+function calcOverallBand(listening, reading, writing, speaking) {
+    return calcOverallBandFromAvailable([listening, reading, writing, speaking].map(v =>
+        (v === null || v === undefined || v === '') ? null : v
+    ).every(v => v !== null) ? [listening, reading, writing, speaking] : [])
+}
+/**
+ * Lấy giá trị IELTS band của 1 kỹ năng cho 1 row
+ * Ưu tiên: allUpdates → ws value → DOM innerHTML (fallback khi ws trả formula string)
+ */
+function getIeltsValForRow(kiNang, scoreDescs, rowIdx, allUpdates, ws, FREEZE_COLS) {
+    const desc = scoreDescs.find(d => d._kiNang === kiNang && d._isIeltsScore)
+    if (!desc) return null
+    const ci = FREEZE_COLS + scoreDescs.indexOf(desc)
+    // 1. Ưu tiên allUpdates (đã recordUpdate trong cùng batch)
+    if (allUpdates[rowIdx]?.[ci] !== undefined) return allUpdates[rowIdx][ci]
+    // 2. Thử ws value (bỏ qua nếu là formula string chưa evaluated)
+    const wsVal = ws.getValueFromCoords(ci, rowIdx)
+    if (wsVal !== null && wsVal !== undefined && wsVal !== '' &&
+        !(typeof wsVal === 'string' && wsVal.startsWith('='))) {
+        const num = Number(wsVal)
+        return isNaN(num) ? null : num
+    }
+    // 3. Fallback DOM innerHTML (jspreadsheet đã render formula result vào đây)
+    const rec = ws.records?.[rowIdx]?.[ci]
+    if (rec?.element) {
+        const domVal = rec.element.innerHTML
+        if (domVal !== '' && domVal !== null && domVal !== undefined) {
+            const num = Number(domVal)
+            return isNaN(num) ? null : num
+        }
+    }
+    return null
+}
+/**
+ * Phân loại type của cột (TA2, IELTS, hoặc other)
+ */
+function classifyColumnType(maCotDiem) {
+    if (maCotDiem?.includes('_IELTS_')) return 'ielts'
+    if (maCotDiem?.includes('_TA2_') || maCotDiem?.includes('__SoCauDung')) return 'ta2'
+    return 'other'
+}
+// ════════════════════════════════════════════════════════════════
+// SPREADSHEET FORMATTERS
+// ════════════════════════════════════════════════════════════════
+/**
+ * Apply formatter "Số câu đúng" dạng "X/Y" vào worksheetConfig
+ */
+function applyColumnFormatters(worksheetConfig, scoreDescs, FREEZE_COLS) {
+    if (!worksheetConfig.columns) return
+    worksheetConfig.columns = worksheetConfig.columns.map((col, colIdx) => {
+        const scoreIdx = colIdx - FREEZE_COLS
+        if (scoreIdx < 0) return col
+        const desc = scoreDescs[scoreIdx]
+        if (!desc || !desc.key?.includes('__SoCauDung') || !desc._soCau) return col
+        return {
+            ...col,
+            render: (cell, value) => {
+                if (!value && value !== 0) { cell.innerText = ''; return }
+                cell.innerText = `${value}/${desc._soCau}`
+            },
+        }
+    })
+}
+// ════════════════════════════════════════════════════════════════
+// API HELPER FUNCTIONS
+// ════════════════════════════════════════════════════════════════
+/**
+ * Fetch danh sách lớp/nhóm
+ */
+async function fetchClasses(nienKhoa) {
+    const data = await fetchPromise(GRADE_CONFIG.API_ENDPOINTS.CLASSES, { NienKhoa: nienKhoa })
+    return data
+        .filter(x => x.MonHocID === GRADE_CONFIG.MON_HOC_ID && x.IsNhomLMS_GiaoBai === false)
+        .map(x => ({
+            id: x.NhomID,
+            name: x.TenNhom,
+            khoiID: x.KhoiID,
+            templateBangDiemID: x.TemplateBangDiemID,
+            monHocLopID: x.MonHocLopID ?? null,  // ✅ thêm dòng này
+        }))
+}
+/**
+ * Fetch + process records từ API thành colsMap + studentsMap
+ * Dùng chung cho cả TA2 và IELTS
+ */
+function processApiRecords(records, colsMap, studentsMap, monHocLopIDRef, gradesMap = null) {
+    if (!Array.isArray(records)) return
+    records.forEach(record => {
+        if (!monHocLopIDRef.value && record.MonHocLopID)
+            monHocLopIDRef.value = record.MonHocLopID
+        if (record.MaCotDiem && !colsMap.has(record.MaCotDiem)) {
+            colsMap.set(record.MaCotDiem, {
+                MaCotDiem: record.MaCotDiem,
+                TenCotDiem_VI: record.TenCotDiem_VI,
+                TenCotDiem_EN: record.TenCotDiem_EN,
+                GiaTriCotDiem: record.GiaTriCotDiem,
+                Formula: record.Formula || null,
+                CotDiemID: record.CotDiemID,
+                ThuTuCotDiem: record.ThuTuCotDiem,
+                MaNhomCotDiem: record.MaNhomCotDiem,
+                DiemMin: record.DiemMin,
+                DiemMax: record.DiemMax,
+                LoaiCotDiem: record.LoaiCotDiem,
+                HeSo: record.HeSo,
+            })
+        }
+        if (record.HocSinhID && !studentsMap.has(record.HocSinhID)) {
+            studentsMap.set(record.HocSinhID, {
+                id: record.HocSinhID,
+                soTT: record.SoDanhBo || 0,
+                hoTen: record.HoTen,
+                englishName: record.EnglishName || '',
+                tenLop: record.TenLop || '',
+            })
+        }
+        if (gradesMap && record.HocSinhID && record.MaCotDiem) {
+            gradesMap.set(`${record.HocSinhID}_${record.MaCotDiem}`, {
+                kqhtID: record.KQHTID || null,
+                cotDiemID: record.CotDiemID ?? null,       // ✅ thêm
+                monHocLopID: record.MonHocLopID ?? null,   // ✅ thêm
+            })
+        }
+    })
+}
+/**
+ * Lọc và sort cols từ cache theo nhóm cột điểm hợp lệ
+ */
+function filterAndSortCols(cachedCols, activeNhomCotDiem, ieltsNhomCotDiem) {
+    return cachedCols
+        .filter(c =>
+            (c.MaNhomCotDiem === activeNhomCotDiem || c.MaNhomCotDiem === ieltsNhomCotDiem) &&
+            GRADE_CONFIG.VALID_COT_DIEM_SUFFIXES.some(s => c.MaCotDiem.endsWith(s))
+        )
+        .sort((a, b) => a.ThuTuCotDiem - b.ThuTuCotDiem)
+        .map(c => ({
+            key: c.MaCotDiem,
+            title: c.TenCotDiem_VI,
+            type: c.GiaTriCotDiem,
+            formula: c.Formula,
+            cotDiemID: c.CotDiemID,
+            diemMin: c.DiemMin,
+            diemMax: c.DiemMax,
+            loaiCotDiem: c.LoaiCotDiem,
+            heSo: c.HeSo,
+        }))
+}
+async function fetchSkillConfig(nienKhoa) {
+    return await fetchPromise(GRADE_CONFIG.API_ENDPOINTS.SKILL_CONFIG, { NienKhoa: nienKhoa })
+}
+async function fetchIeltsConfig(nienKhoa) {
+    return await fetchPromise(GRADE_CONFIG.API_ENDPOINTS.IELTS_CONFIG, { NienKhoa: nienKhoa })
+}
+async function saveGrades(saveData) {
+    return await fetchPromise(GRADE_CONFIG.API_ENDPOINTS.SAVE_GRADES, { ...saveData })
+}
+/**
+ * Tính Overall Band từ 4 kỹ năng
+ * Nếu kỹ năng nào rỗng/null → tính như 0, vẫn chia 4
+ */
+function calcOverallBand(listening, reading, writing, speaking) {
+    const scores = [listening, reading, writing, speaking]
+    const nums = scores.map(v => (v === '' || v === null || v === undefined) ? 0 : Number(v))
+    if (nums.some(v => isNaN(v))) return null
+    const avg = nums.reduce((a, b) => a + b, 0) / 4
+    const dec = avg - Math.floor(avg)
+    if (dec < 0.25) return Math.floor(avg)
+    else if (dec < 0.75) return Math.floor(avg) + 0.5
+    else return Math.ceil(avg)
+}

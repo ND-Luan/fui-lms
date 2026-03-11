@@ -17,7 +17,7 @@
 		},
 		data() {
 			return {
-				isMobile: false
+				isMobile: window.innerWidth < 960  // ← tính ngay, không để false
 			}
 		},
 		mounted() {

@@ -181,7 +181,10 @@
 <script>
 	export default {
 		name: 'UcHocLieuSo',
-		props: { CapID: { default: null } },
+		props: {
+			CapID: { default: null },
+			TuanHoc: { default: null }
+		},
 	
 		data() {
 			return {
@@ -208,11 +211,12 @@
 			}
 		},
 	
+		// SAU ✅
 		mounted() { if (this.CapID) this.onLoad() },
 		watch: {
-			CapID(val) { if (val) this.onLoad() },
+			CapID() { this.onLoad() }, // đổi cấp học → reload
+			TuanHoc() { this.onLoad() }, // đổi tháng → reload
 		},
-	
 		computed: {
 			totalHL() { return this.items.length },
 			totalHasND() { return this.items.filter(i => i.HocLieuCoNoiDung).length },
@@ -313,8 +317,15 @@
 		},
 	
 		methods: {
+			// onLoad()
 			async onLoad() {
-				this.items = await fetchPromise('lms/BaoCao_2_ThongKe_HocLieuSo_ByCapID', { CapID: this.CapID })
+				if (!this.CapID) return
+				this.items = await fetchPromise('lms/BaoCao_2_ThongKe_HocLieuSo_ByCapID', {
+					CapID: this.CapID,
+					NienKhoa: this.TuanHoc?.NienKhoa ?? null, // ✅
+					Nam: this.TuanHoc?.Nam ?? null, // ✅
+					ThangHoc: this.TuanHoc?.Thang ?? null, // ✅
+				}, { forceRefresh: true })
 			},
 			getSubjectColor(name) {
 				let hash = 0

@@ -14,7 +14,6 @@
 				<p class="smd-loading-text">Đang tải kết quả bài làm…</p>
 			</div>
 		</v-card>
-
 		<!-- ── MAIN CARD ── -->
 		<v-card v-else-if="summaryData && summaryData.overview" class="smd-card" rounded="xl" elevation="0">
 			<!-- HEADER -->
@@ -144,6 +143,7 @@
 				return `${(this.scorePct / 100) * 314} 314`
 			},
 			scorePct() {
+				console.log(this.summaryData)
 				const ov = this.summaryData?.overview;
 				if (!ov || !ov.MaxScore) return 0;
 				return Math.round((ov.Score / ov.MaxScore) * 100);

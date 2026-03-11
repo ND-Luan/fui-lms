@@ -13,10 +13,14 @@
 							{{item.TenTinhTrang}}
 						</v-chip>
 					</template>
-					<template #item.log="{item}">
-						<v-btn v-if="item.Count_Log_Diem > 0" @click="redirectLog(item)">
-							<v-icon>mdi-history</v-icon>
-						</v-btn>
+					<template #item.log="{ item }">
+						<v-tooltip text="Lịch sử chỉnh sửa" location="top">
+							<template #activator="{ props }">
+								<v-btn v-if="item.Count_Log_Diem > 0" v-bind="props" icon variant="text" @click="redirectLog(item)">
+									<v-icon>mdi-history</v-icon>
+								</v-btn>
+							</template>
+						</v-tooltip>
 					</template>
 				</v-data-table-virtual>
 			</v-card>

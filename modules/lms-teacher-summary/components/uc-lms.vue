@@ -353,6 +353,7 @@
 		props: {
 			CapID: { default: null },
 			NienKhoa: { default: null },
+			TuanHoc: { default: null }, // ✅ thay NienKhoa → TuanHoc
 		},
 		data() {
 			return {
@@ -514,7 +515,7 @@
 		},
 		watch: {
 			CapID() { this.loadData() },
-			NienKhoa() { this.loadData() },
+			TuanHoc() { this.loadData() }, // ✅ sửa NienKhoa → TuanHoc
 		},
 		mounted() {
 			if (this.CapID) this.loadData()
@@ -526,7 +527,12 @@
 				try {
 					const result = await fetchPromise(
 						'lms/BaoCao_2_ThongKe_BaiTap_BaiHoc_LMS_ByCapID',
-						{ CapID: this.CapID, NienKhoa: vueData.NienKhoa }
+						{
+							CapID: this.CapID,
+							NienKhoa: this.TuanHoc?.NienKhoa ?? null, // ✅ THÊM
+							Nam: this.TuanHoc?.Nam ?? null, // ✅ THÊM
+							ThangHoc: this.TuanHoc?.Thang ?? null, // ✅ THÊM
+						}
 					)
 					this.dataTong = result[0] ?? []
 					this.dataBaiHoc = result[1] ?? []

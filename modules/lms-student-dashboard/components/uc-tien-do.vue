@@ -94,7 +94,6 @@
 										{{ td.TotalTasks - td.CompletedTasks }} còn lại
 									</div>
 									<v-spacer />
-									<!-- ✅ Nút Sổ điểm: truyền đúng môn & mở dialog -->
 									<v-btn size="x-small" color="primary" variant="tonal" class="td-gradebook-btn"
 										@click.stop="openGradebook(td)">
 										<v-icon size="12" start>mdi-book-open-page-variant</v-icon>
@@ -145,17 +144,17 @@
 			</v-col>
 		</v-row>
 
-		<!-- ✅ Dialog nhận props từ state nội bộ -->
 		<uc-student-gradebook-dialog v-model:visible="gradebookVisible" :mon-hoc-id="gradebookMonHocId"
 			:subject-name="gradebookMonHocName" />
-
+		<uc-iframe-window ref="iframeWindow" />
 	</div>
 </template>
 
 <script>
 	export default {
 		props: {
-			NienKhoa: Number
+			NienKhoa: Number,
+			HocSinh: Object,
 		},
 		data() {
 			return {
@@ -167,7 +166,6 @@
 					DanhSachChiTiet: [],
 					Tong: null
 				},
-				// ── Gradebook dialog state ──
 				gradebookVisible: false,
 				gradebookMonHocId: null,
 				gradebookMonHocName: '',
@@ -175,6 +173,9 @@
 			}
 		},
 		computed: {
+			hocSinhID() {
+				return this.HocSinh?.HocSinhID || vueData.user.UserID
+			},
 			overallPct() {
 				if (!this.DSTienDo.length) return 0
 				const total = this.DSTienDo.reduce((s, t) => s + (t.TotalTasks || 0), 0)
@@ -184,14 +185,22 @@
 			}
 		},
 		async mounted() {
-			this.isLoading = true
-			try {
-				this.DSTienDo = await ajaxCALLPromise('lms/EL_Student_Get_TienDo_ByHocSinhID', {
-					HocSinhID: vueData.user.UserID,
-					NienKhoa: this.NienKhoa
-				})
-			} finally {
-				this.isLoading = false
+		},
+		watch: {
+			"HocSinh.HocSinhID": {
+				immediate: true,
+				async handler(hocSinhID) {
+					if (!hocSinhID) return
+					this.isLoading = true
+					try {
+						this.DSTienDo = await ajaxCALLPromise('lms/EL_Student_Get_TienDo_ByHocSinhID', {
+							HocSinhID: hocSinhID,
+							NienKhoa: this.NienKhoa
+						})
+					} finally {
+						this.isLoading = false
+					}
+				}
 			}
 		},
 		methods: {
@@ -211,7 +220,8 @@
 				this.detailLoading = true
 				try {
 					const res = await ajaxCALLPromise('lms/EL_Student_GetSubjectProgressDetail', {
-						MonHocID: td.MonHocID
+						MonHocID: td.MonHocID,
+						HocSinhID: this.HocSinh?.HocSinhID
 					})
 					this.DetailMonHoc.DanhSachChiTiet = res[0] ?? []
 					this.DetailMonHoc.Tong = res[1]?.[0] ?? null
@@ -220,7 +230,6 @@
 				}
 			},
 	
-			// ✅ Mở dialog sổ điểm cho môn đang xem
 			openGradebook(td) {
 				this.gradebookMonHocId = td.MonHocID
 				this.gradebookMonHocName = td.MonHocName
@@ -229,7 +238,8 @@
 	
 			onOpenWindow(ct) {
 				const isLesson = ct.ResourceType === 'LESSON'
-				openWindow({
+	
+				this.$refs.iframeWindow.openWindow({
 					title: `Xem lại ${isLesson ? 'bài học' : 'bài tập'} ${ct.Title}`,
 					url: isLesson
 						? `/lms-student-lesson-viewer?AssignToClassID=${ct.AssignToClassID}`

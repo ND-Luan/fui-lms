@@ -17,6 +17,8 @@
 
 					<v-select v-model="CapID" label="Chọn cấp học" :items="DSCap" item-title="title" item-value="value"
 						density="compact" variant="outlined" hide-details style="max-width:180px" />
+					<v-select v-model="TuanHoc" label="Chọn tuần" :items="DSTuan" item-title="title" item-value="value"
+						density="compact" variant="outlined" return-object hide-details style="max-width:180px" />
 
 					<v-chip size="small" color="primary" variant="tonal" prepend-icon="mdi-calendar">
 						Năm học {{ vueData.NienKhoa }}
@@ -50,10 +52,10 @@
 
 			<v-tabs-window v-model="tab">
 				<v-tabs-window-item :value="0" :key="0" :eager="true">
-					<uc-hoc-lieu-so ref="refHocLieuSo" :CapID="CapID" />
+					<uc-hoc-lieu-so ref="refHocLieuSo" :CapID :TuanHoc />
 				</v-tabs-window-item>
 				<v-tabs-window-item :value="1" :key="1" :eager="true">
-					<uc-lms ref="refLms" :CapID="CapID" />
+					<uc-lms ref="refLms" :CapID :TuanHoc />
 				</v-tabs-window-item>
 			</v-tabs-window>
 		</v-card>
@@ -73,9 +75,23 @@
 					{ title: 'Cấp 2', value: 2 },
 					{ title: 'Cấp 3', value: 3 },
 				],
+				DSTuan: [],
+				TuanHoc: null
 			}
 		},
+		mounted() {
+			this.onLoadTuanHoc()
+		},
 		methods: {
+			// SAU ✅ — tự chọn tháng hiện tại sau khi load
+			async onLoadTuanHoc() {
+				const data = await fetchPromise("lms/TuanHocTap_Get_Thang_Nam", { NienKhoa: vueData.NienKhoa })
+				this.DSTuan = data.map(x => ({ ...x, title: x.Thang_Nam_HienThi, value: x.Thang }))
+	
+				// Auto chọn tháng hiện tại, fallback về phần tử đầu tiên nếu không có
+				const thangHienTai = new Date().getMonth() + 1
+				this.TuanHoc = this.DSTuan.find(x => x.Thang === thangHienTai) ?? this.DSTuan[0] ?? null
+			},
 			onExport() {
 				const hocLieuRef = this.$refs.refHocLieuSo
 				const lmsRef = this.$refs.refLms

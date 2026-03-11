@@ -2,25 +2,26 @@
 	<uc-navigation-drawer v-model:activeKey="activeKey" v-model:activeMonHocID="activeMonHocID"
 		:studentInfoDetail="studentInfoDetail" :avatarStudent="avatarStudent" :subjectProgress="subjectProgress">
 		<!-- Nội dung chính -->
-		<div v-if="activeKey === 0 && NienKhoa">
-			<uc-nhiem-vu :NienKhoa />
+		<div v-if="activeKey === 0 && NienKhoa && studentInfoDetail?.HocSinhID">
+			<uc-nhiem-vu :NienKhoa :HocSinh="studentInfoDetail" />
 		</div>
-		<div v-if="activeKey === 1 && NienKhoa">
-			<uc-hoat-dong :NienKhoa />
+		<div v-if="activeKey === 1 && NienKhoa && studentInfoDetail?.HocSinhID">
+			<uc-hoat-dong :NienKhoa :HocSinh="studentInfoDetail" />
 		</div>
-		<div v-if="activeKey === 2 && NienKhoa">
-			<uc-tien-do :NienKhoa />
+		<div v-if="activeKey === 2 && NienKhoa && studentInfoDetail?.HocSinhID">
+			<uc-tien-do :NienKhoa :HocSinh="studentInfoDetail" />
 		</div>
-		<div v-if="activeKey === 3 && NienKhoa">
-			<uc-ca-nhan :NienKhoa />
+		<div v-if="activeKey === 3 && NienKhoa && studentInfoDetail?.HocSinhID">
+			<uc-ca-nhan :NienKhoa :HocSinh="studentInfoDetail" />
 		</div>
-		<div v-if="activeKey === 4 && NienKhoa">
+		<div v-if="activeKey === 4 && NienKhoa && studentInfoDetail?.HocSinhID">
 			<uc-lich :HocSinh="studentInfoDetail" :NienKhoa :inline="true" />
 		</div>
-		<div v-if="activeKey === 5 && NienKhoa">
+		<div v-if="activeKey === 5 && NienKhoa && studentInfoDetail?.HocSinhID">
 			<uc-hoc-lieu-so :HocSinh="studentInfoDetail" />
 		</div>
-		<uc-achievement-card v-if="activeKey === 6 && NienKhoa" :HocSinh="studentInfoDetail" :inline="true" />
+		<uc-achievement-card v-if="activeKey === 6 && NienKhoa && studentInfoDetail?.HocSinhID"
+			:HocSinh="studentInfoDetail" :inline="true" />
 	</uc-navigation-drawer>
 </template>
 <script>
@@ -40,12 +41,14 @@
 				menuVisible: false,
 				subjectProgress: [],
 				focusTasks: [],
-				NienKhoa: null
+				NienKhoa: null,
+				isFromLinkParent: false,
+				hocSinhIDFromUrl: null,
 			}
 		},
 		mounted() {
 			this.isMobile = this.$vuetify.display.mobile
-			// this.activeMonHocID = this.subjectProgress[0]?.MonHocID
+			this.checkUrlParams()
 			this.initStudentInfoDetail()
 		},
 		computed: {
@@ -78,10 +81,18 @@
 			},
 		},
 		methods: {
+			checkUrlParams() {
+				const urlParams = new URLSearchParams(window.location.search)
+				const isFromLinkParent = urlParams.get('IsFromLinkParent')
+				if (isFromLinkParent === 'true') {
+					this.isFromLinkParent = true
+					this.hocSinhIDFromUrl = parseInt(urlParams.get('HocSinhID'))
+				}
+			},
 			async initStudentInfoDetail() {
 				await this.getNienKhoaIsActive()
-				await this.getTuanHocTap_Get()
 				await this.getInfoHocSinhByUserName()
+				await this.getTuanHocTap_Get()
 				await this.getTienDoMonHoc()
 			},
 			scrollToSelectedItem() {
@@ -117,10 +128,22 @@
 				this.NienKhoa = DSNienKhoa.filter(item => item.IsActive)[0].NienKhoa
 			},
 			async getInfoHocSinhByUserName() {
-				this.studentInfoDetail = await ajaxCALLPromise('/lms/HocSinh_Detail_GetBy_HocSinhID', {
-					HocSinhID: parseInt(this.userAccount.UserName),
+				const hocSinhID = this.isFromLinkParent
+					? this.hocSinhIDFromUrl
+					: this.userAccount.UserID
+	
+				console.log('[DEBUG] isFromLinkParent:', this.isFromLinkParent)
+				console.log('[DEBUG] userAccount:', this.userAccount)
+				console.log('[DEBUG] hocSinhID gửi lên:', hocSinhID)
+				console.log('[DEBUG] NienKhoa:', this.NienKhoa)
+	
+				const result = await ajaxCALLPromise('/lms/HocSinh_Detail_GetBy_HocSinhID', {
+					HocSinhID: hocSinhID,
 					NienKhoa: this.NienKhoa
 				})
+	
+				console.log('[DEBUG] studentInfoDetail trả về:', result)
+				this.studentInfoDetail = result
 			},
 			async getTuanHocTap_Get() {
 				this.DSTuanHoc = await ajaxCALLPromise('lms/TuanHocTap_Get', { NienKhoa: this.NienKhoa })

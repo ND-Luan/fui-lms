@@ -14,7 +14,7 @@
 					<!-- LOGO -->
 					<div style="padding: 22px 20px 14px; display: flex; align-items: center; gap: 11px;">
 						<div class="logo-box">
-							<v-img src="/_cdn/lhbs-lms/logo_lhbs_2.jpg" />
+							<v-img src="/_cdn/lhbs-lms/SongNgu_logo.png" />
 						</div>
 						<div>
 							<div class="logo-text">LHBS</div>
@@ -28,7 +28,7 @@
 					<div class="student-card">
 						<v-avatar size="42" class="student-avatar">
 							<v-icon v-if="!avatarStudent" size="24">mdi-account-circle</v-icon>
-							<v-img v-else :src="avatarStudent" contain>
+							<v-img v-else :src="avatarStudent" contain />
 						</v-avatar>
 						<div style="overflow: hidden; flex: 1;">
 							<div class="student-name">{{ studentInfoDetail?.HoTen }}</div>
@@ -62,7 +62,7 @@
 					</div>
 
 					<!-- FOOTER -->
-					<div class="sidebar-footer">Version 2.0</div>
+					<div class="sidebar-footer">Version 2.1</div>
 
 				</v-navigation-drawer>
 

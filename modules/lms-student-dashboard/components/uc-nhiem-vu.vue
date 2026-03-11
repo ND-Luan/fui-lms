@@ -18,7 +18,7 @@
 				<v-badge class="d-sm-none" :model-value="!IsBtnDot" color="red" location="top right" dot :offset-x="5"
 					:offset-y="5">
 					<uc-bts-mon-hoc v-model:monHocSelected="monHocSelected" :NienKhoa="NienKhoa" size="small"
-						icon="mdi-filter-variant" variant="tonal" color="primary" />
+						icon="mdi-filter-variant" variant="tonal" color="primary" :HocSinh />
 				</v-badge>
 			</div>
 		</div>
@@ -102,7 +102,8 @@
 <script>
 	export default {
 		props: {
-			NienKhoa: Number
+			NienKhoa: Number,
+			HocSinh: Object
 		},
 		data() {
 			return {
@@ -113,14 +114,23 @@
 				selectedMonHoc: null
 			};
 		},
-		async mounted() {
-			this.DSMonHoc = await ajaxCALLPromise('lms/EL_Student_Get_MonHoc_ByHocSinhID', {
-				HocSinhID: vueData.user.UserID,
-				NienKhoa: this.NienKhoa
-			});
-			this.onRefresh();
+		watch: {
+			"HocSinh.HocSinhID": {
+				immediate: true, // chạy ngay khi mount, không cần mounted()
+				async handler(hocSinhID) {
+					if (!hocSinhID) return // guard an toàn
+					this.DSMonHoc = await ajaxCALLPromise('lms/EL_Student_Get_MonHoc_ByHocSinhID', {
+						HocSinhID: this.hocSinhID,
+						NienKhoa: this.NienKhoa
+					});
+					this.onRefresh();
+				}
+			}
 		},
 		computed: {
+			hocSinhID() {
+				return this.HocSinh?.HocSinhID || vueData.user.UserID
+			},
 			IsBtnDot() {
 				const uniqueMonHocInNV = [...new Set(this.DSNhiemVu.map(x => x.MonHocID))];
 				const selectedIDs = this.monHocSelected.map(x => x.MonHocID);
@@ -147,9 +157,17 @@
 				const id = nv.ResourceID;
 				if (!type || !id) return;
 				if (type === 'assignment') {
+					const stringatcClassID = `AssignToClassID=${id}`
+					const stringatsClassID = `AssignToStudentID=${id}`
+					let url = `/lms-student-assignment?Is_SendToClass=${nv.Is_SendToClass}&HocSinhID=${this.HocSinh?.HocSinhID}&`
+					if (nv.Is_SendToClass) {
+						url += stringatcClassID
+					} else {
+						url += stringatsClassID
+					}
 					this.$refs.iframeWindow.openWindow({
 						title: nv.Title,
-						url: `/lms-student-assignment?AssignToClassID=${id}&Is_SendToClass=${nv.Is_SendToClass}`,
+						url,
 						onclose: () => {
 							this.onRefresh();
 						}
@@ -157,7 +175,7 @@
 				} else if (type === 'lesson') {
 					this.$refs.iframeWindow.openWindow({
 						title: nv.Title,
-						url: `/lms-student-lesson-viewer?AssignToClassID=${id}`,
+						url: `/lms-student-lesson-viewer?AssignToClassID=${id}&HocSinhID=${this.HocSinh?.HocSinhID}`,
 						onclose: () => {
 							this.onRefresh();
 						}
@@ -167,7 +185,7 @@
 			async onRefresh() {
 				this.DSNhiemVu = await ajaxCALLPromise('lms/EL_Student_Get_NhiemVu_ByHocSinhID', {
 					NienKhoa: this.NienKhoa,
-					HocSinhID: vueData.user.UserID
+					HocSinhID: this.hocSinhID
 				});
 			},
 			statusInfo(nv) {

@@ -89,6 +89,8 @@ function HandleWidth() {
     }
 }
 addEventListener('resize', HandleWidth)
-// addEventListener("beforeunload", () => {
-// });
+function redirectLMS() {
+    redirect(`/lms-student-dashboard?IsFromLinkParent=true&HocSinhID=${vueData.HocSinhSelected.HocSinhID}`)
+}
 vueData.onSelectedHocSinh = onSelectedHocSinh
+vueData.redirectLMS = redirectLMS

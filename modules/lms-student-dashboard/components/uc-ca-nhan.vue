@@ -10,7 +10,7 @@
 			<div class="sp-profile">
 				<div class="sp-avatar-wrap">
 					<v-avatar size="64" class="sp-avatar">
-						<v-img :src="vueData.v_Set.urlAvatarHocSinh + vueData.user.UserID" />
+						<v-img :src="vueData.v_Set.urlAvatarHocSinh + HocSinh?.HocSinhID" />
 					</v-avatar>
 					<div class="sp-avatar-ring"></div>
 				</div>
@@ -83,7 +83,7 @@
 				<v-icon size="16" color="error">mdi-logout</v-icon>
 				<span>Đăng xuất</span>
 			</div>
-			<div class="sp-version">v1.0</div>
+			<div class="sp-version">v2.1</div>
 		</div>
 
 	</div>
@@ -92,17 +92,13 @@
 <script>
 	export default {
 		props: {
-			NienKhoa: Number
+			NienKhoa: Number,
+			HocSinh: Object,
 		},
 		data() {
 			return {
-				HocSinh: null,
-				isOpenAchievment: false,
 				vueData
 			}
-		},
-		mounted() {
-			this.onLoadDetailHocSinh()
 		},
 		methods: {
 			onLogout() {
@@ -114,15 +110,6 @@
 					url: `/kham-pha?capid=${this.HocSinh?.CapID}&khoiid=${this.HocSinh?.KhoiID}`
 				})
 			},
-			onOpenThanhTich() {
-				//  this.isOpenAchievment = true 
-			},
-			async onLoadDetailHocSinh() {
-				this.HocSinh = await ajaxCALLPromise("lms/HocSinh_Detail_GetBy_HocSinhID", {
-					HocSinhID: vueData.user.UserID,
-					NienKhoa: this.NienKhoa
-				})
-			}
 		}
 	}
 </script>

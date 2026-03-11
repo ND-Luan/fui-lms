@@ -9,7 +9,7 @@
 				</div>
 				<div>
 					<div class="hd__header-title">Hoạt Động</div>
-					<div class="hd__header-count">{{ DSHoatDong.length }} hoạt động</div>
+					<div class="hd__header-count">{{ DSHoatDong_Grouped.length }} hoạt động</div>
 				</div>
 			</div>
 			<div class="hd__header-actions">
@@ -61,29 +61,46 @@
 		<uc-list-loading :loading="IsLoading" :count="5">
 
 			<!-- Empty -->
-			<div v-if="DSHoatDong.length === 0" class="hd__empty">
+			<div v-if="DSHoatDong_Grouped.length === 0" class="hd__empty">
 				<v-icon size="52" color="grey-lighten-2">mdi-timeline-outline</v-icon>
 				<div class="hd__empty-title">Chưa có hoạt động</div>
 				<div class="hd__empty-sub">Các hoạt động học tập sẽ hiện ở đây</div>
 			</div>
 
 			<div v-else class="hd__list">
-				<div v-for="(hd, idx) in DSHoatDong_Paged" :key="idx" class="hd__item">
+				<div v-for="(hd, idx) in DSHoatDong_Paged" :key="hd._groupKey" class="hd__item">
 
 					<!-- Timeline -->
 					<div class="hd__item-timeline">
 						<div class="hd__item-dot" :style="{ background: getFeedColor(hd.FeedType) }"></div>
-						<div class="hd__item-line" v-if="idx < DSHoatDong_Paged.length - 1"></div>
+						<div class="hd__item-line"
+							v-if="idx < DSHoatDong_Paged.length - 1 || (hd._isGroup && expandedGroups.has(hd._groupKey))">
+						</div>
 					</div>
 
 					<!-- Card -->
-					<div class="hd__item-card">
+					<div class="hd__item-card"
+						:class="{ 'hd__item-card--expanded': hd._isGroup && expandedGroups.has(hd._groupKey) }">
 						<div class="hd__item-icon" :style="{ background: getFeedColor(hd.FeedType) + '15' }">
 							<v-icon size="18" :color="getFeedColor(hd.FeedType)">{{ getFeedIcon(hd.FeedType) }}</v-icon>
 						</div>
 						<div class="hd__item-content">
-							<div class="hd__item-title">{{ hd.Title }}</div>
+							<div class="hd__item-title-row">
+								<div class="hd__item-title">{{ hd.Title }}</div>
+								<!-- Badge số lần nộp — chỉ hiện khi có nhiều hơn 1 lần -->
+								<div v-if="hd._isGroup && hd._items.length > 1" class="hd__group-badge"
+									:style="{ background: getFeedColor(hd.FeedType) + '18', color: getFeedColor(hd.FeedType), borderColor: getFeedColor(hd.FeedType) + '40' }"
+									@click.stop="toggleGroup(hd._groupKey)">
+									<v-icon size="11" :color="getFeedColor(hd.FeedType)">mdi-history</v-icon>
+									{{ hd._items.length }} lần
+									<v-icon size="11" :color="getFeedColor(hd.FeedType)">
+										{{ expandedGroups.has(hd._groupKey) ? 'mdi-chevron-up' : 'mdi-chevron-down' }}
+									</v-icon>
+								</div>
+							</div>
+
 							<div class="hd__item-detail" v-if="hd.Details">{{ hd.Details }}</div>
+
 							<div class="hd__item-meta">
 								<span class="hd__item-badge"
 									:style="{ background: getFeedColor(hd.FeedType) + '15', color: getFeedColor(hd.FeedType) }">
@@ -96,21 +113,90 @@
 							</div>
 
 							<!-- Actions — chỉ ASSIGNMENT -->
+							<!-- Thay toàn bộ block Actions -->
 							<div v-if="hd.ResourceType === 'ASSIGNMENT'" class="hd__item-actions">
-								<!-- Xem điểm — gọi summary modal -->
-								<button class="hd__action-btn hd__action-btn--score" @click.stop="onXemDiem(hd)">
-									<v-icon size="12">mdi-star-outline</v-icon>
-									Xem điểm
+
+								<!-- Đang dở lần cuối → Tiếp tục làm -->
+								<button v-if="hd.Is_HasInProgress == 1" class="hd__action-btn hd__action-btn--continue"
+									@click.stop="onTiepTucLam(hd)">
+									<v-icon size="12">mdi-pencil-outline</v-icon>
+									Tiếp tục làm
 								</button>
-								<button class="hd__action-btn" @click.stop="onXemChiTiet(hd)">
-									<v-icon size="12">mdi-eye-outline</v-icon>
-									Chi tiết
-								</button>
-								<button class="hd__action-btn hd__action-btn--rank" @click.stop="onXepHang(hd)">
+
+								<!-- Lần cuối đã xong → hiện Chi tiết + Xem điểm + Làm lại -->
+								<template v-else>
+									<button v-if="hd.FeedType === 'GRADED' && !(hd._isGroup && hd._items.length > 1)"
+										class="hd__action-btn hd__action-btn--score" @click.stop="onXemDiem(hd)">
+										<v-icon size="12">mdi-star-outline</v-icon>
+										Xem điểm
+									</button>
+									<button v-if="!(hd._isGroup && hd._items.length > 1)" class="hd__action-btn"
+										@click.stop="onXemChiTiet(hd)">
+										<v-icon size="12">mdi-eye-outline</v-icon>
+										Chi tiết
+									</button>
+									<button v-if="hd.Is_MaxAssigned == 0" class="hd__action-btn"
+										@click.stop="onLamLai(hd)">
+										<v-icon size="12">mdi-replay</v-icon>
+										Làm lại
+									</button>
+								</template>
+
+								<button v-if="hd.FeedType === 'GRADED'" class="hd__action-btn hd__action-btn--rank" @click.stop="onXepHang(hd)">
 									<v-icon size="12">mdi-podium</v-icon>
 									Xếp hạng
 								</button>
 							</div>
+
+							<!-- ── EXPAND: Danh sách các lần nộp ── -->
+							<div v-if="hd._isGroup && expandedGroups.has(hd._groupKey) && hd._items.length > 1"
+								class="hd__sub-list">
+								<div class="hd__sub-header">
+									<v-icon size="13" color="#888">mdi-history</v-icon>
+									Lịch sử nộp bài
+								</div>
+								<div v-for="(sub, si) in hd._items" :key="si" class="hd__sub-item">
+									<div class="hd__sub-left">
+										<div class="hd__sub-dot" :style="{ background: getFeedColor(sub.FeedType) }">
+										</div>
+										<div class="hd__sub-line" v-if="si < hd._items.length - 1"></div>
+									</div>
+									<div class="hd__sub-body">
+										<div class="hd__sub-top">
+											<span class="hd__sub-lan"
+												:style="{ background: getFeedColor(sub.FeedType) + '18', color: getFeedColor(sub.FeedType) }">
+												Lần {{ sub.LanNop }}
+											</span>
+											<span class="hd__sub-status" :style="{ color: getFeedColor(sub.FeedType) }">
+												<v-icon size="12" :color="getFeedColor(sub.FeedType)">{{
+													getFeedIcon(sub.FeedType) }}</v-icon>
+												{{ getFeedLabel(sub.FeedType) }}
+											</span>
+										</div>
+										<div v-if="sub.Details" class="hd__sub-detail">{{ sub.Details }}</div>
+										<div class="hd__sub-bottom">
+											<span class="hd__sub-time">
+												<v-icon size="10">mdi-clock-outline</v-icon>
+												{{ formatTime(sub.EventTime) }}
+											</span>
+											<div class="hd__sub-actions">
+												<button class="hd__action-btn hd__action-btn--sm"
+													@click.stop="onXemChiTiet(sub)">
+													<v-icon size="11">mdi-eye-outline</v-icon>
+													Chi tiết
+												</button>
+												<button v-if="sub.FeedType === 'GRADED' || sub.FeedType === 'SUBMITTED'"
+													class="hd__action-btn hd__action-btn--sm hd__action-btn--score"
+													@click.stop="onXemDiem(sub)">
+													<v-icon size="11">mdi-star-outline</v-icon>
+													Điểm
+												</button>
+											</div>
+										</div>
+									</div>
+								</div>
+							</div>
+
 						</div>
 					</div>
 				</div>
@@ -137,6 +223,7 @@
 	export default {
 		props: {
 			NienKhoa: Number,
+			HocSinh: Object,
 		},
 		data() {
 			return {
@@ -156,15 +243,14 @@
 				page: 1,
 				pageSize: 10,
 				vueData,
+				// Dùng Set để track các group đang expand — reactive qua $forceUpdate
+				expandedGroups: new Set(),
 	
-				// ─── Summary modal state ───
 				summaryModal: {
 					visible: false,
 					loading: false,
 					data: null,
 				},
-	
-				// ─── Leaderboard modal state ───
 				leaderboardModal: {
 					visible: false,
 					loading: false,
@@ -173,27 +259,54 @@
 			};
 		},
 		computed: {
-			totalPages() {
-				return Math.ceil(this.DSHoatDong.length / this.pageSize);
+			hocSinhID() {
+				return this.HocSinh?.HocSinhID || vueData.user.UserID;
 			},
+	
+			DSHoatDong_Grouped() {
+				return this.DSHoatDong; // SP đã group sẵn rồi
+			},
+	
+			totalPages() {
+				return Math.ceil(this.DSHoatDong_Grouped.length / this.pageSize);
+			},
+	
 			DSHoatDong_Paged() {
 				const start = (this.page - 1) * this.pageSize;
-				return this.DSHoatDong.slice(start, start + this.pageSize);
+				return this.DSHoatDong_Grouped.slice(start, start + this.pageSize);
 			},
 		},
-		async mounted() {
-			this.loadData();
+		watch: {
+			"HocSinh.HocSinhID": {
+				immediate: true,
+				async handler(hocSinhID) {
+					if (!hocSinhID) return;
+					this.loadData();
+				},
+			},
 		},
 		methods: {
 			async loadData() {
 				this.IsLoading = true;
+				this.expandedGroups.clear();
 				try {
 					const res = await ajaxCALLPromise('lms/EL_Student_Get_HoatDong_ByHocSinhID', {
-						HocSinhID: vueData.user.UserID,
+						HocSinhID: this.hocSinhID,
 						NienKhoa: this.NienKhoa,
 					});
-					this.DSHoatDong_Data = res;
-					this.DSHoatDong = res.filter(item => this.ChipSelected === 'ALL' || item.FeedType === this.ChipSelected) || [];
+					this.DSHoatDong_Data = res.map(item => ({
+						...item,
+						_groupKey: item.ResourceType === 'ASSIGNMENT'
+							? `assign_${item.AssignID}`
+							: `single_${item.FeedType}_${item.ObjectID}`,
+						_isGroup: item.ResourceType === 'ASSIGNMENT',
+						_items: item.DSBaiLam
+							? (() => { try { return JSON.parse(item.DSBaiLam); } catch { return []; } })()
+							: [],
+					}));
+					this.DSHoatDong = this.DSHoatDong_Data.filter(
+						item => this.ChipSelected === 'ALL' || item.FeedType === this.ChipSelected
+					);
 					this.page = 1;
 				} finally {
 					this.IsLoading = false;
@@ -203,21 +316,28 @@
 			onClickChipFilter(id) {
 				this.ChipSelected = id;
 				this.DSHoatDong = this.DSHoatDong_Data.filter(item => id === 'ALL' || item.FeedType === id) || [];
+				this.expandedGroups.clear();
 				this.page = 1;
 			},
 	
-			// ─── Xem điểm → mở summary modal ───
+			toggleGroup(key) {
+				if (this.expandedGroups.has(key)) {
+					this.expandedGroups.delete(key);
+				} else {
+					this.expandedGroups.add(key);
+				}
+				this.$forceUpdate();
+			},
+	
 			async onXemDiem(hd) {
-				console.log("hd", hd)
 				this.summaryModal.visible = true;
 				this.summaryModal.loading = true;
 				this.summaryModal.data = null;
-	
 				try {
 					const res = await ajaxCALLPromise('lms/EL_Student_GetSubmissionSummary', {
-						SubmissionID: hd.ObjectID
+						SubmissionID: hd.ObjectID,
+						HocSinhID: this.HocSinh.HocSinhID
 					});
-					// API trả về: [ [overviewItem], [detail1, detail2, ...] ]
 					this.summaryModal.data = {
 						overview: res[0]?.[0] ?? null,
 						details: res[1] ?? [],
@@ -230,21 +350,19 @@
 				}
 			},
 	
-			// ─── Navigate to chi tiết từ summary modal ───
 			onNavigateToDetails(assignToClassID) {
 				this.summaryModal.visible = false;
 				this.$refs.iframeWindow.openWindow({
 					title: 'Chi tiết bài làm',
-					url: `/lms-student-assignment?AssignToClassID=${assignToClassID}&tab=detail`,
+					url: `/lms-student-assignment?AssignToClassID=${assignToClassID}&tab=detail&HocSinhID=${this.HocSinh?.HocSinhID}`,
 				});
 			},
 	
 			onXemChiTiet(hd) {
 				let url = `/lms-student-assignment?LanNop=${hd.LanNop}&Is_SendToClass=${hd.Is_SendToClass}`;
 				url += hd.Is_SendToClass
-					? `&AssignToClassID=${hd.AssignID}`
-					: `&AssignToStudentID=${hd.AssignID}`;
-	
+					? `&AssignToClassID=${hd.AssignID}&HocSinhID=${this.HocSinh?.HocSinhID}`
+					: `&AssignToStudentID=${hd.AssignID}&HocSinhID=${this.HocSinh?.HocSinhID}`;
 				this.$refs.iframeWindow.openWindow({
 					title: 'Chi tiết - ' + hd.Title,
 					url,
@@ -255,17 +373,14 @@
 				this.leaderboardModal.visible = true;
 				this.leaderboardModal.loading = true;
 				this.leaderboardModal.data = null;
-				this.leaderboardModal.AssignToClassID = hd.AssignToClassID;
 				try {
 					const res = await ajaxCALLPromise('lms/EL_Student_GetScoreClasss_ByAssignToClassID', {
 						AssignToClassID: hd.AssignID,
 					});
-					this.leaderboardModal.visible = true;
-	
 					this.leaderboardModal.data = {
-						overview: res[0]?.[0], // { AssignToClassID, TenMonHoc_HienThi, Title, DueDate }
-						students: res[1] ?? [], // [{ HocSinhID, HoTen, Score, SubmissionTime_HienThi, HoTenGV }]
-					}
+						overview: res[0]?.[0],
+						students: res[1] ?? [],
+					};
 				} catch (e) {
 					this.leaderboardModal.visible = false;
 					Vue.$toast?.error('Không thể tải kết quả bài làm. Vui lòng thử lại.');
@@ -274,11 +389,39 @@
 				}
 			},
 	
+			onLamLai(hd) {
+				if (!hd.AssignID) return Vue.$toast?.error('Không tìm thấy thông tin bài tập.');
+				const url = hd.Is_SendToClass
+					? `/lms-student-assignment?AssignToClassID=${hd.AssignID}&Is_Resubmit=1&HocSinhID=${this.HocSinh.HocSinhID}`
+					: `/lms-student-assignment?AssignToStudentID=${hd.AssignID}&Is_Resubmit=1&HocSinhID=${this.HocSinh.HocSinhID}`;
+	
+				const $this = this
+				this.$refs.iframeWindow.openWindow({
+					title: 'Làm lại - ' + hd.Title,
+					url,
+					onclose: () => {
+						$this.loadData();
+					},
+				});
+			},
+			onTiepTucLam(hd) {
+				// Không truyền Is_Resubmit — vào thẳng submission đang dở
+				const url = hd.Is_SendToClass
+					? `/lms-student-assignment?AssignToClassID=${hd.AssignID}&LanNop=${hd.LanNop}&HocSinhID=${this.HocSinh?.HocSinhID}`
+					: `/lms-student-assignment?AssignToStudentID=${hd.AssignID}&LanNop=${hd.LanNop}&HocSinhID=${this.HocSinh?.HocSinhID}`;
+				const $this = this
+				this.$refs.iframeWindow.openWindow({
+					title: 'Tiếp tục - ' + hd.Title,
+					url,
+					onclose: () => { $this.loadData(); },
+				});
+			},
 			getFeedColor(type) {
 				return {
 					GRADED: '#673AB7',
 					SUBMITTED: '#558B2F',
 					SAVE_DRAFT: '#607D8B',
+					IN_PROGRESS: '#FF5722',
 					LESSON_COMPLETED: '#2196F3',
 					ACHIEVEMENT: '#FF9800',
 				}[type] || '#4CAF50';
@@ -289,6 +432,7 @@
 					GRADED: 'mdi-check-decagram',
 					SUBMITTED: 'mdi-upload',
 					SAVE_DRAFT: 'mdi-file-document-edit',
+					IN_PROGRESS: 'mdi-pencil-outline',
 					LESSON_COMPLETED: 'mdi-book-check',
 					ACHIEVEMENT: 'mdi-trophy-award',
 				}[type] || 'mdi-circle-small';
@@ -299,6 +443,7 @@
 					GRADED: 'Đã chấm điểm',
 					SUBMITTED: 'Đã nộp bài',
 					SAVE_DRAFT: 'Lưu bản nháp',
+					IN_PROGRESS: 'Đang làm',
 					LESSON_COMPLETED: 'Hoàn thành bài học',
 					ACHIEVEMENT: 'Thành tích',
 				}[type] || type;

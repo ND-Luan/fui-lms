@@ -112,189 +112,202 @@
 
 <script>
 	export default {
-    props: {
-      HocSinh: Object,
-      inline: { type: Boolean, default: false }
-    },
-    data() {
-      return {
-        loading: false,
-        DSLopHoc: [],
-        ThoiKhoaBieu: { ThoiGian: null, DSTKB: [] },
-        cellMap: {},
-        weekOffset: 0,
-        buoiList: [
-          { value: 1, label: 'Sáng' },
-          { value: 2, label: 'Chiều' }
-        ],
-        days: [
-          { thu: 2, label: 'Thứ 2' },
-          { thu: 3, label: 'Thứ 3' },
-          { thu: 4, label: 'Thứ 4' },
-          { thu: 5, label: 'Thứ 5' },
-          { thu: 6, label: 'Thứ 6' },
-          { thu: 7, label: 'Thứ 7' },
-          { thu: 8, label: 'CN' }
-        ],
-        maxTietSang: 0,
-        maxTietChieu: 0,
-      }
-    },
-    computed: {
-      maxTiet() {
-        return this.maxTietSang + this.maxTietChieu
-      },
-      isCurrentWeek() {
-        return this.weekOffset === 0
-      },
-      weekLabel() {
-        if (this.weekOffset === 0) return 'Tuần này'
-        if (this.weekOffset === -1) return 'Tuần trước'
-        if (this.weekOffset === 1) return 'Tuần sau'
-        const monday = this.getMondayOfWeek(this.weekOffset)
-        const sunday = new Date(monday)
-        sunday.setDate(monday.getDate() + 6)
-        return `${this.formatDateShort(monday)} - ${this.formatDateShort(sunday)}`
-      },
-    },
-    mounted() {
-      this.rebuildDays()
-      if (this.HocSinh) this.getLop()
-    },
-    watch: {
-      HocSinh(val) {
-        if (!val) return
-        this.getLop()
-      }
-    },
-    methods: {
-      rebuildDays() {
-        const baseDays = [
-          { thu: 2, label: 'Thứ 2' },
-          { thu: 3, label: 'Thứ 3' },
-          { thu: 4, label: 'Thứ 4' },
-          { thu: 5, label: 'Thứ 5' },
-          { thu: 6, label: 'Thứ 6' },
-          { thu: 7, label: 'Thứ 7' },
-          { thu: 8, label: 'CN' }
-        ]
-        const monday = this.getMondayOfWeek(this.weekOffset)
-        this.days = baseDays.map((d, i) => {
-          const date = new Date(monday)
-          date.setDate(monday.getDate() + i)
-          return { ...d, date: this.formatDateShort(date) }
-        })
-      },
-
-      changeWeek(delta) {
-        this.weekOffset += delta
-        this.rebuildDays()
-        if (this.HocSinh) this.getAllTKB()
-      },
-
-      goToCurrentWeek() {
-        if (this.isCurrentWeek) return
-        this.weekOffset = 0
-        this.rebuildDays()
-        if (this.HocSinh) this.getAllTKB()
-      },
-
-      async getLop() {
-        this.DSLopHoc = await ajaxCALLPromise("quansinh/TKB_LopHocSelectByHocSinh", { HocSinhID: this.HocSinh.HocSinhID })
-        await this.getAllTKB()
-      },
-
-      async getAllTKB() {
-        if (!this.DSLopHoc.length) return
-        this.loading = true
-        try {
-          const monday = this.formatDate(this.getMondayOfWeek(this.weekOffset))
-          const results = await Promise.all(
-            this.DSLopHoc.map(lh =>
-              ajaxCALLPromise("quansinh/TKB_Lop_HocSinh", { LopHocID: lh.LopHocID, NgayDauTuan: monday })
-                .then(tkb => ({ lh, tkb }))
-            )
-          )
-
-          this.ThoiKhoaBieu.ThoiGian = results[0]?.tkb[0][0] ?? {}
-
-          const map = {}
-          let maxSang = 0
-          let maxChieu = 0
-
-          for (const { lh, tkb } of results) {
-            const rows = tkb[2].map(x => ({ ...x, jsonTiet: JSON.parse(x.jsonTiet) }))
-            for (const row of rows) {
-              const { Thu, Buoi } = row
-              if (!map[Thu]) map[Thu] = {}
-              if (!map[Thu][Buoi]) map[Thu][Buoi] = {}
-              for (const tiet of row.jsonTiet) {
-                map[Thu][Buoi][tiet.Tiet] = {
-                  TenMon: tiet.TenMon,
-                  GiaoVien: tiet.GiaoVien,
-                  TenLop: lh.TenLop ?? null
-                }
-                if (Buoi === 1 && tiet.Tiet > maxSang) maxSang = tiet.Tiet
-                if (Buoi === 2 && tiet.Tiet > maxChieu) maxChieu = tiet.Tiet
-              }
-            }
-          }
-
-          this.cellMap = map
-          this.maxTietSang = maxSang
-          this.maxTietChieu = maxChieu
-        } finally {
-          this.loading = false
-        }
-      },
-
-      getTietOfBuoi(buoi) {
-        const max = buoi === 1 ? this.maxTietSang : this.maxTietChieu
-        return Array.from({ length: max }, (_, i) => i + 1)
-      },
-
-      isOtherClass(tenLop) {
-        if (!tenLop) return false
-        return tenLop !== this.HocSinh?.TenLop
-      },
-
-      getCell(thu, buoi, tiet) {
-        return this.cellMap[thu]?.[buoi]?.[tiet] ?? null
-      },
-
-      getMondayOfWeek(offset = 0) {
-        const today = new Date()
-        const day = today.getDay()
-        const diff = day === 0 ? -6 : 1 - day
-        const monday = new Date(today)
-        monday.setDate(today.getDate() + diff + offset * 7)
-        return monday
-      },
-
-      formatDate(date) {
-        const y = date.getFullYear()
-        const m = String(date.getMonth() + 1).padStart(2, '0')
-        const d = String(date.getDate()).padStart(2, '0')
-        return `${y}-${m}-${d}`
-      },
-
-      // Convert "09/03/2026" → "2026-03-09"
-      parseDateDMY(str) {
-        if (!str) return str
-        const [d, m, y] = str.split('/')
-        return `${y}-${m}-${d}`
-      },
-
-      formatDateShort(date) {
-        const m = String(date.getMonth() + 1).padStart(2, '0')
-        const d = String(date.getDate()).padStart(2, '0')
-        return `${d}/${m}`
-      },
-
-      getCurrentDay() {
-        const day = new Date().getDay()
-        return day === 0 ? 8 : day + 1
-      },
-    }
-  }
+		props: {
+			HocSinh: Object,
+			inline: { type: Boolean, default: false }
+		},
+		data() {
+			return {
+				loading: false,
+				DSLopHoc: [],
+				ThoiKhoaBieu: { ThoiGian: null, DSTKB: [] },
+				cellMap: {},
+				weekOffset: 0,
+				buoiList: [
+					{ value: 1, label: 'Sáng' },
+					{ value: 2, label: 'Chiều' }
+				],
+				days: [
+					{ thu: 2, label: 'Thứ 2' },
+					{ thu: 3, label: 'Thứ 3' },
+					{ thu: 4, label: 'Thứ 4' },
+					{ thu: 5, label: 'Thứ 5' },
+					{ thu: 6, label: 'Thứ 6' },
+					{ thu: 7, label: 'Thứ 7' },
+					{ thu: 8, label: 'CN' }
+				],
+				maxTietSang: 0,
+				maxTietChieu: 0,
+			}
+		},
+		computed: {
+			maxTiet() {
+				return this.maxTietSang + this.maxTietChieu
+			},
+			isCurrentWeek() {
+				return this.weekOffset === 0
+			},
+			weekLabel() {
+				if (this.weekOffset === 0) return 'Tuần này'
+				if (this.weekOffset === -1) return 'Tuần trước'
+				if (this.weekOffset === 1) return 'Tuần sau'
+				const monday = this.getMondayOfWeek(this.weekOffset)
+				const sunday = new Date(monday)
+				sunday.setDate(monday.getDate() + 6)
+				return `${this.formatDateShort(monday)} - ${this.formatDateShort(sunday)}`
+			},
+		},
+		mounted() {
+			this.rebuildDays()
+			if (this.HocSinh) this.getLop()
+		},
+		watch: {
+			HocSinh(val) {
+				if (!val) return
+				this.getLop()
+			}
+		},
+		methods: {
+			rebuildDays() {
+				const baseDays = [
+					{ thu: 2, label: 'Thứ 2' },
+					{ thu: 3, label: 'Thứ 3' },
+					{ thu: 4, label: 'Thứ 4' },
+					{ thu: 5, label: 'Thứ 5' },
+					{ thu: 6, label: 'Thứ 6' },
+					{ thu: 7, label: 'Thứ 7' },
+					{ thu: 8, label: 'CN' }
+				]
+				const monday = this.getMondayOfWeek(this.weekOffset)
+				this.days = baseDays.map((d, i) => {
+					const date = new Date(monday)
+					date.setDate(monday.getDate() + i)
+					return { ...d, date: this.formatDateShort(date) }
+				})
+			},
+	
+			changeWeek(delta) {
+				this.weekOffset += delta
+				this.rebuildDays()
+				if (this.HocSinh) this.getAllTKB()
+			},
+	
+			goToCurrentWeek() {
+				if (this.isCurrentWeek) return
+				this.weekOffset = 0
+				this.rebuildDays()
+				if (this.HocSinh) this.getAllTKB()
+			},
+	
+			async getLop() {
+				this.DSLopHoc = await ajaxCALLPromise("quansinh/TKB_LopHocSelectByHocSinh", { HocSinhID: this.HocSinh.HocSinhID })
+				await this.getAllTKB()
+			},
+	
+			async getAllTKB() {
+				if (!this.DSLopHoc.length) return
+				this.loading = true
+				try {
+					const monday = this.formatDate(this.getMondayOfWeek(this.weekOffset))
+					const results = await Promise.all(
+						this.DSLopHoc.map(lh =>
+							ajaxCALLPromise("quansinh/TKB_Lop_HocSinh", { LopHocID: lh.LopHocID, NgayDauTuan: monday })
+								.then(tkb => ({ lh, tkb }))
+						)
+					)
+	
+					this.ThoiKhoaBieu.ThoiGian = results[0]?.tkb[0][0] ?? {}
+	
+					const map = {}
+					let maxSang = 0
+					let maxChieu = 0
+	
+					for (const { lh, tkb } of results) {
+						const rows = tkb[2].map(x => ({ ...x, jsonTiet: JSON.parse(x.jsonTiet) }))
+						for (const row of rows) {
+							const { Thu, Buoi } = row
+							if (!map[Thu]) map[Thu] = {}
+							if (!map[Thu][Buoi]) map[Thu][Buoi] = {}
+							for (const tiet of row.jsonTiet) {
+								map[Thu][Buoi][tiet.Tiet] = {
+									TenMon: tiet.TenMon,
+									GiaoVien: tiet.GiaoVien,
+									TenLop: lh.TenLop ?? null
+								}
+								if (Buoi === 1 && tiet.Tiet > maxSang) maxSang = tiet.Tiet
+								if (Buoi === 2 && tiet.Tiet > maxChieu) maxChieu = tiet.Tiet
+							}
+						}
+					}
+	
+					this.cellMap = map
+					this.maxTietSang = maxSang
+					this.maxTietChieu = maxChieu
+					this.insScreenSchedule() // ← gọi sau khi có ThoiGian
+				} finally {
+					this.loading = false
+				}
+			},
+	
+			getTietOfBuoi(buoi) {
+				const max = buoi === 1 ? this.maxTietSang : this.maxTietChieu
+				return Array.from({ length: max }, (_, i) => i + 1)
+			},
+	
+			isOtherClass(tenLop) {
+				if (!tenLop) return false
+				return tenLop !== this.HocSinh?.TenLop
+			},
+	
+			getCell(thu, buoi, tiet) {
+				return this.cellMap[thu]?.[buoi]?.[tiet] ?? null
+			},
+	
+			getMondayOfWeek(offset = 0) {
+				const today = new Date()
+				const day = today.getDay()
+				const diff = day === 0 ? -6 : 1 - day
+				const monday = new Date(today)
+				monday.setDate(today.getDate() + diff + offset * 7)
+				return monday
+			},
+	
+			formatDate(date) {
+				const y = date.getFullYear()
+				const m = String(date.getMonth() + 1).padStart(2, '0')
+				const d = String(date.getDate()).padStart(2, '0')
+				return `${y}-${m}-${d}`
+			},
+	
+			// Convert "09/03/2026" → "2026-03-09"
+			parseDateDMY(str) {
+				if (!str) return str
+				const [d, m, y] = str.split('/')
+				return `${y}-${m}-${d}`
+			},
+	
+			formatDateShort(date) {
+				const m = String(date.getMonth() + 1).padStart(2, '0')
+				const d = String(date.getDate()).padStart(2, '0')
+				return `${d}/${m}`
+			},
+	
+			getCurrentDay() {
+				const day = new Date().getDay()
+				return day === 0 ? 8 : day + 1
+			},
+	
+			insScreenSchedule() {
+				const ThoiGian = this.ThoiKhoaBieu.ThoiGian
+				if (!ThoiGian) return
+	
+				fetchPromise("lms/LMS_Screen_Schedule_View", {
+					NgayBatDau: this.parseDateDMY(ThoiGian?.TuNgay) ?? null,
+					NgayKetThuc: this.parseDateDMY(ThoiGian?.DenNgay) ?? null,
+					Date: new Date().toISOString().slice(0, 10), // ngày hôm nay
+					TypeScreen: 1, // Desktop
+				}, { silent: true, forceRefresh: true })
+			},
+		}
+	}
 </script>

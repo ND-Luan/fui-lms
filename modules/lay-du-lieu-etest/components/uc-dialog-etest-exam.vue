@@ -106,9 +106,14 @@
 
 				<!-- Actions -->
 				<v-card-actions class="pa-3">
-					<div v-if="students" class="text-caption text-medium-emphasis">
-						<v-icon size="14" class="mr-1">mdi-information-outline</v-icon>
-						Chỉ những kĩ năng đã chọn cột mới được điền vào bảng điểm
+					<div v-if="students" class="d-flex align-center ga-3">
+						<div class="text-caption text-medium-emphasis">
+							<v-icon size="14" class="mr-1">mdi-information-outline</v-icon>
+							Chỉ những kĩ năng đã chọn cột mới được điền vào bảng điểm
+						</div>
+						<!-- ✅ Thêm checkbox -->
+						<v-checkbox v-model="convertIelts" label="Convert sang điểm IELTS" density="compact"
+							hide-details color="primary" />
 					</div>
 					<v-spacer />
 					<v-btn variant="text" @click="isActive.value = false">Đóng</v-btn>
@@ -145,6 +150,7 @@
 				students: null,
 				skillKeys: [],
 				mapping: {},
+				convertIelts: true,
 			}
 		},
 	
@@ -251,6 +257,7 @@
 					students: this.students,
 					mapping: activeMapping,
 					lopID,
+					convertIelts: this.convertIelts, // ✅
 				})
 	
 				isActive.value = false

@@ -43,11 +43,14 @@ function processInitialData(apiResponse) {
 }
 function updateProgress(payload) {
     if (!vueData.lesson) return;
+    if(!vueData.HocSinhID){
+        Vue.$toast.error('Không tìm thấy HocSinhID! EL_Student_UpdateProgress',{position: 'top'})
+    }
     const dataToSend = {
-        HocSinhID: vueData.user.UserID,
+        HocSinhID: vueData.HocSinhID,
         LessonID: vueData.lesson.LessonID,
         IsCompleted: payload.isCompleted,
-        TimeSpentSeconds: payload.timeSpent
+        TimeSpentSeconds: payload.timeSpent,
     };
     console.log('dataSend', dataToSend)
     console.log('call api....')
