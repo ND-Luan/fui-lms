@@ -25,7 +25,7 @@
 				hệ thống giúp giáo viên tiết kiệm thời gian, tập trung vào việc giảng dạy chất lượng hơn.
 			</div>
 		</div>
-		<div class="text-h6 mt-2">
+		<div class="text-h6">
 			🔧 Tính năng chính
 		</div>
 		<div>

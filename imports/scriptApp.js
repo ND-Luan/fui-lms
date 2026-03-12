@@ -740,11 +740,6 @@ $('document').ready(() => {
             fallback: 'en',
             messages
         },
-        // date: {
-        //     locale: {
-        //         en: 'en-GB',
-        //     },
-        // },
         defaults: {
             global: {
                 // transition: 'no',
