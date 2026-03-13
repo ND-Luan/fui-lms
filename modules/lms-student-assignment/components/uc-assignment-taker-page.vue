@@ -71,6 +71,10 @@ export default {
 
     data() {
         const urlParams = new URLSearchParams(window.location.search);
+
+        // Parse boolean ngay từ đầu, tránh so sánh string rải rác trong code
+        const isSendToClass = urlParams.get('Is_SendToClass') !== 'false';
+
         return {
             urlParams,
             SUBMISSION_STATUS: { DRAFT: 1, SUBMITTED: 2, IN_REVIEW: 3, GRADED: 4 },
@@ -83,7 +87,10 @@ export default {
                 MATCHING: 'QUIZ_MATCHING'
             },
             HocSinhID: parseInt(urlParams.get('HocSinhID') || '0'),
-            Is_SendToClass: urlParams.get('Is_SendToClass') ?? 'true',
+
+            // Boolean thay vì string — dùng trực tiếp trong toàn bộ code
+            isSendToClass,
+
             dataReady: false,
             assignmentData: [],
             monHocName: '',
@@ -100,6 +107,9 @@ export default {
             HocSinhDetail: null,
             DSNienKhoa: [],
             AssignmentConfigAfterShuffle: null,
+
+            // Guard flag — chặn loadAssignmentData chạy đồng thời
+            _isLoadingAssignment: false,
         };
     },
 
@@ -175,36 +185,47 @@ export default {
         // ===========================
 
         async loadAssignmentData(AssignToClassID, AssignToStudentID) {
-            const isSendToStudent = this.Is_SendToClass === 'false';
-
-            if (!isSendToStudent && !AssignToClassID) {
-                Vue.$toast.error('Không tìm thấy AssignToClassID bài tập trên URL.', { position: 'top' });
-                this.dataReady = true;
-                return;
-            }
-            if (isSendToStudent && !AssignToStudentID) {
-                Vue.$toast.error('Không tìm thấy AssignToStudentID bài tập trên URL.', { position: 'top' });
-                this.dataReady = true;
-                return;
-            }
-
-            const endpoint = isSendToStudent
-                ? 'lms/EL_Student_GetAssignmentDetail_AssignToStudent'
-                : 'lms/EL_Student_GetAssignmentDetail';
-
-            const params = {
-                [isSendToStudent ? 'AssignToStudentID' : 'AssignToClassID']:
-                    parseInt(isSendToStudent ? AssignToStudentID : AssignToClassID),
-                HocSinhID: this.HocSinhDetail.HocSinhID,
-                LanNop: this.LanNop ?? 1,
-            };
+            // Guard: chặn gọi đồng thời, tránh race condition
+            if (this._isLoadingAssignment) return;
+            this._isLoadingAssignment = true;
 
             try {
+                const isSendToStudent = !this.isSendToClass;
+
+                if (!isSendToStudent && !AssignToClassID) {
+                    Vue.$toast.error('Không tìm thấy AssignToClassID bài tập trên URL.', { position: 'top' });
+                    return;
+                }
+                if (isSendToStudent && !AssignToStudentID) {
+                    Vue.$toast.error('Không tìm thấy AssignToStudentID bài tập trên URL.', { position: 'top' });
+                    return;
+                }
+
+                const endpoint = isSendToStudent
+                    ? 'lms/EL_Student_GetAssignmentDetail_AssignToStudent'
+                    : 'lms/EL_Student_GetAssignmentDetail';
+
+                // Tách rõ 2 case thay vì dùng computed key — tránh null khi key sai
+                const params = isSendToStudent
+                    ? {
+                        AssignToStudentID: parseInt(AssignToStudentID),
+                        HocSinhID: this.HocSinhDetail.HocSinhID,
+                        LanNop: this.LanNop ?? 1,
+                    }
+                    : {
+                        AssignToClassID: parseInt(AssignToClassID),
+                        HocSinhID: this.HocSinhDetail.HocSinhID,
+                        LanNop: this.LanNop ?? 1,
+                    };
+
                 const data = await fetchPromise(endpoint, params, { cache: false });
                 await this.processAssignmentResponse({ data });
                 this.keyComp++;
             } catch (err) {
                 console.error('Lỗi loadAssignmentData:', err);
+            } finally {
+                // Luôn release guard dù thành công hay lỗi
+                this._isLoadingAssignment = false;
             }
         },
 
@@ -257,7 +278,7 @@ export default {
         },
 
         hasSubmission() {
-            return this.Is_SendToClass === 'false'
+            return !this.isSendToClass
                 ? this.submitionInfo?.SubmissionID
                 : this.submitionInfo?.SubmissionContent;
         },
@@ -374,7 +395,7 @@ export default {
         async saveDraft(payload) {
             if (this.Is_Resubmit === 1) return null;
 
-            const isSendToStudent = this.Is_SendToClass === 'false';
+            const isSendToStudent = !this.isSendToClass;
             const endpoint = isSendToStudent
                 ? 'lms/EL_Student_SaveSubmission_AssignToStudent'
                 : 'lms/EL_Student_SaveSubmission';
@@ -401,7 +422,10 @@ export default {
             this.assignmentData = response.data;
             this.loadSubmittedAnswers(response);
             if (response.data[0][0].Is_Shuffle !== 1) {
+                // saveAssignmentConfig không tự gọi initPage nữa
+                // initPage gọi tập trung tại đây sau khi save config xong
                 await this.saveAssignmentConfig(response.data[1][0]?.SubmissionID);
+                this.initPage();
             }
         },
 
@@ -415,11 +439,11 @@ export default {
                 },
                 { cache: false }
             );
-            this.initPage();
+            // Không gọi initPage() ở đây — caller tự quyết định
         },
 
         async submitAssignment(payload) {
-            const isSendToStudent = this.Is_SendToClass === 'false';
+            const isSendToStudent = !this.isSendToClass;
             const endpoint = isSendToStudent
                 ? 'lms/EL_Student_SaveSubmission_AssignToStudent'
                 : 'lms/EL_Student_SaveSubmission';
@@ -442,7 +466,6 @@ export default {
                 Vue.$toast.success('Nộp bài thành công!', { position: 'top' });
                 this.initPage();
             } catch (err) {
-                // errorMiddleware đã hiện dialog, chỉ cần toast thêm nếu muốn
                 Vue.$toast.error('Có lỗi xảy ra khi nộp bài. Vui lòng thử lại.', { position: 'top' });
             }
         },
@@ -467,7 +490,8 @@ export default {
         // ===========================
 
         async insertSubmissionForResubmit() {
-            if (this.Is_SendToClass === 'false') return;
+            // isSendToClass là boolean — không cần so sánh string
+            if (!this.isSendToClass) return;
 
             const payload = {
                 AssignToClassID: this.assignmentData[0][0].AssignToClassID,

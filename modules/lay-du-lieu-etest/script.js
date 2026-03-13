@@ -9,10 +9,10 @@ const GRADE_CONFIG = {
     FREEZE_COLS: 5,
     IELTS_SKILLS: ['Listening', 'Reading', 'Writing', 'Speaking'],
     SEMESTER_OPTIONS: [
-        // { key: 'S1_Mid', label: 'HK1 - Giữa kì' },
-        // { key: 'S1_Final', label: 'HK1 - Cuối kì' },
-        { key: 'S2_Mid', label: 'HK2 - Giữa kì' },
-        // { key: 'S2_Final', label: 'HK2 - Cuối kì' },
+        // { key: 'S1_Mid', label: 'HK1 - Giữa kì', HocKi: 1 },
+        // { key: 'S1_Final', label: 'HK1 - Cuối kì', HocKi: 1 },
+        { key: 'S2_Mid', label: 'HK2 - Giữa kì', HocKi: 2 },
+        // { key: 'S2_Final', label: 'HK2 - Cuối kì', HocKi: 2 },
     ],
     SCORE_TYPES_CAP2: [
         { key: 'HK', label: 'Điểm HK' },

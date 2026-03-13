@@ -1,70 +1,73 @@
 <template>
-	<span>
-		<slot :activatorProps="activatorProps" />
+	<v-dialog max-width="960px" scrollable persistent @update:model-value="onDialogToggle">
 
-		<v-dialog v-model="isOpen" max-width="900px" scrollable persistent>
+		<template #activator="{ props: activatorProps }">
+			<slot :activator-props="activatorProps" />
+		</template>
+
+		<template #default="{ isActive }">
 			<v-card>
-				<v-toolbar density="compact" color="primary" flat>
-					<v-toolbar-title>Quản lí kì thi</v-toolbar-title>
+				<v-card-title class="d-flex align-center ga-2 pa-4 bg-primary">
+					<v-icon color="white">mdi-clipboard-list-outline</v-icon>
+					<span class="text-white text-subtitle-1 font-weight-bold">Quản lí kì thi</span>
 					<v-spacer />
-					<v-btn icon="mdi-close" variant="text" color="white" @click="close" />
-				</v-toolbar>
+					<v-btn icon="mdi-close" variant="text" color="white" size="small" @click="isActive.value = false" />
+				</v-card-title>
+
+				<v-divider />
 
 				<v-card-text class="pa-4">
 
-					<!-- ── STEP 1: Filter + Danh sách kì thi ── -->
-					<div v-if="step === 1">
-						<v-row dense class="mb-3">
-							<v-col cols="12" sm="6">
-								<v-text-field v-model="search" density="compact" variant="outlined" hide-details
-									placeholder="Tìm kì thi..." prepend-inner-icon="mdi-magnify" clearable />
-							</v-col>
-							<v-col cols="12" sm="6">
-								<!-- TODO: thêm filter khác nếu cần (môn, năm...) -->
-							</v-col>
-						</v-row>
+					<!-- ── Chọn kì thi + lớp ── -->
+					<v-row dense class="mb-4">
+						<v-col cols="12" sm="7">
+							<v-autocomplete v-model="selectedExam" :items="exams" :loading="loadingExams"
+								item-title="name" item-value="id" return-object label="Chọn kì thi"
+								placeholder="Tìm kì thi..." density="compact" variant="outlined" hide-details clearable
+								no-data-text="Không có dữ liệu" prepend-inner-icon="mdi-magnify"
+								@update:model-value="onExamChange" />
+						</v-col>
+						<v-col cols="12" sm="5">
+							<v-select v-model="selectedLopID" :items="lopOptions" item-title="label" item-value="key"
+								label="Chọn lớp" density="compact" variant="outlined" hide-details
+								:disabled="!selectedExam" @update:model-value="loadPreview" />
+						</v-col>
+					</v-row>
 
-						<v-data-table :headers="examHeaders" :items="filteredExams" :loading="loadingExams"
-							item-value="id" density="compact" hover no-data-text="Không có dữ liệu"
-							@click:row="(_, { item }) => selectExam(item)">
-							<template #item.actions="{ item }">
-								<v-btn size="small" variant="tonal" color="primary" @click.stop="selectExam(item)">
-									Chọn
-								</v-btn>
-							</template>
-						</v-data-table>
+					<!-- Preview -->
+					<div v-if="loadingPreview" class="d-flex justify-center py-6">
+						<v-progress-circular indeterminate color="primary" />
 					</div>
 
-					<!-- ── STEP 2: Chọn lớp + Preview điểm ── -->
-					<div v-if="step === 2">
-						<div class="d-flex align-center ga-2 mb-4">
-							<v-btn size="small" variant="text" prepend-icon="mdi-arrow-left" @click="step = 1">
-								Quay lại
-							</v-btn>
-							<span class="text-subtitle-2 text-medium-emphasis">
-								Kì thi đã chọn:
-							</span>
-							<v-chip color="primary" size="small">{{ selectedExam?.name }}</v-chip>
+					<template v-else-if="previewRows.length">
+						<div class="d-flex align-center ga-2 mb-2">
+							<v-chip size="small" color="primary" prepend-icon="mdi-account-group-outline">
+								{{ previewRows.length }} học sinh
+							</v-chip>
+							<v-chip v-for="s in skillSummary" :key="s.name" size="small" color="teal-darken-1">
+								{{ s.name }}: TB {{ s.avg }}
+							</v-chip>
 						</div>
+						<v-data-table :headers="previewHeaders" :items="previewRows" density="compact"
+							hide-default-footer :items-per-page="-1" fixed-header height="360" class="border rounded" />
+					</template>
 
-						<!-- Chọn lớp -->
-						<v-select v-model="selectedLopID" :items="lopOptions" item-title="label" item-value="key"
-							label="Chọn lớp để apply" density="compact" variant="outlined" hide-details class="mb-4"
-							style="max-width: 280px" @update:model-value="loadPreview" />
+					<!-- Chưa chọn kì thi -->
+					<div v-else-if="!selectedExam" class="text-center text-medium-emphasis py-10">
+						<v-icon size="48" color="grey-lighten-1">mdi-clipboard-search-outline</v-icon>
+						<div class="mt-2">Chọn kì thi và lớp để xem dữ liệu</div>
+					</div>
 
-						<!-- Preview -->
-						<div v-if="loadingPreview" class="d-flex justify-center py-6">
-							<v-progress-circular indeterminate color="primary" />
-						</div>
+					<!-- Đã chọn kì thi, chưa chọn lớp -->
+					<div v-else-if="selectedExam && !selectedLopID" class="text-center text-medium-emphasis py-10">
+						<v-icon size="48" color="grey-lighten-1">mdi-google-classroom</v-icon>
+						<div class="mt-2">Chọn lớp để xem dữ liệu điểm</div>
+					</div>
 
-						<v-data-table v-else-if="previewRows.length" :headers="previewHeaders" :items="previewRows"
-							density="compact" hide-default-footer :items-per-page="-1" class="border rounded">
-							<!-- TODO: custom cell render nếu cần highlight thay đổi -->
-						</v-data-table>
-
-						<div v-else-if="selectedLopID" class="text-center text-medium-emphasis py-6">
-							Không có dữ liệu điểm cho lớp này
-						</div>
+					<!-- Đã chọn đủ nhưng không có data -->
+					<div v-else class="text-center text-medium-emphasis py-10">
+						<v-icon size="48" color="grey-lighten-1">mdi-table-off</v-icon>
+						<div class="mt-2">Không có dữ liệu điểm cho lớp này</div>
 					</div>
 
 				</v-card-text>
@@ -72,158 +75,183 @@
 				<v-divider />
 				<v-card-actions class="pa-3">
 					<v-spacer />
-					<v-btn variant="text" @click="close">Đóng</v-btn>
-					<v-btn v-if="step === 2" color="primary" variant="flat" :disabled="!canApply" :loading="applying"
-						@click="doApply">
+					<v-btn variant="text" @click="isActive.value = false">Đóng</v-btn>
+					<v-btn color="primary" variant="flat" :disabled="!canApply" :loading="applying"
+						@click="doApply(isActive)">
 						<v-icon start size="16">mdi-check</v-icon>
 						Apply vào bảng điểm
 					</v-btn>
 				</v-card-actions>
 			</v-card>
-		</v-dialog>
-	</span>
+		</template>
+
+	</v-dialog>
 </template>
 
 <script>
-	export default {
-		name: 'UcDialogQuanLiKiThi',
-	
-		props: {
-			// Danh sách lớp đang load trong spreadsheet (từ wsMeta)
-			classes: { type: Array, default: () => [] },
-			nienKhoa: { type: Number, default: null },
+export default {
+	name: 'UcDialogQuanLiKiThi',
+
+	props: {
+		classes: { type: Array, default: () => [] },
+		nienKhoa: { type: Number, default: null },
+		hocKy: { type: Number, default: 2 },
+	},
+
+	emits: ['apply'],
+
+	data() {
+		return {
+			loadingExams: false,
+			exams: [],
+			selectedExam: null,
+
+			selectedLopID: null,
+			loadingPreview: false,
+			rawScoreData: [],
+			previewRows: [],
+			applying: false,
+		}
+	},
+
+	computed: {
+		lopOptions() {
+			return this.classes.map(cls => ({ key: cls.id, label: cls.name }))
 		},
-	
-		emits: ['apply'],
-	
-		data() {
-			return {
-				isOpen: false,
-				step: 1,
-	
-				// Step 1
-				search: '',
-				loadingExams: false,
-				exams: [],           // TODO: fill từ API
-				selectedExam: null,
-	
-				// Step 2
-				selectedLopID: null,
-				loadingPreview: false,
-				previewRows: [],     // TODO: fill từ API
-				applying: false,
-	
-				examHeaders: [
-					// TODO: điều chỉnh theo response API
-					{ title: 'Tên kì thi', key: 'name', sortable: true },
-					{ title: 'Ngày thi', key: 'date', sortable: true },
-					{ title: 'Môn', key: 'subject' },
-					{ title: '', key: 'actions', sortable: false, align: 'end' },
-				],
-	
-				previewHeaders: [
-					// TODO: điều chỉnh theo response API
-					{ title: 'Mã HS', key: 'hocSinhID' },
-					{ title: 'Họ và tên', key: 'hoTen' },
-					{ title: 'Điểm', key: 'diem' },
-				],
-			}
+
+		canApply() {
+			return !!this.selectedExam && !!this.selectedLopID && this.previewRows.length > 0
 		},
-	
-		computed: {
-			activatorProps() {
-				return { onClick: this.open }
-			},
-	
-			filteredExams() {
-				if (!this.search) return this.exams
-				const q = this.search.toLowerCase()
-				return this.exams.filter(e =>
-					Object.values(e).some(v => String(v).toLowerCase().includes(q))
-				)
-			},
-	
-			lopOptions() {
-				return this.classes.map(cls => ({ key: cls.id, label: cls.name }))
-			},
-	
-			canApply() {
-				return !!this.selectedExam && !!this.selectedLopID && this.previewRows.length > 0
-			},
+
+		previewHeaders() {
+			const base = [
+				{ title: 'Mã HS', key: 'hocSinhID', width: '110px' },
+				{ title: 'Họ và tên', key: 'hoTen', width: '180px' },
+			]
+			const skills = [...new Set((this.rawScoreData ?? []).map(r => r.TenKyNang))]
+			return [
+				...base,
+				...skills.map(s => ({ title: s, key: `skill_${s}`, align: 'center', width: '120px' })),
+			]
 		},
-	
-		methods: {
-			open() {
-				this.reset()
-				this.isOpen = true
-				this.fetchExams()
-			},
-	
-			close() {
-				this.isOpen = false
-			},
-	
-			reset() {
-				this.step = 1
-				this.search = ''
-				this.exams = []
+
+		skillSummary() {
+			const skills = [...new Set((this.rawScoreData ?? []).map(r => r.TenKyNang))]
+			return skills.map(s => {
+				const vals = this.previewRows
+					.map(r => r[`skill_${s}`])
+					.filter(v => v !== null && v !== undefined && !isNaN(Number(v)))
+					.map(Number)
+				const avg = vals.length
+					? (vals.reduce((a, b) => a + b, 0) / vals.length).toFixed(2)
+					: '—'
+				return { name: s, avg }
+			})
+		},
+	},
+
+	methods: {
+		onDialogToggle(val) {
+			if (val) {
 				this.selectedExam = null
 				this.selectedLopID = null
+				this.rawScoreData = []
 				this.previewRows = []
-			},
-	
-			async fetchExams() {
-				this.loadingExams = true
-				try {
-					// TODO: thay bằng API thực
-					// const data = await fetchPromise('endpoint/exam-list', { NienKhoa: this.nienKhoa })
-					// this.exams = data.map(x => ({ id: x.ExamID, name: x.TenKiThi, date: x.NgayThi, subject: x.TenMonHoc }))
-					this.exams = []
-				} finally {
-					this.loadingExams = false
-				}
-			},
-	
-			selectExam(exam) {
-				this.selectedExam = exam
-				this.selectedLopID = null
-				this.previewRows = []
-				this.step = 2
-			},
-	
-			async loadPreview() {
-				if (!this.selectedExam || !this.selectedLopID) return
-				this.loadingPreview = true
-				this.previewRows = []
-				try {
-					// TODO: thay bằng API thực
-					// const data = await fetchPromise('endpoint/exam-scores', {
-					//     ExamID: this.selectedExam.id,
-					//     LopID: this.selectedLopID,
-					// })
-					// this.previewRows = data.map(x => ({ hocSinhID: x.HocSinhID, hoTen: x.HoTen, diem: x.Diem }))
-					this.previewRows = []
-				} finally {
-					this.loadingPreview = false
-				}
-			},
-	
-			async doApply() {
-				if (!this.canApply) return
-				this.applying = true
-				try {
-					// Emit lên parent để xử lý giống onEtestApply
-					this.$emit('apply', {
-						exam: this.selectedExam,
-						lopID: this.selectedLopID,
-						rows: this.previewRows,
-						// TODO: bổ sung mapping nếu cần
-					})
-					this.close()
-				} finally {
-					this.applying = false
-				}
-			},
+				this.fetchExams()
+			}
 		},
-	}
+
+		async fetchExams() {
+			if (this.exams.length) return
+			this.loadingExams = true
+			try {
+				const data = await fetchPromise('/qlktt/LMS_DanhSachKyThi', {
+					NamHoc: this.nienKhoa ?? new Date().getFullYear(),
+					HocKy: this.hocKy,
+				})
+				this.exams = (data ?? []).map(x => ({
+					id: x.KyThiID,
+					name: x.TenKyThi,
+					namHoc: x.NamHoc,
+					hocKy: x.HocKy,
+				}))
+			} finally {
+				this.loadingExams = false
+			}
+		},
+
+		onExamChange() {
+			this.selectedLopID = null
+			this.rawScoreData = []
+			this.previewRows = []
+		},
+
+		async loadPreview() {
+			if (!this.selectedExam || !this.selectedLopID) return
+			this.loadingPreview = true
+			this.rawScoreData = []
+			this.previewRows = []
+			try {
+				const data = await fetchPromise('/qlktt/LMS_KhaiBaoCauHinhAnhVan', {
+					KyThiID: this.selectedExam.id,
+				})
+				this.rawScoreData = data ?? []
+				const filtered = this._filterByLop(this.rawScoreData, this.selectedLopID)
+				this.previewRows = this._buildPreviewRows(filtered)
+			} finally {
+				this.loadingPreview = false
+			}
+		},
+
+		_buildPreviewRows(data) {
+			const map = new Map()
+			for (const r of data) {
+				if (!map.has(r.HocSinhID)) {
+					map.set(r.HocSinhID, {
+						hocSinhID: r.HocSinhID,
+						hoTen: `${r.Ho} ${r.Ten}`.trim(),
+					})
+				}
+				map.get(r.HocSinhID)[`skill_${r.TenKyNang}`] = r.DiemTong
+			}
+			return [...map.values()]
+		},
+		_getKhoiFromLopID(lopID) {
+			const cls = this.classes.find(c => c.id === lopID)
+			if (!cls) return null
+			const match = String(cls.name).match(/^(\d+)/)
+			return match ? Number(match[1]) : null
+		},
+
+		_filterByLop(data, lopID) {
+			const cls = this.classes.find(c => c.id === lopID)
+			if (!cls) return data
+
+			const khoi = this._getKhoiFromLopID(lopID)
+			if (khoi === null) return data
+
+			if (khoi >= 6 && khoi <= 9) {
+				return data.filter(r => r.KhoiID === khoi)
+			} else {
+				// Khối 10-12: lọc theo Nhom === tên lớp
+				return data.filter(r => r.Nhom === cls.name)
+			}
+		},
+		async doApply(isActive) {
+			if (!this.canApply) return
+			this.applying = true
+			try {
+				this.$emit('apply', {
+					exam: this.selectedExam,
+					lopID: this.selectedLopID,
+					rows: this.previewRows,
+					rawRows: this.rawScoreData,
+				})
+				isActive.value = false
+			} finally {
+				this.applying = false
+			}
+		},
+	},
+}
 </script>
