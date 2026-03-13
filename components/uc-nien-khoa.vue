@@ -13,12 +13,12 @@
 					<span>Chọn niên khóa</span>
 				</v-tooltip>
 			</template>
-			<v-list>
+			<v-list  style="max-height: 300px">
 				<v-list-subheader>Niên khóa</v-list-subheader>
 				<v-list-item v-for="(item, index) in DSNienKhoa" :key="index" :value="index"
 					:class="vueData.NienKhoaItem.NienKhoaID === item.NienKhoaID ? 'bg-primary' : ''">
-					<v-list-item-title @click="selectedNienKhoa(item)"> {{ item.NienKhoa }} -
-						HK{{item.HocKi}}</v-list-item-title>
+					<v-list-item-title @click="selectedNienKhoa(item)">
+						 {{ formatNienKhoa(item.NienKhoa) }} - HK{{item.HocKi}}</v-list-item-title>
 				</v-list-item>
 			</v-list>
 		</v-menu>
@@ -127,6 +127,13 @@
 				vueData.NienKhoaItem = item
 				localStorage.setItem("NienKhoa", vueData.NienKhoa)
 				localStorage.setItem("HocKi", vueData.NienKhoaItem.HocKi)
+			},
+			formatNienKhoa(nienKhoa) {
+				if (!nienKhoa) return ''
+				const year = parseInt(nienKhoa)
+				const start = year.toString().slice(-2)        // "2025" → "25"
+				const end = (year + 1).toString().slice(-2)    // "2026" → "26"
+				return `${start}-${end}`                       // "25-26"
 			}
 		}
 	}

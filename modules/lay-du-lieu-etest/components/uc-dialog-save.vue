@@ -44,7 +44,8 @@
 
 				<v-card-text class="pa-0">
 					<v-data-table :headers="headers" :items="filteredRows" :items-per-page="-1" density="compact"
-						hide-default-footer>
+					:row-props="getRowProps"
+						hide-default-footer style="max-height: calc(100dvh - 261px)">
 
 						<!-- Lớp + Mã HS + Họ tên (merge) -->
 						<template #[`item.student`]="{ item }">
@@ -210,6 +211,9 @@
 			confirm(isActive) {
 				this.$emit('confirm', { close: () => { isActive.value = false } })
 			},
+			getRowProps({ item }) {
+    return item.isOverwrite ? { class: 'row-overwrite' } : {}
+},
 		},
 	}
 </script>

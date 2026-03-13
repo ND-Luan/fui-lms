@@ -293,7 +293,7 @@ $('document').ready(() => {
                     GradeAllAssignments: "Grade All Assignments",
                     FindStudent: "Find Student",
                     GradeAssignment: "Grade Assignment",
-                    Actions:"Actions",
+                    Actions: "Actions",
                     NoticeHighestScoreSubmission: "Note: The system records the submission with the highest score",
                     PleaseSelectClassSubjectAssignment: "Please select Class, Subject, and Assignment to view data.",
                     MaximumScore: "Maximum Score",
@@ -590,7 +590,7 @@ $('document').ready(() => {
                     GradeAllAssignments: "Chấm tất cả bài",
                     FindStudent: "Tìm học sinh",
                     GradeAssignment: "Chấm bài",
-                    Actions:"Thao tác",
+                    Actions: "Thao tác",
                     NoticeHighestScoreSubmission: "Chú ý: Hệ thống ghi nhận lần nộp bài được chấm điểm cao nhất",
                     PleaseSelectClassSubjectAssignment: "Vui lòng chọn Lớp, Môn và Bài tập để xem dữ liệu.",
                     MaximumScore: "Điểm tối đa",
@@ -712,17 +712,13 @@ $('document').ready(() => {
         }
     })
     app.use(i18n);
+    // ✅ Sửa thành
+    // const iframeRef = Vue.ref(null)
+    app.provide('iframeRef', { value: null })
+    app.provide('snackbarRef', { value: null })
+
+
     vueData.v_Set.themeStyle = {
-        // display: {
-        //     mobileBreakpoint: 'lg',
-        //     thresholds: {
-        //         xs: 0,
-        //         sm: 340,
-        //         md: 540,
-        //         lg: 800,
-        //         xl: 1280,
-        //     },
-        // },
         theme: {
             options: { customProperties: true },
             themes: {
@@ -730,7 +726,9 @@ $('document').ready(() => {
                     dark: false,
                     colors: {
                         primary: "#217D46",
-                        secondary: "#5BB377"
+                        secondary: "#5BB377",
+                        // background: "#961212",
+                        // surface: "#f2f2f2",
                     }
                 },
             },
@@ -742,7 +740,6 @@ $('document').ready(() => {
         },
         defaults: {
             global: {
-                // transition: 'no',
                 ripple: false,
                 flat: true
             },
@@ -767,7 +764,6 @@ $('document').ready(() => {
             },
             VSelect: {
                 density: "compact",
-                // clearable: true,
                 color: 'primary',
                 variant: "outlined",
                 hideDetails: "auto",
@@ -794,19 +790,17 @@ $('document').ready(() => {
                     style: "padding-inline-start: calc(8px + var(--indent-padding)) !important;"
                 },
                 VListItem: {
-                    style: "padding-inline: 8px"
+                    style: "padding-inline: 8px",
+                    density: "compact",
                 }
             },
             VTabs: {
                 color: 'primary',
-                elevated: 4,
                 sliderColor: 'primary',
                 density: 'compact',
             },
             VTab: {
                 color: 'primary',
-                elevated: 4,
-                sliderColor: 'primary',
                 density: 'compact',
             },
             VTabsWindowItem: {
@@ -824,7 +818,7 @@ $('document').ready(() => {
                 noDataText: "Chưa có dữ liệu",
                 itemsPerPageText: 'Dữ liệu trên mỗi trang',
                 pageText: "{0}-{1} trên {2}",
-                itemsPerPage: 15,
+                itemsPerPage: 10,
                 itemsPerPageOptions: [
                     { value: 10, title: '10' },
                     { value: 15, title: '15' },
@@ -847,7 +841,7 @@ $('document').ready(() => {
                 noDataText: "Chưa có dữ liệu",
                 itemsPerPageText: 'Dữ liệu trên mỗi trang',
                 pageText: "{0}-{1} trên {2}",
-                itemsPerPage: 15,
+                itemsPerPage: 10,
                 itemsPerPageOptions: [
                     { value: 10, title: '10' },
                     { value: 15, title: '15' },
@@ -872,11 +866,11 @@ $('document').ready(() => {
             },
             VCard: {
                 VCardTitle: {
-                    class: 'd-flex align-center ga-2 px-2 py-2 text-primary',
-                    style: "font-size: 1.1rem"
+                    class: 'd-flex align-center ga-2 px-2 py-1 text-primary',
+                    style: "font-size: 1rem"
                 },
                 VCardText: {
-                    style: "padding: 0 8px 8px"
+                    style: "padding: 0 8px 6px"
                 }
             },
             VDialog: {
@@ -885,23 +879,29 @@ $('document').ready(() => {
             VExpansionPanels: {
                 variant: 'accordion'
             },
-            VButton: {
+            VBtn: {              // ← sửa từ VButton
                 variant: "outlined",
-                color: "primary",
+                // color: "primary",
                 size: "small"
             },
             VChip: {
                 size: "small",
-                label: true
+                label: true,
+                density: "comfortable",
+            },
+            VAlert: {
+                density: "compact",
+                variant: "tonal",
+            },
+            VContainer: {
+                class: "pa-0 w-100",
+                style: "max-width: 100% !important;"
             },
             VRow: {
                 dense: true
             },
-            VAlert: {
-                density: "compact"
-            },
-            VContainer: {
-                class: "pa-0"
+            VAppBar: {
+                density:"compact"
             }
         }
     }

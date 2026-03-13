@@ -1,0 +1,4 @@
+.v-dialog--fullscreen .v-overlay__content {
+    max-width: 100% !important;
+    width: 100% !important;
+}

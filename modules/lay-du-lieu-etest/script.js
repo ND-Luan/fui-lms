@@ -48,6 +48,10 @@ const GRADE_CONFIG = {
         IELTS_CONFIG: 'lms/ThietLap_KiNang_IELTS_Get',
         SAVE_GRADES: 'lms/KQHT_MonHocLop_Ins',
     },
+    IELTS_NHOM_IDS: new Set([
+        'N251101', 'N251102',
+        'N251201', 'N251202', 'N251203', 'N251204', 'N251205', 'N251206',
+    ]),
     MON_HOC_ID: 76,
     DEFAULT_TEMPLATE_SCORE_ORDER: 14,
 }
@@ -331,6 +335,7 @@ function processApiRecords(records, colsMap, studentsMap, monHocLopIDRef, grades
                 kqhtID: record.KQHTID || null,
                 cotDiemID: record.CotDiemID ?? null,       // ✅ thêm
                 monHocLopID: record.MonHocLopID ?? null,   // ✅ thêm
+                value: record.KetQuaDanhGia_VI ?? null,  // ✅ thêm dòng này
             })
         }
     })
@@ -379,4 +384,172 @@ function calcOverallBand(listening, reading, writing, speaking) {
     if (dec < 0.25) return Math.floor(avg)
     else if (dec < 0.75) return Math.floor(avg) + 0.5
     else return Math.ceil(avg)
+}
+// ════════════════════════════════════════════════════════════════
+// PROPAGATE HELPERS
+// ════════════════════════════════════════════════════════════════
+/**
+ * ctx = { cls, students, scoreDescs, gradesMap, hasIelts, instances, wsMeta, FREEZE_COLS, changedCells }
+ * Trả về { changedCells patch, cellUpdates } để component merge vào
+ */
+function propagateSoCauDung(
+    { cls, students, scoreDescs, FREEZE_COLS },
+    idx, rowIndex, soCauDungDesc, soCauDungVal, ws
+) {
+    const diemThoDesc = scoreDescs.find(d => d._soCauDungKey === soCauDungDesc.key)
+    if (!diemThoDesc || !diemThoDesc._soCau) return {}
+    const diemThoIdx = scoreDescs.findIndex(d => d.key === diemThoDesc.key)
+    if (diemThoIdx === -1) return {}
+    const diemThoVal = (soCauDungVal !== null && soCauDungVal !== undefined)
+        ? parseFloat((soCauDungVal * 10 / diemThoDesc._soCau).toFixed(2))
+        : ''
+    const diemThoCi = FREEZE_COLS + diemThoIdx
+    const snapOld = (ci) => {
+        const raw = ws?.getValueFromCoords(ci, rowIndex)
+        return (raw === null || raw === undefined || raw === '' ||
+            (typeof raw === 'string' && raw.startsWith('=')))
+            ? null : (isNaN(Number(raw)) ? raw : Number(raw))
+    }
+    const student = students[rowIndex]
+    const makeEntry = (desc, value, oldValue) => ({
+        wsIdx: idx, nhomID: cls.id, tenNhom: cls.name,
+        monHocLopID: cls.monHocLopID,
+        hocSinhID: student.id, hoTen: student.hoTen,
+        maCotDiem: desc.key, tenCotDiem: desc.title,
+        cotDiemID: desc.cotDiemID ?? null,
+        value, oldValue, kqhtID: null,
+    })
+    const patch = {}
+    const cellUpdates = {}  // { ci: val } để caller _applyCell
+    const oldDiemTho = snapOld(diemThoCi)
+    cellUpdates[diemThoCi] = diemThoVal
+    patch[`${idx}_${rowIndex}_${diemThoCi}`] = makeEntry(diemThoDesc, diemThoVal, oldDiemTho)
+    // Conv
+    const expectedConvKey = diemThoDesc.key.replace('_Point', '_Conv')
+    const convDesc = scoreDescs.find(d => d.key === expectedConvKey)
+    if (convDesc?._formulaTemplate) {
+        const convIdx = scoreDescs.findIndex(d => d.key === convDesc.key)
+        const convCi = FREEZE_COLS + convIdx
+        const valueMap = {}
+        scoreDescs.forEach((sd, si) => {
+            if (!sd.key) return
+            const v = ws.options?.data?.[rowIndex]?.[FREEZE_COLS + si]
+            if (v !== null && v !== undefined && v !== '') valueMap[sd.key] = Number(v)
+        })
+        valueMap[diemThoDesc.key] = diemThoVal
+        const convVal = evaluateFormulaString(convDesc._formulaTemplate, valueMap)
+        if (convVal !== null && convVal !== undefined) {
+            const oldConv = snapOld(convCi)
+            cellUpdates[convCi] = convVal
+            patch[`${idx}_${rowIndex}_${convCi}`] = makeEntry(convDesc, convVal, oldConv)
+        }
+    }
+    return { patch, cellUpdates }
+}
+/**
+ * Tính Avg_Point, Avg_Conv, TA2_Point cho 1 row
+ * Trả về { patch, cellUpdates }
+ */
+function propagateAvgPoint(
+    { cls, students, scoreDescs, FREEZE_COLS },
+    idx, rowIndex, ws
+) {
+    const avgPointDesc = scoreDescs.find(d => d._isAvgPoint)
+    if (!avgPointDesc) return {}
+    const avgIdx = scoreDescs.findIndex(d => d.key === avgPointDesc.key)
+    const avgCi = FREEZE_COLS + avgIdx
+    const skillKeys = ['Listening', 'Reading', 'Writing', 'Speaking']
+    const vals = skillKeys.map(k => {
+        const desc = scoreDescs.find(sd => sd.key?.includes(`TA2_${k}_Point`) && sd._isDiemTho)
+        if (!desc) return null
+        const ci = FREEZE_COLS + scoreDescs.indexOf(desc)
+        const v = ws.options?.data?.[rowIndex]?.[ci]
+        return (v !== null && v !== undefined && v !== '') ? Number(v) : null
+    })
+    const valid = vals.filter(v => v !== null && !isNaN(v))
+    if (valid.length === 0) return {}
+    const avg = parseFloat((valid.reduce((a, b) => a + b, 0) / valid.length).toFixed(2))
+    const snapOld = (ci) => {
+        const raw = ws?.getValueFromCoords(ci, rowIndex)
+        return (raw === null || raw === undefined || raw === '' ||
+            (typeof raw === 'string' && raw.startsWith('=')))
+            ? null : (isNaN(Number(raw)) ? raw : Number(raw))
+    }
+    const student = students[rowIndex]
+    const makeEntry = (desc, value, oldValue) => ({
+        wsIdx: idx, nhomID: cls.id, tenNhom: cls.name,
+        monHocLopID: cls.monHocLopID,
+        hocSinhID: student.id, hoTen: student.hoTen,
+        maCotDiem: desc.key, tenCotDiem: desc.title,
+        cotDiemID: desc.cotDiemID ?? null,
+        value, oldValue, kqhtID: null,
+    })
+    const patch = {}
+    const cellUpdates = {}
+    patch[`${idx}_${rowIndex}_${avgCi}`] = makeEntry(avgPointDesc, avg, snapOld(avgCi))
+    cellUpdates[avgCi] = avg
+    const valueMap = {}
+    scoreDescs.forEach((sd, si) => {
+        if (!sd.key) return
+        const v = ws.options?.data?.[rowIndex]?.[FREEZE_COLS + si]
+        if (v !== null && v !== undefined && v !== '') valueMap[sd.key] = Number(v)
+    })
+    valueMap[avgPointDesc.key] = avg
+    // Avg_Conv
+    const avgConvKey = avgPointDesc.key.replace('_Avg_Point', '_Avg_Conv')
+    const avgConvDesc = scoreDescs.find(d => d.key === avgConvKey)
+    if (avgConvDesc?._formulaTemplate) {
+        const avgConvIdx = scoreDescs.findIndex(d => d.key === avgConvDesc.key)
+        const avgConvCi = FREEZE_COLS + avgConvIdx
+        const avgConvVal = evaluateFormulaString(avgConvDesc._formulaTemplate, valueMap)
+        if (avgConvVal !== null && avgConvVal !== undefined) {
+            cellUpdates[avgConvCi] = avgConvVal
+            valueMap[avgConvDesc.key] = avgConvVal
+            patch[`${idx}_${rowIndex}_${avgConvCi}`] = makeEntry(avgConvDesc, avgConvVal, snapOld(avgConvCi))
+        }
+    }
+    // TA2_Point
+    const ta2PointDesc = scoreDescs.find(d =>
+        d.key?.endsWith('_TA2_Point') && !d.key?.includes('_Avg_') && d._formulaTemplate
+    )
+    if (ta2PointDesc) {
+        const ta2PointIdx = scoreDescs.findIndex(d => d.key === ta2PointDesc.key)
+        const ta2PointCi = FREEZE_COLS + ta2PointIdx
+        const ta2Val = evaluateFormulaString(ta2PointDesc._formulaTemplate, valueMap)
+        if (ta2Val !== null && ta2Val !== undefined) {
+            cellUpdates[ta2PointCi] = ta2Val
+            patch[`${idx}_${rowIndex}_${ta2PointCi}`] = makeEntry(ta2PointDesc, ta2Val, snapOld(ta2PointCi))
+        }
+    }
+    return { patch, cellUpdates }
+}
+// ════════════════════════════════════════════════════════════════
+// SAVE HELPERS
+// ════════════════════════════════════════════════════════════════
+/**
+ * Filter + map changedCells → saveRows (bỏ SoCauDung, bỏ formula)
+ */
+function buildSaveRows(changedCells) {
+    const saveRows = []
+    for (const cellKey of Object.keys(changedCells)) {
+        const cell = changedCells[cellKey]
+        if (cell.maCotDiem?.includes('__SoCauDung')) continue
+        if (typeof cell.value === 'string' && cell.value.startsWith('=')) continue
+        if (typeof cell.oldValue === 'string' && cell.oldValue.startsWith('=')) continue
+        const [wsIdx, rowIndex, colIndex] = cellKey.split('_').map(Number)
+        saveRows.push({
+            tenNhom: cell.tenNhom, maSoHS: cell.hocSinhID, hoTen: cell.hoTen,
+            maCotDiem: cell.maCotDiem, tenCotDiem: cell.tenCotDiem,
+            oldValue: cell.oldValue ?? null, newValue: cell.value,
+            isOverwrite: cell.oldValue !== null && cell.oldValue !== undefined && cell.oldValue !== '',
+            type: classifyColumnType(cell.maCotDiem),
+            _internal: {
+                wsIdx, rowIndex, colIndex,
+                hocSinhID: cell.hocSinhID, cotDiemID: cell.cotDiemID,
+                maCotDiem: cell.maCotDiem, monHocLopID: cell.monHocLopID,
+                kqhtID: cell.kqhtID ?? null,
+            },
+        })
+    }
+    return saveRows
 }

@@ -59,6 +59,16 @@
 						</template>
 					</uc-dialog-etest-exam>
 
+					<uc-dialog-quan-li-ki-thi :classes="loadedClasses" :nienKhoa="vueData.NienKhoa"
+						@apply="onQuanLiKiThiApply">
+						<template #default="{ activatorProps }">
+							<v-list-item v-bind="activatorProps" prepend-icon="mdi-clipboard-list-outline" @click.stop="activatorProps.onClick">
+								<v-list-item-title>Quản lí kì thi</v-list-item-title>
+								<v-list-item-subtitle>Đẩy điểm từ kì thi</v-list-item-subtitle>
+							</v-list-item>
+						</template>
+					</uc-dialog-quan-li-ki-thi>
+
 					<uc-dialog-thiet-lap-ki-nang :nienKhoa="vueData.NienKhoa" :classes="loadedClasses">
 						<template #default="{ activatorProps }">
 							<v-list-item v-bind="activatorProps" prepend-icon="mdi-cog-outline">
@@ -174,8 +184,9 @@
 						const { students, cols, monHocLopID, gradesMap } = await this.fetchTemplateCols(cls.templateBangDiemID, cls)
 						// ✅ Chỉ set nếu chưa có (monHocLopID từ fetchClasses ưu tiên hơn)
 						if (!cls.monHocLopID) cls.monHocLopID = monHocLopID
-						const { worksheetConfig, scoreDescs } = this.buildClassWorksheet(cls, students, cols, thietLapList)
-						this.wsMeta.push({ cls, students, scoreDescs, gradesMap })
+						const { worksheetConfig, scoreDescs } = this.buildClassWorksheet(cls, students, cols, thietLapList, gradesMap)
+						const hasIelts = GRADE_CONFIG.IELTS_NHOM_IDS.has(cls.id)
+						this.wsMeta.push({ cls, students, scoreDescs, gradesMap, hasIelts })
 						this.worksheetConfigs.push(worksheetConfig)
 					}
 					this.soCauDungOptions = this.buildSoCauDungOptions()
@@ -249,6 +260,10 @@
 				if (scoreColIdx < 0) return
 				const desc = scoreDescs[scoreColIdx]
 				if (!desc || !desc.key) return
+				// ✅ Bỏ qua các cột IELTS formula — không record vào changedCells
+				if (desc._isIeltsScore || desc._isIeltsOverallBand) {
+					if (!meta.hasIelts) return  // ✅ lớp không có IELTS → bỏ qua hoàn toàn
+				}
 				const student = students[rowIndex]
 				if (!student) return
 				const ws = this.instances[idx]?.[0]
@@ -274,56 +289,53 @@
 				// Nếu là ô SoCauDung → tự động tính DiemTho
 				if (desc.key?.includes('__SoCauDung')) {
 					this._propagateSoCauDung(idx, rowIndex, desc, actualValue, ws)
+					// ✅ Thêm: tính lại Avg sau khi DiemTho đã được cập nhật
+					this._propagateAvgPoint(idx, rowIndex, ws)
 				}
 			},
 	
-			// Tính DiemTho từ SoCauDung và ghi vào changedCells
 			_propagateSoCauDung(idx, rowIndex, soCauDungDesc, soCauDungVal, ws) {
 				const meta = this.wsMeta[idx]
-				const { cls, students, scoreDescs } = meta
-				const diemThoDesc = scoreDescs.find(d => d._soCauDungKey === soCauDungDesc.key)
-				if (!diemThoDesc || !diemThoDesc._soCau) return
-				const diemThoIdx = scoreDescs.findIndex(d => d.key === diemThoDesc.key)
-				if (diemThoIdx === -1) return
-	
-				const diemThoVal = soCauDungVal !== null
-					? parseFloat((soCauDungVal * 10 / diemThoDesc._soCau).toFixed(2))
-					: ''
-				const diemThoCi = this.FREEZE_COLS + diemThoIdx
-				const rawOld = ws?.options?.data?.[rowIndex]?.[diemThoCi]
-				const oldDiemTho = this._parseValue(rawOld)
-	
-				this._applyCell(ws, diemThoCi, rowIndex, diemThoVal)
-	
-				const student = students[rowIndex]
-				this.changedCells = {
-					...this.changedCells,
-					[`${idx}_${rowIndex}_${diemThoCi}`]: {
-						wsIdx: idx, nhomID: cls.id, tenNhom: cls.name,
-						monHocLopID: cls.monHocLopID,
-						hocSinhID: student.id, hoTen: student.hoTen,
-						maCotDiem: diemThoDesc.key, tenCotDiem: diemThoDesc.title,
-						cotDiemID: diemThoDesc.cotDiemID ?? null,
-						value: diemThoVal, oldValue: oldDiemTho,
-					},
-				}
+				const { patch, cellUpdates } = propagateSoCauDung(
+					{ ...meta, FREEZE_COLS: this.FREEZE_COLS },
+					idx, rowIndex, soCauDungDesc, soCauDungVal, ws
+				)
+				Object.entries(cellUpdates).forEach(([ci, val]) => this._applyCell(ws, Number(ci), rowIndex, val))
+				this.changedCells = { ...this.changedCells, ...patch }
 			},
 	
+			_propagateAvgPoint(idx, rowIndex, ws) {
+				const meta = this.wsMeta[idx]
+				const { patch, cellUpdates } = propagateAvgPoint(
+					{ ...meta, FREEZE_COLS: this.FREEZE_COLS },
+					idx, rowIndex, ws
+				)
+				if (!patch) return
+				Object.entries(cellUpdates).forEach(([ci, val]) => this._applyCell(ws, Number(ci), rowIndex, val))
+				this.changedCells = { ...this.changedCells, ...patch }
+			},
+	
+			async onConfirmSave() {
+				this.saveRows = buildSaveRows(this.changedCells)
+			},
 			// ════════════════════════════════════════════════
 			// ETEST APPLY
 			// ════════════════════════════════════════════════
 	
-			async onEtestApply({ students, mapping, lopID, convertIelts = true }) {
-				let targetIdx = this.activeWsIdx
-				if (lopID) {
-					const norm = String(lopID).trim().toLowerCase()
-					const found = this.wsMeta.findIndex(meta =>
-						String(meta.cls.name).trim().toLowerCase().includes(norm) ||
-						norm.includes(String(meta.cls.name).trim().toLowerCase())
-					)
-					if (found !== -1) targetIdx = found
-					else { alert(`Không tìm thấy tab khớp với lớp "${lopID}".`); return }
+			async onEtestApply({ students, mapping, lopIDs, selectedLopID, convertIelts = true }) {
+				// ✅ Tìm tab khớp với selectedLopID
+				const norm = String(selectedLopID ?? lopIDs?.[0] ?? '').trim().toLowerCase()
+				const targetIdx = this.wsMeta.findIndex(meta => {
+					const name = String(meta.cls.name).trim().toLowerCase()
+					return name === norm || name.includes(norm) || norm.includes(name)
+				})
+	
+				if (targetIdx === -1) {
+					alert(`Không tìm thấy tab khớp với lớp "${selectedLopID}".\nCác tab hiện có: ${this.wsMeta.map(m => m.cls.name).join(', ')}`)
+					return
 				}
+	
+				// ✅ Tự chuyển sang tab đúng
 				this.activeWsIdx = targetIdx
 				await this.$nextTick()
 				if (!this.initializedTabs.has(targetIdx)) await new Promise(r => setTimeout(r, 300))
@@ -334,8 +346,13 @@
 				const ws = instance[0]
 				if (!ws) return
 	
+				// ✅ Filter học sinh theo selectedLopID
+				const filteredStudents = students.filter(s =>
+					String(s.LopID).trim().toLowerCase() === norm
+				)
+	
 				const { cls, students: clsStudents, scoreDescs } = meta
-				const etestMap = new Map(students.map(s => [String(s.StudentID), s]))
+				const etestMap = new Map(filteredStudents.map(s => [String(s.StudentID), s]))  // ✅ dùng filteredStudents
 				const descMap = new Map(scoreDescs.map((d, i) => [d.key, i]))
 				const rowMap = new Map(clsStudents.map((s, i) => [String(s.id), i]))
 				const allUpdates = {}
@@ -346,14 +363,21 @@
 				const snapOldValue = (rowIdx, ci) => {
 					const k = `${rowIdx}_${ci}`
 					if (oldValueSnapshot[k] !== undefined) return
+					// ✅ Dùng getValueFromCoords thay vì options.data để lấy giá trị đã tính
 					const raw = ws.getValueFromCoords(ci, rowIdx)
-					oldValueSnapshot[k] = (raw !== null && raw !== undefined && raw !== '' &&
-						!(typeof raw === 'string' && raw.startsWith('=')))
+					// ✅ Nếu là công thức → coi như trống (không phải giá trị thực)
+					if (typeof raw === 'string' && raw.startsWith('=')) {
+						oldValueSnapshot[k] = null
+						return
+					}
+					oldValueSnapshot[k] = (raw !== null && raw !== undefined && raw !== '')
 						? (isNaN(Number(raw)) ? raw : Number(raw))
 						: null
 				}
 	
 				const recordUpdate = (rowIdx, ci, maCotDiem, val) => {
+					// ✅ Bỏ qua nếu val là công thức
+					if (typeof val === 'string' && val.startsWith('=')) return
 					// ✅ Snapshot trước khi ghi
 					snapOldValue(rowIdx, ci)
 	
@@ -390,11 +414,12 @@
 	
 					for (const [skillKey, descKey] of Object.entries(mapping)) {
 						const val = eRow[skillKey]
-						if (val === null || val === undefined) continue
+						if (val === null || val === undefined) continue  // ✅ null → skip luôn
 						const di = descMap.get(descKey)
 						if (di === undefined) continue
 	
-						recordUpdate(rowIdx, this.FREEZE_COLS + di, descKey, val)
+						const actualVal = val === null ? 0 : val  // ✅ null → 0
+						recordUpdate(rowIdx, this.FREEZE_COLS + di, descKey, actualVal)
 	
 						if (!descKey.includes('__SoCauDung')) continue
 						const diemThoDesc = scoreDescs.find(d => d._soCauDungKey === descKey)
@@ -531,11 +556,14 @@
 				console.log(`[onEtestApply] tab[${targetIdx}] "${cls.name}" — ${totalCells} ô`)
 			},
 	
+			onQuanLiKiThiApply() {
+	
+			},
 			// ════════════════════════════════════════════════
 			// BUILD WORKSHEET
 			// ════════════════════════════════════════════════
 	
-			buildClassWorksheet(cls, students, cols, thietLapList) {
+			buildClassWorksheet(cls, students, cols, thietLapList, gradesMap = new Map()) {
 				const fixedDescs = [
 					{ title: 'STT', key: null, colType: 'text', readOnly: true, width: '60px' },
 					{ title: 'Mã học sinh', key: null, colType: 'text', readOnly: true, width: '110px' },
@@ -603,6 +631,13 @@
 									_isConv: true, cotDiemID: avgConvCol.cotDiemID ?? null,
 								})
 							}
+						} else {
+							// ✅ Thêm: các formula number column thông thường (VD: TA2_Point)
+							scoreDescs.push({
+								title: c.title, key: c.key, colType: 'numeric', readOnly: true,
+								width: '130px', _formulaTemplate: c.formula,
+								cotDiemID: c.cotDiemID ?? null,
+							})
 						}
 					} else if (c.type === 'text' && c.formula) {
 						processedKeys.add(c.key)
@@ -620,25 +655,29 @@
 				}
 	
 				if (this.isTA2Mode) {
-					const ieltsCols = cols.filter(c => c.key?.includes('_IELTS_'))
-					const getIeltsColInfo = (keySuffix, defaultTitle) => {
-						const found = ieltsCols.find(c => c.key?.endsWith(keySuffix))
-						return { key: found?.key ?? `${prefix.replace('_TA2', '')}_${keySuffix}`, title: found?.title ?? defaultTitle, cotDiemID: found?.cotDiemID ?? null }
+					const hasIelts = GRADE_CONFIG.IELTS_NHOM_IDS.has(cls.id)  // ✅ check theo NhomID
+					if (hasIelts) {
+						const ieltsCols = cols.filter(c => c.key?.includes('_IELTS_'))
+						const getIeltsColInfo = (keySuffix, defaultTitle) => {
+							const found = ieltsCols.find(c => c.key?.endsWith(keySuffix))
+							return { key: found?.key ?? `${prefix.replace('_TA2', '')}_${keySuffix}`, title: found?.title ?? defaultTitle, cotDiemID: found?.cotDiemID ?? null }
+						}
+	
+						// 4 kỹ năng IELTS
+						for (const { kiNang, suffix, defaultTitle, isWS } of [
+							{ kiNang: 'Listening', suffix: 'IELTS_Listening_Conv', defaultTitle: 'IELTS Nghe', isWS: false },
+							{ kiNang: 'Reading', suffix: 'IELTS_Reading_Conv', defaultTitle: 'IELTS Đọc', isWS: false },
+							{ kiNang: 'Writing', suffix: 'IELTS_Writing_Conv', defaultTitle: 'IELTS Viết', isWS: true },
+							{ kiNang: 'Speaking', suffix: 'IELTS_Speaking_Conv', defaultTitle: 'IELTS Nói', isWS: true },
+						]) {
+							const info = getIeltsColInfo(suffix, defaultTitle)
+							scoreDescs.push({ title: info.title, key: info.key, colType: 'numeric', readOnly: true, width: '130px', cotDiemID: info.cotDiemID, _isIeltsScore: true, _kiNang: kiNang, _ieltsFormulaKiNang: kiNang, _isWS: isWS })
+						}
+	
+						const bandConv = getIeltsColInfo('IELTS_Band_Conv', 'IELTS Overall Band')
+						scoreDescs.push({ title: bandConv.title, key: bandConv.key, colType: 'numeric', readOnly: true, width: '160px', cotDiemID: bandConv.cotDiemID, _isIeltsOverallBand: true })
 					}
 	
-					// 4 kỹ năng IELTS
-					for (const { kiNang, suffix, defaultTitle, isWS } of [
-						{ kiNang: 'Listening', suffix: 'IELTS_Listening_Conv', defaultTitle: 'IELTS Nghe', isWS: false },
-						{ kiNang: 'Reading', suffix: 'IELTS_Reading_Conv', defaultTitle: 'IELTS Đọc', isWS: false },
-						{ kiNang: 'Writing', suffix: 'IELTS_Writing_Conv', defaultTitle: 'IELTS Viết', isWS: true },
-						{ kiNang: 'Speaking', suffix: 'IELTS_Speaking_Conv', defaultTitle: 'IELTS Nói', isWS: true },
-					]) {
-						const info = getIeltsColInfo(suffix, defaultTitle)
-						scoreDescs.push({ title: info.title, key: info.key, colType: 'numeric', readOnly: true, width: '130px', cotDiemID: info.cotDiemID, _isIeltsScore: true, _kiNang: kiNang, _ieltsFormulaKiNang: kiNang, _isWS: isWS })
-					}
-	
-					const bandConv = getIeltsColInfo('IELTS_Band_Conv', 'IELTS Overall Band')
-					scoreDescs.push({ title: bandConv.title, key: bandConv.key, colType: 'numeric', readOnly: true, width: '160px', cotDiemID: bandConv.cotDiemID, _isIeltsOverallBand: true })
 				}
 	
 				const allDescs = [...fixedDescs, ...scoreDescs]
@@ -656,7 +695,12 @@
 					const fixedVals = [s.soTT, s.id, s.hoTen, s.englishName, s.tenLop]
 					const scoreVals = scoreDescs.map(d => {
 						if (!d.key) return ''
+						const existingVal = gradesMap.get(`${s.id}_${d.key}`)?.value ?? null
+	
+						// SoCauDung — lookup thẳng
+						if (d.key?.includes('__SoCauDung')) return existingVal ?? ''
 						if (d._isDiemTho) {
+							if (existingVal !== null) return existingVal // ✅ có sẵn → dùng luôn
 							if (!d._soCau) return ''
 							const def = allColDefs.find(c => c.key === d._soCauDungKey)
 							return def ? `=${def.colLetter}${rowIndex}*10/${d._soCau}` : ''
@@ -714,30 +758,6 @@
 			// ════════════════════════════════════════════════
 			// SAVE
 			// ════════════════════════════════════════════════
-	
-			async onConfirmSave() {
-				const saveRows = []
-				for (const cellKey of Object.keys(this.changedCells)) {
-					const cell = this.changedCells[cellKey]
-					if (cell.maCotDiem?.includes('__SoCauDung')) continue // ✅
-					const [wsIdx, rowIndex, colIndex] = cellKey.split('_').map(Number)
-					saveRows.push({
-						tenNhom: cell.tenNhom, maSoHS: cell.hocSinhID, hoTen: cell.hoTen,
-						maCotDiem: cell.maCotDiem, tenCotDiem: cell.tenCotDiem,
-						oldValue: cell.oldValue ?? null, newValue: cell.value,
-						isOverwrite: cell.oldValue !== null && cell.oldValue !== undefined && cell.oldValue !== '',
-						type: classifyColumnType(cell.maCotDiem),
-						_internal: {
-							wsIdx, rowIndex, colIndex,
-							hocSinhID: cell.hocSinhID, cotDiemID: cell.cotDiemID,
-							maCotDiem: cell.maCotDiem, monHocLopID: cell.monHocLopID,
-							kqhtID: cell.kqhtID ?? null,
-						},
-					})
-				}
-				this.saveRows = saveRows
-			},
-	
 			async onConfirmSaveActual({ close }) {
 				this.saving = true
 				try {
@@ -861,7 +881,7 @@
 	
 			async fetchTemplateCols(templateBangDiemID, cls) {
 				if (!templateBangDiemID || !cls) return { students: [], cols: [], monHocLopID: null, gradesMap: new Map() }
-				const cacheKey = `${templateBangDiemID}_${this.activeNhomCotDiem}`
+				const cacheKey = `${cls.id}_${templateBangDiemID}_${this.activeNhomCotDiem}`
 				if (!this.templateColsCache[cacheKey]) {
 					const semester = this.config.semesterPeriod?.includes('S2') ? 'HK2' : 'HK1'
 					const basePayload = { LopID: cls.id, MonHocID: GRADE_CONFIG.MON_HOC_ID, TemplateBangDiemID: templateBangDiemID, Semester: semester }

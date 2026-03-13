@@ -1,31 +1,32 @@
 <template>
 	<Global>
-		<div>{{data}}</div>
-		<v-btn text="check" @click="getNienKhoa" />
-		<v-btn text="clear cache" @click="getNienKhoa_disableCache" />
-		<v-btn text="clear cache" @click="getNienKhoa_disableCache_withError" />
+		<v-btn @click="openPage">Mở trang</v-btn>
+		<v-select />
+		<GlobalDataTable :headers :items />
 	</Global>
 </template>
 
 <script>
-	export default {
-		props: [],
-		data() {
-			return { data: [] }
+export default {
+	inject: ['iframeRef'],
+	data() {
+		return {
+			headers: [{ title: "xxx", value: "xxx" }],
+			items: [{ xxx: "Nooijk dung 1" }]
+		}
+	},
+	methods: {
+		openPage() {
+			this.iframeRef.value?.openWindow({
+				title: 'Google',
+				url: '/nhap-diem?capid=1',
+				icon: 'mdi-google',
+				onclose: () => console.log('đã đóng'),
+			})
 		},
-		mounted() { },
-		computed: {},
-		watch: {},
-		methods: {
-			async getNienKhoa() {
-				this.data = await fetchPromise("lms/NienKhoa_Get", { params: 1 })
-			},
-			async getNienKhoa_disableCache() {
-				this.data = await fetchPromise("lms/NienKhoa_Get", { params: 1 })
-			},
-			async getNienKhoa_disableCache_withError() {
-				this.data = await fetchPromise("lms/NienKhoa_Get_2", { params: 1 })
-			},
+		closePage() {
+			this.iframeRef.value?.closeWindow()
 		}
 	}
+}
 </script>
