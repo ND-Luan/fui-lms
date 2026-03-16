@@ -1,14 +1,12 @@
 // ============================================================
 // CONSTANTS
 // ============================================================
-
 const SUBMISSION_STATUS = {
     DRAFT: 1,
     SUBMITTED: 2,
     IN_REVIEW: 3,
     GRADED: 4
 };
-
 const QUIZ_TYPES = {
     SINGLE_CHOICE: 'QUIZ_SINGLE_CHOICE',
     MULTIPLE_CHOICE: 'QUIZ_MULTIPLE_CHOICE',
@@ -17,7 +15,6 @@ const QUIZ_TYPES = {
     FILL_IN_BLANK: 'QUIZ_FILL_IN_BLANK',
     MATCHING: 'QUIZ_MATCHING'
 };
-
 // ============================================================
 // MIXIN: useQuestionNavigation
 // Quản lý điều hướng câu hỏi (prev/next, group/index tracking)
@@ -33,13 +30,11 @@ function useQuestionNavigation() {
                 }
                 return number + questionIndex;
             },
-
             getGlobalQuestionNumberByQuestionId(questionId) {
                 if (!this.allQuestions) return 0;
                 const index = this.allQuestions.findIndex(q => q.id === questionId);
                 return index + 1;
             },
-
             navigateToQuestion(groupIndex, questionIndexInGroup, id) {
                 if (this.viewMode === 'all') {
                     const element = document.getElementById(id);
@@ -55,7 +50,6 @@ function useQuestionNavigation() {
                     this.toggleGroupCollapse(groupIndex);
                 }
             },
-
             prevQuestion() {
                 if (this.currentQuestionIndexInGroup > 0) {
                     this.currentQuestionIndexInGroup--;
@@ -65,7 +59,6 @@ function useQuestionNavigation() {
                         this.assignment.groups[this.currentGroupIndex].questions.length - 1;
                 }
             },
-
             nextQuestion() {
                 if (!this.assignment?.groups) return;
                 const currentGroup = this.assignment.groups[this.currentGroupIndex];
@@ -78,7 +71,6 @@ function useQuestionNavigation() {
                 }
             }
         },
-
         computed: {
             allQuestions() {
                 return this.assignment?.groups?.flatMap(g => g.questions) || [];
@@ -100,7 +92,6 @@ function useQuestionNavigation() {
         }
     };
 }
-
 // ============================================================
 // MIXIN: useAnswerTracking
 // Theo dõi trạng thái trả lời của từng câu hỏi
@@ -116,13 +107,11 @@ function useAnswerTracking() {
                 if (typeof answer === 'object' && !Array.isArray(answer) && Object.keys(answer).length === 0) return false;
                 return true;
             },
-
             getGroupAnsweredCount(group) {
                 if (!group?.questions) return 0;
                 return group.questions.filter(q => this.isAnswered(q.id)).length;
             }
         },
-
         computed: {
             answeredCount() {
                 return this.allQuestions.filter(q => this.isAnswered(q.id)).length;
@@ -134,7 +123,6 @@ function useAnswerTracking() {
         }
     };
 }
-
 // ============================================================
 // MIXIN: useAutoSave
 // Auto-save bài làm với debounce + throttle
@@ -152,7 +140,6 @@ function useAutoSave() {
                 MIN_SAVE_INTERVAL: 2000
             };
         },
-
         methods: {
             triggerAutoSave() {
                 this.saveStatus = 'Đang soạn...';
@@ -161,11 +148,9 @@ function useAutoSave() {
                 if (this.autoSaveTimer) clearTimeout(this.autoSaveTimer);
                 this.autoSaveTimer = setTimeout(() => { this.saveDraft(); }, 1000);
             },
-
             async saveDraft() {
                 if (this.isSaving || this.isSubmitted) return;
                 if (!this.assignment?.AssignToClassID && !this.assignment?.AssignToStudentID) return;
-
                 const now = Date.now();
                 if (now - this.lastSaveTime < this.MIN_SAVE_INTERVAL) {
                     if (this.autoSaveTimer) clearTimeout(this.autoSaveTimer);
@@ -175,20 +160,17 @@ function useAutoSave() {
                     );
                     return;
                 }
-
                 this.isSaving = true;
                 this.lastSaveTime = now;
                 this.saveStatus = 'Đang lưu...';
                 this.saveStatusColor = 'blue';
                 this.saveStatusIcon = 'mdi-cloud-upload-outline';
-
                 const payload = {
                     AssignToClassID: this.assignment?.AssignToClassID ?? this.assignment?.AssignToStudentID,
                     SubmissionContent: JSON.stringify({ answers: this.userAnswers }),
                     SubmissionStatus: SUBMISSION_STATUS.DRAFT,
                     HocSinhID: this.hocSinhDetail?.HocSinhID
                 };
-
                 try {
                     await this.onSaveDraft(payload);
                     this.saveStatus = 'Đã lưu';
@@ -207,7 +189,6 @@ function useAutoSave() {
         }
     };
 }
-
 // ============================================================
 // MIXIN: useQuestionStatus
 // Tính toán trạng thái, icon, màu sắc của từng câu hỏi
@@ -223,7 +204,6 @@ function useQuestionStatus() {
                 if (typeof g.manualScore === 'number') { s += g.manualScore; has = true; }
                 return has ? s : null;
             },
-
             questionStatus(questionId, maxPoint) {
                 const answered = this.isAnswered(questionId);
                 if (!this.isSubmitted) {
@@ -239,7 +219,6 @@ function useQuestionStatus() {
                 if (s >= (maxPoint ?? 0)) return { label: 'Đúng', color: 'success', variant: 'tonal' };
                 return { label: 'Một phần', color: 'warning', variant: 'tonal' };
             },
-
             getQuestionStatusIcon(questionId) {
                 if (this.isGraded) {
                     const question = this.allQuestions.find(q => q.id === questionId);
@@ -251,7 +230,6 @@ function useQuestionStatus() {
                 }
                 return this.isAnswered(questionId) ? 'mdi-pencil-circle' : 'mdi-help-box-outline';
             },
-
             getIconColor(questionId) {
                 if (this.isGraded) {
                     const question = this.allQuestions.find(q => q.id === questionId);
@@ -266,7 +244,6 @@ function useQuestionStatus() {
         }
     };
 }
-
 // ============================================================
 // MIXIN: useCopyPasteBlocker
 // Chặn copy/paste trong khi làm bài (có hỗ trợ IME tiếng Việt)
@@ -285,7 +262,6 @@ function useCopyPasteBlocker() {
                     Vue.$toast?.warning('Không được phép sao chép/dán nội dung trong bài thi này', { position: 'top' });
                 }
             },
-
             blockContextMenu(e) {
                 if (this.isSubmitted) return;
                 const target = e.target;
@@ -293,7 +269,6 @@ function useCopyPasteBlocker() {
                     e.preventDefault();
                 }
             },
-
             blockKeyboardShortcuts(e) {
                 if (this.isSubmitted) return;
                 if (e.isComposing || e.keyCode === 229) return;
@@ -307,17 +282,14 @@ function useCopyPasteBlocker() {
                     Vue.$toast?.warning('Không được phép sử dụng phím tắt sao chép/dán', { position: 'top' });
                 }
             },
-
             handleCompositionStart(e) {
                 if (e.target) e.target._isComposing = true;
             },
-
             handleCompositionEnd(e) {
                 if (e.target) {
                     setTimeout(() => { if (e.target) e.target._isComposing = false; }, 50);
                 }
             },
-
             addCopyPasteBlocker() {
                 document.addEventListener('copy', this.blockCopyPaste);
                 document.addEventListener('cut', this.blockCopyPaste);
@@ -327,7 +299,6 @@ function useCopyPasteBlocker() {
                 document.addEventListener('compositionstart', this.handleCompositionStart);
                 document.addEventListener('compositionend', this.handleCompositionEnd);
             },
-
             removeCopyPasteBlocker() {
                 document.removeEventListener('copy', this.blockCopyPaste);
                 document.removeEventListener('cut', this.blockCopyPaste);
@@ -357,7 +328,6 @@ function useTimeTracking() {
                     { silent: true, cache: false }
                 );
             },
-
             insertAccessTime(submitionInfo) {
                 if (!this._isActiveSubmission(submitionInfo?.SubmissionStatus)) return;
                 // fire-and-forget — không cần await
@@ -367,7 +337,6 @@ function useTimeTracking() {
                     { silent: true, cache: false }
                 );
             },
-
             _isActiveSubmission(status) {
                 return ![
                     SUBMISSION_STATUS.SUBMITTED,
