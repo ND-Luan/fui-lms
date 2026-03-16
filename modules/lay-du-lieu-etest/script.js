@@ -47,12 +47,15 @@ const GRADE_CONFIG = {
         SKILL_CONFIG: 'lms/ThietLap_KiNang_Get',
         IELTS_CONFIG: 'lms/ThietLap_KiNang_IELTS_Get',
         SAVE_GRADES: 'lms/KQHT_MonHocLop_Ins',
+        MON_HOC_LOP_CAP2: 'lms/MonHocLop_CapID_Get',
     },
     IELTS_NHOM_IDS: new Set([
         'N251101', 'N251102',
         'N251201', 'N251202', 'N251203', 'N251204', 'N251205', 'N251206',
     ]),
     MON_HOC_ID: 76,
+    MON_HOC_ID_CAP2: 46,
+    MON_HOC_CODE_CAP2: 'ANH',
     DEFAULT_TEMPLATE_SCORE_ORDER: 14,
 }
 // ════════════════════════════════════════════════════════════════
@@ -283,8 +286,37 @@ function applyColumnFormatters(worksheetConfig, scoreDescs, FREEZE_COLS) {
 // ════════════════════════════════════════════════════════════════
 /**
  * Fetch danh sách lớp/nhóm
+ * - cap3: dùng API cũ lms/NhomAV_Get, filter theo MonHocID
+ * - cap2: dùng API Lop_Get_By_CapID, trả về danh sách lớp trực tiếp
  */
-async function fetchClasses(nienKhoa) {
+async function fetchClasses(nienKhoa, cap = 'cap3') {
+    if (cap === 'cap2') {
+        const CAP_ID_MAP = { cap2: 2, cap3: 3 }
+        const capID = CAP_ID_MAP[cap] ?? 2
+        // Fetch song song: danh sách lớp + MonHocLop (để lấy TemplateBangDiemID, MonHocLopID)
+        const [lopData, monHocLopData] = await Promise.all([
+            fetchPromise('lms/Lop_Get_By_CapID', { NienKhoa: nienKhoa, CapID: capID }),
+            fetchPromise(GRADE_CONFIG.API_ENDPOINTS.MON_HOC_LOP_CAP2, { NienKhoa: nienKhoa, CapID: capID }),
+        ])
+        // Build map LopID → MonHocLop (filter theo MonHocCode = 'ANH')
+        const monHocLopMap = new Map()
+        ;(monHocLopData ?? [])
+            .filter(x => x.MonHocCode === GRADE_CONFIG.MON_HOC_CODE_CAP2)
+            .forEach(x => monHocLopMap.set(String(x.LopNhomID), x))
+        return (lopData ?? []).map(x => {
+            const mhl = monHocLopMap.get(String(x.LopID))
+            return {
+                id: x.LopID,
+                name: x.TenLop,
+                khoiID: x.KhoiID,
+                templateBangDiemID: mhl?.TemplateBangDiemID ?? null,
+                monHocLopID: mhl?.MonHocLopID ?? null,
+                maDonVi: x.MaDonVi ?? null,
+                gvcn: x.Ten_GVCN ?? null,
+            }
+        })
+    }
+    // cap3: API cũ
     const data = await fetchPromise(GRADE_CONFIG.API_ENDPOINTS.CLASSES, { NienKhoa: nienKhoa })
     return data
         .filter(x => x.MonHocID === GRADE_CONFIG.MON_HOC_ID && x.IsNhomLMS_GiaoBai === false)
@@ -293,7 +325,7 @@ async function fetchClasses(nienKhoa) {
             name: x.TenNhom,
             khoiID: x.KhoiID,
             templateBangDiemID: x.TemplateBangDiemID,
-            monHocLopID: x.MonHocLopID ?? null,  // ✅ thêm dòng này
+            monHocLopID: x.MonHocLopID ?? null,
         }))
 }
 /**

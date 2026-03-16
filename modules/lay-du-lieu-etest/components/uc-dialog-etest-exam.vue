@@ -96,10 +96,24 @@
 							</v-chip>
 						</div>
 
-						<!-- Bảng dữ liệu -->
+						<!-- Bảng dữ liệu + chọn học sinh -->
+						<div class="d-flex align-center pa-2 bg-grey-lighten-4 border rounded-t mb-0">
+							<v-icon size="16" class="mr-1" color="primary">mdi-account-check-outline</v-icon>
+							<span class="text-caption font-weight-medium">
+								Áp dụng cho:
+								<strong class="text-primary">{{ selectedStudentIDs.length }}</strong>
+								/ {{ filteredStudentsByLop.length }} học sinh
+							</span>
+							<v-spacer />
+							<v-btn size="x-small" variant="text" color="primary" @click="selectAllStudents">Chọn tất cả</v-btn>
+							<v-btn size="x-small" variant="text" color="grey" @click="selectedStudentIDs = []">Bỏ chọn</v-btn>
+						</div>
 						<v-data-table :headers="tableHeaders" :items="filteredStudentsByLop"
-							:items-per-page="-1" density="compact" class="border rounded mb-4"
-							fixed-header height="280" hide-default-footer />
+							:items-per-page="-1" density="compact" class="border rounded-b mb-4"
+							fixed-header height="260" hide-default-footer
+							:item-value="s => String(s.StudentID)"
+							v-model="selectedStudentIDs"
+							show-select />
 
 						<!-- Mapping -->
 						<v-card variant="outlined" class="pa-3">
@@ -191,6 +205,7 @@ export default {
 			skillKeys: [],
 			mapping: {},
 			selectedLopID: null,
+			selectedStudentIDs: [],
 			localConvertIelts: this.convertIelts,
 
 			examPresets: [
@@ -207,6 +222,10 @@ export default {
 
 	watch: {
 		convertIelts(val) { this.localConvertIelts = val },
+		filteredStudentsByLop(list) {
+			// Auto-select tất cả khi danh sách thay đổi (đổi lớp, load mới)
+			this.selectedStudentIDs = list.map(s => String(s.StudentID))
+		},
 	},
 
 	computed: {
@@ -255,6 +274,10 @@ export default {
 	},
 
 	methods: {
+		selectAllStudents() {
+			this.selectedStudentIDs = this.filteredStudentsByLop.map(s => String(s.StudentID))
+		},
+
 		selectPreset(preset) {
 			this.examCode = preset.code
 			this.localConvertIelts = preset.hasIelts
@@ -263,6 +286,7 @@ export default {
 			this.skillKeys = []
 			this.mapping = {}
 			this.selectedLopID = null
+			this.selectedStudentIDs = []
 			this.error = ''
 		},
 
@@ -274,6 +298,7 @@ export default {
 			this.skillKeys = []
 			this.mapping = {}
 			this.selectedLopID = null
+			this.selectedStudentIDs = []
 
 			try {
 				const raw = await fetchPromise('etest/ET_GV_Exam_BaiThiSelect', {
@@ -324,9 +349,15 @@ export default {
 			)
 			const lopIDs = [...new Set(this.students.map(s => s.LopID).filter(Boolean))]
 
+			// Nếu user đã chọn subset học sinh → filter students list
+			const selectedSet = new Set(this.selectedStudentIDs.map(String))
+			const filteredStudents = selectedSet.size > 0
+				? this.students.filter(s => selectedSet.has(String(s.StudentID)))
+				: this.students
+
 			this.$emit('apply', {
 				examCode: this.examCode.trim(),
-				students: this.students,
+				students: filteredStudents,
 				mapping: activeMapping,
 				lopIDs,
 				selectedLopID: this.selectedLopID,

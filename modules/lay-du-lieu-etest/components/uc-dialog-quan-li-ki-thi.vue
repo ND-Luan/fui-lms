@@ -94,7 +94,7 @@
 						</v-card>
 
 						<!-- Preview table -->
-						<div class="d-flex align-center ga-2 mb-2">
+						<div class="d-flex align-center ga-2 mb-1">
 							<v-chip size="small" color="primary" prepend-icon="mdi-account-group-outline">
 								{{ previewRows.length }} học sinh
 							</v-chip>
@@ -102,8 +102,23 @@
 								{{ s.name }}: TB {{ s.avg }}
 							</v-chip>
 						</div>
+						<!-- Toolbar chọn học sinh -->
+						<div class="d-flex align-center pa-2 bg-grey-lighten-4 border rounded-t">
+							<v-icon size="16" class="mr-1" color="primary">mdi-account-check-outline</v-icon>
+							<span class="text-caption font-weight-medium">
+								Áp dụng cho:
+								<strong class="text-primary">{{ selectedStudentIDs.length }}</strong>
+								/ {{ previewRows.length }} học sinh
+							</span>
+							<v-spacer />
+							<v-btn size="x-small" variant="text" color="primary" @click="selectAllStudents">Chọn tất cả</v-btn>
+							<v-btn size="x-small" variant="text" color="grey" @click="selectedStudentIDs = []">Bỏ chọn</v-btn>
+						</div>
 						<v-data-table :headers="previewHeaders" :items="previewRows" density="compact"
-							hide-default-footer :items-per-page="-1" fixed-header height="300" class="border rounded" />
+							hide-default-footer :items-per-page="-1" fixed-header height="270" class="border rounded-b"
+							:item-value="r => String(r.hocSinhID)"
+							v-model="selectedStudentIDs"
+							show-select />
 					</template>
 
 					<!-- Chưa chọn kì thi -->
@@ -174,6 +189,8 @@
 			rawScoreData: [],
 			previewRows: [],
 			applying: false,
+
+			selectedStudentIDs: [],
 
 			// Mapping: { [TenKyNang]: maCotDiem }
 			skillMapping: {},
@@ -307,6 +324,7 @@
 			this.rawScoreData = []
 			this.previewRows = []
 			this.skillMapping = {}
+			this.selectedStudentIDs = []
 		},
 
 		async loadPreview() {
@@ -324,11 +342,17 @@
 				// Union với filter theo Nhom để không bỏ sót HS nào
 				const filtered = this._filterForPreview(this.rawScoreData, this.selectedLopID)
 				this.previewRows = this._buildPreviewRows(filtered)
+				// Auto-select tất cả học sinh
+				this.selectedStudentIDs = this.previewRows.map(r => String(r.hocSinhID))
 				// Trigger auto-map ngay sau khi có data
 				this._autoMap(this.detectedSkills)
 			} finally {
 				this.loadingPreview = false
 			}
+		},
+
+		selectAllStudents() {
+			this.selectedStudentIDs = this.previewRows.map(r => String(r.hocSinhID))
 		},
 
 		// ── Auto-map kĩ năng theo từ khóa tên ──
@@ -444,12 +468,14 @@
 					Object.entries(this.skillMapping).filter(([, v]) => !!v)
 				)
 
-				// ✅ studentScores build từ TẤT CẢ rawScoreData — không filter theo lớp
-				// Parent sẽ tự match theo HocSinhID trong tab đang active
-				// → HS chuyển lớp (API trả Nhom cũ) vẫn được apply đúng tab
+				// Build studentScores — filter theo selectedStudentIDs nếu user chọn subset
+				const selectedSet = this.selectedStudentIDs.length > 0
+					? new Set(this.selectedStudentIDs.map(String))
+					: null
 				const studentScores = new Map()
 
 				for (const r of this.rawScoreData) {
+					if (selectedSet && !selectedSet.has(String(r.HocSinhID))) continue
 					const maCotDiem = activeMapping[r.TenKyNang]
 					if (!maCotDiem) continue
 

@@ -183,7 +183,7 @@
 				this.destroyAllSpreadsheets()
 				this.templateColsCache = {}; this._thietLapCache = null; this.changedCells = {}; this.wsMeta = []
 				try {
-					const fetchList = [fetchClasses(vueData.NienKhoa), this.fetchThietLapKiNang()]
+					const fetchList = [fetchClasses(vueData.NienKhoa, this.config.cap), this.fetchThietLapKiNang()]
 					if (this.isTA2Mode) fetchList.push(this.fetchIeltsThietLap())
 					const [classes, thietLapList] = await Promise.all(fetchList)
 					this.loadedClasses = classes
@@ -1026,7 +1026,7 @@
 							NienKhoa: vueData.NienKhoa,
 							MonHocLopID: cls.monHocLopID,
 							LopID: cls.id,
-							MonHocID: GRADE_CONFIG.MON_HOC_ID,
+							MonHocID: this.config.cap === 'cap2' ? GRADE_CONFIG.MON_HOC_ID_CAP2 : GRADE_CONFIG.MON_HOC_ID,
 							TemplateBangDiemID: cls.templateBangDiemID,
 							MaNhomCotDiem: this.activeNhomCotDiem,
 							KetQuaObjArr: JSON.stringify(items),
@@ -1130,15 +1130,21 @@
 	
 			async fetchTemplateCols(templateBangDiemID, cls) {
 				if (!templateBangDiemID || !cls) return { students: [], cols: [], monHocLopID: null, gradesMap: new Map() }
+				const isCap2 = this.config.cap === 'cap2'
+				const monHocID = isCap2 ? GRADE_CONFIG.MON_HOC_ID_CAP2 : GRADE_CONFIG.MON_HOC_ID
 				const cacheKey = `${cls.id}_${templateBangDiemID}_${this.activeNhomCotDiem}`
 				if (!this.templateColsCache[cacheKey]) {
 					const semester = this.config.semesterPeriod?.includes('S2') ? 'HK2' : 'HK1'
-					const basePayload = { LopID: cls.id, MonHocID: GRADE_CONFIG.MON_HOC_ID, TemplateBangDiemID: templateBangDiemID, Semester: semester }
+					const basePayload = { LopID: cls.id, MonHocID: monHocID, TemplateBangDiemID: templateBangDiemID, Semester: semester }
 					const ieltsNhomCotDiem = this.activeNhomCotDiem?.replace('_TA2', '_IELTS')
+					// Cấp 2: không truyền ThuTuNhom; cấp 3: ThuTuNhom=14
+					const mainPayload = isCap2
+						? { ...basePayload, MaNhomCotDiem: this.activeNhomCotDiem }
+						: { ...basePayload, MaNhomCotDiem: this.activeNhomCotDiem, ThuTuNhom: 14 }
 	
 					const [data, ieltsData] = await Promise.all([
-						fetchPromise(GRADE_CONFIG.API_ENDPOINTS.TEMPLATE_COLS, { ...basePayload, MaNhomCotDiem: this.activeNhomCotDiem, ThuTuNhom: 14 }),
-						this.isTA2Mode
+						fetchPromise(GRADE_CONFIG.API_ENDPOINTS.TEMPLATE_COLS, mainPayload),
+						(!isCap2 && this.isTA2Mode)
 							? fetchPromise(GRADE_CONFIG.API_ENDPOINTS.TEMPLATE_COLS, { ...basePayload, MaNhomCotDiem: ieltsNhomCotDiem, ThuTuNhom: 15 })
 							: Promise.resolve([]),
 					])
