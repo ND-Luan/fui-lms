@@ -15,7 +15,7 @@ const GRADE_CONFIG = {
         // { key: 'S2_Final', label: 'HK2 - Cuối kì', HocKi: 2 },
     ],
     SCORE_TYPES_CAP2: [
-        { key: 'HK', label: 'Điểm HK' },
+        { key: 'HK_CB', label: 'Điểm HK + Cambridge' },
     ],
     SCORE_TYPES_CAP3: [
         // { key: 'HK', label: 'Điểm HK' },
@@ -295,14 +295,18 @@ async function fetchClasses(nienKhoa, cap = 'cap3') {
         const capID = CAP_ID_MAP[cap] ?? 2
         // Fetch song song: danh sách lớp + MonHocLop (để lấy TemplateBangDiemID, MonHocLopID)
         const [lopData, monHocLopData] = await Promise.all([
-            fetchPromise('lms/Lop_Get_By_CapID', { NienKhoa: nienKhoa, CapID: capID }),
+            fetchPromise('lms/Lop_Get_By_CapID', {
+                NienKhoa: nienKhoa,
+                CapID: capID,
+                HocKi: vueData.NienKhoaItem.HocKi
+            }),
             fetchPromise(GRADE_CONFIG.API_ENDPOINTS.MON_HOC_LOP_CAP2, { NienKhoa: nienKhoa, CapID: capID }),
         ])
         // Build map LopID → MonHocLop (filter theo MonHocCode = 'ANH')
         const monHocLopMap = new Map()
-        ;(monHocLopData ?? [])
-            .filter(x => x.MonHocCode === GRADE_CONFIG.MON_HOC_CODE_CAP2)
-            .forEach(x => monHocLopMap.set(String(x.LopNhomID), x))
+            ; (monHocLopData ?? [])
+                .filter(x => x.MonHocCode === GRADE_CONFIG.MON_HOC_CODE_CAP2)
+                .forEach(x => monHocLopMap.set(String(x.LopNhomID), x))
         return (lopData ?? []).map(x => {
             const mhl = monHocLopMap.get(String(x.LopID))
             return {

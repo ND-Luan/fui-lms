@@ -26,8 +26,7 @@
 							<div class="text-caption text-white" style="opacity:.8">Có nội dung</div>
 							<div class="d-flex align-center ga-2">
 								<div class="text-h5 font-weight-bold text-white">{{ totalHasND }}</div>
-								<v-chip size="x-small" color="white" variant="tonal"
-									class="text-success font-weight-bold">
+								<v-chip size="x-small" color="white" variant="tonal" class="text-success font-weight-bold">
 									{{ totalHL ? Math.round(totalHasND / totalHL * 100) : 0 }}%
 								</v-chip>
 							</div>
@@ -45,8 +44,7 @@
 							<div class="text-caption text-white" style="opacity:.8">Chưa có nội dung</div>
 							<div class="d-flex align-center ga-2">
 								<div class="text-h5 font-weight-bold text-white">{{ totalHL - totalHasND }}</div>
-								<v-chip size="x-small" color="white" variant="tonal"
-									class="text-warning font-weight-bold">
+								<v-chip size="x-small" color="white" variant="tonal" class="text-warning font-weight-bold">
 									{{ totalHL ? Math.round((totalHL - totalHasND) / totalHL * 100) : 0 }}%
 								</v-chip>
 							</div>
@@ -61,17 +59,13 @@
 			<div class="d-flex align-center ga-2 flex-wrap">
 				<v-icon size="16" color="primary">mdi-filter-outline</v-icon>
 				<span class="text-caption text-medium-emphasis">Lọc theo khối:</span>
-				<v-btn-toggle v-model="activeKhoi" color="primary" variant="outlined" density="compact" rounded="lg"
-					divided>
+				<v-btn-toggle v-model="activeKhoi" color="primary" variant="outlined" density="compact" rounded="lg" divided>
 					<v-btn :value="0" size="small" class="text-caption">Tất cả</v-btn>
-					<v-btn v-for="k in khoiList" :key="k" :value="k" size="small" class="text-caption">Khối {{ k }}
-					</v-btn>
+					<v-btn v-for="k in khoiList" :key="k" :value="k" size="small" class="text-caption">Khối {{ k }}</v-btn>
 				</v-btn-toggle>
 				<v-spacer />
-				<v-chip size="small" color="success" variant="tonal" prepend-icon="mdi-check-circle">Có nội dung
-				</v-chip>
-				<v-chip size="small" color="warning" variant="tonal" prepend-icon="mdi-clock-outline">Chưa có nội dung
-				</v-chip>
+				<v-chip size="small" color="success" variant="tonal" prepend-icon="mdi-check-circle">Có nội dung</v-chip>
+				<v-chip size="small" color="warning" variant="tonal" prepend-icon="mdi-clock-outline">Chưa có nội dung</v-chip>
 			</div>
 		</v-card>
 
@@ -109,6 +103,7 @@
 					<v-divider />
 					<v-data-table :headers="tableHeaders" :items="filteredItems" density="compact" hide-default-footer
 						fixed-header height="420" :items-per-page="-1" hover>
+
 						<template #item.KhoiID="{ item }">
 							<v-chip size="x-small" color="primary" variant="tonal" label class="font-weight-bold">
 								Khối {{ item.KhoiID }}
@@ -136,8 +131,7 @@
 						</template>
 
 						<template #item.HocLieuCoNoiDung="{ item }">
-							<v-chip :color="item.HocLieuCoNoiDung ? 'success' : 'warning'" variant="tonal"
-								size="x-small"
+							<v-chip :color="item.HocLieuCoNoiDung ? 'success' : 'warning'" variant="tonal" size="x-small"
 								:prepend-icon="item.HocLieuCoNoiDung ? 'mdi-check' : 'mdi-clock-outline'">
 								{{ item.HocLieuCoNoiDung ? 'Có nội dung' : 'Chưa có' }}
 							</v-chip>
@@ -151,8 +145,7 @@
 								<v-spacer />
 								<div class="d-flex align-center ga-1">
 									<v-icon size="13" color="primary">mdi-book-multiple</v-icon>
-									<span class="text-body-2 font-weight-bold text-primary">{{ filteredItems.length }}
-										học liệu</span>
+									<span class="text-body-2 font-weight-bold text-primary">{{ filteredItems.length }} học liệu</span>
 								</div>
 								<v-divider vertical class="mx-1" />
 								<div class="d-flex align-center ga-1">
@@ -182,10 +175,11 @@
 	export default {
 		name: 'UcHocLieuSo',
 		props: {
-			CapID: { default: null },
-			TuanHoc: { default: null }
+			CapID:       { default: null },
+			NgayBatDau:  { default: null },  // 'YYYY-MM-DD' | null
+			NgayKetThuc: { default: null },  // 'YYYY-MM-DD' | null
 		},
-	
+
 		data() {
 			return {
 				items: [],
@@ -201,27 +195,27 @@
 					'#84CC16', '#F97316', '#EC4899',
 					'#14B8A6', '#6366F1', '#A78BFA',
 				],
-	
 				tableHeaders: [
-					{ title: 'Khối', value: 'KhoiID', width: 80, sortable: true },
-					{ title: 'Môn học', value: 'TenMonHoc_HienThi', sortable: false },
-					{ title: 'Nội dung', value: 'TongNoiDung', width: 140, sortable: true },
-					{ title: 'Trạng thái', value: 'HocLieuCoNoiDung', width: 120, sortable: true },
+					{ title: 'Khối',      value: 'KhoiID',             width: 80,  sortable: true },
+					{ title: 'Môn học',   value: 'TenMonHoc_HienThi',              sortable: false },
+					{ title: 'Nội dung',  value: 'TongNoiDung',        width: 140, sortable: true },
+					{ title: 'Trạng thái',value: 'HocLieuCoNoiDung',   width: 120, sortable: true },
 				],
 			}
 		},
-	
-		// SAU ✅
+
 		mounted() { if (this.CapID) this.onLoad() },
 		watch: {
-			CapID() { this.onLoad() }, // đổi cấp học → reload
-			TuanHoc() { this.onLoad() }, // đổi tháng → reload
+			CapID()       { this.onLoad() },
+			NgayBatDau()  { this.onLoad() },
+			NgayKetThuc() { this.onLoad() },
 		},
+
 		computed: {
-			totalHL() { return this.items.length },
+			totalHL()    { return this.items.length },
 			totalHasND() { return this.items.filter(i => i.HocLieuCoNoiDung).length },
-			maxND() { return Math.max(...this.items.map(i => i.TongNoiDung), 1) },
-	
+			maxND()      { return Math.max(...this.items.map(i => i.TongNoiDung), 1) },
+
 			khoiList() {
 				return [...new Set(this.items.map(i => i.KhoiID))].sort((a, b) => a - b)
 			},
@@ -315,16 +309,14 @@
 				}
 			},
 		},
-	
+
 		methods: {
-			// onLoad()
 			async onLoad() {
 				if (!this.CapID) return
 				this.items = await fetchPromise('lms/BaoCao_2_ThongKe_HocLieuSo_ByCapID', {
-					CapID: this.CapID,
-					NienKhoa: this.TuanHoc?.NienKhoa ?? null, // ✅
-					Nam: this.TuanHoc?.Nam ?? null, // ✅
-					ThangHoc: this.TuanHoc?.Thang ?? null, // ✅
+					CapID:       this.CapID,
+					NgayBatDau:  this.NgayBatDau  ?? null,
+					NgayKetThuc: this.NgayKetThuc ?? null,
 				}, { forceRefresh: true })
 			},
 			getSubjectColor(name) {

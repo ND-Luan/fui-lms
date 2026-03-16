@@ -146,11 +146,19 @@
 			},
 			scoreTypeOptions() { return this.config.cap === 'cap2' ? GRADE_CONFIG.SCORE_TYPES_CAP2 : GRADE_CONFIG.SCORE_TYPES_CAP3 },
 			isTA2Mode() { return this.config.cap === 'cap3' && this.config.scoreType === 'TA2' },
+			isCap2CBMode() { return this.config.cap === 'cap2' && this.config.scoreType === 'HK_CB' },
 			canLoad() { return !!this.config.cap && !!this.config.semesterPeriod && !!this.config.scoreType },
+			// cap2 HK_CB → activeNhomCotDiem = S2_Mid (phần HK), cbNhomCotDiem = S2_Mid_CB
 			activeNhomCotDiem() {
 				const { semesterPeriod, scoreType } = this.config
 				if (!semesterPeriod || !scoreType) return null
-				return scoreType === 'HK' ? semesterPeriod : `${semesterPeriod}_${scoreType}`
+				if (scoreType === 'HK' || scoreType === 'HK_CB') return semesterPeriod
+				return `${semesterPeriod}_${scoreType}`
+			},
+			cbNhomCotDiem() {
+				const { semesterPeriod, scoreType, cap } = this.config
+				if (cap !== 'cap2' || scoreType !== 'HK_CB' || !semesterPeriod) return null
+				return `${semesterPeriod}_CB`
 			},
 			changedCount() { return Object.keys(this.changedCells).length },
 			selectedSemesterHocKy() {
@@ -1137,32 +1145,45 @@
 					const semester = this.config.semesterPeriod?.includes('S2') ? 'HK2' : 'HK1'
 					const basePayload = { LopID: cls.id, MonHocID: monHocID, TemplateBangDiemID: templateBangDiemID, Semester: semester }
 					const ieltsNhomCotDiem = this.activeNhomCotDiem?.replace('_TA2', '_IELTS')
+
 					// Cấp 2: không truyền ThuTuNhom; cấp 3: ThuTuNhom=14
 					const mainPayload = isCap2
 						? { ...basePayload, MaNhomCotDiem: this.activeNhomCotDiem }
 						: { ...basePayload, MaNhomCotDiem: this.activeNhomCotDiem, ThuTuNhom: 14 }
-	
-					const [data, ieltsData] = await Promise.all([
+
+					// Call thứ 2: cap2 HK_CB → S2_Mid_CB | cap3 TA2 → IELTS
+					let secondaryPromise = Promise.resolve([])
+					if (isCap2 && this.cbNhomCotDiem) {
+						secondaryPromise = fetchPromise(GRADE_CONFIG.API_ENDPOINTS.TEMPLATE_COLS, {
+							...basePayload, MaNhomCotDiem: this.cbNhomCotDiem,
+						})
+					} else if (!isCap2 && this.isTA2Mode) {
+						secondaryPromise = fetchPromise(GRADE_CONFIG.API_ENDPOINTS.TEMPLATE_COLS, {
+							...basePayload, MaNhomCotDiem: ieltsNhomCotDiem, ThuTuNhom: 15,
+						})
+					}
+
+					const [data, secondaryData] = await Promise.all([
 						fetchPromise(GRADE_CONFIG.API_ENDPOINTS.TEMPLATE_COLS, mainPayload),
-						(!isCap2 && this.isTA2Mode)
-							? fetchPromise(GRADE_CONFIG.API_ENDPOINTS.TEMPLATE_COLS, { ...basePayload, MaNhomCotDiem: ieltsNhomCotDiem, ThuTuNhom: 15 })
-							: Promise.resolve([]),
+						secondaryPromise,
 					])
-	
+
 					const colsMap = new Map()
 					const studentsMap = new Map()
 					const monHocLopIDRef = { value: null }
 					const gradesMap = new Map()
 					processApiRecords(data, colsMap, studentsMap, monHocLopIDRef, gradesMap)
-					processApiRecords(ieltsData, colsMap, studentsMap, monHocLopIDRef, gradesMap)
+					processApiRecords(secondaryData, colsMap, studentsMap, monHocLopIDRef, gradesMap)
 					this.templateColsCache[cacheKey] = { cols: Array.from(colsMap.values()), students: Array.from(studentsMap.values()), monHocLopID: monHocLopIDRef.value, gradesMap }
 				}
-	
+
 				const cached = this.templateColsCache[cacheKey]
 				const ieltsNhomCotDiem = this.activeNhomCotDiem?.replace('_TA2', '_IELTS')
+				// cap2 CB: filter cho phép cả nhóm HK lẫn CB đi qua; cap3: HK + IELTS
+				const secondaryNhomCotDiem = isCap2 ? this.cbNhomCotDiem : ieltsNhomCotDiem
 				return {
 					students: cached.students,
-					cols: filterAndSortCols(cached.cols, this.activeNhomCotDiem, ieltsNhomCotDiem),
+					cols: filterAndSortCols(cached.cols, this.activeNhomCotDiem, secondaryNhomCotDiem),
 					monHocLopID: cached.monHocLopID,
 					gradesMap: cached.gradesMap,
 				}
