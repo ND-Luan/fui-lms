@@ -15,7 +15,7 @@ const GRADE_CONFIG = {
         // { key: 'S2_Final', label: 'HK2 - Cuối kì', HocKi: 2 },
     ],
     SCORE_TYPES_CAP2: [
-        { key: 'HK_CB', label: 'Điểm HK + Cambridge' },
+        { key: 'HK', label: 'Điểm HK + Cambridge' },
     ],
     SCORE_TYPES_CAP3: [
         // { key: 'HK', label: 'Điểm HK' },
@@ -34,6 +34,11 @@ const GRADE_CONFIG = {
         'TA2_Speaking_Point', 'TA2_Speaking_Conv',
         'TA2_Avg_Point', 'TA2_Avg_Conv',
         'TA2_Point',
+        'CB_Listening_Point', 'CB_Listening_Conv',
+        'CB_Reading_Point', 'CB_Reading_Conv',
+        'CB_Writing_Point', 'CB_Writing_Conv',
+        'CB_Speaking_Point', 'CB_Speaking_Conv',
+        'CB_Avg_Point', 'CB_Avg_Conv',
         'IELTS_Listening_Conv',
         'IELTS_Reading_Conv',
         'IELTS_Writing_Conv',
@@ -87,9 +92,12 @@ function getColumnWidth(title, colType, options = {}) {
 /**
  * Xử lý công thức: thay tên cột bằng tọa độ (e.g. S2_Mid_TA2_Listening_Point → C2)
  */
-function resolveFormula(formula, allColDefs, rowIndex) {
+function resolveFormula(formula, allColDefs, rowIndex, constMap = {}) {
     if (!formula) return ''
     let f = formula.replace(/\bIIF\b/g, 'IF')
+    for (const [k, v] of Object.entries(constMap)) {
+        f = f.replace(new RegExp(`\\b${k}\\b`, 'g'), String(v))
+    }
     f = f.replace(/\b([A-Za-z][A-Za-z0-9]*(?:_[A-Za-z0-9]+)+)\b/g, match => {
         const found = allColDefs.find(c => c.key === match)
         return found ? `${found.colLetter}${rowIndex}` : match
@@ -257,7 +265,24 @@ function getIeltsValForRow(kiNang, scoreDescs, rowIdx, allUpdates, ws, FREEZE_CO
 function classifyColumnType(maCotDiem) {
     if (maCotDiem?.includes('_IELTS_')) return 'ielts'
     if (maCotDiem?.includes('_TA2_') || maCotDiem?.includes('__SoCauDung')) return 'ta2'
+    if (maCotDiem?.includes('_CB_')) return 'cambridge'
     return 'other'
+}
+// ════════════════════════════════════════════════════════════════
+// CAMBRIDGE HELPERS
+// ════════════════════════════════════════════════════════════════
+function calcCambridgeConv(pct, khoiID) {
+    if (pct === null || pct === undefined || pct === '') return null
+    const p = Number(pct), khoi = Number(khoiID)
+    if (isNaN(p)) return null
+    if (khoi === 9) {
+        if (p >= 90) return 'Vượt yêu cầu'
+        if (p >= 60) return 'Đạt'
+        return 'Chưa đạt'
+    }
+    if (p >= 80) return 'Vượt yêu cầu'
+    if (p >= 50) return 'Đạt'
+    return 'Chưa đạt'
 }
 // ════════════════════════════════════════════════════════════════
 // SPREADSHEET FORMATTERS
@@ -379,13 +404,24 @@ function processApiRecords(records, colsMap, studentsMap, monHocLopIDRef, grades
 /**
  * Lọc và sort cols từ cache theo nhóm cột điểm hợp lệ
  */
-function filterAndSortCols(cachedCols, activeNhomCotDiem, ieltsNhomCotDiem) {
+function filterAndSortCols(cachedCols, activeNhomCotDiem, ieltsNhomCotDiem, cbNhomCotDiem = null) {
+    const groupOrder = (nhom) => {
+        if (nhom === ieltsNhomCotDiem) return 2
+        if (cbNhomCotDiem && nhom === cbNhomCotDiem) return 1
+        return 0
+    }
     return cachedCols
         .filter(c =>
-            (c.MaNhomCotDiem === activeNhomCotDiem || c.MaNhomCotDiem === ieltsNhomCotDiem) &&
+            (c.MaNhomCotDiem === activeNhomCotDiem ||
+             c.MaNhomCotDiem === ieltsNhomCotDiem ||
+             (cbNhomCotDiem && c.MaNhomCotDiem === cbNhomCotDiem)) &&
             GRADE_CONFIG.VALID_COT_DIEM_SUFFIXES.some(s => c.MaCotDiem.endsWith(s))
         )
-        .sort((a, b) => a.ThuTuCotDiem - b.ThuTuCotDiem)
+        .sort((a, b) => {
+            const gDiff = groupOrder(a.MaNhomCotDiem) - groupOrder(b.MaNhomCotDiem)
+            if (gDiff !== 0) return gDiff
+            return a.ThuTuCotDiem - b.ThuTuCotDiem
+        })
         .map(c => ({
             key: c.MaCotDiem,
             title: c.TenCotDiem_VI,
@@ -494,9 +530,11 @@ function propagateAvgPoint(
     if (!avgPointDesc) return {}
     const avgIdx = scoreDescs.findIndex(d => d.key === avgPointDesc.key)
     const avgCi = FREEZE_COLS + avgIdx
+    const avgPrefix = avgPointDesc.key?.match(/_(TA2|CB)_Avg_Point$/)?.[1] ?? 'TA2'
+    const isPointFlag = avgPrefix === 'CB' ? '_isCambridgePoint' : '_isDiemTho'
     const skillKeys = ['Listening', 'Reading', 'Writing', 'Speaking']
     const vals = skillKeys.map(k => {
-        const desc = scoreDescs.find(sd => sd.key?.includes(`TA2_${k}_Point`) && sd._isDiemTho)
+        const desc = scoreDescs.find(sd => sd.key?.includes(`${avgPrefix}_${k}_Point`) && sd[isPointFlag])
         if (!desc) return null
         const ci = FREEZE_COLS + scoreDescs.indexOf(desc)
         const v = ws.options?.data?.[rowIndex]?.[ci]

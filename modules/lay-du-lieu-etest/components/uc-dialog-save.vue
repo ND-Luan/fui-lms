@@ -44,8 +44,7 @@
 
 				<v-card-text class="pa-0">
 					<v-data-table :headers="headers" :items="filteredRows" :items-per-page="-1" density="compact"
-					:row-props="getRowProps"
-						hide-default-footer style="max-height: calc(100dvh - 261px)">
+						:row-props="getRowProps" hide-default-footer style="max-height: calc(100dvh - 261px)">
 
 						<!-- Lớp + Mã HS + Họ tên (merge) -->
 						<template #[`item.student`]="{ item }">
@@ -62,6 +61,8 @@
 								<div class="d-flex align-center ga-1">
 									<v-icon v-if="item.type === 'ielts'" x-small color="primary">mdi-target</v-icon>
 									<v-icon v-else-if="item.type === 'ta2'" x-small color="info">mdi-pencil</v-icon>
+									<v-icon v-else-if="item.type === 'cambridge'" x-small
+										color="deep-purple">mdi-school</v-icon>
 									<span class="font-weight-medium">{{ item.tenCotDiem }}</span>
 								</div>
 								<div class="text-caption text-disabled">{{ item.maCotDiem }}</div>
@@ -113,123 +114,127 @@
 </template>
 
 <script>
-	export default {
-		name: 'UcDialogSave',
-	
-		props: {
-			rows: {
-				type: Array,
-				default: () => [],
-			},
-			loading: {
-				type: Boolean,
-				default: false,
-			},
+export default {
+	name: 'UcDialogSave',
+
+	props: {
+		rows: {
+			type: Array,
+			default: () => [],
 		},
-	
-		emits: ['confirm'],
-	
-		data() {
-			return {
-				searchText: '',
-				filterOverwrite: 'all',
-				filterOptions: [
-					{ label: 'Tất cả', value: 'all' },
-					{ label: 'Chỉ ghi đè', value: 'overwrite' },
-					{ label: 'Chỉ thêm mới', value: 'new' },
-				],
+		loading: {
+			type: Boolean,
+			default: false,
+		},
+	},
+
+	emits: ['confirm'],
+
+	data() {
+		return {
+			searchText: '',
+			filterOverwrite: 'all',
+			filterOptions: [
+				{ label: 'Tất cả', value: 'all' },
+				{ label: 'Chỉ ghi đè', value: 'overwrite' },
+				{ label: 'Chỉ thêm mới', value: 'new' },
+			],
+		}
+	},
+
+	computed: {
+		overwriteRows() {
+			return this.rows.filter(r => r.isOverwrite)
+		},
+
+		filteredRows() {
+			if (!this.rows?.length) return []  // ✅ guard
+
+			let filtered = this.rows
+
+			if (this.filterOverwrite === 'overwrite') {
+				filtered = filtered.filter(r => r.isOverwrite)
+			} else if (this.filterOverwrite === 'new') {
+				filtered = filtered.filter(r => !r.isOverwrite)
 			}
+
+			if (this.searchText.trim()) {
+				const query = this.searchText.trim().toLowerCase()
+				filtered = filtered.filter(r =>
+					r.hoTen?.toLowerCase().includes(query) ||
+					r.maSoHS?.toLowerCase().includes(query) ||
+					r.tenNhom?.toLowerCase().includes(query) ||
+					r.tenCotDiem?.toLowerCase().includes(query) ||
+					r.maCotDiem?.toLowerCase().includes(query)
+				)
+			}
+
+			// ✅ Sort: lớp → học sinh → nhóm cột
+			const typeOrder = (maCotDiem) => {
+				if (maCotDiem?.includes('__SoCauDung')) return 0
+				if (maCotDiem?.includes('_TA2_') && maCotDiem?.includes('_Point')) return 1
+				if (maCotDiem?.includes('_TA2_') && maCotDiem?.includes('_Conv')) return 2
+				if (maCotDiem?.endsWith('_TA2_Point')) return 3
+				if (maCotDiem?.includes('_IELTS_') && !maCotDiem?.includes('Band')) return 4
+				if (maCotDiem?.includes('_IELTS_Band')) return 5
+				// Cambridge
+				if (maCotDiem?.includes('_CB_') && maCotDiem?.includes('_Point')) return 7
+				if (maCotDiem?.includes('_CB_') && maCotDiem?.includes('_Conv')) return 8
+				if (maCotDiem?.includes('_CB_Avg')) return 9
+				return 6
+			}
+
+			return [...filtered].sort((a, b) => {
+				const clsCompare = (a.tenNhom ?? '').localeCompare(b.tenNhom ?? '')
+				if (clsCompare !== 0) return clsCompare
+				const studentCompare = String(a.maSoHS ?? '').localeCompare(String(b.maSoHS ?? ''))
+				if (studentCompare !== 0) return studentCompare
+				return typeOrder(a.maCotDiem) - typeOrder(b.maCotDiem)
+			})
 		},
-	
-		computed: {
-			overwriteRows() {
-				return this.rows.filter(r => r.isOverwrite)
-			},
-	
-			filteredRows() {
-				if (!this.rows?.length) return []  // ✅ guard
-	
-				let filtered = this.rows
-	
-				if (this.filterOverwrite === 'overwrite') {
-					filtered = filtered.filter(r => r.isOverwrite)
-				} else if (this.filterOverwrite === 'new') {
-					filtered = filtered.filter(r => !r.isOverwrite)
-				}
-	
-				if (this.searchText.trim()) {
-					const query = this.searchText.trim().toLowerCase()
-					filtered = filtered.filter(r =>
-						r.hoTen?.toLowerCase().includes(query) ||
-						r.maSoHS?.toLowerCase().includes(query) ||
-						r.tenNhom?.toLowerCase().includes(query) ||
-						r.tenCotDiem?.toLowerCase().includes(query) ||
-						r.maCotDiem?.toLowerCase().includes(query)
-					)
-				}
-	
-				// ✅ Sort: lớp → học sinh → nhóm cột
-				const typeOrder = (maCotDiem) => {
-					if (maCotDiem?.includes('__SoCauDung')) return 0
-					if (maCotDiem?.includes('_TA2_') && maCotDiem?.includes('_Point')) return 1
-					if (maCotDiem?.includes('_TA2_') && maCotDiem?.includes('_Conv')) return 2
-					if (maCotDiem?.endsWith('_TA2_Point')) return 3
-					if (maCotDiem?.includes('_IELTS_') && !maCotDiem?.includes('Band')) return 4
-					if (maCotDiem?.includes('_IELTS_Band')) return 5
-					return 6
-				}
-	
-				return [...filtered].sort((a, b) => {
-					const clsCompare = (a.tenNhom ?? '').localeCompare(b.tenNhom ?? '')
-					if (clsCompare !== 0) return clsCompare
-					const studentCompare = String(a.maSoHS ?? '').localeCompare(String(b.maSoHS ?? ''))
-					if (studentCompare !== 0) return studentCompare
-					return typeOrder(a.maCotDiem) - typeOrder(b.maCotDiem)
-				})
-			},
-	
-			headers() {
-				return [
-					{ title: 'Học sinh', key: 'student', width: 200 },
-					{ title: 'Cột điểm', key: 'column', width: 200 },
-					{ title: 'Giá trị cũ', key: 'oldValue', width: 120 },
-					{ title: 'Giá trị mới', key: 'newValue', width: 150 },
-				]
-			},
+
+		headers() {
+			return [
+				{ title: 'Học sinh', key: 'student', width: 200 },
+				{ title: 'Cột điểm', key: 'column', width: 200 },
+				{ title: 'Giá trị cũ', key: 'oldValue', width: 120 },
+				{ title: 'Giá trị mới', key: 'newValue', width: 150 },
+			]
 		},
-	
-		methods: {
-			// Format số câu đúng dạng "18/20"
-			formatCorrectAnswers(value, totalQuestions) {
-				if (value === null || value === undefined) return '—'
-				if (totalQuestions) {
-					return `${value}/${totalQuestions}`
-				}
-				return value
-			},
-	
-			confirm(isActive) {
-				this.$emit('confirm', { close: () => { isActive.value = false } })
-			},
-			getRowProps({ item }) {
-    return item.isOverwrite ? { class: 'row-overwrite' } : {}
-},
+	},
+
+	methods: {
+		// Format số câu đúng dạng "18/20"
+		formatCorrectAnswers(value, totalQuestions) {
+			if (value === null || value === undefined) return '—'
+			if (totalQuestions) {
+				return `${value}/${totalQuestions}`
+			}
+			return value
 		},
-	}
+
+		confirm(isActive) {
+			this.$emit('confirm', { close: () => { isActive.value = false } })
+		},
+		getRowProps({ item }) {
+			return item.isOverwrite ? { class: 'row-overwrite' } : {}
+		},
+	},
+}
 </script>
 
 <style scoped>
-	:deep(.v-data-table__tr) {
-		border-bottom: 1px solid rgba(0, 0, 0, 0.08);
-	}
+:deep(.v-data-table__tr) {
+	border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+}
 
-	:deep(.v-data-table__td) {
-		padding: 0 !important;
-		padding-left: 16px !important;
-	}
+:deep(.v-data-table__td) {
+	padding: 0 !important;
+	padding-left: 16px !important;
+}
 
-	:deep(.v-data-table__th) {
-		background-color: #f5f5f5;
-		font-weight: 600;
-	}
+:deep(.v-data-table__th) {
+	background-color: #f5f5f5;
+	font-weight: 600;
+}
 </style>
