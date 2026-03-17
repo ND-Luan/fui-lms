@@ -824,10 +824,10 @@ export default {
 				if (c.key?.includes('_IELTS_')) continue
 				if (processedKeys.has(c.key)) continue
 
-				const isInputCol = c.type === 'number' && !c.formula
+				const isInputCol = c.type === 'number' && !c.formula && !c.key?.includes('_CB_')
 
 				if (isInputCol) {
-					// HK: chỉ cần SoCauDung + DiemTho, bỏ qua Conv
+					// HK: chỉ cần SoCauDung + DiemTho, bỏ qua Conv (CB không có số câu đúng)
 					const expectedConvKey = c.key.replace('_Point', '_Conv')
 					const convColIdx = cols.findIndex((col, ci) => ci > i && col.key === expectedConvKey)
 					// Skip Conv col để không bị xử lý lại ở vòng sau
@@ -868,10 +868,11 @@ export default {
 								_isConv: true, cotDiemID: avgConvCol.cotDiemID ?? null,
 							})
 					} else if (isCBCol) {
-						// CB Point: formula có DiemMax → lấy từ HK col cùng kỹ năng
+						// CB Point: formula DiemTho * 100 / DiemMax → lấy HK col cùng kỹ năng
 						const skillSuffix = c.key.replace(/^.*_CB_/, '_')
 						const hkCol = cols.find(hk => !hk.key?.includes('_CB_') && hk.key?.endsWith(skillSuffix))
 						const diemMax = hkCol?.diemMax ?? null
+						const hkPointKey = hkCol?.key ?? null  // key của cột DiemTho HK tương ứng
 						const cbConvKey = c.key.replace('_Point', '_Conv')
 						const cbConvColIdx = cols.findIndex((col, ci) => ci > i && col.key === cbConvKey)
 						const cbConvCol = cbConvColIdx !== -1 ? cols[cbConvColIdx] : null
@@ -879,7 +880,7 @@ export default {
 						scoreDescs.push({
 							title: colTitle(c), key: c.key, colType: 'numeric', readOnly: true,
 							width: '130px', _formulaTemplate: c.formula,
-							_isCambridgePoint: true, _diemMax: diemMax,
+							_isCambridgePoint: true, _diemMax: diemMax, _hkPointKey: hkPointKey,
 							cotDiemID: c.cotDiemID ?? null,
 						})
 						if (cbConvCol)
@@ -902,7 +903,7 @@ export default {
 					scoreDescs.push({ title: colTitle(c), key: c.key, colType: 'text', readOnly: true, width: '200px', _formulaTemplate: c.formula, cotDiemID: c.cotDiemID ?? null })
 				} else {
 					processedKeys.add(c.key)
-					// Cột text thường
+					// Cột text thường / fallback
 					scoreDescs.push({
 						title: colTitle(c), key: c.key, colType: 'numeric', readOnly: true,
 						width: '130px', _formulaTemplate: c.formula,
@@ -954,11 +955,16 @@ export default {
 					if (!d.key) return ''
 					const existingVal = gradesMap.get(`${s.id}_${d.key}`)?.value ?? null
 
-					// Cambridge Point: resolveFormula với DiemMax inject
+					// Cambridge Point: resolveFormula với DiemMax + DiemTho inject
 					if (d._isCambridgePoint) {
 						if (existingVal !== null) return existingVal
 						if (!d._formulaTemplate) return ''
 						const constMap = d._diemMax !== null ? { DiemMax: d._diemMax } : {}
+						// Inject DiemTho → tọa độ cột HK Point tương ứng (vì DiemTho không có underscore nên resolveFormula không tự replace được)
+						if (d._hkPointKey) {
+							const hkDef = allColDefs.find(c => c.key === d._hkPointKey)
+							if (hkDef) constMap['DiemTho'] = `${hkDef.colLetter}${rowIndex}`
+						}
 						return resolveFormula(d._formulaTemplate, allColDefs, rowIndex, constMap)
 					}
 					// Cambridge Conv: resolveFormula bình thường
