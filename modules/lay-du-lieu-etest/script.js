@@ -276,13 +276,14 @@ function calcCambridgeConv(pct, khoiID) {
     const p = Number(pct), khoi = Number(khoiID)
     if (isNaN(p)) return null
     if (khoi === 9) {
-        if (p >= 90) return 'Vượt yêu cầu'
-        if (p >= 60) return 'Đạt'
-        return 'Chưa đạt'
+        if (p >= 90) return 'Exceeding Requirements/Vượt yêu cầu'
+        if (p >= 60) return 'Meeting Requirements/Đạt yêu cầu'
+        return 'Not Meeting Requirements/Chưa đạt'
     }
-    if (p >= 80) return 'Vượt yêu cầu'
-    if (p >= 50) return 'Đạt'
-    return 'Chưa đạt'
+    // Khối 6, 7, 8
+    if (p >= 80) return 'Exceeding Requirements/Vượt yêu cầu'
+    if (p >= 50) return 'Meeting Requirements/Đạt yêu cầu'
+    return 'Not Meeting Requirements/Chưa đạt'
 }
 // ════════════════════════════════════════════════════════════════
 // SPREADSHEET FORMATTERS
@@ -465,15 +466,22 @@ function calcOverallBand(listening, reading, writing, speaking) {
  * Trả về { changedCells patch, cellUpdates } để component merge vào
  */
 function propagateSoCauDung(
-    { cls, students, scoreDescs, FREEZE_COLS },
+    { cls, students, scoreDescs, gradesMap, FREEZE_COLS, cap },
     idx, rowIndex, soCauDungDesc, soCauDungVal, ws
 ) {
     const diemThoDesc = scoreDescs.find(d => d._soCauDungKey === soCauDungDesc.key)
-    if (!diemThoDesc || !diemThoDesc._soCau) return {}
+    if (!diemThoDesc || !diemThoDesc._soCau) {
+        console.warn('[propagateSoCauDung] Không tìm thấy diemThoDesc hoặc _soCau=null cho', soCauDungDesc.key,
+            '→ diemThoDesc:', diemThoDesc)
+        return { patch: {}, cellUpdates: {} }
+    }
     const diemThoIdx = scoreDescs.findIndex(d => d.key === diemThoDesc.key)
-    if (diemThoIdx === -1) return {}
+    if (diemThoIdx === -1) return { patch: {}, cellUpdates: {} }
+    const isCap2 = cap === 'cap2'
     const diemThoVal = (soCauDungVal !== null && soCauDungVal !== undefined)
-        ? parseFloat((soCauDungVal * 10 / diemThoDesc._soCau).toFixed(2))
+        ? isCap2
+            ? parseFloat((soCauDungVal / diemThoDesc._soCau * (diemThoDesc.diemMax ?? 10)).toFixed(2))
+            : parseFloat((soCauDungVal * 10 / diemThoDesc._soCau).toFixed(2))
         : ''
     const diemThoCi = FREEZE_COLS + diemThoIdx
     const snapOld = (ci) => {
@@ -483,66 +491,93 @@ function propagateSoCauDung(
             ? null : (isNaN(Number(raw)) ? raw : Number(raw))
     }
     const student = students[rowIndex]
-    const makeEntry = (desc, value, oldValue) => ({
-        wsIdx: idx, nhomID: cls.id, tenNhom: cls.name,
-        monHocLopID: cls.monHocLopID,
-        hocSinhID: student.id, hoTen: student.hoTen,
-        maCotDiem: desc.key, tenCotDiem: desc.title,
-        cotDiemID: desc.cotDiemID ?? null,
-        value, oldValue, kqhtID: null,
-    })
+    const makeEntry = (desc, value, oldValue) => {
+        const existingGrade = gradesMap?.get(`${student.id}_${desc.key}`)
+        return {
+            wsIdx: idx, nhomID: cls.id, tenNhom: cls.name,
+            monHocLopID: cls.monHocLopID,
+            hocSinhID: student.id, hoTen: student.hoTen,
+            maCotDiem: desc.key, tenCotDiem: desc.title,
+            cotDiemID: desc.cotDiemID ?? existingGrade?.cotDiemID ?? null,
+            value, oldValue,
+            kqhtID: existingGrade?.kqhtID ?? null,
+        }
+    }
     const patch = {}
     const cellUpdates = {}  // { ci: val } để caller _applyCell
     const oldDiemTho = snapOld(diemThoCi)
     cellUpdates[diemThoCi] = diemThoVal
     patch[`${idx}_${rowIndex}_${diemThoCi}`] = makeEntry(diemThoDesc, diemThoVal, oldDiemTho)
-    // Conv
-    const expectedConvKey = diemThoDesc.key.replace('_Point', '_Conv')
-    const convDesc = scoreDescs.find(d => d.key === expectedConvKey)
-    if (convDesc?._formulaTemplate) {
-        const convIdx = scoreDescs.findIndex(d => d.key === convDesc.key)
-        const convCi = FREEZE_COLS + convIdx
-        const valueMap = {}
-        scoreDescs.forEach((sd, si) => {
-            if (!sd.key) return
-            const v = ws.options?.data?.[rowIndex]?.[FREEZE_COLS + si]
-            if (v !== null && v !== undefined && v !== '') valueMap[sd.key] = Number(v)
-        })
-        valueMap[diemThoDesc.key] = diemThoVal
-        const convVal = evaluateFormulaString(convDesc._formulaTemplate, valueMap)
-        if (convVal !== null && convVal !== undefined) {
-            const oldConv = snapOld(convCi)
-            cellUpdates[convCi] = convVal
-            patch[`${idx}_${rowIndex}_${convCi}`] = makeEntry(convDesc, convVal, oldConv)
+    // Conv (cap3 only — cap2 ẩn _Conv HK)
+    if (!isCap2) {
+        const expectedConvKey = diemThoDesc.key.replace('_Point', '_Conv')
+        const convDesc = scoreDescs.find(d => d.key === expectedConvKey)
+        if (convDesc?._formulaTemplate) {
+            const convIdx = scoreDescs.findIndex(d => d.key === convDesc.key)
+            const convCi = FREEZE_COLS + convIdx
+            const valueMap = {}
+            scoreDescs.forEach((sd, si) => {
+                if (!sd.key) return
+                const v = ws.options?.data?.[rowIndex]?.[FREEZE_COLS + si]
+                if (v !== null && v !== undefined && v !== '') valueMap[sd.key] = Number(v)
+            })
+            valueMap[diemThoDesc.key] = diemThoVal
+            const convVal = evaluateFormulaString(convDesc._formulaTemplate, valueMap)
+            if (convVal !== null && convVal !== undefined) {
+                const oldConv = snapOld(convCi)
+                cellUpdates[convCi] = convVal
+                patch[`${idx}_${rowIndex}_${convCi}`] = makeEntry(convDesc, convVal, oldConv)
+            }
+        }
+    }
+    // CB_Point + CB_Conv (cap2 only)
+    if (isCap2) {
+        const cbPointDesc = scoreDescs.find(d => d._isCambridgePoint && d._hkPointKey === diemThoDesc.key)
+        if (cbPointDesc && cbPointDesc._diemMax) {
+            const cbIdx = scoreDescs.findIndex(d => d.key === cbPointDesc.key)
+            const cbCi = FREEZE_COLS + cbIdx
+            const cbVal = parseFloat((diemThoVal / cbPointDesc._diemMax * 100).toFixed(2))
+            cellUpdates[cbCi] = cbVal
+            patch[`${idx}_${rowIndex}_${cbCi}`] = makeEntry(cbPointDesc, cbVal, snapOld(cbCi))
+            // CB_Conv
+            const cbConvDesc = scoreDescs.find(d => d._isCambridgeConv && d._cbPointKey === cbPointDesc.key)
+            if (cbConvDesc) {
+                const cbConvIdx = scoreDescs.findIndex(d => d.key === cbConvDesc.key)
+                const cbConvCi = FREEZE_COLS + cbConvIdx
+                const cbConvVal = calcCambridgeConv(cbVal, cls.khoiID) ?? ''
+                if (cbConvVal !== '') {
+                    cellUpdates[cbConvCi] = cbConvVal
+                    patch[`${idx}_${rowIndex}_${cbConvCi}`] = makeEntry(cbConvDesc, cbConvVal, snapOld(cbConvCi))
+                }
+            }
         }
     }
     return { patch, cellUpdates }
 }
 /**
- * Tính Avg_Point, Avg_Conv, TA2_Point cho 1 row
+ * Tính Avg_Point, Avg_Conv, TA2_Point/CB_Avg cho 1 row
+ * pendingUpdates: { ci: val } — các ô đã _applyCell trước đó trong cùng batch (DiemTho mới nhất)
  * Trả về { patch, cellUpdates }
  */
 function propagateAvgPoint(
-    { cls, students, scoreDescs, FREEZE_COLS },
-    idx, rowIndex, ws
+    { cls, students, scoreDescs, gradesMap, FREEZE_COLS, cap },
+    idx, rowIndex, ws,
+    pendingUpdates = {}
 ) {
-    const avgPointDesc = scoreDescs.find(d => d._isAvgPoint)
-    if (!avgPointDesc) return {}
-    const avgIdx = scoreDescs.findIndex(d => d.key === avgPointDesc.key)
-    const avgCi = FREEZE_COLS + avgIdx
-    const avgPrefix = avgPointDesc.key?.match(/_(TA2|CB)_Avg_Point$/)?.[1] ?? 'TA2'
-    const isPointFlag = avgPrefix === 'CB' ? '_isCambridgePoint' : '_isDiemTho'
-    const skillKeys = ['Listening', 'Reading', 'Writing', 'Speaking']
-    const vals = skillKeys.map(k => {
-        const desc = scoreDescs.find(sd => sd.key?.includes(`${avgPrefix}_${k}_Point`) && sd[isPointFlag])
-        if (!desc) return null
-        const ci = FREEZE_COLS + scoreDescs.indexOf(desc)
+    const isCap2 = cap === 'cap2'
+    // Helper đọc ưu tiên pendingUpdates → ws.records.value → ws.options.data
+    const readVal = (ci) => {
+        if (pendingUpdates[ci] !== undefined && pendingUpdates[ci] !== '') return pendingUpdates[ci]
+        // ✅ Đọc từ records.value trước (jspreadsheet lưu giá trị hiện tại ở đây)
+        const recVal = ws.records?.[rowIndex]?.[ci]?.value
+        if (recVal !== null && recVal !== undefined && recVal !== '' &&
+            !(typeof recVal === 'string' && recVal.startsWith('='))) {
+            return recVal
+        }
         const v = ws.options?.data?.[rowIndex]?.[ci]
-        return (v !== null && v !== undefined && v !== '') ? Number(v) : null
-    })
-    const valid = vals.filter(v => v !== null && !isNaN(v))
-    if (valid.length === 0) return {}
-    const avg = parseFloat((valid.reduce((a, b) => a + b, 0) / valid.length).toFixed(2))
+        return (v !== null && v !== undefined && v !== '' &&
+            !(typeof v === 'string' && v.startsWith('='))) ? v : null
+    }
     const snapOld = (ci) => {
         const raw = ws?.getValueFromCoords(ci, rowIndex)
         return (raw === null || raw === undefined || raw === '' ||
@@ -550,49 +585,120 @@ function propagateAvgPoint(
             ? null : (isNaN(Number(raw)) ? raw : Number(raw))
     }
     const student = students[rowIndex]
-    const makeEntry = (desc, value, oldValue) => ({
-        wsIdx: idx, nhomID: cls.id, tenNhom: cls.name,
-        monHocLopID: cls.monHocLopID,
-        hocSinhID: student.id, hoTen: student.hoTen,
-        maCotDiem: desc.key, tenCotDiem: desc.title,
-        cotDiemID: desc.cotDiemID ?? null,
-        value, oldValue, kqhtID: null,
-    })
-    const patch = {}
-    const cellUpdates = {}
-    patch[`${idx}_${rowIndex}_${avgCi}`] = makeEntry(avgPointDesc, avg, snapOld(avgCi))
-    cellUpdates[avgCi] = avg
-    const valueMap = {}
-    scoreDescs.forEach((sd, si) => {
-        if (!sd.key) return
-        const v = ws.options?.data?.[rowIndex]?.[FREEZE_COLS + si]
-        if (v !== null && v !== undefined && v !== '') valueMap[sd.key] = Number(v)
-    })
-    valueMap[avgPointDesc.key] = avg
-    // Avg_Conv
-    const avgConvKey = avgPointDesc.key.replace('_Avg_Point', '_Avg_Conv')
-    const avgConvDesc = scoreDescs.find(d => d.key === avgConvKey)
-    if (avgConvDesc?._formulaTemplate) {
-        const avgConvIdx = scoreDescs.findIndex(d => d.key === avgConvDesc.key)
-        const avgConvCi = FREEZE_COLS + avgConvIdx
-        const avgConvVal = evaluateFormulaString(avgConvDesc._formulaTemplate, valueMap)
-        if (avgConvVal !== null && avgConvVal !== undefined) {
-            cellUpdates[avgConvCi] = avgConvVal
-            valueMap[avgConvDesc.key] = avgConvVal
-            patch[`${idx}_${rowIndex}_${avgConvCi}`] = makeEntry(avgConvDesc, avgConvVal, snapOld(avgConvCi))
+    const makeEntry = (desc, value, oldValue) => {
+        const existingGrade = gradesMap?.get(`${student.id}_${desc.key}`)
+        return {
+            wsIdx: idx, nhomID: cls.id, tenNhom: cls.name,
+            monHocLopID: cls.monHocLopID,
+            hocSinhID: student.id, hoTen: student.hoTen,
+            maCotDiem: desc.key, tenCotDiem: desc.title,
+            cotDiemID: desc.cotDiemID ?? existingGrade?.cotDiemID ?? null,
+            value, oldValue,
+            kqhtID: existingGrade?.kqhtID ?? null,
         }
     }
-    // TA2_Point
-    const ta2PointDesc = scoreDescs.find(d =>
-        d.key?.endsWith('_TA2_Point') && !d.key?.includes('_Avg_') && d._formulaTemplate
-    )
-    if (ta2PointDesc) {
-        const ta2PointIdx = scoreDescs.findIndex(d => d.key === ta2PointDesc.key)
-        const ta2PointCi = FREEZE_COLS + ta2PointIdx
-        const ta2Val = evaluateFormulaString(ta2PointDesc._formulaTemplate, valueMap)
-        if (ta2Val !== null && ta2Val !== undefined) {
-            cellUpdates[ta2PointCi] = ta2Val
-            patch[`${idx}_${rowIndex}_${ta2PointCi}`] = makeEntry(ta2PointDesc, ta2Val, snapOld(ta2PointCi))
+    const patch = {}
+    const cellUpdates = {}
+    // ── HK Avg_Point ──
+    const hkAvgDesc = scoreDescs.find(d => d._isAvgPoint && !d.key?.includes('_CB_'))
+    if (hkAvgDesc) {
+        const avgIdx = scoreDescs.findIndex(d => d.key === hkAvgDesc.key)
+        const avgCi = FREEZE_COLS + avgIdx
+        const diemThoDescs = isCap2
+            ? scoreDescs.filter(d => d._isDiemTho)
+            : ['Listening', 'Reading', 'Writing', 'Speaking'].map(k =>
+                scoreDescs.find(sd => sd.key?.includes(`TA2_${k}_Point`) && sd._isDiemTho)
+              ).filter(Boolean)
+        const vals = diemThoDescs.map(d => {
+            const ci = FREEZE_COLS + scoreDescs.indexOf(d)
+            const v = readVal(ci)
+            console.log(`[propagateAvgPoint] DiemTho "${d.key}" ci=${ci} readVal=${v}`,
+                '| pending:', pendingUpdates[ci],
+                '| records.value:', ws.records?.[rowIndex]?.[ci]?.value,
+                '| options.data:', ws.options?.data?.[rowIndex]?.[ci])
+            return v !== null ? Number(v) : null
+        })
+        console.log('[propagateAvgPoint] vals:', vals, '| isCap2:', isCap2, '| diemThoDescs count:', diemThoDescs.length)
+        const valid = vals.filter(v => v !== null && !isNaN(v))
+        if (valid.length > 0) {
+            const avg = parseFloat((valid.reduce((a, b) => a + b, 0) / valid.length).toFixed(2))
+            cellUpdates[avgCi] = avg
+            pendingUpdates = { ...pendingUpdates, [avgCi]: avg }
+            patch[`${idx}_${rowIndex}_${avgCi}`] = makeEntry(hkAvgDesc, avg, snapOld(avgCi))
+            // Build valueMap từ scoreDescs + pendingUpdates
+            const valueMap = {}
+            scoreDescs.forEach((sd, si) => {
+                if (!sd.key) return
+                const v = readVal(FREEZE_COLS + si)
+                if (v !== null && v !== undefined) valueMap[sd.key] = Number(v)
+            })
+            valueMap[hkAvgDesc.key] = avg
+            // Avg_Conv (cap3 only)
+            if (!isCap2) {
+                const avgConvKey = hkAvgDesc.key.replace('_Avg_Point', '_Avg_Conv')
+                const avgConvDesc = scoreDescs.find(d => d.key === avgConvKey)
+                if (avgConvDesc?._formulaTemplate) {
+                    const avgConvIdx = scoreDescs.findIndex(d => d.key === avgConvDesc.key)
+                    const avgConvCi = FREEZE_COLS + avgConvIdx
+                    const avgConvVal = evaluateFormulaString(avgConvDesc._formulaTemplate, valueMap)
+                    if (avgConvVal !== null && avgConvVal !== undefined) {
+                        cellUpdates[avgConvCi] = avgConvVal
+                        valueMap[avgConvDesc.key] = avgConvVal
+                        patch[`${idx}_${rowIndex}_${avgConvCi}`] = makeEntry(avgConvDesc, avgConvVal, snapOld(avgConvCi))
+                    }
+                }
+            }
+            // TA2_Point (cap3 only)
+            if (!isCap2) {
+                const ta2PointDesc = scoreDescs.find(d =>
+                    d.key?.endsWith('_TA2_Point') && !d.key?.includes('_Avg_') && d._formulaTemplate
+                )
+                if (ta2PointDesc) {
+                    const ta2PointIdx = scoreDescs.findIndex(d => d.key === ta2PointDesc.key)
+                    const ta2PointCi = FREEZE_COLS + ta2PointIdx
+                    const ta2Val = evaluateFormulaString(ta2PointDesc._formulaTemplate, valueMap)
+                    console.log('[propagateAvgPoint] TA2_Point formula:', ta2PointDesc._formulaTemplate,
+                        '| valueMap keys:', Object.keys(valueMap), '| result:', ta2Val)
+                    if (ta2Val !== null && ta2Val !== undefined) {
+                        cellUpdates[ta2PointCi] = ta2Val
+                        patch[`${idx}_${rowIndex}_${ta2PointCi}`] = makeEntry(ta2PointDesc, ta2Val, snapOld(ta2PointCi))
+                    }
+                } else {
+                    console.warn('[propagateAvgPoint] Không tìm thấy TA2_Point desc với _formulaTemplate trong scoreDescs.',
+                        scoreDescs.filter(d => d.key?.endsWith('_TA2_Point')).map(d => ({ key: d.key, hasFormula: !!d._formulaTemplate })))
+                }
+            }
+        }
+    }
+    // ── CB_Avg_Point (cap2 only) ──
+    if (isCap2) {
+        const cbAvgDesc = scoreDescs.find(d => d._isAvgPoint && d.key?.includes('_CB_'))
+        if (cbAvgDesc) {
+            const cbAvgIdx = scoreDescs.findIndex(d => d.key === cbAvgDesc.key)
+            const cbAvgCi = FREEZE_COLS + cbAvgIdx
+            const cbSkillDescs = scoreDescs.filter(d => d._isCambridgePoint)
+            const vals = cbSkillDescs.map(d => {
+                const ci = FREEZE_COLS + scoreDescs.indexOf(d)
+                const v = readVal(ci)
+                return v !== null ? Number(v) : null
+            }).filter(v => v !== null && !isNaN(v))
+            if (vals.length > 0) {
+                const cbAvg = parseFloat((vals.reduce((a, b) => a + b, 0) / vals.length).toFixed(2))
+                cellUpdates[cbAvgCi] = cbAvg
+                patch[`${idx}_${rowIndex}_${cbAvgCi}`] = makeEntry(cbAvgDesc, cbAvg, snapOld(cbAvgCi))
+                // CB_Avg_Conv
+                const cbAvgConvKey = cbAvgDesc.key.replace('_Avg_Point', '_Avg_Conv')
+                const cbAvgConvDesc = scoreDescs.find(d => d.key === cbAvgConvKey)
+                if (cbAvgConvDesc) {
+                    const cbAvgConvIdx = scoreDescs.findIndex(d => d.key === cbAvgConvKey)
+                    const cbAvgConvCi = FREEZE_COLS + cbAvgConvIdx
+                    const convVal = calcCambridgeConv(cbAvg, cls.khoiID) ?? ''
+                    if (convVal !== '') {
+                        cellUpdates[cbAvgConvCi] = convVal
+                        patch[`${idx}_${rowIndex}_${cbAvgConvCi}`] = makeEntry(cbAvgConvDesc, convVal, snapOld(cbAvgConvCi))
+                    }
+                }
+            }
         }
     }
     return { patch, cellUpdates }
@@ -609,6 +715,8 @@ function buildSaveRows(changedCells) {
         const cell = changedCells[cellKey]
         if (cell.maCotDiem?.includes('__SoCauDung')) continue
         if (typeof cell.value === 'string' && cell.value.startsWith('=')) continue
+        if (typeof cell.value === 'number' && isNaN(cell.value)) continue
+        if (cell.value === null || cell.value === undefined || cell.value === '') continue
         if (typeof cell.oldValue === 'string' && cell.oldValue.startsWith('=')) continue
         const [wsIdx, rowIndex, colIndex] = cellKey.split('_').map(Number)
         saveRows.push({

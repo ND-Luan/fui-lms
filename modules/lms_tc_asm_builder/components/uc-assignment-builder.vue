@@ -473,11 +473,11 @@
 	
 				switch (componentInfo.type) {
 					case 'QUIZ_SINGLE_CHOICE':
-						newQuestion.config.options = [{ id: `opt_1`, text: 'Lựa chọn A' }, { id: `opt_2`, text: 'Lựa chọn B' }, { id: `opt_3`, text: 'Lựa chọn C' }, { id: `opt_4`, text: 'Lựa chọn D' }];
+						newQuestion.config.options = [{ id: `opt_1`, text: '' }, { id: `opt_2`, text: '' }, { id: `opt_3`, text: '' }, { id: `opt_4`, text: '' }];
 						newQuestion.config.correctAnswer = null;
 						break;
 					case 'QUIZ_MULTIPLE_CHOICE':
-						newQuestion.config.options = [{ id: `opt_1`, text: 'Lựa chọn A' }, { id: `opt_2`, text: 'Lựa chọn B' }, { id: `opt_3`, text: 'Lựa chọn C' }, { id: `opt_5`, text: 'Lựa chọn D' }];
+						newQuestion.config.options = [{ id: `opt_1`, text: '' }, { id: `opt_2`, text: '' }, { id: `opt_3`, text: '' }, { id: `opt_5`, text: '' }];
 						newQuestion.config.correctAnswers = [];
 						break;
 					case 'QUIZ_TRUE_FALSE':

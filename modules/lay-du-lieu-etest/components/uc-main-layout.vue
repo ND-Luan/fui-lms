@@ -49,8 +49,8 @@
 
 					<v-divider class="my-1" />
 
-					<uc-dialog-etest-exam v-if="isTA2Mode" :so-cau-dung-options="soCauDungOptions"
-						@apply="onEtestApply">
+					<uc-dialog-etest-exam v-if="isTA2Mode || config.cap === 'cap2'"
+						:so-cau-dung-options="soCauDungOptions" @apply="onEtestApply">
 						<template #default="{ activatorProps }">
 							<v-list-item v-bind="activatorProps" prepend-icon="mdi-file-import-outline">
 								<v-list-item-title>Import eTest</v-list-item-title>
@@ -196,6 +196,12 @@ export default {
 					// ✅ Chỉ set nếu chưa có (monHocLopID từ fetchClasses ưu tiên hơn)
 					if (!cls.monHocLopID) cls.monHocLopID = monHocLopID
 					const { worksheetConfig, scoreDescs } = this.buildClassWorksheet(cls, students, cols, thietLapList, gradesMap)
+					// ⚠️ Cảnh báo cột SoCauDung chưa có thiết lập kĩ năng
+					const missingSoCau = scoreDescs.filter(d => d.key?.includes('__SoCauDung') && !d._soCau)
+					if (missingSoCau.length > 0) {
+						console.warn(`[ThiếtLậpKĩNăng] Lớp "${cls.name}" — ${missingSoCau.length} cột chưa có SoCau:`,
+							missingSoCau.map(d => d.key))
+					}
 					const hasIelts = GRADE_CONFIG.IELTS_NHOM_IDS.has(cls.id)
 					this.wsMeta.push({ cls, students, scoreDescs, gradesMap, hasIelts })
 					this.worksheetConfigs.push(worksheetConfig)
@@ -297,31 +303,32 @@ export default {
 				},
 			}
 
-			// Nếu là ô SoCauDung → tự động tính DiemTho
+			// Nếu là ô SoCauDung → tự động tính DiemTho + CB + Avg
 			if (desc.key?.includes('__SoCauDung')) {
-				this._propagateSoCauDung(idx, rowIndex, desc, actualValue, ws)
-				// ✅ Thêm: tính lại Avg sau khi DiemTho đã được cập nhật
-				this._propagateAvgPoint(idx, rowIndex, ws)
+				const pendingUpdates = this._propagateSoCauDung(idx, rowIndex, desc, actualValue, ws)
+				this._propagateAvgPoint(idx, rowIndex, ws, pendingUpdates)
 			}
 		},
 
 		_propagateSoCauDung(idx, rowIndex, soCauDungDesc, soCauDungVal, ws) {
 			const meta = this.wsMeta[idx]
-			const { patch, cellUpdates } = propagateSoCauDung(
-				{ ...meta, FREEZE_COLS: this.FREEZE_COLS },
+			const { patch = {}, cellUpdates = {} } = propagateSoCauDung(
+				{ ...meta, FREEZE_COLS: this.FREEZE_COLS, cap: this.config.cap },
 				idx, rowIndex, soCauDungDesc, soCauDungVal, ws
 			)
 			Object.entries(cellUpdates).forEach(([ci, val]) => this._applyCell(ws, Number(ci), rowIndex, val))
 			this.changedCells = { ...this.changedCells, ...patch }
+			// Trả về cellUpdates để caller dùng làm pendingUpdates cho _propagateAvgPoint
+			return cellUpdates
 		},
 
-		_propagateAvgPoint(idx, rowIndex, ws) {
+		_propagateAvgPoint(idx, rowIndex, ws, pendingUpdates = {}) {
 			const meta = this.wsMeta[idx]
-			const { patch, cellUpdates } = propagateAvgPoint(
-				{ ...meta, FREEZE_COLS: this.FREEZE_COLS },
-				idx, rowIndex, ws
+			const { patch = {}, cellUpdates = {} } = propagateAvgPoint(
+				{ ...meta, FREEZE_COLS: this.FREEZE_COLS, cap: this.config.cap },
+				idx, rowIndex, ws,
+				pendingUpdates
 			)
-			if (!patch) return
 			Object.entries(cellUpdates).forEach(([ci, val]) => this._applyCell(ws, Number(ci), rowIndex, val))
 			this.changedCells = { ...this.changedCells, ...patch }
 		},
@@ -333,8 +340,7 @@ export default {
 		// ETEST APPLY
 		// ════════════════════════════════════════════════
 
-		async onEtestApply({ students, mapping, lopIDs, selectedLopID, convertIelts = true }) {
-			// ✅ Tìm tab khớp với selectedLopID
+		async onEtestApply({ students, mapping, lopIDs, selectedLopID, convertIelts = true, hasSkillKeys = true }) {
 			const norm = String(selectedLopID ?? lopIDs?.[0] ?? '').trim().toLowerCase()
 			const targetIdx = this.wsMeta.findIndex(meta => {
 				const name = String(meta.cls.name).trim().toLowerCase()
@@ -346,7 +352,6 @@ export default {
 				return
 			}
 
-			// ✅ Tự chuyển sang tab đúng
 			this.activeWsIdx = targetIdx
 			await this.$nextTick()
 			if (!this.initializedTabs.has(targetIdx)) await new Promise(r => setTimeout(r, 300))
@@ -358,22 +363,17 @@ export default {
 			if (!ws) return
 
 			const { cls, students: clsStudents, scoreDescs } = meta
-			// ✅ Không filter theo LopID — match theo HocSinhID trong tab đang active
-			// HS có thể đã chuyển lớp (eTest trả LopID cũ) nhưng jspreadsheet đặt đúng tab
 			const etestMap = new Map(students.map(s => [String(s.StudentID), s]))
 			const descMap = new Map(scoreDescs.map((d, i) => [d.key, i]))
 			const rowMap = new Map(clsStudents.map((s, i) => [String(s.id), i]))
 			const allUpdates = {}
 			const changedBuffer = {}
 
-			// ✅ Snapshot oldValues TRƯỚC KHI apply bất cứ thứ gì
 			const oldValueSnapshot = {}
 			const snapOldValue = (rowIdx, ci) => {
 				const k = `${rowIdx}_${ci}`
 				if (oldValueSnapshot[k] !== undefined) return
-				// ✅ Dùng getValueFromCoords thay vì options.data để lấy giá trị đã tính
 				const raw = ws.getValueFromCoords(ci, rowIdx)
-				// ✅ Nếu là công thức → coi như trống (không phải giá trị thực)
 				if (typeof raw === 'string' && raw.startsWith('=')) {
 					oldValueSnapshot[k] = null
 					return
@@ -384,11 +384,8 @@ export default {
 			}
 
 			const recordUpdate = (rowIdx, ci, maCotDiem, val) => {
-				// ✅ Bỏ qua nếu val là công thức
 				if (typeof val === 'string' && val.startsWith('=')) return
-				// ✅ Snapshot trước khi ghi
 				snapOldValue(rowIdx, ci)
-
 				if (!allUpdates[rowIdx]) allUpdates[rowIdx] = {}
 				allUpdates[rowIdx][ci] = val
 
@@ -411,23 +408,190 @@ export default {
 					maCotDiem, tenCotDiem: d?.title ?? maCotDiem,
 					cotDiemID,
 					value: val,
-					oldValue: oldValueSnapshot[`${rowIdx}_${ci}`], // ✅ dùng snapshot
+					oldValue: oldValueSnapshot[`${rowIdx}_${ci}`],
 					kqhtID,
 				}
 			}
 
+			// Helper: apply 1 cell lên UI + allUpdates + recordUpdate
+			const applyAndRecord = (rowIdx, ci, maCotDiem, val) => {
+				snapOldValue(rowIdx, ci)
+				this._applyCell(ws, ci, rowIdx, val)
+				if (!allUpdates[rowIdx]) allUpdates[rowIdx] = {}
+				allUpdates[rowIdx][ci] = val
+				recordUpdate(rowIdx, ci, maCotDiem, val)
+			}
+
+			// ════════════════════════════════════════════════
+			// CAP2: không có skill keys — SoCauDung → 1 cột duy nhất
+			// ════════════════════════════════════════════════
+			if (!hasSkillKeys) {
+				const maCotDiem = mapping.__SoCauDung_Direct
+				if (!maCotDiem) return
+				const di = descMap.get(maCotDiem)
+				if (di === undefined) return
+
+				// Pass 1: SoCauDung + DiemTho — apply ngay lên UI
+				for (const [sid, eRow] of etestMap) {
+					const rowIdx = rowMap.get(sid)
+					if (rowIdx === undefined) continue
+					const val = eRow.SoCauDung
+					if (val === null || val === undefined) continue
+
+					// Ghi SoCauDung
+					applyAndRecord(rowIdx, this.FREEZE_COLS + di, maCotDiem, val)
+
+					// Tính DiemTho = (SoCauDung / SoCau) * DiemMax — apply ngay
+					const diemThoDesc = scoreDescs.find(d => d._soCauDungKey === maCotDiem)
+					if (diemThoDesc) {
+						const soCau = diemThoDesc._soCau ?? eRow.SoCauLam ?? null
+						const diemMax = diemThoDesc.diemMax ?? 10
+						if (soCau) {
+							const diemThoVal = parseFloat(((val / soCau) * diemMax).toFixed(2))
+							const diemThoIdx = scoreDescs.findIndex(d => d.key === diemThoDesc.key)
+							if (diemThoIdx !== -1)
+								applyAndRecord(rowIdx, this.FREEZE_COLS + diemThoIdx, diemThoDesc.key, diemThoVal)
+						}
+					}
+				}
+
+				// Pass 2: Total_Point — đọc DiemTho từ ws.options.data (đã apply ở Pass 1)
+				const totalPointDesc = scoreDescs.find(d =>
+					d._formulaTemplate &&
+					!d._isAvgPoint &&
+					d.key?.endsWith('_Total_Point')
+				)
+				if (totalPointDesc) {
+					const totalIdx = scoreDescs.findIndex(d => d.key === totalPointDesc.key)
+					const totalCi = this.FREEZE_COLS + totalIdx
+
+					for (const rowIdxStr of Object.keys(allUpdates)) {
+						const rowIdx = Number(rowIdxStr)
+						const valueMap = buildValueMapForRow(scoreDescs, rowIdx, allUpdates, ws, this.FREEZE_COLS)
+						const totalVal = evaluateFormulaString(totalPointDesc._formulaTemplate, valueMap)
+						if (totalVal !== null && totalVal !== undefined)
+							applyAndRecord(rowIdx, totalCi, totalPointDesc.key, totalVal)
+					}
+				}
+
+				// Pass 3: Avg_Point — lấy tất cả _isDiemTho chia cho tổng số kỹ năng
+				const avgPointDesc = scoreDescs.find(d => d._isAvgPoint)
+				if (avgPointDesc) {
+					const avgIdx = scoreDescs.findIndex(d => d.key === avgPointDesc.key)
+					const avgCi = this.FREEZE_COLS + avgIdx
+					const diemThoDescs = scoreDescs.filter(d => d._isDiemTho)
+					const totalSkills = diemThoDescs.length
+
+					for (const rowIdxStr of Object.keys(allUpdates)) {
+						const rowIdx = Number(rowIdxStr)
+
+						const vals = diemThoDescs.map(desc => {
+							const ci = this.FREEZE_COLS + scoreDescs.indexOf(desc)
+							// ✅ Ưu tiên allUpdates (đã apply), fallback ws.options.data
+							const v = allUpdates[rowIdx]?.[ci] ?? ws.options?.data?.[rowIdx]?.[ci]
+							return (v !== null && v !== undefined && v !== '') ? Number(v) : null
+						})
+
+						const sum = vals.reduce((a, v) => a + (v ?? 0), 0)
+						const avg = parseFloat((sum / totalSkills).toFixed(2))
+						applyAndRecord(rowIdx, avgCi, avgPointDesc.key, avg)
+					}
+				}
+
+				// Pass 4: CB_Point = (DiemTho / DiemMax) * 100
+				const cbPointDescs = scoreDescs.filter(d => d._isCambridgePoint && d._hkPointKey && d._diemMax)
+				for (const cbDesc of cbPointDescs) {
+					const cbIdx = scoreDescs.findIndex(d => d.key === cbDesc.key)
+					if (cbIdx === -1) continue
+					const cbCi = this.FREEZE_COLS + cbIdx
+					const hkIdx = scoreDescs.findIndex(d => d.key === cbDesc._hkPointKey)
+					if (hkIdx === -1) continue
+					const hkCi = this.FREEZE_COLS + hkIdx
+					for (const rowIdxStr of Object.keys(allUpdates)) {
+						const rowIdx = Number(rowIdxStr)
+						const hkVal = allUpdates[rowIdx]?.[hkCi] ?? ws.options?.data?.[rowIdx]?.[hkCi]
+						if (hkVal === null || hkVal === undefined || hkVal === '') continue
+						const cbVal = parseFloat((Number(hkVal) / cbDesc._diemMax * 100).toFixed(2))
+						applyAndRecord(rowIdx, cbCi, cbDesc.key, cbVal)
+					}
+				}
+
+				// Pass 4b: CB_Conv = CB_CONV(cbPoint, khoiID)
+				const cbConvDescs = scoreDescs.filter(d => d._isCambridgeConv && d._cbPointKey)
+				for (const cbConvDesc of cbConvDescs) {
+					const convIdx = scoreDescs.findIndex(d => d.key === cbConvDesc.key)
+					if (convIdx === -1) continue
+					const convCi = this.FREEZE_COLS + convIdx
+					const cbPtIdx = scoreDescs.findIndex(d => d.key === cbConvDesc._cbPointKey)
+					if (cbPtIdx === -1) continue
+					const cbPtCi = this.FREEZE_COLS + cbPtIdx
+					for (const rowIdxStr of Object.keys(allUpdates)) {
+						const rowIdx = Number(rowIdxStr)
+						const cbPtVal = allUpdates[rowIdx]?.[cbPtCi] ?? ws.options?.data?.[rowIdx]?.[cbPtCi]
+						if (cbPtVal === null || cbPtVal === undefined || cbPtVal === '') continue
+						const convVal = calcCambridgeConv(Number(cbPtVal), cls.khoiID) ?? ''
+						if (convVal !== '') applyAndRecord(rowIdx, convCi, cbConvDesc.key, convVal)
+					}
+				}
+
+				// Pass 4c: CB_Avg_Point = trung bình các CB_Point
+				const cbAvgPointDesc = scoreDescs.find(d => d._isAvgPoint && d.key?.includes('_CB_'))
+				if (cbAvgPointDesc) {
+					const cbAvgIdx = scoreDescs.findIndex(d => d.key === cbAvgPointDesc.key)
+					const cbAvgCi = this.FREEZE_COLS + cbAvgIdx
+					const cbSkillDescs = scoreDescs.filter(d => d._isCambridgePoint && d._hkPointKey)
+					for (const rowIdxStr of Object.keys(allUpdates)) {
+						const rowIdx = Number(rowIdxStr)
+						const vals = cbSkillDescs.map(d => {
+							const ci = this.FREEZE_COLS + scoreDescs.indexOf(d)
+							const v = allUpdates[rowIdx]?.[ci] ?? ws.options?.data?.[rowIdx]?.[ci]
+							return (v !== null && v !== undefined && v !== '') ? Number(v) : null
+						}).filter(v => v !== null)
+						if (!vals.length) continue
+						const avg = parseFloat((vals.reduce((a, b) => a + b, 0) / vals.length).toFixed(2))
+						applyAndRecord(rowIdx, cbAvgCi, cbAvgPointDesc.key, avg)
+					}
+				}
+
+				// Pass 4d: CB_Avg_Conv = CB_CONV(cbAvgPoint, khoiID)
+				if (cbAvgPointDesc) {
+					const cbAvgConvKey = cbAvgPointDesc.key.replace('_Avg_Point', '_Avg_Conv')
+					const cbAvgConvDesc = scoreDescs.find(d => d.key === cbAvgConvKey)
+					if (cbAvgConvDesc) {
+						const cbAvgIdx = scoreDescs.findIndex(d => d.key === cbAvgPointDesc.key)
+						const cbAvgCi = this.FREEZE_COLS + cbAvgIdx
+						const cbAvgConvIdx = scoreDescs.findIndex(d => d.key === cbAvgConvKey)
+						const cbAvgConvCi = this.FREEZE_COLS + cbAvgConvIdx
+						for (const rowIdxStr of Object.keys(allUpdates)) {
+							const rowIdx = Number(rowIdxStr)
+							const avgVal = allUpdates[rowIdx]?.[cbAvgCi] ?? ws.options?.data?.[rowIdx]?.[cbAvgCi]
+							if (avgVal === null || avgVal === undefined || avgVal === '') continue
+							const convVal = calcCambridgeConv(Number(avgVal), cls.khoiID) ?? ''
+							if (convVal !== '') applyAndRecord(rowIdx, cbAvgConvCi, cbAvgConvDesc.key, convVal)
+						}
+					}
+				}
+
+				this.changedCells = { ...this.changedCells, ...changedBuffer }
+				const totalCells = Object.values(allUpdates).reduce((s, c) => s + Object.keys(c).length, 0)
+				console.log(`[onEtestApply][cap2] tab[${targetIdx}] "${cls.name}" — ${totalCells} ô`)
+				return
+			}
+
+			// ════════════════════════════════════════════════
+			// CAP3: có skill keys — mapping từng kỹ năng
+			// ════════════════════════════════════════════════
 			for (const [sid, eRow] of etestMap) {
 				const rowIdx = rowMap.get(sid)
 				if (rowIdx === undefined) continue
 
 				for (const [skillKey, descKey] of Object.entries(mapping)) {
 					const val = eRow[skillKey]
-					if (val === null || val === undefined) continue  // ✅ null → skip luôn
+					if (val === null || val === undefined) continue
 					const di = descMap.get(descKey)
 					if (di === undefined) continue
 
-					const actualVal = val === null ? 0 : val  // ✅ null → 0
-					recordUpdate(rowIdx, this.FREEZE_COLS + di, descKey, actualVal)
+					recordUpdate(rowIdx, this.FREEZE_COLS + di, descKey, val)
 
 					if (!descKey.includes('__SoCauDung')) continue
 					const diemThoDesc = scoreDescs.find(d => d._soCauDungKey === descKey)
@@ -438,7 +602,7 @@ export default {
 					if (diemThoIdx === -1) continue
 					recordUpdate(rowIdx, this.FREEZE_COLS + diemThoIdx, diemThoDesc.key, diemThoVal)
 
-					// ✅ Tìm conv bằng key thay vì index+1
+					// Conv
 					const expectedConvKey = diemThoDesc.key.replace('_Point', '_Conv')
 					const convDesc = scoreDescs.find(d => d.key === expectedConvKey)
 					if (convDesc?._formulaTemplate) {
@@ -511,7 +675,7 @@ export default {
 					this._applyCell(ws, Number(ciStr), rowIdx, val)
 			}
 
-			// ✅ Force tính Avg_Point + Avg_Conv sau khi apply xong
+			// Force tính Avg_Point + Avg_Conv (cap3)
 			const avgPointDesc = scoreDescs.find(d => d._isAvgPoint)
 			const avgConvKey = avgPointDesc?.key?.replace('_Avg_Point', '_Avg_Conv')
 			const avgConvDesc = avgConvKey ? scoreDescs.find(d => d.key === avgConvKey) : null
@@ -536,17 +700,16 @@ export default {
 					if (valid.length === 0) continue
 
 					const avg = parseFloat((valid.reduce((a, b) => a + b, 0) / valid.length).toFixed(2))
-
-					snapOldValue(rowIdx, avgCi) // ✅ snapshot trước khi apply
+					snapOldValue(rowIdx, avgCi)
 					this._applyCell(ws, avgCi, rowIdx, avg)
 					allUpdates[rowIdx][avgCi] = avg
 					recordUpdate(rowIdx, avgCi, avgPointDesc.key, avg)
 
-					// Tính Avg_Conv
+					// Avg_Conv
 					if (avgConvDesc?._formulaTemplate) {
 						const avgConvIdx = scoreDescs.findIndex(d => d.key === avgConvDesc.key)
 						const avgConvCi = this.FREEZE_COLS + avgConvIdx
-						snapOldValue(rowIdx, avgConvCi) // ✅ snapshot trước khi apply
+						snapOldValue(rowIdx, avgConvCi)
 						const valueMap = buildValueMapForRow(scoreDescs, rowIdx, allUpdates, ws, this.FREEZE_COLS)
 						valueMap[avgPointDesc.key] = avg
 						const avgConvVal = evaluateFormulaString(avgConvDesc._formulaTemplate, valueMap)
@@ -561,7 +724,7 @@ export default {
 
 			this.changedCells = { ...this.changedCells, ...changedBuffer }
 			const totalCells = Object.values(allUpdates).reduce((s, c) => s + Object.keys(c).length, 0)
-			console.log(`[onEtestApply] tab[${targetIdx}] "${cls.name}" — ${totalCells} ô`)
+			console.log(`[onEtestApply][cap3] tab[${targetIdx}] "${cls.name}" — ${totalCells} ô`)
 		},
 		async onQuanLiKiThiApply({ exam, lopID, skillMapping, mappingField, studentScores }) {
 			if (!studentScores?.size) return
@@ -651,7 +814,10 @@ export default {
 					const diemThoDesc = scoreDescs.find(d => d._soCauDungKey === maCotDiem)
 					if (!diemThoDesc || !diemThoDesc._soCau) continue
 
-					const diemThoVal = parseFloat((val * 10 / diemThoDesc._soCau).toFixed(2))
+					// cap2: (SoCauDung / SoCau) * DiemMax | cap3: SoCauDung * 10 / SoCau
+					const diemThoVal = this.config.cap === 'cap2'
+						? parseFloat((val / diemThoDesc._soCau * (diemThoDesc.diemMax ?? 10)).toFixed(2))
+						: parseFloat((val * 10 / diemThoDesc._soCau).toFixed(2))
 					const diemThoIdx = scoreDescs.findIndex(d => d.key === diemThoDesc.key)
 					if (diemThoIdx === -1) continue
 					recordUpdate(rowIdx, this.FREEZE_COLS + diemThoIdx, diemThoDesc.key, diemThoVal)
@@ -743,22 +909,50 @@ export default {
 				this._suppressOnChange = false
 			}
 
+			// ── Pass 2b: tính Total_Point từ formula API (cap2 dùng evaluateFormulaString) ──
+			if (this.config.cap === 'cap2') {
+				const totalPointDesc = scoreDescs.find(d =>
+					d._formulaTemplate && !d._isAvgPoint && d.key?.endsWith('_Total_Point')
+				)
+				if (totalPointDesc) {
+					const totalIdx = scoreDescs.findIndex(d => d.key === totalPointDesc.key)
+					const totalCi = this.FREEZE_COLS + totalIdx
+					for (const rowIdxStr of Object.keys(allUpdates)) {
+						const rowIdx = Number(rowIdxStr)
+						const valueMap = buildValueMapForRow(scoreDescs, rowIdx, allUpdates, ws, this.FREEZE_COLS)
+						const totalVal = evaluateFormulaString(totalPointDesc._formulaTemplate, valueMap)
+						if (totalVal !== null && totalVal !== undefined) {
+							this._applyCell(ws, totalCi, rowIdx, totalVal)
+							allUpdates[rowIdx][totalCi] = totalVal
+							recordUpdate(rowIdx, totalCi, totalPointDesc.key, totalVal)
+						}
+					}
+				}
+			}
+
 			// ── Pass 3: tính Avg_Point + Avg_Conv sau khi UI đã có đủ DiemTho ──
 			const avgPointDesc = scoreDescs.find(d => d._isAvgPoint)
 			const avgConvKey = avgPointDesc?.key?.replace('_Avg_Point', '_Avg_Conv')
 			const avgConvDesc = avgConvKey ? scoreDescs.find(d => d.key === avgConvKey) : null
 
-			if (avgPointDesc) {
+			if (avgPointDesc && !avgPointDesc.key?.includes('_CB_')) {
 				const avgIdx = scoreDescs.findIndex(d => d.key === avgPointDesc.key)
 				const avgCi = this.FREEZE_COLS + avgIdx
+				const isCap2 = this.config.cap === 'cap2'
 
 				for (const rowIdxStr of Object.keys(allUpdates)) {
 					const rowIdx = Number(rowIdxStr)
 
-					const skillKeys = ['Listening', 'Reading', 'Writing', 'Speaking']
-					const vals = skillKeys.map(k => {
-						const desc = scoreDescs.find(sd => sd.key?.includes(`TA2_${k}_Point`) && sd._isDiemTho)
-						if (!desc) return null
+					// cap2: lấy tất cả _isDiemTho | cap3: lấy TA2_ skills
+					let diemThoDescs
+					if (isCap2) {
+						diemThoDescs = scoreDescs.filter(d => d._isDiemTho)
+					} else {
+						const skillKeys = ['Listening', 'Reading', 'Writing', 'Speaking']
+						diemThoDescs = skillKeys.map(k => scoreDescs.find(sd => sd.key?.includes(`TA2_${k}_Point`) && sd._isDiemTho)).filter(Boolean)
+					}
+
+					const vals = diemThoDescs.map(desc => {
 						const ci = this.FREEZE_COLS + scoreDescs.indexOf(desc)
 						const v = allUpdates[rowIdx]?.[ci] ?? ws.options?.data?.[rowIdx]?.[ci]
 						return (v !== null && v !== undefined && v !== '') ? Number(v) : null
@@ -772,8 +966,8 @@ export default {
 					allUpdates[rowIdx][avgCi] = avg
 					recordUpdate(rowIdx, avgCi, avgPointDesc.key, avg)
 
-					// Avg_Conv
-					if (avgConvDesc?._formulaTemplate) {
+					// Avg_Conv (chỉ cap3)
+					if (!isCap2 && avgConvDesc?._formulaTemplate) {
 						const avgConvIdx = scoreDescs.findIndex(d => d.key === avgConvDesc.key)
 						const avgConvCi = this.FREEZE_COLS + avgConvIdx
 						const valueMap = buildValueMapForRow(scoreDescs, rowIdx, allUpdates, ws, this.FREEZE_COLS)
@@ -783,6 +977,83 @@ export default {
 							this._applyCell(ws, avgConvCi, rowIdx, avgConvVal)
 							allUpdates[rowIdx][avgConvCi] = avgConvVal
 							recordUpdate(rowIdx, avgConvCi, avgConvDesc.key, avgConvVal)
+						}
+					}
+				}
+			}
+
+			// ── Pass CB (chỉ cap2) ──
+			if (this.config.cap === 'cap2') {
+				// CB_Point = (DiemTho / DiemMax) * 100
+				const cbPointDescs = scoreDescs.filter(d => d._isCambridgePoint && d._hkPointKey && d._diemMax)
+				for (const cbDesc of cbPointDescs) {
+					const cbIdx = scoreDescs.findIndex(d => d.key === cbDesc.key)
+					if (cbIdx === -1) continue
+					const cbCi = this.FREEZE_COLS + cbIdx
+					const hkIdx = scoreDescs.findIndex(d => d.key === cbDesc._hkPointKey)
+					if (hkIdx === -1) continue
+					const hkCi = this.FREEZE_COLS + hkIdx
+					for (const rowIdxStr of Object.keys(allUpdates)) {
+						const rowIdx = Number(rowIdxStr)
+						const hkVal = allUpdates[rowIdx]?.[hkCi] ?? ws.options?.data?.[rowIdx]?.[hkCi]
+						if (hkVal === null || hkVal === undefined || hkVal === '') continue
+						const cbVal = parseFloat((Number(hkVal) / cbDesc._diemMax * 100).toFixed(2))
+						this._applyCell(ws, cbCi, rowIdx, cbVal)
+						allUpdates[rowIdx][cbCi] = cbVal
+						recordUpdate(rowIdx, cbCi, cbDesc.key, cbVal)
+					}
+				}
+				// CB_Conv = CB_CONV(cbPoint, khoiID)
+				const cbConvDescs = scoreDescs.filter(d => d._isCambridgeConv && d._cbPointKey)
+				for (const cbConvDesc of cbConvDescs) {
+					const convIdx = scoreDescs.findIndex(d => d.key === cbConvDesc.key)
+					if (convIdx === -1) continue
+					const convCi = this.FREEZE_COLS + convIdx
+					const cbPtIdx = scoreDescs.findIndex(d => d.key === cbConvDesc._cbPointKey)
+					if (cbPtIdx === -1) continue
+					const cbPtCi = this.FREEZE_COLS + cbPtIdx
+					for (const rowIdxStr of Object.keys(allUpdates)) {
+						const rowIdx = Number(rowIdxStr)
+						const cbPtVal = allUpdates[rowIdx]?.[cbPtCi] ?? ws.options?.data?.[rowIdx]?.[cbPtCi]
+						if (cbPtVal === null || cbPtVal === undefined || cbPtVal === '') continue
+						const convVal = calcCambridgeConv(Number(cbPtVal), cls.khoiID) ?? ''
+						if (convVal !== '') {
+							this._applyCell(ws, convCi, rowIdx, convVal)
+							allUpdates[rowIdx][convCi] = convVal
+							recordUpdate(rowIdx, convCi, cbConvDesc.key, convVal)
+						}
+					}
+				}
+				// CB_Avg_Point
+				const cbAvgPointDesc = scoreDescs.find(d => d._isAvgPoint && d.key?.includes('_CB_'))
+				if (cbAvgPointDesc) {
+					const cbAvgIdx = scoreDescs.findIndex(d => d.key === cbAvgPointDesc.key)
+					const cbAvgCi = this.FREEZE_COLS + cbAvgIdx
+					const cbSkillDescs = scoreDescs.filter(d => d._isCambridgePoint && d._hkPointKey)
+					for (const rowIdxStr of Object.keys(allUpdates)) {
+						const rowIdx = Number(rowIdxStr)
+						const vals = cbSkillDescs.map(d => {
+							const ci = this.FREEZE_COLS + scoreDescs.indexOf(d)
+							const v = allUpdates[rowIdx]?.[ci] ?? ws.options?.data?.[rowIdx]?.[ci]
+							return (v !== null && v !== undefined && v !== '') ? Number(v) : null
+						}).filter(v => v !== null)
+						if (!vals.length) continue
+						const avg = parseFloat((vals.reduce((a, b) => a + b, 0) / vals.length).toFixed(2))
+						this._applyCell(ws, cbAvgCi, rowIdx, avg)
+						allUpdates[rowIdx][cbAvgCi] = avg
+						recordUpdate(rowIdx, cbAvgCi, cbAvgPointDesc.key, avg)
+						// CB_Avg_Conv
+						const cbAvgConvKey = cbAvgPointDesc.key.replace('_Avg_Point', '_Avg_Conv')
+						const cbAvgConvDesc = scoreDescs.find(d => d.key === cbAvgConvKey)
+						if (cbAvgConvDesc) {
+							const cbAvgConvIdx = scoreDescs.findIndex(d => d.key === cbAvgConvKey)
+							const cbAvgConvCi = this.FREEZE_COLS + cbAvgConvIdx
+							const convVal = calcCambridgeConv(avg, cls.khoiID) ?? ''
+							if (convVal !== '') {
+								this._applyCell(ws, cbAvgConvCi, rowIdx, convVal)
+								allUpdates[rowIdx][cbAvgConvCi] = convVal
+								recordUpdate(rowIdx, cbAvgConvCi, cbAvgConvDesc.key, convVal)
+							}
 						}
 					}
 				}
@@ -823,14 +1094,46 @@ export default {
 				const c = cols[i]
 				if (c.key?.includes('_IELTS_')) continue
 				if (processedKeys.has(c.key)) continue
+				// ✅ cap2: ẩn toàn bộ cột _Conv bên HK (không phải CB)
+				if (isCap2 && c.key?.endsWith("_Conv") && !c.key?.includes("_CB_")) continue
+
+				// CB col: không có formula từ API, công thức tính từ JS
+				const isCBPointCol = c.key?.includes('_CB_') && c.key?.endsWith('_Point') && !c.formula
+				if (isCBPointCol) {
+					processedKeys.add(c.key)
+					const skillSuffix = c.key.replace(/^.*_CB_/, '_')
+					const hkCol = cols.find(hk => !hk.key?.includes('_CB_') && hk.key?.endsWith(skillSuffix))
+					const diemMax = hkCol?.diemMax ?? null
+					const hkPointKey = hkCol?.key ?? null
+					// CB_Point
+					scoreDescs.push({
+						title: colTitle(c), key: c.key,
+						colType: 'numeric', readOnly: true, width: '130px',
+						_isCambridgePoint: true, _diemMax: diemMax, _hkPointKey: hkPointKey,
+						cotDiemID: c.cotDiemID ?? null,
+					})
+					// CB_Conv — dùng CB_CONV(cbPoint, khoiID), không có formula từ API
+					const cbConvKey = c.key.replace('_Point', '_Conv')
+					const cbConvColIdx = cols.findIndex((col, ci) => ci > i && col.key === cbConvKey)
+					if (cbConvColIdx !== -1) {
+						processedKeys.add(cbConvKey)
+						i = cbConvColIdx
+						scoreDescs.push({
+							title: colTitle(cols[cbConvColIdx]), key: cbConvKey,
+							colType: 'text', readOnly: true, width: '160px',
+							_isCambridgeConv: true, _cbPointKey: c.key,
+							cotDiemID: cols[cbConvColIdx].cotDiemID ?? null,
+						})
+					}
+					continue
+				}
 
 				const isInputCol = c.type === 'number' && !c.formula && !c.key?.includes('_CB_')
 
 				if (isInputCol) {
-					// HK: chỉ cần SoCauDung + DiemTho, bỏ qua Conv (CB không có số câu đúng)
+					// Skip Conv col
 					const expectedConvKey = c.key.replace('_Point', '_Conv')
 					const convColIdx = cols.findIndex((col, ci) => ci > i && col.key === expectedConvKey)
-					// Skip Conv col để không bị xử lý lại ở vòng sau
 					if (convColIdx !== -1) { processedKeys.add(expectedConvKey); i = convColIdx }
 
 					const soCau = getSoCau(thietLapList, cls.id, c.key)
@@ -838,14 +1141,18 @@ export default {
 					processedKeys.add(c.key)
 
 					scoreDescs.push({
-						title: `${colTitle(c)} - Số câu đúng`, key: soCauDungKey, colType: 'numeric', readOnly: false, width: '150px', _soCau: soCau, cotDiemID: null
+						title: `${colTitle(c)} - Số câu đúng`, key: soCauDungKey,
+						colType: 'numeric', readOnly: false, width: '150px',
+						_soCau: soCau, cotDiemID: null,
 					})
-					// Cột DiemTho
 					scoreDescs.push({
-						title: colTitle(c), key: c.key, colType: 'numeric', readOnly: true, width: '130px', _isDiemTho: true,
-						_soCauDungKey: soCauDungKey, _soCau: soCau, cotDiemID: c.cotDiemID ?? null
+						title: colTitle(c), key: c.key,
+						colType: 'numeric', readOnly: true, width: '130px',
+						_isDiemTho: true, _soCauDungKey: soCauDungKey, _soCau: soCau,
+						cotDiemID: c.cotDiemID ?? null,
+						diemMax: c.diemMax ?? 10,  // ✅ cho cap2 tính (SoCauDung/SoCau)*DiemMax
 					})
-					// Conv bị bỏ qua cho HK cấp 2
+
 				} else if (c.type === 'number' && c.formula) {
 					processedKeys.add(c.key)
 					const isAvgPoint = c.key?.endsWith('_Avg_Point')
@@ -856,64 +1163,63 @@ export default {
 						const avgConvColIdx = cols.findIndex((col, ci) => ci > i && col.key === avgConvKey)
 						const avgConvCol = avgConvColIdx !== -1 ? cols[avgConvColIdx] : null
 						if (avgConvColIdx !== -1) { processedKeys.add(avgConvCol.key); i = avgConvColIdx }
+
 						scoreDescs.push({
-							title: colTitle(c), key: c.key, colType: 'numeric', readOnly: true,
-							width: '130px', _formulaTemplate: c.formula,
-							_isAvgPoint: true, cotDiemID: c.cotDiemID ?? null,
-						})
-						if (avgConvCol)
-							scoreDescs.push({
-								title: colTitle(avgConvCol), key: avgConvCol.key, colType: 'numeric', readOnly: true,
-								width: '200px', _formulaTemplate: avgConvCol.formula ?? null,
-								_isConv: true, cotDiemID: avgConvCol.cotDiemID ?? null,
-							})
-					} else if (isCBCol) {
-						// CB Point: formula DiemTho * 100 / DiemMax → lấy HK col cùng kỹ năng
-						const skillSuffix = c.key.replace(/^.*_CB_/, '_')
-						const hkCol = cols.find(hk => !hk.key?.includes('_CB_') && hk.key?.endsWith(skillSuffix))
-						const diemMax = hkCol?.diemMax ?? null
-						const hkPointKey = hkCol?.key ?? null  // key của cột DiemTho HK tương ứng
-						const cbConvKey = c.key.replace('_Point', '_Conv')
-						const cbConvColIdx = cols.findIndex((col, ci) => ci > i && col.key === cbConvKey)
-						const cbConvCol = cbConvColIdx !== -1 ? cols[cbConvColIdx] : null
-						if (cbConvColIdx !== -1) { processedKeys.add(cbConvKey); i = cbConvColIdx }
-						scoreDescs.push({
-							title: colTitle(c), key: c.key, colType: 'numeric', readOnly: true,
-							width: '130px', _formulaTemplate: c.formula,
-							_isCambridgePoint: true, _diemMax: diemMax, _hkPointKey: hkPointKey,
+							title: colTitle(c), key: c.key,
+							colType: 'numeric', readOnly: true, width: '130px',
+							_formulaTemplate: c.formula, _isAvgPoint: true,
 							cotDiemID: c.cotDiemID ?? null,
 						})
-						if (cbConvCol)
-							scoreDescs.push({
-								title: colTitle(cbConvCol), key: cbConvCol.key, colType: 'text', readOnly: true,
-								width: '160px', _formulaTemplate: cbConvCol.formula ?? null,
-								_isCambridgeConv: true, _cbPointKey: c.key,
-								cotDiemID: cbConvCol.cotDiemID ?? null,
-							})
+
+						if (avgConvCol) {
+							const isCBAvg = c.key?.includes('_CB_')
+							if (isCBAvg) {
+								// CB_Avg_Conv: dùng CB_CONV từ JS
+								scoreDescs.push({
+									title: colTitle(avgConvCol), key: avgConvCol.key,
+									colType: 'text', readOnly: true, width: '160px',
+									_isCambridgeConv: true, _cbPointKey: c.key,
+									cotDiemID: avgConvCol.cotDiemID ?? null,
+								})
+							} else if (!isCap2) {
+								// HK Avg_Conv: chỉ cap3
+								scoreDescs.push({
+									title: colTitle(avgConvCol), key: avgConvCol.key,
+									colType: 'numeric', readOnly: true, width: '200px',
+									_formulaTemplate: avgConvCol.formula ?? null,
+									_isConv: true, cotDiemID: avgConvCol.cotDiemID ?? null,
+								})
+							}
+						}
+
 					} else {
 						scoreDescs.push({
-							title: colTitle(c), key: c.key, colType: 'numeric', readOnly: true,
-							width: '130px', _formulaTemplate: c.formula,
-							cotDiemID: c.cotDiemID ?? null,
+							title: colTitle(c), key: c.key,
+							colType: 'numeric', readOnly: true, width: '130px',
+							_formulaTemplate: c.formula, cotDiemID: c.cotDiemID ?? null,
 						})
 					}
+
 				} else if (c.type === 'text' && c.formula) {
 					processedKeys.add(c.key)
-					// Cột formula text
-					scoreDescs.push({ title: colTitle(c), key: c.key, colType: 'text', readOnly: true, width: '200px', _formulaTemplate: c.formula, cotDiemID: c.cotDiemID ?? null })
+					scoreDescs.push({
+						title: colTitle(c), key: c.key,
+						colType: 'text', readOnly: true, width: '200px',
+						_formulaTemplate: c.formula, cotDiemID: c.cotDiemID ?? null,
+					})
+
 				} else {
 					processedKeys.add(c.key)
-					// Cột text thường / fallback
 					scoreDescs.push({
-						title: colTitle(c), key: c.key, colType: 'numeric', readOnly: true,
-						width: '130px', _formulaTemplate: c.formula,
-						cotDiemID: c.cotDiemID ?? null,
+						title: colTitle(c), key: c.key,
+						colType: 'numeric', readOnly: true, width: '130px',
+						_formulaTemplate: c.formula, cotDiemID: c.cotDiemID ?? null,
 					})
 				}
 			}
 
 			if (this.isTA2Mode) {
-				const hasIelts = GRADE_CONFIG.IELTS_NHOM_IDS.has(cls.id)  // ✅ check theo NhomID
+				const hasIelts = GRADE_CONFIG.IELTS_NHOM_IDS.has(cls.id)
 				if (hasIelts) {
 					const ieltsCols = cols.filter(c => c.key?.includes('_IELTS_'))
 					const getIeltsColInfo = (keySuffix, defaultTitle) => {
@@ -921,7 +1227,6 @@ export default {
 						return { key: found?.key ?? `${prefix.replace('_TA2', '')}_${keySuffix}`, title: found?.title ?? defaultTitle, cotDiemID: found?.cotDiemID ?? null }
 					}
 
-					// 4 kỹ năng IELTS
 					for (const { kiNang, suffix, defaultTitle, isWS } of [
 						{ kiNang: 'Listening', suffix: 'IELTS_Listening_Conv', defaultTitle: 'IELTS Nghe', isWS: false },
 						{ kiNang: 'Reading', suffix: 'IELTS_Reading_Conv', defaultTitle: 'IELTS Đọc', isWS: false },
@@ -929,13 +1234,21 @@ export default {
 						{ kiNang: 'Speaking', suffix: 'IELTS_Speaking_Conv', defaultTitle: 'IELTS Nói', isWS: true },
 					]) {
 						const info = getIeltsColInfo(suffix, defaultTitle)
-						scoreDescs.push({ title: info.title, key: info.key, colType: 'numeric', readOnly: true, width: '130px', cotDiemID: info.cotDiemID, _isIeltsScore: true, _kiNang: kiNang, _ieltsFormulaKiNang: kiNang, _isWS: isWS })
+						scoreDescs.push({
+							title: info.title, key: info.key,
+							colType: 'numeric', readOnly: true, width: '130px',
+							cotDiemID: info.cotDiemID,
+							_isIeltsScore: true, _kiNang: kiNang, _ieltsFormulaKiNang: kiNang, _isWS: isWS,
+						})
 					}
 
 					const bandConv = getIeltsColInfo('IELTS_Band_Conv', 'IELTS Overall Band')
-					scoreDescs.push({ title: bandConv.title, key: bandConv.key, colType: 'numeric', readOnly: true, width: '160px', cotDiemID: bandConv.cotDiemID, _isIeltsOverallBand: true })
+					scoreDescs.push({
+						title: bandConv.title, key: bandConv.key,
+						colType: 'numeric', readOnly: true, width: '160px',
+						cotDiemID: bandConv.cotDiemID, _isIeltsOverallBand: true,
+					})
 				}
-
 			}
 
 			const allDescs = [...fixedDescs, ...scoreDescs]
@@ -955,53 +1268,59 @@ export default {
 					if (!d.key) return ''
 					const existingVal = gradesMap.get(`${s.id}_${d.key}`)?.value ?? null
 
-					// Cambridge Point: resolveFormula với DiemMax + DiemTho inject
+					// Cambridge Point: (DiemKiNang / DiemMax) * 100
 					if (d._isCambridgePoint) {
 						if (existingVal !== null) return existingVal
-						if (!d._formulaTemplate) return ''
-						const constMap = d._diemMax !== null ? { DiemMax: d._diemMax } : {}
-						// Inject DiemTho → tọa độ cột HK Point tương ứng (vì DiemTho không có underscore nên resolveFormula không tự replace được)
-						if (d._hkPointKey) {
-							const hkDef = allColDefs.find(c => c.key === d._hkPointKey)
-							if (hkDef) constMap['DiemTho'] = `${hkDef.colLetter}${rowIndex}`
-						}
-						return resolveFormula(d._formulaTemplate, allColDefs, rowIndex, constMap)
-					}
-					// Cambridge Conv: resolveFormula bình thường
-					if (d._isCambridgeConv) {
-						if (existingVal !== null) return existingVal
-						if (!d._formulaTemplate) return ''
-						return resolveFormula(d._formulaTemplate, allColDefs, rowIndex)
+						if (!d._hkPointKey || !d._diemMax) return ''
+						const hkDef = allColDefs.find(c => c.key === d._hkPointKey)
+						if (!hkDef) return ''
+						// Guard NaN: nếu HK Point rỗng thì trả ''
+						return `=IF(${hkDef.colLetter}${rowIndex}="","",${hkDef.colLetter}${rowIndex}/${d._diemMax}*100)`
 					}
 
-					// SoCauDung — lookup thẳng
+					// Cambridge Conv: dùng CB_CONV(cbPoint, khoiID)
+					if (d._isCambridgeConv) {
+						if (existingVal !== null) return existingVal
+						if (!d._cbPointKey) return ''
+						const cbDef = allColDefs.find(c => c.key === d._cbPointKey)
+						if (!cbDef) return ''
+						return `=IF(${cbDef.colLetter}${rowIndex}="","",CB_CONV(${cbDef.colLetter}${rowIndex},${cls.khoiID}))`
+					}
+
+					// SoCauDung
 					if (d.key?.includes('__SoCauDung')) return existingVal ?? ''
+
+					// DiemTho
 					if (d._isDiemTho) {
-						if (existingVal !== null) return existingVal // ✅ có sẵn → dùng luôn
+						if (existingVal !== null) return existingVal
 						if (!d._soCau) return ''
 						const def = allColDefs.find(c => c.key === d._soCauDungKey)
+						// ✅ cap2: (SoCauDung / SoCau) * DiemMax | cap3: SoCauDung * 10 / SoCau
+						if (isCap2) {
+							return def ? `=${def.colLetter}${rowIndex}/${d._soCau}*${d.diemMax ?? 10}` : ''
+						}
 						return def ? `=${def.colLetter}${rowIndex}*10/${d._soCau}` : ''
 					}
 
+					// IELTS
 					if (d._ieltsFormulaKiNang) {
 						if (d._isWS) {
-							if (existingVal !== null) return existingVal // ✅ DB đã có → dùng luôn
-							// Writing/Speaking: IELTS_BAND_WS(DiemTho)
+							if (existingVal !== null) return existingVal
 							const diemThoDef = allColDefs.find(c =>
 								c.key === scoreDescs.find(sd => sd.key?.includes(`TA2_${d._ieltsFormulaKiNang}_Point`) && sd._isDiemTho)?.key
 							)
 							return diemThoDef ? `=IELTS_BAND_WS(${diemThoDef.colLetter}${rowIndex})` : ''
 						} else {
-							// Listening/Reading: IELTS_BAND(SoCauDung, kiNang)
-							if (existingVal !== null) return existingVal // ✅ DB đã có → dùng luôn
+							if (existingVal !== null) return existingVal
 							const soCauDef = allColDefs.find(c =>
 								c.key === scoreDescs.find(sd => sd.key?.includes(`TA2_${d._ieltsFormulaKiNang}_Point__SoCauDung`))?.key
 							)
 							return soCauDef ? `=IELTS_BAND(${soCauDef.colLetter}${rowIndex},"${d._ieltsFormulaKiNang}")` : ''
 						}
 					}
+
 					if (d._isIeltsOverallBand) {
-						if (existingVal !== null) return existingVal // ✅ DB đã có → dùng luôn
+						if (existingVal !== null) return existingVal
 						const defs = GRADE_CONFIG.IELTS_SKILLS.map(kiNang =>
 							allColDefs.find(c => c.key === scoreDescs.find(sd => sd._kiNang === kiNang && sd._isIeltsScore)?.key)
 						)
@@ -1010,8 +1329,19 @@ export default {
 							: ''
 					}
 
-					// Avg_Point: detect prefix (TA2/CB/...) rồi tìm defs tương ứng
+					// Avg_Point
 					if (d._isAvgPoint) {
+						if (isCap2) {
+							// ✅ cap2: tính từ tất cả _isDiemTho / tổng số kỹ năng
+							const diemThoDescs = scoreDescs.filter(sd => sd._isDiemTho)
+							const defs = diemThoDescs.map(sd => allColDefs.find(c => c.key === sd.key))
+							if (defs.every(Boolean)) {
+								const sum = defs.map(def => `${def.colLetter}${rowIndex}`).join('+')
+								return `=(${sum})/${diemThoDescs.length}`
+							}
+							return ''
+						}
+						// cap3: TA2_AVG_POINT / CB_AVG_POINT
 						const skillKeys = ['Listening', 'Reading', 'Writing', 'Speaking']
 						const avgPrefix = d.key?.match(/_(TA2|CB)_Avg_Point$/)?.[1] ?? 'TA2'
 						const formulaFn = avgPrefix === 'CB' ? 'CB_AVG_POINT' : 'TA2_AVG_POINT'
@@ -1103,7 +1433,11 @@ export default {
 			const displayVal = (val !== null && val !== undefined && val !== '') ? String(val) : ''
 			if (ws.options?.data?.[rowIdx]) ws.options.data[rowIdx][ci] = val ?? ''
 			const rec = ws.records?.[rowIdx]?.[ci]
-			if (rec?.element) rec.element.innerHTML = displayVal
+			if (rec) {
+				// ✅ Update records.value để getValueFromCoords + readVal đọc đúng
+				rec.value = val ?? ''
+				if (rec.element) rec.element.innerHTML = displayVal
+			}
 		},
 
 		buildSoCauDungOptions() {

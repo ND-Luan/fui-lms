@@ -517,13 +517,35 @@ export default {
 					this.DSHocSinh
 				);
 
+				// ✅ Lấy tên cột Theme (e.g., Theme2_TST, Theme4_TST...)
+				const mappingConfig = CONSTANTS.THEME_MAPPING[
+					this.filter.MaNhomCotDiemItem.MaNhomCotDiem
+				];
+
+				if (mappingConfig) {
+					const targetColumn = mappingConfig.target;
+					const colIndex = this.headers.findIndex(h => h.name === targetColumn);
+
+					// ✅ Scan từng student, nếu có giá trị mới → add vào editedCells
+					updatedStudents.forEach((student, rowIndex) => {
+						if (student[targetColumn] != null && student[targetColumn] !== '') {
+							this.editedCells = [...this.editedCells, {
+								x: colIndex,
+								y: rowIndex,
+								cellName: targetColumn,
+								value: student[targetColumn]
+							}];
+						}
+					});
+				}
+
 				this.DSHocSinh = updatedStudents;
 				this.keyComp++;
 
 				Vue.$toast.success('Lấy điểm Test thành công!', { position: 'top' });
 			} catch (error) {
 				console.error('onGetDiemTest error:', error);
-				Vue.$toast.error('Có lỗi xảy ra khi lấy điểm Test!', { position: 'top' });
+				Vue.$toast.error('Có lỗi xảy ra!', { position: 'top' });
 			}
 		},
 

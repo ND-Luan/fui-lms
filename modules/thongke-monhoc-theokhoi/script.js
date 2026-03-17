@@ -1,10 +1,10 @@
 function initMaCotDiem() {
     if (vueData.CapID === 1) {
         vueData.MaCotDiem = 'DiemCK_' + vueData.HocKi
-        vueData.HocKi = 'HK1'
+        // vueData.HocKi = 'HK2'
     } else {
         vueData.MaCotDiem = 'DiemTB_' + vueData.HocKi
-        vueData.HocKi = 'HK1'
+        // vueData.HocKi = 'HK2'
     }
 }
 function initHeaders() {

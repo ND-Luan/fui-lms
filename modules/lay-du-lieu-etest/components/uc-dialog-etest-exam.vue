@@ -81,8 +81,15 @@
 							<v-chip size="small" color="primary" prepend-icon="mdi-account-group-outline">
 								{{ students.length }} học sinh
 							</v-chip>
+
+							<!-- Cap3: hiện TB từng skill key -->
 							<v-chip v-for="sk in skillKeys" :key="sk" size="small" color="teal-darken-1">
 								{{ sk.trim() }}: TB {{ skillAvg(sk) }}
+							</v-chip>
+
+							<!-- Cap2: hiện TB SoCauDung -->
+							<v-chip v-if="!hasSkillKeys" size="small" color="teal-darken-1">
+								SoCauDung: TB {{ skillAvg('SoCauDung') }}
 							</v-chip>
 
 							<!-- Chọn lớp nếu có nhiều lớp -->
@@ -115,8 +122,8 @@
 							v-model="selectedStudentIDs"
 							show-select />
 
-						<!-- Mapping -->
-						<v-card variant="outlined" class="pa-3">
+						<!-- ══ Mapping — Cap3: nhiều skill keys ══ -->
+						<v-card v-if="hasSkillKeys" variant="outlined" class="pa-3">
 							<div class="text-subtitle-2 font-weight-bold mb-3 d-flex align-center ga-1">
 								<v-icon size="18" color="primary">mdi-swap-horizontal</v-icon>
 								Chọn cột bảng điểm tương ứng cho từng kĩ năng eTest
@@ -144,6 +151,29 @@
 							</v-row>
 						</v-card>
 
+						<!-- ══ Mapping — Cap2: chỉ có SoCauDung, chọn kĩ năng cần điền ══ -->
+						<v-card v-else variant="outlined" class="pa-3">
+							<div class="text-subtitle-2 font-weight-bold mb-3 d-flex align-center ga-1">
+								<v-icon size="18" color="primary">mdi-swap-horizontal</v-icon>
+								Bài thi này thuộc kĩ năng nào?
+							</div>
+							<div class="text-caption text-medium-emphasis mb-3">
+								Bài thi eTest chỉ có 1 giá trị <strong>SoCauDung</strong> chung —
+								chọn cột <strong>Số câu đúng</strong> của kĩ năng cần điền vào bảng điểm.
+							</div>
+							<div class="d-flex align-center ga-3">
+								<v-chip size="small" color="teal-darken-1" class="flex-shrink-0">
+									SoCauDung = {{ skillAvg('SoCauDung') }} (TB)
+								</v-chip>
+								<v-icon size="18" color="grey">mdi-arrow-right</v-icon>
+								<v-select v-model="singleMapping" :items="soCauDungOptions"
+									item-title="label" item-value="key"
+									placeholder="-- Chọn cột Số câu đúng --"
+									density="compact" variant="outlined" hide-details clearable
+									style="max-width: 420px" />
+							</div>
+						</v-card>
+
 					</template>
 
 				</v-card-text>
@@ -154,8 +184,9 @@
 				<v-card-actions class="pa-3 d-flex align-center">
 
 					<template v-if="students">
-						<!-- IELTS indicator -->
-						<v-chip :color="localConvertIelts ? 'primary' : 'default'"
+						<!-- IELTS indicator — chỉ hiện với cap3 có skill keys -->
+						<v-chip v-if="hasSkillKeys"
+							:color="localConvertIelts ? 'primary' : 'default'"
 							size="small" variant="tonal"
 							:prepend-icon="localConvertIelts ? 'mdi-translate' : 'mdi-translate-off'"
 							style="cursor:pointer"
@@ -163,7 +194,7 @@
 							{{ localConvertIelts ? 'Convert IELTS' : 'Không convert IELTS' }}
 						</v-chip>
 
-						<div class="text-caption text-medium-emphasis ml-3">
+						<div class="text-caption text-medium-emphasis" :class="hasSkillKeys ? 'ml-3' : ''">
 							<v-icon size="14" class="mr-1">mdi-information-outline</v-icon>
 							Chỉ kĩ năng đã chọn cột mới được điền
 						</div>
@@ -204,11 +235,18 @@ export default {
 			students: null,
 			skillKeys: [],
 			mapping: {},
+			singleMapping: null,   // cap2: SoCauDung → 1 cột duy nhất
 			selectedLopID: null,
 			selectedStudentIDs: [],
 			localConvertIelts: this.convertIelts,
 
 			examPresets: [
+				// Cấp 2
+				{ label: 'K6', code: '49CB1ADD-670F-4A10-9600-26C32EC5EBE6', hasIelts: false },
+				{ label: 'K7', code: '223901B2-3FB1-4E8E-BAA6-39DB077CD479', hasIelts: false },
+				{ label: 'K8', code: '9E280CED-A1BD-42E0-B57A-7E169398C59A', hasIelts: false },
+				{ label: 'K9', code: '2755A625-F249-44B6-8A37-0C11AFAA9587', hasIelts: false },
+				// Cấp 3
 				{ label: '10AV1,2', code: 'DB02F88A-C193-44E6-BADF-6A662BC019C5', hasIelts: false },
 				{ label: '10AV3,4', code: '2C9CD69F-2869-49F5-9503-CE4932E861F0', hasIelts: false },
 				{ label: '10AV5',   code: 'E9CB6CF6-C3AC-437C-B761-EEBDF40C391B', hasIelts: false },
@@ -223,7 +261,6 @@ export default {
 	watch: {
 		convertIelts(val) { this.localConvertIelts = val },
 		filteredStudentsByLop(list) {
-			// Auto-select tất cả khi danh sách thay đổi (đổi lớp, load mới)
 			this.selectedStudentIDs = list.map(s => String(s.StudentID))
 		},
 	},
@@ -235,7 +272,15 @@ export default {
 				'HoSV', 'TenSV', 'LopID', 'NgaySinh', 'GioiTinh',
 				'SoLanLamBai', 'SoCauLam', 'SoCauDung', 'DiemThi',
 				'GiaoVienCham', 'StartTime', 'TrangThai',
+				'UserName', 'CreateUser', 'CreateTime',
+				'UpdateUser', 'UpdateTime', 'UserCode',
 			]
+		},
+
+		// Cap3: API trả các key kỹ năng riêng (Listening, Reading...)
+		// Cap2: không có key kỹ năng, chỉ có SoCauDung chung
+		hasSkillKeys() {
+			return this.skillKeys.length > 0
 		},
 
 		lopOptions() {
@@ -252,17 +297,24 @@ export default {
 
 		tableHeaders() {
 			if (!this.students?.length) return []
-			return Object.keys(this.students[0]).map(k => ({
-				title: k, key: k, sortable: true,
-				width: k === 'HoSV' ? '140px'
-					: k === 'TrangThai' ? '220px'
-					: this.skillKeys.includes(k) ? '120px'
-					: '100px',
-				align: this.skillKeys.includes(k) ? 'center' : 'start',
-			}))
+			const skipCols = new Set([
+				'UserName', 'UserCode', 'CreateUser', 'CreateTime',
+				'UpdateUser', 'UpdateTime', 'ExamID', 'StudentTestID',
+			])
+			return Object.keys(this.students[0])
+				.filter(k => !skipCols.has(k))
+				.map(k => ({
+					title: k, key: k, sortable: true,
+					width: k === 'HoSV' ? '140px'
+						: k === 'TrangThai' ? '220px'
+						: this.skillKeys.includes(k) ? '120px'
+						: '100px',
+					align: this.skillKeys.includes(k) ? 'center' : 'start',
+				}))
 		},
 
 		hasMappingSelected() {
+			if (!this.hasSkillKeys) return !!this.singleMapping
 			return Object.values(this.mapping).some(v => !!v)
 		},
 
@@ -281,10 +333,10 @@ export default {
 		selectPreset(preset) {
 			this.examCode = preset.code
 			this.localConvertIelts = preset.hasIelts
-			// Reset
 			this.students = null
 			this.skillKeys = []
 			this.mapping = {}
+			this.singleMapping = null
 			this.selectedLopID = null
 			this.selectedStudentIDs = []
 			this.error = ''
@@ -297,6 +349,7 @@ export default {
 			this.students = null
 			this.skillKeys = []
 			this.mapping = {}
+			this.singleMapping = null
 			this.selectedLopID = null
 			this.selectedStudentIDs = []
 
@@ -317,6 +370,7 @@ export default {
 				}
 
 				this.students = studentList
+				// Lọc ra các key kỹ năng (cap3), cap2 sẽ rỗng vì tất cả đều nằm trong fixedCols
 				this.skillKeys = Object.keys(studentList[0]).filter(k => !this.fixedCols.includes(k))
 				this.mapping = Object.fromEntries(this.skillKeys.map(k => [k, null]))
 
@@ -344,16 +398,17 @@ export default {
 		apply(isActive) {
 			if (!this.canApply) return
 
-			const activeMapping = Object.fromEntries(
-				Object.entries(this.mapping).filter(([, v]) => !!v)
-			)
 			const lopIDs = [...new Set(this.students.map(s => s.LopID).filter(Boolean))]
-
-			// Nếu user đã chọn subset học sinh → filter students list
 			const selectedSet = new Set(this.selectedStudentIDs.map(String))
 			const filteredStudents = selectedSet.size > 0
 				? this.students.filter(s => selectedSet.has(String(s.StudentID)))
 				: this.students
+
+			// Cap3: mapping { skillKey → maCotDiem }
+			// Cap2: mapping { __SoCauDung_Direct → maCotDiem } — 1 cột duy nhất
+			const activeMapping = this.hasSkillKeys
+				? Object.fromEntries(Object.entries(this.mapping).filter(([, v]) => !!v))
+				: { __SoCauDung_Direct: this.singleMapping }
 
 			this.$emit('apply', {
 				examCode: this.examCode.trim(),
@@ -362,6 +417,7 @@ export default {
 				lopIDs,
 				selectedLopID: this.selectedLopID,
 				convertIelts: this.localConvertIelts,
+				hasSkillKeys: this.hasSkillKeys,  // ✅ để parent biết cách xử lý
 			})
 
 			isActive.value = false
