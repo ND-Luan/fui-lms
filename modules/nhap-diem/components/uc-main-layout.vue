@@ -65,64 +65,106 @@
 				<uc-filter v-model="filter" @onRefresh="onRefresh" />
 			</v-card-text>
 			<v-divider />
-			<v-card-text class="d-flex align-center ga-2">
-				<div class="d-flex ga-2 flex-wrap mt-2">
-					<!-- Lưu ý Comment -->
-					<v-alert v-if="hasStudents" type="warning" variant="tonal" style="width: fit-content">
-						<div class="text-caption text-medium-emphasis">
-							Comment (Màu đỏ) trong ô nhập điểm là các ô điểm <b>Giáo viên khác</b> đã nhập
-						</div>
-					</v-alert>
-					<!-- Quy tắc đổi sao -->
-					<v-alert v-if="showStarConversionRule" type="info" variant="tonal" density="compact">
-						<div class="text-caption">
-							<b>Quy tắc đổi sao:</b>
-							Điểm ≥9 = 5⭐, ≥7 = 4⭐, ≥5 = 3⭐, còn lại = 2⭐
-						</div>
-					</v-alert>
-					<!-- Thông báo từ chối -->
-					<v-alert v-if="hasStudents && reasonReject.disabled" type="warning" variant="tonal"
-						density="compact" class="mb-2">
-						<div class="text-body-2 font-weight-medium">{{ reasonReject.textPerson }}</div>
-						<div class="text-body-2">
-							Lý do: <span class="font-weight-medium">{{ reasonReject.NoiDungNhanXet }}</span>
-						</div>
-					</v-alert>
-				</div>
-				<v-spacer />
+
+			<!-- Toolbar: Buttons hành động -->
+			<v-card-text class="py-2 d-flex align-center ga-2 flex-wrap">
 				<v-btn v-if="!isAllColumnsLocked" @click="onLuuTam" color="grey" variant="outlined"
-					:disabled="isDisabled">
+					:disabled="isDisabled" size="small">
 					<v-icon start>mdi-content-save</v-icon>
 					Lưu tạm
 					<v-badge v-if="changedCellCount > 0" :content="changedCellCount" color="primary" inline
 						class="ml-1" />
 				</v-btn>
 				<v-btn v-if="!isAllColumnsLocked" @click="onOpenDialogKhoaCotDiem" color="teal" variant="outlined"
-					:disabled="isDisabled">
+					:disabled="isDisabled" size="small">
 					<v-icon start>mdi-lock</v-icon>
 					Khóa cột điểm
 				</v-btn>
-				<!-- Menu Actions -->
-				<v-menu location="bottom end">
-					<template v-slot:activator="{ props }">
-						<v-btn color="primary" v-bind="props" variant="text" icon="mdi-dots-vertical"></v-btn>
-					</template>
-					<v-list density="compact">
-						<v-list-item v-if="filter.MonHocItem?.MonHocID === 5" title="Mẫu nhận xét"
-							@click="onOpenMauNhanXet" />
-						<v-list-item v-if="showGetThemeTestButton" title="Lấy điểm Test (Theme)"
-							@click="onGetDiemTest" />
-						<v-list-item title="Xuất Excel" @click="onExportExcel" />
-					</v-list>
-				</v-menu>
+				<v-btn v-if="filter.MonHocItem?.MonHocID === 5" @click="onOpenMauNhanXet" color="primary"
+					variant="outlined" size="small" :disabled="!hasStudents">
+					<v-icon start>mdi-comment-text-outline</v-icon>
+					Mẫu nhận xét
+				</v-btn>
+				<v-btn v-if="showGetThemeTestButton" @click="onGetDiemTest" color="primary"
+					variant="outlined" size="small" :disabled="!hasStudents">
+					<v-icon start>mdi-download-outline</v-icon>
+					Lấy điểm Test
+				</v-btn>
+				<v-btn @click="onExportExcel" color="primary" variant="outlined" size="small"
+					:disabled="!hasStudents">
+					<v-icon start>mdi-microsoft-excel</v-icon>
+					Xuất Excel
+				</v-btn>
+			</v-card-text>
+
+			<v-divider v-if="hasStudents" />
+
+			<!-- Khu vực thông báo — tách riêng khỏi toolbar -->
+			<v-card-text v-if="hasStudents" class="py-2 d-flex flex-column ga-2">
+				<!-- Gợi ý khóa cột điểm khi đã nhập đủ — ưu tiên hiển thị đầu -->
+				<v-alert v-if="showSuggestLockAlert" type="success" variant="tonal" density="compact"
+					closable @click:close="onDismissSuggestLock">
+					<div class="d-flex align-center justify-space-between flex-wrap ga-3">
+						<div>
+							<div class="text-body-2 font-weight-bold">
+								🎉 Đã nhập đủ điểm —
+								{{ suggestLockColumns.length === 1
+									? '"' + suggestLockColumns[0].title + '"'
+									: suggestLockColumns.length + ' cột' }}
+								sẵn sàng chốt!
+							</div>
+							<div class="text-caption text-medium-emphasis mt-1">
+								Khóa cột điểm để chốt dữ liệu, giáo viên sẽ không thể chỉnh sửa thêm.
+								<template v-if="suggestLockColumns.length > 1">
+									<br/>Các cột: <span class="font-weight-medium">{{ suggestLockColumns.map(c => c.title).join(' · ') }}</span>
+								</template>
+							</div>
+						</div>
+						<div class="d-flex ga-2">
+							<v-btn size="small" color="success" variant="flat"
+								@click.stop="onLockSuggestedColumns">
+								<v-icon start size="small">mdi-lock-check</v-icon>
+								Chốt &amp; khóa ngay
+							</v-btn>
+							<v-btn size="small" color="success" variant="text"
+								@click.stop="onOpenDialogKhoaCotDiem">
+								Tự chọn cột
+							</v-btn>
+						</div>
+					</div>
+				</v-alert>
+
+				<!-- Thông báo từ chối -->
+				<v-alert v-if="reasonReject.disabled" type="error" variant="tonal" density="compact">
+					<div class="text-body-2 font-weight-medium">{{ reasonReject.textPerson }}</div>
+					<div class="text-body-2 text-medium-emphasis">
+						Lý do: <span class="font-weight-medium">{{ reasonReject.NoiDungNhanXet }}</span>
+					</div>
+				</v-alert>
+
+				<!-- Hàng thông báo phụ: comment + đổi sao -->
+				<div class="d-flex ga-2 flex-wrap">
+					<v-alert type="warning" variant="tonal" density="compact" style="width: fit-content">
+						<div class="text-caption text-medium-emphasis">
+							Comment <b>(màu đỏ)</b> là ô điểm do <b>Giáo viên khác</b> nhập
+						</div>
+					</v-alert>
+					<v-alert v-if="showStarConversionRule" type="info" variant="tonal" density="compact"
+						style="width: fit-content">
+						<div class="text-caption">
+							<b>Đổi sao:</b> ≥9 = 5⭐ · ≥7 = 4⭐ · ≥5 = 3⭐ · còn lại = 2⭐
+						</div>
+					</v-alert>
+				</div>
 			</v-card-text>
 
 			<!-- Jexcel Table -->
-			<v-card-text class="pa-0 fontSizeCustom">
+			<v-card-text class="pa-0 fontSizeCustom" ref="tableWrapper">
 				<uc-jexcel v-if="hasStudents" :key="keyComp" v-model="instance" v-model:dataSource="DSHocSinh"
 					class="hExcel" :freeze-columns="freezeColumns" :columns="headers" :comments="comments"
 					:styleSheet="styleSheet" :nestedHeaders="shouldShowNestedHeaders ? nestedHeaders : []"
-					:rootDataSource="DSHocSinh_API" @onChange="onChangeSheet" :filters="true" />
+					:rootDataSource="DSHocSinh_API" @onChange="onChangeSheet" :filters="true"
+					:style="{ '--excel-max-height': excelMaxHeight }" />
 				<uc-card-empty v-else />
 			</v-card-text>
 		</v-card>
@@ -177,6 +219,14 @@ export default {
 				TinhTrang: null,
 				statusDetail: null
 			},
+
+			// Gợi ý khóa cột điểm
+			suggestLockColumns: [],       // Danh sách cột gợi ý khóa
+			dismissedSuggest: false,      // User đã tắt gợi ý này chưa
+
+			// Excel height
+			excelMaxHeight: '400px',
+			_resizeObserver: null,
 
 			// Jexcel Config
 			headers: [],
@@ -266,6 +316,16 @@ export default {
 		},
 
 		/**
+		 * Hiển thị gợi ý khóa cột điểm khi đã nhập đủ
+		 */
+		showSuggestLockAlert() {
+			return this.hasStudents &&
+				!this.isDisabled &&
+				!this.dismissedSuggest &&
+				this.suggestLockColumns.length > 0;
+		},
+
+		/**
 		 * Hiển thị quy tắc đổi sao
 		 */
 		showStarConversionRule() {
@@ -303,7 +363,79 @@ export default {
 		}
 	},
 
+	mounted() {
+		this._updateExcelHeight();
+		// Theo dõi thay đổi kích thước của toàn bộ card (title, toolbar, alert co giãn)
+		this._resizeObserver = new ResizeObserver(() => {
+			this._updateExcelHeight();
+		});
+		this._resizeObserver.observe(this.$el);
+	},
+
+	beforeUnmount() {
+		if (this._resizeObserver) {
+			this._resizeObserver.disconnect();
+			this._resizeObserver = null;
+		}
+	},
+
 	methods: {
+		/**
+		 * Tính và cập nhật chiều cao bảng excel để fit màn hình
+		 * Đo vị trí top của tableWrapper so với viewport, lấy phần còn lại
+		 */
+		_updateExcelHeight() {
+			this.$nextTick(() => {
+				const wrapper = this.$refs.tableWrapper?.$el ?? this.$refs.tableWrapper;
+				if (!wrapper) return;
+				const top = wrapper.getBoundingClientRect().top;
+				const padding = 16; // khoảng thở dưới cùng
+				const height = window.innerHeight - top - padding;
+				this.excelMaxHeight = Math.max(height, 200) + 'px';
+			});
+		},
+
+		/**
+		 * Kiểm tra và cập nhật danh sách cột gợi ý khóa
+		 */
+		checkSuggestLock() {
+			this.dismissedSuggest = false;
+			this.suggestLockColumns = BangDiemService.data.getColumnsReadyToLock(
+				this.DSHocSinh,
+				this.DSCotDiem_ByMaNhomCotDiem,
+				this.displayColumns,
+				this.DSHocSinh_API
+			);
+		},
+
+		/**
+		 * Tắt gợi ý khóa (user chủ động bỏ qua)
+		 */
+		onDismissSuggestLock() {
+			this.dismissedSuggest = true;
+		},
+
+		/**
+		 * Khóa ngay các cột được gợi ý
+		 */
+		async onLockSuggestedColumns() {
+			try {
+				for (const cotDiem of this.suggestLockColumns) {
+					await BangDiemService.api.toggleKhoaCotDiem({
+						LopID: this.filter.LopItem.LopID,
+						MonHocLopID: this.filter.MonHocItem.MonHocLopID,
+						MaCotDiem: cotDiem.value,
+						IsKhoaCotDiem: true
+					});
+				}
+				Vue.$toast.success('Đã khóa các cột điểm đã nhập đủ!', { position: 'top' });
+				await this.onRefresh();
+			} catch (error) {
+				console.error('onLockSuggestedColumns error:', error);
+				Vue.$toast.error('Có lỗi xảy ra khi khóa cột điểm!', { position: 'top' });
+			}
+		},
+
 		/**
 		 * Reset dữ liệu
 		 */
@@ -359,6 +491,10 @@ export default {
 				this.tinhTrangStatus = result.tinhTrangStatus;
 
 				this.editedCells = defaultCells; // ✅ reactive trong Vue 3
+
+				// ✅ Kiểm tra gợi ý khóa cột điểm
+				this.checkSuggestLock();
+
 				// Re-render
 				this.keyComp++;
 			} catch (error) {
@@ -578,4 +714,4 @@ export default {
 		}
 	}
 }
-</script>
+</script> 

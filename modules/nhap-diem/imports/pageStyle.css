@@ -1,5 +1,7 @@
+
+/* Chiều cao bảng tự động fit màn hình — giá trị được tính động từ JS */
 .hExcel .jss_content {
-    max-height: calc(100vh - 151px) !important
+    max-height: var(--excel-max-height, calc(100vh - 300px)) !important;
 }
 
 .fontSizeCustom {
