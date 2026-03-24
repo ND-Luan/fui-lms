@@ -162,10 +162,11 @@ export default {
 		},
 
 		async getLop() {
-			this.DSLop = await fetchPromise("lms/Lop_Get_ByKhoiID", {
+			const _dsLop = await fetchPromise("lms/Lop_Get_ByKhoiID", {
 				NienKhoa: vueData.NienKhoa,
 				KhoiID: this.KhoiItem.KhoiID,
 			})
+			this.DSLop = _dsLop.filter(x => x.IsNhom === false)
 		},
 
 		async getHocSinh(forceRefresh = false) {

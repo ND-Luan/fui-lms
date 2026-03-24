@@ -102,23 +102,41 @@ const ApiService = {
      */
     async toggleKhoaCotDiem(params) {
         return await ajaxCALLPromise("lms/KhoaCotDiem_Ins_And_Upd", params);
-    }
+    },
+    /**
+     * Lấy config STEM theo niên khóa từ tblConfig_STEM
+     */
+    async getSTEMConfig(params) {
+        return await ajaxCALLPromise("lms/Config_STEM_Get", params);
+    },
 };
 // ==================== FILTER SERVICE ====================
 const FilterService = {
     /**
      * Xác định action API dựa trên filter
      */
-    getBangDiemAction(filter) {
+    getBangDiemAction(filter, vueData, stemConfigList = []) {
         const monHocID = filter.MonHocItem?.MonHocID;
         const maNhom = filter.MaNhomCotDiemItem?.MaNhomCotDiem;
+        const hocKi = filter.MaNhomCotDiemItem?.Semester; // 'HK1' hoặc 'HK2'
         // Môn 5 (English) - DiemCK/DiemGK
         if (monHocID === 5 && (maNhom?.includes('DiemCK') || maNhom?.includes('DiemGK'))) {
             return 'lms/HocSinhBangDiem_Get_ByThuTuNhom';
         }
-        // Môn 36 (STEM) - DiemCK
-        if (monHocID === CONSTANTS.SUBJECT_IDS.STEM_36 && maNhom?.includes('DiemCK')) {
-            return 'lms/HocSinhBangDiem_STEM_CK_Get';
+        // Môn 36 (STEM)
+        if (monHocID === CONSTANTS.SUBJECT_IDS.STEM_36) {
+            const stemConfig = stemConfigList.find(c => c.HocKi === hocKi && c.Enable);
+            if (stemConfig) {
+                // Có config: chỉ gọi STEM_CK_Get khi maNhom khớp HocKi_LayTongDiemChuDe
+                if (maNhom?.includes(stemConfig.HocKi_LayTongDiemChuDe)) {
+                    return 'lms/HocSinhBangDiem_STEM_CK_Get';
+                }
+            } else {
+                // Không có config → fallback: cả DiemCK lẫn DiemGK đều gọi STEM_CK_Get
+                if (maNhom?.includes('DiemCK') || maNhom?.includes('DiemGK')) {
+                    return 'lms/HocSinhBangDiem_STEM_CK_Get';
+                }
+            }
         }
         return 'lms/HocSinhBangDiem_Get_ByMonHocID_MaNhom';
     },
@@ -223,16 +241,13 @@ const DataProcessor = {
      */
     getColumnsReadyToLock(DSHocSinh, DSCotDiem_ByMaNhomCotDiem, displayColumns, apiData) {
         if (!DSHocSinh?.length || !DSCotDiem_ByMaNhomCotDiem?.length) return [];
-
         return DSCotDiem_ByMaNhomCotDiem.filter(cotDiem => {
             // Bỏ qua cột đã khóa
             const display = displayColumns.find(d => d.value === cotDiem.value);
             if (display?.isLocked) return false;
-
             // Bỏ qua cột công thức (tự tính, không cần khóa thủ công)
             const sampleCol = apiData.find(x => x.MaCotDiem === cotDiem.value);
             if (sampleCol?.LoaiCotDiem === 'Công thức') return false;
-
             // Kiểm tra tất cả học sinh đều có giá trị hợp lệ ở cột này
             return DSHocSinh.every(hs => {
                 const val = hs[cotDiem.value];
@@ -240,7 +255,6 @@ const DataProcessor = {
             });
         });
     },
-
     /**
      * Xử lý dữ liệu trước khi push API
      */
@@ -503,9 +517,14 @@ const FormulaProcessor = {
         if (this.isCase_EnglishThemeResult(column, isEnglish, filter)) {
             return KetQuaDanhGia_VI;
         }
-        // CASE 4: STEM TongDiem
+        // CASE 4: STEM TongDiem (đã có KetQuaDanhGia_VI từ API)
         if (this.isCase_STEM_TongDiem(groupCode, MaCotDiem, filter.MonHocItem?.MonHocID)) {
             return KetQuaDanhGia_VI;
+        }
+        // CASE 4b: STEM DiemCK/SaoCK — build formula, expand range A:B trước
+        if (this.isCase_STEM_DiemCK(groupCode, MaCotDiem, filter.MonHocItem?.MonHocID)) {
+            const expandedFormula = this.expandRangeInFormula(Formula, allColumns);
+            return '=' + replaceFormula(columnsCotDiem, expandedFormula, rowIndex, freezeColumns);
         }
         // CASE 5: Chỉ có 1 cột
         if (allColumns.length === 1) {
@@ -553,9 +572,31 @@ const FormulaProcessor = {
         return isEnglish && this.isGetResultTopic(column, filter);
     },
     isCase_STEM_TongDiem(groupCode, maCotDiem, monHocID) {
-        return groupCode?.includes('DiemCK') &&
+        // TongDiem_CDx đã có sẵn KetQuaDanhGia_VI từ API → trả về thẳng
+        return (groupCode?.includes('DiemCK') || groupCode?.includes('DiemGK')) &&
             monHocID === CONSTANTS.SUBJECT_IDS.STEM_36 &&
             ['TongDiem_CD1', 'TongDiem_CD2', 'TongDiem_CD3'].some(x => maCotDiem.includes(x));
+    },
+    isCase_STEM_DiemCK(groupCode, maCotDiem, monHocID) {
+        // DiemCK_/SaoCK_ cần build formula (có range A:B cần expand)
+        return (groupCode?.includes('DiemCK') || groupCode?.includes('DiemGK')) &&
+            monHocID === CONSTANTS.SUBJECT_IDS.STEM_36 &&
+            ['DiemCK_', 'DiemGK_', 'SaoCK_', 'SaoGK_'].some(x => maCotDiem.includes(x));
+    },
+    /**
+     * Expand range syntax "ColA:ColB" thành "ColA, ColB, ColC, ..."
+     * dựa trên danh sách cột thực tế trong allColumns
+     * Ví dụ: AVERAGE(TongDiem_CD1_HK2:TongDiem_CD3_HK2)
+     *      → AVERAGE(TongDiem_CD1_HK2, TongDiem_CD2_HK2, TongDiem_CD3_HK2)
+     */
+    expandRangeInFormula(formula, allColumns) {
+        return formula.replace(/(\w+):(\w+)/g, (match, startCol, endCol) => {
+            const colNames = allColumns.map(c => c.MaCotDiem);
+            const startIdx = colNames.indexOf(startCol);
+            const endIdx = colNames.indexOf(endCol);
+            if (startIdx === -1 || endIdx === -1 || startIdx > endIdx) return match;
+            return colNames.slice(startIdx, endIdx + 1).join(', ');
+        });
     },
     isGetResultTopic(column, filter) {
         const groupCode = filter.MaNhomCotDiemItem?.MaNhomCotDiem;
@@ -599,19 +640,22 @@ const StyleService = {
      */
     applyComments(students, gradeColumns, apiData, freezeColumns) {
         const comments = {};
+        // Build lookup map O(n) thay vì find() O(n) trong double loop → tránh treo khi nhiều cột
+        const commentMap = {};
+        apiData.forEach(x => {
+            if (x.Is_Comment) {
+                commentMap[`${x.HocSinhID}_${x.MaCotDiem}`] = x.NhapDiemUser;
+            }
+        });
         students.forEach((row, rowIndex) => {
             gradeColumns.forEach((column, colIndex) => {
-                const cellAddress = jspreadsheet.helpers.getCellNameFromCoords(
-                    colIndex + freezeColumns,
-                    rowIndex
-                );
-                const commentData = apiData.find(
-                    x => x.HocSinhID === row.HocSinhID &&
-                        x.MaCotDiem === column.MaCotDiem &&
-                        x.Is_Comment
-                );
-                if (commentData) {
-                    comments[cellAddress] = `Cột điểm do ${commentData.NhapDiemUser} đã nhập`;
+                const user = commentMap[`${row.HocSinhID}_${column.MaCotDiem}`];
+                if (user) {
+                    const cellAddress = jspreadsheet.helpers.getCellNameFromCoords(
+                        colIndex + freezeColumns,
+                        rowIndex
+                    );
+                    comments[cellAddress] = `Cột điểm do ${user} đã nhập`;
                 }
             });
         });
@@ -909,21 +953,31 @@ const BangDiemService = {
                     tinhTrangStatus: { isDisabled: false, TinhTrang: null }
                 };
             }
-            // 1. Fetch data
-            const action = this.filter.getBangDiemAction(filter);
+            // 1. Fetch STEM config nếu là môn STEM
+            let stemConfigList = [];
+            if (filter.MonHocItem.MonHocID === CONSTANTS.SUBJECT_IDS.STEM_36) {
+                stemConfigList = await this.api.getSTEMConfig({
+                    NienKhoa: vueData.NienKhoa,
+                    KhoiID: filter.KhoiItem.KhoiID
+                });
+            }
+            // 2. Xác định action API (STEM cần stemConfigList để if/else đúng)
+            const action = this.filter.getBangDiemAction(filter, vueData, stemConfigList);
             const apiData = await this.api.fetchBangDiem(action, {
                 LopID: filter.LopItem.LopID,
                 MonHocID: filter.MonHocItem.MonHocID,
                 TemplateBangDiemID: filter.MonHocItem.TemplateBangDiemID,
                 MaNhomCotDiem: filter.MaNhomCotDiemItem.MaNhomCotDiem,
                 ThuTuNhom: filter.MaNhomCotDiemItem.ThuTuNhom,
-                Semester: filter.MaNhomCotDiemItem.Semester
+                Semester: filter.MaNhomCotDiemItem.Semester,
+                NienKhoa: vueData.NienKhoa,  // store STEM dùng để tra tblConfig_STEM
+                KhoiID: filter.KhoiItem?.KhoiID
             });
-            // 2. Lấy Tình Trạng ngay sau khi fetch data
+            // 3. Lấy Tình Trạng ngay sau khi fetch data
             const tinhTrangStatus = this.utility.getTinhTrangStatus(apiData, vueData);
-            // 3. Process students
+            // 4. Process students
             const students = this.data.processStudentList(apiData);
-            // 4. Calculate freeze columns
+            // 5. Calculate freeze columns
             const isEnglish = this.filter.isEnglishSubject(filter.MonHocItem.MonHocID);
             const isGroup = this.filter.isGroupSubject(filter.MonHocItem.MonHocID);
             const freezeColumns = this.data.calculateFreezeColumns(
@@ -931,7 +985,7 @@ const BangDiemService = {
                 isEnglish,
                 isGroup
             );
-            // 5. Get locked columns
+            // 6. Get locked columns
             const lockedColumns = await this.api.getKhoaCotDiem({
                 LopID: filter.LopItem.LopID,
                 MonHocLopID: filter.MonHocItem.MonHocLopID,
@@ -939,7 +993,7 @@ const BangDiemService = {
                 Semester: filter.MaNhomCotDiemItem.Semester,
                 NienKhoa: vueData.NienKhoa
             });
-            // 6. Build headers - Sử dụng tinhTrangStatus.isDisabled
+            // 7. Build headers - Sử dụng tinhTrangStatus.isDisabled
             const firstStudent = fn_ProrityTinhTrang(students);
             const gradeColumns = apiData.filter(x => x.HocSinhID === firstStudent.HocSinhID);
             const DSCotDiem_ByMaNhomCotDiem = gradeColumns.map(x => ({
@@ -975,7 +1029,7 @@ const BangDiemService = {
                     isLocked: !!lockedCol
                 };
             });
-            // 7. Build data rows
+            // 8. Build data rows
             const dataRows = this.buildDataRows(
                 students,
                 apiData,
@@ -985,7 +1039,7 @@ const BangDiemService = {
                 isEnglish,
                 vueData
             );
-            // 8. Apply styles and comments
+            // 9. Apply styles and comments
             const styleSheet = this.style.applyBackgroundStyles(dataRows, gradeColumns, freezeColumns);
             const comments = this.style.applyComments(dataRows, gradeColumns, apiData, freezeColumns);
             return {
@@ -1101,4 +1155,4 @@ const BangDiemService = {
     async sendToBGH(filter, vueData) {
         return await this.tinhTrang.sendToBGH(filter, vueData);
     }
-} 
+}

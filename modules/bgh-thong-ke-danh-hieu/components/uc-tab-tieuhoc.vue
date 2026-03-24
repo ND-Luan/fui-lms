@@ -48,7 +48,7 @@
 							KẾT QUẢ RÈN LUYỆN KHỐI 1, 2, 3, 4, 5 – NĂNG LỰC
 						</v-card-title>
 						<v-card-text class="pa-0">
-							<v-data-table :items="DataChart2" :headers="headersChart2" :hide-default-footer="true">
+							<v-data-table :items="DataChart2" :headers="headersChart2" :items-per-page="-1" :hide-default-footer="true">
 								<template #item="{ item, index }">
 									<tr :style="getRowStyle(item)" :class="getRowClass(item)">
 										<td v-for="obj of headersChart2"
@@ -100,7 +100,7 @@
 							KẾT QUẢ HỌC TẬP – CẤP TIỂU HỌC
 						</v-card-title>
 						<v-card-text class="pa-0">
-							<v-data-table :items="DataChart4" :headers="headersChart4" :hide-default-footer="true" />
+							<v-data-table :items="DataChart4" :headers="headersChart4" :items-per-page="-1" :hide-default-footer="true" />
 						</v-card-text>
 					</v-card>
 
@@ -484,9 +484,7 @@
 					})
 					this.DataChotBaoCao = data
 				}
-	
-	
-	
+	 
 				this.DataChotBaoCao = data
 				this.handleChart4(data[2])
 				this.handleChart5(data[3])
@@ -651,6 +649,7 @@
 					TenMonHoc_HienThi: 'Năng lực đặc thù'
 				}]
 				this.DataChart2 = [...objNangLucChung, ...NangLucChungArr, ...objNangLucDacThu, ...NangLucDacThuArr]
+				console.log("DataChart2", this.DataChart2)
 				// //Lấy khối 5 => Phẩm Chất- Năng lực
 				// let Chart3 = data[2]
 				// let arrNangLucPhamChat = [...new Set(Chart3.map(item => item.TenMonHoc_HienThi))]

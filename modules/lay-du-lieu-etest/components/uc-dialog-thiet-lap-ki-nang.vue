@@ -408,9 +408,9 @@
 				],
 	
 				KI_NANG_MAP: {
-					HK: ['Listening', 'Speaking', 'Reading', 'Writing', 'Total'],
-					TA2: ['Listening', 'Speaking', 'Reading', 'Writing', 'Total'],
-					IELTS: ['Listening', 'Speaking', 'Reading', 'Writing', 'Total'],
+					HK: ['Listening', 'Language', 'Reading', 'Writing', 'Speaking', 'Total'],
+					TA2: ['Listening', 'Reading', 'Writing', 'Speaking', 'Total'],
+					IELTS: ['Listening', 'Reading', 'Writing', 'Speaking', 'Total'],
 				},
 	
 				headers: [

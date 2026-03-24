@@ -9,14 +9,15 @@
 							item-value="KhoiID" return-object />
 					</v-col>
 					<v-col class="d-flex ga-2" cols="3">
-						<v-btn text="Làm mới" prepend-icon="mdi-refresh" @click="onRefresh" variant="outlined" color="primary" />
-						<uc-btn-dialog-add v-model:DSNhom="itemNhoms" prepend-icon="mdi-plus" text="Thêm học sinh" variant="outlined"
-							color="teal" @onSubmitFinish="onRefresh(true)" :disabled="NhomDetail === null"
-							:NhomDetail_Child="NhomDetail" />
-						<v-btn :text="textChuyenNhom" prepend-icon="mdi-swap-horizontal" @click="onOpenDialogChange" variant="outlined" color="blue"
-							:disabled="NhomDetail === null" />
-						<v-btn text="Cập nhật số thứ tự" prepend-icon="mdi-sort-numeric-ascending" @click="onUpdateSTT" variant="outlined" color="green"
-							:disabled="NhomDetail === null" />
+						<v-btn text="Làm mới" prepend-icon="mdi-refresh" @click="onRefresh" variant="outlined"
+							color="primary" />
+						<uc-btn-dialog-add v-model:DSNhom="itemNhoms" prepend-icon="mdi-plus" text="Thêm học sinh"
+							variant="outlined" color="teal" @onSubmitFinish="onRefresh(true)"
+							:disabled="NhomDetail === null" :NhomDetail_Child="NhomDetail" />
+						<v-btn :text="textChuyenNhom" prepend-icon="mdi-swap-horizontal" @click="onOpenDialogChange"
+							variant="outlined" color="blue" :disabled="NhomDetail === null" />
+						<v-btn text="Cập nhật số thứ tự" prepend-icon="mdi-sort-numeric-ascending" @click="onUpdateSTT"
+							variant="outlined" color="green" :disabled="NhomDetail === null" />
 					</v-col>
 				</v-row>
 			</v-card-text>
@@ -156,7 +157,17 @@
 					const itemHS = this.itemHocSinhs.find(x => x.HocSinhID === itemHS_Calen.HocSinhID)
 					arr.push({ ...itemHS, SoTT: itemHS_Calen?.STT || 0 })
 				}
-				console.log("arr", arr)
+	
+				for (var ndetail of this.NhomDetail.ListNhomID_Child.split(',')) {
+					const dshs = await fetchPromise("lms/HocSinhNhom_Get_ByNhomID", {
+						NienKhoa: vueData.NienKhoa,
+						NhomID: ndetail
+					})
+					for (var itemHS_Calen of this.DSHocSinh_Calen) {
+						const itemHS = dshs.find(x => x.HocSinhID === itemHS_Calen.HocSinhID)
+						arr.push({ ...itemHS, SoTT: itemHS_Calen?.STT || 0 })
+					}
+				}
 	
 				for (var item of arr) {
 					await fetchPromise("lms/SoTT_Udp_ByHSNhomID", {

@@ -26,17 +26,29 @@
 		</v-card>
 		<v-divider />
 		<v-card title="Thống kê môn học theo khối">
+			<template #append>
+				<v-btn color="success" prepend-icon="mdi-microsoft-excel" variant="tonal" size="small"
+					:disabled="!itemThongKe.length" @click="exportExcel">
+					Xuất Excel
+				</v-btn>
+			</template>
 			<v-data-table :headers="headerThongKe" :items="itemThongKe" :items-per-page="-1" hide-default-footer />
 		</v-card>
 		<v-divider />
 		<v-card title="Danh sách bảng điểm học sinh">
+			<template #append>
+				<v-btn color="success" prepend-icon="mdi-microsoft-excel" variant="tonal" size="small"
+					:disabled="!itemBangDiem.length" @click="exportExcelBangDiem">
+					Xuất Excel
+				</v-btn>
+			</template>
 			<v-data-table :headers="headerBangDiem" :items="itemBangDiem" :items-per-page="-1" hide-default-footer />
 		</v-card>
 	</Global>
 </template>
 
 <script>
-export default {
+	export default {
 	props: [],
 	data() {
 		let DSHocKi = []
@@ -72,6 +84,7 @@ export default {
 		}
 	},
 	mounted() {
+		this.loadSheetJS()
 	},
 	computed: {},
 	watch: {
@@ -87,6 +100,77 @@ export default {
 		}
 	},
 	methods: {
+		// ─── Load SheetJS một lần duy nhất ───────────────────────────────
+		loadSheetJS() {
+			if (window.XLSX) return
+			return new Promise((resolve, reject) => {
+				const script = document.createElement("script")
+				script.src = "https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"
+				script.onload = resolve
+				script.onerror = reject
+				document.head.appendChild(script)
+			})
+		},
+
+		// ─── Hàm xuất Excel dùng chung ───────────────────────────────────
+		_exportToExcel(headers, items, sheetName, fileName) {
+			const XLSX = window.XLSX
+			if (!XLSX) {
+				alert("Thư viện xuất Excel chưa sẵn sàng, vui lòng thử lại.")
+				return
+			}
+
+			// Build header row từ headers config của v-data-table
+			const headerRow = headers.map(h => h.title)
+			const keys = headers.map(h => h.value)
+
+			// Build data rows
+			const dataRows = items.map(item =>
+				keys.map(key => {
+					const val = item[key]
+					return val === undefined || val === null ? "" : val
+				})
+			)
+
+			// Gộp thành mảng 2 chiều
+			const wsData = [headerRow, ...dataRows]
+
+			const ws = XLSX.utils.aoa_to_sheet(wsData)
+
+			// Tự động co giãn độ rộng cột
+			const colWidths = headerRow.map((h, i) => {
+				const maxLen = Math.max(
+					String(h).length,
+					...dataRows.map(r => String(r[i] ?? "").length)
+				)
+				return { wch: Math.min(maxLen + 4, 50) }
+			})
+			ws["!cols"] = colWidths
+
+			const wb = XLSX.utils.book_new()
+			XLSX.utils.book_append_sheet(wb, ws, sheetName)
+			XLSX.writeFile(wb, fileName)
+		},
+
+		// ─── Xuất bảng Thống kê ──────────────────────────────────────────
+		exportExcel() {
+			const hocKi = this.HocKiItem?.title ?? "HocKi"
+			const khoi = this.KhoiItem?.TenKhoiHoc ?? "Khoi"
+			const mon = this.MonHocItem?.MonHocName ?? "MonHoc"
+			const fileName = `ThongKe_${mon}_${khoi}_${hocKi}.xlsx`
+			this._exportToExcel(this.headerThongKe, this.itemThongKe, "Thống kê", fileName)
+		},
+
+		// ─── Xuất bảng Bảng điểm học sinh ───────────────────────────────
+		exportExcelBangDiem() {
+			const hocKi = this.HocKiItem?.title ?? "HocKi"
+			const khoi = this.KhoiItem?.TenKhoiHoc ?? "Khoi"
+			const mon = this.MonHocItem?.MonHocName ?? "MonHoc"
+			const fileName = `BangDiem_${mon}_${khoi}_${hocKi}.xlsx`
+			this._exportToExcel(this.headerBangDiem, this.itemBangDiem, "Bảng điểm", fileName)
+		},
+
+		// ─── Các method gốc giữ nguyên ───────────────────────────────────
 		async getKhoi() {
 			this.DSKhoi = await fetchPromise("lms/KhoiHocByCapHoc_Get", {
 				CapID: this.CapID,
@@ -113,7 +197,6 @@ export default {
 			const columnArr = []
 
 			raw.forEach(item => {
-				// tạo học sinh
 				if (!map[item.HocSinhID]) {
 					map[item.HocSinhID] = {
 						HocSinhID: item.HocSinhID,
@@ -121,11 +204,7 @@ export default {
 						HoTen: item.HoTen,
 					}
 				}
-
-				// 👉 dùng KetQuaDanhGia_VI
 				map[item.HocSinhID][item.MaCotDiem] = item.KetQuaDanhGia_VI ?? "-"
-
-				// build column (có sort)
 				if (!columnArr.find(x => x.key === item.MaCotDiem)) {
 					columnArr.push({
 						key: item.MaCotDiem,
@@ -135,19 +214,14 @@ export default {
 				}
 			})
 
-			// sort column
 			columnArr.sort((a, b) => a.order - b.order)
 
-			// data
 			this.itemBangDiem = Object.values(map)
-
-			// header
 			this.headerBangDiem = [
 				{ title: "Số danh bộ", value: "SoDanhBo", minWidth: "100px", width: "100px", align: "center" },
 				{ title: "Họ tên", value: "HoTen", minWidth: "150px", width: "150px" },
 				{ title: "Ngày sinh", value: "NgaySinh", minWidth: "120px", width: "120px" },
 				{ title: "Giới tính", value: "GioiTinh", minWidth: "100px", width: "100px" },
-
 				...columnArr.map(col => ({
 					title: col.title,
 					value: col.key,
@@ -172,142 +246,41 @@ export default {
 			let headers = []
 			if ([106, 43, 42, 41, 40, 38, 37, 36].includes(this.MonHocItem?.MonHocID)) {
 				headers = [
-					{
-						"title": "Giai đoạn",
-						"value": "Semester"
-					},
-					{
-						"title": "Khối",
-						"value": "TenKhoiHoc"
-					},
-					{
-						"title": "Tổng số học sinh",
-						"value": "TongSoHocSinh",
-						"align": "right"
-					},
-					{
-						"title": "Sao < 3",
-						"value": "SaoDuoi3"
-					},
-					{
-						"title": "Tỉ lệ sao < 3",
-						"value": "TiLeSao3"
-					},
-					{
-						"title": "Sao 3",
-						"value": "Sao3"
-					},
-					{
-						"title": "Tỉ lệ sao 3",
-						"value": "TiLeSao3"
-					},
-					{
-						"title": "Sao 4",
-						"value": "Sao4"
-					},
-					{
-						"title": "Tỉ lệ sao 4",
-						"value": "TiLeSao4"
-					},
-					{
-						"title": "Sao 5",
-						"value": "Sao5"
-					},
-					{
-						"title": "Tỉ lệ sao 5",
-						"value": "TiLeSao5"
-					}
+					{ "title": "Giai đoạn", "value": "Semester" },
+					{ "title": "Khối", "value": "TenKhoiHoc" },
+					{ "title": "Tổng số học sinh", "value": "TongSoHocSinh", "align": "right" },
+					{ "title": "Sao < 3", "value": "SaoDuoi3" },
+					{ "title": "Tỉ lệ sao < 3", "value": "TiLeSaoDuoi3" },
+					{ "title": "Sao 3", "value": "Sao3" },
+					{ "title": "Tỉ lệ sao 3", "value": "TiLeSao3" },
+					{ "title": "Sao 4", "value": "Sao4" },
+					{ "title": "Tỉ lệ sao 4", "value": "TiLeSao4" },
+					{ "title": "Sao 5", "value": "Sao5" },
+					{ "title": "Tỉ lệ sao 5", "value": "TiLeSao5" }
 				]
 			}
 			else {
 				headers = [
-					{
-						"title": "Giai đoạn",
-						"value": "Semester"
-					},
-					{
-						"title": "Khối",
-						"value": "TenKhoiHoc"
-					},
-					{
-						"title": "Tổng số học sinh",
-						"value": "TongSoHocSinh",
-						"align": "right"
-					},
-					{
-						"title": "<5",
-						"value": "DiemDuoi5",
-						"align": "right"
-					},
-					{
-						"title": "TL <5",
-						"value": "TiLeDiem5",
-						"align": "right"
-					},
-					{
-						"title": "5",
-						"value": "DiemDuoi5",
-						"align": "right"
-					},
-					{
-						"title": "TL 5",
-						"value": "TiLeDiem5",
-						"align": "right"
-					},
-					{
-						"title": "6",
-						"value": "Diem6",
-						"align": "right"
-					},
-					{
-						"title": "TL 6",
-						"value": "TiLeDiem6",
-						"align": "right"
-					},
-					{
-						"title": "7",
-						"value": "Diem7",
-						"align": "right"
-					},
-					{
-						"title": "TL 7",
-						"value": "TiLeDiem7",
-						"align": "right"
-					},
-					{
-						"title": "8",
-						"value": "Diem8",
-						"align": "right"
-					},
-					{
-						"title": "TL 8",
-						"value": "TiLeDiem8",
-						"align": "right"
-					},
-					{
-						"title": "9",
-						"value": "Diem9",
-						"align": "right"
-					},
-					{
-						"title": "TL 9",
-						"value": "TiLeDiem9",
-						"align": "right"
-					},
-					{
-						"title": "10",
-						"value": "Diem10",
-						"align": "right"
-					},
-					{
-						"title": "TL 10",
-						"value": "TiLeDiem10",
-						"align": "right"
-					}
+					{ "title": "Giai đoạn", "value": "Semester" },
+					{ "title": "Khối", "value": "TenKhoiHoc" },
+					{ "title": "Tổng số học sinh", "value": "TongSoHocSinh", "align": "right" },
+					{ "title": "<5", "value": "DiemDuoi5", "align": "right" },
+					{ "title": "TL <5", "value": "TiLeDiemDuoi5", "align": "right" },
+					{ "title": "5", "value": "Diem5", "align": "right" },
+					{ "title": "TL 5", "value": "TiLeDiem5", "align": "right" },
+					{ "title": "6", "value": "Diem6", "align": "right" },
+					{ "title": "TL 6", "value": "TiLeDiem6", "align": "right" },
+					{ "title": "7", "value": "Diem7", "align": "right" },
+					{ "title": "TL 7", "value": "TiLeDiem7", "align": "right" },
+					{ "title": "8", "value": "Diem8", "align": "right" },
+					{ "title": "TL 8", "value": "TiLeDiem8", "align": "right" },
+					{ "title": "9", "value": "Diem9", "align": "right" },
+					{ "title": "TL 9", "value": "TiLeDiem9", "align": "right" },
+					{ "title": "10", "value": "Diem10", "align": "right" },
+					{ "title": "TL 10", "value": "TiLeDiem10", "align": "right" }
 				]
 			}
 			this.headerThongKe = headers
-
 		}
 	},
 }

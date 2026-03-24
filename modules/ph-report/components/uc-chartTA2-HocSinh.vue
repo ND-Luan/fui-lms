@@ -402,6 +402,8 @@ export default {
 						KhoiID: vueData.HocSinhSelected.KhoiID,
 					},
 					res => {
+						console.log('this.DSLopIelts',this.DSLopIelts)
+						console.log('this.HocSinhSelected.TenLopAV',this.HocSinhSelected.TenLopAV)
 						if (this.DSLopIelts.includes(this.HocSinhSelected.TenLopAV)) {
 							const DSKyHoc = ['S1_Mid_IELTS', 'S1_Final_IELTS', 'S2_Mid_IELTS', 'S2_Final_IELTS']
 							const DSCotDiem = ['IELTS_Listening', 'IELTS_Reading', 'IELTS_Writing', 'IELTS_Speaking', 'IELTS_Band']
