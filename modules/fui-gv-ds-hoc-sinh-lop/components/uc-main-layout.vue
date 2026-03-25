@@ -3,19 +3,17 @@
 		<template #header>
 			<v-card>
 				<v-card-title>
-					<v-icon>mdi-account-group</v-icon>
 					{{ TitlePage }} • {{ TitleCap }}
 				</v-card-title>
 				<v-card-text>
 					<v-row align="center">
 						<v-col cols="12" sm="3">
 							<v-select v-model="KhoiItem" label="Chọn khối" :items="DSKhoi" item-title="TenKhoiHoc"
-								item-value="KhoiID" prepend-inner-icon="mdi-layers" return-object />
+								item-value="KhoiID" return-object />
 						</v-col>
 						<v-col cols="12" sm="3">
 							<v-select v-model="LopItem" label="Chọn lớp" :items="DSLop" item-title="TenLop"
-								item-value="LopID" prepend-inner-icon="mdi-door-open" :disabled="!KhoiItem"
-								return-object />
+								item-value="LopID" :disabled="!KhoiItem" return-object />
 						</v-col>
 						<v-col class="d-flex align-center ga-2 flex-wrap">
 							<v-btn @click="getHocSinh()" variant="outlined" color="primary" :disabled="!LopItem">
@@ -38,7 +36,7 @@
 		<!-- Thay toàn bộ phần template v-data-table -->
 		<v-data-table v-model="DSHocSinhSelected" :headers :items :show-select="true" items-per-page="-1"
 			:item-value="(item) => item" hide-default-footer hover
-			style="max-height: calc(100dvh - 89px); overflow-y: auto;">
+			style="max-height: calc(100dvh - 77px); overflow-y: auto;">
 			<!-- STT -->
 			<template #item.STT="{ item }">
 				<span class="text-caption text-medium-emphasis font-weight-medium">{{ item.STT }}</span>
