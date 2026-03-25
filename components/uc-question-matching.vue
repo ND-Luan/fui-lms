@@ -1,31 +1,51 @@
 <template>
 	<div>
 		<!-- Hướng dẫn -->
-		<v-alert v-if="guideText" class="mb-2" variant="tonal" type="info" density="comfortable" border="start"
-			border-color="info">
-			<strong>Hướng dẫn:</strong> {{ guideText }}
+		<v-alert v-if="guideText || useTapAssignMode" class="mb-2" variant="tonal" type="info" density="comfortable"
+			border="start" border-color="info">
+			<div v-if="guideText"><strong>Hướng dẫn:</strong> {{ guideText }}</div>
+			<div v-if="useTapAssignMode" :class="{ 'mt-1': guideText }">
+				<strong>Chế độ iOS:</strong> Chạm 1 đáp án ở <strong>Cột B</strong>, rồi chạm ô <strong>Cột A</strong>
+				để gán.
+				Chạm vào đáp án đã gán ở <strong>Cột A</strong> để chọn, rồi chạm ô A khác để đổi hoặc bấm nút <em>Bỏ về
+					Cột B</em> để hoàn trả.
+			</div>
 		</v-alert>
 
 		<!-- =============== DESKTOP: 2 CỘT NGANG =============== -->
 		<div v-if="!isMobile" class="d-flex ga-12 w-100 justify-center">
 			<!-- CỘT A -->
 			<div class="drop-zones">
-				<div v-for="item in columnA" :key="item.id" class="drop-zone pa-4" @drop="onDrop($event, item)"
-					@dragover.prevent @dragenter.prevent>
+				<div v-for="item in columnA" :key="item.id" class="drop-zone pa-4" :class="{
+						'drop-zone-tap-active': useTapAssignMode && !!selectedTapItemB,
+						'drop-zone-tap-selected-source': useTapAssignMode && selectedTapSourceAId === item.id
+					}" @click="onTapAssignToA(item)">
 					<div class="d-flex flex-row">
 						<div class="jigsaw2">
 							<span class="r"></span>
 							<span class="text">{{ item.text }}</span>
 						</div>
 
-						<!-- ĐÁP ÁN ĐÃ CHỌN – CÓ THỂ KÉO RA -->
-						<div v-if="item.dropArray?.length" class="jigsaw1" :class="{
-							'correct-match': showResult && isCorrectPair(item.id, item.dropArray[0].id),
-							'incorrect-match': showResult && !isCorrectPair(item.id, item.dropArray[0].id)
-						}" @dragstart="onDragStartFromA($event, item)" draggable="true">
-							<span class="l"></span>
-							<span class="text">{{ item.dropArray[0].text }}</span>
-						</div>
+						<!-- ĐÁP ÁN ĐÃ CHỌN -->
+						<vuedraggable v-model="item.dropArray" item-key="id" :group="dragGroup" :sort="false"
+							:disabled="isDragDisabled || useTapAssignMode" @add="onAddToA(item)"
+							@change="onDragDataChanged" :animation="150" :force-fallback="isIOS"
+							:fallback-on-body="isIOS" :delay-on-touch-only="true" :delay="touchDragDelay"
+							:touch-start-threshold="4" :fallback-tolerance="4" :empty-insert-threshold="24"
+							class="flex-grow-1 min-w-0 drop-zone-answer-slot">
+							<template #item="{ element }">
+								<div class="jigsaw1" :class="{
+									'correct-match': showResult && isCorrectPair(item.id, element.id),
+									'incorrect-match': showResult && !isCorrectPair(item.id, element.id)
+								}">
+									<span class="l"></span>
+									<span class="text">{{ element.text }}</span>
+								</div>
+							</template>
+							<template #footer>
+								<div v-if="!item.dropArray?.length" class="drop-zone-answer-placeholder"></div>
+							</template>
+						</vuedraggable>
 					</div>
 					<!-- <div>
 						<v-icon :color=""></v-icon>
@@ -35,11 +55,21 @@
 
 
 			<!-- CỘT B -->
-			<div class="drop-zones" v-if="columnB.length > 0">
+			<div class="drop-zones">
+				<!-- NÚT TRẢ VỀ CỘT B khi đang giữ item từ Cột A -->
+				<div v-if="useTapAssignMode && selectedTapSourceAId" class="tap-return-zone mt-1 mb-2"
+					@click="returnTapItemToB">
+					<v-icon size="18" class="mr-1">mdi-arrow-left-bold</v-icon>
+					Bỏ về Cột B: <strong class="ml-1">"{{ selectedTapItemB?.text }}"</strong>
+				</div>
 				<vuedraggable v-model="columnB" item-key="id" @start="onStart" @end="endDrag" :animation="150"
-					:sort="false" :disabled="readonly || isGrade || submissionstatus >= 2">
+					:group="dragGroup" :disabled="isDragDisabled || useTapAssignMode" @change="onDragDataChanged"
+					:force-fallback="isIOS" :fallback-on-body="isIOS" :delay-on-touch-only="true"
+					:delay="touchDragDelay" :touch-start-threshold="4" :fallback-tolerance="4">
 					<template #item="{ element }">
-						<div class="d-flex drop-zone-columnB pa-4" @dragstart="onDragStart($event, element)">
+						<div class="d-flex drop-zone-columnB pa-4"
+							:class="{ 'tap-item-selected': useTapAssignMode && selectedTapItemB?.id === element.id }"
+							@click="onTapPickFromB(element)">
 							<div class="jigsaw1-wrapper">
 								<span class="l"></span>
 								<div class="jigsaw1">
@@ -65,7 +95,8 @@
 
 				<!-- TO (Cột B) -->
 				<div class="mobile-to" @click="openMobileDialog(itemA)">
-					<div v-if="itemA.dropArray?.length" class="jigsaw1 d-flex align-center" style="background-color: #ffffff !important; border:solid 1px #217d46" :class="{
+					<div v-if="itemA.dropArray?.length" class="jigsaw1 d-flex align-center"
+						style="background-color: #ffffff !important; border:solid 1px #217d46" :class="{
 						'correct-match': showResult && isCorrectPair(itemA.id, itemA.dropArray[0].id),
 						'incorrect-match': showResult && !isCorrectPair(itemA.id, itemA.dropArray[0].id)
 					}">
@@ -91,7 +122,8 @@
 		<v-dialog v-model="mobileDialog" max-width="400" persistent>
 			<v-card>
 				<v-card-title class="bg-primary text-white text-subtitle-1">
-					<span class="text-white">Chọn đáp án cho: <strong class="ml-1">"{{ selectedLeftItem?.text }}"</strong></span>
+					<span class="text-white">Chọn đáp án cho: <strong class="ml-1">"{{ selectedLeftItem?.text
+							}}"</strong></span>
 				</v-card-title>
 				<v-card-text class="pt-4">
 					<v-list density="compact">
@@ -145,20 +177,22 @@
 					<template #activator="{ props: menuProps }">
 						<v-tooltip location="top">
 							<template #activator="{ props: tooltipProps }">
-								<v-btn v-bind="{ ...menuProps, ...tooltipProps }" icon="mdi-notebook-edit-outline" size="small"
-									variant="text" color="primary" />
+								<v-btn v-bind="{ ...menuProps, ...tooltipProps }" icon="mdi-notebook-edit-outline"
+									size="small" variant="text" color="primary" />
 							</template>
 							<span>Ý kiến của bạn</span>
 						</v-tooltip>
 					</template>
 					<v-card :min-width="widthScreen < 650 ? null : 600" variant="outlined" class="elevation-0">
-						<v-card-title class="px-4 py-3" style="background-color:#E3F2FD; color:#1565C0; font-weight:600;">
+						<v-card-title class="px-4 py-3"
+							style="background-color:#E3F2FD; color:#1565C0; font-weight:600;">
 							Ý kiến của bạn
 						</v-card-title>
 						<v-list>
 							<v-list-item>
-								<v-textarea :model-value="grading?.comment || ''" @update:model-value="onStudentCommentInput" rows="2"
-									hide-details variant="outlined" placeholder="Nhập ý kiến của bạn" />
+								<v-textarea :model-value="grading?.comment || ''"
+									@update:model-value="onStudentCommentInput" rows="2" hide-details variant="outlined"
+									placeholder="Nhập ý kiến của bạn" />
 							</v-list-item>
 						</v-list>
 						<v-card-actions class="border-t py-0">
@@ -210,7 +244,7 @@
 </template>
 
 <script>
-export default {
+	export default {
 	name: "uc-question-matching",
 	components: { vuedraggable },
 	props: {
@@ -235,10 +269,18 @@ export default {
 			correctCount: 0,
 			columnA: [],
 			columnB: [],
-			draggingFromA: false
+			dragGroup: { name: 'matching-items', pull: true, put: true },
+			selectedTapItemB: null,
+		selectedTapSourceAId: null,
+		useTapAssignMode: false,
+		isIOS: false,
+		touchDragDelay: 0
 		};
 	},
 	computed: {
+		isDragDisabled() {
+			return this.readonly || this.isGrade || this.submissionstatus >= 2;
+		},
 		guideText() {
 			return this.question?.config?.submissionNote ||
 				this.question?.config?.instruction ||
@@ -297,6 +339,7 @@ export default {
 			this.showResult = true
 		}
 		this.widthScreen = window.innerWidth;
+		this._detectDevice();
 		this.checkMobile();
 		this.initializeData();
 		if (this.isGrade) this.autoGrade();
@@ -310,9 +353,19 @@ export default {
 		'question.config': { handler: 'initializeData', deep: true }
 	},
 	methods: {
+		_detectDevice() {
+			const ua = navigator.userAgent || '';
+			const iOSByUA = /iPad|iPhone|iPod/i.test(ua);
+			const iPadOS = navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1;
+			this.isIOS = iOSByUA || iPadOS;
+			const isCoarsePointer = window.matchMedia('(pointer: coarse)').matches;
+			this.touchDragDelay = isCoarsePointer ? 120 : 0;
+			this.useTapAssignMode = !this.isMobile && this.isIOS && isCoarsePointer;
+		},
 		handleResize() {
 			this.widthScreen = window.innerWidth;
 			this.checkMobile();
+			this._detectDevice();
 		},
 		checkMobile() {
 			this.isMobile = window.innerWidth <= 768;
@@ -323,6 +376,8 @@ export default {
 				dropArray: []
 			}));
 			this.columnB = [...(this.question?.config?.columnB || [])];
+			this.selectedTapItemB = null;
+			this.selectedTapSourceAId = null;
 			if (this.answer?.length) this.loadAnswers();
 		},
 		loadAnswers() {
@@ -358,44 +413,89 @@ export default {
 		isSelectedInDialog(itemB) {
 			return this.selectedLeftItem?.dropArray[0]?.id === itemB.id;
 		},
-		// === DESKTOP DRAG ===
-		onDragStart(e, item) {
-			e.dataTransfer.setData('itemId', item.id);
-			e.dataTransfer.setData('fromA', ''); // từ B
-		},
-		onDragStartFromA(e, targetA) {
-			if (this.readonly || this.isGrade || this.submissionstatus >= 2) return;
-			const itemB = targetA.dropArray[0];
-			e.dataTransfer.setData('itemId', itemB.id);
-			e.dataTransfer.setData('fromA', targetA.id);
-			this.draggingFromA = true;
-		},
-		onDrop(e, targetA) {
-			if (this.isMobile || this.readonly || this.isGrade || this.submissionstatus >= 2) return;
-			e.preventDefault();
-
-			const itemId = e.dataTransfer.getData('itemId');
-			const fromAId = e.dataTransfer.getData('fromA');
-
-			// Tìm item bị kéo
-			let draggedItem = this.columnB.find(b => b.id === itemId);
-			if (!draggedItem && fromAId) {
-				const sourceA = this.columnA.find(a => a.id === fromAId);
-				draggedItem = sourceA?.dropArray[0];
-				if (sourceA) sourceA.dropArray = [];
+		// === DESKTOP/TABLET DRAG ===
+		onAddToA(targetA) {
+			if (!targetA?.dropArray?.length) return;
+			if (targetA.dropArray.length > 1) {
+				const latestItem = targetA.dropArray[targetA.dropArray.length - 1];
+				const oldItems = targetA.dropArray.slice(0, -1);
+				if (oldItems.length) this.columnB.push(...oldItems);
+				targetA.dropArray = [latestItem];
 			}
-			if (!draggedItem) return;
-
-			// Xử lý item cũ
-			let oldItem = targetA.dropArray[0];
-			if (oldItem) this.columnB.push(oldItem);
-
-			// Gán mới
-			targetA.dropArray = [draggedItem];
-			this.columnB = this.columnB.filter(b => b.id !== itemId);
-
+			this.showResult = false;
 			this.emitAnswerChange();
-			this.draggingFromA = false;
+		},
+		onDragDataChanged() {
+			this.showResult = false;
+			this.selectedTapItemB = null;
+			this.selectedTapSourceAId = null;
+			this.emitAnswerChange();
+		},
+		onTapPickFromB(itemB) {
+			if (!this.useTapAssignMode || this.isDragDisabled) return;
+			this.selectedTapSourceAId = null;
+			this.selectedTapItemB = this.selectedTapItemB?.id === itemB.id ? null : itemB;
+		},
+		returnTapItemToB() {
+			if (!this.selectedTapSourceAId || !this.selectedTapItemB) return;
+			const sourceA = this.columnA.find(a => a.id === this.selectedTapSourceAId);
+			if (sourceA) {
+				this.columnB.push(sourceA.dropArray[0]);
+				sourceA.dropArray = [];
+			}
+			this.selectedTapItemB = null;
+			this.selectedTapSourceAId = null;
+			this.showResult = false;
+			this.emitAnswerChange();
+		},
+		onTapAssignToA(targetA) {
+			if (!this.useTapAssignMode || this.isDragDisabled) return;
+
+			if (!this.selectedTapItemB) {
+				const existing = targetA.dropArray?.[0];
+				if (!existing) return;
+				this.selectedTapItemB = existing;
+				this.selectedTapSourceAId = targetA.id;
+				return;
+			}
+
+			if (this.selectedTapSourceAId && this.selectedTapSourceAId === targetA.id) {
+				this.selectedTapItemB = null;
+				this.selectedTapSourceAId = null;
+				return;
+			}
+
+			const sourceA = this.selectedTapSourceAId ? this.columnA.find(a => a.id === this.selectedTapSourceAId) : null;
+			const selectedId = this.selectedTapItemB.id;
+			const selectedItem = sourceA ? sourceA.dropArray?.[0] : this.columnB.find(b => b.id === selectedId);
+			if (!selectedItem) {
+				this.selectedTapItemB = null;
+				this.selectedTapSourceAId = null;
+				return;
+			}
+
+			const oldItem = targetA.dropArray?.[0];
+
+			if (sourceA) {
+				sourceA.dropArray = [];
+			} else {
+				this.columnB = this.columnB.filter(b => b.id !== selectedId);
+			}
+
+			targetA.dropArray = [selectedItem];
+
+			if (oldItem) {
+				if (sourceA) {
+					sourceA.dropArray = [oldItem];
+				} else {
+					this.columnB.push(oldItem);
+				}
+			}
+
+			this.selectedTapItemB = null;
+			this.selectedTapSourceAId = null;
+			this.showResult = false;
+			this.emitAnswerChange();
 		},
 		onStart() { this.showResult = false; },
 		endDrag() { this.emitAnswerChange(); },
@@ -437,6 +537,8 @@ export default {
 		handleRemoveAnswer(itemA){
 			this.columnB.push(itemA.dropArray[0])
 			itemA.dropArray = []
+			this.selectedTapItemB = null
+			this.selectedTapSourceAId = null
 			this.selectedLeftItem = {...itemA}
 		}
 	}
