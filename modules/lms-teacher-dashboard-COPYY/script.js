@@ -139,50 +139,6 @@ function processLibraryData(flatLibraryData) {
     return _
 }
 /**
- * Lấy ngày đầu tuần (Thứ Hai) của một ngày bất kỳ.
- * @param {Date} d - Ngày hiện tại.
- * @returns {string} - Chuỗi ngày tháng dạng 'YYYY-MM-DD'.
- */
-function getStartOfWeek(d) {
-    d = new Date(d);
-    const day = d.getDay();
-    const diff = d.getDate() - day + (day === 0 ? -6 : 1);
-    const monday = new Date(d.setDate(diff));
-    const year = monday.getFullYear();
-    const month = ('0' + (monday.getMonth() + 1)).slice(-2);
-    const date = ('0' + monday.getDate()).slice(-2);
-    return `${year}-${month}-${date}`;
-}
-/**
- * Xử lý dữ liệu TKB tuần và trích xuất lịch dạy cho ngày hôm nay.
- * @param {Array} weeklyScheduleData - Dữ liệu từ API.
- */
-function processWeeklyScheduleForToday(weeklyScheduleData) {
-    if (!weeklyScheduleData || weeklyScheduleData.length === 0) {
-        vueData.schedule = [];
-        return;
-    }
-    const today = new Date();
-    const todayColumnKey = (today.getDay() === 0) ? '1' : (today.getDay() + 1).toString();
-    const periodTimes = {
-        1: '07:30 - 08:15', 2: '08:25 - 09:10', 3: '09:30 - 10:15', 4: '10:25 - 11:10', 5: '11:20 - 12:05',
-        6: '13:30 - 14:15', 7: '14:25 - 15:10', 8: '15:30 - 16:15', 9: '16:25 - 17:10', 10: '17:15 - 18:00'
-    };
-    const todaySchedule = [];
-    weeklyScheduleData.forEach(period => {
-        const classInfoHtml = period[todayColumnKey];
-        if (classInfoHtml) {
-            const cleanedInfo = classInfoHtml.replace(/<br\s*\/?>/gi, ' - ').replace(/<\/?b>/g, '').trim();
-            const finalTitle = `Tiết ${period.Tiet}: ${cleanedInfo.endsWith(' -') ? cleanedInfo.slice(0, -2) : cleanedInfo}`;
-            todaySchedule.push({
-                title: finalTitle,
-                subtitle: `Buổi ${period.Buoi} (Thời gian: ${periodTimes[period.Tiet] || 'N/A'})`
-            });
-        }
-    });
-    vueData.schedule = todaySchedule;
-}
-/**
  * Hàm khởi tạo chính, gọi tất cả các API cần thiết khi trang tải.
  */
 function apiCall1() {
@@ -209,72 +165,15 @@ function apiCall3() {
         }, reject);
     })
 };
-function apiCall4() {
-    return new Promise((resolve, reject) => {
-        ajaxCALL("lms/EL_Teacher_GetFocusTasks", { HocKi: vueData.NienKhoaItem?.HocKi }, function (response) {
-            vueData.focusTasks = response.data;
-            resolve();
-        }, reject);
-    })
-};
 async function initPage() {
-    vueData.dataReady = false; // Bắt đầu với trạng thái chưa sẵn sàng
-    await apiCall1()
-    await apiCall2()
-    await apiCall3()
-    // await apiCall4()
-    await GET_EL_Teacher_GetFocusTasks_Student()
-    // Chờ tất cả các API nội bộ hoàn thành
-    Promise.all([apiCall1, apiCall2, apiCall3, GET_EL_Teacher_GetFocusTasks_Student]).then(() => {
-        console.log("Tất cả API nội bộ đã tải xong.");
-        vueData.dataReady = true; // Chỉ bật giao diện khi mọi thứ đã sẵn sàng
-    }).catch(error => {
-        console.error("Một trong các API nội bộ đã thất bại:", error);
-        Toast.error({ text: "Tải dữ liệu dashboard thất bại." });
-        vueData.dataReady = true; // Vẫn hiển thị giao diện với thông báo lỗi
-    });
-    // API bên ngoài vẫn chạy độc lập
-    // const payload = { "NgayDauTuan": getStartOfWeek(new Date()), "GiaoVienID": vueData.sys_UserID };
-    // $.ajax({
-    //     url: 'https://tapi.lhbs.vn/quansinh/ThoiKhoaBieu_GiaoVien',
-    //     type: 'POST',
-    //     contentType: 'application/json',
-    //     data: JSON.stringify(payload),
-    //     headers: { 'Authorization': 'Bearer ' + window.F_TOKEN },
-    //     success: function (response) {
-    //         if (response && response.data && response.data.length >= 2) {
-    //             processWeeklyScheduleForToday(response.data[1]);
-    //         }
-    //     },
-    //     error: function (jqXHR) {
-    //         console.error("Lỗi khi tải lịch dạy từ API bên ngoài.", jqXHR.responseText);
-    //         vueData.schedule = [{ title: 'Không thể tải lịch dạy', subtitle: 'Vui lòng kiểm tra lại' }];
-    //     }
-    // });
-}
-/**
- * Xử lý sự kiện khi giáo viên click nút "Vào lớp".
- * @param {object} classInfo - Object chứa thông tin của lớp được click.
- */
-function goToClassPage(classInfo) {
-    Toast.info({ text: `Vào lớp ${classInfo.TenLop}...` });
-    console.log("Điều hướng đến trang chi tiết lớp:", classInfo);
-}
-/**
- * Xử lý sự kiện khi giáo viên click nút "Chấm bài".
- * @param {object} classInfo - Object chứa thông tin của lớp được click.
- */
-function goToGradingPage(classInfo) {
-    Toast.info({ text: `Mở trang chấm bài cho lớp ${classInfo.TenLop}...` });
-    console.log("Điều hướng đến trang chấm bài của lớp:", classInfo);
-}
-/**
- * Xử lý sự kiện khi giáo viên click nút "Tạo bài tập cho nhóm".
- * @param {object} groupInfo - Object chứa thông tin của nhóm (Khối, Môn).
- */
-function createAssignmentForGroup(groupInfo) {
-    Toast.info({ text: `Mở trang tạo bài tập cho ${groupInfo.TenKhoi} - ${groupInfo.MonHocName}...` });
-    console.log("Mở trang tạo bài tập cho nhóm:", groupInfo);
+    vueData.dataReady = false;
+    try {
+        await Promise.all([apiCall1(), apiCall2(), apiCall3()]);
+        GET_EL_Teacher_GetFocusTasks_Student(); // fire-and-forget
+    } catch (error) {
+        console.error("Tải dữ liệu dashboard thất bại:", error);
+    }
+    vueData.dataReady = true;
 }
 Vue.component('FWindowCustom', {
     props: ['winData', 'dialogOpen'],
@@ -320,10 +219,6 @@ function onCloseWindow(id) {
         app.config.globalProperties.v_OpenWindowList.splice(indexWindow, 1)
     }
 }
-function callTest() {
-    console.log('Test function called from tc dashboard');
-    // app.config.globalProperties.v_OpenWindowList.pop()
-}
 async function GET_EL_Teacher_GetFocusTasks_Student() {
     ajaxCALL('lms/EL_Teacher_GetFocusTasks_Student', {}, res => {
         vueData.focusTasks_student = res.data
@@ -333,15 +228,7 @@ async function Update_IsHided(AssignToClassID){
      ajaxCALL('lms/EL_Teacher_Dashboard_Update_IsHided', {AssignToClassID}, res => {
     })
 }
-vueData.callTest = callTest;
 // Đăng ký các hàm vào vueData để ALLDRAW có thể gọi
 vueData.initPage = initPage;
-vueData.goToClassPage = goToClassPage;
-vueData.goToGradingPage = goToGradingPage;
-vueData.createAssignmentForGroup = createAssignmentForGroup;
 vueData.onOpenWindowCustom = onOpenWindowCustom
 vueData.onCloseWindow = onCloseWindow
-vueData.apiCall1 = apiCall1
-vueData.apiCall2 = apiCall2
-vueData.apiCall3 = apiCall3
-vueData.apiCall4 = apiCall4

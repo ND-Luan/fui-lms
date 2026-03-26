@@ -208,137 +208,27 @@ export default {
 		this.$i18n.locale = toggle ? "en" : "vi"
 		return {
 			isShowModalChangeUser: false,
-			activeTab: 'classes', x: null, vueData,
+			vueData,
 			isShowModalAddNoiDung: false,
 			DSMonHocActive: [],
-			panel: [0],
-			panelChild: [0],
 			KhoiItem: {},
 			isShowMyLiberies: false,
 			assignmentNeedGradingPanel: [],
-			isOpen: false,
-			url: '',
 			toggle,
-			filterStatus: [],
-			statuses: {
-				'PENDING_GRADING': { color: 'warning', icon: 'mdi-file-clock-outline', iconColor: '#fb8c00', text: this.$i18n.locale == 'en' ? 'Need Grade' : 'Cần chấm', cardClass: 'warning' },
-				'OVERDUE': { color: 'error', icon: 'mdi-calendar-remove', iconColor: '#f44336', text: this.$i18n.locale == 'en' ? 'Over Due' : 'Quá hạn', cardClass: 'urgent' },
-				'UPCOMING': { color: 'primary', icon: 'mdi-calendar-arrow-right', iconColor: '#1976d2', text: this.$i18n.locale == 'en' ? 'Coming' : 'Sắp tới', cardClass: 'primary' }
-			},
-			filterArray: [
-				{ title: this.$i18n.locale == 'en' ? 'Need Grade' : 'Cần chấm', value: 'PENDING_GRADING' },
-				{ title: this.$i18n.locale == 'en' ? 'Over Due' : 'Quá hạn', value: 'OVERDUE' },
-				{ title: this.$i18n.locale == 'en' ? 'Coming' : 'Sắp tới', value: 'UPCOMING' }
-			],
-			KhoiFilter: null,
-			LopFilter: null,
-			page: 1,
-			pageSize: 10,
-			isShowModalFocusTask: false
 		}
 	},
-	emits: ['view-class', 'grade-class', 'create-assignment'],
 	props: {
-		focusTasks: Array,
 		teachingGroups: Array,
-		schedule: Array,
-		activities: Array,
 		contentLibrary: Array,
 	},
-	computed: {
-		focusTaskFiltered() {
-			return this.focusTasks.concat(vueData.focusTasks_student).filter(task => {
-				// 1. Filter theo trạng thái (nhiều trạng thái)
-				if (this.filterStatus.length > 0 && !this.filterStatus.includes(task.Status)) {
-					return false
-				}
-
-				// 2. Filter theo Khối
-				if (this.KhoiFilter && this.KhoiFilter != -1 && task.KhoiID !== this.KhoiFilter) {
-					return false
-				}
-
-				// 3. Filter theo Lớp
-				if (this.LopFilter && task.LopID !== this.LopFilter) {
-					return false
-				}
-
-				return true
-			});
-		},
-		DSKhoi() {
-			return this.focusTasks.reduce((acc, task) => {
-				if (task.KhoiID && !acc.some(x => x.value === task.KhoiID)) {
-					acc.push({ title: 'Khối ' + task.KhoiID, value: task.KhoiID });
-				}
-				return acc;
-			}, [{ title: 'Tất cả', value: -1 }]);
-		},
-		DSLop() {
-			return this.focusTasks.reduce((acc, task) => {
-				if (task.LopID && !acc.some(x => x.value === task.LopID)) {
-					acc.push({ title: task.TenLopHoacNhom, value: task.LopID, KhoiID: task.KhoiID });
-				}
-				return acc;
-			}, []).filter(item => {
-				if (!this.KhoiFilter) return true;
-				return this.KhoiFilter == -1 ? true : item.KhoiID == this.KhoiFilter;
-			});
-		},
-		pagedItems() {
-			const start = (this.page - 1) * this.pageSize;
-			return this.focusTaskFiltered.slice(start, start + this.focusTaskFiltered.length);
-		},
-		totalPages() {
-			return Math.ceil(this.focusTaskFiltered.length / this.focusTaskFiltered.length)
-		}
-	},
 	watch: {
-		activeTab: function (newVal) {
-			this.$nextTick(() => {
-				this.panel = [0]
-				this.panelChild = [0]
-			})
-		},
-		contentLibrary: function (newVal) {
-			console.log('contentLibrary changed', newVal)
-		},
-		toggle: function (val) {
+		toggle(val) {
 			localStorage.setItem('IsLanguage', val)
-			if (val) {
-				this.$i18n.locale = 'en'
-			}
-			else this.$i18n.locale = 'vi';
+			this.$i18n.locale = val ? 'en' : 'vi'
 		},
-		KhoiFilter: function (val) {
-			if (val) {
-				this.LopFilter = null
-				this.filterStatus = []
-			}
-		},
-		LopFilter: function (val) {
-			if (val) {
-				this.filterStatus = []
-			}
-		}
-
 	},
 	created() {
-		if (this.focusTasks && this.focusTasks.length > 0) {
-			// this.assignmentNeedGradingPanel = [0]
-			let countMaxItemOfStatus = {
-				'PENDING_GRADING': 0,
-				'OVERDUE': 0,
-				'UPCOMING': 0
-			}
-		}
-		console.log('this.teachingGroups', this.teachingGroups)
 		this.DSMonHocActive = [...new Set(this.teachingGroups.map(item => item.MonHocName))].map(mh => ({ MonHocName: mh, activeTab: this.teachingGroups.filter(item => item.MonHocName == mh)[0].KhoiID }));
-	},
-	mounted() {
-		if (this.teachingGroups && this.teachingGroups.length > 0) {
-			this.activeTab = this.teachingGroups[0].KhoiID
-		}
 	},
 	methods: {
 		getPendingCount(classItem) {
@@ -371,12 +261,8 @@ export default {
 			})
 		},
 		onHandleOpenChangeGV() {
-			console.log('this.isShowModalChangeUser', this.isShowModalChangeUser)
 			this.isShowModalChangeUser = true
 		},
-		TestUIFocusTask() {
-			this.isShowModalFocusTask = true
-		}
 	}
 }
 </script>
