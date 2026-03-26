@@ -4,53 +4,11 @@
             "EXE": "IsCheck_NotRoleParent(vueData.user)"
         },
         {
-            "focusTasks": [],
             "focusTasks_student": [],
-            "dataReady": false,
-            "teachingGroups": [],
-            "schedule": [],
-            "activities": [],
-            "contentLibrary": [],
-            "selectedKhoiID": null,
-            "winData": {},
-            "isOpenWindowCustom": false,
-            "arrWindowID": [],
-            "domHeaderLength": 0,
             "GiaoVienID_Selected": null
-        },
-        {
-            "getLop": {
-                "API": "/lms/Lop_Get_ByKhoiID",
-                "IN": {
-                    "KhoiID": "selectedKhoiID",
-                    "NienKhoa": "vueData.NienKhoa"
-                },
-                "OUT": "dsLop"
-            }
-        },
-        {
-            "getTuanByNienKhoa": {
-                "API": "/lms/TuanHocTap_Get",
-                "IN": {
-                    "NienKhoa": "vueData.NienKhoa"
-                },
-                "OUT": "DSTuanHoc"
-            }
         }
     ],
-    "watch": {
-        "NienKhoa": [
-            {
-                "CALL": "getTuanByNienKhoa"
-            },
-            {
-                "EXE": "initPage()"
-            }
-        ],
-        "domHeaderLength": {
-            "EXE": "console.log('domHeaderLength',vueData.domHeaderLength)"
-        }
-    },
+    "watch": {},
     "controls": [
         {
             "prop": "fluid pa-0",
@@ -59,18 +17,7 @@
                     "prop": ":no-gutters='true'",
                     "cols": [
                         {
-                            "el": "uc-lms-tc-dashboard-v2",
-                            "attr": {
-                                "v-if": "dataReady && NienKhoa",
-                                ":focus-tasks": "focusTasks",
-                                ":teaching-groups": "teachingGroups",
-                                ":schedule": "schedule",
-                                ":activities": "activities",
-                                "v-model:content-library": "contentLibrary",
-                                ":on-view-class": "goToClassPage",
-                                ":on-grade-class": "goToGradingPage",
-                                ":on-create-assignment": "createAssignmentForGroup"
-                            }
+                            "el": "uc-main-layout"
                         }
                     ]
                 }

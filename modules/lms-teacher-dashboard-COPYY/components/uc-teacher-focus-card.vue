@@ -153,9 +153,8 @@ export default {
 		},
 		handleHide(task) {
 			task.IsHided = !task.IsHided
-			this.Update_IsHided(task.AssignToClassID)
+			ajaxCALL('lms/EL_Teacher_Dashboard_Update_IsHided', { AssignToClassID: task.AssignToClassID }, () => {})
 		},
-		Update_IsHided
 
 	}
 }
