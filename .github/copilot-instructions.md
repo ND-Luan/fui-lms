@@ -107,6 +107,37 @@ export default {
 - `items-per-page="-1" hide-default-footer` — no pagination UI
 - Filter `v-select` components: plain (no `density`, `variant="solo"`, `flat`, `prepend-inner-icon`)
 
+### `#header` slot design rules (standard pattern)
+
+Always use this exact structure inside `<template #header>` — no custom `rounded`, `elevation`, `border` props on the card:
+
+```vue
+<template #header>
+  <v-card>
+    <v-card-title>{{ TitlePage }} • {{ TitleCap }}</v-card-title>
+    <v-card-text>
+      <v-row align="center">
+        <v-col cols="12" sm="3">
+          <v-select v-model="FilterItem" label="Chọn ..." :items="DS" ... />
+        </v-col>
+        <!-- more filter cols -->
+        <v-col class="d-flex align-center ga-2 flex-wrap">
+          <!-- action buttons: v-btn with variant="outlined" or variant="tonal" -->
+        </v-col>
+      </v-row>
+    </v-card-text>
+  </v-card>
+</template>
+```
+
+**Header rules:**
+- Outer element is always `<v-card>` — **no** `rounded`, `elevation`, `border`, `class` props
+- Title in `<v-card-title>`: use `TitlePage` (+ `• TitleCap` if school-level aware)
+- Filters in `<v-card-text>` wrapped in `<v-row align="center">` with `<v-col>` per filter
+- Action buttons go in the last `<v-col class="d-flex align-center ga-2 flex-wrap">`
+- **Don't** use custom `d-flex` / overline / `v-divider` inside the header card — use `v-card-title` + `v-card-text` with `v-row`/`v-col` instead
+- **Don't** add `density`, `variant="outlined"` to filter `v-select` in header
+
 ---
 
 ## Legacy `raw.json` DSL (legacy modules)
