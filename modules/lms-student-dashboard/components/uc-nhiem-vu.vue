@@ -73,6 +73,10 @@
 								<span class="nv__card-dot">·</span>
 								<span class="nv__card-teacher">{{ nv.HoTenNguoiGiao }}</span>
 							</div>
+							<div v-if="nv.DueDate" style="margin-top: 4px; font-size: 12px; color: #546e7a; display: flex; align-items: center; gap: 4px;">
+								<v-icon size="12" color="#546e7a">mdi-calendar-clock</v-icon>
+								<span>Hạn nộp: {{ formatDueDate(nv.DueDate) }}</span>
+							</div>
 							<div class="nv__card-footer">
 								<span class="nv__badge"
 									:class="nv.ResourceType === 'ASSIGNMENT' ? 'nv__badge--assignment' : 'nv__badge--lesson'">
@@ -150,6 +154,18 @@
 			},
 		},
 		methods: {
+			formatDueDate(dueDate) {
+				if (!dueDate) return '';
+				const parsedDate = new Date(dueDate);
+				if (Number.isNaN(parsedDate.getTime())) return dueDate;
+				return parsedDate.toLocaleString('vi-VN', {
+					year: 'numeric',
+					month: '2-digit',
+					day: '2-digit',
+					hour: '2-digit',
+					minute: '2-digit'
+				});
+			},
 			countByMonHoc(id) {
 				return this.DSNhiemVu.filter(nv => nv.MonHocID === id).length;
 			},

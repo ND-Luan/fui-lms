@@ -10,8 +10,8 @@
 				<div ref="headerRef">
 					<slot name="header" />
 				</div>
-				<v-main >
-					<v-container>
+				<v-main>
+					<v-container fluid class="pa-0">
 						<slot />
 					</v-container>
 				</v-main>

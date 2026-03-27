@@ -67,7 +67,7 @@
 				</v-navigation-drawer>
 
 				<!-- MAIN CONTENT -->
-				<v-main style="background: #f6f8fc; flex: 1;">
+				<div style="background: #f6f8fc; flex: 1;">
 
 					<!-- Top bar -->
 					<div class="topbar">
@@ -80,10 +80,10 @@
 						</div>
 					</div>
 
-					<div style="height: calc(100dvh - 56px); overflow: auto;">
+					<v-main style="height: calc(100dvh - 56px); overflow: auto;">
 						<slot />
-					</div>
-				</v-main>
+					</v-main>
+				</div>
 			</div>
 
 			<!-- ══════════════════════ MOBILE ══════════════════════ -->
@@ -106,11 +106,11 @@
 				</div>
 
 				<!-- Content -->
-				<v-main style="flex: 1; background: #f6f8fc;">
+				<div style="flex: 1; background: #f6f8fc;">
 					<div style="height: calc(100dvh - 56px - 62px); overflow: auto;">
 						<slot />
 					</div>
-				</v-main>
+				</div>
 
 				<!-- Bottom nav -->
 				<div class="bottom-nav">
