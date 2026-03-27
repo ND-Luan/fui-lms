@@ -1,66 +1,62 @@
 <template>
 
-	<!-- <div v-if="!FocusTaskListFilter || FocusTaskListFilter.length === 0"
-		class="text-center pa-5 text-grey rounded border mx-3">
-		<p class="mb-0">{{ $t('message.NoAssignmentToGrade') }}</p>
-	</div> -->
-	<div class="pa-2" style="height: fit-content; ">
-		<div class="d-flex w-100 ga-2 h-100" style="height: 600px;">
-			<div class="d-flex flex-column h-100" style="flex: 0 0 20%;">
-				<div style="min-height: fit-content;flex: 0 0 auto;">
-					<v-select v-model="KhoiIDSelected" label="Khối" :items="DSKhoi" item-title="TenKhoi"
-						item-value="KhoiID"></v-select>
-				</div>
-				<div style="flex: 1 1 100%; overflow-y: auto; scrollbar-width: thin;">
-					<v-list>
-						<v-list-item v-for="item in DSLop" :key="item.LopNhomID" :value="item.LopNhomID"
-							:active="LopNhomIDSelected == item.LopNhomID" active-class="text-primary" class="pa-2"
-							rounded @click="LopNhomIDSelected = item.LopNhomID">
-							<v-list-item-title class="d-flex align-center ">
-								{{ item.TenLop }}
-							</v-list-item-title>
-							<template #append >
-								<div class="d-flex ga-1 align-center">
-									<span class="text-primary text-caption">{{ item.TongBT }} bài tập</span>
-								|
-								<span class="text-warning text-caption">{{ item.BaiTapSapToi_Upcoming +
-									item.BaiTapCanCham_PendingGrading}} cần chấm</span>
-								</div>
-							</template>
-						</v-list-item>
-						<div v-if="DSLop.length === 0" class="text-center pa-4 text-grey rounded border">
-							<p class="mb-0">
-								Không tìm thấy lớp!
-							</p>
+	<div class="td-focus-task">
+		<v-row :no-gutters="true" class="td-focus-task__layout">
+			<!-- Left: Class Picker (4 columns) -->
+			<v-col cols="12" md="4" class="td-focus-task__picker-col">
+				<div class="td-focus-task__class-picker">
+					<div class="td-focus-task__class-picker-head">
+						<v-select class="td-focus-task__grade-select" v-model="KhoiIDSelected" label="Khối" :items="DSKhoi"
+							item-title="TenKhoi" item-value="KhoiID"></v-select>
+					</div>
+					<div v-if="DSLop.length > 0" class="td-focus-task__class-scroll">
+						<div
+							v-for="item in DSLop"
+							:key="item.LopNhomID"
+							class="td-focus-task__class-pill"
+							:class="{ 'td-focus-task__class-pill--active': LopNhomIDSelected == item.LopNhomID }"
+							@click="LopNhomIDSelected = item.LopNhomID"
+						>
+							<div class="td-focus-task__class-pill-name">{{ item.TenLop }}</div>
+							<div class="td-focus-task__class-pill-meta">
+								<span class="text-primary text-caption">{{ item.TongBT }} bài tập</span>
+								<span class="text-medium-emphasis">|</span>
+								<span class="text-warning text-caption">{{ item.BaiTapSapToi_Upcoming + item.BaiTapCanCham_PendingGrading }} cần chấm</span>
+							</div>
 						</div>
-					</v-list>
+					</div>
+					<div v-else class="text-center pa-4 text-grey rounded border td-focus-task__empty-class">
+						<p class="mb-0">Không tìm thấy lớp!</p>
+					</div>
 				</div>
-			</div>
-			<v-divider vertical />
-			<div class="d-flex flex-column " style="flex: 1 0 70%; ">
-				<div class="w-100 d-flex mb-2 align-center ga-2" style="min-height: fit-content;flex: 0 0 auto;">
-					<span class="text-subtitle-1 font-weight-medium">
-						Bài tập
-					</span>
-					<v-spacer></v-spacer>
-					<v-select label="Trạng thái" v-model="StatusSelected" :items="StatusLists" :hide-details="true" density="compact" style="max-width: 159px;"></v-select>
-					<v-text-field label="Tìm kiếm" v-model="search" style="max-width: 320px; max-height: 36px"
-						prepend-inner-icon="mdi-magnify" />
-					<v-btn v-tooltip=" IsShowHidedTask ? 'Xem bài tập' : 'Xem bài tập đã ẩn'" size="x-small" :icon="IsShowHidedTask ? 'mdi-eye-off-outline' :'mdi-eye-outline'" @click="IsShowHidedTask = !IsShowHidedTask"></v-btn>
-				</div>
-				<div style="flex: 1 1 100%; overflow-y: auto;overflow-x: hidden; scrollbar-width: thin;">
-					<v-row dense>
-						<v-col cols="12" md="3" v-for="asm in FocusTaskListFilter">
-							<uc-teacher-focus-card :task="asm" />
-						</v-col>
-					</v-row>
-					<div v-if="!FocusTaskListFilter || FocusTaskListFilter.length === 0"
-						class="text-center pa-5 text-grey rounded border mt-2">
+			</v-col>
+
+			<!-- Right: Assignment Content (8 columns) -->
+			<v-col cols="12" md="8" class="td-focus-task__content-col">
+				<div class="td-focus-task__content">
+					<div class="td-focus-task__toolbar">
+						<div class="td-focus-task__toolbar-title text-subtitle-1 font-weight-medium">Bài tập</div>
+						<div class="td-focus-task__toolbar-controls">
+							<v-select class="td-focus-task__status-select" label="Trạng thái" v-model="StatusSelected" :items="StatusLists" :hide-details="true" density="compact"></v-select>
+							<v-text-field class="td-focus-task__search" label="Tìm kiếm" v-model="search"
+								prepend-inner-icon="mdi-magnify" />
+							<v-btn v-tooltip="IsShowHidedTask ? 'Xem bài tập' : 'Xem bài tập đã ẩn'" size="x-small" :icon="IsShowHidedTask ? 'mdi-eye-off-outline' : 'mdi-eye-outline'" @click="IsShowHidedTask = !IsShowHidedTask"></v-btn>
+						</div>
+					</div>
+					<div class="td-focus-task__grid-wrap">
+						<v-row dense>
+						<v-col cols="12" v-for="asm in FocusTaskListFilter" :key="asm.AssignToClassID || asm.AssignmentID || asm.Title">
+								<uc-teacher-focus-card :task="asm" />
+							</v-col>
+						</v-row>
+						<div v-if="!FocusTaskListFilter || FocusTaskListFilter.length === 0"
+						class="text-center pa-5 text-grey rounded border mt-2 td-focus-task__empty-result">
 						<p class="mb-0">{{ $t('message.NoAssignmentToGrade') }}</p>
 					</div>
 				</div>
 			</div>
-		</div>
+			</v-col>
+		</v-row>
 	</div>
 </template>
 

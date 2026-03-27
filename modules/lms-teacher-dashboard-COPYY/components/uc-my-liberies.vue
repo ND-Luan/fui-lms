@@ -1,6 +1,6 @@
 <template>
-	<v-navigation-drawer v-model="isOpen" temporary location="end" width="400">
-		<v-list-item prepend-icon="" class="bg-white position-sticky top-0" style="z-index: 50; height: 50px">
+	<v-navigation-drawer v-model="isOpen" temporary location="end" width="400" class="td-library-drawer">
+		<v-list-item prepend-icon="" class="bg-white position-sticky top-0 td-library-header">
 			<template #prepend>
 				<v-icon size="small">mdi-library-shelves</v-icon>
 			</template>
@@ -13,11 +13,11 @@
 		</v-list-item>
 		<v-divider></v-divider>
 
-		<div class="pa-2 " style="display: flex;flex-direction: row; flex-wrap: wrap; gap: 4px;">
+		<div class="pa-2 td-library-subjects">
 			<span class="text-subtitle-1 font-weight-medium">{{ $t('message.ListSubjects') }}: </span><br>
 			<v-btn v-for="(item, index) in DSMonHoc" :key="index" size="small" :value="item.MonHocName" variant="tonal"
 				active-color="green" @click="getLiberies(item)" :active="item.MonHocName === selected.MonHocName" color="blue-grey">
-				<span class="text-subtitle-2" style="font-size: .775rem !important;">{{ item.MonHocName == 'Ngoại ngữ' ?
+				<span class="text-subtitle-2 td-library-subject-text">{{ item.MonHocName == 'Ngoại ngữ' ?
 					($i18n.locale ==
 						'en' ? 'English' : item.MonHocName) : item.MonHocName }}</span>
 			</v-btn>
@@ -25,12 +25,12 @@
 			}}</span>
 		</div>
 		<v-divider></v-divider>
-		<div class="pa-2 d-flex ga-2" v-if="DSMonHoc.length > 0">
+		<div class="pa-2 d-flex ga-2 td-library-toolbar" v-if="DSMonHoc.length > 0">
 			<v-spacer></v-spacer>
 			<v-btn color="brown" variant="outlined" size="small" @click="onOpenKhoNoiDung()"
 				v-tooltip="$i18n.locale == 'en' ? 'Content Library' : 'Kho nội dung'">
 				<v-icon>mdi-archive-outline</v-icon>
-				<span class="text-subtitle-2" style="font-size: .775rem !important;">
+				<span class="text-subtitle-2 td-library-subject-text">
 					{{ $t('message.ContentLibrary') }}
 				</span>
 			</v-btn>
@@ -38,7 +38,7 @@
 				<template v-slot:activator="{ props }">
 					<v-btn color="primary" variant="outlined" size="small" v-bind="props" v-tooltip="tooltipCreateContent">
 						<v-icon>mdi-plus</v-icon>
-						<span class="text-subtitle-2" style="font-size: .775rem !important;">{{
+						<span class="text-subtitle-2 td-library-subject-text">{{
 							$t('message.CreateContent') }}</span>
 					</v-btn>
 				</template>
@@ -51,9 +51,9 @@
 			</v-menu>
 		</div>
 		<v-divider></v-divider>
-		<div class="d-flex flex-column ga-2  overflow-y">
+		<div class="d-flex flex-column ga-2 overflow-y td-library-content">
 			<div v-for="KhoiItem in contentLibrary.filter(khoi => khoi.MonHocName == selected.MonHocName)"
-				class="bg-grey-lighten-4 pa-2">
+				class="bg-grey-lighten-4 pa-2 td-library-grade-block">
 				<span class="text-subtitle-1 font-weight-medium">{{ $t('message.Grade') }} {{ KhoiItem.KhoiID }}</span>
 				<v-expansion-panels :model-value="KhoiItem.weeks.map((e, index) => { return index })"
 					variant="accordion" multiple class="border-t pt-1">
@@ -68,20 +68,19 @@
 
 						<v-expansion-panel-text class="d-flex flex-column">
 							<div v-for="(item, indexw) in week.chapters.map(item => { return [...item.items] }).flat()"
-								class="flex-md-4 flex-sm-12 d-flex align-center flex-grow-1 px-1 py-2  mb-md-0"
-								style="min-width: 0;cursor: pointer;"
+								class="flex-md-4 flex-sm-12 d-flex align-center flex-grow-1 px-1 py-2  mb-md-0 td-library-item-row"
 								@click="onSelectedLibery(item, week.chapters.map(item => { return [...item.items] }).flat())">
 								<v-icon :color="itemInfo(item).color" size="22" class="mr-2">
 									{{ itemInfo(item).icon }}
 								</v-icon>
 								<div class="item-details">
 									<div class="item-title text-wrap break-words three-lines"
-										style="font-weight: 400; font-size: 0.875rem !important;">
+										style="font-weight: 400;">
 										{{ item.Title }}
 									</div>
 									<div v-if="item.Instructions && item.Instructions.length > 0"
 										class=" text-wrap break-words two-lines"
-										style=" font-size: 0.775rem !important;">
+										>
 										<span class="font-weight-bold">{{ $t('message.Instructions') }}:</span> {{
 											item.Instructions }}
 									</div>
@@ -126,7 +125,7 @@
 				</v-expansion-panels>
 			</div>
 		</div>
-		<div class=" d-flex border-t pa-2 bg-white" style="position: absolute; bottom: 0; width: 100%;">
+		<div class="d-flex border-t pa-2 bg-white td-library-footer">
 			<v-spacer></v-spacer>
 			<v-btn color="primary" variant="text" @click="CloseLiberies">Đóng</v-btn>
 		</div>

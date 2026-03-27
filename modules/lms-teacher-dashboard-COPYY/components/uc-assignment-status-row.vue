@@ -1,10 +1,9 @@
 <template>
 	<div class="assignment-row rounded-lg"
-		:style="{ 'border-left': '4px ' + 'solid ' + getBgColor(assignment.ResourceType) }" style="padding: 4px 8px !important">
+		:style="{ '--td-assignment-accent': getBgColor(assignment.ResourceType) }">
 		<!-- Cột thông tin bài tập -->
 		<div class="assignment-details">
-			<div class="assignment-title d-flex flex-md-row flex-column gap-2 align-md-center align-start ma-0">
-				<div>
+			<div class="assignment-tags">
 					<v-chip size="small" label variant="text" class="pa-0 font-weight-medium"
 						:color="assignment.AssignType == 'CLASS' ? '#4CAF50' : '#7E57C2'"> {{
 						assignment.AssignType == 'CLASS' ? 'Theo lớp' : "Theo học sinh" }} </v-chip>
@@ -15,7 +14,8 @@
 						color="#d16a6a"
 						> {{
 						$t('message.Chapter') }}: {{ assignment.Chuong }} </v-chip>
-				</div>
+			</div>
+			<div class="assignment-title d-flex flex-md-row flex-column gap-2 align-md-center align-start ma-0">
 				{{ assignment.AssignmentTitle ?? assignment.LessonTitle }}
 			</div>
 			<div class="assignment-meta d-flex ga-2"

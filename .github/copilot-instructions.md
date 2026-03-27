@@ -264,3 +264,48 @@ Inject `snackbarRef` and `iframeRef` in child components.
 - **Don't** use `vueData.headers` (global) for table headers — keep them as local component `data`
 - **Don't** re-export functions to `vueData` from inside Vue components — use Vue methods/computed instead
 - **Don't** use `uc-page` + `f-table` DSL elements for new module layouts
+
+---
+
+## Vue 3 Template Best Practices
+
+### Template String Literals in Event Handlers
+
+**❌ DO NOT use backtick template strings in Vue template event attributes:**
+```vue
+<!-- WRONG - cannot use template strings here -->
+@click="toggleWeekExpand(`week-${row.raw.TuanHocID}`)"
+```
+
+**✅ DO compute keys/values in component data/methods and pass them as properties:**
+
+In your `buildTableRows()` or data transformation method:
+```javascript
+buildKhoiTableRows(khoiItem) {
+  const weekKey = (tuanHocID) => `week-${tuanHocID}`
+  const classKey = (tuanHocID, lopID) => `class-${tuanHocID}-${lopID}`
+  
+  ;(khoiItem.weeks || []).forEach(week => {
+    const wKey = weekKey(week.TuanHocID)  // Pre-compute
+    rows.push({
+      _key: wKey,
+      weekKey: wKey,  // Store as property
+      classId: classKey(week.TuanHocID, classItem.LopID),  // Store as property
+      // ... other properties
+    })
+  })
+}
+```
+
+In your template:
+```vue
+<!-- CORRECT - use pre-computed property -->
+@click="toggleWeekExpand(row.raw.weekKey)"
+@click="toggleClassExpand(row.raw.classId)"
+```
+
+### Why?
+- Template expressions should be simple and side-effect-free
+- Complex string interpolation belongs in JavaScript logic
+- Makes template readable and debugging easier
+- Separates concerns: data transformation (JS) vs. UI rendering (template)
