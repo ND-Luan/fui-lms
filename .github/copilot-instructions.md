@@ -1,6 +1,218 @@
-# fui-lms – Copilot Instructions
+# fui-lms – Copilot Master Rules
 
-## Project Overview
+---
+
+## ROLE & TECH STACK
+
+**Role:** Senior Vue 3 + Vuetify 3 developer, specialized in Options API, building a Vietnamese school LMS (~150 feature modules).
+
+**Framework:** Vue 3 — **ALWAYS Options API** (`data`, `computed`, `watch`, `methods`, `mounted`, `props`, `emits`).  
+**NEVER** use Composition API (`setup`, `ref`, `reactive`, `onMounted`, `defineProps`).
+
+**UI Library:** Vuetify 3 — components: `v-container`, `v-row`, `v-col`, `v-card`, `v-btn`, `v-data-table`, `v-dialog`, `v-select`, `v-chip`, `v-icon`, `v-divider`.
+
+**No build step** — Vue and Vuetify are loaded externally at runtime.
+
+---
+
+## STRICT TOKEN SAVING RULES *(critical — always enforce)*
+
+| # | Rule |
+|---|------|
+| 1 | **Minimize context.** Only operate on the code provided or selected. Do not read the entire project. |
+| 2 | **Minimalist output.** Return ONLY the final code or specific patches. No greetings, no explanations, no summaries unless explicitly asked. |
+| 3 | **Partial updates.** If refactoring a file > 80 lines, return ONLY the changed methods or template sections, not the whole file. Mark omissions with `// ... (unchanged)`. |
+| 4 | **No repetition.** Do not echo back my question or show code I already provided unless it is modified. |
+| 5 | **Stop & ask.** If a response would exceed 100 lines, pause and ask: *"Continue? (yes/no)"* |
+
+---
+
+## HOW TO PROMPT
+
+### Refactor
+```
+REFACTOR [method or section name]
+[paste only the relevant code block]
+Goal: [what to improve]
+```
+
+### Clone Page
+```
+CLONE PAGE
+Source: [module name or paste uc-main-layout.vue]
+Target domain: [e.g. "Quản lý giáo viên" instead of "Quản lý học sinh"]
+Swap: [list field/API name changes]
+Keep: Vuetify structure identical.
+```
+
+### New Component
+```
+NEW COMPONENT [uc-component-name]
+Type: [dialog | table-row | filter-panel]
+Props: [list]
+Emits: [list]
+API: [endpoint if any]
+```
+
+### New Module
+```
+NEW MODULE [module-name]  (prefix: gv-|bgh-|admin-|ph-|bc-|lms-student-|lms-teacher-)
+Filters: [Khối → Lớp → ...]
+Main API: [endpoint]
+Columns: [list]
+Actions: [buttons if any]
+```
+
+---
+
+## CODING RULES
+
+### Options API skeleton for `uc-main-layout.vue`
+
+```vue
+<template>
+  <Global>
+    <template #header>
+      <v-card>
+        <v-card-title>{{ TitlePage }} • {{ TitleCap }}</v-card-title>
+        <v-card-text>
+          <v-row align="center">
+            <v-col cols="12" sm="3">
+              <v-select v-model="KhoiItem" label="Chọn khối"
+                :items="DSKhoi" item-title="TenKhoiHoc" item-value="KhoiID" return-object />
+            </v-col>
+            <v-col class="d-flex align-center ga-2 flex-wrap">
+              <v-btn variant="outlined" color="primary" @click="getDS()">
+                <v-icon start>mdi-reload</v-icon>Làm mới
+              </v-btn>
+            </v-col>
+          </v-row>
+        </v-card-text>
+      </v-card>
+    </template>
+
+    <v-divider />
+
+    <v-data-table v-model="DSSelected" :headers :items="DS"
+      item-value="ID" :show-select="true"
+      items-per-page="-1" hide-default-footer hover
+      style="max-height: calc(100dvh - 77px); overflow-y: auto;">
+      <template #no-data>
+        <div class="d-flex flex-column align-center justify-center py-12 text-medium-emphasis">
+          <v-icon size="48" class="mb-3 opacity-40">mdi-table-search</v-icon>
+          <p class="text-body-2">Chọn lớp để xem dữ liệu</p>
+        </div>
+      </template>
+    </v-data-table>
+  </Global>
+</template>
+
+<script>
+export default {
+  inject: ['snackbarRef', 'iframeRef'],
+  data() {
+    return {
+      vueData,
+      DSKhoi: [], KhoiItem: null,
+      DS: [], DSSelected: [],
+      headers: [
+        { title: 'STT', key: 'STT', width: 60 },
+        { title: 'Tên', key: 'TenHocSinh' },
+      ],
+    }
+  },
+  computed: {
+    TitleCap() { return renderText(parseInt(vueData.CapID)) },
+    TitlePage() { return getTitlePageByURL(window.location.pathname + window.location.search) },
+  },
+  watch: {
+    KhoiItem(v) { this.DS = []; if (v) this.getDS() },
+  },
+  mounted() { this.getKhoi() },
+  methods: {
+    async getKhoi() {
+      this.DSKhoi = await fetchPromise('khoi/list', { CapID: vueData.CapID })
+    },
+    async getDS() {
+      const res = await fetchPromise('module/ds', {
+        KhoiID: this.KhoiItem.KhoiID,
+        NienKhoa: vueData.NienKhoa,
+        HocKi: vueData.NienKhoaItem.HocKi,
+      })
+      this.DS = res.data ?? []
+    },
+    async onSave() {
+      const ok = await confirm({ title: 'Xác nhận lưu?' })
+      if (!ok) return
+      ajaxCALL('module/save', { ...this.form }, () => {
+        this.snackbarRef.show({ message: 'Lưu thành công', color: 'success' })
+        this.getDS()
+      })
+    },
+  },
+}
+</script>
+```
+
+### API rules
+| Purpose | Function |
+|---------|----------|
+| Read / fetch list | `fetchPromise(url, params, options?)` |
+| Insert / update / delete | `ajaxCALL(url, params, cb)` — always preceded by `confirm()` |
+| Parallel reads | `fetchBatchPromise([{ url, params }, ...])` |
+
+`fetchPromise` returns `res.data` array by default (5-min cache). Use `{ cache: false }` after mutations.
+
+### Vuetify rules
+- `#header` slot root: plain `<v-card>` — **no** `rounded`, `elevation`, `border`, `class`
+- Filter `v-select`: **no** `density`, `variant`, `flat`, `prepend-inner-icon`
+- `v-data-table` **must** have `style="max-height: calc(100dvh - 77px); overflow-y: auto;"` + `items-per-page="-1" hide-default-footer`
+- `headers` always in local `data()` — never `vueData.headers`
+- Student cell → use `<uc-info-student :item="item" />` not inline avatar
+- Dialogs → use `<uc-dialog>` not raw `<v-dialog>`
+
+### Template event handler rules
+```vue
+<!-- ❌ WRONG — backtick template string in handler -->
+@click="open(`row-${item.ID}`)"
+
+<!-- ✅ CORRECT — pre-compute in buildRows() / data transform -->
+// In method: rows.push({ rowKey: `row-${item.ID}`, ...item })
+@click="open(item.rowKey)"
+```
+
+### Cascade filter watch pattern
+```js
+watch: {
+  KhoiItem(v) {
+    this.LopItem = null; this.DSLop = []
+    if (v) this.getLop()
+  },
+  LopItem(v) {
+    this.DS = []
+    if (v) this.getDS()
+  },
+},
+```
+
+### EnumTinhTrang (always define locally in `data()`)
+```js
+EnumTinhTrang: {
+  ChuaLuu: 0, LuuTam: 1, GVBM_GuiDiem: 2, GVCN_TuChoi: 3,
+  GVCN_GuiDiem: 4, TT_TuChoi: 5, TT_GuiBGH: 6, BGH_TuChoi: 7, BGH_Duyet: 8,
+}
+```
+
+### TinhTrang chip
+```vue
+<v-chip size="x-small" :color="item.MauTinhTrang || 'default'" variant="tonal">
+  {{ item.TenTinhTrang }}
+</v-chip>
+```
+
+---
+
+## PROJECT OVERVIEW
 
 Vue 3 + Vuetify 3 Learning Management System (LMS) for Vietnamese schools.  
 ~150 feature modules covering: teacher grade entry, student dashboards, reporting, class management, parent reports, and exam integration.
@@ -43,11 +255,9 @@ module-name/
     └── uc-main-layout.vue   # Main layout (preferred pattern)
 ```
 
-### Preferred modern pattern (post-refactor)
+**Preferred modern pattern:** all logic in `uc-main-layout.vue`, `raw.json` minimal (see CODING RULES above), `script.js` empty.
 
-Move **all logic into a self-contained `uc-main-layout.vue`** component. Keep `raw.json` minimal and `script.js` empty.
-
-**`raw.json` (minimal):**
+**`raw.json` minimal form:**
 ```json
 {
   "data": [
@@ -60,97 +270,17 @@ Move **all logic into a self-contained `uc-main-layout.vue`** component. Keep `r
 }
 ```
 
-**`uc-main-layout.vue` template structure** (mirrors `fui-gv-ds-hoc-sinh-lop`):
-```vue
-<template>
-  <Global>
-    <template #header>
-      <v-card>
-        <v-card-title>{{ TitlePage }} • {{ TitleCap }}</v-card-title>
-        <v-card-text>
-          <!-- v-row with v-select filters + action buttons -->
-        </v-card-text>
-      </v-card>
-    </template>
-
-    <v-divider />
-
-    <v-data-table v-model="selected" :headers :items="DS"
-      item-value="ID" :show-select="true"
-      items-per-page="-1" hide-default-footer hover
-      style="max-height: calc(100dvh - 77px); overflow-y: auto;">
-      <!-- custom slots -->
-    </v-data-table>
-  </Global>
-</template>
-
-<script>
-export default {
-  inject: ['snackbarRef', 'iframeRef'],
-  data() { return { vueData, /* local state */ } },
-  computed: {
-    TitleCap() { return renderText(parseInt(vueData.CapID)) },
-    TitlePage() { return getTitlePageByURL(window.location.pathname + window.location.search) },
-  },
-  watch: { /* cascade resets on filter changes */ },
-  mounted() { this.getKhoi() },
-  methods: { /* fetchPromise-based API calls + renderDS*() transforms */ },
-}
-</script>
-```
-
-**Rules for the new pattern:**
-- Use `fetchPromise(url, params, options?)` for all API calls, **not** `ajaxCALL` inside components
-- Use `ajaxCALL(url, params, cb)` only for write/mutation operations (update, insert)
-- Always `inject: ['snackbarRef', 'iframeRef']`
-- `v-data-table` must have `max-height: calc(100dvh - 77px); overflow-y: auto;` to prevent viewport overflow
-- `items-per-page="-1" hide-default-footer` — no pagination UI
-- Filter `v-select` components: plain (no `density`, `variant="solo"`, `flat`, `prepend-inner-icon`)
-
-### `#header` slot design rules (standard pattern)
-
-Always use this exact structure inside `<template #header>` — no custom `rounded`, `elevation`, `border` props on the card:
-
-```vue
-<template #header>
-  <v-card>
-    <v-card-title>{{ TitlePage }} • {{ TitleCap }}</v-card-title>
-    <v-card-text>
-      <v-row align="center">
-        <v-col cols="12" sm="3">
-          <v-select v-model="FilterItem" label="Chọn ..." :items="DS" ... />
-        </v-col>
-        <!-- more filter cols -->
-        <v-col class="d-flex align-center ga-2 flex-wrap">
-          <!-- action buttons: v-btn with variant="outlined" or variant="tonal" -->
-        </v-col>
-      </v-row>
-    </v-card-text>
-  </v-card>
-</template>
-```
-
-**Header rules:**
-- Outer element is always `<v-card>` — **no** `rounded`, `elevation`, `border`, `class` props
-- Title in `<v-card-title>`: use `TitlePage` (+ `• TitleCap` if school-level aware)
-- Filters in `<v-card-text>` wrapped in `<v-row align="center">` with `<v-col>` per filter
-- Action buttons go in the last `<v-col class="d-flex align-center ga-2 flex-wrap">`
-- **Don't** use custom `d-flex` / overline / `v-divider` inside the header card — use `v-card-title` + `v-card-text` with `v-row`/`v-col` instead
-- **Don't** add `density`, `variant="outlined"` to filter `v-select` in header
-
 ---
 
-## Legacy `raw.json` DSL (legacy modules)
-
-Older modules drive the whole UI from `raw.json`. Understand but don't author new modules this way.
+## Legacy `raw.json` DSL (understand, do not author)
 
 | Key | Purpose |
 |-----|---------|
-| `data[n].EXE` | Execute JS on init: `"IsCheck_NotRoleParent(vueData.user)"` |
+| `data[n].EXE` | Execute JS on init |
 | `data[n].{PropName}` | Set vueData property: `"CapID": "parseInt(capid)"` |
 | `data[n].{apiName}` | Define named API: `{ API, IN, OUT, CALLBACK }` |
 | `data[n].CALL` | Invoke named API: `{"CALL": "getKhoi"}` |
-| `watch.{prop}` | Reactive handler with optional `IF`/`THEN`/`CALL`/`EXE` |
+| `watch.{prop}` | Reactive handler with `IF`/`THEN`/`CALL`/`EXE` |
 | `controls[n].el` | Component name: `"v-card"`, `"uc-main-layout"`, `"f-table"` |
 | `controls[n].attr` | Vue attrs/props: `{":items": "DSKhoi", "v-model": "KhoiItem"}` |
 | `controls[n].innerHTML` | Nested children array |
@@ -162,8 +292,7 @@ Older modules drive the whole UI from `raw.json`. Understand but don't author ne
 ### API
 ```javascript
 fetchPromise(url, params, { cache, forceRefresh, suppressError, loadingText })
-// Returns promise; caches 5 min by default
-// Use for all reads
+// Returns promise; caches 5 min by default — use for all reads
 
 ajaxCALL(url, params, callback)
 // Use for mutations (insert/update/delete)
@@ -185,11 +314,11 @@ openWindow({ title, url })        // Open iframe window
 
 ### Global state
 ```javascript
-vueData             // Global reactive object — shared between raw.json DSL and Vue components
-vueData.CapID       // School level (1=primary, 2=middle, 3=high)
-vueData.NienKhoa    // Academic year
-vueData.NienKhoaItem.HocKi  // Semester (1 or 2)
-vueData.v_Set.urlAvatarHocSinh  // Base URL for student avatars
+vueData                          // Global reactive object
+vueData.CapID                    // School level (1=primary, 2=middle, 3=high)
+vueData.NienKhoa                 // Academic year
+vueData.NienKhoaItem.HocKi       // Semester (1 or 2)
+vueData.v_Set.urlAvatarHocSinh   // Base URL for student avatars
 ```
 
 ---
@@ -197,13 +326,7 @@ vueData.v_Set.urlAvatarHocSinh  // Base URL for student avatars
 ## Shared Components
 
 ### `Global.vue`
-Main app wrapper. Always use at the root of `uc-main-layout.vue`.
-```vue
-<Global>
-  <template #header><!-- sticky header content --></template>
-  <!-- page body -->
-</Global>
-```
+Main app wrapper — always use at the root of `uc-main-layout.vue`.
 Provides: `GlobalLoading`, `GlobalApiErrorDialog`, `GlobalUiSnackbar`, `GlobalIframeWindow`.  
 Inject `snackbarRef` and `iframeRef` in child components.
 
@@ -264,48 +387,3 @@ Inject `snackbarRef` and `iframeRef` in child components.
 - **Don't** use `vueData.headers` (global) for table headers — keep them as local component `data`
 - **Don't** re-export functions to `vueData` from inside Vue components — use Vue methods/computed instead
 - **Don't** use `uc-page` + `f-table` DSL elements for new module layouts
-
----
-
-## Vue 3 Template Best Practices
-
-### Template String Literals in Event Handlers
-
-**❌ DO NOT use backtick template strings in Vue template event attributes:**
-```vue
-<!-- WRONG - cannot use template strings here -->
-@click="toggleWeekExpand(`week-${row.raw.TuanHocID}`)"
-```
-
-**✅ DO compute keys/values in component data/methods and pass them as properties:**
-
-In your `buildTableRows()` or data transformation method:
-```javascript
-buildKhoiTableRows(khoiItem) {
-  const weekKey = (tuanHocID) => `week-${tuanHocID}`
-  const classKey = (tuanHocID, lopID) => `class-${tuanHocID}-${lopID}`
-  
-  ;(khoiItem.weeks || []).forEach(week => {
-    const wKey = weekKey(week.TuanHocID)  // Pre-compute
-    rows.push({
-      _key: wKey,
-      weekKey: wKey,  // Store as property
-      classId: classKey(week.TuanHocID, classItem.LopID),  // Store as property
-      // ... other properties
-    })
-  })
-}
-```
-
-In your template:
-```vue
-<!-- CORRECT - use pre-computed property -->
-@click="toggleWeekExpand(row.raw.weekKey)"
-@click="toggleClassExpand(row.raw.classId)"
-```
-
-### Why?
-- Template expressions should be simple and side-effect-free
-- Complex string interpolation belongs in JavaScript logic
-- Makes template readable and debugging easier
-- Separates concerns: data transformation (JS) vs. UI rendering (template)
