@@ -5,6 +5,7 @@
 		<GlobalStaleDataBanner />
 		<GlobalUiSnackbar ref="snackbarRef" />
 		<GlobalIframeWindow ref="iframeWin" />
+		<GlobalConfirmDialog ref="confirmRef" />
 		<v-responsive>
 			<v-app theme="light">
 				<div ref="headerRef">
@@ -23,7 +24,7 @@
 <script>
 export default {
 	name: "Global",
-	inject: ['iframeRef', 'snackbarRef'],
+	inject: ['iframeRef', 'snackbarRef', 'confirmRef'],
 	data() {
 		return {
 			headerHeight: 0,
@@ -37,6 +38,7 @@ export default {
 
 		this.iframeRef.value = this.$refs.iframeWin
 		this.snackbarRef.value = this.$refs.snackbarRef
+		this.confirmRef.value = this.$refs.confirmRef
 	},
 	beforeUnmount() {
 		this.observer?.disconnect()

@@ -719,6 +719,7 @@ $('document').ready(() => {
     // ✅ Provide global refs
     app.provide('iframeRef', { value: null })
     app.provide('snackbarRef', { value: null })
+    app.provide('confirmRef', { value: null })
 
 
     vueData.v_Set.themeStyle = {
