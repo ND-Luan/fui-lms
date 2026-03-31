@@ -6,7 +6,13 @@
 					<v-select v-model="HocKi" label="Chọn học kì để so với chỉ tiêu" :items="DSHocKi" item-title="title"
 						item-value="value" />
 				</v-col>
-				<v-col class="d-flex ga-2">
+				<v-col class="d-flex align-center ga-2 flex-wrap">
+					<span class="text-body-2 text-medium-emphasis">Lấy dữ liệu từ:</span>
+					<v-btn-toggle v-model="NguonDuLieu" mandatory density="compact" variant="outlined" color="primary">
+						<v-btn value="QLDiem">QLDiem</v-btn>
+						<v-btn value="LMS">LMS</v-btn>
+					</v-btn-toggle>
+					<v-divider vertical class="mx-1" />
 					<v-btn color="primary" variant="outlined" prepend-icon="mdi-magnify" @click="onLoad">
 						Tìm kiếm
 					</v-btn>
@@ -73,6 +79,7 @@
 					{ title: "Cuối HK2", value: 4, textValue: "CK_HK2" }
 				],
 				HocKi: null,
+				NguonDuLieu: 'QLDiem',
 				DSMonHoc: [],
 				Data: [],
 				header_HKs: [
@@ -139,10 +146,18 @@
 				if (this.BaoCaoItem?.IsChotBaoCao) {
 					_data = JSON.parse(this.BaoCaoItem.JSON_BaoCao)
 				} else {
-					const data = await ajaxCALLPromise("psmark1/LMS_GetThongKeDanhGia_TheoMon", {
-						"NamHoc": NienKhoa,
-						"KyDanhGia": HocKi
-					})
+					let data
+					if (this.NguonDuLieu === 'LMS') {
+						data = await ajaxCALLPromise("lms/BaoCao_LMS_GetThongKeDanhGia_TheoMon", {
+							HocKi: HK_LMS.textValue,
+							NienKhoa: NienKhoa,
+						})
+					} else {
+						data = await ajaxCALLPromise("psmark1/LMS_GetThongKeDanhGia_TheoMon", {
+							"NamHoc": NienKhoa,
+							"KyDanhGia": HocKi
+						})
+					}
 					_data = data
 					this.DataQLDiem = data
 				}
