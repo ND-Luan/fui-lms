@@ -765,3 +765,94 @@ function ajaxCALLPromise(url, params = null) {
         })
     })
 }
+
+/***********************
+ * v-auto-table-height Directive
+ * Automatically calculates and applies height to v-data-table
+ * Usage: <div v-auto-table-height> ... </div>
+ * Options: <div v-auto-table-height="{ offset: 8 }"> (extra bottom offset, default 8)
+ *****************************/
+const autoTableHeightDirective = {
+    mounted(el, binding) {
+        const options = binding.value || {};
+        const { offset = 8 } = options;
+
+        const updateHeight = () => {
+            // Measure the exact top position of this element in the viewport
+            const rect = el.getBoundingClientRect();
+            const availableHeight = window.innerHeight - rect.top - offset;
+            const height = Math.max(availableHeight, 200);
+            el.style.height = `${height}px`;
+            el.style.overflowY = 'auto';
+        };
+
+        // Initial height — defer one tick to ensure DOM is laid out
+        requestAnimationFrame(updateHeight);
+
+        // Setup ResizeObserver for container size changes
+        const resizeObserver = new ResizeObserver(() => requestAnimationFrame(updateHeight));
+        resizeObserver.observe(document.body);
+
+        window.addEventListener('resize', updateHeight);
+
+        el._tableHeightObserver = resizeObserver;
+        el._tableHeightResizeHandler = updateHeight;
+    },
+
+    unmounted(el) {
+        if (el._tableHeightObserver) {
+            el._tableHeightObserver.disconnect();
+            delete el._tableHeightObserver;
+        }
+        if (el._tableHeightResizeHandler) {
+            window.removeEventListener('resize', el._tableHeightResizeHandler);
+            delete el._tableHeightResizeHandler;
+        }
+    }
+};
+
+/***********************
+ * calculateDataTableHeight
+ * Auto-calculate height for v-data-table to fit viewport
+ * @param {object} options - Configuration object
+ *   - headerHeight: Height of top fixed header (default: 77px)
+ *   - cardHeaderHeight: Height of filter card section (default: 200px)
+ *   - additionalOffset: Extra pixels to subtract for padding/margins (default: 20px)
+ * @returns {string} - CSS height value in pixels
+ * @example
+ *   // In Options API component:
+ *   data() {
+ *     return { tableHeight: '500px', resizeObserver: null }
+ *   },
+ *   computed: {
+ *     TableHeight() { return this.tableHeight }
+ *   },
+ *   mounted() {
+ *     this.setupResizeObserver(this.$el)
+ *   },
+ *   beforeUnmount() {
+ *     if (this.resizeObserver) this.resizeObserver.disconnect()
+ *   },
+ *   methods: {
+ *     setupResizeObserver(containerEl) {
+ *       this.resizeObserver = new ResizeObserver(() => {
+ *         this.tableHeight = calculateDataTableHeight()
+ *       })
+ *       this.resizeObserver.observe(containerEl)
+ *     }
+ *   }
+ *   // In template:
+ *   <v-data-table :style="{ maxHeight: TableHeight, overflowY: 'auto' }" />
+ *****************************/
+function calculateDataTableHeight(options = {}) {
+    const {
+        headerHeight = 77,      // Fixed top header height
+        cardHeaderHeight = 200,  // Filter/header card height
+        additionalOffset = 20    // Extra padding/margin offset
+    } = options;
+
+    const viewportHeight = window.innerHeight || document.documentElement.clientHeight;
+    const calculatedHeight = viewportHeight - headerHeight - cardHeaderHeight - additionalOffset;
+
+    return `${Math.max(calculatedHeight, 300)}px`; // Minimum 300px to avoid too small tables
+}

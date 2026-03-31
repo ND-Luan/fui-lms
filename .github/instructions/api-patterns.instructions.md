@@ -55,6 +55,26 @@ async onSave() {
 }
 ```
 
+## `confirm` callback pattern in Vue methods
+
+When using `confirm({ action })` and you need to access Vue instance properties inside the callback, always create an intermediate variable first:
+
+```js
+async onDoAction() {
+  const $this = this
+  confirm({
+    title: 'Xác nhận thực hiện?',
+    action: async () => {
+      // Always use $this inside confirm callback.
+      await $this.doWork()
+      $this.snackbarRef.show({ message: 'Thành công', color: 'success' })
+    },
+  })
+}
+```
+
+Do not rely on direct `this` access inside `confirm` callbacks.
+
 ## `fetchBatchPromise` — parallel reads
 
 Use when multiple independent APIs must be loaded together (e.g. on `mounted`):

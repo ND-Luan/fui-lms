@@ -712,8 +712,11 @@ $('document').ready(() => {
         }
     })
     app.use(i18n);
-    // ✅ Sửa thành
-    // const iframeRef = Vue.ref(null)
+    
+    // ✅ Register global directives
+    app.directive('auto-table-height', autoTableHeightDirective)
+    
+    // ✅ Provide global refs
     app.provide('iframeRef', { value: null })
     app.provide('snackbarRef', { value: null })
 
