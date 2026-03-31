@@ -1,27 +1,30 @@
 <template>
 	<Global>
-		<v-card>
-			<v-card-title>{{TitlePage}}</v-card-title>
-			<v-card-text>
-				<v-row>
-					<v-col cols="3">
-						<v-select v-model="KhoiItem" label="Chọn khối" :items="DSKhoi" item-title="TenKhoiHoc"
-							item-value="KhoiID" return-object />
-					</v-col>
-					<v-col class="d-flex ga-2" cols="3">
-						<v-btn text="Làm mới" prepend-icon="mdi-refresh" @click="onRefresh" variant="outlined"
-							color="primary" />
-						<uc-btn-dialog-add v-model:DSNhom="itemNhoms" prepend-icon="mdi-plus" text="Thêm học sinh"
-							variant="outlined" color="teal" @onSubmitFinish="onRefresh(true)"
-							:disabled="NhomDetail === null" :NhomDetail_Child="NhomDetail" />
-						<v-btn :text="textChuyenNhom" prepend-icon="mdi-swap-horizontal" @click="onOpenDialogChange"
-							variant="outlined" color="blue" :disabled="NhomDetail === null" />
-						<v-btn text="Cập nhật số thứ tự" prepend-icon="mdi-sort-numeric-ascending" @click="onUpdateSTT"
-							variant="outlined" color="green" :disabled="NhomDetail === null" />
-					</v-col>
-				</v-row>
-			</v-card-text>
-		</v-card>
+		<template #header>
+			<v-card>
+				<v-card-title>{{TitlePage}}</v-card-title>
+				<v-card-text>
+					<v-row>
+						<v-col cols="3">
+							<v-select v-model="KhoiItem" label="Chọn khối" :items="DSKhoi" item-title="TenKhoiHoc"
+								item-value="KhoiID" return-object />
+						</v-col>
+						<v-col class="d-flex ga-2" cols="3">
+							<v-btn text="Làm mới" prepend-icon="mdi-refresh" @click="onRefresh" variant="outlined"
+								color="primary" />
+							<uc-btn-dialog-add v-model:DSNhom="itemNhoms" prepend-icon="mdi-plus" text="Thêm học sinh"
+								variant="outlined" color="teal" @onSubmitFinish="onRefresh(true)"
+								:disabled="NhomDetail === null" :NhomDetail_Child="NhomDetail" />
+							<v-btn :text="textChuyenNhom" prepend-icon="mdi-swap-horizontal" @click="onOpenDialogChange"
+								variant="outlined" color="blue" :disabled="NhomDetail === null" />
+							<v-btn text="Cập nhật số thứ tự" prepend-icon="mdi-sort-numeric-ascending" @click="onUpdateSTT"
+								variant="outlined" color="green" :disabled="NhomDetail === null" />
+						</v-col>
+					</v-row>
+				</v-card-text>
+			</v-card>
+		</template>
+
 		<v-divider />
 		<v-row>
 			<v-col cols="3">
@@ -49,15 +52,15 @@
 					</template>
 					<template #item.ChuyenNhom="{item}">
 						<v-btn icon="mdi-transfer-right" @click="onChangeNhomHocSinh(item)" size="small" variant="text"
-							color="green">
+							color="green" />
 					</template>
 					<template #item.Xoa="{item}">
-						<v-btn icon="mdi-delete" color="red" @click="onDeleteHocSinh(item)" size="small" variant="text">
+						<v-btn icon="mdi-delete" color="red" @click="onDeleteHocSinh(item)" size="small" variant="text" />
 					</template>
 				</v-data-table>
 			</v-col>
 		</v-row>
-		<uc-dialog-change v-model="IsShowDialogChange" :HocSinhDetail :DSNhom="itemNhoms"
+		<uc-dialog-change v-model="IsShowDialogChange" :HocSinhDetail :NhomDetail :DSNhom="itemNhoms"
 			@onSubmitFinish="onRefresh(true)" />
 	</Global>
 </template>

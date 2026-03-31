@@ -48,7 +48,7 @@ async onSave() {
 
   ajaxCALL('module/save', { ...this.formData }, (res) => {
     if (res.status === 'success') {
-      this.snackbarRef.show({ message: 'Lưu thành công', color: 'success' })
+      this.snackbarRef.value.show({ message: 'Lưu thành công', color: 'success' })
       this.getData()
     }
   })
@@ -67,7 +67,7 @@ async onDoAction() {
     action: async () => {
       // Always use $this inside confirm callback.
       await $this.doWork()
-      $this.snackbarRef.show({ message: 'Thành công', color: 'success' })
+      $this.snackbarRef.value.show({ message: 'Thành công', color: 'success' })
     },
   })
 }
@@ -132,11 +132,12 @@ mounted() { this.getKhoi() },
 
 ## Snackbar feedback
 
-Always use `snackbarRef` (injected) to show operation results — **never** use `alert()`:
+`snackbarRef` is injected as `{ value: null }` and populated by the `Global` component at runtime.
+Always call via `.value` — **never** use `alert()`:
 
 ```js
-this.snackbarRef.show({ message: 'Cập nhật thành công', color: 'success' })
-this.snackbarRef.show({ message: 'Có lỗi xảy ra', color: 'error' })
+this.snackbarRef.value.show({ message: 'Cập nhật thành công', color: 'success' })
+this.snackbarRef.value.show({ message: 'Có lỗi xảy ra', color: 'error' })
 ```
 
 ## Common API param names

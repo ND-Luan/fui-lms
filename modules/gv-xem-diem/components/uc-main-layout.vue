@@ -326,7 +326,7 @@ export default {
         async onSubmitKeoDiem() {
             if (this.IsPullingDiem) return
             if (!this.SelectedKeoDiemColumns.length) {
-                this.snackbarRef.show({ message: 'Vui lòng chọn ít nhất 1 cột điểm', color: 'warning' })
+                this.snackbarRef.value.show({ message: 'Vui lòng chọn ít nhất 1 cột điểm', color: 'warning' })
                 return
             }
             await this.fnKeoDiem(this.SelectedKeoDiemColumns)
@@ -565,16 +565,6 @@ export default {
             this.IsCompareLMS = true
         },
 
-        ajaxCallAsync(url, params) {
-            return new Promise((resolve, reject) => {
-                try {
-                    ajaxCALL(url, params, res => resolve(res))
-                } catch (error) {
-                    reject(error)
-                }
-            })
-        },
-
         async fnKeoDiem(selectedColumns = []) {
             const $this = this
             confirm({
@@ -582,7 +572,7 @@ export default {
                 action: async () => {
                     const dataToPull = $this.buildPayloadBySelectedColumns($this.DSHocSinh_API_QLD, selectedColumns)
                     if (!dataToPull.length) {
-                        $this.snackbarRef.show({ message: 'Không có dữ liệu để kéo điểm', color: 'warning' })
+                        $this.snackbarRef.value.show({ message: 'Không có dữ liệu để kéo điểm', color: 'warning' })
                         return
                     }
 
@@ -608,16 +598,16 @@ export default {
                         for (const task of tasks) {
                             $this.PullProgressCurrent += 1
                             $this.PullProgressText = `Đang kéo HS ${task.HocSinhID} - môn ${task.MonHocID} (${$this.PullProgressCurrent}/${$this.PullProgressTotal})`
-                            await $this.ajaxCallAsync(`lms/fn_HocSinh_KeoDiem_C${vueData.CapID}`, {
+                            await fetchPromise(`lms/fn_HocSinh_KeoDiem_C${vueData.CapID}`, {
                                 JsonData: task.JsonData,
-                            })
+                            }, { cache: false })
                         }
 
                         $this.PullProgressText = `Hoàn tất (${$this.PullProgressTotal}/${$this.PullProgressTotal})`
-                        $this.snackbarRef.show({ message: 'Kéo điểm thành công', color: 'success' })
+                        $this.snackbarRef.value.show({ message: 'Kéo điểm thành công', color: 'success' })
                         $this.IsShowDialogKeoDiem = false
                     } catch (error) {
-                        $this.snackbarRef.show({ message: 'Kéo điểm thất bại', color: 'error' })
+                        $this.snackbarRef.value.show({ message: 'Kéo điểm thất bại', color: 'error' })
                     } finally {
                         $this.resetPullProgress()
                     }
