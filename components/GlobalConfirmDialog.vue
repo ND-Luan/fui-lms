@@ -1,7 +1,7 @@
 <template>
     <v-dialog v-model="visible" max-width="420" persistent>
         <v-card>
-            <v-card-title class="d-flex align-center ga-2 pt-4" :class="`text-${typeConfig.color}`">
+            <v-card-title class="d-flex align-center ga-2 pt-4" :class="titleClass">
                 <v-icon :color="typeConfig.color">{{ typeConfig.icon }}</v-icon>
                 {{ config.title }}
             </v-card-title>
@@ -50,6 +50,9 @@ export default {
     computed: {
         typeConfig() {
             return this.TYPE_MAP[this.config.type] ?? this.TYPE_MAP.confirm
+        },
+        titleClass() {
+            return `text-${this.typeConfig.color}`
         },
     },
     methods: {
