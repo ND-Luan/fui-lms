@@ -339,6 +339,7 @@ async function fetchClasses(nienKhoa, cap = 'cap3') {
                 id: x.LopID,
                 name: x.TenLop,
                 khoiID: x.KhoiID,
+                khoiName: x.TenKhoi ?? `Khối ${x.KhoiID}`,
                 templateBangDiemID: mhl?.TemplateBangDiemID ?? null,
                 monHocLopID: mhl?.MonHocLopID ?? null,
                 maDonVi: x.MaDonVi ?? null,
@@ -832,6 +833,7 @@ function buildSaveRows(changedCells) {
                 wsIdx, rowIndex, colIndex,
                 hocSinhID: cell.hocSinhID, cotDiemID: cell.cotDiemID,
                 maCotDiem: cell.maCotDiem, monHocLopID: cell.monHocLopID,
+                lopID: cell.lopID ?? cell.nhomID, templateBangDiemID: cell.templateBangDiemID ?? null,
                 kqhtID: cell.kqhtID ?? null,
             },
         })

@@ -101,13 +101,13 @@
 						Chọn cấp, học kì, loại điểm rồi bấm
 						<v-chip color="primary" size="small" class="mx-1">Tải dữ liệu</v-chip>
 					</div>
-					<div class="text-body-2 text-medium-emphasis mt-1">Mỗi lớp sẽ hiển thị thành 1 tab riêng</div>
+					<div class="text-body-2 text-medium-emphasis mt-1">Cấp 2: mỗi khối là 1 tab, các lớp gộp chung · Cấp 3: mỗi lớp là 1 tab</div>
 				</div>
 			</v-container>
 
 			<div v-if="ready">
 				<v-tabs v-model="activeWsIdx" color="primary" density="compact">
-					<v-tab v-for="(meta, idx) in wsMeta" :key="idx" :value="idx">{{ meta.cls.name }}</v-tab>
+					<v-tab v-for="(meta, idx) in wsMeta" :key="idx" :value="idx">{{ meta.tabName ?? meta.cls?.name }}</v-tab>
 				</v-tabs>
 				<v-divider />
 				<v-tabs-window v-model="activeWsIdx">
@@ -203,22 +203,86 @@
 					if (this.isTA2Mode) fetchList.push(this.fetchIeltsThietLap())
 					const [classes, thietLapList] = await Promise.all(fetchList)
 					this.loadedClasses = classes
-					for (const cls of classes) {
-						const { students, cols, monHocLopID, gradesMap } = await this.fetchTemplateCols(cls.templateBangDiemID, cls)
-						if (!cls.monHocLopID) cls.monHocLopID = monHocLopID
-						const { worksheetConfig, scoreDescs } = this.buildClassWorksheet(cls, students, cols, thietLapList, gradesMap)
-						// ⚠️ Cảnh báo cột SoCauDung chưa có thiết lập kĩ năng (chỉ cap3)
-						if (this.config.cap === 'cap3') {
-							const missingSoCau = scoreDescs.filter(d => d.key?.includes('__SoCauDung') && !d._soCau)
-							if (missingSoCau.length > 0) {
-								console.warn(`[ThiếtLậpKĩNăng] Lớp "${cls.name}" — ${missingSoCau.length} cột chưa có SoCau:`,
-									missingSoCau.map(d => d.key))
-							}
+
+					const isCap2 = this.config.cap === 'cap2'
+
+					if (isCap2) {
+						// ── Cap2: group by khoiID → mỗi khối = 1 tab ──
+						const khoiMap = new Map()
+						for (const cls of classes) {
+							if (!khoiMap.has(cls.khoiID)) khoiMap.set(cls.khoiID, [])
+							khoiMap.get(cls.khoiID).push(cls)
 						}
-						const hasIelts = GRADE_CONFIG.IELTS_NHOM_IDS.has(cls.id)
-						this.wsMeta.push({ cls, students, scoreDescs, gradesMap, hasIelts })
-						this.worksheetConfigs.push(worksheetConfig)
+						// Sort khối theo khoiID tăng dần (K6→K9)
+						const sortedKhois = [...khoiMap.entries()].sort((a, b) => a[0] - b[0])
+
+						for (const [khoiID, khoiClasses] of sortedKhois) {
+							// Fetch data song song cho tất cả lớp trong khối
+							const fetchResults = await Promise.all(
+								khoiClasses.map(cls => this.fetchTemplateCols(cls.templateBangDiemID, cls))
+							)
+							// Patch monHocLopID vào cls
+							fetchResults.forEach((res, i) => {
+								if (!khoiClasses[i].monHocLopID) khoiClasses[i].monHocLopID = res.monHocLopID
+							})
+
+							// Gộp students + gradesMap; build rowClassMap
+							const allStudents = []
+							const mergedGradesMap = new Map()
+							const rowClassMap = new Map()
+
+							// Dùng cols + scoreDescs từ class đầu tiên có data
+							const firstValidIdx = fetchResults.findIndex(r => r.cols.length > 0)
+							if (firstValidIdx === -1) continue
+							const cols = fetchResults[firstValidIdx].cols
+
+							khoiClasses.forEach((cls, ci) => {
+								const { students, gradesMap } = fetchResults[ci]
+								const startRow = allStudents.length
+								students.forEach((s, si) => {
+									rowClassMap.set(startRow + si, cls)
+									allStudents.push(s)
+								})
+								for (const [k, v] of gradesMap) mergedGradesMap.set(k, v)
+							})
+
+							const { worksheetConfig, scoreDescs } = this.buildClassWorksheet(
+								khoiClasses[firstValidIdx], allStudents, cols, thietLapList, mergedGradesMap
+							)
+
+							const khoiName = khoiClasses[0].khoiName ?? `Khối ${khoiID}`
+							this.wsMeta.push({
+								tabName: khoiName,
+								cls: null,
+								classes: khoiClasses,
+								khoiID,
+								students: allStudents,
+								scoreDescs,
+								gradesMap: mergedGradesMap,
+								rowClassMap,
+								hasIelts: false,
+							})
+							this.worksheetConfigs.push(worksheetConfig)
+						}
+					} else {
+						// ── Cap3: giữ nguyên — mỗi lớp = 1 tab ──
+						for (const cls of classes) {
+							const { students, cols, monHocLopID, gradesMap } = await this.fetchTemplateCols(cls.templateBangDiemID, cls)
+							if (!cls.monHocLopID) cls.monHocLopID = monHocLopID
+							const { worksheetConfig, scoreDescs } = this.buildClassWorksheet(cls, students, cols, thietLapList, gradesMap)
+							if (this.config.cap === 'cap3') {
+								const missingSoCau = scoreDescs.filter(d => d.key?.includes('__SoCauDung') && !d._soCau)
+								if (missingSoCau.length > 0) {
+									console.warn(`[ThiếtLậpKĩNăng] Lớp "${cls.name}" — ${missingSoCau.length} cột chưa có SoCau:`,
+										missingSoCau.map(d => d.key))
+								}
+							}
+							const hasIelts = GRADE_CONFIG.IELTS_NHOM_IDS.has(cls.id)
+							this.wsMeta.push({ tabName: cls.name, cls, classes: [cls], students, scoreDescs, gradesMap, rowClassMap: null, hasIelts })
+							this.worksheetConfigs.push(worksheetConfig)
+						}
 					}
+
 					this.soCauDungOptions = this.buildSoCauDungOptions()
 					this.ready = true
 				} finally { this.loading = false }
@@ -248,7 +312,7 @@
 
 				const $this = this
 				const instance = jspreadsheet(el, {
-					worksheets: [worksheetConfig],
+					worksheets: [{ ...worksheetConfig, tableOverflow: true, tableHeight: 'calc(100dvh - 93px)', tableWidth: '100%' }],
 					tabs: false,
 					onbeforecreateworksheet: () => false,
 					freezeColumns: this.FREEZE_COLS,
@@ -287,7 +351,8 @@
 				if (this._suppressOnChange) return
 				const meta = this.wsMeta[idx]
 				if (!meta) return
-				const { cls, students, scoreDescs } = meta
+				const { students, scoreDescs, rowClassMap } = meta
+				const cls = rowClassMap?.get(rowIndex) ?? meta.cls
 				const scoreColIdx = colIndex - this.FREEZE_COLS
 				if (scoreColIdx < 0) return
 				const desc = scoreDescs[scoreColIdx]
@@ -310,6 +375,7 @@
 					[cellKey]: {
 						wsIdx: idx, nhomID: cls.id, tenNhom: cls.name,
 						monHocLopID: cls.monHocLopID,
+						lopID: cls.id, templateBangDiemID: cls.templateBangDiemID,
 						hocSinhID: student.id, hoTen: student.hoTen,
 						maCotDiem: desc.key, tenCotDiem: desc.title,
 						cotDiemID: desc.cotDiemID ?? null,
@@ -891,14 +957,14 @@
 			// ════════════════════════════════════════════════
 
 			async onQuanLiKiThiApply_cap2({ studentScores }) {
-				const targetIdx = this.activeWsIdx
-				const meta = this.wsMeta[targetIdx]
-				const instance = this.instances[targetIdx]
+				const tabIdx = this.activeWsIdx
+				const meta = this.wsMeta[tabIdx]
+				const instance = this.instances[tabIdx]
 				if (!meta || !instance) return
 				const ws = instance[0]
 				if (!ws) return
 
-				const { cls, students, scoreDescs } = meta
+				const { students, scoreDescs, rowClassMap } = meta
 				const rowMap = new Map(students.map((s, i) => [String(s.id), i]))
 				const descMap = new Map(scoreDescs.map((d, i) => [d.key, i]))
 				const allUpdates = {}
@@ -920,6 +986,8 @@
 					const ci = this.FREEZE_COLS + di
 					const student = students[rowIdx]
 					if (!student) return
+					const cls = rowClassMap?.get(rowIdx) ?? meta.cls
+					if (!cls) return
 					const d = scoreDescs[di]
 					const existingGrade = meta.gradesMap?.get(`${student.id}_${maCotDiem}`)
 					const oldValue = snapOld(ci, rowIdx)
@@ -928,10 +996,11 @@
 					if (!allUpdates[rowIdx]) allUpdates[rowIdx] = {}
 					allUpdates[rowIdx][ci] = val
 
-					changedBuffer[`${targetIdx}_${rowIdx}_${ci}`] = {
-						wsIdx: targetIdx,
+					changedBuffer[`${tabIdx}_${rowIdx}_${ci}`] = {
+						wsIdx: tabIdx,
 						nhomID: cls.id, tenNhom: cls.name,
 						monHocLopID: cls.monHocLopID,
+						lopID: cls.id, templateBangDiemID: cls.templateBangDiemID,
 						hocSinhID: student.id, hoTen: student.hoTen,
 						maCotDiem, tenCotDiem: d?.title ?? maCotDiem,
 						cotDiemID: d?.cotDiemID ?? existingGrade?.cotDiemID ?? null,
@@ -955,7 +1024,7 @@
 				}
 
 				if (matchCount === 0) {
-					alert(`Không tìm thấy học sinh nào khớp trong tab "${cls.name}".`)
+					alert('Không tìm thấy học sinh nào khớp.')
 					return
 				}
 
@@ -971,7 +1040,6 @@
 
 					for (const rowIdxStr of Object.keys(allUpdates)) {
 						const rowIdx = Number(rowIdxStr)
-						// Nếu đã có giá trị CB từ mapping trực tiếp → bỏ qua
 						if (allUpdates[rowIdx]?.[cbCi] !== undefined) continue
 						const hkVal = allUpdates[rowIdx]?.[hkCi] ?? ws.options?.data?.[rowIdx]?.[hkCi]
 						if (hkVal === null || hkVal === undefined || hkVal === '') continue
@@ -992,11 +1060,11 @@
 
 					for (const rowIdxStr of Object.keys(allUpdates)) {
 						const rowIdx = Number(rowIdxStr)
-						// Nếu đã có giá trị CB_Conv từ mapping trực tiếp → bỏ qua
 						if (allUpdates[rowIdx]?.[cbConvCi] !== undefined) continue
 						const cbPtVal = allUpdates[rowIdx]?.[cbPtCi] ?? ws.options?.data?.[rowIdx]?.[cbPtCi]
 						if (cbPtVal === null || cbPtVal === undefined || cbPtVal === '') continue
-						const convVal = calcCambridgeConv(Number(cbPtVal), cls.khoiID) ?? ''
+						const cls = rowClassMap?.get(rowIdx) ?? meta.cls
+						const convVal = calcCambridgeConv(Number(cbPtVal), cls?.khoiID) ?? ''
 						if (convVal !== '') applyAndRecord(rowIdx, cbConvDesc.key, convVal)
 					}
 				}
@@ -1045,7 +1113,8 @@
 							const cbAvgConvKey = cbAvgDesc.key.replace('_Avg_Point', '_Avg_Conv')
 							const cbAvgConvDesc = scoreDescs.find(d => d.key === cbAvgConvKey)
 							if (cbAvgConvDesc) {
-								const convVal = calcCambridgeConv(cbAvg, cls.khoiID) ?? ''
+								const cls = rowClassMap?.get(rowIdx) ?? meta.cls
+								const convVal = calcCambridgeConv(cbAvg, cls?.khoiID) ?? ''
 								if (convVal !== '') applyAndRecord(rowIdx, cbAvgConvDesc.key, convVal)
 							}
 						}
@@ -1053,8 +1122,7 @@
 				}
 
 				this.changedCells = { ...this.changedCells, ...changedBuffer }
-				const total = Object.keys(changedBuffer).length
-				console.log(`[onQuanLiKiThiApply_cap2] tab[${targetIdx}] "${cls.name}" — ${matchCount} HS, ${total} ô`)
+				console.log(`[onQuanLiKiThiApply_cap2] tab[${tabIdx}] "${meta.tabName}" — ${matchCount} HS, ${Object.keys(changedBuffer).length} ô`)
 			},
 
 			// ════════════════════════════════════════════════
@@ -1393,17 +1461,32 @@
 			async onConfirmSaveActual({ close }) {
 				this.saving = true
 				try {
-					const groupByWs = new Map()
+					// Group by monHocLopID — each class in a khoi tab has its own monHocLopID
+					const groupByMHL = new Map()
 					for (const row of this.saveRows) {
-						const wsIdx = row._internal.wsIdx
-						if (!groupByWs.has(wsIdx)) groupByWs.set(wsIdx, [])
-						groupByWs.get(wsIdx).push(row)
+						const key = row._internal.monHocLopID ?? `ws_${row._internal.wsIdx}`
+						if (!groupByMHL.has(key)) groupByMHL.set(key, [])
+						groupByMHL.get(key).push(row)
 					}
 
-					for (const [wsIdx, rows] of groupByWs) {
-						const meta = this.wsMeta[wsIdx]
-						const cls = meta?.cls
-						if (!cls) continue
+					for (const [, rows] of groupByMHL) {
+						const internal = rows[0]._internal
+						const monHocLopID = internal.monHocLopID
+						const lopID = internal.lopID ?? internal.nhomID
+						const templateBangDiemID = internal.templateBangDiemID
+
+						// Fallback: get from wsMeta for cap3 (meta.cls still valid)
+						let resolvedLopID = lopID
+						let resolvedTemplateBDID = templateBangDiemID
+						let resolvedMonHocLopID = monHocLopID
+						if (!resolvedMonHocLopID) {
+							const meta = this.wsMeta[internal.wsIdx]
+							const cls = meta?.cls
+							if (!cls) continue
+							resolvedLopID = cls.id
+							resolvedTemplateBDID = cls.templateBangDiemID
+							resolvedMonHocLopID = cls.monHocLopID
+						}
 
 						const items = rows.map(row => ({
 							KQHTID: row._internal.kqhtID ?? 0,
@@ -1416,10 +1499,10 @@
 
 						await saveGrades({
 							NienKhoa: vueData.NienKhoa,
-							MonHocLopID: cls.monHocLopID,
-							LopID: cls.id,
+							MonHocLopID: resolvedMonHocLopID,
+							LopID: resolvedLopID,
 							MonHocID: this.config.cap === 'cap2' ? GRADE_CONFIG.MON_HOC_ID_CAP2 : GRADE_CONFIG.MON_HOC_ID,
-							TemplateBangDiemID: cls.templateBangDiemID,
+							TemplateBangDiemID: resolvedTemplateBDID,
 							MaNhomCotDiem: this.activeNhomCotDiem,
 							KetQuaObjArr: JSON.stringify(items),
 						})

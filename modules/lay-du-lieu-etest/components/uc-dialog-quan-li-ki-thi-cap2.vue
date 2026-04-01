@@ -231,7 +231,7 @@
 				{ apiField: 'Doc',      label: 'Đọc',        suffix: 'Reading_Point' },
 				{ apiField: 'Viet',     label: 'Viết',       suffix: 'Writing_Point' },
 				{ apiField: 'Noi',      label: 'Nói',        suffix: 'Speaking_Point' },
-				{ apiField: 'DiemTong', label: 'Điểm tổng',  suffix: 'Avg_Point', isAvg: true },
+				{ apiField: 'DiemTong', label: 'Điểm tổng',  suffix: 'Total_Point', isTotal: true },
 			]
 
 			const CB_SKILLS = [
@@ -289,7 +289,7 @@
 					.filter(d => d.key &&
 						!d.key.includes('_CB_') &&
 						!d.key.includes('__SoCauDung') &&
-						(d._isDirectScore || d._isAvgPoint))
+						(d._isDirectScore || d._isAvgPoint || d._isTotal))
 					.map(d => ({ key: d.key, label: d.title ?? d.key }))
 			},
 
@@ -538,8 +538,8 @@
 					for (const s of this.HK_SKILLS) {
 						if (m[s.apiField]) continue
 						const found = hkOpts.find(o =>
-							s.isAvg
-								? o.key?.endsWith('_Avg_Point') && !o.key?.includes('_CB_')
+							s.isTotal
+								? o.key?.endsWith('_Total_Point')
 								: o.key?.endsWith(s.suffix)
 						)
 						if (found) m[s.apiField] = found.key
@@ -567,6 +567,11 @@
 			async doApply(isActive) {
 				if (!this.canApply) return
 				this.applying = true
+				const CB_CONV_MAP = {
+					'Chưa đạt':      'Not Meeting Requirements/Chưa đạt',
+					'Đạt':           'Meeting Requirements/Đạt',
+					'Vượt yêu cầu': 'Exceeding Requirements/Vượt yêu cầu',
+				}
 				try {
 					const selectedSet = new Set(this.selectedStudentIDs.map(String))
 					const studentScores = new Map()
@@ -578,7 +583,7 @@
 						studentScores.get(hocSinhID)[maCotDiem] = val
 					}
 
-					for (const row of this.filteredRows) {
+				for (const row of this.previewRows) {
 						if (!selectedSet.has(String(row.hocSinhID))) continue
 
 						if (this.fillMode !== 'CB') {
@@ -591,7 +596,10 @@
 						if (this.fillMode !== 'HK') {
 							for (const s of this.CB_SKILLS) {
 								const col = this.cbMapping[s.apiField]
-								if (col) addScore(row.hocSinhID, col, row[s.apiField])
+								if (!col) continue
+								let val = row[s.apiField]
+								if (!s.isNumeric && val) val = CB_CONV_MAP[val] ?? val
+								addScore(row.hocSinhID, col, val)
 							}
 						}
 					}
