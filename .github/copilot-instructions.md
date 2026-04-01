@@ -330,6 +330,8 @@ Main app wrapper — always use at the root of `uc-main-layout.vue`.
 Provides: `GlobalLoading`, `GlobalApiErrorDialog`, `GlobalUiSnackbar`, `GlobalIframeWindow`.  
 Inject `snackbarRef` and `iframeRef` in child components.
 
+When implementing module UI, prefer these existing `Global*` components for shared app-level behaviors instead of creating equivalent local wrappers in each module.
+
 ### Common `uc-*` components
 | Component | Usage |
 |-----------|-------|

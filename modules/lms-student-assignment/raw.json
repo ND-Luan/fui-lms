@@ -9,9 +9,7 @@
                     "prop": ":no-gutters='true'",
                     "cols": [
                         {
-                            "w": 12,
-                            "el": "uc-assignment-taker-page",
-                            "attr": {}
+                            "el": "uc-assignment-taker-page"
                         }
                     ]
                 }

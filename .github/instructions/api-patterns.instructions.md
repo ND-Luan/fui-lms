@@ -9,14 +9,15 @@ applyTo: "modules/**/*.vue,modules/**/script.js,imports/**/*.js"
 | Situation | Function |
 |-----------|----------|
 | Fetch data for display (GET-style) | `fetchPromise(url, params, options?)` |
-| Insert / update / delete | `ajaxCALL(url, params, callback)` |
+| Insert / update / delete | `fetchPromise(url, params, { cache: false })` |
 | Multiple parallel reads at once | `fetchBatchPromise([{ url, params }, ...], options?)` |
 
-**Never** use `ajaxCALL` inside Vue components for read operations — use `fetchPromise`.
+**Always** use `fetchPromise` — for both reads and mutations. Use `{ cache: false }` on mutation calls to skip the cache.
 
-## `fetchPromise` — all reads
+## `fetchPromise` — reads and mutations
 
 ```js
+// Read
 async getData() {
   const res = await fetchPromise('module/endpoint', {
     NienKhoa: vueData.NienKhoa,
@@ -24,6 +25,17 @@ async getData() {
     LopID: this.LopItem.LopID,
   })
   this.DS = res.data ?? []
+}
+
+// Mutation — always preceded by confirmRef dialog, always { cache: false }
+async onSave() {
+  const ok = await this._confirm()?.show({ title: 'Xác nhận lưu?' })
+  if (!ok) return
+  const res = await fetchPromise('module/save', { ...this.formData }, { cache: false })
+  if (res?.status === 'success' || res?.data) {
+    this.snackbarRef.value.showSnackbar({ message: 'Lưu thành công', color: 'success' })
+    this.getData()
+  }
 }
 ```
 
@@ -37,23 +49,16 @@ fetchPromise(url, params, {
 })
 ```
 
-## `ajaxCALL` — mutations only
+## Snackbar — always `showSnackbar()`
 
-Always wrap mutations in `confirm()` first:
+The injected `snackbarRef` exposes `showSnackbar()`, **not** `show()`:
 
 ```js
-async onSave() {
-  const ok = await confirm({ title: 'Xác nhận lưu dữ liệu?' })
-  if (!ok) return
-
-  ajaxCALL('module/save', { ...this.formData }, (res) => {
-    if (res.status === 'success') {
-      this.snackbarRef.value.show({ message: 'Lưu thành công', color: 'success' })
-      this.getData()
-    }
-  })
-}
+this.snackbarRef.value.showSnackbar({ message: 'Cập nhật thành công', color: 'success' })
+this.snackbarRef.value.showSnackbar({ message: 'Có lỗi xảy ra', color: 'error' })
 ```
+
+❌ Never call `.show()` — that method does not exist on `GlobalUiSnackbar`.
 
 ## `confirm` callback pattern in Vue methods
 
@@ -73,9 +78,7 @@ async onDoAction() {
 }
 ```
 
-Do not rely on direct `this` access inside `confirm` callbacks.
-
-## `fetchBatchPromise` — parallel reads
+Do not rely on direct `this` access inside `confirm` callbacks. — parallel reads
 
 Use when multiple independent APIs must be loaded together (e.g. on `mounted`):
 
@@ -133,11 +136,11 @@ mounted() { this.getKhoi() },
 ## Snackbar feedback
 
 `snackbarRef` is injected as `{ value: null }` and populated by the `Global` component at runtime.
-Always call via `.value` — **never** use `alert()`:
+Always call `.showSnackbar()` via `.value` — **never** use `alert()` or `.show()`:
 
 ```js
-this.snackbarRef.value.show({ message: 'Cập nhật thành công', color: 'success' })
-this.snackbarRef.value.show({ message: 'Có lỗi xảy ra', color: 'error' })
+this.snackbarRef.value.showSnackbar({ message: 'Cập nhật thành công', color: 'success' })
+this.snackbarRef.value.showSnackbar({ message: 'Có lỗi xảy ra', color: 'error' })
 ```
 
 ## Common API param names

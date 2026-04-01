@@ -65,6 +65,15 @@ export default {
 
 ## Mandatory rules
 
+### Prefer Global components
+- Use `<Global>` as the root wrapper for main module layouts (`uc-main-layout.vue`).
+- Prefer existing global UI components for shared app-level behaviors instead of re-implementing the same UI pattern in feature modules:
+  - `GlobalLoading`
+  - `GlobalApiErrorDialog`
+  - `GlobalUiSnackbar`
+  - `GlobalIframeWindow`
+- Do not create duplicate local components for loading overlays, global API error dialogs, app-wide snackbar notifications, or iframe window containers when Global equivalents already exist.
+
 ### `inject`
 Always include:
 ```js
@@ -138,6 +147,18 @@ Use for all modal dialogs instead of raw `v-dialog`:
   <!-- content -->
 </uc-dialog>
 ```
+
+### `GlobalConfirmDialog` — use `confirm()` for mutations
+Always call `confirm()` before any insert/update/delete operation. It maps to `GlobalConfirmDialog` and is available as a global helper:
+```js
+async onSave() {
+  const ok = await confirm({ title: 'Xác nhận lưu?' })
+  if (!ok) return
+  ajaxCALL(...)
+}
+```
+- **Never** use `window.confirm()` or inline dialog hacks for confirmation
+- `confirm()` is already wired to `GlobalConfirmDialog` via the global runtime — no import needed
 
 ### TinhTrang chip pattern
 ```vue
