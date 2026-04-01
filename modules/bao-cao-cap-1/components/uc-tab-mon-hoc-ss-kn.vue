@@ -10,7 +10,13 @@
 					<v-select v-model="CacNienKhoaSoSanh" label="Chọn niên khóa của năm học trước"
 						:items="DSNienKhoaCoThe" item-title="title" item-value="value" multiple chips closable-chips />
 				</v-col>
-				<v-col class="d-flex ga-2">
+				<v-col class="d-flex align-center ga-2 flex-wrap">
+					<span class="text-body-2 text-medium-emphasis">Lấy dữ liệu từ:</span>
+					<v-btn-toggle v-model="NguonDuLieu" mandatory density="compact" variant="outlined" color="primary">
+						<v-btn value="QLDiem">QLDiem</v-btn>
+						<v-btn value="LMS">LMS</v-btn>
+					</v-btn-toggle>
+					<v-divider vertical class="mx-1" />
 					<v-btn color="primary" variant="outlined" prepend-icon="mdi-magnify" @click="onLoad">
 						Tìm kiếm
 					</v-btn>
@@ -60,6 +66,7 @@
 				HocKiSoSanh: null, // Học kì được chọn để lấy chỉ tiêu
 				CacNienKhoaSoSanh: [], // Các niên khóa để so sánh cùng kì
 				DSNienKhoaCoThe: [], // Danh sách các niên khóa có thể chọn
+				NguonDuLieu: 'QLDiem',
 				DSMonHoc: [],
 				header_HKs: [
 					{
@@ -74,8 +81,10 @@
 		mounted() {
 			// Tạo danh sách các niên khóa có thể chọn
 			this.DSNienKhoaCoThe = [
+				{ title: '2025 - 2026', value: 2025 },
 				{ title: '2024 - 2025', value: 2024 },
 				{ title: '2023 - 2024', value: 2023 }
+
 			]
 		},
 		methods: {
@@ -169,14 +178,22 @@
 					CapID: 1,
 					NienKhoa: NienKhoa,
 				})
-				this.BaoCaoItem = dataLMS[1][0] //Lấy chi tiế
-				if (this.BaoCaoItem.IsChotBaoCao) {
+				this.BaoCaoItem = dataLMS[1][0] //Lấy chi tiết
+				if (this.BaoCaoItem?.IsChotBaoCao) {
 					_data = JSON.parse(this.BaoCaoItem.JSON_BaoCao)
 				} else {
-					const data = await ajaxCALLPromise("psmark1/LMS_GetThongKeDanhGia_TheoMon", {
-						"NamHoc": NienKhoa,
-						"KyDanhGia": HocKi
-					})
+					let data
+					if (this.NguonDuLieu === 'LMS') {
+						data = await ajaxCALLPromise("lms/BaoCao_LMS_GetThongKeDanhGia_TheoMon", {
+							HocKi: HK_LMS.textValue,
+							NienKhoa: NienKhoa,
+						})
+					} else {
+						data = await ajaxCALLPromise("psmark1/LMS_GetThongKeDanhGia_TheoMon", {
+							"NamHoc": NienKhoa,
+							"KyDanhGia": HocKi
+						})
+					}
 					_data = data
 					this.DataQLDiem = data
 				}
