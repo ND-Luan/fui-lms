@@ -10,6 +10,7 @@
 **NEVER** use Composition API (`setup`, `ref`, `reactive`, `onMounted`, `defineProps`).
 
 **UI Library:** Vuetify 3 — components: `v-container`, `v-row`, `v-col`, `v-card`, `v-btn`, `v-data-table`, `v-dialog`, `v-select`, `v-chip`, `v-icon`, `v-divider`.
+**Shared Table Component:** Prefer `GlobalDataTable` for table rendering when possible.
 
 **No build step** — Vue and Vuetify are loaded externally at runtime.
 
@@ -166,10 +167,24 @@ export default {
 ### Vuetify rules
 - `#header` slot root: plain `<v-card>` — **no** `rounded`, `elevation`, `border`, `class`
 - Filter `v-select`: **no** `density`, `variant`, `flat`, `prepend-inner-icon`
-- `v-data-table` **must** have `style="max-height: calc(100dvh - 77px); overflow-y: auto;"` + `items-per-page="-1" hide-default-footer`
+- Prefer `<GlobalDataTable>` instead of raw `<v-data-table>` for module tables.
+- When using `<GlobalDataTable>`, always pass `v-data-table-height` (for example: `v-data-table-height="calc(100dvh - 77px)"`).
+- When table height must adapt to viewport/container changes, use the global directive `v-auto-table-height` (from `autoTableHeightDirective`) to auto-recalculate height.
+- If a raw `v-data-table` is still used, it **must** have `style="max-height: calc(100dvh - 77px); overflow-y: auto;"` + `items-per-page="-1" hide-default-footer`.
 - `headers` always in local `data()` — never `vueData.headers`
 - Student cell → use `<uc-info-student :item="item" />` not inline avatar
 - Dialogs → use `<uc-dialog>` not raw `<v-dialog>`
+
+### vueData scope rules
+- `raw.json`'s `data[]` entries are injected into `vueData` at runtime. Example: `{ "CapID": "parseInt(capid)" }` → `vueData.CapID`. When migrating to `uc-main-layout.vue`, read these via `vueData` directly — do **not** redeclare them as new local `data()` properties.
+- Do not use `this.vueData` for local module state (`LopID`, `ThangObj`, `items`, `headers`, dialog flags, table selections, filters).
+- Keep module state local in component `data()` and access via `this.*`.
+- Only read academic-year context from `vueData.NienKhoa` and `vueData.NienKhoaItem`.
+- Access the current logged-in user from the global directly: `vueData.user.UserID`. Do **not** copy `vueData.user` into a local state property.
+
+### `script.js` usage rule
+- **Move all logic into `uc-main-layout.vue` `methods`.** `script.js` should be empty or near-empty for modern modules.
+- Only put code in `script.js` when: the logic is too long/complex to inline, it is shared across multiple components in the same module, or it requires special handling outside the Vue lifecycle.
 
 ### Template event handler rules
 ```vue

@@ -27,19 +27,19 @@ Every `uc-main-layout.vue` (and any sibling component that uses `Global`) must f
 
     <v-divider />
 
-    <v-data-table
+    <GlobalDataTable
       v-model="DSSelected"
-      :headers
+      :headers="headers"
       :items="DS"
       item-value="ID"
       :show-select="true"
       items-per-page="-1"
       hide-default-footer
       hover
-      style="max-height: calc(100dvh - 77px); overflow-y: auto;"
+      v-data-table-height="calc(100dvh - 77px)"
     >
       <!-- custom column slots -->
-    </v-data-table>
+    </GlobalDataTable>
   </Global>
 </template>
 
@@ -80,6 +80,22 @@ Always include:
 inject: ['snackbarRef', 'iframeRef']
 ```
 
+### `script.js` usage rule
+- All module logic (API calls, data transforms, event handlers, helpers) **must live inside the `uc-main-layout.vue` `methods`**, not in `script.js`.
+- `script.js` is reserved only for: logic too complex to inline (e.g. long multi-step async pipelines), code shared across multiple components in the same module, or domain-specific utilities that require special handling.
+- If `script.js` is empty or trivial, that is intentional and correct — do not move logic back out.
+
+### `vueData` usage scope
+- `raw.json`'s `data[]` entries are evaluated at runtime and injected into `vueData`. For example:
+  ```json
+  { "CapID": "parseInt(capid)" }
+  ```
+  becomes `vueData.CapID` globally. When migrating to `uc-main-layout.vue`, **do not redeclare these as local state** — read them from `vueData` directly (e.g. `vueData.CapID`, `parseInt(vueData.CapID || capid)` in `mounted`).
+- Do not use `this.vueData` for local UI/module state such as `LopID`, `ThangObj`, `items`, `headers`, dialog flags, or selection state.
+- Keep those values as local component state (`this.LopID`, `this.ThangObj`, `this.items`, ...).
+- Only read global academic context from `vueData.NienKhoa` and `vueData.NienKhoaItem` in module components.
+- Access the current logged-in user directly from the global: `vueData.user.UserID`. Do **not** copy it into a local state property.
+
 ### `#header` slot
 - Root element **must** be `<v-card>` with no extra props (`rounded`, `elevation`, `border`, `class`)
 - Title in `<v-card-title>`: `{{ TitlePage }} • {{ TitleCap }}`
@@ -87,10 +103,13 @@ inject: ['snackbarRef', 'iframeRef']
 - Action buttons in the last `<v-col class="d-flex align-center ga-2 flex-wrap">`
 - Filter `v-select` must be plain — **no** `density`, `variant`, `flat`, `prepend-inner-icon`
 
-### `v-data-table`
-- **Always** add `style="max-height: calc(100dvh - 77px); overflow-y: auto;"`
-- **Always** add `items-per-page="-1" hide-default-footer` — no pagination
-- Keep `headers` as local component `data`, never use `vueData.headers`
+### `GlobalDataTable` / `v-data-table`
+- Prefer `GlobalDataTable` for module tables.
+- When using `GlobalDataTable`, always pass `v-data-table-height` (example: `v-data-table-height="calc(100dvh - 77px)"`).
+- When you need auto-fit height by viewport/container resize, apply `v-auto-table-height` (from `autoTableHeightDirective`) on the table wrapper/container.
+- **Always** add `items-per-page="-1" hide-default-footer` — no pagination.
+- If you must use raw `v-data-table`, add `style="max-height: calc(100dvh - 77px); overflow-y: auto;"`.
+- Keep `headers` as local component `data`, never use `vueData.headers`.
 
 ### Template event handlers — NO template string literals
 ❌ Wrong:

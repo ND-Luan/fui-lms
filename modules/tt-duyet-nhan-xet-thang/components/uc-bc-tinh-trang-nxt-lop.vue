@@ -1,9 +1,9 @@
 <template>
     <v-card>
         <v-card-title class="d-flex bg-primary ">
-            <span class="text-white">Tình Trạng Nhận Xét Tháng {{ vueData.ThangObj?.Thang }}</span>
+            <span class="text-white">Tình Trạng Nhận Xét Tháng {{ ThangObj?.Thang }}</span>
             <v-spacer></v-spacer>
-            <v-btn @click="onClose()" variant="text" icon="mdi-close"></v-btn>
+            <v-btn @click="$emit('close')" variant="text" icon="mdi-close"></v-btn>
         </v-card-title>
         <v-card-text class="pa-0">
             <div class="w-100"></div>
@@ -12,7 +12,7 @@
                     <span class="text-primary">Khối {{ KhoiID }}</span>
                 </v-card-title>
                 <v-card-text class="d-flex flex-wrap ga-2">
-                    <v-chip @click="NXTDetailClass(Lop.LopID)" style="cursor: pointer"
+                    <v-chip @click="onSelectLop(Lop.LopID)" style="cursor: pointer"
                         v-for="Lop in dataLopNXT.filter(item => item.KhoiID == KhoiID)" :color="Lop.MauTinhTrang">
                         {{ Lop.TenLop }} - {{ Lop.TenTinhTrang }}</v-chip>
                 </v-card-text>
@@ -22,37 +22,35 @@
 </template>
 <script>
 export default {
+    props: ['ThangObj', 'CapID'],
+    emits: ['close', 'select-lop'],
     data() {
         return {
+            vueData,
             dataLopNXT: [],
             DSKhoiID: [],
-            vueData
         }
     },
     mounted() {
         this.getDataLopNXT()
     },
     methods: {
-        onClose() {
-            vueData.isOpenReport = false
+        onSelectLop(lopid) {
+            this.$emit('select-lop', lopid)
+            this.$emit('close')
         },
         getDataLopNXT() {
             ajaxCALL('/lms/NhanXetThang_Lop_Get_TinhTrang', {
                 NienKhoa: vueData.NienKhoa,
-                Thang: vueData.ThangObj.Thang,
-                CapID: vueData.CapID,
+                Thang: this.ThangObj?.Thang,
+                CapID: this.CapID,
             }, res => {
                 if (res.data.length > 0) {
                     this.dataLopNXT = res.data
-                    let DSKhoiID = [...new Set(this.dataLopNXT.map(item => item.KhoiID))];
-                    this.DSKhoiID = DSKhoiID
+                    this.DSKhoiID = [...new Set(this.dataLopNXT.map(item => item.KhoiID))]
                 }
             })
         },
-        NXTDetailClass(lopid) {
-            vueData.isOpenReport = false
-            vueData.LopID = lopid
-        }
     }
 }
 </script>

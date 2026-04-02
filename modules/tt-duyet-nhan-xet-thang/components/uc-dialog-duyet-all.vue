@@ -49,7 +49,7 @@
 
 <script>
 	export default {
-	    props: [],
+	    props: ['DSLop', 'ThangObj'],
 	    data() {
 	        return {
 	            vueData,
@@ -148,11 +148,10 @@
 	                }
 	
 	                Vue.$toast.success(`Duyệt ${validSelection.length} lớp thành công`)
-	
+
 	                // Reload lại danh sách để cập nhật tình trạng mới
 	                vueData.IsShowDialogDuyetAll = false
-	                CALL("NhanXetThang_Lop_Get")
-	                CALL("NhanXetThang_Get")
+	                this.$emit('done')
 	            } catch (error) {
 	                Vue.$toast.error(`Có lỗi xảy ra: ${error.message}`)
 	            } finally {
@@ -167,21 +166,19 @@
 	        },
 	        async getDSNhanXetThang() {
 	            let arr = []
-	            // Lấy tất cả lớp, không chỉ lớp được chọn
-	            const dsLop = vueData.DSLop || []
-	
+	            const dsLop = this.DSLop || []
+
 	            for (var lop of dsLop) {
 	                const DSNXT = await ajaxCALLPromise("lms/NhanXetThang_Lop_Get", {
 	                    LopID: lop.LopID,
 	                    NienKhoa: vueData.NienKhoa
 	                })
 	                const filterDS_NXT = DSNXT.find(x =>
-	                    x.Thang === vueData.ThangObj.Thang
-	                    && x.Nam === vueData.ThangObj.Nam
-	                    && x.NienKhoa === vueData.ThangObj.NienKhoa
+	                    x.Thang === this.ThangObj.Thang
+	                    && x.Nam === this.ThangObj.Nam
+	                    && x.NienKhoa === this.ThangObj.NienKhoa
 	                )
 	                if (filterDS_NXT) {
-	                    // Gắn thêm tên lớp
 	                    filterDS_NXT.TenLop = lop.TenLop
 	                    arr.push(filterDS_NXT)
 	                }
@@ -199,7 +196,9 @@
 	                HocSinhID, NoiDung
 	            })
 	        },
-	        processBeforePushME
+	        processBeforePushME(item) {
+	            return buildPushMEText(item, parseInt(vueData.CapID), vueData.NienKhoa, this.ThangObj)
+	        },
 	    },
 	}
 </script>

@@ -6,7 +6,13 @@
 					<v-select v-model="HocKi" label="Chọn học kì để so với chỉ tiêu" :items="DSHocKi" item-title="title"
 						item-value="value" />
 				</v-col>
-				<v-col class="d-flex ga-2">
+				<v-col class="d-flex align-center ga-2 flex-wrap">
+					<span class="text-body-2 text-medium-emphasis">Lấy dữ liệu từ:</span>
+					<v-btn-toggle v-model="NguonDuLieu" mandatory density="compact" variant="outlined" color="primary">
+						<v-btn value="QLDiem">QLDiem</v-btn>
+						<v-btn value="LMS">LMS</v-btn>
+					</v-btn-toggle>
+					<v-divider vertical class="mx-1" />
 					<v-btn color="primary" variant="outlined" prepend-icon="mdi-magnify" @click="onLoad">
 						Tìm kiếm
 					</v-btn>
@@ -73,6 +79,7 @@
 					{ title: "Cuối HK2", value: 4, textValue: "CK_HK2" }
 				],
 				HocKi: null,
+				NguonDuLieu: 'QLDiem',
 				DSMonHoc: [],
 				Data: [],
 				header_HKs: [
@@ -128,17 +135,43 @@
 				if (this.BaoCaoItem.IsChotBaoCao) {
 					_data = JSON.parse(this.BaoCaoItem.JSON_BaoCao)
 				} else {
-					const data = await ajaxCALLPromise("psmark1/LMS_GetThongKeDanhGia_TheoNLPC", {
-						"NamHoc": NienKhoa,
-						"KyDanhGia": HocKi
-					})
-					_data = data
-					this.DataQLDiem = data
+					let data
+					if (this.NguonDuLieu === 'LMS') {
+						data = await ajaxCALLPromise("lms/BaoCao_LMS_GetThongKeDanhGia_TheoNLPC", {
+							HocKi: HK_LMS.textValue,
+							NienKhoa: NienKhoa,
+						})
+					} else {
+						data = await ajaxCALLPromise("psmark1/LMS_GetThongKeDanhGia_TheoNLPC", {
+							"NamHoc": NienKhoa,
+							"KyDanhGia": HocKi
+						})
+					}
+					_data = this.fn_NormalizeNLPC(data)
+					this.DataQLDiem = _data
 				}
 				return _data
 			},
 			async fn_LoadChiTieu(NienKhoa) {
 				return await ajaxCALLPromise("lms/ChiTieu_C1_Get", { NienKhoa })
+			},
+			// Chuẩn hóa tên field: HoanThanh → Dat, ChuaHoanThanh → CanCoGang
+			fn_NormalizeNLPC(rows) {
+				return (rows || []).map(item => {
+					const normalized = { ...item }
+					for (const key of Object.keys(item)) {
+						if (key.endsWith('HoanThanh') && !key.endsWith('TileHoanThanh')) {
+							normalized[key.replace('HoanThanh', 'Dat')] = item[key]
+						} else if (key.endsWith('TileHoanThanh')) {
+							normalized[key.replace('TileHoanThanh', 'TileDat')] = item[key]
+						} else if (key.endsWith('ChuaHoanThanh') && !key.endsWith('TileChuaHoanThanh')) {
+							normalized[key.replace('ChuaHoanThanh', 'CanCoGang')] = item[key]
+						} else if (key.endsWith('TileChuaHoanThanh')) {
+							normalized[key.replace('TileChuaHoanThanh', 'TileCanCoGang')] = item[key]
+						}
+					}
+					return normalized
+				})
 			},
 			getDataByMonHocID(data, chiTieuByMonHocID, MonHocID, MonHocCode, NienKhoa) {
 				const newData = []
@@ -149,10 +182,10 @@
 	
 							const x = chiTieuByMonHocID.find(n => n.MonHocID === MonHocID && item.KhoiID === n.KhoiID)
 	
-							// Lấy các tỷ lệ thực tế từ item
+							// Lấy các tỷ lệ thực tế từ item (dùng tên đã chuẩn hóa)
 							const tlTot = item[`${MonHocCode}TileTot`] ?? null
-							const tlDat = item[`${MonHocCode}TileHoanThanh`] ?? null
-							const tlCCG = item[`${MonHocCode}TileChuaHoanThanh`] ?? null
+							const tlDat = item[`${MonHocCode}TileDat`] ?? null
+							const tlCCG = item[`${MonHocCode}TileCanCoGang`] ?? null
 	
 							// Lấy chỉ tiêu
 							const ct_Tot = x?.ChiTieu_Tot ?? null
@@ -160,13 +193,13 @@
 							const ct_CCG = x?.ChiTieu_CanCoGang ?? null
 	
 							const slTot = Number(item[`${MonHocCode}Tot`]) || 0
-							const slDat = Number(item[`${MonHocCode}HoanThanh`]) || 0
-							const slCCG = Number(item[`${MonHocCode}ChuaHoanThanh`]) || 0
+							const slDat = Number(item[`${MonHocCode}Dat`]) || 0
+							const slCCG = Number(item[`${MonHocCode}CanCoGang`]) || 0
 	
 							newData.push({
 								...item,
 	
-								TongSL: slTot + slDat + slCCG,
+								TongSL: Number(item.TongSL) || (slTot + slDat + slCCG),
 	
 								// Chỉ tiêu
 								[`${MonHocCode}ChiTieu_Tot_NK${NienKhoa}`]: ct_Tot,
@@ -272,18 +305,18 @@
 				// 2) Cột TSHS ĐÁNH GIÁ: Sum(TongSL)
 				if (colKey === 'TongSL') return totalSL
 	
-				// 3) Cột Số lượng theo mức: *Tot, *HT, *CHT => SUM
-				// (tránh nhầm TileTot/TileHT/TileCHT)
-				if (/(Tot|HT|CHT)$/.test(colKey) && !colKey.includes('Tile')) {
+				// 3) Cột Số lượng theo mức: *Tot, *Dat, *CanCoGang => SUM
+				// (tránh nhầm TileTot/TileDat/TileCanCoGang)
+				if (/(Tot|Dat|CanCoGang)$/.test(colKey) && !colKey.includes('Tile') && !colKey.includes('ChiTieu') && !colKey.includes('TangGiam')) {
 					return (items || []).reduce((s, x) => s + (Number(x[colKey]) || 0), 0)
 				}
 	
-				// 4) Cột %: *TileTot, *TileHT, *TileCHT => SUM(mức)/SUM(TongSL)*100
-				if (/Tile(Tot|HT|CHT)$/.test(colKey)) {
+				// 4) Cột %: *TileTot, *TileDat, *TileCanCoGang => SUM(mức)/SUM(TongSL)*100
+				if (/Tile(Tot|Dat|CanCoGang)$/.test(colKey)) {
 					const countKey = colKey
 						.replace('TileTot', 'Tot')
-						.replace('TileHoanThanh', 'Dat')
-						.replace('TileChuaHoanThanh', 'CanCoGang')
+						.replace('TileDat', 'Dat')
+						.replace('TileCanCoGang', 'CanCoGang')
 	
 					const sumCount = (items || []).reduce((s, x) => s + (Number(x[countKey]) || 0), 0)
 					const pct = totalSL > 0 ? (sumCount / totalSL) * 100 : 0

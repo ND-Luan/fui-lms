@@ -7,6 +7,14 @@
     padding: 0 8px !important;
 }
 .custom-height-uc-quill-editor {
-    height: fit-content !important;
-    min-height: 155px !important;
+    height: 110px !important;
+    min-height: 110px !important;
+    max-height: 110px !important;
+    overflow-y: auto !important;
+}
+
+.compact-comment {
+    white-space: normal;
+    line-height: 1.35;
+    font-size: 13px;
 }
