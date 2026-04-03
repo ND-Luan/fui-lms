@@ -117,6 +117,12 @@ export default {
             this.DS = []
             if (v) this.getDS()
         },
+        HocKi() {
+            this.MaNhomCotDiemItem = null
+            this.DSMaNhomCotDiem = []
+            this.DS = []
+            if (this.MonHocItem) this.getMaNhomCotDiem()
+        },
     },
     mounted() {
         this.getAllLop()

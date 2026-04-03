@@ -48,7 +48,7 @@
 					:item-value="v => v" items-per-page="-1" style="max-height: calc(100dvh - 93px)" hide-default-footer
 					show-select>
 					<template #item.SoTT="{item}">
-						<v-text-field v-model="item.SoTT" placeholder="Nhập số thứ tự..." />
+					<v-text-field v-model="item.SoTT" placeholder="Nhập số thứ tự..." @blur="onSoTTBlur(item)" />
 					</template>
 					<template #item.ChuyenNhom="{item}">
 						<v-btn icon="mdi-transfer-right" @click="onChangeNhomHocSinh(item)" size="small" variant="text"
@@ -203,6 +203,9 @@
 				})
 			},
 			onSelectNhomDetail(item) { this.NhomDetail = _.cloneDeep(item) },
+			onSoTTBlur(item) {
+				ajaxCALL('lms/SoTT_Udp_ByHSNhomID', { HSNhomID: item.HSNhomID, SoTT: item.SoTT }, () => {})
+			},
 		},
 	}
 </script>
