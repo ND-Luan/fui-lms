@@ -10,7 +10,13 @@
 					<v-select v-model="CacNienKhoaSoSanh" label="Chọn niên khóa của năm học trước"
 						:items="DSNienKhoaCoThe" item-title="title" item-value="value" multiple chips closable-chips />
 				</v-col>
-				<v-col class="d-flex ga-2">
+				<v-col class="d-flex align-center ga-2 flex-wrap">
+					<span class="text-body-2 text-medium-emphasis">Lấy dữ liệu từ:</span>
+					<v-btn-toggle v-model="NguonDuLieu" mandatory density="compact" variant="outlined" color="primary">
+						<v-btn value="QLDiem">QLDiem</v-btn>
+						<v-btn value="LMS">LMS</v-btn>
+					</v-btn-toggle>
+					<v-divider vertical class="mx-1" />
 					<v-btn color="primary" variant="outlined" prepend-icon="mdi-magnify" @click="onLoad">
 						Tìm kiếm
 					</v-btn>
@@ -62,7 +68,8 @@
 				CacNienKhoaSoSanh: [],
 				DSNienKhoaCoThe: [],
 				DSMonHoc: [],
-				header_HKs: [{ title: "Khối", value: "KhoiID" }]
+				header_HKs: [{ title: "Khối", value: "KhoiID" }],
+				NguonDuLieu: 'QLDiem'
 			}
 		},
 		mounted() {
@@ -147,14 +154,22 @@
 				if (this.BaoCaoItem?.IsChotBaoCao) {
 					_data = JSON.parse(this.BaoCaoItem.JSON_BaoCao)
 				} else {
-					const data = await ajaxCALLPromise("psmark1/LMS_GetThongKeDanhGia_TheoNLPC", {
-						"NamHoc": NienKhoa,
-						"KyDanhGia": HocKi
-					})
-					_data = data
-					this.DataQLDiem = data
+					let data
+					if (this.NguonDuLieu === 'LMS') {
+						data = await ajaxCALLPromise("lms/BaoCao_LMS_GetThongKeDanhGia_TheoNLPC", {
+							HocKi: HK_LMS.textValue,
+							NienKhoa: NienKhoa,
+						})
+					} else {
+						data = await ajaxCALLPromise("psmark1/LMS_GetThongKeDanhGia_TheoNLPC", {
+							"NamHoc": NienKhoa,
+							"KyDanhGia": HocKi
+						})
+					}
+					_data = this.fn_NormalizeNLPC(data)
+					this.DataQLDiem = _data
 				}
-				return _data.flat() // API trả về mảng 2 chiều → flat là đúng
+				return _data
 			},
 	
 			async fn_LoadChiTieu(NienKhoa) {
@@ -162,6 +177,34 @@
 				return data || []
 			},
 	
+			// Chuẩn hóa tên field: QLDiem (HoanThanh/ChuaHoanThanh) và LMS (HT/CHT) → Dat/CanCoGang
+			fn_NormalizeNLPC(rows) {
+				const flatRows = Array.isArray(rows[0]) ? rows.flat() : (rows || [])
+				return flatRows.map(item => {
+					const normalized = { ...item }
+					for (const key of Object.keys(item)) {
+					if (key.endsWith('HoanThanh') && !key.endsWith('TileHoanThanh')) {
+						normalized[key.replace('HoanThanh', 'Dat')] = item[key]
+					} else if (key.endsWith('TileHoanThanh')) {
+						normalized[key.replace('TileHoanThanh', 'TileDat')] = item[key]
+					} else if (key.endsWith('ChuaHoanThanh') && !key.endsWith('TileChuaHoanThanh')) {
+						normalized[key.replace('ChuaHoanThanh', 'CanCoGang')] = item[key]
+					} else if (key.endsWith('TileChuaHoanThanh')) {
+						normalized[key.replace('TileChuaHoanThanh', 'TileCanCoGang')] = item[key]
+					// LMS format
+					} else if (key.endsWith('TileCHT')) {
+						normalized[key.replace('TileCHT', 'TileCanCoGang')] = item[key]
+					} else if (key.endsWith('CHT') && !key.endsWith('TileCHT')) {
+						normalized[key.replace('CHT', 'CanCoGang')] = item[key]
+					} else if (key.endsWith('TileHT') && !key.endsWith('TileCHT')) {
+						normalized[key.replace('TileHT', 'TileDat')] = item[key]
+					} else if (key.endsWith('HT') && !key.endsWith('CHT') && !key.endsWith('TileHT')) {
+						normalized[key.replace('HT', 'Dat')] = item[key]
+					}
+					}
+					return normalized
+				})
+			},
 			isSumField(key) {
 				return key.includes('SoLuong')
 			},
@@ -202,12 +245,12 @@
 						row[`${MonHocCode}TileTot_${hk.textValue}`] = this.getMonValue(dataHK, khoiID, MonHocCode, 'TileTot')
 						row[`${MonHocCode}SoLuongTot_${hk.textValue}`] = this.getMonValue(dataHK, khoiID, MonHocCode, 'Tot')
 	
-						row[`${MonHocCode}TileHoanThanh_${hk.textValue}`] = this.getMonValue(dataHK, khoiID, MonHocCode, 'TileHoanThanh')
-						row[`${MonHocCode}SoLuongHoanThanh_${hk.textValue}`] = this.getMonValue(dataHK, khoiID, MonHocCode, 'HoanThanh')
+						row[`${MonHocCode}TileDat_${hk.textValue}`] = this.getMonValue(dataHK, khoiID, MonHocCode, 'TileDat')
+						row[`${MonHocCode}SoLuongDat_${hk.textValue}`] = this.getMonValue(dataHK, khoiID, MonHocCode, 'Dat')
 	
-						row[`${MonHocCode}TileChuaHoanThanh_${hk.textValue}`] = this.getMonValue(dataHK, khoiID, MonHocCode,
-							'TileChuaHoanThanh')
-						row[`${MonHocCode}SoLuongChuaHoanThanh_${hk.textValue}`] = this.getMonValue(dataHK, khoiID, MonHocCode, 'ChuaHoanThanh')
+						row[`${MonHocCode}TileCanCoGang_${hk.textValue}`] = this.getMonValue(dataHK, khoiID, MonHocCode,
+							'TileCanCoGang')
+						row[`${MonHocCode}SoLuongCanCoGang_${hk.textValue}`] = this.getMonValue(dataHK, khoiID, MonHocCode, 'CanCoGang')
 					}
 	
 					// --- Cùng kì các năm trước ---
@@ -215,15 +258,15 @@
 					for (const nk of sortedNK) {
 						const dataNK = dataCacNamTruoc[nk]
 						row[`${MonHocCode}TileTot_CungKy_NK${nk}`] = this.getMonValue(dataNK, khoiID, MonHocCode, 'TileTot')
-						row[`${MonHocCode}TileHoanThanh_CungKy_NK${nk}`] = this.getMonValue(dataNK, khoiID, MonHocCode, 'TileHoanThanh')
-						row[`${MonHocCode}TileChuaHoanThanh_CungKy_NK${nk}`] = this.getMonValue(dataNK, khoiID, MonHocCode, 'TileChuaHoanThanh')
+						row[`${MonHocCode}TileDat_CungKy_NK${nk}`] = this.getMonValue(dataNK, khoiID, MonHocCode, 'TileDat')
+						row[`${MonHocCode}TileCanCoGang_CungKy_NK${nk}`] = this.getMonValue(dataNK, khoiID, MonHocCode, 'TileCanCoGang')
 					}
 	
 					// --- Giá trị thực tế học kì đang so sánh (để tính tăng/giảm) ---
 					const dataSoSanh = allHocKiData[hocKiSoSanhObj.value]
 					const thuc_Tot = this.getMonValue(dataSoSanh, khoiID, MonHocCode, 'TileTot')
-					const thuc_Dat = this.getMonValue(dataSoSanh, khoiID, MonHocCode, 'TileHoanThanh')
-					const thuc_CCG = this.getMonValue(dataSoSanh, khoiID, MonHocCode, 'TileChuaHoanThanh')
+					const thuc_Dat = this.getMonValue(dataSoSanh, khoiID, MonHocCode, 'TileDat')
+					const thuc_CCG = this.getMonValue(dataSoSanh, khoiID, MonHocCode, 'TileCanCoGang')
 	
 					// --- Tính tăng/giảm ---
 					row[`TangGiam_SoVoi_ChiTieu_Tot_${hkText}_NK${NienKhoa}`] =
@@ -252,15 +295,15 @@
 				for (const hk of this.DSHocKi) {
 					const dataHK = allHocKiData[hk.value]
 					const total = (totalRow[`${MonHocCode}SoLuongTot_${hk.textValue}`] ?? 0) +
-						(totalRow[`${MonHocCode}SoLuongHoanThanh_${hk.textValue}`] ?? 0) +
-						(totalRow[`${MonHocCode}SoLuongChuaHoanThanh_${hk.textValue}`] ?? 0)
+						(totalRow[`${MonHocCode}SoLuongDat_${hk.textValue}`] ?? 0) +
+						(totalRow[`${MonHocCode}SoLuongCanCoGang_${hk.textValue}`] ?? 0)
 					if (total != 0) {
 						totalRow[`${MonHocCode}TileTot_${hk.textValue}`] = `${_.round(totalRow[`${MonHocCode}SoLuongTot_${hk.textValue}`] * 100
 							/ total, 2)} %`
-						totalRow[`${MonHocCode}TileHoanThanh_${hk.textValue}`] =
-							`${_.round(totalRow[`${MonHocCode}SoLuongHoanThanh_${hk.textValue}`] * 100 / total, 2)} %`
-						totalRow[`${MonHocCode}TileChuaHoanThanh_${hk.textValue}`] =
-							`${_.round(totalRow[`${MonHocCode}SoLuongChuaHoanThanh_${hk.textValue}`] * 100 / total, 2)} %`
+						totalRow[`${MonHocCode}TileDat_${hk.textValue}`] =
+							`${_.round(totalRow[`${MonHocCode}SoLuongDat_${hk.textValue}`] * 100 / total, 2)} %`
+						totalRow[`${MonHocCode}TileCanCoGang_${hk.textValue}`] =
+							`${_.round(totalRow[`${MonHocCode}SoLuongCanCoGang_${hk.textValue}`] * 100 / total, 2)} %`
 					}
 				}
 				rows.push(totalRow)
@@ -271,8 +314,8 @@
 			renderHeader_HKs(MonHocCode, TenMonHoc_HienThi, NienKhoa, hocKiSoSanhObj) {
 				const groups = [
 					{ title: 'TỐT', type: 'Tot', field: 'Tot' },
-					{ title: 'ĐẠT', type: 'Dat', field: 'HoanThanh' },
-					{ title: 'CẦN CỐ GẮNG', type: 'CanCoGang', field: 'ChuaHoanThanh' }
+					{ title: 'ĐẠT', type: 'Dat', field: 'Dat' },
+					{ title: 'CẦN CỐ GẮNG', type: 'CanCoGang', field: 'CanCoGang' }
 				]
 	
 				const groupHeaders = []

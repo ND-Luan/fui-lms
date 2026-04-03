@@ -143,7 +143,7 @@
         </template>
 
         <template #item.NhanXetCap1Mobile="{ item }">
-          <div style="padding: 10px; max-width: 350px;" class="d-flex flex-column ga-2">
+          <div style="padding: 10px; max-width: 100%;" class="d-flex flex-column ga-2">
             <div>
               <b class="text-left">Nhận xét môn Toán</b>
               <div class="compact-comment" v-html="formatComment(item.NhanXetToan_HTML)"></div>
@@ -247,7 +247,7 @@
         </template>
 
         <template #item.NhanXetCap23Mobile="{ item }">
-          <div style="padding: 10px; max-width: 350px;" class="d-flex flex-column ga-2">
+          <div style="padding: 10px; max-width: 100%;" class="d-flex flex-column ga-2">
             <template v-if="isCuoiKi">
               <div>
                 <b class="text-left">Ưu điểm</b>

@@ -6,7 +6,13 @@
 					<v-select v-model="HocKi" label="Chọn học kì" :items="DSHocKi" item-title="title"
 						item-value="value" />
 				</v-col>
-				<v-col class="d-flex ga-2">
+				<v-col class="d-flex align-center ga-2 flex-wrap">
+					<span class="text-body-2 text-medium-emphasis">Lấy dữ liệu từ:</span>
+					<v-btn-toggle v-model="NguonDuLieu" mandatory density="compact" variant="outlined" color="primary">
+						<v-btn value="QLDiem">QLDiem</v-btn>
+						<v-btn value="LMS">LMS</v-btn>
+					</v-btn-toggle>
+					<v-divider vertical class="mx-1" />
 					<v-btn color="primary" variant="outlined" prepend-icon="mdi-magnify" @click="onLoad(HocKi, NienKhoa)">
 						Tìm kiếm
 					</v-btn>
@@ -113,13 +119,14 @@
 					{ title: "Cuối HK2", value: 4, textValue: "CK_HK2" }
 				],
 				HocKi: null,
+				NguonDuLieu: 'QLDiem',
 				itemMonHocs: [],
 				items: [],
 				itemSums: [],
 				BaoCaoItem: null,
 				DataQLDiem: [],
 			}
-		},
+		}, 
 		methods: {
 			async onLoad(KyDanhGia, NamHoc) {
 				let data
@@ -136,10 +143,17 @@
 					data = JSON.parse(this.BaoCaoItem.JSON_BaoCao)
 				}
 				else {
-					data = await ajaxCALLPromise("psmark1/LMS_GetThongKeDanhGia_ThongKeDiem", {
-						KyDanhGia,
-						NamHoc
-					})
+					if (this.NguonDuLieu === 'LMS') {
+						data = await ajaxCALLPromise("lms/BaoCao_LMS_GetThongKeDanhGia_ThongKeDiem", {
+							NienKhoa: NamHoc,
+							HocKi: HK_LMS.textValue,
+						})
+					} else {
+						data = await ajaxCALLPromise("psmark1/LMS_GetThongKeDanhGia_ThongKeDiem", {
+							KyDanhGia,
+							NamHoc
+						})
+					}
 					this.DataQLDiem = data
 				}
 	
@@ -212,7 +226,7 @@
 			},
 			onExportExcel() {
 				if (!this.items.length) {
-					this.$toast.warning("Chưa có dữ liệu!");
+					Vue.$toast.warning("Chưa có dữ liệu!");
 					return;
 				}
 	

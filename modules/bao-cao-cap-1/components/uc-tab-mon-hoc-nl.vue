@@ -6,7 +6,13 @@
 					<v-select v-model="HocKi" label="Chọn học kì để so với chỉ tiêu" :items="DSHocKi" item-title="title"
 						item-value="value" />
 				</v-col>
-				<v-col class="d-flex ga-2">
+				<v-col class="d-flex align-center ga-2 flex-wrap">
+					<span class="text-body-2 text-medium-emphasis">Lấy dữ liệu từ:</span>
+					<v-btn-toggle v-model="NguonDuLieu" mandatory density="compact" variant="outlined" color="primary">
+						<v-btn value="QLDiem">QLDiem</v-btn>
+						<v-btn value="LMS">LMS</v-btn>
+					</v-btn-toggle>
+					<v-divider vertical class="mx-1" />
 					<v-btn color="primary" variant="outlined" prepend-icon="mdi-magnify" @click="onLoad">
 						Tìm kiếm
 					</v-btn>
@@ -86,6 +92,7 @@
 					}
 				],
 				DataQLDiem: [],
+				NguonDuLieu: 'QLDiem',
 				BaoCaoItem: null
 			}
 		},
@@ -132,10 +139,18 @@
 				if (this.BaoCaoItem.IsChotBaoCao) {
 					_data = JSON.parse(this.BaoCaoItem.JSON_BaoCao)
 				} else {
-					const data = await ajaxCALLPromise("psmark1/LMS_GetThongKeDanhGia_TheoNLPC", {
-						"NamHoc": NienKhoa,
-						"KyDanhGia": HocKi
-					})
+					let data
+					if (this.NguonDuLieu === 'LMS') {
+						data = await ajaxCALLPromise("lms/BaoCao_LMS_GetThongKeDanhGia_TheoNLPC", {
+							HocKi: HK_LMS.textValue,
+							NienKhoa: NienKhoa,
+						})
+					} else {
+						data = await ajaxCALLPromise("psmark1/LMS_GetThongKeDanhGia_TheoNLPC", {
+							"NamHoc": NienKhoa,
+							"KyDanhGia": HocKi
+						})
+					}
 					_data = this.fn_NormalizeNLPC(data)
 					this.DataQLDiem = _data
 				}
@@ -144,9 +159,10 @@
 			async fn_LoadChiTieu(NienKhoa) {
 				return await ajaxCALLPromise("lms/ChiTieu_C1_Get", { NienKhoa })
 			},
-			// Chuẩn hóa tên field: HoanThanh → Dat, ChuaHoanThanh → CanCoGang
+			// Chuẩn hóa tên field: QLDiem (HoanThanh/ChuaHoanThanh) và LMS (HT/CHT) → Dat/CanCoGang
 			fn_NormalizeNLPC(rows) {
-				return (rows || []).map(item => {
+				const flatRows = Array.isArray(rows[0]) ? rows.flat() : (rows || [])
+				return flatRows.map(item => {
 					const normalized = { ...item }
 					for (const key of Object.keys(item)) {
 						if (key.endsWith('HoanThanh') && !key.endsWith('TileHoanThanh')) {
@@ -157,6 +173,15 @@
 							normalized[key.replace('ChuaHoanThanh', 'CanCoGang')] = item[key]
 						} else if (key.endsWith('TileChuaHoanThanh')) {
 							normalized[key.replace('TileChuaHoanThanh', 'TileCanCoGang')] = item[key]
+						// LMS format
+						} else if (key.endsWith('TileCHT')) {
+							normalized[key.replace('TileCHT', 'TileCanCoGang')] = item[key]
+						} else if (key.endsWith('CHT') && !key.endsWith('TileCHT')) {
+							normalized[key.replace('CHT', 'CanCoGang')] = item[key]
+						} else if (key.endsWith('TileHT') && !key.endsWith('TileCHT')) {
+							normalized[key.replace('TileHT', 'TileDat')] = item[key]
+						} else if (key.endsWith('HT') && !key.endsWith('CHT') && !key.endsWith('TileHT')) {
+							normalized[key.replace('HT', 'Dat')] = item[key]
 						}
 					}
 					return normalized
@@ -236,8 +261,8 @@
 								align: "center",
 								children: [
 									{ title: `Chỉ tiêu ${NienKhoa} - ${NienKhoa + 1}`, value: `${MonHocCode}ChiTieu_Dat_NK${NienKhoa}`, align: "end" },
-									{ title: `Số lượng ${NienKhoa} - ${NienKhoa + 1}`, value: `${MonHocCode}HT`, align: "end" },
-									{ title: `${Semester} ${NienKhoa} - ${NienKhoa + 1}`, value: `${MonHocCode}TileHT`, align: "end" },
+									{ title: `Số lượng ${NienKhoa} - ${NienKhoa + 1}`, value: `${MonHocCode}Dat`, align: "end" },
+									{ title: `${Semester} ${NienKhoa} - ${NienKhoa + 1}`, value: `${MonHocCode}TileDat`, align: "end" },
 									{ title: "Tăng giảm so với chỉ tiêu", value: `TangGiam_SoVoi_ChiTieu_Dat_NK${NienKhoa}`, align: "end" }
 								]
 							},
@@ -246,9 +271,9 @@
 								align: "center",
 								children: [
 									{ title: `Chỉ tiêu ${NienKhoa} - ${NienKhoa + 1}`, value: `${MonHocCode}ChiTieu_CanCoGang_NK${NienKhoa}`, align: "end" },
-									{ title: `Số lượng ${NienKhoa} - ${NienKhoa + 1}`, value: `${MonHocCode}CHT`, align: "end" },
-									{ title: `${Semester} ${NienKhoa} - ${NienKhoa + 1}`, value: `${MonHocCode}TileCHT`, align: "end" },
-									{ title: "Tăng giảm so với chỉ tiêu", value: `TangGiam_SoVoi_ChiTieu_CHT_NK${NienKhoa}`, align: "end" }
+									{ title: `Số lượng ${NienKhoa} - ${NienKhoa + 1}`, value: `${MonHocCode}CanCoGang`, align: "end" },
+									{ title: `${Semester} ${NienKhoa} - ${NienKhoa + 1}`, value: `${MonHocCode}TileCanCoGang`, align: "end" },
+									{ title: "Tăng giảm so với chỉ tiêu", value: `TangGiam_SoVoi_ChiTieu_CanCoGang_NK${NienKhoa}`, align: "end" }
 								]
 							}
 						]

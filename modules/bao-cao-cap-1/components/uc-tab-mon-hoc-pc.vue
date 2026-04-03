@@ -155,9 +155,10 @@
 			async fn_LoadChiTieu(NienKhoa) {
 				return await ajaxCALLPromise("lms/ChiTieu_C1_Get", { NienKhoa })
 			},
-			// Chuẩn hóa tên field: HoanThanh → Dat, ChuaHoanThanh → CanCoGang
+			// Chuẩn hóa tên field: QLDiem (HoanThanh/ChuaHoanThanh) và LMS (HT/CHT) → Dat/CanCoGang
 			fn_NormalizeNLPC(rows) {
-				return (rows || []).map(item => {
+				const flatRows = Array.isArray(rows[0]) ? rows.flat() : (rows || [])
+				return flatRows.map(item => {
 					const normalized = { ...item }
 					for (const key of Object.keys(item)) {
 						if (key.endsWith('HoanThanh') && !key.endsWith('TileHoanThanh')) {
@@ -168,6 +169,15 @@
 							normalized[key.replace('ChuaHoanThanh', 'CanCoGang')] = item[key]
 						} else if (key.endsWith('TileChuaHoanThanh')) {
 							normalized[key.replace('TileChuaHoanThanh', 'TileCanCoGang')] = item[key]
+						// LMS format
+						} else if (key.endsWith('TileCHT')) {
+							normalized[key.replace('TileCHT', 'TileCanCoGang')] = item[key]
+						} else if (key.endsWith('CHT') && !key.endsWith('TileCHT')) {
+							normalized[key.replace('CHT', 'CanCoGang')] = item[key]
+						} else if (key.endsWith('TileHT') && !key.endsWith('TileCHT')) {
+							normalized[key.replace('TileHT', 'TileDat')] = item[key]
+						} else if (key.endsWith('HT') && !key.endsWith('CHT') && !key.endsWith('TileHT')) {
+							normalized[key.replace('HT', 'Dat')] = item[key]
 						}
 					}
 					return normalized
@@ -247,8 +257,8 @@
 								align: "center",
 								children: [
 									{ title: `Chỉ tiêu ${NienKhoa} - ${NienKhoa + 1}`, value: `${MonHocCode}ChiTieu_Dat_NK${NienKhoa}`, align: "end" },
-									{ title: `Số lượng ${NienKhoa} - ${NienKhoa + 1}`, value: `${MonHocCode}HT`, align: "end" },
-									{ title: `${Semester} ${NienKhoa} - ${NienKhoa + 1}`, value: `${MonHocCode}TileHT`, align: "end" },
+									{ title: `Số lượng ${NienKhoa} - ${NienKhoa + 1}`, value: `${MonHocCode}Dat`, align: "end" },
+									{ title: `${Semester} ${NienKhoa} - ${NienKhoa + 1}`, value: `${MonHocCode}TileDat`, align: "end" },
 									{ title: "Tăng giảm so với chỉ tiêu", value: `TangGiam_SoVoi_ChiTieu_Dat_NK${NienKhoa}`, align: "end" }
 								]
 							},
@@ -257,9 +267,9 @@
 								align: "center",
 								children: [
 									{ title: `Chỉ tiêu ${NienKhoa} - ${NienKhoa + 1}`, value: `${MonHocCode}ChiTieu_CanCoGang_NK${NienKhoa}`, align: "end" },
-									{ title: `Số lượng ${NienKhoa} - ${NienKhoa + 1}`, value: `${MonHocCode}CHT`, align: "end" },
-									{ title: `${Semester} ${NienKhoa} - ${NienKhoa + 1}`, value: `${MonHocCode}TileCHT`, align: "end" },
-									{ title: "Tăng giảm so với chỉ tiêu", value: `TangGiam_SoVoi_ChiTieu_CHT_NK${NienKhoa}`, align: "end" }
+									{ title: `Số lượng ${NienKhoa} - ${NienKhoa + 1}`, value: `${MonHocCode}CanCoGang`, align: "end" },
+									{ title: `${Semester} ${NienKhoa} - ${NienKhoa + 1}`, value: `${MonHocCode}TileCanCoGang`, align: "end" },
+									{ title: "Tăng giảm so với chỉ tiêu", value: `TangGiam_SoVoi_ChiTieu_CanCoGang_NK${NienKhoa}`, align: "end" }
 								]
 							}
 						]
