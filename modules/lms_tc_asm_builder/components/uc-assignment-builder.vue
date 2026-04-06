@@ -53,6 +53,14 @@
 					<!-- <v-col :cols="!vueData.AssignToClassID ? 4 : 6">
 						<v-btn @click="onOpenPreview" text='Xem trước' color="teal" block />
 					</v-col> -->
+					<v-col cols="12" v-if="autoSaveStatus" class="pb-0">
+						<v-chip size="x-small" :color="autoSaveStatus === 'saving' ? 'grey' : 'success'" variant="tonal" class="w-100 justify-center">
+							<v-icon v-if="autoSaveStatus === 'saving'" start size="12" class="mdi-spin">mdi-loading</v-icon>
+							<v-icon v-else start size="12">mdi-check-circle-outline</v-icon>
+							<span v-if="autoSaveStatus === 'saving'">Đang lưu tự động...</span>
+							<span v-else>Đã lưu tự động<span v-if="lastSavedRelative"> — {{ lastSavedRelative }}</span></span>
+						</v-chip>
+					</v-col>
 					<v-col :cols="!vueData.AssignToClassID ? 6 : 12">
 						<v-btn color="info" variant="outlined" block @click="handleSave(true)">
 							<v-icon start class="me-1">mdi-content-save-outline</v-icon>{{ $t('message.SaveAssignment')
@@ -191,7 +199,8 @@
 		props: {
 			initialAssignment: undefined,
 			isEditMode: Boolean,
-			onSave: { type: Function, default: () => { } }
+			onSave: { type: Function, default: () => { } },
+			onAutoSave: { type: Function, default: () => { } },
 		},
 		data() {
 			const toggle = JSON.parse(localStorage.getItem('IsLanguage')) ?? false
@@ -228,7 +237,10 @@
 				DSHocSinhByLopID: [],
 				DSHocSinhSelected: [],
 				DSGiaoVien_Permission: [],
-				GiaoVienPermissionSelected: []
+				GiaoVienPermissionSelected: [],
+				autoSaveStatus: null,
+				lastSavedAt: null,
+				relativeTimeNow: null,
 			}
 		},
 		mounted() {
@@ -242,7 +254,19 @@
 				console.log("this.classOptions", this.classOptions)
 			});
 		},
+		beforeUnmount() {
+			clearTimeout(this.autoSaveTimer)
+			clearInterval(this.relativeTimeTimer)
+		},
 		computed: {
+			lastSavedRelative() {
+				if (!this.lastSavedAt) return ''
+				const now = this.relativeTimeNow || Date.now()
+				const diff = Math.floor((now - this.lastSavedAt) / 1000)
+				if (diff < 10) return 'vừa lưu'
+				if (diff < 60) return `${diff} giây trước`
+				return `${Math.floor(diff / 60)} phút trước`
+			},
 			isIndeterminate: function () {
 				return this.selectedClass.length != 0 && this.selectedClass.length !== this.classOptions.length
 			},
@@ -270,6 +294,29 @@
 			}
 		},
 		methods: {
+			scheduleAutoSave() {
+				if (!this.isEditMode) return
+				clearTimeout(this.autoSaveTimer)
+				this.autoSaveTimer = setTimeout(async () => {
+					const groups = this.assignment.AssignmentConfig?.groups || []
+					const isNotFullQuiz = vueData.isCheckAllGroupFullQuiz(groups)
+					const payload = {
+						assignment: this.assignment,
+						isPublishing: false,
+						Is_Full_Quiz: !isNotFullQuiz,
+						setting: this.setting,
+					}
+					this.autoSaveStatus = 'saving'
+					await this.onAutoSave(payload)
+					this.lastSavedAt = Date.now()
+					this.relativeTimeNow = Date.now()
+					this.autoSaveStatus = 'saved'
+					clearInterval(this.relativeTimeTimer)
+					this.relativeTimeTimer = setInterval(() => {
+						this.relativeTimeNow = Date.now()
+					}, 10000)
+				}, 2000)
+			},
 			formatNumber(value, decimals = 2) {
 				const num = Number(value)
 	
@@ -605,8 +652,14 @@
 					setting: this.setting
 				};
 				console.log('payload', payload)
-	
-				await this.onSave(payload);
+				clearTimeout(this.autoSaveTimer)
+				this.autoSaveStatus = 'saving'
+				await this.onSave(payload)
+				this.lastSavedAt = Date.now()
+				this.relativeTimeNow = Date.now()
+				this.autoSaveStatus = 'saved'
+				clearInterval(this.relativeTimeTimer)
+				this.relativeTimeTimer = setInterval(() => { this.relativeTimeNow = Date.now() }, 10000)
 			},
 			// ==== Helpers hiển thị ====
 			formattedDate(dateStr) {
@@ -695,8 +748,8 @@
 					}
 				},
 				immediate: true,
-				deep: true
 			},
+
 			selectedItem: function (item) {
 				this.fileAudio = null
 			},
@@ -705,6 +758,7 @@
 					if (newVal && this.isEditMode) {
 						vueData.AssignmentDataLog = _.cloneDeep(newVal);
 					}
+					this.scheduleAutoSave()
 				},
 				deep: true
 			},

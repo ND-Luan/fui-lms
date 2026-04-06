@@ -5,6 +5,18 @@
 	</div>
 
 	<div v-else class="container-scroll">
+		<!-- Auto-save announcement banner -->
+		<v-alert
+			v-if="showAutoSaveBanner"
+			type="info"
+			variant="tonal"
+			density="compact"
+			class="rounded-0 ma-0"
+			closable
+			@click:close="dismissAutoSaveBanner"
+		>
+			<span class="text-body-2">✨ <strong>Tính năng mới:</strong> Bài chấm sẽ được lưu tự động sau mỗi thao tác. Bạn không cần bấm “Lưu nháp” nữa.</span>
+		</v-alert>
 		<!-- Assignment Header -->
 		<v-card class="rounded-0" variant="tonal" color="primary">
 			<v-alert class="rounded-0 pa-2" color="primary" variant="tonal">
@@ -279,6 +291,12 @@
 						</v-btn>
 
 						<div class="d-flex align-center ga-2" v-if="![0, 1, 4].includes(submission?.SubmissionStatus)">
+							<v-chip v-if="autoSaveStatus" size="x-small" :color="autoSaveStatus === 'saving' ? 'grey' : 'success'" variant="tonal">
+								<v-icon v-if="autoSaveStatus === 'saving'" start size="12" class="mdi-spin">mdi-loading</v-icon>
+								<v-icon v-else start size="12">mdi-check-circle-outline</v-icon>
+								<span v-if="autoSaveStatus === 'saving'">{{ IsEngLish ? 'Saving...' : 'Đang lưu...' }}</span>
+								<span v-else>{{ IsEngLish ? 'Auto-saved' : 'Đã lưu tự động' }}<span v-if="lastSavedRelative"> — {{ lastSavedRelative }}</span></span>
+							</v-chip>
 							<v-btn @click="saveGrading(false)" color="grey-darken-1" variant="outlined"
 								:loading="isSaving" size="small">
 								<v-icon start>mdi-content-save-outline</v-icon>
@@ -556,6 +574,12 @@
 
 								<div class="d-flex flex-wrap align-center ga-2"
 									v-if="![0, 1, 4].includes(submission?.SubmissionStatus)">
+									<v-chip v-if="autoSaveStatus" size="x-small" :color="autoSaveStatus === 'saving' ? 'grey' : 'success'" variant="tonal">
+										<v-icon v-if="autoSaveStatus === 'saving'" start size="12" class="mdi-spin">mdi-loading</v-icon>
+										<v-icon v-else start size="12">mdi-check-circle-outline</v-icon>
+										<span v-if="autoSaveStatus === 'saving'">{{ IsEngLish ? 'Saving...' : 'Đang lưu...' }}</span>
+										<span v-else>{{ IsEngLish ? 'Auto-saved' : 'Đã lưu tự động' }}<span v-if="lastSavedRelative"> — {{ lastSavedRelative }}</span></span>
+									</v-chip>
 									<v-btn @click="saveGrading(false)" color="grey-darken-1" variant="outlined"
 										size="small" :loading="isSaving">
 										<v-icon start size="16">mdi-content-save-outline</v-icon>
@@ -675,7 +699,9 @@
 			submissionData: Array,
 			onSaveGradingDraft: { type: Function, default: () => { } },
 			onPublishGrades: { type: Function, default: () => { } },
-			onOpenPublishDialog: { type: Function, default: () => { } }
+			onOpenPublishDialog: { type: Function, default: () => { } },
+			onInitPage: { type: Function, default: () => { } },
+			onAutoSaveDraft: { type: Function, default: () => { } },
 		},
 		data() {
 			this.$i18n.locale = (localStorage.getItem('IsLanguage') && localStorage.getItem('IsLanguage') == 'true') ? 'en' : 'vi'
@@ -696,15 +722,28 @@
 				isLoading: false,
 				vueData,
 				mobile,
-				IsOpenModal_Require_Resend: false
+				IsOpenModal_Require_Resend: false,
+				autoSaveStatus: null,
+				lastSavedAt: null,
+				relativeTimeNow: null,
 			}
 		},
 		mounted() {
-			if (this.mobile) {
-				this.viewMode = 'all'
-			}
+			if (this.mobile) this.viewMode = 'all'
+		},
+		beforeUnmount() {
+			clearTimeout(this.autoSaveTimer)
+			clearInterval(this.relativeTimeTimer)
 		},
 		computed: {
+			lastSavedRelative() {
+				if (!this.lastSavedAt) return ''
+				const now = this.relativeTimeNow || Date.now()
+				const diff = Math.floor((now - this.lastSavedAt) / 1000)
+				if (diff < 10) return 'vừa lưu'
+				if (diff < 60) return `${diff} giây trước`
+				return `${Math.floor(diff / 60)} phút trước`
+			},
 	
 			totalQuestions() {
 				if (!this.assignment?.groups) return 0;
@@ -780,6 +819,27 @@
 				this.isLoading = false
 			},
 	
+			scheduleAutoSave() {
+				if ([0, 1, 4].includes(this.submission?.SubmissionStatus)) return
+				clearTimeout(this.autoSaveTimer)
+				this.autoSaveTimer = setTimeout(async () => {
+					this.autoSaveStatus = 'saving'
+					const payload = {
+						SubmissionID: this.submission.SubmissionID,
+						Score: this.gradingSummary.totalScore,
+						TeacherComment: this.gradingSummary.teacherComment,
+						SubmissionContent: JSON.stringify({ answers: this.gradingData }),
+					}
+					await this.onAutoSaveDraft(payload)
+					this.lastSavedAt = Date.now()
+					this.relativeTimeNow = Date.now()
+					this.autoSaveStatus = 'saved'
+					clearInterval(this.relativeTimeTimer)
+					this.relativeTimeTimer = setInterval(() => {
+						this.relativeTimeNow = Date.now()
+					}, 10000)
+				}, 1500)
+			},
 			isQuestionGraded(questionId) {
 				const grading = this.gradingData[questionId]?.grading;
 				return grading && (grading.manualScore !== null && grading.manualScore !== undefined);
@@ -790,18 +850,16 @@
 			},
 			//Hiện tại đang sử dụng cho File Upload
 			updateAnswer(questionId, newAnswer) {
-				console.log('udp')
 				this.gradingData[questionId] = {
 					...this.gradingData[questionId],
 					answerData: newAnswer
 				}
-				this.saveGrading(false)
+				this.scheduleAutoSave()
 			},
 			async saveGrading(isPublishing) {
 				const $this = this
 				let listQuestions = _.flatten(this.assignment.groups.map(q => { return [...q.questions] }))
 				this.isSaving = true;
-				console.log('this.submission', this.submission)
 				// if(!this.gradingSummary.totalScore){
 				// }
 				// await this.calculateTotalScore();
@@ -850,6 +908,7 @@
 						this.calculateTotalScore();
 					}, 0);
 				}
+				this.scheduleAutoSave()
 			},
 			async calculateTotalScore() {
 				let total = 0;
@@ -977,7 +1036,7 @@
 							Reason: $this.Reason
 						}, res => {
 							Vue.$toast.success(`${this.IsEngLish ? 'Successfully requested the student to resubmit the assignment!' : 'Yêu cầu học sinh nộp lại bài tập thành công!'} `, { position: "top" })
-							vueData.initPage()
+							$this.onInitPage()
 						})
 					}
 				})
@@ -995,6 +1054,8 @@
 				handler: 'processData',
 				immediate: true,
 			},
+			'gradingSummary.totalScore'() { this.scheduleAutoSave() },
+			'gradingSummary.teacherComment'() { this.scheduleAutoSave() },
 			mobile: function (val) {
 				if (val) this.viewMode = 'all'
 				else this.viewMode = 'single'
