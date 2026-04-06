@@ -39,7 +39,6 @@ export default {
 			studentInfoDetail: {},
 			filterFocusTask: [],
 			tabMonHoc: null,
-			isMobile: false,
 			DSTuanHoc: [],
 			TuanHoc: null,
 			menuVisible: false,
@@ -48,15 +47,17 @@ export default {
 			NienKhoa: null,
 			isFromLinkParent: false,
 			hocSinhIDFromUrl: null,
-			version: "2.3"
+			version: "2.4"
 		}
 	},
 	mounted() {
-		this.isMobile = this.$vuetify.display.mobile
 		this.checkUrlParams()
 		this.initStudentInfoDetail()
 	},
 	computed: {
+		isMobile() {
+			return this.$vuetify.display.mobile
+		},
 		DSTienDoMonHocTheoTuan() {
 			console.log('focusTasks', this.focusTasks)
 			const arr = this.focusTasks.filter(x => x.TuanHocID === this.TuanHoc?.TuanHocID)
@@ -77,9 +78,8 @@ export default {
 		},
 	},
 	watch: {
-		'$vuetify.display.mobile': function (isMobile) {
+		'$vuetify.display.mobile'() {
 			this.activeKey = 0
-			this.isMobile = isMobile
 		},
 		menuVisible: function (menu) {
 			if (menu) this.scrollToSelectedItem();

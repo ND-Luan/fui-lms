@@ -712,10 +712,10 @@ $('document').ready(() => {
         }
     })
     app.use(i18n);
-    
+
     // ✅ Register global directives
     app.directive('auto-table-height', autoTableHeightDirective)
-    
+
     // ✅ Provide global refs
     app.provide('iframeRef', { value: null })
     app.provide('snackbarRef', { value: null })
@@ -735,6 +735,16 @@ $('document').ready(() => {
                         // surface: "#f2f2f2",
                     }
                 },
+            },
+        },
+        display: {
+            mobileBreakpoint: 'lg',
+            thresholds: {
+                xs: 0,
+                sm: 340,
+                md: 540,
+                lg: 800,
+                xl: 1280,
             },
         },
         locale: {
@@ -905,7 +915,7 @@ $('document').ready(() => {
                 dense: true
             },
             VAppBar: {
-                density:"compact"
+                density: "compact"
             }
         }
     }

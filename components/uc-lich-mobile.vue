@@ -71,18 +71,18 @@
 					<template v-if="currentDayData">
 						<div v-for="buoi in currentDayData.DSBuoi" :key="buoi.Buoi" class="m-buoi-section">
 							<!-- Header buổi -->
-							<div class="m-buoi-header" :class="buoi.Buoi === 1 ? 'm-buoi-sang' : 'm-buoi-chieu'">
+							<div class="m-buoi-header" :class="buoi.Buoi === 1 ? 'm-buoi-sang' : buoi.Buoi === 3 ? 'm-buoi-toi' : 'm-buoi-chieu'">
 								<span class="m-buoi-dot-sm mr-1"
-									:class="buoi.Buoi === 1 ? 'm-dot-morning' : 'm-dot-afternoon'"></span>
+									:class="buoi.Buoi === 1 ? 'm-dot-morning' : buoi.Buoi === 3 ? 'm-dot-evening' : 'm-dot-afternoon'"></span>
 								{{ buoi.TenBuoi }}
 							</div>
 							<!-- Danh sách tiết -->
 							<!-- Danh sách tiết: slot cố định 1-5 -->
 							<div v-for="slotNum in 5" :key="slotNum" class="m-tiet-row-item"
-								:class="buoi.Buoi === 1 ? 'm-tiet-row--sang' : 'm-tiet-row--chieu'">
+								:class="buoi.Buoi === 1 ? 'm-tiet-row--sang' : buoi.Buoi === 3 ? 'm-tiet-row--toi' : 'm-tiet-row--chieu'">
 
 								<!-- Số tiết -->
-								<div class="m-tiet-badge" :class="buoi.Buoi === 1 ? 'm-badge-sang' : 'm-badge-chieu'">
+								<div class="m-tiet-badge" :class="buoi.Buoi === 1 ? 'm-badge-sang' : buoi.Buoi === 3 ? 'm-badge-toi' : 'm-badge-chieu'">
 									{{ slotNum }}
 								</div>
 
@@ -272,8 +272,9 @@
 						}))
 						for (const row of kb) {
 							const { Thu, Buoi, TenBuoi } = row
+							const displayTenBuoi = Buoi === 3 ? 'Tối' : TenBuoi
 							if (!mergedByThu[Thu]) mergedByThu[Thu] = {}
-							if (!mergedByThu[Thu][Buoi]) mergedByThu[Thu][Buoi] = { Buoi, TenBuoi, jsonTiet: [] }
+							if (!mergedByThu[Thu][Buoi]) mergedByThu[Thu][Buoi] = { Buoi, TenBuoi: displayTenBuoi, jsonTiet: [] }
 							mergedByThu[Thu][Buoi].jsonTiet.push(...row.jsonTiet)
 						}
 					}

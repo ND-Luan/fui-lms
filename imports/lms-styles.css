@@ -1179,6 +1179,26 @@
     border-left: 2px solid #bbdefb;
 }
 
+.m-buoi-toi {
+    background: #ede7f6;
+    color: #4527a0;
+    border-left: 3px solid #7e57c2;
+}
+
+.m-dot-evening {
+    background: #7e57c2;
+}
+
+.m-badge-toi {
+    background: #d1c4e9;
+    color: #311b92;
+    font-weight: 700;
+}
+
+.m-tiet-row--toi {
+    border-left: 2px solid #d1c4e9;
+}
+
 /* ── Tiết trống ── */
 .m-tiet-empty {
     flex: 1;
@@ -1389,6 +1409,11 @@
 .buoi-chieu {
     background: rgba(var(--v-theme-primary), 0.05);
     color: rgba(var(--v-theme-primary), 0.7);
+}
+
+.buoi-toi {
+    background: #ede7f6;
+    color: #4527a0;
 }
 
 /* Tiết cell */

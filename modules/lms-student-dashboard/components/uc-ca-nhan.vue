@@ -33,7 +33,7 @@
 			<div class="sp-section-label">Tính năng</div>
 
 			<!-- Thời khóa biểu -->
-			<uc-lich :HocSinh="HocSinh">
+			<uc-lich :HocSinh="HocSinh" :isMobile>
 				<template #activator="{ activatorProps }">
 					<div class="sp-item" v-bind="activatorProps">
 						<div class="sp-item-icon sp-item-icon--primary">
@@ -94,7 +94,8 @@
 		props: {
 			NienKhoa: Number,
 			HocSinh: Object,
-			version: String
+			version: String,
+			isMobile: Boolean
 		},
 		data() {
 			return {

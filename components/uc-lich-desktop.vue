@@ -73,7 +73,7 @@
 							<template v-for="buoi in buoiList" :key="buoi.value">
 								<tr v-for="(tietNum, tietIdx) in getTietOfBuoi(buoi.value)" :key="tietNum">
 									<td v-if="tietIdx === 0" :rowspan="getTietOfBuoi(buoi.value).length" class="td-buoi"
-										:class="buoi.value === 1 ? 'buoi-sang' : 'buoi-chieu'">
+								:class="getBuoiTdClass(buoi.value)">
 										<span>{{ buoi.label }}</span>
 									</td>
 									<td class="td-tiet">{{ tietNum }}</td>
@@ -125,7 +125,8 @@
 				weekOffset: 0,
 				buoiList: [
 					{ value: 1, label: 'Sáng' },
-					{ value: 2, label: 'Chiều' }
+					{ value: 2, label: 'Chiều' },
+					{ value: 3, label: 'Tối' }
 				],
 				days: [
 					{ thu: 2, label: 'Thứ 2' },
@@ -138,11 +139,12 @@
 				],
 				maxTietSang: 0,
 				maxTietChieu: 0,
+				maxTietToi: 0,
 			}
 		},
 		computed: {
 			maxTiet() {
-				return this.maxTietSang + this.maxTietChieu
+				return this.maxTietSang + this.maxTietChieu + this.maxTietToi
 			},
 			isCurrentWeek() {
 				return this.weekOffset === 0
@@ -221,7 +223,8 @@
 					const map = {}
 					let maxSang = 0
 					let maxChieu = 0
-	
+					let maxToi = 0
+
 					for (const { lh, tkb } of results) {
 						const rows = tkb[2].map(x => ({ ...x, jsonTiet: JSON.parse(x.jsonTiet) }))
 						for (const row of rows) {
@@ -236,22 +239,29 @@
 								}
 								if (Buoi === 1 && tiet.Tiet > maxSang) maxSang = tiet.Tiet
 								if (Buoi === 2 && tiet.Tiet > maxChieu) maxChieu = tiet.Tiet
+								if (Buoi === 3 && tiet.Tiet > maxToi) maxToi = tiet.Tiet
 							}
 						}
 					}
-	
+
 					this.cellMap = map
 					this.maxTietSang = maxSang
 					this.maxTietChieu = maxChieu
-					this.insScreenSchedule() // ← gọi sau khi có ThoiGian
+					this.maxTietToi = maxToi
+					this.insScreenSchedule()// ← gọi sau khi có ThoiGian
 				} finally {
 					this.loading = false
 				}
 			},
 	
 			getTietOfBuoi(buoi) {
-				const max = buoi === 1 ? this.maxTietSang : this.maxTietChieu
+				const max = buoi === 1 ? this.maxTietSang : buoi === 2 ? this.maxTietChieu : this.maxTietToi
 				return Array.from({ length: max }, (_, i) => i + 1)
+			},
+			getBuoiTdClass(buoi) {
+				if (buoi === 1) return 'buoi-sang'
+				if (buoi === 3) return 'buoi-toi'
+				return 'buoi-chieu'
 			},
 	
 			isOtherClass(tenLop) {
