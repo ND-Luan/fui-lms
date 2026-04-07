@@ -33,7 +33,7 @@
 				{{ $t('message.Submitted') }}:{{ assignment.SubmittedCount }}/{{ assignment.TotalStudentsInClass }}
 			</v-chip>
 			<v-chip v-else size="small" variant="text" color="info" class="font-weight-medium">
-				{{ $t('message.InProgress') }}:{{ assignment.LearningCount }}/{{ assignment.TotalStudentsInClass }}
+				{{ $t('message.InProgress') }}:{{ assignment.RemainingToComplete }}/{{ assignment.TotalStudentsInClass }}
 			</v-chip>
 			<v-chip v-if="assignment.ResourceType === 'ASSIGNMENT'" size="small" variant="text" color="#4CAF50"
 				class="font-weight-medium">

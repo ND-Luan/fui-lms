@@ -8,17 +8,33 @@
             <p class="loading-label">Đang tải dữ liệu học sinh...</p>
         </div>
 
+        <!-- Thông báo tính năng mới: Đánh dấu câu hỏi (hiện trong 2 ngày) -->
+        <v-alert
+            v-if="showFlagFeatureAlert"
+            type="info"
+            variant="tonal"
+            closable
+            class="ma-2"
+            @click:close="dismissFlagFeatureAlert"
+        >
+            <template #prepend>
+                <v-icon>mdi-flag-variant</v-icon>
+            </template>
+            <strong>Tính năng mới:</strong> Bạn có thể <strong>đánh dấu câu hỏi</strong> bằng nút
+            <v-icon size="16" color="red">mdi-flag-variant-outline</v-icon>
+            để xem lại sau — kể cả sau khi đã nộp bài.
+            Tất cả câu hỏi đã đánh dấu sẽ được tổng hợp tại trang <strong>Câu hỏi đã đánh dấu</strong> trong Trang chủ học sinh.
+        </v-alert>
+
         <!-- Main Content -->
-        <v-container v-else fluid class="pa-0">
+        <v-container v-if="dataReady" fluid class="pa-0">
             <v-row :no-gutters="true">
                 <v-col cols="12">
                     <!-- Assignment Taker Component -->
                     <uc-assignment-taker-2 v-if="dataReady === true" :key="keyComp" ref="assignmentTaker" class="pa-0"
                         v-model:assignment-data="assignmentData" v-model:puseranswers="puseranswers"
                         :hocSinhDetail="HocSinhDetail" :mon-hoc-name="monHocName" :on-save-draft="saveDraft"
-                        :on-open-submit-dialog="openSubmitDialog" />
-
-                    <!-- Confirm Submit Dialog -->
+                        :on-save-flags-post-submit="saveFlagsPostSubmit" />
                     <v-dialog v-model="confirmSubmitDialog" max-width="450" style="width: 450px">
                         <v-card class="submit-dialog-card">
                             <!-- Dialog Header -->
@@ -110,11 +126,15 @@ export default {
 
             // Guard flag — chặn loadAssignmentData chạy đồng thời
             _isLoadingAssignment: false,
+
+            // Alert tính năng mới đánh dấu câu hỏi
+            showFlagFeatureAlert: false,
         };
     },
 
     mounted() {
         this.callNienKhoa_Get();
+        this._initFlagFeatureAlert();
     },
 
     methods: {
@@ -507,6 +527,54 @@ export default {
                 this.initPage();
             } catch (err) {
                 console.error('Lỗi insertSubmissionForResubmit:', err);
+            }
+        },
+
+        // ===========================
+        // ALERT TÍNH NĂNG MỚI
+        // ===========================
+
+        _initFlagFeatureAlert() {
+            const KEY = 'flag_feature_alert_dismissed';
+            const dismissed = localStorage.getItem(KEY);
+            if (dismissed) return;
+            // Hiện trong 2 ngày kể từ lần đầu vào
+            const FIRST_KEY = 'flag_feature_alert_first_seen';
+            const now = Date.now();
+            const firstSeen = localStorage.getItem(FIRST_KEY);
+            if (!firstSeen) {
+                localStorage.setItem(FIRST_KEY, now.toString());
+            } else if (now - parseInt(firstSeen) > 2 * 24 * 60 * 60 * 1000) {
+                // Quá 2 ngày — tự ẩn, không cần user tắt
+                localStorage.setItem(KEY, '1');
+                return;
+            }
+            this.showFlagFeatureAlert = true;
+        },
+
+        dismissFlagFeatureAlert() {
+            this.showFlagFeatureAlert = false;
+            localStorage.setItem('flag_feature_alert_dismissed', '1');
+        },
+
+        // ===========================
+        // FLAG POST-SUBMIT
+        // ===========================
+
+        async saveFlagsPostSubmit(payload) {
+            const isSendToStudent = !this.isSendToClass;
+            if (isSendToStudent) {
+                await fetchPromise('lms/EL_Student_SaveSubmission_AssignToStudent_WithFlag', {
+                    AssignToStudentID: parseInt(this.urlParams.get('AssignToStudentID')),
+                    HocSinhID: this.HocSinhDetail.HocSinhID,
+                    SubmissionContent: payload.SubmissionContent,
+                }, { cache: false });
+            } else {
+                await fetchPromise('lms/EL_Student_SaveSubmissionWithFlag', {
+                    AssignToClassID: payload.AssignToClassID,
+                    HocSinhID: this.HocSinhDetail.HocSinhID,
+                    SubmissionContent: payload.SubmissionContent,
+                }, { cache: false });
             }
         },
 

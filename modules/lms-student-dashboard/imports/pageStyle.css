@@ -1008,3 +1008,68 @@
     font-weight: 600;
     letter-spacing: 0.01em;
 }
+
+/* ============================================================
+   uc-store-question — Câu hỏi đã đánh dấu
+   ============================================================ */
+.sq { padding: 12px 12px 80px; }
+
+.sq__header {
+display: flex; align-items: center; justify-content: space-between;
+margin-bottom: 12px; padding: 0 2px;
+}
+.sq__header-left { display: flex; align-items: center; gap: 10px; }
+.sq__header-icon {
+width: 36px; height: 36px; border-radius: 10px;
+background: linear-gradient(135deg, #e53935, #b71c1c);
+display: flex; align-items: center; justify-content: center;
+}
+.sq__header-title { font-size: 15px; font-weight: 700; color: #1a2332; }
+.sq__header-count { font-size: 12px; color: #8896a5; margin-top: 1px; }
+.sq__header-actions { display: flex; align-items: center; gap: 4px; }
+
+/* CHIPS */
+.sq__chips {
+display: flex; gap: 8px; flex-wrap: wrap;
+margin-bottom: 14px; padding: 0 2px;
+}
+.sq__chip {
+display: flex; align-items: center; gap: 5px;
+padding: 5px 12px; border-radius: 20px; cursor: pointer;
+font-size: 13px; font-weight: 500;
+background: #f1f5f9; color: #475569;
+transition: all 0.18s;
+}
+.sq__chip--active { background: #e53935; color: #fff; }
+.sq__chip-badge {
+background: rgba(0,0,0,0.12); border-radius: 10px;
+padding: 1px 6px; font-size: 11px;
+}
+.sq__chip--active .sq__chip-badge { background: rgba(255,255,255,0.25); }
+
+/* EMPTY */
+.sq__empty {
+text-align: center; padding: 60px 24px;
+display: flex; flex-direction: column; align-items: center; gap: 8px;
+}
+.sq__empty-title { font-size: 15px; font-weight: 600; color: #64748b; }
+.sq__empty-sub { font-size: 13px; color: #94a3b8; display: flex; align-items: center; gap: 4px; }
+
+/* LIST */
+.sq__list { padding: 0 2px; }
+
+.sq__asgn-banner {
+	display: flex; align-items: center; justify-content: space-between;
+	padding: 6px 12px; background: #f8fafc;
+	border-left: 3px solid #e53935;
+	border-bottom: 1px solid #edf0f7;
+	flex-wrap: wrap; gap: 4px;
+}
+.sq__asgn-banner-left {
+	display: flex; align-items: center; gap: 5px;
+	font-size: 12px; color: #64748b; overflow: hidden;
+}
+.sq__asgn-banner-left span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 180px; }
+.sq__asgn-sep { color: #cbd5e1; }
+.sq__asgn-banner-right { display: flex; align-items: center; gap: 4px; flex-shrink: 0; }
+.sq__question-text { font-size: 14px; line-height: 1.6; }

@@ -4,8 +4,8 @@
  */
 function processGroupedDashboardData(response) {
     console.log("BƯỚC 1: Dữ liệu thô từ API", response);
-    if (!response || !response.data || response.data.length < 3) {
-        console.error("LỖI: API GetGroupedDashboard không trả về đủ 3 bảng dữ liệu.");
+    if (!response || !response.data || response.data.length < 5) {
+        console.error("LỖI: API GetGroupedDashboard không trả về đủ 5 bảng dữ liệu.");
         vueData.teachingGroups = [];
         return;
     }

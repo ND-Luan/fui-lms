@@ -48,7 +48,7 @@
 		</div>
 
 		<!-- Danh sách -->
-		<div class="nv__list" style="min-height: calc(100dvh)">
+		<div class="nv__list">
 			<v-row dense>
 				<v-col v-for="(nv, idx) in DSNhiemVu_Filter" :key="idx" cols="12" sm="6" lg="4">
 					<div class="nv__card" :class="'nv__card--' + nv.ResourceType.toLowerCase()" @click="onRedirect(nv)">

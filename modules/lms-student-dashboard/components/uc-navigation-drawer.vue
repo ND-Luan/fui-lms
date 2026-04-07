@@ -146,8 +146,7 @@
 					{ icon: "mdi-account-circle", title: "Cá nhân", activeKey: 3, mobileOnly: true },
 					{ icon: "mdi-calendar-month", title: "Thời khóa biểu", activeKey: 4, desktopOnly: true },
 					{ icon: "mdi-book-education-outline", title: "Học liệu số", activeKey: 5, desktopOnly: true },
-					{ icon: "mdi-trophy-outline", title: "Thành tích", activeKey: 6, desktopOnly: true },
-					{ icon: "mdi-logout", title: "Đăng xuất", activeKey: 7, desktopOnly: true },
+					{ icon: "mdi-trophy-outline", title: "Thành tích", activeKey: 6, desktopOnly: true },				{ icon: "mdi-flag-variant", title: "Câu hỏi đã đánh dấu", activeKey: 8, desktopOnly: true },					{ icon: "mdi-logout", title: "Đăng xuất", activeKey: 7, desktopOnly: true },
 				],
 				 
 			}

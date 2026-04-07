@@ -2066,9 +2066,9 @@
 .nv {
     display: flex;
     flex-direction: column;
-    height: 100%;
     background: #f4f6f9;
-    overflow: hidden;
+    overflow-x: hidden;
+    min-height: 100%;
 }
 
 /* ── Header ── */
@@ -2195,8 +2195,11 @@
 /* ── List ── */
 .nv__list {
     flex: 1;
-    overflow-y: auto;
+    overflow-x: hidden;
+    overflow-y: visible;
     padding: 10px 12px;
+    min-width: 0;
+    width: 100%;
 }
 
 /* ── Card ── */

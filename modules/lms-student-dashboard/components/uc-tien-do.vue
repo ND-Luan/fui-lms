@@ -145,7 +145,7 @@
 		</v-row>
 
 		<uc-student-gradebook-dialog v-model:visible="gradebookVisible" :mon-hoc-id="gradebookMonHocId"
-			:subject-name="gradebookMonHocName" :isMobile />
+			:hoc-sinh-id="hocSinhID" :subject-name="gradebookMonHocName" :isMobile />
 		<uc-iframe-window ref="iframeWindow" />
 	</div>
 </template>

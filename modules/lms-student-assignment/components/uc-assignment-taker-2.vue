@@ -169,10 +169,11 @@
 </template>
 
 <script>
+// Các mixin factory và constants được định nghĩa trong script.js (global scope)
 export default {
 	name: 'uc-assignment-taker',
 
-	// Mixins từ script.js (load global trước component)
+	// Mixins từ script.js
 	mixins: [
 		useQuestionNavigation(),
 		useAnswerTracking(),
@@ -196,6 +197,8 @@ export default {
 		userAnswersSubmitted: { type: Object, default: () => ({}) },
 		/** Callback lưu nháp — trả về Promise */
 		onSaveDraft: { type: Function, default: () => Promise.resolve() },
+		/** Callback lưu flag sau khi đã nộp bài (status > 2) — API TBD */
+		onSaveFlagsPostSubmit: { type: Function, default: () => Promise.resolve() },
 		/** Callback mở dialog xác nhận nộp bài */
 		onOpenSubmitDialog: { type: Function, default: () => { } },
 	},
@@ -495,7 +498,11 @@ export default {
 				newAnswers[qid] = { ...newAnswers[qid], flag: !newAnswers[qid]?.flag };
 			}
 			this.$emit('update:puseranswers', newAnswers);
-			this.triggerAutoSave();
+			if (this.isSubmitted) {
+				this.saveFlagsOnly();
+			} else {
+				this.triggerAutoSave();
+			}
 		},
 
 		// ══════════════════════════════════════════════════════

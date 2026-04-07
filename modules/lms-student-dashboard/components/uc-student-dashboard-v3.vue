@@ -24,6 +24,9 @@
 			</div>
 			<uc-achievement-card v-if="activeKey === 6 && NienKhoa && studentInfoDetail?.HocSinhID"
 				:HocSinh="studentInfoDetail" :inline="true" :isMobile />
+			<div v-if="activeKey === 8 && NienKhoa && studentInfoDetail?.HocSinhID">
+				<uc-store-question :HocSinh="studentInfoDetail" :NienKhoa="NienKhoa" :isMobile />
+			</div>
 		</uc-navigation-drawer>
 	</Global>
 </template>

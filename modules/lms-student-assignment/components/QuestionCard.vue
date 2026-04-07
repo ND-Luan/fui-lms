@@ -13,7 +13,7 @@
 				<v-chip color="primary" class="font-weight-medium pa-0" variant="text" size="small">
 					{{ question.points }}đ
 				</v-chip>
-				<v-btn v-if="submissionStatus < 2" size="small"
+				<v-btn size="small"
 					:icon="isFlagged ? 'mdi-flag-variant' : 'mdi-flag-variant-outline'" color="red" variant="text"
 					@click="$emit('flag')" v-tooltip="'Đánh dấu câu hỏi'"></v-btn>
 			</div>

@@ -50,7 +50,7 @@
 								<v-badge v-for="(q, questionIndexInGroup) in group.questions" :key="q.id"
 									location="top right" :color="userAnswers[q.id]?.flag ? 'red' : 'white'"
 									:icon="userAnswers[q.id]?.flag ? 'mdi-flag-variant' : ''"
-									:model-value="userAnswers[q.id]?.flag && (draft?.SubmissionStatus ?? null) == 1">
+							:model-value="!!userAnswers[q.id]?.flag">
 									<v-btn @click="$emit('navigate', groupIndex, questionIndexInGroup, q.id)"
 										:color="getIconColor(q.id)"
 										:variant="isActive(groupIndex, questionIndexInGroup) ? 'elevated' : 'tonal'"

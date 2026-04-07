@@ -107,6 +107,7 @@
 		props: {
 			visible: { type: Boolean, default: false },
 			monHocId: { type: Number, default: null },
+			hocSinhId: { type: [Number, String], default: null },
 			subjectName: { type: String, default: '' },
 			isMobile: Boolean
 		},
@@ -146,6 +147,10 @@
 			// Fetch lại nếu môn thay đổi trong khi dialog đang mở
 			monHocId(newVal) {
 				if (this.visible && newVal) this.fetchGradebook()
+			},
+			// Fetch lại nếu học sinh thay đổi trong khi dialog đang mở
+			hocSinhId(newVal) {
+				if (this.visible && this.monHocId && newVal != null && newVal !== '') this.fetchGradebook()
 			}
 		},
 	
@@ -154,9 +159,12 @@
 				this.loading = true
 				this.gradeData = []
 				try {
+					const payload = { MonHocID: this.monHocId }
+					if (this.hocSinhId != null && this.hocSinhId !== '') payload.HocSinhID = this.hocSinhId
+
 					await ajaxCALL(
 						'lms/EL_Student_GetMyGradebook',
-						{ MonHocID: this.monHocId },
+						payload,
 						(res) => {
 							// res.data[0] = danh sách assignment headers
 							// res.data[1] = (optional) tổng kết
