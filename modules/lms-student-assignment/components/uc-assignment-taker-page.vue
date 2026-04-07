@@ -34,43 +34,31 @@
                     <uc-assignment-taker-2 v-if="dataReady === true" :key="keyComp" ref="assignmentTaker" class="pa-0"
                         v-model:assignment-data="assignmentData" v-model:puseranswers="puseranswers"
                         :hocSinhDetail="HocSinhDetail" :mon-hoc-name="monHocName" :on-save-draft="saveDraft"
-                        :on-save-flags-post-submit="saveFlagsPostSubmit" />
-                    <v-dialog v-model="confirmSubmitDialog" max-width="450" style="width: 450px">
-                        <v-card class="submit-dialog-card">
-                            <!-- Dialog Header -->
-                            <div class="dialog-header">
-                                <v-icon size="28" color="white">mdi-send-check-outline</v-icon>
-                                <span class="dialog-title-text">Xác nhận nộp bài</span>
-                            </div>
+                        :on-save-flags-post-submit="saveFlagsPostSubmit"
+                        :on-open-submit-dialog="openSubmitDialog" />
+                    <v-dialog v-model="confirmSubmitDialog" max-width="420">
+                        <v-card>
+                            <v-alert type="warning" variant="tonal" rounded="0" class="mb-0"
+                                icon="mdi-send-check-outline" title="Xác nhận nộp bài">
+                                Bạn có chắc chắn muốn nộp bài không? Sau khi nộp, bạn sẽ
+                                <strong>không thể chỉnh sửa</strong> bài làm của mình.
+                            </v-alert>
 
-                            <v-card-text class="dialog-body">
-                                <div class="confirm-message">
-                                    <v-icon size="20" color="warning" class="me-2">mdi-alert-outline</v-icon>
-                                    Bạn có chắc chắn muốn nộp bài không? Sau khi nộp, bạn sẽ
-                                    <strong>không thể chỉnh sửa</strong> bài làm của mình.
-                                </div>
+                            <v-alert v-if="renderQuestionNotSubmit().length > 0"
+                                type="error" variant="tonal" rounded="0" class="mb-0"
+                                icon="mdi-alert-circle-outline">
+                                Còn những câu
+                                <strong>{{ renderQuestionNotSubmit() }}</strong>
+                                chưa làm.
+                            </v-alert>
 
-                                <!-- Unanswered Warning -->
-                                <div v-if="renderQuestionNotSubmit().length > 0" class="unanswered-warning mt-3">
-                                    <v-icon size="16" color="error" class="me-1">mdi-alert-circle-outline</v-icon>
-                                    Còn những câu
-                                    <span class="text-error font-weight-bold">
-                                        {{ renderQuestionNotSubmit() }}
-                                    </span>
-                                    chưa làm
-                                </div>
-                            </v-card-text>
-
-                            <v-card-actions class="dialog-actions">
+                            <v-card-actions class="pa-3">
                                 <v-spacer />
                                 <v-btn variant="text" color="grey" @click="confirmSubmitDialog = false">
-                                    <v-icon start>mdi-close</v-icon>
-                                    Hủy
+                                    <v-icon start>mdi-close</v-icon>Hủy
                                 </v-btn>
-                                <v-btn color="success" variant="flat" class="submit-btn"
-                                    @click="submitAssignmentFinal()">
-                                    <v-icon start>mdi-check-all</v-icon>
-                                    Xác nhận Nộp
+                                <v-btn color="success" variant="flat" @click="submitAssignmentFinal()">
+                                    <v-icon start>mdi-check-all</v-icon>Xác nhận Nộp
                                 </v-btn>
                             </v-card-actions>
                         </v-card>
@@ -138,6 +126,14 @@ export default {
     },
 
     methods: {
+
+        // ===========================
+        // SUBMIT DIALOG
+        // ===========================
+
+        openSubmitDialog() {
+            this.confirmSubmitDialog = true;
+        },
 
         // ===========================
         // INITIALIZATION

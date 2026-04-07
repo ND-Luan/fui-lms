@@ -30,7 +30,7 @@ export default {
     methods: {
         async getNienKhoa() {
             const res = await fetchPromise('lms/NienKhoa_Get', {})
-            const DSNienKhoa = res.data ?? []
+            const DSNienKhoa = res ?? []
             vueData.NienKhoaItem = DSNienKhoa.find(x => x.IsActive) ?? null
             vueData.NienKhoa = vueData.NienKhoaItem?.NienKhoa ?? 0
             if (vueData.NienKhoa) this.initPage()
@@ -48,8 +48,8 @@ export default {
                 ? 'lms/EL_Teacher_GetSubmissionDetail'
                 : 'lms/EL_Teacher_GetSubmissionDetail_AssignToStudent'
             const res = await fetchPromise(url, { SubmissionID: submissionId, HocKi: vueData.NienKhoaItem.HocKi }, { cache: false })
-            if (res?.data?.length >= 2 && res.data[0].length > 0) {
-                this.submissionData = res.data
+            if (res?.length >= 2 && res[0].length > 0) {
+                this.submissionData = res
                 this.dataReady = true
             } else {
                 this.snackbarRef.value.showSnackbar({ message: 'Không thể tải dữ liệu bài nộp.', color: 'error' })
@@ -62,8 +62,8 @@ export default {
             const res = await fetchPromise('lms/EL_Teacher_SaveGradeDraft', payload, { cache: false })
             this.snackbarRef.value.showSnackbar({ message: 'Đã lưu nháp kết quả chấm!', color: 'success' })
             this.initPage()
-            if (res?.data?.[0]) {
-                this.submissionData[1][0] = { ...res.data[0] }
+            if (res?.[0]) {
+                this.submissionData[1][0] = { ...res[0] }
                 this.submissionData = [...this.submissionData]
             }
         },
