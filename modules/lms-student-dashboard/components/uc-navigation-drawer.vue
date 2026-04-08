@@ -37,6 +37,21 @@
 						</div>
 					</div>
 
+					<!-- NHÓM ĐANG HỌC -->
+					<div v-if="studentInfoDetail?.DSNhomDangHoc?.length" class="sidebar-groups">
+						<div class="sidebar-groups-label">Nhóm đang học</div>
+						<div class="sidebar-groups-chips">
+							<div
+								v-for="nhom in studentInfoDetail.DSNhomDangHoc"
+								:key="nhom.TenNhom"
+								class="sp-nhom-item"
+							>
+								<div class="sp-nhom-mon">{{ nhom.TenMonHoc_HienThi }}</div>
+								<div class="sp-nhom-code">{{ nhom.TenNhom }}</div>
+							</div>
+						</div>
+					</div>
+
 					<!-- LABEL -->
 					<div class="menu-label">Menu chính</div>
 

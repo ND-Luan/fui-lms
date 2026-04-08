@@ -151,6 +151,12 @@ export default {
 			})
 
 			console.log('[DEBUG] studentInfoDetail trả về:', result)
+			if (result?.DSNhomDangHoc && typeof result.DSNhomDangHoc === 'string') {
+				result.DSNhomDangHoc = JSON.parse(result.DSNhomDangHoc)
+			}
+			if (result?.NienKhoaHoc && typeof result.NienKhoaHoc === 'string') {
+				result.NienKhoaHoc = JSON.parse(result.NienKhoaHoc)
+			}
 			this.studentInfoDetail = result
 		},
 		async getTuanHocTap_Get() {

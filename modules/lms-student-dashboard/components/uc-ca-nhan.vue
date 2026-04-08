@@ -28,6 +28,21 @@
 			</div>
 		</div>
 
+		<!-- ── NHÓM ĐANG HỌC ── -->
+		<div v-if="HocSinh?.DSNhomDangHoc?.length" class="sp-groups">
+			<div class="sp-section-label">Nhóm đang học</div>
+			<div class="sp-groups-chips">
+				<div
+					v-for="nhom in HocSinh.DSNhomDangHoc"
+					:key="nhom.TenNhom"
+					class="sp-nhom-item"
+				>
+					<div class="sp-nhom-mon">{{ nhom.TenMonHoc_HienThi }}</div>
+					<div class="sp-nhom-code">{{ nhom.TenNhom }}</div>
+				</div>
+			</div>
+		</div>
+
 		<!-- ── MENU ── -->
 		<div class="sp-menu">
 			<div class="sp-section-label">Tính năng</div>
