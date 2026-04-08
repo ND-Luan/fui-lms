@@ -4010,6 +4010,10 @@
     background: #d97706;
 }
 
+.sp-item-icon--red {
+    background: #e53935;
+}
+
 .sp-item-body {
     flex: 1;
     min-width: 0;

@@ -1,8 +1,8 @@
 <template>
 	<v-card :id="question.id" class="question-card mb-2" flat border>
-		<v-card-text class="px-2 pt-2 pb-2">
+		<v-card-text class="px-2 pt-1 pb-2">
 			<!-- Header -->
-			<div class="d-flex align-center ga-2 mb-2 ">
+			<div class="d-flex align-center ga-1 mb-1">
 				<v-chip v-if="questionTypeLabel" class="font-weight-medium pa-0" variant="text" :color="questionTypeLabel.color" size="small">
 					{{ questionTypeLabel.label }}
 				</v-chip>

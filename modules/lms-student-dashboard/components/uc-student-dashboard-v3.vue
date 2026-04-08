@@ -3,6 +3,28 @@
 		<uc-navigation-drawer v-model:activeKey="activeKey" v-model:activeMonHocID="activeMonHocID"
 			:studentInfoDetail="studentInfoDetail" :avatarStudent="avatarStudent" :subjectProgress="subjectProgress"
 			:version :isMobile>
+
+			<!-- ── TOPBAR (desktop only) ── -->
+			<template #topbar>
+				<div class="topbar">
+					<div class="topbar-icon">
+						<v-icon size="18" color="white">{{ activePageIcon }}</v-icon>
+					</div>
+					<div class="topbar-text">
+						<div class="topbar-title">{{ activePageTitle }}</div>
+						<div v-if="topbarCtx.subtitle" class="topbar-subtitle">{{ topbarCtx.subtitle }}</div>
+					</div>
+					<div class="topbar-date">
+						{{ new Date().toLocaleDateString('vi-VN', { weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric' }) }}
+					</div>
+					<v-btn v-if="topbarCtx.onRefresh" size="small" variant="text" icon="mdi-refresh" @click="topbarCtx.onRefresh()" />
+				</div>
+			</template>
+
+			<!-- ── TOPBAR MOBILE ── -->
+			<template #topbar-mobile>
+			</template>
+
 			<!-- Nội dung chính -->
 			<div v-if="activeKey === 0 && NienKhoa && studentInfoDetail?.HocSinhID">
 				<uc-nhiem-vu :NienKhoa :HocSinh="studentInfoDetail" :isMobile />
@@ -25,7 +47,7 @@
 			<uc-achievement-card v-if="activeKey === 6 && NienKhoa && studentInfoDetail?.HocSinhID"
 				:HocSinh="studentInfoDetail" :inline="true" :isMobile />
 			<div v-if="activeKey === 8 && NienKhoa && studentInfoDetail?.HocSinhID">
-				<uc-store-question :HocSinh="studentInfoDetail" :NienKhoa="NienKhoa" :isMobile />
+				<uc-store-question :HocSinh="studentInfoDetail" :NienKhoa="NienKhoa" :isMobile :hide-header="true" />
 			</div>
 		</uc-navigation-drawer>
 	</Global>
@@ -34,9 +56,13 @@
 export default {
 	inject: ['snackbarRef', 'iframeRef'],
 	emits: ['update:grade-summary', 'view-summary', 'view-details'],
+	provide() {
+		return { topbarCtx: this.topbarCtx }
+	},
 	data() {
 		return {
 			vueData,
+			topbarCtx: { subtitle: '', onRefresh: null },
 			activeKey: 0,
 			activeMonHocID: null,
 			studentInfoDetail: {},
@@ -50,7 +76,7 @@ export default {
 			NienKhoa: null,
 			isFromLinkParent: false,
 			hocSinhIDFromUrl: null,
-			version: "2.4"
+			version: "2.6"
 		}
 	},
 	mounted() {
@@ -60,6 +86,14 @@ export default {
 	computed: {
 		isMobile() {
 			return this.$vuetify.display.mobile
+		},
+		activePageTitle() {
+			const map = { 0: 'Nhiệm vụ', 1: 'Hoạt động', 2: 'Tiến độ', 3: 'Cá nhân', 4: 'Thời khóa biểu', 5: 'Học liệu số', 6: 'Thành tích', 8: 'Câu hỏi đã đánh dấu' }
+			return map[this.activeKey] ?? 'Tổng quan'
+		},
+		activePageIcon() {
+			const map = { 0: 'mdi-format-list-checkbox', 1: 'mdi-history', 2: 'mdi-chart-line', 3: 'mdi-account-circle', 4: 'mdi-calendar-month', 5: 'mdi-book-education-outline', 6: 'mdi-trophy-outline', 8: 'mdi-flag-variant' }
+			return map[this.activeKey] ?? 'mdi-home-outline'
 		},
 		DSTienDoMonHocTheoTuan() {
 			console.log('focusTasks', this.focusTasks)

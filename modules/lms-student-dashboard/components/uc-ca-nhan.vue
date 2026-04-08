@@ -75,6 +75,18 @@
 				<v-icon size="16" class="sp-item-arrow">mdi-chevron-right</v-icon>
 			</div>
 
+			<!-- Câu hỏi đã đánh dấu -->
+			<div class="sp-item" @click="storeQuestionDialog = true">
+				<div class="sp-item-icon sp-item-icon--red">
+					<v-icon size="18" color="white">mdi-flag-variant</v-icon>
+				</div>
+				<div class="sp-item-body">
+					<div class="sp-item-title">Câu hỏi đã đánh dấu</div>
+					<div class="sp-item-sub">Ôn lại câu hỏi đã flag</div>
+				</div>
+				<v-icon size="16" class="sp-item-arrow">mdi-chevron-right</v-icon>
+			</div>
+
 			<!-- Thành tích -->
 			<uc-achievement-card :HocSinh="HocSinh">
 				<template #activator="{ activatorProps }">
@@ -101,6 +113,20 @@
 			<div class="sp-version">v{{version}}</div>
 		</div>
 
+		<!-- Dialog: Câu hỏi đã đánh dấu -->
+		<v-dialog v-model="storeQuestionDialog" :fullscreen="isMobile" max-width="700" scrollable>
+			<v-card>
+				<v-toolbar density="compact" color="primary">
+					<v-toolbar-title>Câu hỏi đã đánh dấu</v-toolbar-title>
+					<v-spacer />
+					<v-btn icon="mdi-close" variant="text" @click="storeQuestionDialog = false" />
+				</v-toolbar>
+				<v-card-text class="pa-0">
+					<uc-store-question :HocSinh="HocSinh" :NienKhoa="NienKhoa" :isMobile />
+				</v-card-text>
+			</v-card>
+		</v-dialog>
+
 	</div>
 </template>
 
@@ -114,7 +140,8 @@
 		},
 		data() {
 			return {
-				vueData
+				vueData,
+				storeQuestionDialog: false,
 			}
 		},
 		methods: {

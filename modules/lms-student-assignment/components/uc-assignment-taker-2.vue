@@ -6,55 +6,38 @@
 	</div>
 
 	<!-- ── MAIN ── -->
-	<div v-else>
+	<div v-else style="height: 100dvh; display: flex; flex-direction: column; overflow: hidden;">
 
 		<!-- Header thông tin bài tập -->
 		<AssignmentHeader :assignment="assignment" :mon-hoc-name="monHocName" :student="hocSinhDetail" :draft="draft" />
 
-		<!-- Kết quả (chỉ hiện khi đã chấm) -->
-		<v-card v-show="isGraded" class="mx-2 mb-2" flat border>
-			<v-card-text class="py-2">
-				<div class="d-flex align-center flex-wrap ga-2">
-					<v-chip color="primary" size="small" variant="outlined">
-						<v-icon start size="16">mdi-trophy</v-icon>
-						{{ draft?.Score }} / {{ assignment?.MaxScore }} điểm
-					</v-chip>
-
-					<v-chip size="small" color="success" variant="outlined">
-						<v-icon start size="16">mdi-check-decagram</v-icon>
-						Đã chấm
-					</v-chip>
-
-					<v-spacer />
-
-					<v-btn v-if="draft?.TeacherComment?.trim()" size="small" variant="text"
-						@click="toggleTC = !toggleTC">
-						<v-icon start size="16">mdi-comment-quote-outline</v-icon>
-						{{ toggleTC ? 'Ẩn nhận xét' : 'Xem nhận xét' }}
-					</v-btn>
-				</div>
-
+		<!-- Nhận xét giáo viên (chỉ hiện khi đã chấm và có nhận xét) -->
+		<v-card v-if="isGraded && draft?.TeacherComment?.trim()" class="mx-2 mb-2" flat border>
+			<v-card-text class="py-1">
+				<v-btn size="small" variant="text" @click="toggleTC = !toggleTC">
+					<v-icon start size="16">mdi-comment-quote-outline</v-icon>
+					{{ toggleTC ? 'Ẩn nhận xét GV' : 'Xem nhận xét GV' }}
+				</v-btn>
 				<v-expand-transition>
-					<div v-show="toggleTC && draft?.TeacherComment?.trim()" class="mt-2 text-body-2"
-						v-html="draft?.TeacherComment" />
+					<div v-show="toggleTC" class="mt-1 text-body-2" v-html="draft?.TeacherComment" />
 				</v-expand-transition>
 			</v-card-text>
 		</v-card>
 
 		<!-- Layout chính -->
-		<v-row dense>
+		<v-row dense style="flex: 1 1 0; min-height: 0; overflow: hidden; margin: 0;">
 
 			<!-- Sidebar điều hướng (ẩn trên mobile) -->
-			<v-col v-if="!isMobile" cols="12" sm="12" md="2" style="border-inline-end: 0.5px dashed #a7a2a2;">
+			<v-col v-if="!isMobile" cols="12" sm="12" md="2" style="height: 100%; overflow: hidden; border-inline-end: 0.5px dashed #a7a2a2; padding: 0;">
 				<QuestionNavigation :groups="assignment.groups" :user-answers="userAnswers"
 					:current-group-index="currentGroupIndex" :current-question-index="currentQuestionIndexInGroup"
-					:draft="draft" :get-icon-color="getIconColor" :get-status-icon="getQuestionStatusIcon"
+					:draft="draft" :assignment="assignment" :get-icon-color="getIconColor" :get-status-icon="getQuestionStatusIcon"
 					:get-question-number="getGlobalQuestionNumber" v-model:view-mode="viewMode"
 					@navigate="navigateToQuestion" />
 			</v-col>
 
 			<!-- Nội dung câu hỏi -->
-			<v-col cols="12" md="10" class="pe-0">
+			<v-col cols="12" md="10" style="height: 100%; overflow: hidden; padding: 0;">
 
 				<!-- ── CHẾ ĐỘ 1 CÂU ── -->
 				<template v-if="viewMode === 'single'">
@@ -104,29 +87,16 @@
 							<v-divider class="mt-2" />
 
 							<!-- Action bar sticky -->
-							<v-card-actions class="pa-2 d-flex justify-space-between uat__action-bar">
-								<v-btn variant="text" :disabled="isFirstQuestion" @click="prevQuestion">
+							<v-card-actions class="pa-1 d-flex justify-space-between align-center uat__action-bar">
+								<v-btn variant="text" size="small" :disabled="isFirstQuestion" @click="prevQuestion">
 									<v-icon start>mdi-chevron-left</v-icon>Câu trước
 								</v-btn>
 
-								<div class="d-flex align-center ga-2">
-									<v-chip v-if="!isSubmitted" :color="saveStatusColor" size="small" label>
-										<v-icon start size="16">{{ saveStatusIcon }}</v-icon>
-										{{ saveStatus }}
-									</v-chip>
+								<span class="text-caption text-medium-emphasis">
+									Câu {{ globalQuestionNumber }} / {{ totalQuestions }}
+								</span>
 
-									<v-btn v-if="!isSubmitted" variant="outlined" color="success" size="small"
-										@click="handleSubmit">
-										<v-icon start>mdi-check-all</v-icon>Nộp bài
-									</v-btn>
-
-									<v-chip v-else color="success" size="small" label>
-										<v-icon start>mdi-check-decagram</v-icon>
-										{{ isGraded ? 'Đã chấm điểm' : 'Đã nộp bài' }}
-									</v-chip>
-								</div>
-
-								<v-btn variant="text" :disabled="isLastQuestion" @click="nextQuestion">
+								<v-btn variant="text" size="small" :disabled="isLastQuestion" @click="nextQuestion">
 									Câu sau<v-icon end>mdi-chevron-right</v-icon>
 								</v-btn>
 							</v-card-actions>
@@ -135,7 +105,7 @@
 				</template>
 
 				<!-- ── CHẾ ĐỘ TẤT CẢ CÂU ── -->
-				<div v-else class="uat__all-mode" style="overflow: auto;" :style="contentCardStyle">
+				<div v-else class="uat__all-mode" :style="contentCardStyle">
 					<AssignmentProgress v-show="shouldShowProgress" class="my-2 mx-2" :answered-count="answeredCount"
 						:total-questions="totalQuestions" :progress-percent="progressPercent" :save-status="saveStatus"
 						:save-status-color="saveStatusColor" :save-status-icon="saveStatusIcon"
@@ -293,9 +263,7 @@ export default {
 		},
 
 		contentCardStyle() {
-			return (this.draft?.SubmissionStatus ?? 0) <= 2
-				? { height: 'calc(100vh - 70px)' }
-				: { height: 'calc(100vh - 111px)' };
+			return { height: '100%', overflow: 'auto' };
 		},
 
 		shouldShowProgress() {
@@ -457,12 +425,16 @@ export default {
 					// Đảm bảo mỗi câu hỏi đều có structure đủ
 					asmData.groups.forEach(group => {
 						(group.questions || []).forEach(question => {
-							if (!question.id || answers[question.id]) return;
-							answers[question.id] = {
-								answerData: null,
-								flag: false,
-								grading: { comment: null, teacherComment: null, manualScore: null },
-							};
+							if (!question.id) return;
+							if (!answers[question.id]) {
+								answers[question.id] = {
+									answerData: null,
+									flag: false,
+									grading: { comment: null, teacherComment: null, manualScore: null },
+								};
+							} else if (answers[question.id].flag === undefined) {
+								answers[question.id].flag = false;
+							}
 						});
 					});
 
@@ -495,11 +467,12 @@ export default {
 					grading: { comment: null, teacherComment: null, manualScore: null },
 				};
 			} else {
-				newAnswers[qid] = { ...newAnswers[qid], flag: !newAnswers[qid]?.flag };
+				const currentFlag = newAnswers[qid].flag ?? false;
+				newAnswers[qid] = { ...newAnswers[qid], flag: !currentFlag };
 			}
 			this.$emit('update:puseranswers', newAnswers);
 			if (this.isSubmitted) {
-				this.saveFlagsOnly();
+				this.saveFlagsOnly(newAnswers);
 			} else {
 				this.triggerAutoSave();
 			}

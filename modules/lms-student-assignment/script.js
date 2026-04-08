@@ -184,7 +184,7 @@ function useAutoSave() {
 				}
 			},
 			// Lưu flag sau khi học sinh đã nộp bài — không reset SubmissionStatus
-			async saveFlagsOnly() {
+			async saveFlagsOnly(answers) {
 				if (this.isSaving) return;
 				if (!this.assignment?.AssignToClassID && !this.assignment?.AssignToStudentID) return;
 				const currentStatus = this.draft?.SubmissionStatus;
@@ -194,7 +194,7 @@ function useAutoSave() {
 				this.saveStatusIcon = 'mdi-cloud-upload-outline';
 				const payload = {
 					AssignToClassID: this.assignment?.AssignToClassID ?? this.assignment?.AssignToStudentID,
-					SubmissionContent: JSON.stringify({ answers: this.userAnswers }),
+					SubmissionContent: JSON.stringify({ answers: answers ?? this.userAnswers }),
 					SubmissionStatus: currentStatus,
 					HocSinhID: this.hocSinhDetail?.HocSinhID,
 				};

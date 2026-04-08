@@ -1,23 +1,6 @@
 <template>
 	<div class="td-wrap">
 
-		<!-- ── HEADER ── -->
-		<div class="td-header">
-			<div class="td-header-left">
-				<div class="td-header-icon">
-					<v-icon size="16" color="white">mdi-chart-line</v-icon>
-				</div>
-				<div>
-					<div class="td-header-title">Tiến Độ Môn Học</div>
-					<div class="td-header-sub">{{ DSTienDo.length }} môn học</div>
-				</div>
-			</div>
-			<div class="td-overall" v-if="DSTienDo.length">
-				<div class="td-overall-pct">{{ overallPct }}%</div>
-				<div class="td-overall-label">hoàn thành</div>
-			</div>
-		</div>
-
 		<!-- ── LOADING ── -->
 		<div v-if="isLoading" class="td-loading-list">
 			<div v-for="n in 4" :key="n" class="td-card-skel">
@@ -152,10 +135,14 @@
 
 <script>
 	export default {
+		inject: ['topbarCtx'],
 		props: {
 			NienKhoa: Number,
 			HocSinh: Object,
 			isMobile: Boolean
+		},
+		beforeUnmount() {
+			if (this.topbarCtx) { this.topbarCtx.subtitle = ''; this.topbarCtx.onRefresh = null }
 		},
 		data() {
 			return {
@@ -205,6 +192,24 @@
 			}
 		},
 		methods: {
+			syncTopbar() {
+				if (!this.topbarCtx) return
+				this.topbarCtx.subtitle = this.DSTienDo.length + ' môn · ' + this.overallPct + '% hoàn thành'
+				this.topbarCtx.onRefresh = this.refreshData
+			},
+			async refreshData() {
+				if (!this.HocSinh?.HocSinhID) return
+				this.isLoading = true
+				try {
+					this.DSTienDo = await ajaxCALLPromise('lms/EL_Student_Get_TienDo_ByHocSinhID', {
+						HocSinhID: this.HocSinh.HocSinhID,
+						NienKhoa: this.NienKhoa
+					})
+					this.syncTopbar()
+				} finally {
+					this.isLoading = false
+				}
+			},
 			calcProgress(td) {
 				if (!td?.TotalTasks) return 0
 				return Math.min((td.CompletedTasks / td.TotalTasks) * 100, 100)

@@ -1,25 +1,6 @@
 <template>
 	<div class="hd">
 
-		<!-- ── HEADER ── -->
-		<div class="hd__header">
-			<div class="hd__header-left">
-				<div class="hd__header-icon">
-					<v-icon size="18" color="white">mdi-history</v-icon>
-				</div>
-				<div>
-					<div class="hd__header-title">Hoạt Động</div>
-					<div class="hd__header-count">{{ DSHoatDong_Grouped.length }} hoạt động</div>
-				</div>
-			</div>
-			<div class="hd__header-actions">
-				<v-btn size="small" variant="text" icon="mdi-refresh" @click="loadData" />
-				<v-btn class="d-sm-none" size="small" variant="tonal" color="primary"
-					:icon="ChipSelected === 'ALL' ? 'mdi-filter-variant' : 'mdi-filter-check'"
-					@click="filterSheet = true" />
-			</div>
-		</div>
-
 		<!-- ── CHIPS (desktop) ── -->
 		<div class="hd__chips d-none d-sm-flex">
 			<div v-for="chip in DSChipFilter" :key="chip.id" class="hd__chip"
@@ -29,6 +10,18 @@
 				<v-icon size="12" :color="ChipSelected === chip.id ? 'white' : chip.color">{{ chip.icon }}</v-icon>
 				{{ chip.title }}
 			</div>
+		</div>
+
+		<!-- Mobile filter + refresh trigger -->
+		<div class="mobile-bar d-sm-none">
+			<span class="mobile-bar-count">{{ DSHoatDong_Grouped.length }} hoạt động</span>
+			<span v-if="ChipSelected !== 'ALL'" class="mobile-bar-filter">
+				• {{ DSChipFilter.find(c => c.id === ChipSelected)?.title }}
+			</span>
+			<v-btn size="x-small" variant="text" color="primary" icon="mdi-refresh" @click="loadData()" />
+			<v-btn size="x-small" :variant="ChipSelected !== 'ALL' ? 'tonal' : 'text'" color="primary"
+				:icon="ChipSelected === 'ALL' ? 'mdi-filter-variant' : 'mdi-filter-check'"
+				@click="filterSheet = true" />
 		</div>
 
 		<!-- ── BOTTOM SHEET (mobile) ── -->
@@ -230,10 +223,14 @@
 
 <script>
 	export default {
+		inject: ['topbarCtx'],
 		props: {
 			NienKhoa: Number,
 			HocSinh: Object,
 			isMobile: Boolean
+		},
+		beforeUnmount() {
+			if (this.topbarCtx) { this.topbarCtx.subtitle = ''; this.topbarCtx.onRefresh = null }
 		},
 		data() {
 			return {
@@ -241,7 +238,7 @@
 				DSHoatDong: [],
 				ChipSelected: 'ALL',
 				DSChipFilter: [
-					{ id: 'ALL', title: 'Tất cả', color: '#4CAF50', icon: 'mdi-apps' },
+					{ id: 'ALL', title: 'Tất cả', color: '#1976D2', icon: 'mdi-apps' },
 					{ id: 'GRADED', title: 'Đã chấm điểm', color: '#673AB7', icon: 'mdi-check-decagram' },
 					{ id: 'SUBMITTED', title: 'Đã nộp bài', color: '#558B2F', icon: 'mdi-upload' },
 					{ id: 'SAVE_DRAFT', title: 'Lưu bản nháp', color: '#607D8B', icon: 'mdi-file-document-edit' },
@@ -296,6 +293,11 @@
 			},
 		},
 		methods: {
+			syncTopbar() {
+				if (!this.topbarCtx) return
+				this.topbarCtx.subtitle = this.DSHoatDong_Grouped.length + ' hoạt động'
+				this.topbarCtx.onRefresh = this.loadData
+			},
 			async loadData() {
 				this.IsLoading = true;
 				this.expandedGroups.clear();
@@ -318,6 +320,7 @@
 						item => this.ChipSelected === 'ALL' || item.FeedType === this.ChipSelected
 					);
 					this.page = 1;
+					this.syncTopbar()
 				} finally {
 					this.IsLoading = false;
 				}
@@ -328,6 +331,7 @@
 				this.DSHoatDong = this.DSHoatDong_Data.filter(item => id === 'ALL' || item.FeedType === id) || [];
 				this.expandedGroups.clear();
 				this.page = 1;
+				this.syncTopbar()
 			},
 	
 			toggleGroup(key) {
@@ -444,7 +448,7 @@
 					IN_PROGRESS: '#FF5722',
 					LESSON_COMPLETED: '#2196F3',
 					ACHIEVEMENT: '#FF9800',
-				}[type] || '#4CAF50';
+				}[type] || '#1976D2';
 			},
 	
 			getFeedIcon(type) {

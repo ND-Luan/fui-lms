@@ -17,6 +17,83 @@ html{
 }
 
 
+/* ============= topbar ============= */
+.topbar {
+	display: flex;
+	align-items: center;
+	padding: 0 16px;
+	height: 56px;
+	background: #ffffff;
+	border-bottom: 1px solid #edf0f7;
+	flex-shrink: 0;
+}
+.topbar-subtitle {
+	font-size: 11px;
+	color: rgba(var(--v-theme-on-surface), .45);
+	line-height: 1.2;
+	margin-top: 1px;
+}
+
+.topbar-icon {
+	width: 32px;
+	height: 32px;
+	border-radius: 8px;
+	background: rgb(var(--v-theme-primary));
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	flex-shrink: 0;
+	margin-right: 10px;
+}
+
+.topbar-text {
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+}
+
+.topbar-title {
+	font-size: 15px;
+	font-weight: 600;
+	line-height: 1.2;
+	color: rgba(var(--v-theme-on-surface), .85);
+}
+
+.topbar-date {
+	font-size: 12px;
+	color: rgba(var(--v-theme-on-surface), .4);
+	white-space: nowrap;
+	margin-left: auto;
+	margin-right: 8px;
+	align-self: center;
+}
+
+/* ============= mobile-bar (shared filter row) ============= */
+.mobile-bar {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	margin: 10px 12px 4px;
+	padding: 6px 10px 6px 14px;
+	background: rgba(var(--v-theme-primary), .05);
+	border: 1px solid rgba(var(--v-theme-primary), .1);
+	border-radius: 12px;
+}
+
+.mobile-bar-count {
+	font-size: 12px;
+	font-weight: 600;
+	color: rgb(var(--v-theme-primary));
+	flex: 1;
+}
+
+.mobile-bar-filter {
+	font-size: 11px;
+	color: rgba(var(--v-theme-on-surface), .45);
+	margin-left: 4px;
+	flex: 1;
+}
+
 /* ============= uc-navigation-drawer.vue – sidebar groups ============= */
 .sidebar-groups {
 	padding: 0 16px 10px;

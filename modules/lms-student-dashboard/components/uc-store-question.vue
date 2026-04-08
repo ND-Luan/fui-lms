@@ -1,7 +1,7 @@
 <template>
 	<div class="sq">
 		<!-- HEADER -->
-		<div class="sq__header">
+		<div v-if="!hideHeader" class="sq__header">
 			<div class="sq__header-left">
 				<div class="sq__header-icon">
 					<v-icon size="18" color="white">mdi-flag-variant</v-icon>
@@ -31,6 +31,11 @@
 					{{ mh.TenMonHoc_HienThi }}
 				</div>
 			</template>
+		</div>
+
+		<!-- COUNT (desktop, sau khi load) -->
+		<div v-if="!isMobile && !isLoading && selectedMonHocID && filteredList.length > 0" class="sq__list-count">
+			{{ filteredList.length }} câu hỏi đã đánh dấu
 		</div>
 
 		<!-- EMPTY STATE — chưa chọn môn -->
@@ -80,9 +85,6 @@
 						<v-icon start :icon="qStatus(item).icon" size="11" />
 						{{ qStatus(item).label }}
 						</v-chip>
-						<v-icon size="14" color="red">mdi-flag-variant</v-icon>
-						<v-btn size="x-small" variant="text" color="primary" icon="mdi-open-in-new"
-							v-tooltip="'Mở bài làm'" @click="openAssignment(item)" />
 					</div>
 				</div>
 
@@ -99,7 +101,7 @@
 					<!-- Answer (readonly) -->
 					<component :is="questionComponent(item.questionObj.type)"
 						:question="item.questionObj"
-						:answer="item.AnswerData"
+						:answer="getEffectiveAnswer(item)"
 						:grading="cleanGrading(item.Grading)"
 						:readonly="true"
 						:isGrade="true"
@@ -109,14 +111,11 @@
 						:is-block-copy-paste="false"
 						:is-show-btn-comment="false" />
 
-				<!-- Nhận xét GV (chỉ hiện khi có) -->
-				<v-alert v-if="item.Grading?.teacherComment" class="mt-2" variant="tonal"
-					type="info" density="compact" border="start" icon="mdi-comment-quote-outline">
-					<strong>Nhận xét GV:</strong> {{ item.Grading.teacherComment }}
-				</v-alert>
-				</v-card-text>
+					</v-card-text>
 			</v-card>
 		</div>
+
+		<uc-iframe-window ref="iframeWindow" />
 
 		<!-- MOBILE FILTER BOTTOM SHEET -->
 		<v-bottom-sheet v-model="showFilterSheet">
@@ -145,11 +144,11 @@
 <script>
 export default {
 	name: 'UcStoreQuestion',
-	inject: ['iframeRef'],
 	props: {
 		HocSinh: { type: Object, default: () => ({}) },
 		NienKhoa: { type: Number, default: null },
 		isMobile: { type: Boolean, default: false },
+		hideHeader: { type: Boolean, default: false },
 	},
 	data() {
 		return {
@@ -224,6 +223,7 @@ export default {
 				let config = null;
 				let answers = {};
 				try { config = JSON.parse(row.AssignmentConfig); } catch { continue; }
+				if (!config) continue;
 				try { answers = JSON.parse(row.SubmissionContent)?.answers ?? {}; } catch { /* no answers */ }
 
 				const allQuestions = (config.groups ?? []).flatMap(g => g.questions ?? []);
@@ -255,13 +255,14 @@ export default {
 			return result;
 		},
 		openAssignment(item) {
-			const base = '/lms-student-assignment';
-			const params = item.Is_SendToClass
-				? `Is_SendToClass=true&AssignToClassID=${item.AssignToClassID}&HocSinhID=${this.hocSinhID}`
-				: `Is_SendToClass=false&AssignToStudentID=${item.AssignToStudentID}&HocSinhID=${this.hocSinhID}`;
-			this.iframeRef?.value?.open({
+			let url = `/lms-student-assignment?Is_SendToClass=${item.Is_SendToClass}&HocSinhID=${this.hocSinhID}&`;
+			url += item.Is_SendToClass
+				? `AssignToClassID=${item.AssignToClassID}`
+				: `AssignToStudentID=${item.AssignToStudentID}`;
+			this.$refs.iframeWindow.openWindow({
 				title: item.AssignmentTitle,
-				url: `${base}?${params}`,
+				url,
+				onclose: () => { this.getDS(); },
 			});
 		},
 		statusChip(status) {
@@ -311,6 +312,41 @@ export default {
 				AUDIO_RESPONSE: 'uc-question-audio-response',
 			};
 			return map[type] || 'div';
+		},
+		getEffectiveAnswer(item) {
+			const g = item.Grading;
+			const status = item.SubmissionStatus;
+			if (status !== 4 || !g) return item.AnswerData;
+			const score = g.manualScore ?? g.autoScore ?? null;
+			if (score === null || score > 0) return item.AnswerData;
+			// Graded & wrong → show correct answer from AssignmentConfig
+			return this._correctAnswerFromConfig(item.questionObj);
+		},
+		_correctAnswerFromConfig(q) {
+			const config = q.config || {};
+			switch (q.type) {
+				case 'QUIZ_SINGLE_CHOICE':
+				case 'QUIZ_TRUE_FALSE':
+					return config.correctAnswer ?? null;
+				case 'QUIZ_MULTIPLE_CHOICE':
+					return config.correctAnswers ?? config.correctOptionIds ?? [];
+				case 'QUIZ_MULTIPLE_TRUE_FALSE': {
+					const r = {};
+					(config.options || []).forEach(opt => { r[opt.id] = opt.correctAnswer; });
+					return r;
+				}
+				case 'QUIZ_FILL_IN_BLANK': {
+					const r = {};
+					(config.parts || []).filter(p => p.type === 'blank').forEach(p => {
+						r[p.id] = (p.acceptedAnswers && p.acceptedAnswers.length > 0) ? p.acceptedAnswers[0] : '';
+					});
+					return r;
+				}
+				case 'QUIZ_MATCHING':
+					return config.correctPairs ?? [];
+				default:
+					return null;
+			}
 		},
 		questionTypeLabel(type) {
 			if (typeof questionsTypesLabel === 'function') {

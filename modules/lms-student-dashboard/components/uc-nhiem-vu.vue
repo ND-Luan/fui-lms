@@ -1,26 +1,13 @@
 <template>
 	<div class="nv">
-		<!-- Header -->
-		<div class="nv__header">
-			<div class="nv__header-left">
-				<div class="nv__header-icon">
-					<v-icon size="18" color="white">mdi-format-list-checkbox</v-icon>
-				</div>
-				<div>
-					<div class="nv__header-title">Nhiệm Vụ</div>
-					<div class="nv__header-count">{{ DSNhiemVu_Filter.length }} nhiệm vụ</div>
-				</div>
-			</div>
-			<div class="nv__header-actions">
-				<v-btn size="small" variant="text" icon="mdi-refresh" @click="onRefresh" />
-
-				<!-- Mobile only: bottom sheet filter -->
-				<v-badge class="d-sm-none" :model-value="!IsBtnDot" color="red" location="top right" dot :offset-x="5"
-					:offset-y="5">
-					<uc-bts-mon-hoc v-model:monHocSelected="monHocSelected" :NienKhoa="NienKhoa" size="small"
-						icon="mdi-filter-variant" variant="tonal" color="primary" :HocSinh />
-				</v-badge>
-			</div>
+		<!-- Mobile filter + refresh -->
+		<div class="mobile-bar d-sm-none">
+			<span class="mobile-bar-count">{{ DSNhiemVu_Filter.length }} nhiệm vụ</span>
+			<v-btn size="x-small" variant="text" color="primary" icon="mdi-refresh" @click="onRefresh()" />
+			<v-badge :model-value="!IsBtnDot" color="red" location="top right" dot :offset-x="5" :offset-y="5">
+				<uc-bts-mon-hoc v-model:monHocSelected="monHocSelected" :NienKhoa="NienKhoa" size="x-small"
+					icon="mdi-filter-variant" variant="tonal" color="primary" :HocSinh />
+			</v-badge>
 		</div>
 
 		<!-- Desktop only: chip filter (hidden on mobile) -->
@@ -105,10 +92,14 @@
 
 <script>
 	export default {
+		inject: ['topbarCtx'],
 		props: {
 			NienKhoa: Number,
 			HocSinh: Object,
 			isMobile: Boolean
+		},
+		beforeUnmount() {
+			if (this.topbarCtx) { this.topbarCtx.subtitle = ''; this.topbarCtx.onRefresh = null }
 		},
 		data() {
 			return {
@@ -130,7 +121,8 @@
 					});
 					this.onRefresh();
 				}
-			}
+			},
+			DSNhiemVu_Filter() { this.syncTopbar() },
 		},
 		computed: {
 			hocSinhID() {
@@ -154,6 +146,11 @@
 			},
 		},
 		methods: {
+			syncTopbar() {
+				if (!this.topbarCtx) return
+				this.topbarCtx.subtitle = this.DSNhiemVu_Filter.length + ' nhiệm vụ'
+				this.topbarCtx.onRefresh = this.onRefresh
+			},
 			formatDueDate(dueDate) {
 				if (!dueDate) return '';
 				const parsedDate = new Date(dueDate);

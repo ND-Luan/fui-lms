@@ -1,18 +1,34 @@
 <template>
-	<v-card class="question-nav" sticky top="80px" flat>
-		<v-card-title class="d-flex justify-space-between align-center header-respondsive-fs py-2">
-			<span style="font-size: clamp(14px,2vw,16px);">Cấu trúc bài tập</span>
-			<div class="d-flex ga-2 align-center">
-				<v-btn icon size="small" @click="navCollapsed = !navCollapsed">
-					<v-icon>{{ navCollapsed ? 'mdi-chevron-down' : 'mdi-chevron-up' }}</v-icon>
-				</v-btn>
-			</div>
+	<v-card class="question-nav" flat style="height: 100%; display: flex; flex-direction: column;">
+		<v-card-title class="d-flex justify-space-between align-center header-respondsive-fs px-2 py-1">
+			<span style="font-size: clamp(12px,2vw,14px);">Cấu trúc bài tập</span>
+			<v-btn icon size="x-small" density="compact" variant="text" @click="navCollapsed = !navCollapsed">
+				<v-icon size="16">{{ navCollapsed ? 'mdi-chevron-down' : 'mdi-chevron-up' }}</v-icon>
+			</v-btn>
 		</v-card-title>
 
 		<v-divider></v-divider>
 
+		<!-- Thông tin điểm + hạn nộp -->
+		<div v-if="assignment" class="px-2 py-1 d-flex flex-column ga-1 border-b">
+			<div v-if="draft?.SubmissionStatus === 4" class="d-flex align-center ga-1">
+				<v-chip color="primary" size="x-small" variant="outlined">
+					<v-icon start size="12">mdi-trophy</v-icon>
+					{{ draft?.Score }} / {{ assignment?.MaxScore }}đ
+				</v-chip>
+				<v-chip size="x-small" color="success" variant="outlined">
+					<v-icon start size="12">mdi-check-decagram</v-icon>
+					Đã chấm
+				</v-chip>
+			</div>
+			<span class="text-caption text-medium-emphasis d-flex align-center ga-1">
+				<v-icon size="12">mdi-calendar-outline</v-icon>
+				Hạn: {{ formatDate(assignment?.DueDate) }}
+			</span>
+		</div>
+
 		<v-expand-transition>
-			<div v-show="!navCollapsed" class="pa-2 pb-0" style="max-height: calc(-185px + 100vh);overflow: auto;">
+			<div v-show="!navCollapsed" class="pa-2 pb-0" style="flex: 1; overflow: auto; min-height: 0;">
 				<div class="d-flex justify-end mb-2">
 					<v-btn-toggle :model-value="viewMode" @update:model-value="$emit('update:viewMode', $event)"
 						color="primary" variant="outlined" density="compact" divided mandatory size="x-small">
@@ -107,6 +123,10 @@
 			getQuestionNumber: {
 				type: Function,
 				required: true
+			},
+			assignment: {
+				type: Object,
+				default: () => ({})
 			}
 		},
 		emits: ['navigate', 'update:viewMode'],
@@ -131,6 +151,13 @@
 			}
 		},
 		methods: {
+			formatDate(dateString) {
+				if (!dateString) return 'Chưa có';
+				try {
+					const date = new Date(dateString);
+					return date.toLocaleString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+				} catch { return '—'; }
+			},
 			toggleGroup(groupIndex) {
 				this.groupCollapsed = {
 					...this.groupCollapsed,
