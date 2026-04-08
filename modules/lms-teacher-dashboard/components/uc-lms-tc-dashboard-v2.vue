@@ -52,11 +52,7 @@
 							<div class="d-flex w-100" >
 								<span class="text-primary font-weight-medium" style="font-size: 16px !important">{{
 									$t('message.Subject') }}: {{
-										$i18n.locale == 'en' &&
-											teachingGroups.filter(item => item.MonHocName == mh.MonHocName)[0]?.MonHocName ==
-											'Ngoại ngữ' ?
-											'English' : teachingGroups.filter(item =>
-												item.MonHocName == mh.MonHocName)[0]?.MonHocName}}</span>
+										mh.MonHocName == 'Ngoại ngữ' ? 'English' : mh.MonHocName}}</span>
 								<v-spacer></v-spacer>
 
 								<v-menu transition="slide-y-transition">
@@ -67,7 +63,7 @@
 									</template>
 									<v-list>
 										<v-list-item
-											v-for="KhoiItem in teachingGroups.filter(item => item.MonHocName == mh.MonHocName)"
+											v-for="KhoiItem in mh.groups"
 											:value="KhoiItem.KhoiID" :key="KhoiItem.KhoiID"
 											@click="OpenModalAddNoiDung(KhoiItem)">
 											<v-list-item-title>{{ $t('message.Grade') }} {{
@@ -82,7 +78,7 @@
 								<v-divider></v-divider>
 								<v-tabs v-model="mh.activeTab" bg-color="transparent" class="mb-1">
 									<v-tab
-										v-for="KhoiItem in teachingGroups.filter(item => item.MonHocName == mh.MonHocName && item.weeks.length > 0)"
+										v-for="KhoiItem in mh.groupsWithWeeks"
 										:value="KhoiItem.KhoiID" :key="KhoiItem.KhoiID">{{ $t('message.Grade') }} {{
 											KhoiItem.KhoiID }}
 									</v-tab>
@@ -93,30 +89,30 @@
 
 					<v-tabs-window v-model="mh.activeTab">
 						<v-tabs-window-item
-							v-for="(KhoiItem, index) in teachingGroups.filter(item => item.MonHocName == mh.MonHocName)"
+							v-for="(KhoiItem, index) in mh.groups"
 							:value="KhoiItem.KhoiID" :key="KhoiItem.KhoiID">
 							<v-card>
 								<v-card-text class="pa-2">
 									<v-row dense>
 										<v-col cols="12" md="12">
 											<v-expansion-panels variant="popout"
-												:model-value="KhoiItem.weeks?.map((k, index) => index)" multiple>
+												:model-value="KhoiItem.allIndices" multiple>
 												<p v-if="KhoiItem.weeks.length == 0">{{
 													$t('message.EmptyLessonAndAssignment')
 												}}</p>
 												<!-- Mỗi tuần là 1 expansion panel -->
 												<v-expansion-panel v-for="week in KhoiItem.weeks" :key="week.TuanHocID"
-													:model-value="KhoiItem.weeks?.map((k, index) => index)" multiple>
+													:model-value="KhoiItem.allIndices" multiple>
 													<v-expansion-panel-title class="week-group-header text-white"
 														style="background-color: #009688; min-height: 38px !important; padding: 0 8px !important">
 														{{ week.Tuan_HienThi }}
 													</v-expansion-panel-title>
 													<v-expansion-panel-text>
 														<v-expansion-panels
-															:model-value="week.classes.map((k, index) => index)"
+															:model-value="week.allClassIndices"
 															multiple>
 															<v-expansion-panel
-																v-for="classItem in week.classes.sort((a, b) => b.LopID - a.LopID)"
+																v-for="classItem in week.sortedClasses"
 																:key="classItem.LopID" class="mb-1">
 																<div v-if="classItem.LopID != -1">
 																	<v-expansion-panel-title
@@ -301,7 +297,6 @@ export default {
 			})
 		},
 		contentLibrary: function (newVal) {
-			console.log('contentLibrary changed', newVal)
 		},
 		toggle: function (val) {
 			localStorage.setItem('IsLanguage', val)
@@ -324,16 +319,22 @@ export default {
 
 	},
 	created() {
-		if (this.focusTasks && this.focusTasks.length > 0) {
-			// this.assignmentNeedGradingPanel = [0]
-			let countMaxItemOfStatus = {
-				'PENDING_GRADING': 0,
-				'OVERDUE': 0,
-				'UPCOMING': 0
+		this.DSMonHocActive = [...new Set(this.teachingGroups.map(item => item.MonHocName))].map(mh => {
+			const groups = this.teachingGroups.filter(item => item.MonHocName == mh)
+			groups.forEach(g => {
+				g.allIndices = g.weeks?.map((_, i) => i) ?? []
+				g.weeks?.forEach(w => {
+					w.sortedClasses = [...w.classes].sort((a, b) => b.LopID - a.LopID)
+					w.allClassIndices = w.classes.map((_, i) => i)
+				})
+			})
+			return {
+				MonHocName: mh,
+				activeTab: groups[0].KhoiID,
+				groups,
+				groupsWithWeeks: groups.filter(g => g.weeks?.length > 0),
 			}
-		}
-		console.log('this.teachingGroups', this.teachingGroups)
-		this.DSMonHocActive = [...new Set(this.teachingGroups.map(item => item.MonHocName))].map(mh => ({ MonHocName: mh, activeTab: this.teachingGroups.filter(item => item.MonHocName == mh)[0].KhoiID }));
+		})
 	},
 	mounted() {
 		if (this.teachingGroups && this.teachingGroups.length > 0) {

@@ -5,18 +5,6 @@
 	</div>
 
 	<div v-else class="container-scroll">
-		<!-- Auto-save announcement banner -->
-		<v-alert
-			v-if="showAutoSaveBanner"
-			type="info"
-			variant="tonal"
-			density="compact"
-			class="rounded-0 ma-0"
-			closable
-			@click:close="dismissAutoSaveBanner"
-		>
-			<span class="text-body-2">✨ <strong>Tính năng mới:</strong> Bài chấm sẽ được lưu tự động sau mỗi thao tác. Bạn không cần bấm “Lưu nháp” nữa.</span>
-		</v-alert>
 		<!-- Assignment Header -->
 		<v-card class="rounded-0" variant="tonal" color="primary">
 			<v-alert class="rounded-0 pa-2" color="primary" variant="tonal">

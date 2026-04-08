@@ -353,7 +353,7 @@
 	        // ─────────────────────────────────────────
 	        async convertItems() {
 	            const { firstDay, lastDay } = this.getFirstAndLastDay(
-	                vueData.NienKhoa?.split('-')[0],
+	                vueData.NienKhoa,
 	                this.ThangObj?.Thang
 	            )
 	

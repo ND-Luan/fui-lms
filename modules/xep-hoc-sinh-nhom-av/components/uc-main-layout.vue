@@ -27,7 +27,7 @@
 
 		<v-divider />
 		<v-row>
-			<v-col cols="3">
+			<v-col cols="4">
 				<v-data-table :headers="headerNhoms" :items="itemNhoms" items-per-page="-1"
 					style="max-height: calc(100dvh - 93px)" hide-default-footer>
 					<template #item.NhomID="{item, value}">
@@ -43,7 +43,7 @@
 				</v-data-table>
 			</v-col>
 			<v-divider vertical />
-			<v-col cols="9">
+			<v-col cols="8">
 				<v-data-table v-model="DSHocSinhSeleceted" :headers="headerHocSinhs" :items="itemHocSinhs"
 					:item-value="v => v" items-per-page="-1" style="max-height: calc(100dvh - 93px)" hide-default-footer
 					show-select>

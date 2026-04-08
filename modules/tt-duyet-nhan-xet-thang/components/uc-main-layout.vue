@@ -7,6 +7,9 @@
           <v-chip color="primary" variant="text" class="font-weight-medium ml-2">
             Tổng số học sinh: {{ items.length }}
           </v-chip>
+          <v-chip v-if="ThangObj" size="small" :color="ThangObj.MauTinhTrang || 'default'" variant="tonal" class="mt-1">
+            {{ ThangObj.TenTinhTrang }}
+          </v-chip>
           <v-spacer />
           <v-btn v-if="vueData.user?.UserID === 'NA0000022' && ThangObj" color="primary" variant="outlined"
             @click="isOpenReport = true">
@@ -36,7 +39,7 @@
             </v-col>
 
             <v-col cols="12" class="d-flex justify-space-between align-center flex-wrap ga-2">
-              <div class="d-flex flex-column">
+              <div class="d-flex flex-column ga-1">
                 <div v-if="ThangObj?.ReasonReject && ThangObj?.TinhTrang === 3">
                   Lý do từ chối: <span class="text-red">{{ ThangObj?.ReasonReject }}</span>
                 </div>
@@ -294,13 +297,8 @@
     </uc-dialog>
 
     <v-dialog v-model="isOpenReport" max-width="800">
-      <uc-bc-tinh-trang-nxt-lop
-        v-if="isOpenReport"
-        :ThangObj="ThangObj"
-        :CapID="CapID"
-        @close="isOpenReport = false"
-        @select-lop="onSelectLop"
-      />
+      <uc-bc-tinh-trang-nxt-lop v-if="isOpenReport" :ThangObj="ThangObj" :CapID="CapID" @close="isOpenReport = false"
+        @select-lop="onSelectLop" />
     </v-dialog>
 
     <uc-dialog-duyet-all :DSLop="DSLop" :ThangObj="ThangObj" @done="onDuyetAllDone" />
@@ -384,19 +382,16 @@ export default {
   },
   mounted() {
     this.CapID = parseInt(vueData.CapID || capid)
-    this.restoreFilter()
     this.getDSLop()
   },
   methods: {
-    restoreFilter() {
-      const LopIDSaved = localStorage.getItem('LopID_C' + this.CapID + '_NXT')
-      if (LopIDSaved) this.LopID = parseInt(LopIDSaved)
-    },
+
     async getDSLop() {
-      this.DSLop = await fetchPromise('lms/Lop_Get_By_CapID', {
+      const data = await fetchPromise('lms/Lop_Get_By_CapID', {
         NienKhoa: vueData.NienKhoa,
         CapID: this.CapID,
       })
+      this.DSLop = data.filter(x => !x.IsNhom)
     },
     async getDSThang() {
       this.DSThang = await fetchPromise('lms/NhanXetThang_Lop_Get', {

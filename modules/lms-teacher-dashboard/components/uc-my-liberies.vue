@@ -43,7 +43,7 @@
 					</v-btn>
 				</template>
 				<v-list>
-					<v-list-item v-for="KhoiItem in teachingGroups.filter(item => item.MonHocName == selected.MonHocName)"
+					<v-list-item v-for="KhoiItem in selectedGroups"
 						:value="KhoiItem.KhoiID" :key="KhoiItem.KhoiID" @click="OpenModalAddNoiDung(KhoiItem)">
 						<v-list-item-title>{{ $t('message.Grade') }} {{ KhoiItem.KhoiID }}</v-list-item-title>
 					</v-list-item>
@@ -52,10 +52,10 @@
 		</div>
 		<v-divider></v-divider>
 		<div class="d-flex flex-column ga-2  overflow-y">
-			<div v-for="KhoiItem in contentLibrary.filter(khoi => khoi.MonHocName == selected.MonHocName)"
+			<div v-for="KhoiItem in selectedLibraries"
 				class="bg-grey-lighten-4 pa-2">
 				<span class="text-subtitle-1 font-weight-medium">{{ $t('message.Grade') }} {{ KhoiItem.KhoiID }}</span>
-				<v-expansion-panels :model-value="KhoiItem.weeks.map((e, index) => { return index })"
+				<v-expansion-panels :model-value="KhoiItem.allIndices"
 					variant="accordion" multiple class="border-t pt-1">
 					<v-expansion-panel v-for="(week, index) in KhoiItem.weeks" :key="index"
 						class="mb-1 custom-panel-liberies">
@@ -67,12 +67,12 @@
 						</v-expansion-panel-title>
 
 						<v-expansion-panel-text class="d-flex flex-column">
-							<div v-for="(item, indexw) in week.chapters.map(item => { return [...item.items] }).flat()"
+							<div v-for="(item, indexw) in week.flatItems"
 								class="flex-md-4 flex-sm-12 d-flex align-center flex-grow-1 px-1 py-2  mb-md-0"
 								style="min-width: 0;cursor: pointer;"
-								@click="onSelectedLibery(item, week.chapters.map(item => { return [...item.items] }).flat())">
-								<v-icon :color="itemInfo(item).color" size="22" class="mr-2">
-									{{ itemInfo(item).icon }}
+								@click="onSelectedLibery(item, week.flatItems)">
+								<v-icon :color="item._info.color" size="22" class="mr-2">
+									{{ item._info.icon }}
 								</v-icon>
 								<div class="item-details">
 									<div class="item-title text-wrap break-words three-lines"
@@ -88,8 +88,8 @@
 								</div>
 								<v-spacer></v-spacer>
 								<div class="d-flex align-center ga-2">
-									<v-chip :color="statusInfo(item).color" class="font-weight-medium" variant="text" size="small">
-										{{ statusInfo(item).text }}
+									<v-chip :color="item._status.color" class="font-weight-medium" variant="text" size="small">
+										{{ item._status.text }}
 									</v-chip>
 								</div>
 								<v-menu transition="slide-y-transition">
@@ -132,7 +132,7 @@
 		</div>
 		<uc-libery-details v-if="isShowModalLiberyDetails" v-model:isOpen="isShowModalLiberyDetails"
 			v-model:selectedLibery="selectedLibery" :key="keyComp" :DSAssignedClass="DSAssignedClass"
-			@update:selectedLibery="(newVal) => { vueData.apiCall3(); console.log('newVal', newVal); }" />
+			@update:selectedLibery="() => { vueData.apiCall3() }" />
 	</v-navigation-drawer>
 </template>
 <script>
@@ -161,17 +161,45 @@ export default {
 	mounted() {
 		document.body.classList.add('no-scroll');
 		this.DSMonHoc = [...this.DSMonHocActive]
-		console.log('this.DSMonHoc ',this.DSMonHoc )
 		this.$nextTick(() => {
 			if (this.DSMonHoc.length > 0) this.selected = this.DSMonHoc[0];
-			console.log('contentLibrary', this.contentLibrary)
 		})
 
 	},
 	computed: {
-		tooltipCreateContent: function () {
+		tooltipCreateContent() {
 			return 'Tạo nội dung cho môn học ' + this.selected.MonHocName
-		}
+		},
+		selectedGroups() {
+			if (!this.selected?.MonHocName) return []
+			return this.teachingGroups.filter(item => item.MonHocName == this.selected.MonHocName)
+		},
+		selectedLibraries() {
+			if (!this.selected?.MonHocName) return []
+			return this.contentLibrary
+				.filter(khoi => khoi.MonHocName == this.selected.MonHocName)
+				.map(khoi => ({
+					...khoi,
+					allIndices: khoi.weeks?.map((_, i) => i) ?? [],
+					weeks: khoi.weeks?.map(w => ({
+						...w,
+						flatItems: w.chapters.flatMap(c => c.items.map(item => ({
+							...item,
+							_info: item.ResourceType === 'ASSIGNMENT'
+								? { icon: 'mdi-notebook-edit-outline', color: 'blue' }
+								: { icon: 'mdi-presentation-play', color: 'green' },
+							_status: (() => {
+								const m = {
+									1: { text: this.$i18n.locale == 'en' ? 'Drafting' : 'Đang soạn thảo', color: 'grey' },
+									2: { text: this.$i18n.locale == 'en' ? 'Ready to Assign' : 'Sẵn sàng giao', color: 'orange' },
+									3: { text: this.$i18n.locale == 'en' ? 'Assigned' : 'Đã giao', color: 'success' },
+								}
+								return m[item.Status] || m[1]
+							})()
+						})))
+					}))
+				}))
+		},
 	},
 	watch: {
 		contentLibrary: function (newVal) {
@@ -218,7 +246,6 @@ export default {
 			return statusMap[item.Status] || statusMap[1];
 		},
 		onSelectedLibery(item, DSAssignedClass) {
-			console.log('DSAssignedClass', DSAssignedClass)
 			this.selectedLibery = item
 			this.DSAssignedClass = DSAssignedClass
 			this.isShowModalLiberyDetails = true
@@ -227,7 +254,6 @@ export default {
 			this.$emit('CreateContent', item)
 		},
 		onRedirectToASM(item) {
-			console.log('item', item)
 			let url = null
 			if (item.ResourceType === 'ASSIGNMENT') {
 				url = `/lms_tc_asm_builder?AssignmentID=${item.ResourceID}`
