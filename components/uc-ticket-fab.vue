@@ -178,12 +178,13 @@
 				</v-card-text>
 
 				<v-card-actions>
+					
+					<v-spacer />
+					<v-btn variant="text" @click="detailDialog.show = false">Đóng</v-btn>
 					<v-btn color="primary" variant="outlined" :loading="detailDialog.isSendingComment"
 						@click="sendComment">
 						Gửi phản hồi
 					</v-btn>
-					<v-spacer />
-					<v-btn variant="text" @click="detailDialog.show = false">Đóng</v-btn>
 				</v-card-actions>
 			</v-card>
 		</v-dialog>

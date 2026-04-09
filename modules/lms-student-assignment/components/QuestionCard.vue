@@ -19,13 +19,13 @@
 			</div>
 
 			<!-- Question Text -->
-			<div class="d-flex ga-2 mb-2">
-				<v-icon :color="iconColor" size="18">
-					{{ statusIcon }}
-				</v-icon>
-				<b style="flex-shrink: 0;">Câu {{ questionNumber }}:</b>
-				<uc-latex-view class="question-text flex-column justify-start flex-grow-1" :escape-html="false"
-					v-model:content="question.config.questionText" style="align-items: start !important;" />
+			<div class="mb-2">
+				<div class="d-flex align-center ga-1 mb-1">
+					<v-icon :color="iconColor" size="18">{{ statusIcon }}</v-icon>
+					<b>Câu {{ questionNumber }}:</b>
+				</div>
+				<uc-latex-view class="question-text flex-column justify-start" :escape-html="false"
+					v-model:content="question.config.questionText" style="align-items: start !important; width: 100%;" />
 			</div>
 
 			<!-- Media - Lazy load khi visible -->

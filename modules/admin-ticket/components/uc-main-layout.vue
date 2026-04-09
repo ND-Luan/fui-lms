@@ -84,7 +84,7 @@
 				</template>
 			</GlobalDataTable>
 
-			<uc-ticket-detail v-model="detailDialog.show" :ticket-id="detailDialog.ticketId" @updated="getDS" />
+			<uc-ticket-detail v-model="detailDialog.show" :ticket-id="detailDialog.ticketId" :dev-user="devUser" @updated="getDS" />
 
 			<!-- Dialog đổi người trực -->
 			<v-dialog v-model="tokenDialog.show" width="460" :close-on-back="false">

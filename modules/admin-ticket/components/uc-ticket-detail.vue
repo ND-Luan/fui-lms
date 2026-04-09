@@ -92,7 +92,7 @@
 			>
 				<div class="d-flex align-center ga-1 mb-1">
 					<v-chip v-if="c.IsInternal" size="x-small" color="warning" variant="tonal">Nội bộ</v-chip>
-					<span class="text-caption text-medium-emphasis">{{ c.CreateUser }} · {{ formatDate(c.CreateTime) }}</span>
+					<span class="text-caption text-medium-emphasis">{{ c.CreatedByName ?? c.CreateUser }} · {{ formatDate(c.CreatedAt ?? c.CreateTime) }}</span>
 				</div>
 				<p class="text-body-2">{{ c.Content }}</p>
 			</div>
@@ -138,6 +138,7 @@ export default {
 	props: {
 		modelValue: { type: Boolean, required: true },
 		ticketId: { type: Number, default: null },
+		devUser: { type: Object, default: null },
 	},
 	emits: ['update:modelValue', 'updated'],
 	data() {
@@ -186,7 +187,7 @@ export default {
 			this.comments = res?.[2] ?? []
 			if (this.ticket) {
 				this.editStatus = this.ticket.Status
-				this.editAssignedTo = this.ticket.AssignedTo ?? ''
+				this.editAssignedTo = this.ticket.AssignedTo ?? this.devUser?.UserID ?? ''
 			}
 			this.isLoading = false
 		},
@@ -206,6 +207,9 @@ export default {
 			}
 		},
 		async assignTicket() {
+			if (!this.editAssignedTo?.trim() && this.devUser?.UserID) {
+				this.editAssignedTo = this.devUser.UserID
+			}
 			if (!this.editAssignedTo?.trim()) return
 			const res = await fetchPromise('lms/Ticket_Assign', {
 				TicketID: this.ticket.TicketID,
@@ -232,8 +236,8 @@ export default {
 				this.comments.push({
 					Content: this.newComment.trim(),
 					IsInternal: this.isInternal ? 1 : 0,
-					CreateUser: vueData.user.UserID,
-					CreateTime: new Date().toISOString(),
+					CreatedByName: this.devUser?.UserID ?? vueData.user.UserID,
+					CreatedAt: new Date().toISOString(),
 				})
 				this.newComment = ''
 				this.isInternal = false

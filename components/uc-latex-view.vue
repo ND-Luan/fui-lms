@@ -1,6 +1,6 @@
 <!-- uc-latex-view.vue -->
 <template>
-	<div ref="contentContainer" class="uc-latex-view d-flex align-center" v-html="renderedContent" />
+	<div ref="contentContainer" class="uc-latex-view d-flex align-center" style="min-width: 0; overflow-x: auto;" v-html="renderedContent" />
 </template>
 <script>
 export default {
