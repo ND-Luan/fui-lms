@@ -1,6 +1,12 @@
 <template>
 	<v-card>
-		<p class="ma-2 text-subtitle-1 font-weight-medium">{{ $t('message.QuestionLibrary') }}</p>
+		<div v-if="inDrawer" class="d-flex align-center pa-3 border-b">
+			<span class="text-subtitle-2 font-weight-medium flex-grow-1">{{ $t('message.QuestionLibrary') }}</span>
+			<v-btn icon size="small" variant="text" @click="$emit('close')">
+				<v-icon>mdi-close</v-icon>
+			</v-btn>
+		</div>
+		<p v-else class="ma-2 text-subtitle-1 font-weight-medium">{{ $t('message.QuestionLibrary') }}</p>
 		<v-divider></v-divider>
 		<v-list density="compact" nav class="pa-0">
 			<v-list-subheader>{{ $t('message.InteractiveQuiz') }}</v-list-subheader>
@@ -27,7 +33,10 @@
 <script>
 	export default {
 		name: 'uc-assignment-component-library',
-		emits: ['add-component'],
+		emits: ['add-component', 'close'],
+		props: {
+			inDrawer: { type: Boolean, default: false }
+		},
 		data() {
 			const toggle = JSON.parse(localStorage.getItem('IsLanguage')) ?? false
 			this.$i18n.locale = toggle ? "en" : "vi"

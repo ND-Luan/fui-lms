@@ -199,7 +199,7 @@ export default {
 			this.tokenDialog.show = false
 		},
 		async getDS() {
-			const res = await fetchPromise('lms/Ticket_GetList', {}, { cache: false })
+			const res = await fetchPromise('lms/Ticket_GetList', { IsIT: 1 }, { cache: false })
 			this.DS = res ?? []
 		},
 		openDetail(item) {

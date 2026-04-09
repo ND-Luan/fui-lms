@@ -16,7 +16,7 @@
 				@click="selectedMonHoc = null">
 				<v-icon size="13" start>mdi-view-grid</v-icon>
 				Tất cả
-				<span class="nv__chip-badge">{{ DSNhiemVu.length }}</span>
+				<span class="nv__chip-badge">{{ countAllNhiemVu }}</span>
 			</div>
 			<div v-for="mh in DSMonHoc" :key="mh.MonHocID" class="nv__chip"
 				:class="{ 'nv__chip--active': selectedMonHoc === mh.MonHocID }" @click="selectedMonHoc = mh.MonHocID">
@@ -133,12 +133,16 @@
 				const selectedIDs = this.monHocSelected.map(x => x.MonHocID);
 				return selectedIDs.length === uniqueMonHocInNV.length;
 			},
+			DSNhiemVu_MonHocFiltered() {
+				if (!this.monHocSelected || this.monHocSelected.length === 0) return this.DSNhiemVu;
+				const selectedIDs = this.monHocSelected.map(x => x.MonHocID);
+				return this.DSNhiemVu.filter(nv => selectedIDs.includes(nv.MonHocID));
+			},
+			countAllNhiemVu() {
+				return this.DSNhiemVu_MonHocFiltered.length;
+			},
 			DSNhiemVu_Filter() {
-				let list = this.DSNhiemVu;
-				if (this.monHocSelected && this.monHocSelected.length > 0) {
-					const selectedIDs = this.monHocSelected.map(x => x.MonHocID);
-					list = list.filter(nv => selectedIDs.includes(nv.MonHocID));
-				}
+				let list = this.DSNhiemVu_MonHocFiltered;
 				if (this.selectedMonHoc) {
 					list = list.filter(nv => nv.MonHocID === this.selectedMonHoc);
 				}
@@ -164,7 +168,7 @@
 				});
 			},
 			countByMonHoc(id) {
-				return this.DSNhiemVu.filter(nv => nv.MonHocID === id).length;
+				return this.DSNhiemVu_MonHocFiltered.filter(nv => nv.MonHocID === id).length;
 			},
 			onRedirect(nv) {
 				const type = (nv.ResourceType || '').toLowerCase();

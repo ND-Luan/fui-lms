@@ -415,3 +415,47 @@
  .invisible-chip {
      visibility: hidden;
  }
+
+/* ===== Mobile layout ===== */
+.mobile-top-bar {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    background: #fff;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.12);
+    min-height: 48px;
+}
+
+.mobile-bottom-bar {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 10;
+    background: #fff;
+    border-top: 1px solid rgba(0, 0, 0, 0.12);
+    padding-bottom: env(safe-area-inset-bottom);
+    min-height: 56px;
+}
+
+@media (max-width: 959px) {
+    .assignment-builder {
+        padding-bottom: 72px;
+    }
+
+    /* Tăng touch target cho các nút trong canvas */
+    .question-preview .v-btn {
+        min-width: 40px;
+        min-height: 40px;
+    }
+
+    /* Drawer width giới hạn 85vw trên mobile nhỏ */
+    .v-navigation-drawer {
+        max-width: 85vw;
+    }
+
+    /* Full-width Add Section button */
+    .assignment-canvas > .v-btn {
+        border-radius: 0;
+    }
+}

@@ -1,18 +1,54 @@
 <template>
 	<div class="assignment-builder">
-		<v-row class="ma-0" dense>
+		<!-- Mobile: Library Drawer (left) -->
+		<v-navigation-drawer v-if="isMobile" v-model="isLibraryDrawerOpen" location="left" temporary width="300">
+			<uc-assignment-component-library @add-component="addComponent" :in-drawer="true"
+				@close="isLibraryDrawerOpen = false" style="height: 100%; overflow: auto;" />
+		</v-navigation-drawer>
+
+		<!-- Mobile: Properties Drawer (right) -->
+		<v-navigation-drawer v-if="isMobile" v-model="isPropertiesDrawerOpen" location="right" temporary width="320">
+			<uc-assignment-properties v-if="selectedItem" :assignment="assignment"
+				:groups="assignment.AssignmentConfig?.groups" :item="selectedItem"
+				@update:groups="updateGroups" :in-drawer="true" @close="isPropertiesDrawerOpen = false" />
+			<div v-else class="pa-6 text-center text-medium-emphasis">
+				<v-icon size="48" class="mb-2">mdi-cursor-default-click-outline</v-icon>
+				<p class="text-body-2 mt-2">Chọn câu hỏi để chỉnh sửa</p>
+			</div>
+		</v-navigation-drawer>
+
+		<!-- Mobile: Top Bar -->
+		<div v-if="isMobile" class="mobile-top-bar d-flex align-center pa-2 ga-2">
+			<v-btn icon variant="text" size="small" @click="isLibraryDrawerOpen = true">
+				<v-icon>mdi-menu</v-icon>
+				<v-tooltip activator="parent" location="bottom">Thêm câu hỏi</v-tooltip>
+			</v-btn>
+			<span class="text-body-2 flex-grow-1 text-truncate font-weight-medium">{{ assignment.Title || 'Bài soạn' }}</span>
+			<v-chip v-if="autoSaveStatus" size="x-small" :color="autoSaveStatus === 'saving' ? 'grey' : 'success'" variant="tonal">
+				<v-icon v-if="autoSaveStatus === 'saving'" start size="12" class="mdi-spin">mdi-loading</v-icon>
+				<v-icon v-else start size="12">mdi-check-circle-outline</v-icon>
+				{{ autoSaveStatus === 'saving' ? 'Đang lưu...' : 'Đã lưu' }}
+			</v-chip>
+			<v-btn icon variant="text" size="small" :disabled="!selectedItem" @click="isPropertiesDrawerOpen = true">
+				<v-icon>mdi-tune-variant</v-icon>
+				<v-tooltip activator="parent" location="bottom">Thuộc tính</v-tooltip>
+			</v-btn>
+		</div>
+
+		<!-- Desktop: 3-col layout -->
+		<v-row v-if="!isMobile" class="ma-0" dense>
 			<v-col cols="12" md="2">
 				<uc-assignment-component-library @add-component="addComponent"
 					style="height: calc(-223px + 100dvh); overflow: auto" />
 				<v-divider />
-				<p class="text-subtitle-2">
+				<p class="text-subtitle-2 px-3 pt-2 mb-0">
 					{{ $t('message.Setting') }}
 				</p>
-				<div>
+				<div class="px-2">
 					<v-checkbox v-model="setting.IsBlockCopy_Paste" label="Chặn copy paste" />
 				</div>
 				<v-divider />
-				<div class="mt-4">
+				<div class="mt-3 px-2">
 					<div class="text-display text-center">
 						{{ $t('message.TotalScore') }}
 						<v-chip variant="text" class="ps-1 pe-0 font-weight-medium" color="primary" size="medium"> {{
@@ -80,6 +116,23 @@
 				</v-row>
 			</v-col>
 		</v-row>
+
+		<!-- Mobile: Canvas -->
+		<div v-if="isMobile" style="height: calc(100dvh - 96px); overflow: auto; padding-bottom: 64px;">
+			<uc-assignment-canvas :groups="assignment?.AssignmentConfig?.groups" :selected-item="selectedItem"
+				@update:groups="updateGroups" @update:selected-item="selectedItem = $event" />
+		</div>
+
+		<!-- Mobile: Bottom Bar -->
+		<div v-if="isMobile && assignment.AssignmentConfig?.groups.length > 0" class="mobile-bottom-bar d-flex ga-2 pa-2">
+			<v-btn variant="outlined" color="info" class="flex-grow-1" @click="handleSave(true)">
+				<v-icon start>mdi-content-save-outline</v-icon>{{ $t('message.SaveAssignment') }}
+			</v-btn>
+			<v-btn v-if="!vueData.AssignToClassID" variant="outlined" color="success" class="flex-grow-1" @click="openDialogAssignToStudent">
+				<v-icon start>mdi-clipboard-arrow-right-outline</v-icon>{{ $t('message.Assigned') }}
+			</v-btn>
+		</div>
+
 		<uc-loading-page v-model="loadingPage.isLoading" v-model:text="loadingPage.text" />
 		<v-dialog v-model="isOpenDialogForAssignToStudent" max-width="800px">
 			<v-card>
@@ -252,6 +305,8 @@ export default {
 			autoSaveStatus: null,
 			lastSavedAt: null,
 			relativeTimeNow: null,
+			isLibraryDrawerOpen: false,
+			isPropertiesDrawerOpen: false,
 		}
 	},
 	mounted() {
@@ -270,6 +325,9 @@ export default {
 		clearInterval(this.relativeTimeTimer)
 	},
 	computed: {
+		isMobile() {
+			return this.$vuetify.display.smAndDown
+		},
 		lastSavedRelative() {
 			if (!this.lastSavedAt) return ''
 			const now = this.relativeTimeNow || Date.now()
@@ -442,7 +500,6 @@ export default {
 			return this.confirmRef.value
 		},
 		addComponent(componentInfo) {
-			console.log('componentInfo', componentInfo)
 			const newGroups = [...JSON.parse(JSON.stringify(this.assignment.AssignmentConfig.groups))];
 			let ordinalNumber = 1;
 			let previousQuestion = 1
@@ -450,102 +507,12 @@ export default {
 				if (newGroups[i].questions.length > 0) {
 					ordinalNumber += newGroups[i].questions.length;
 					previousQuestion = ordinalNumber
+				} else {
+					ordinalNumber = previousQuestion
 				}
-				else ordinalNumber = previousQuestion
 			}
 
-			const newQuestion = {
-				id: `q_${Date.now()}`,
-				type: componentInfo.type,
-				label: componentInfo.label,
-				skills: [],
-				ordinalNumber,
-				points: 1.0,
-				gradingType: 'auto',
-				config: {
-					media: {
-						type: "YOUTUBE", //DEFAULT
-						sourceYT: {
-							id: "",
-							name: "",
-							source: ""
-						},
-						sourceRecord: {
-							id: "",
-							name: "",
-							source: ""
-						},
-						sourceFiles: {
-							file: [],
-							image: []
-						}
-					},
-					isAdvanced: false,
-					questionText: ''
-				}
-			};
-
-			switch (componentInfo.type) {
-				case 'QUIZ_SINGLE_CHOICE':
-					newQuestion.config.options = [{ id: `opt_1`, text: '' }, { id: `opt_2`, text: '' }, { id: `opt_3`, text: '' }, { id: `opt_4`, text: '' }];
-					newQuestion.config.correctAnswer = null;
-					break;
-				case 'QUIZ_MULTIPLE_CHOICE':
-					newQuestion.config.options = [{ id: `opt_1`, text: '' }, { id: `opt_2`, text: '' }, { id: `opt_3`, text: '' }, { id: `opt_5`, text: '' }];
-					newQuestion.config.correctAnswers = [];
-					break;
-				case 'QUIZ_TRUE_FALSE':
-					newQuestion.config.statement = "Mệnh đề cần xác định đúng/sai.";
-					newQuestion.config.correctAnswer = true;
-					break;
-				case 'QUIZ_MULTIPLE_TRUE_FALSE':
-					newQuestion.config.options = [{ id: 'a', text: '', correctAnswer: null, inCorrectAnswer: null }]
-					break;
-				case 'QUIZ_FILL_IN_BLANK':
-					newQuestion.config.parts = [
-						{ type: 'text', value: 'Điền vào ' },
-						{ type: 'blank', id: 'blank_1', acceptedAnswers: ['chỗ trống'] },
-						{ type: 'text', value: ' này.' }
-					];
-					break;
-				case 'QUIZ_MATCHING':
-					newQuestion.config.columnA = []
-					newQuestion.config.columnB = []
-					newQuestion.config.correctPairs = []
-					break
-				case 'QUIZ_MATCHING_V2':
-					newQuestion.config.columnA = []
-					newQuestion.config.columnB = []
-					newQuestion.config.correctPairs = []
-					break
-				case 'ESSAY':
-					newQuestion.gradingType = 'manual';
-					// newQuestion.config.media = {
-					// 	"type": "IMAGE_GALLERY",
-					// 	"sources": []
-					// }
-					// console.log('newQuestion', newQuestion)
-					break;
-				case 'SHORT_ANSWER':
-					newQuestion.gradingType = 'manual';
-					break;
-				case 'FILE_UPLOAD':
-					newQuestion.gradingType = 'manual';
-					// newQuestion.config.media = {
-					// 	"type": "FILE_UPLOAD",
-					// 	"sources": ""
-					// }
-					break;
-				case 'AUDIO_RESPONSE':
-					newQuestion.gradingType = 'manual';
-					// newQuestion.config.media = {
-					// 	"type": "AUDIO_RESPONSE",
-					// 	"sourceYT": "",
-					// 	"sourceIMG": "",
-					// 	"sourceRecord": "",
-					// }
-					break;
-			}
+			const newQuestion = vueData.buildNewQuestion(componentInfo, ordinalNumber);
 
 			if (newGroups.length > 0) {
 				newGroups[newGroups.length - 1].questions.push(newQuestion);
@@ -576,6 +543,9 @@ export default {
 			}
 			this.updateGroups(newGroups);
 			this.selectedItem = { type: 'question', groupIndex: newGroups.length - 1, qIndex: newGroups[newGroups.length - 1].questions.length - 1 };
+			if (this.isMobile) {
+				this.isLibraryDrawerOpen = false
+			}
 		},
 		updateGroups(newGroups) {
 			this.assignment.AssignmentConfig.groups = newGroups.map(item => {
@@ -791,6 +761,9 @@ export default {
 
 		selectedItem: function (item) {
 			this.fileAudio = null
+			if (item && this.isMobile) {
+				this.isPropertiesDrawerOpen = true
+			}
 		},
 		assignment: {
 			handler(newVal) {

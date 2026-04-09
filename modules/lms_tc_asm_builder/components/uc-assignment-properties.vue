@@ -1,6 +1,12 @@
 <template>
-	<v-card sticky top="80px">
-		<div class="d-flex align-center text-subtitle-1 font-weight-medium flex-wrap ga-2">
+	<v-card :sticky="inDrawer ? undefined : true" top="80px">
+		<div v-if="inDrawer" class="d-flex align-center pa-3 border-b">
+			<span class="text-subtitle-2 font-weight-medium flex-grow-1">Thuộc tính</span>
+			<v-btn icon size="small" variant="text" @click="$emit('close')">
+				<v-icon>mdi-close</v-icon>
+			</v-btn>
+		</div>
+		<div class="d-flex align-center text-subtitle-1 font-weight-medium flex-wrap ga-2 px-3 pt-2">
 			{{ $t('message.Attribute') }}
 			<div class="ml-2" v-if="item.type === 'question' && globalQuestionNumber !== 0">
 				<v-chip v-if="isQuestionTextField === false" label variant="outlined" color="primary"
@@ -23,12 +29,12 @@
 			</div>
 		</div>
 		<v-divider class="my-2" />
-		<div v-if="!item" class="text-center pa-10 text-grey">
+		<div v-if="!item" class="text-center pa-8 text-grey">
 			<v-icon size="48" class="mb-2">mdi-cursor-default-click-outline</v-icon>
 			<div>{{ $t('message.SelectSectionOrQuestionToEdit') }}</div>
 		</div>
 
-		<div v-else>
+		<div v-else class="px-3 pb-3">
 			<div v-if="item.type === 'group'" class="d-flex flex-column ga-2">
 				<v-text-field class="mt-2" :model-value="selectedGroupData.title"
 					@update:model-value="updateItem('title', $event)" :label="$t('message.SectionGroupName')"
@@ -112,40 +118,38 @@
 						<v-col cols="8" class="d-flex justify-center align-center">
 							<v-text-field v-if="!selectedQuestionData.config.isAdvanced" :model-value="option.text"
 								@update:model-value="updateOptionText(index, $event)" dense variant="outlined"
-								hide-details :clearable="false" />
+							hide-details :clearable="false" placeholder="Nhập nội dung đáp án..." />
 							<uc-latex-edit class="w-100" v-else v-model:content="option.text" />
 						</v-col>
 						<v-col cols="2" class="d-flex justify-center align-center">
 							<v-btn size="x-small" @click="removeOption(index)" class="ml-1" icon="mdi-close" />
 						</v-col>
 					</v-row>
-					<v-btn block small @click="addOption" variant="tonal" class="mt-2">
+					<v-btn block size="small" @click="addOption" variant="tonal" class="mt-2">
 						<v-icon start>mdi-plus</v-icon>{{ $t('message.MoreAnswer') }}
 					</v-btn>
 				</div>
 				<!-- QUIZ_MULTIPLE_CHOICE -->
 				<div v-else-if="selectedQuestionData.type === 'QUIZ_MULTIPLE_CHOICE'">
-					<v-row dense v-for="(option, index) in selectedQuestionData.config.options" :key="option.id">
-						<v-col cols="2" class="d-flex justify-center align-center">
+					<v-row dense v-for="(option, index) in selectedQuestionData.config.options" :key="option.id" align="center">
+						<v-col cols="2" class="d-flex justify-center">
 							<v-checkbox :model-value="selectedQuestionData.config.correctAnswers" :value="option.id"
 								@update:model-value="updateQuestionConfig('correctAnswers', $event)" hide-details
 								class="flex-shrink-0">
 							</v-checkbox>
 						</v-col>
-						<v-col cols="8" class="d-flex justify-center align-center">
+						<v-col cols="9">
 							<v-text-field v-if="!selectedQuestionData.config.isAdvanced" :model-value="option.text"
-								@update:model-value="updateOptionText(index, $event)" dense variant="outlined"
-								hide-details :clearable="false" />
+								@update:model-value="updateOptionText(index, $event)" variant="outlined"
+							hide-details :clearable="false" density="compact" placeholder="Nhập nội dung đáp án..." />
 							<uc-latex-edit v-else v-model:content="option.text" />
 						</v-col>
-						<v-col cols="2" class="d-flex justify-center align-center">
-							<v-btn icon size="small" @click="removeOption(index)" class="ml-1">
-								<v-icon>mdi-close</v-icon>
-							</v-btn>
+						<v-col cols="1" class="d-flex justify-center">
+							<v-icon size="20" class="cursor-pointer text-red" @click="removeOption(index)">mdi-close</v-icon>
 						</v-col>
 					</v-row>
-					<v-btn small @click="addOption" variant="tonal" class="mt-2">
-						<v-icon left>mdi-plus</v-icon>{{ $t('message.MoreAnswer') }}
+					<v-btn block size="small" @click="addOption" variant="tonal" class="mt-2">
+						<v-icon start>mdi-plus</v-icon>{{ $t('message.MoreAnswer') }}
 					</v-btn>
 				</div>
 				<!-- QUIZ_TRUE_FALSE -->
@@ -158,19 +162,18 @@
 				</div>
 				<!-- QUIZ_MULTIPLE_TRUE_FALSE -->
 				<div v-else-if="selectedQuestionData.type === 'QUIZ_MULTIPLE_TRUE_FALSE'">
-					<v-row v-for="(option, index) in selectedQuestionData.config.options" :key="index" dense>
-						<v-col class="d-flex justify-space-evenly" cols="2">
-							<v-checkbox v-model="option.correctAnswer" color="primary"
-								@update:modelValue="(val) => { if (val) option.inCorrectAnswer = false }" />
-							<v-checkbox v-model="option.inCorrectAnswer" color="red"
+					<v-row v-for="(option, index) in selectedQuestionData.config.options" :key="index" dense align="center">
+						<v-col class="d-flex justify-space-evenly" cols="3">
+						<v-checkbox v-model="option.correctAnswer" color="primary" hide-details
+							@update:modelValue="(val) => { if (val) option.inCorrectAnswer = false }" />
+						<v-checkbox v-model="option.inCorrectAnswer" color="red" hide-details
 								@update:modelValue="(val) => { if (val) option.correctAnswer = false }" />
 						</v-col>
-						<v-col cols="8">
-							<v-text-field v-if="!selectedQuestionData.config.isAdvanced" v-model="option.text"
-								density="compact" variant="outlined" hide-details :clearable="false" />
-							<uc-latex-edit v-else v-model:content="option.text" :isEditable="true" />
-						</v-col>
-						<v-col cols="2">
+						<v-col cols="7" class="d-flex align-center ga-1">
+							<v-text-field :model-value="option.text"
+								@update:model-value="updateOptionText(index, $event)"
+								variant="outlined" density="compact" hide-details :clearable="false"
+								placeholder="Nhập nội dung đáp án..." />
 							<v-btn v-if="selectedQuestionData.config.options.length > 2" icon="mdi-delete-outline"
 								variant="text" size="small" color="red" @click="removeOption(index)" />
 						</v-col>
@@ -186,72 +189,40 @@
 					<div v-for="(part, index) in selectedQuestionData.config.parts" :key="index"
 						class="d-flex flex-wrap align-center mb-2">
 						<v-text-field v-if="part.type === 'text'" :model-value="part.value"
-							@update:model-value="updatePart(index, 'value', $event)" :label="$t('message.TextContent')"
-							variant="outlined" density="compact" hide-details :clearable="false" />
+						@update:model-value="updatePart(index, 'value', $event)" :placeholder="$t('message.TextContent')"
+						variant="outlined" density="compact" hide-details :clearable="false" />
 
-						<v-text-field v-if="part.type === 'blank'" :model-value="part.acceptedAnswers[0]"
-							@update:model-value="updatePart(index, 'acceptedAnswers', [$event])"
-							:label="$t('message.CorrectAnswer')" variant="outlined" density="compact" hide-details
+					<v-text-field v-if="part.type === 'blank'" :model-value="part.acceptedAnswers[0]"
+						@update:model-value="updatePart(index, 'acceptedAnswers', [$event])"
+						:placeholder="$t('message.CorrectAnswer')" variant="outlined" density="compact" hide-details
 							class="ml-2" :clearable="false" />
 						<v-btn icon size="small" @click="removePart(index)" class="ml-1">
 							<v-icon>mdi-close</v-icon>
 						</v-btn>
 					</div>
-					<v-btn small @click="addPart('text')" variant="tonal" class="mr-2 mt-2">{{ $t('message.AddText')
-						}}</v-btn>
-					<v-btn small @click="addPart('blank')" variant="tonal" class="mt-2">{{ $t('message.AddBlank')
-						}}</v-btn>
+					<v-btn size="small" @click="addPart('text')" variant="tonal" class="mr-2 mt-2">{{ $t('message.AddText') }}</v-btn>
+					<v-btn size="small" @click="addPart('blank')" variant="tonal" class="mt-2">{{ $t('message.AddBlank') }}</v-btn>
 				</div>
-				<!-- QUIZ_MATCHING -->
-				<div v-else-if="selectedQuestionData.type === 'QUIZ_MATCHING'">
-					<v-row>
-						<v-col><label class="form-label">{{ $t('message.Column') }} A</label></v-col>
-						<v-col><label class="form-label">{{ $t('message.Column') }} B
-								({{ $t('message.Similar') }})</label></v-col>
+				<!-- QUIZ_MATCHING (QUIZ_MATCHING_V2 kept for backward compat with existing data) -->
+				<div v-else-if="['QUIZ_MATCHING', 'QUIZ_MATCHING_V2'].includes(selectedQuestionData.type)">
+					<v-row dense class="mb-1">
+						<v-col><p class="text-caption font-weight-medium mb-0">{{ $t('message.Column') }} A</p></v-col>
+						<v-col><p class="text-caption font-weight-medium mb-0">{{ $t('message.Column') }} B ({{ $t('message.Similar') }})</p></v-col>
+						<v-col cols="2"></v-col>
 					</v-row>
-					<v-row v-for="(pair, index) in selectedQuestionData.config.columnA" :key="index" class="mb-n5">
+					<v-row v-for="(pair, index) in selectedQuestionData.config.columnA" :key="index" dense class="mb-1">
 						<v-col cols="5">
 							<v-text-field v-if="!selectedQuestionData.config.isAdvanced" v-model="pair.text"
-								density="compact" variant="outlined" hide-details :clearable="false" />
-							<uc-latex-edit v-else v-model:content="pair.text" style="width: 50%" />
+							density="compact" variant="outlined" hide-details :clearable="false" :placeholder="$t('message.Column') + ' A...'" />
+						<uc-latex-edit v-else v-model:content="pair.text" class="w-100" />
+					</v-col>
+					<v-col cols="5">
+						<v-text-field v-if="!selectedQuestionData.config.isAdvanced"
+							v-model="selectedQuestionData.config.columnB[index].text" density="compact"
+							variant="outlined" hide-details :clearable="false" :placeholder="$t('message.Column') + ' B...'"/>
+							<uc-latex-edit v-else v-model:content="selectedQuestionData.config.columnB[index].text" class="w-100" />
 						</v-col>
-						<v-col cols="5" class="d-flex align-center">
-							<v-text-field v-if="!selectedQuestionData.config.isAdvanced"
-								v-model="selectedQuestionData.config.columnB[index].text" density="compact"
-								variant="outlined" hide-details style="width: 40%" :clearable="false" />
-							<uc-latex-edit v-else v-model:content="selectedQuestionData.config.columnB[index].text" />
-
-						</v-col>
-						<v-col cols="2">
-							<v-btn icon="mdi-delete-outline" variant="text" size="small" color="red"
-								@click="removePair(index)" />
-						</v-col>
-					</v-row>
-					<v-btn prepend-icon="mdi-plus" variant="tonal" color="primary" @click="addPair" class="mt-4 mb-4">
-						{{ $t('message.AddPair') }}
-					</v-btn>
-				</div>
-				<!-- QUIZ_MATCHING_V2 -->
-				<div v-else-if="selectedQuestionData.type === 'QUIZ_MATCHING_V2'">
-					<v-row>
-						<v-col><label class="form-label">{{ $t('message.Column') }} A</label></v-col>
-						<v-col><label class="form-label">{{ $t('message.Column') }} B
-								({{ $t('message.Similar') }})</label></v-col>
-					</v-row>
-					<v-row v-for="(pair, index) in selectedQuestionData.config.columnA" :key="index" class="mb-n5">
-						<v-col cols="5">
-							<v-text-field v-if="!selectedQuestionData.config.isAdvanced" v-model="pair.text"
-								density="compact" variant="outlined" hide-details :clearable="false" />
-							<uc-latex-edit v-else v-model:content="pair.text" style="width: 50%" />
-						</v-col>
-						<v-col cols="5" class="d-flex align-center">
-							<v-text-field v-if="!selectedQuestionData.config.isAdvanced"
-								v-model="selectedQuestionData.config.columnB[index].text" density="compact"
-								variant="outlined" hide-details style="width: 40%" :clearable="false" />
-							<uc-latex-edit v-else v-model:content="selectedQuestionData.config.columnB[index].text" />
-
-						</v-col>
-						<v-col cols="2">
+						<v-col cols="2" class="d-flex align-center">
 							<v-btn icon="mdi-delete-outline" variant="text" size="small" color="red"
 								@click="removePair(index)" />
 						</v-col>
@@ -290,8 +261,8 @@
 <script>
 	export default {
 		name: 'uc-assignment-properties',
-		props: { groups: { type: Array, default: () => [] }, item: Object, assignment: Object },
-		emits: ['update:groups', 'update:item'],
+		props: { groups: { type: Array, default: () => [] }, item: Object, assignment: Object, inDrawer: { type: Boolean, default: false } },
+		emits: ['update:groups', 'update:item', 'close'],
 		data() {
 			this.$i18n.locale = (localStorage.getItem('IsLanguage') && localStorage.getItem('IsLanguage') == 'true') ? 'en' : 'vi'
 			return {
@@ -340,20 +311,11 @@
 		},
 		methods: {
 			onPointInput(value) {
-				const normalized = this.normalizeNumberInput(value);
+				const normalized = vueData.normalizeNumberInput(value);
 				this.updateQuestion('points', normalized);
 			},
-	
-			normalizeNumberInput(value) {
-				if (value === null || value === undefined) return 0;
-	
-				const normalized = String(value).replace(',', '.');
-				const num = parseFloat(normalized);
-	
-				return isNaN(num) ? 0 : num;
-			},
-	
-			isAutoGradable(type) { return type.startsWith('QUIZ_'); },
+
+			isAutoGradable(type) { return vueData.isAutoGradable(type) },
 			// Handle emit từ uc-media cho group
 			handleGroupMediaUpdate(updatedData) {
 				if (!this.item || this.item.type !== 'group') return;
@@ -416,7 +378,7 @@
 			updateQuestion(key, value) { const ng = JSON.parse(JSON.stringify(this.groups)); ng[this.item.groupIndex].questions[this.item.qIndex][key] = value; this.updateGroups(ng); },
 			updateQuestionConfig(key, value) { const ng = JSON.parse(JSON.stringify(this.groups)); ng[this.item.groupIndex].questions[this.item.qIndex].config[key] = value; this.updateGroups(ng); },
 			updateOptionText(optionIndex, text) { const ng = JSON.parse(JSON.stringify(this.groups)); ng[this.item.groupIndex].questions[this.item.qIndex].config.options[optionIndex].text = text; this.updateGroups(ng); },
-			addOption() { const ng = JSON.parse(JSON.stringify(this.groups)); const opts = ng[this.item.groupIndex].questions[this.item.qIndex].config.options; opts.push({ id: `opt_${Date.now()}`, text: 'Lựa chọn mới' }); this.updateGroups(ng); },
+			addOption() { const ng = JSON.parse(JSON.stringify(this.groups)); ng[this.item.groupIndex].questions[this.item.qIndex].config.options.push({ id: `opt_${Date.now()}`, text: 'Lựa chọn mới' }); this.updateGroups(ng); },
 			removeOption(optionIndex) {
 				console.log('optionIndex', optionIndex)
 				const ng = JSON.parse(JSON.stringify(this.groups));

@@ -1,14 +1,20 @@
 -- =============================================
--- 1. Create Ticket
+-- FINAL VERSION (Correct Actor vs Owner)
+-- Actor = @SYS_USERID
+-- Owner = AssignedTo
 -- =============================================
-CREATE OR ALTER PROC [dbo].[spAPI_Ticket_Create]
-    @Title          NVARCHAR(255),
-    @Description    NVARCHAR(MAX),
-    @Url            NVARCHAR(1000) = NULL,
-    @Browser        NVARCHAR(255) = NULL,
-    @Os             NVARCHAR(255) = NULL,
+
+-- =============================================
+-- 1. CREATE TICKET
+-- =============================================
+CREATE OR ALTER PROC spAPI_Ticket_Create
+    @Title NVARCHAR(255),
+    @Description NVARCHAR(MAX),
+    @Url NVARCHAR(1000) = NULL,
+    @Browser NVARCHAR(255) = NULL,
+    @Os NVARCHAR(255) = NULL,
     @AttachmentJSON NVARCHAR(MAX) = NULL,
-    @SYS_USERID     VARCHAR(9)
+    @SYS_USERID VARCHAR(9)
 AS
 BEGIN
     SET NOCOUNT ON;
@@ -28,183 +34,159 @@ BEGIN
 
     SET @TicketID = SCOPE_IDENTITY();
 
-    -- Attachments
     IF (@AttachmentJSON IS NOT NULL AND LTRIM(RTRIM(@AttachmentJSON)) <> '')
     BEGIN
         INSERT INTO TicketAttachments (
             TicketID, FileID, JSON_Annotation, CreateUser, CreateTime
         )
-        SELECT 
-            @TicketID,
-            j.FileID,
-            j.JSON_Annotation,
-            @SYS_USERID,
-            GETDATE()
+        SELECT @TicketID, FileID, JSON_Annotation, @SYS_USERID, GETDATE()
         FROM OPENJSON(@AttachmentJSON)
         WITH (
             FileID VARCHAR(100) '$.FileID',
             JSON_Annotation NVARCHAR(MAX) '$.Annotation'
-        ) AS j
-        WHERE j.FileID IS NOT NULL AND j.FileID <> '';
+        );
     END
 
-    -- LOG
-    INSERT INTO TicketLogs (
-        TicketID, Action, NewValue, CreateUser, CreateTime
-    )
-    VALUES (
-        @TicketID, 'CREATE', @Title, @SYS_USERID, GETDATE()
-    );
+    -- LOG (actor = SYS_USERID)
+    INSERT INTO TicketLogs (TicketID, Action, NewValue, CreateUser, CreateTime)
+    VALUES (@TicketID, 'CREATE', @Title, @SYS_USERID, GETDATE());
 
     SELECT @TicketID AS TicketID;
 END
 GO
 
 -- =============================================
--- 2. Assign Ticket
+-- 2. ADD COMMENT (actor only)
 -- =============================================
-CREATE OR ALTER PROC [dbo].[spAPI_Ticket_Assign]
-    @TicketID     INT,
-    @AssignedTo   VARCHAR(9),
-    @SYS_USERID   VARCHAR(9)
+CREATE OR ALTER PROC spAPI_Ticket_AddComment
+    @TicketID INT,
+    @Content NVARCHAR(MAX),
+    @IsInternal BIT = 0,
+    @IsIT BIT = 0,
+    @SYS_USERID VARCHAR(9)
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    DECLARE @IsSeenByUser BIT = 0;
+    DECLARE @IsSeenByIT BIT = 0;
+
+    IF (@IsInternal = 1)
+    BEGIN
+        SET @IsSeenByUser = 1;
+        SET @IsSeenByIT = 1;
+    END
+    ELSE IF (@IsIT = 1)
+    BEGIN
+        SET @IsSeenByIT = 1;
+        SET @IsSeenByUser = 0;
+    END
+    ELSE
+    BEGIN
+        SET @IsSeenByIT = 0;
+        SET @IsSeenByUser = 1;
+    END
+
+    INSERT INTO TicketComments (
+        TicketID, Content, IsInternal,
+        IsSeenByUser, IsSeenByIT,
+        CreateUser, CreateTime
+    )
+    VALUES (
+        @TicketID, @Content, @IsInternal,
+        @IsSeenByUser, @IsSeenByIT,
+        @SYS_USERID, GETDATE()
+    );
+
+    -- LOG (actor)
+    INSERT INTO TicketLogs (TicketID, Action, Note, CreateUser, CreateTime)
+    VALUES (@TicketID, 'COMMENT', @Content, @SYS_USERID, GETDATE());
+END
+GO
+
+-- =============================================
+-- 3. ASSIGN (actor assigns owner)
+-- =============================================
+CREATE OR ALTER PROC spAPI_Ticket_Assign
+    @TicketID INT,
+    @AssignedTo VARCHAR(9),
+    @SYS_USERID VARCHAR(9)
 AS
 BEGIN
     SET NOCOUNT ON;
 
     DECLARE @OldAssignedTo VARCHAR(9);
 
-    SELECT @OldAssignedTo = AssignedTo
-    FROM Tickets
-    WHERE TicketID = @TicketID;
+    SELECT @OldAssignedTo = AssignedTo FROM Tickets WHERE TicketID = @TicketID;
 
-    UPDATE t
-    SET 
-        t.AssignedTo = @AssignedTo,
-        t.Status = 'IN_PROGRESS',
-        t.UpdateUser = @SYS_USERID,
-        t.UpdateTime = GETDATE()
-    FROM Tickets t
-    WHERE t.TicketID = @TicketID
-      AND t.IsDeleted = 0;
+    UPDATE Tickets
+    SET AssignedTo = @AssignedTo,
+        Status = 'IN_PROGRESS',
+        UpdateUser = @SYS_USERID,
+        UpdateTime = GETDATE()
+    WHERE TicketID = @TicketID AND IsDeleted = 0;
 
-    -- LOG
-    INSERT INTO TicketLogs (
-        TicketID, Action, OldValue, NewValue, CreateUser, CreateTime
-    )
-    VALUES (
-        @TicketID, 'ASSIGN', @OldAssignedTo, @AssignedTo, @SYS_USERID, GETDATE()
-    );
+    -- LOG (actor = SYS_USERID, owner change tracked)
+    INSERT INTO TicketLogs (TicketID, Action, OldValue, NewValue, CreateUser, CreateTime)
+    VALUES (@TicketID, 'ASSIGN', @OldAssignedTo, @AssignedTo, @SYS_USERID, GETDATE());
 END
 GO
 
 -- =============================================
--- 3. Update Status
+-- 4. UPDATE STATUS
 -- =============================================
-CREATE OR ALTER PROC [dbo].[spAPI_Ticket_UpdateStatus]
-    @TicketID     INT,
-    @Status       VARCHAR(20),
-    @SYS_USERID   VARCHAR(9)
+CREATE OR ALTER PROC spAPI_Ticket_UpdateStatus
+    @TicketID INT,
+    @Status VARCHAR(20),
+    @SYS_USERID VARCHAR(9)
 AS
 BEGIN
     SET NOCOUNT ON;
 
     DECLARE @OldStatus VARCHAR(20);
 
-    SELECT @OldStatus = Status
-    FROM Tickets
+    SELECT @OldStatus = Status FROM Tickets WHERE TicketID = @TicketID;
+
+    UPDATE Tickets
+    SET Status = @Status,
+        UpdateUser = @SYS_USERID,
+        UpdateTime = GETDATE()
+    WHERE TicketID = @TicketID AND IsDeleted = 0;
+
+    INSERT INTO TicketLogs (TicketID, Action, OldValue, NewValue, CreateUser, CreateTime)
+    VALUES (@TicketID, 'STATUS', @OldStatus, @Status, @SYS_USERID, GETDATE());
+END
+GO
+
+-- =============================================
+-- 5. DELETE
+-- =============================================
+CREATE OR ALTER PROC spAPI_Ticket_Delete
+    @TicketID INT,
+    @SYS_USERID VARCHAR(9)
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    UPDATE Tickets
+    SET IsDeleted = 1,
+        UpdateUser = @SYS_USERID,
+        UpdateTime = GETDATE()
     WHERE TicketID = @TicketID;
 
-    UPDATE t
-    SET 
-        t.Status = @Status,
-        t.UpdateUser = @SYS_USERID,
-        t.UpdateTime = GETDATE()
-    FROM Tickets t
-    WHERE t.TicketID = @TicketID
-      AND t.IsDeleted = 0;
-
-    -- LOG
-    INSERT INTO TicketLogs (
-        TicketID, Action, OldValue, NewValue, CreateUser, CreateTime
-    )
-    VALUES (
-        @TicketID, 'STATUS', @OldStatus, @Status, @SYS_USERID, GETDATE()
-    );
+    INSERT INTO TicketLogs (TicketID, Action, CreateUser, CreateTime)
+    VALUES (@TicketID, 'DELETE', @SYS_USERID, GETDATE());
 END
 GO
 
 -- =============================================
--- 4. Add Comment
+-- 6. GET LIST
 -- =============================================
-CREATE OR ALTER PROC [dbo].[spAPI_Ticket_AddComment]
-    @TicketID     INT,
-    @Content      NVARCHAR(MAX),
-    @IsInternal   BIT = 0,
-    @SYS_USERID   VARCHAR(9)
-AS
-BEGIN
-    SET NOCOUNT ON;
-
-    INSERT INTO TicketComments (
-        TicketID,
-        Content,
-        IsInternal,
-        CreateUser,
-        CreateTime
-    )
-    VALUES (
-        @TicketID,
-        @Content,
-        @IsInternal,
-        @SYS_USERID,
-        GETDATE()
-    );
-
-    -- LOG
-    INSERT INTO TicketLogs (
-        TicketID, Action, Note, CreateUser, CreateTime
-    )
-    VALUES (
-        @TicketID, 'COMMENT', @Content, @SYS_USERID, GETDATE()
-    );
-END
-GO
-
--- =============================================
--- 5. Delete Ticket
--- =============================================
-CREATE OR ALTER PROC [dbo].[spAPI_Ticket_Delete]
-    @TicketID     INT,
-    @SYS_USERID   VARCHAR(9)
-AS
-BEGIN
-    SET NOCOUNT ON;
-
-    UPDATE t
-    SET 
-        t.IsDeleted = 1,
-        t.UpdateUser = @SYS_USERID,
-        t.UpdateTime = GETDATE()
-    FROM Tickets t
-    WHERE t.TicketID = @TicketID;
-
-    -- LOG
-    INSERT INTO TicketLogs (
-        TicketID, Action, CreateUser, CreateTime
-    )
-    VALUES (
-        @TicketID, 'DELETE', @SYS_USERID, GETDATE()
-    );
-END
-GO
-
--- =============================================
--- 6. Get List (GIỮ NGUYÊN)
--- =============================================
-CREATE OR ALTER PROC [dbo].[spAPI_Ticket_GetList]
-    @Status       VARCHAR(20) = NULL,
-    @AssignedTo   VARCHAR(9) = NULL,
-    @CreateUser   VARCHAR(9) = NULL
+CREATE OR ALTER PROC spAPI_Ticket_GetList
+    @Status VARCHAR(20) = NULL,
+    @AssignedTo VARCHAR(9) = NULL,
+    @CreateUser VARCHAR(9) = NULL,
+    @IsIT BIT = 0
 AS
 BEGIN
     SET NOCOUNT ON;
@@ -215,48 +197,111 @@ BEGIN
         t.Status,
         t.AssignedTo,
         t.CreateUser,
-        t.CreateTime
+        t.CreateTime,
+        (SELECT COUNT(*) FROM TicketComments c
+         WHERE c.TicketID = t.TicketID
+           AND c.IsSeenByIT = 0) AS UnreadIT,
+        (SELECT COUNT(*) FROM TicketComments c
+         WHERE c.TicketID = t.TicketID
+           AND c.IsSeenByUser = 0
+           AND c.IsInternal = 0) AS UnreadUser
     FROM Tickets t
     WHERE t.IsDeleted = 0
       AND (@Status IS NULL OR t.Status = @Status)
       AND (@AssignedTo IS NULL OR t.AssignedTo = @AssignedTo)
       AND (@CreateUser IS NULL OR t.CreateUser = @CreateUser)
+      -- User chỉ thấy ticket còn unread, IT thấy tất cả
+      AND (
+          @IsIT = 1
+          OR (SELECT COUNT(*) FROM TicketComments c
+              WHERE c.TicketID = t.TicketID
+                AND c.IsSeenByUser = 0
+                AND c.IsInternal = 0) > 0
+      )
     ORDER BY t.CreateTime DESC;
 END
 GO
 
 -- =============================================
--- 7. Get Detail (GIỮ NGUYÊN)
+-- 7. GET DETAIL
 -- =============================================
-CREATE OR ALTER PROC [dbo].[spAPI_Ticket_GetDetail]
+CREATE OR ALTER PROC spAPI_Ticket_GetDetail
     @TicketID INT,
     @IsIT BIT = 0
 AS
 BEGIN
     SET NOCOUNT ON;
 
-    SELECT * 
-    FROM Tickets
-    WHERE TicketID = @TicketID AND IsDeleted = 0;
+    SELECT * FROM Tickets WHERE TicketID = @TicketID AND IsDeleted = 0;
 
-    SELECT *
-    FROM TicketAttachments
-    WHERE TicketID = @TicketID AND IsDeleted = 0;
+    SELECT * FROM TicketAttachments WHERE TicketID = @TicketID AND IsDeleted = 0;
 
-    SELECT *
-    FROM TicketComments
+    SELECT * FROM TicketComments
     WHERE TicketID = @TicketID
       AND IsDeleted = 0
       AND (@IsIT = 1 OR IsInternal = 0)
     ORDER BY CreateTime ASC;
 
-    -- LOGS cho IT xem
     IF (@IsIT = 1)
     BEGIN
-        SELECT *
-        FROM TicketLogs
+        SELECT * FROM TicketLogs
         WHERE TicketID = @TicketID
         ORDER BY CreateTime DESC;
+    END
+END
+GO
+
+-- =============================================
+-- 8. MARK AS SEEN
+-- =============================================
+CREATE OR ALTER PROC spAPI_Ticket_MarkAsSeen
+    @TicketID INT,
+    @IsIT BIT,
+    @SYS_USERID VARCHAR(9)
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    IF (@IsIT = 1)
+    BEGIN
+        UPDATE TicketComments
+        SET IsSeenByIT = 1
+        WHERE TicketID = @TicketID AND IsSeenByIT = 0;
+    END
+    ELSE
+    BEGIN
+        UPDATE TicketComments
+        SET IsSeenByUser = 1
+        WHERE TicketID = @TicketID
+          AND IsSeenByUser = 0
+          AND IsInternal = 0;
+    END
+END
+GO
+
+-- =============================================
+-- 9. GET UNREAD COUNT
+-- =============================================
+CREATE OR ALTER PROC spAPI_Ticket_GetUnreadCount
+    @TicketID INT,
+    @IsIT BIT
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    IF (@IsIT = 1)
+    BEGIN
+        SELECT COUNT(*) AS UnreadCount
+        FROM TicketComments
+        WHERE TicketID = @TicketID AND IsSeenByIT = 0;
+    END
+    ELSE
+    BEGIN
+        SELECT COUNT(*) AS UnreadCount
+        FROM TicketComments
+        WHERE TicketID = @TicketID
+          AND IsSeenByUser = 0
+          AND IsInternal = 0;
     END
 END
 GO

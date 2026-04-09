@@ -2,7 +2,8 @@
 	<div>
 		<!-- Alert banner: có ticket đang xử lý -->
 		<v-alert v-for="ticket in DSActive" :key="ticket.TicketID" :color="alertColor(ticket.Status)" variant="tonal"
-			density="compact" border="start" class="mb-2 cursor-pointer" @click="openDetail(ticket)">
+			density="compact" border="start" class="mb-2 cursor-pointer" closable
+			@click:close.stop="dismissTicket(ticket.TicketID)" @click="openDetail(ticket)">
 			<template #prepend>
 				<v-icon>{{ alertIcon(ticket.Status) }}</v-icon>
 			</template>
@@ -63,6 +64,20 @@
 							<p class="text-body-2 ma-0">{{ c.Content }}</p>
 						</div>
 					</template>
+
+					<!-- Reply box -->
+					<v-divider class="my-3" />
+					<p class="text-caption font-weight-bold text-medium-emphasis mb-2">Phản hồi của bạn</p>
+					<v-textarea v-model="detailDialog.newComment" rows="2" auto-grow hide-details
+						placeholder="Nhập nội dung phản hồi..." variant="outlined" density="compact" />
+					<div class="d-flex justify-end mt-2">
+						<v-btn color="primary" size="small" variant="tonal"
+							:loading="detailDialog.isSending"
+							:disabled="!detailDialog.newComment?.trim()"
+							@click="sendComment">
+							<v-icon start>mdi-send</v-icon>Gửi
+						</v-btn>
+					</div>
 				</v-card-text>
 			</v-card>
 		</v-dialog>
@@ -74,16 +89,19 @@ export default {
 	data() {
 		return {
 			DS: [],
+			dismissed: [],
 			detailDialog: {
 				show: false,
 				ticket: null,
 				comments: [],
+				newComment: '',
+				isSending: false,
 			},
 		}
 	},
 	computed: {
 		DSActive() {
-			return this.DS.filter(t => t.Status !== 'OPEN' && t.Status !== 'CANCELLED')
+			return this.DS.filter(t => t.Status !== 'OPEN' && t.Status !== 'CANCELLED' && !this.dismissed.includes(t.TicketID))
 		},
 	},
 	mounted() {
@@ -103,7 +121,35 @@ export default {
 			}, { cache: false })
 			this.detailDialog.ticket = res?.[0]?.[0] ?? item
 			this.detailDialog.comments = res?.[2] ?? []
+			this.detailDialog.newComment = ''
 			this.detailDialog.show = true
+			ajaxCALL('lms/Ticket_MarkAsSeen', { TicketID: item.TicketID, IsIT: 0 }, () => {
+				const t = this.DS.find(x => x.TicketID === item.TicketID)
+				if (t) t.UnreadUser = 0
+			})
+		},
+		dismissTicket(ticketID) {
+			const t = this.DS.find(x => x.TicketID === ticketID)
+			if (t) t.UnreadUser = 0
+			ajaxCALL('lms/Ticket_MarkAsSeen', { TicketID: ticketID, IsIT: 0 }, () => {})
+		},
+		async sendComment() {
+			if (!this.detailDialog.newComment?.trim()) return
+			this.detailDialog.isSending = true
+			const res = await fetchPromise('lms/Ticket_AddComment', {
+				TicketID: this.detailDialog.ticket.TicketID,
+				Content: this.detailDialog.newComment.trim(),
+				IsInternal: 0,
+			}, { cache: false })
+			this.detailDialog.isSending = false
+			if (res) {
+				this.detailDialog.comments.push({
+					Content: this.detailDialog.newComment.trim(),
+					CreatedByName: null,
+					CreatedAt: new Date().toISOString(),
+				})
+				this.detailDialog.newComment = ''
+			}
 		},
 		statusLabel(status) {
 			const map = { OPEN: 'Mới', IN_PROGRESS: 'Đang xử lý', CLOSED: 'Đã giải quyết', CANCELLED: 'Đã hủy' }
@@ -124,3 +170,4 @@ export default {
 	},
 }
 </script>
+

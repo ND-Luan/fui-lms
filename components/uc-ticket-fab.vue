@@ -488,6 +488,7 @@ export default {
 			this.isLoadingHistory = true
 			this.history = await fetchPromise('lms/Ticket_GetList', {
 				CreateUser: vueData.user.UserID,
+				IsIT: 1,
 			}, { cache: false })
 			this.isLoadingHistory = false
 		},
