@@ -8,7 +8,7 @@
 						<v-row align="center">
 							<v-col cols="12" sm="3">
 								<v-select v-model="filterStatus" label="Trạng thái" :items="DSStatus" item-title="label"
-									item-value="value" clearable />
+								item-value="value" />
 							</v-col>
 							<v-col class="d-flex align-center ga-2 flex-wrap">
 								<v-btn variant="outlined" color="primary" @click="getDS">
@@ -130,6 +130,7 @@ export default {
 			DS: [],
 			filterStatus: null,
 			DSStatus: [
+				{ label: 'Tất cả', value: null },
 				{ label: 'Mới', value: 'OPEN' },
 				{ label: 'Đang xử lý', value: 'IN_PROGRESS' },
 				{ label: 'Đã đóng', value: 'CLOSED' },
@@ -199,7 +200,7 @@ export default {
 			this.tokenDialog.show = false
 		},
 		async getDS() {
-			const res = await fetchPromise('lms/Ticket_GetList', { IsIT: 1 }, { cache: false })
+			const res = await fetchPromise('lms/Ticket_GetList', { IsIT: true }, { cache: false })
 			this.DS = res ?? []
 		},
 		openDetail(item) {
