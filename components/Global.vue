@@ -6,6 +6,7 @@
 		<GlobalUiSnackbar ref="snackbarRef" />
 		<GlobalIframeWindow ref="iframeWin" />
 		<GlobalConfirmDialog ref="confirmRef" />
+		<uc-ticket-fab />
 		<v-responsive>
 			<v-app theme="light">
 				<div ref="headerRef">
