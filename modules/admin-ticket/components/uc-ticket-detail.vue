@@ -181,7 +181,7 @@ export default {
 			this.newComment = ''
 			this.isInternal = false
 			const res = await fetchPromise('lms/Ticket_GetDetail', { TicketID: ticketId, IsIT: 1 }, { cache: false })
-			this.ticket = res?.[0] ?? null
+			this.ticket = res?.[0]?.[0] ?? null
 			this.attachments = res?.[1] ?? []
 			this.comments = res?.[2] ?? []
 			if (this.ticket) {
@@ -200,7 +200,7 @@ export default {
 				Status: newStatus,
 			}, { cache: false })
 			if (res) {
-				this.snackbarRef.show({ message: 'Đã cập nhật trạng thái', color: 'success' })
+				this.snackbarRef.value.showSnackbar({ message: 'Đã cập nhật trạng thái', color: 'success' })
 				this.ticket.Status = newStatus
 				this.$emit('updated')
 			}
@@ -212,7 +212,7 @@ export default {
 				AssignedTo: this.editAssignedTo.trim(),
 			}, { cache: false })
 			if (res) {
-				this.snackbarRef.show({ message: 'Đã gán người xử lý', color: 'success' })
+				this.snackbarRef.value.showSnackbar({ message: 'Đã gán người xử lý', color: 'success' })
 				this.ticket.AssignedTo = this.editAssignedTo.trim()
 				this.editStatus = 'IN_PROGRESS'
 				this.$emit('updated')
@@ -228,7 +228,7 @@ export default {
 			}, { cache: false })
 			this.isSendingComment = false
 			if (res) {
-				this.snackbarRef.show({ message: 'Đã gửi phản hồi', color: 'success' })
+				this.snackbarRef.value.showSnackbar({ message: 'Đã gửi phản hồi', color: 'success' })
 				this.comments.push({
 					Content: this.newComment.trim(),
 					IsInternal: this.isInternal ? 1 : 0,

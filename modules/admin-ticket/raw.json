@@ -3,7 +3,7 @@
     "watch": {},
     "controls": [
         {
-            "prop": "fluid pa-2",
+            "prop": "fluid pa-0",
             "rows": [
                 {
                     "prop": ":no-gutters='true'",

@@ -143,10 +143,10 @@ export default {
       this.DS = res.data ?? []
     },
     async onSave() {
-      const ok = await confirm({ title: 'Xác nhận lưu?' })
+      const ok = await this.confirmRef.value.show({ title: 'Xác nhận lưu?' })
       if (!ok) return
       ajaxCALL('module/save', { ...this.form }, () => {
-        this.snackbarRef.show({ message: 'Lưu thành công', color: 'success' })
+        this.snackbarRef.value.showSnackbar({ message: 'Lưu thành công', color: 'success' })
         this.getDS()
       })
     },
@@ -216,6 +216,24 @@ EnumTinhTrang: {
   ChuaLuu: 0, LuuTam: 1, GVBM_GuiDiem: 2, GVCN_TuChoi: 3,
   GVCN_GuiDiem: 4, TT_TuChoi: 5, TT_GuiBGH: 6, BGH_TuChoi: 7, BGH_Duyet: 8,
 }
+```
+
+### CRUD action column
+Action buttons in table rows must be on a **single row** — wrap in `<div class="d-flex align-center ga-1">`. Use `mdi-pencil` for edit/detail, `mdi-delete-outline` for delete. Never use `mdi-eye` or `mdi-eye-outline` for opening a detail dialog.
+
+```vue
+<template #item.actions="{ item }">
+  <div class="d-flex align-center ga-1">
+    <v-btn icon size="small" variant="text" color="primary" @click="openDetail(item)">
+      <v-icon>mdi-pencil</v-icon>
+      <v-tooltip activator="parent" location="top">Chỉnh sửa</v-tooltip>
+    </v-btn>
+    <v-btn icon size="small" variant="text" color="error" @click="deleteItem(item)">
+      <v-icon>mdi-delete-outline</v-icon>
+      <v-tooltip activator="parent" location="top">Xóa</v-tooltip>
+    </v-btn>
+  </div>
+</template>
 ```
 
 ### TinhTrang chip
@@ -318,7 +336,7 @@ fetchBatchPromise([{ url, params }, ...], { forceRefresh })
 
 ### UI helpers
 ```javascript
-confirm({ title, action })        // Confirmation dialog before mutation
+confirm({ title, action })        // Legacy — prefer this.confirmRef.value.show({ title }) instead
 renderText(capID)                 // e.g. "Cấp 1" from capID int
 getTitlePageByURL(path)           // Page title from URL
 IsCheck_NotRoleParent(user)       // Guard: redirects if parent role

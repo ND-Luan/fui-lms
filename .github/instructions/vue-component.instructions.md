@@ -167,17 +167,35 @@ Use for all modal dialogs instead of raw `v-dialog`:
 </uc-dialog>
 ```
 
-### `GlobalConfirmDialog` — use `confirm()` for mutations
-Always call `confirm()` before any insert/update/delete operation. It maps to `GlobalConfirmDialog` and is available as a global helper:
+### `GlobalConfirmDialog` — use `confirmRef` for mutations
+Always call `this.confirmRef.value.show()` before any insert/update/delete operation. `confirmRef` is injected and wired to `GlobalConfirmDialog`:
 ```js
 async onSave() {
-  const ok = await confirm({ title: 'Xác nhận lưu?' })
+  const ok = await this.confirmRef.value.show({ title: 'Xác nhận lưu?' })
   if (!ok) return
-  ajaxCALL(...)
+  // ... thực hiện mutation
 }
 ```
-- **Never** use `window.confirm()` or inline dialog hacks for confirmation
-- `confirm()` is already wired to `GlobalConfirmDialog` via the global runtime — no import needed
+- **Never** use `window.confirm()`, the global `confirm()`, or inline dialog hacks for confirmation
+- `confirmRef` must be in `inject: ['snackbarRef', 'iframeRef', 'confirmRef']`
+
+### CRUD action column
+Action buttons (edit, delete, view…) in table rows must always be on a **single row** — use `d-flex align-center` wrapper with `ga-1` gap. Use `mdi-pencil` for edit/open-detail, `mdi-delete-outline` for delete. Never use `mdi-eye` or `mdi-eye-outline` for opening a detail/edit dialog.
+
+```vue
+<template #item.actions="{ item }">
+  <div class="d-flex align-center ga-1">
+    <v-btn icon size="small" variant="text" color="primary" @click="openDetail(item)">
+      <v-icon>mdi-pencil</v-icon>
+      <v-tooltip activator="parent" location="top">Chỉnh sửa</v-tooltip>
+    </v-btn>
+    <v-btn icon size="small" variant="text" color="error" @click="deleteItem(item)">
+      <v-icon>mdi-delete-outline</v-icon>
+      <v-tooltip activator="parent" location="top">Xóa</v-tooltip>
+    </v-btn>
+  </div>
+</template>
+```
 
 ### TinhTrang chip pattern
 ```vue

@@ -1,14 +1,8 @@
 <template>
 	<div v-if="vueData.user && vueData.user.UserID">
 		<!-- FAB Button -->
-		<v-btn
-			icon
-			color="error"
-			size="large"
-			style="position: fixed; bottom: 80px; right: 24px; z-index: 9999;"
-			elevation="4"
-			@click="openDialog"
-		>
+		<v-btn icon color="error" size="small" style="position: fixed; bottom: 80px; right: 24px; z-index: 9999;"
+			elevation="4" @click="openDialog">
 			<v-icon>mdi-bug-outline</v-icon>
 			<v-tooltip activator="parent" location="left">Báo lỗi</v-tooltip>
 		</v-btn>
@@ -33,63 +27,36 @@
 				<v-card-text style="max-height: 520px; overflow-y: auto; padding: 16px 24px;">
 					<!-- Tab 1: Create -->
 					<div v-if="activeTab === 'create'">
-						<v-text-field
-							v-model="form.Title"
-							label="Tiêu đề lỗi *"
-							:rules="[v => !!v || 'Bắt buộc']"
-							hide-details="auto"
-							class="mb-3"
-						/>
-						<v-textarea
-							v-model="form.Description"
-							label="Mô tả chi tiết *"
-							:rules="[v => !!v || 'Bắt buộc']"
-							hide-details="auto"
-							rows="4"
-							class="mb-3"
-						/>
+						<v-text-field v-model="form.Title" label="Tiêu đề lỗi *" :rules="[v => !!v || 'Bắt buộc']"
+							hide-details="auto" class="mb-3" />
+						<v-textarea v-model="form.Description" label="Mô tả chi tiết *"
+							:rules="[v => !!v || 'Bắt buộc']" hide-details="auto" rows="4" class="mb-3" />
 
 						<!-- Attachment upload -->
 						<div class="mb-3">
 							<p class="text-body-2 mb-1">Ảnh đính kèm (tùy chọn)</p>
-							<v-btn variant="outlined" size="small" @click="$refs.fileInput.click()" :loading="isUploading">
+							<v-btn variant="outlined" size="small" @click="$refs.fileInput.click()"
+								:loading="isUploading">
 								<v-icon start>mdi-image-plus</v-icon>
 								Chọn ảnh
 							</v-btn>
-							<input ref="fileInput" type="file" accept="image/*" multiple style="display:none;" @change="handleFileChange" />
+							<input ref="fileInput" type="file" accept="image/*" multiple style="display:none;"
+								@change="handleFileChange" />
 
 							<div v-if="attachments.length" class="d-flex flex-wrap ga-2 mt-2">
-								<div
-									v-for="(att, i) in attachments"
-									:key="i"
-									style="position: relative; width: 72px; height: 72px;"
-								>
-									<v-img
-										:src="att.previewUrl"
-										width="72"
-										height="72"
-										cover
+								<div v-for="(att, i) in attachments" :key="i"
+									style="position: relative; width: 72px; height: 72px;">
+									<v-img :src="att.previewUrl" width="72" height="72" cover
 										style="border-radius: 6px; cursor: pointer;"
-										@click="previewImage(att.fileId)"
-									/>
-									<v-btn
-										icon
-										size="x-small"
-										variant="elevated"
-										color="info"
+										@click="previewImage(att.fileId)" />
+									<v-btn icon size="x-small" variant="elevated" color="info"
 										style="position: absolute; bottom: -6px; left: -6px;"
-										@click.stop="openAnnotate(i)"
-									>
+										@click.stop="openAnnotate(i)">
 										<v-icon size="12">mdi-pencil</v-icon>
 									</v-btn>
-									<v-btn
-										icon
-										size="x-small"
-										variant="elevated"
-										color="error"
+									<v-btn icon size="x-small" variant="elevated" color="error"
 										style="position: absolute; top: -6px; right: -6px;"
-										@click.stop="removeAttachment(i)"
-									>
+										@click.stop="removeAttachment(i)">
 										<v-icon size="12">mdi-close</v-icon>
 									</v-btn>
 								</div>
@@ -115,18 +82,15 @@
 						<div v-if="isLoadingHistory" class="d-flex justify-center py-8">
 							<v-progress-circular indeterminate color="primary" />
 						</div>
-						<div v-else-if="history.length === 0" class="d-flex flex-column align-center py-8 text-medium-emphasis">
+						<div v-else-if="history.length === 0"
+							class="d-flex flex-column align-center py-8 text-medium-emphasis">
 							<v-icon size="40" class="mb-2 opacity-40">mdi-ticket-outline</v-icon>
 							<p class="text-body-2">Chưa có lỗi nào được báo</p>
 						</div>
 						<v-list v-else lines="two">
-							<v-list-item
-								v-for="item in history"
-								:key="item.TicketID"
-								:subtitle="formatDate(item.CreateTime)"
-								@click="openTicketDetail(item)"
-								style="cursor: pointer;"
-							>
+							<v-list-item v-for="item in history" :key="item.TicketID"
+								:subtitle="formatDate(item.CreateTime)" @click="openTicketDetail(item)"
+								style="cursor: pointer;">
 								<template #title>
 									<span class="font-weight-medium">{{ item.Title }}</span>
 								</template>
@@ -144,11 +108,12 @@
 
 				<v-card-actions>
 					<v-spacer />
-					<v-btn v-if="activeTab === 'create'" color="primary" variant="elevated" :loading="isSubmitting" @click="submitTicket">
+					<v-btn variant="text" @click="isShow = false">Đóng</v-btn>
+					<v-btn v-if="activeTab === 'create'" color="primary" variant="elevated" :loading="isSubmitting"
+						@click="submitTicket">
 						<v-icon start>mdi-send</v-icon>
 						Gửi báo lỗi
 					</v-btn>
-					<v-btn variant="text" @click="isShow = false">Đóng</v-btn>
 				</v-card-actions>
 			</v-card>
 		</v-dialog>
@@ -180,21 +145,15 @@
 
 				<v-card-text style="max-height: 420px; overflow-y: auto; padding: 16px 24px;">
 					<p class="text-body-2 mb-2">{{ detailDialog.ticket.Description }}</p>
-					<p class="text-caption text-medium-emphasis mb-4">{{ formatDate(detailDialog.ticket.CreateTime) }}</p>
+					<p class="text-caption text-medium-emphasis mb-4">{{ formatDate(detailDialog.ticket.CreateTime) }}
+					</p>
 
 					<!-- Attachments -->
 					<div v-if="detailDialog.attachments.length" class="mb-3">
 						<p class="text-body-2 font-weight-medium mb-1">Ảnh đính kèm</p>
 						<div class="d-flex flex-wrap ga-1">
-							<v-chip
-								v-for="(att, i) in detailDialog.attachments"
-								:key="i"
-								size="small"
-								color="primary"
-								variant="tonal"
-								style="cursor: pointer;"
-								@click="previewImage(att.FileID)"
-							>
+							<v-chip v-for="(att, i) in detailDialog.attachments" :key="i" size="small" color="primary"
+								variant="tonal" style="cursor: pointer;" @click="previewImage(att.FileID)">
 								<v-icon start size="14">mdi-image-outline</v-icon>
 								{{ att.FileName || ('Ảnh ' + (i + 1)) }}
 							</v-chip>
@@ -208,22 +167,19 @@
 						Chưa có phản hồi
 					</div>
 					<div v-for="(c, i) in detailDialog.comments" :key="i" class="mb-3 pa-2 rounded bg-grey-lighten-4">
-						<p class="text-caption font-weight-medium">{{ c.CreateUser }} · {{ formatDate(c.CreateTime) }}</p>
+						<p class="text-caption font-weight-medium">{{ c.CreateUser }} · {{ formatDate(c.CreateTime) }}
+						</p>
 						<p class="text-body-2">{{ c.Content }}</p>
 					</div>
 
 					<!-- Add comment -->
-					<v-textarea
-						v-model="detailDialog.newComment"
-						label="Gửi phản hồi"
-						rows="2"
-						hide-details
-						class="mt-2"
-					/>
+					<v-textarea v-model="detailDialog.newComment" label="Gửi phản hồi" rows="2" hide-details
+						class="mt-2" />
 				</v-card-text>
 
 				<v-card-actions>
-					<v-btn color="primary" variant="outlined" :loading="detailDialog.isSendingComment" @click="sendComment">
+					<v-btn color="primary" variant="outlined" :loading="detailDialog.isSendingComment"
+						@click="sendComment">
 						Gửi phản hồi
 					</v-btn>
 					<v-spacer />
@@ -236,31 +192,47 @@
 			<v-card>
 				<v-card-title class="d-flex align-center pa-2 ga-2 flex-wrap">
 					<v-btn-toggle v-model="annotateDialog.tool" mandatory density="compact" color="primary">
-						<v-btn value="select" size="small"><v-icon size="16">mdi-cursor-move</v-icon><v-tooltip activator="parent">Chọn / kéo</v-tooltip></v-btn>
-						<v-btn value="pen" size="small"><v-icon size="16">mdi-pencil</v-icon><v-tooltip activator="parent">Bút tự do</v-tooltip></v-btn>
-						<v-btn value="rect" size="small"><v-icon size="16">mdi-rectangle-outline</v-icon><v-tooltip activator="parent">Hình chữ nhật</v-tooltip></v-btn>
-						<v-btn value="circle" size="small"><v-icon size="16">mdi-circle-outline</v-icon><v-tooltip activator="parent">Hình tròn</v-tooltip></v-btn>
-						<v-btn value="arrow" size="small"><v-icon size="16">mdi-arrow-top-right</v-icon><v-tooltip activator="parent">Mũi tên</v-tooltip></v-btn>
-						<v-btn value="text" size="small"><v-icon size="16">mdi-format-text</v-icon><v-tooltip activator="parent">Văn bản</v-tooltip></v-btn>
+						<v-btn value="select" size="small"><v-icon size="16">mdi-cursor-move</v-icon><v-tooltip
+								activator="parent">Chọn / kéo</v-tooltip></v-btn>
+						<v-btn value="pen" size="small"><v-icon size="16">mdi-pencil</v-icon><v-tooltip
+								activator="parent">Bút
+								tự do</v-tooltip></v-btn>
+						<v-btn value="rect" size="small"><v-icon size="16">mdi-rectangle-outline</v-icon><v-tooltip
+								activator="parent">Hình chữ nhật</v-tooltip></v-btn>
+						<v-btn value="circle" size="small"><v-icon size="16">mdi-circle-outline</v-icon><v-tooltip
+								activator="parent">Hình tròn</v-tooltip></v-btn>
+						<v-btn value="arrow" size="small"><v-icon size="16">mdi-arrow-top-right</v-icon><v-tooltip
+								activator="parent">Mũi tên</v-tooltip></v-btn>
+						<v-btn value="text" size="small"><v-icon size="16">mdi-format-text</v-icon><v-tooltip
+								activator="parent">Văn bản</v-tooltip></v-btn>
 					</v-btn-toggle>
-					<input type="color" v-model="annotateDialog.color" title="Màu" style="width:30px;height:30px;border:none;border-radius:4px;cursor:pointer;padding:2px;" />
-					<div v-if="annotateDialog.tool !== 'text' && annotateDialog.tool !== 'select'" class="d-flex align-center ga-1" style="min-width:120px;">
+					<input type="color" v-model="annotateDialog.color" title="Màu"
+						style="width:30px;height:30px;border:none;border-radius:4px;cursor:pointer;padding:2px;" />
+					<div v-if="annotateDialog.tool !== 'text' && annotateDialog.tool !== 'select'"
+						class="d-flex align-center ga-1" style="min-width:120px;">
 						<v-icon size="14">mdi-line-weight</v-icon>
-						<v-slider v-model="annotateDialog.lineWidth" min="1" max="12" step="1" hide-details style="min-width:80px;" />
+						<v-slider v-model="annotateDialog.lineWidth" min="1" max="12" step="1" hide-details
+							style="min-width:80px;" />
 						<span class="text-caption">{{ annotateDialog.lineWidth }}</span>
 					</div>
-					<div v-if="annotateDialog.tool === 'text'" class="d-flex align-center ga-1" style="min-width:130px;">
+					<div v-if="annotateDialog.tool === 'text'" class="d-flex align-center ga-1"
+						style="min-width:130px;">
 						<v-icon size="14">mdi-format-size</v-icon>
-						<v-slider v-model="annotateDialog.fontSize" min="10" max="72" step="2" hide-details style="min-width:80px;" />
+						<v-slider v-model="annotateDialog.fontSize" min="10" max="72" step="2" hide-details
+							style="min-width:80px;" />
 						<span class="text-caption">{{ annotateDialog.fontSize }}px</span>
 					</div>
-					<v-btn icon size="small" variant="text" :disabled="!annotateDialog.shapes.length" @click="annotateUndo">
+					<v-btn icon size="small" variant="text" :disabled="!annotateDialog.shapes.length"
+						@click="annotateUndo">
 						<v-icon>mdi-undo</v-icon><v-tooltip activator="parent">Hoàn tác</v-tooltip>
 					</v-btn>
-					<v-btn icon size="small" variant="text" color="error" :disabled="annotateDialog.selectedIndex < 0" @click="annotateDeleteSelected">
-						<v-icon>mdi-trash-can-outline</v-icon><v-tooltip activator="parent">Xóa đối tượng đã chọn</v-tooltip>
+					<v-btn icon size="small" variant="text" color="error" :disabled="annotateDialog.selectedIndex < 0"
+						@click="annotateDeleteSelected">
+						<v-icon>mdi-trash-can-outline</v-icon><v-tooltip activator="parent">Xóa đối tượng đã
+							chọn</v-tooltip>
 					</v-btn>
-					<v-btn icon size="small" variant="text" :disabled="!annotateDialog.shapes.length" @click="annotateClear">
+					<v-btn icon size="small" variant="text" :disabled="!annotateDialog.shapes.length"
+						@click="annotateClear">
 						<v-icon>mdi-delete-sweep-outline</v-icon><v-tooltip activator="parent">Xóa tất cả</v-tooltip>
 					</v-btn>
 					<v-spacer />
@@ -268,24 +240,18 @@
 				</v-card-title>
 				<v-divider />
 				<v-card-text class="pa-0" style="background:#e0e0e0;overflow:auto;">
-					<canvas
-						ref="annotateCanvas"
+					<canvas ref="annotateCanvas"
 						:style="{ display: 'block', maxWidth: '100%', margin: 'auto', cursor: annotateDialog.tool === 'select' ? 'default' : 'crosshair' }"
-						@mousedown="annotateStart"
-						@mousemove="annotateMove"
-						@mouseup="annotateEnd"
-						@mouseleave="annotateEnd"
-						@touchstart.prevent="annotateTouchStart"
-						@touchmove.prevent="annotateTouchMove"
-						@touchend.prevent="annotateEnd"
-					/>
+						@mousedown="annotateStart" @mousemove="annotateMove" @mouseup="annotateEnd"
+						@mouseleave="annotateEnd" @touchstart.prevent="annotateTouchStart"
+						@touchmove.prevent="annotateTouchMove" @touchend.prevent="annotateEnd" />
 				</v-card-text>
 				<v-divider />
 				<v-card-actions>
-					<v-btn color="primary" variant="elevated" :loading="annotateDialog.isUploading" @click="annotateConfirm">
+					<v-btn variant="text" @click="annotateDialog.show = false">Đóng</v-btn>
+				<v-btn color="primary" variant="elevated" @click="annotateConfirm">
 						<v-icon start>mdi-check</v-icon>Xác nhận & lưu
 					</v-btn>
-					<v-btn variant="text" @click="annotateDialog.show = false">Hủy</v-btn>
 				</v-card-actions>
 			</v-card>
 
@@ -294,13 +260,8 @@
 				<v-card>
 					<v-card-title>Nhập văn bản</v-card-title>
 					<v-card-text>
-						<v-text-field
-							v-model="annotateDialog.textInput.value"
-							label="Nội dung"
-							autofocus
-							hide-details
-							@keyup.enter="annotateTextConfirm"
-						/>
+						<v-text-field v-model="annotateDialog.textInput.value" label="Nội dung" autofocus hide-details
+							@keyup.enter="annotateTextConfirm" />
 					</v-card-text>
 					<v-card-actions>
 						<v-btn color="primary" variant="elevated" @click="annotateTextConfirm">OK</v-btn>
@@ -308,7 +269,6 @@
 					</v-card-actions>
 				</v-card>
 			</v-dialog>
-		</v-dialog>
 		</v-dialog>
 	</div>
 </template>
@@ -359,7 +319,6 @@ export default {
 				isDrawing: false,
 				currentShape: null,
 				imageEl: null,
-				isUploading: false,
 				textInput: { show: false, x: 0, y: 0, value: '' },
 			},
 		}
@@ -423,7 +382,7 @@ export default {
 						return parseFloat(d.platformVersion) >= 13 ? 'Windows 11' : 'Windows 10'
 					}
 					return d.platform
-				} catch {}
+				} catch { }
 			}
 			const ua = navigator.userAgent
 			if (/Windows NT 10\.0/.test(ua)) return 'Windows 10/11'
@@ -451,13 +410,13 @@ export default {
 					const list = d.fullVersionList ?? []
 					const main = list.find(b => /Chrome|Edge|Opera|Brave/.test(b.brand) && !b.brand.includes('Not'))
 					if (main) return `${main.brand} ${main.version}`
-				} catch {}
+				} catch { }
 			}
 			const ua = navigator.userAgent
-			if (/Edg\//.test(ua))     return 'Microsoft Edge ' + (ua.match(/Edg\/([\d.]+)/)?.[1] ?? '')
-			if (/OPR\//.test(ua))     return 'Opera ' + (ua.match(/OPR\/([\d.]+)/)?.[1] ?? '')
+			if (/Edg\//.test(ua)) return 'Microsoft Edge ' + (ua.match(/Edg\/([\d.]+)/)?.[1] ?? '')
+			if (/OPR\//.test(ua)) return 'Opera ' + (ua.match(/OPR\/([\d.]+)/)?.[1] ?? '')
 			if (/Firefox\//.test(ua)) return 'Firefox ' + (ua.match(/Firefox\/([\d.]+)/)?.[1] ?? '')
-			if (/Chrome\//.test(ua))  return 'Chrome ' + (ua.match(/Chrome\/([\d.]+)/)?.[1] ?? '')
+			if (/Chrome\//.test(ua)) return 'Chrome ' + (ua.match(/Chrome\/([\d.]+)/)?.[1] ?? '')
 			if (/Version\/.*Safari/.test(ua)) return 'Safari ' + (ua.match(/Version\/([\d.]+)/)?.[1] ?? '')
 			return ua
 		},
@@ -474,9 +433,9 @@ export default {
 					const res = await fetch('https://file.lhbs.vn/lms/upload/FileData', {
 						method: 'POST',
 						body: formData,
-                        headers: {
-                            Authorization: $awt,
-                        }
+						headers: {
+							Authorization: $awt,
+						}
 					})
 					const json = await res.json()
 					const fileId = json?.Files?.[0]?.FILE_ID
@@ -500,15 +459,15 @@ export default {
 		},
 		async submitTicket() {
 			if (!this.form.Title?.trim() || !this.form.Description?.trim()) {
-				this.snackbarRef.show({ message: 'Vui lòng điền tiêu đề và mô tả', color: 'warning' })
+				this.snackbarRef.value.showSnackbar({ message: 'Vui lòng điền tiêu đề và mô tả', color: 'warning' })
 				return
 			}
 			this.isSubmitting = true
 			const attachmentJSON = this.attachments.length
 				? JSON.stringify(this.attachments.map(a => ({
-						FileID: a.fileId,
-						Annotation: a.annotationShapes?.length ? JSON.stringify(a.annotationShapes) : null,
-					})))
+					FileID: a.fileId,
+					Annotation: a.annotationShapes?.length ? JSON.stringify(a.annotationShapes) : null,
+				})))
 				: null
 			const res = await fetchPromise('lms/Ticket_Create', {
 				Title: this.form.Title.trim(),
@@ -520,7 +479,7 @@ export default {
 			}, { cache: false })
 			this.isSubmitting = false
 			if (res) {
-				this.snackbarRef.show({ message: 'Báo lỗi đã được gửi thành công!', color: 'success' })
+				this.snackbarRef.value.showSnackbar({ message: 'Báo lỗi đã được gửi thành công!', color: 'success' })
 				this.isShow = false
 			}
 		},
@@ -552,7 +511,7 @@ export default {
 			}, { cache: false })
 			this.detailDialog.isSendingComment = false
 			if (res) {
-				this.snackbarRef.show({ message: 'Đã gửi phản hồi', color: 'success' })
+				this.snackbarRef.value.showSnackbar({ message: 'Đã gửi phản hồi', color: 'success' })
 				this.detailDialog.comments.push({
 					Content: this.detailDialog.newComment.trim(),
 					CreateUser: vueData.user.UserID,
@@ -595,7 +554,6 @@ export default {
 				isDrawing: false,
 				currentShape: null,
 				imageEl: null,
-				isUploading: false,
 				textInput: { show: false, x: 0, y: 0, value: '' },
 			}
 			this.$nextTick(() => {
@@ -820,41 +778,14 @@ export default {
 		},
 		annotateTouchStart(e) { this.annotateStart(e.touches[0]) },
 		annotateTouchMove(e) { this.annotateMove(e.touches[0]) },
-		async annotateConfirm() {
-			const canvas = this.$refs.annotateCanvas
-			this.annotateDialog.isUploading = true
-			const blob = await new Promise(res => canvas.toBlob(res, 'image/png'))
+		annotateConfirm() {
 			const idx = this.annotateDialog.attachmentIndex
-			const oldAtt = this.attachments[idx]
-			if (oldAtt?.previewUrl) URL.revokeObjectURL(oldAtt.previewUrl)
-			const previewUrl = URL.createObjectURL(blob)
-			const file = new File([blob], oldAtt?.name || 'annotated.png', { type: 'image/png' })
-			const formData = new FormData()
-			formData.append('file', file)
-			try {
-				const res = await fetch('https://file.lhbs.vn/lms/upload/FileData', {
-					method: 'POST',
-					body: formData,
-					headers: { Authorization: $awt },
-				})
-				const json = await res.json()
-				const fileId = json?.Files?.[0]?.FILE_ID
-				if (fileId) {
-					this.attachments[idx] = {
-						name: file.name,
-						fileId,
-						previewUrl,
-						annotationShapes: [...this.annotateDialog.shapes],
-					}
-					this.attachments = [...this.attachments]  // trigger reactivity
-				} else {
-					URL.revokeObjectURL(previewUrl)
-				}
-			} catch (err) {
-				URL.revokeObjectURL(previewUrl)
-				console.error('Annotate upload error', err)
+			// Giữ nguyên ảnh gốc (fileId + previewUrl), chỉ lưu shapes riêng
+			this.attachments[idx] = {
+				...this.attachments[idx],
+				annotationShapes: [...this.annotateDialog.shapes],
 			}
-			this.annotateDialog.isUploading = false
+			this.attachments = [...this.attachments]  // trigger reactivity
 			this.annotateDialog.show = false
 		},
 	},
