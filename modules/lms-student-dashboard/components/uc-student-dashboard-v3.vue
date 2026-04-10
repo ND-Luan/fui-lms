@@ -56,7 +56,7 @@
 </template>
 <script>
 export default {
-	inject: ['snackbarRef', 'iframeRef'],
+	inject: ['snackbarRef', 'iframeRef', 'confirmRef'],
 	emits: ['update:grade-summary', 'view-summary', 'view-details'],
 	provide() {
 		return { topbarCtx: this.topbarCtx }
@@ -81,8 +81,21 @@ export default {
 			version: "2.7"
 		}
 	},
-	mounted() {
-		this.checkUrlParams()
+	async mounted() {
+		const urlParams = new URLSearchParams(window.location.search)
+		const isFromLinkParent = urlParams.get('IsFromLinkParent') === 'true'
+		const hocSinhID = parseInt(urlParams.get('HocSinhID'))
+
+		if (vueData.user.GroupID === 2) {
+			if (!isFromLinkParent || !hocSinhID) {
+				await this.confirmRef.value.show({ title: 'Bạn không có quyền truy cập trang này', hideCancel: true })
+				redirect('/ph-report')
+				return
+			}
+			this.isFromLinkParent = true
+			this.hocSinhIDFromUrl = hocSinhID
+		}
+
 		this.initStudentInfoDetail()
 	},
 	computed: {
@@ -125,14 +138,6 @@ export default {
 		},
 	},
 	methods: {
-		checkUrlParams() {
-			const urlParams = new URLSearchParams(window.location.search)
-			const isFromLinkParent = urlParams.get('IsFromLinkParent')
-			if (isFromLinkParent === 'true') {
-				this.isFromLinkParent = true
-				this.hocSinhIDFromUrl = parseInt(urlParams.get('HocSinhID'))
-			}
-		},
 		async initStudentInfoDetail() {
 			await this.getNienKhoaIsActive()
 			await this.getInfoHocSinhByUserName()

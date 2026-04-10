@@ -110,7 +110,7 @@ Actions: [buttons if any]
 
 <script>
 export default {
-  inject: ['snackbarRef', 'iframeRef'],
+  inject: ['snackbarRef', 'iframeRef', 'confirmRef'],
   data() {
     return {
       vueData,
@@ -145,10 +145,11 @@ export default {
     async onSave() {
       const ok = await this.confirmRef.value.show({ title: 'Xác nhận lưu?' })
       if (!ok) return
-      ajaxCALL('module/save', { ...this.form }, () => {
+      const res = await fetchPromise('module/save', { ...this.form }, { cache: false })
+      if (res?.status === 'success' || res?.data) {
         this.snackbarRef.value.showSnackbar({ message: 'Lưu thành công', color: 'success' })
         this.getDS()
-      })
+      }
     },
   },
 }
@@ -159,10 +160,10 @@ export default {
 | Purpose | Function |
 |---------|----------|
 | Read / fetch list | `fetchPromise(url, params, options?)` |
-| Insert / update / delete | `ajaxCALL(url, params, cb)` — always preceded by `confirm()` |
+| Insert / update / delete | `fetchPromise(url, params, { cache: false })` — always preceded by `this.confirmRef.value.show()` |
 | Parallel reads | `fetchBatchPromise([{ url, params }, ...])` |
 
-`fetchPromise` returns `res.data` array by default (5-min cache). Use `{ cache: false }` after mutations.
+`fetchPromise` returns `res.data` array by default (5-min cache). Use `{ cache: false }` for all mutations to bypass cache.
 
 ### Vuetify rules
 - `#header` slot root: plain `<v-card>` — **no** `rounded`, `elevation`, `border`, `class`
@@ -325,10 +326,8 @@ module-name/
 ### API
 ```javascript
 fetchPromise(url, params, { cache, forceRefresh, suppressError, loadingText })
-// Returns promise; caches 5 min by default — use for all reads
-
-ajaxCALL(url, params, callback)
-// Use for mutations (insert/update/delete)
+// Returns promise; caches 5 min by default — use for ALL reads AND mutations
+// Mutations: always pass { cache: false }
 
 fetchBatchPromise([{ url, params }, ...], { forceRefresh })
 // Parallel fetch
@@ -336,7 +335,8 @@ fetchBatchPromise([{ url, params }, ...], { forceRefresh })
 
 ### UI helpers
 ```javascript
-confirm({ title, action })        // Legacy — prefer this.confirmRef.value.show({ title }) instead
+// ❌ confirm({ title, action }) — Legacy, do NOT use
+// ✅ Use this.confirmRef.value.show({ title }) inside Vue methods
 renderText(capID)                 // e.g. "Cấp 1" from capID int
 getTitlePageByURL(path)           // Page title from URL
 IsCheck_NotRoleParent(user)       // Guard: redirects if parent role
@@ -360,8 +360,11 @@ vueData.v_Set.urlAvatarHocSinh   // Base URL for student avatars
 
 ### `Global.vue`
 Main app wrapper — always use at the root of `uc-main-layout.vue`.
-Provides: `GlobalLoading`, `GlobalApiErrorDialog`, `GlobalUiSnackbar`, `GlobalIframeWindow`.  
-Inject `snackbarRef` and `iframeRef` in child components.
+Provides: `GlobalLoading`, `GlobalApiErrorDialog`, `GlobalUiSnackbar`, `GlobalIframeWindow`, `GlobalConfirmDialog`.  
+Always inject `snackbarRef`, `iframeRef`, and `confirmRef` in child components:
+```js
+inject: ['snackbarRef', 'iframeRef', 'confirmRef']
+```
 
 When implementing module UI, prefer these existing `Global*` components for shared app-level behaviors instead of creating equivalent local wrappers in each module.
 

@@ -1,5 +1,5 @@
 <template>
-    <v-dialog v-model="visible" max-width="420" persistent>
+    <v-dialog v-model="visible" :max-width="config.maxWidth || 420" persistent>
         <v-card>
             <v-card-title class="d-flex align-center ga-2 pt-4" :class="titleClass">
                 <v-icon :color="typeConfig.color">{{ typeConfig.icon }}</v-icon>
@@ -35,6 +35,7 @@ export default {
                 type: 'confirm',
                 confirmText: '',
                 cancelText: '',
+                maxWidth: 420,
                 action: null,
                 cancel: null,
             },
@@ -56,8 +57,8 @@ export default {
         },
     },
     methods: {
-        show({ title = '', text = '', type = 'confirm', confirmText = '', cancelText = '', action = null, cancel = null } = {}) {
-            this.config = { title, text, type, confirmText, cancelText, action, cancel }
+        show({ title = '', text = '', type = 'confirm', confirmText = '', cancelText = '', maxWidth = 420, action = null, cancel = null } = {}) {
+            this.config = { title, text, type, confirmText, cancelText, maxWidth, action, cancel }
             this.visible = true
             if (typeof action === 'function') return
             return new Promise(resolve => { this._resolve = resolve })

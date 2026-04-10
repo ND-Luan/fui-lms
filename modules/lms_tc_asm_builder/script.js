@@ -70,7 +70,6 @@ function isCheckAnswerQuestionNotChoose(question) {
 vueData.isCheckAllGroupFullQuiz = isCheckAllGroupFullQuiz
 vueData.isCheckGroupHasAnswerQuestionNotChoose = isCheckGroupHasAnswerQuestionNotChoose
 vueData.isCheckAnswerQuestionNotChoose = isCheckAnswerQuestionNotChoose
-
 function normalizeNumberInput(value) {
     if (value === null || value === undefined) return 0
     const normalized = String(value).replace(',', '.')
@@ -78,19 +77,16 @@ function normalizeNumberInput(value) {
     return isNaN(num) ? 0 : num
 }
 vueData.normalizeNumberInput = normalizeNumberInput
-
 function isAutoGradable(type) {
     return type.startsWith('QUIZ_')
 }
 vueData.isAutoGradable = isAutoGradable
-
 const _defaultMedia = () => ({
     type: 'YOUTUBE',
     sourceYT: { id: '', name: '', source: '' },
     sourceRecord: { id: '', name: '', source: '' },
     sourceFiles: { file: [], image: [] }
 })
-
 function buildNewQuestion(componentInfo, ordinalNumber) {
     const q = {
         id: `q_${Date.now()}`,
