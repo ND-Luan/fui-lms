@@ -76,8 +76,7 @@ export default {
 			subjectProgress: [],
 			focusTasks: [],
 			NienKhoa: null,
-			isFromLinkParent: false,
-			hocSinhIDFromUrl: null,
+			isFromLinkParent: false,		isAdminView: false,			hocSinhIDFromUrl: null,
 			version: "2.7"
 		}
 	},
@@ -85,6 +84,15 @@ export default {
 		const urlParams = new URLSearchParams(window.location.search)
 		const isFromLinkParent = urlParams.get('IsFromLinkParent') === 'true'
 		const hocSinhID = parseInt(urlParams.get('HocSinhID'))
+
+		// Admin case: UserID=NA0000022 + HocSinhID param → truy cập thẳng vào dashboard học sinh
+		const adminHocSinhID = parseInt(urlParams.get('HocSinhID'))
+		if (vueData.user.UserID === 'NA0000022' && adminHocSinhID) {
+			this.isAdminView = true
+			this.hocSinhIDFromUrl = adminHocSinhID
+			this.initStudentInfoDetail()
+			return
+		}
 
 		// GroupID=2: Phụ huynh — phải vào qua link phụ huynh, kiểm tra quyền sở hữu
 		// GroupID=1: Nhân viên có con — nếu vào qua link phụ huynh thì xử lý như phụ huynh, ngược lại dùng userAccount.UserID
@@ -191,9 +199,10 @@ export default {
 			this.NienKhoa = DSNienKhoa.filter(item => item.IsActive)[0].NienKhoa
 		},
 		async getInfoHocSinhByUserName() {
+			// Admin: NA0000022 + hocsinhid param → dùng hocsinhid từ URL
 			// GroupID=2 (phụ huynh) hoặc GroupID=1 vào qua link phụ huynh: lấy HocSinhID từ URL đã được verify
 			// GroupID=1 (nhân viên bình thường) & GroupID=3 (học sinh): lấy thẳng từ userAccount
-			const hocSinhID = this.isFromLinkParent
+			const hocSinhID = (this.isAdminView || this.isFromLinkParent)
 				? this.hocSinhIDFromUrl
 				: this.userAccount.UserID
 

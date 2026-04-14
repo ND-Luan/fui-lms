@@ -28,8 +28,8 @@
 					v-model:content="question.config.questionText" style="align-items: start !important; width: 100%;" />
 			</div>
 
-			<!-- Media - Lazy load khi visible -->
-			<div v-if="question.config.media && shouldLoadMedia" class="media-container mb-2">
+			<!-- Media -->
+			<div v-if="hasMedia" class="media-container mb-2">
 				<div v-if="question.config.media.sourceYT.source.length > 0" class="youtube-container">
 					<iframe :src="renderUrlYoutube(question.config.media.sourceYT.source)" frameborder="0"
 						allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
@@ -42,10 +42,19 @@
 				<div v-if="question.config.media.sourceFiles.image?.length > 0" style="min-height: fit-content">
 					<v-img v-for="file in question.config.media.sourceFiles.image" :key="file.source"
 						:src="getImageUrl(file.source)" :lazy-src="getImageUrl(file.source, 'w200')" class="rounded-lg"
-						max-height="400" loading="lazy">
+						height="400" loading="lazy">
 						<template #placeholder>
 							<v-row align="center" class="fill-height ma-0" justify="center">
 								<v-progress-circular color="grey-lighten-5" indeterminate />
+							</v-row>
+						</template>
+						<template #error>
+							<v-row align="center" class="fill-height ma-0" justify="center" style="min-height: 80px;">
+								<div class="d-flex flex-column align-center text-medium-emphasis ga-1">
+									<v-icon size="32" color="error">mdi-image-broken-variant</v-icon>
+									<span class="text-caption">Không tải được ảnh</span>
+									<span class="text-caption text-truncate" style="max-width: 200px;">{{ file.name }}</span>
+								</div>
 							</v-row>
 						</template>
 					</v-img>
@@ -118,13 +127,20 @@
 		emits: ['update:answer', 'flag'],
 	
 		data() {
-			return {
-				shouldLoadMedia: false,
-				observer: null
-			};
+			return {};
 		},
 	
 		computed: {
+			hasMedia() {
+				const m = this.question.config?.media;
+				if (!m) return false;
+				return (
+					m.sourceYT?.source?.length > 0 ||
+					m.sourceRecord?.source?.length > 0 ||
+					m.sourceFiles?.image?.length > 0 ||
+					m.sourceFiles?.file?.length > 0
+				);
+			},
 			isGraded() {
 				return this.submissionStatus === 4;
 			},
@@ -147,35 +163,6 @@
 					'AUDIO_RESPONSE': 'uc-question-audio-response'
 				};
 				return map[this.question.type] || 'div';
-			}
-		},
-	
-		mounted() {
-			// Lazy load media khi card visible (Intersection Observer)
-			if (this.question.config.media) {
-				this.observer = new IntersectionObserver(
-					(entries) => {
-						entries.forEach(entry => {
-							if (entry.isIntersecting && !this.shouldLoadMedia) {
-								this.shouldLoadMedia = true;
-								this.observer.disconnect();
-							}
-						});
-					},
-					{
-						rootMargin: '50px' // Load trước 50px khi sắp vào viewport
-					}
-				);
-	
-				this.observer.observe(this.$el);
-			} else {
-				this.shouldLoadMedia = true;
-			}
-		},
-	
-		beforeUnmount() {
-			if (this.observer) {
-				this.observer.disconnect();
 			}
 		},
 	

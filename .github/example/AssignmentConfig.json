@@ -3,8 +3,8 @@
     "type": "GROUPED_MIXED",
     "groups": [
         {
-            "id": "group_1762243355167",
-            "title": "Section 1",
+            "id": "group_1775549732913",
+            "title": "Phần 1",
             "media": {
                 "type": "YOUTUBE",
                 "sourceYT": {
@@ -29,9 +29,10 @@
             },
             "questions": [
                 {
-                    "id": "q_1762243365007",
-                    "type": "QUIZ_SINGLE_CHOICE",
-                    "label": "Trắc nghiệm",
+                    "id": "q_1775549933657",
+                    "type": "QUIZ_MULTIPLE_TRUE_FALSE",
+                    "label": "Nhiều đúng / Sai",
+                    "skills": [],
                     "ordinalNumber": 1,
                     "points": 1,
                     "gradingType": "auto",
@@ -54,32 +55,40 @@
                             }
                         },
                         "isAdvanced": false,
-                        "questionText": "<p><span lang=\"VI\" dir=\"ltr\">Điền vào chỗ trống:</span><br><span lang=\"VI\" dir=\"ltr\">“... gạo trắng nước trong</span></p><p><span lang=\"VI\" dir=\"ltr\">Ai đi đến đó thì không muốn về.”</span></p>",
+                        "questionText": "",
                         "options": [
                             {
-                                "id": "opt_1",
-                                "text": "Đồng Nai"
+                                "id": "a",
+                                "text": "A. Nấm hương có hình tròn, màu nâu.",
+                                "correctAnswer": null,
+                                "inCorrectAnswer": null
                             },
                             {
-                                "id": "opt_2",
-                                "text": "Trấn Biên"
+                                "id": "opt_1775549961142",
+                                "text": "B. Nấm mốc thường phát triển trong môi trường ấm nóng và ẩm ướt.\t",
+                                "correctAnswer": null,
+                                "inCorrectAnswer": null
                             },
                             {
-                                "id": "opt_3",
-                                "text": "Biên Hòa"
+                                "id": "opt_1775549969793",
+                                "text": "C. Các loại nấm đều có màu đỏ.\t",
+                                "inCorrectAnswer": null,
+                                "correctAnswer": null
                             },
                             {
-                                "id": "opt_4",
-                                "text": "Sài Gòn"
+                                "id": "opt_1775549978959",
+                                "text": "D. Tất cả các loại nấm đều có dạng hình tròn.\t",
+                                "inCorrectAnswer": null,
+                                "correctAnswer": null
                             }
-                        ],
-                        "correctAnswer": "opt_1"
+                        ]
                     }
                 },
                 {
-                    "id": "q_1762243373473",
-                    "type": "QUIZ_SINGLE_CHOICE",
-                    "label": "Trắc nghiệm",
+                    "id": "q_1775550115359",
+                    "type": "QUIZ_MULTIPLE_TRUE_FALSE",
+                    "label": "Nhiều đúng / Sai",
+                    "skills": [],
                     "ordinalNumber": 2,
                     "points": 1,
                     "gradingType": "auto",
@@ -102,34 +111,42 @@
                             }
                         },
                         "isAdvanced": false,
-                        "questionText": "<p><span lang=\"VI\" dir=\"ltr\">Điền vào chỗ trống:</span><br><span lang=\"VI\" dir=\"ltr\">“Thân em cam, quýt, bưởi bòng</span></p><p><span lang=\"VI\" dir=\"ltr\">Đắng the ngoài vỏ mà...”</span></p>",
+                        "questionText": "",
                         "options": [
                             {
-                                "id": "opt_1",
-                                "text": "Lòng chua cay"
+                                "id": "a",
+                                "text": "A. Dựa vào các chất dinh dưỡng có trong thức ăn, người ta chia thức ăn thành 5 nhóm. ",
+                                "correctAnswer": null,
+                                "inCorrectAnswer": null
                             },
                             {
-                                "id": "opt_2",
-                                "text": "Lòng ngọt thanh"
+                                "id": "opt_1775550119992",
+                                "text": "B. Chất xơ không có giá trị dinh dưỡng nhưng rất cần thiết, đảm bảo cho cơ quan tiêu hoá hoạt động bình thường.\t",
+                                "correctAnswer": null,
+                                "inCorrectAnswer": null
                             },
                             {
-                                "id": "opt_3",
-                                "text": "Lòng buồn bã"
+                                "id": "opt_1775550130476",
+                                "text": "C. Hoa quả cần được bảo quản trong ngăn mát tủ lạnh.\t",
+                                "correctAnswer": null,
+                                "inCorrectAnswer": null
                             },
                             {
-                                "id": "opt_4",
-                                "text": "Lòng đắng chua"
+                                "id": "opt_1775550132511",
+                                "text": "D. Khi thấy thực phẩm có dấu hiệu bị mốc, chúng ta cần cạo lớp mốc đi và ăn phần còn lại. ",
+                                "inCorrectAnswer": null,
+                                "correctAnswer": null
                             }
-                        ],
-                        "correctAnswer": "opt_2"
+                        ]
                     }
                 },
                 {
-                    "id": "q_1762243374145",
-                    "type": "QUIZ_SINGLE_CHOICE",
-                    "label": "Trắc nghiệm",
+                    "id": "q_1775550244346",
+                    "type": "QUIZ_MULTIPLE_TRUE_FALSE",
+                    "label": "Nhiều đúng / Sai",
+                    "skills": [],
                     "ordinalNumber": 3,
-                    "points": 1,
+                    "points": 2,
                     "gradingType": "auto",
                     "config": {
                         "media": {
@@ -150,32 +167,40 @@
                             }
                         },
                         "isAdvanced": false,
-                        "questionText": "<p><span lang=\"VI\" dir=\"ltr\">“Tháng giêng nắng dai, tháng hai giông tố</span></p><p><span lang=\"VI\" dir=\"ltr\">Tháng ba nồm sợ, tháng tư nồm non.”</span><br><span lang=\"VI\" dir=\"ltr\">Là câu tục ngữ nói về:</span></p>",
+                        "questionText": "",
                         "options": [
                             {
-                                "id": "opt_1",
-                                "text": "Tháng trong năm"
+                                "id": "a",
+                                "text": "A. Chúng ta cần lựa chọn những thực phẩm có nguồn gốc rõ ràng và không có dấu hiệu bị hư hỏng.",
+                                "correctAnswer": null,
+                                "inCorrectAnswer": null
                             },
                             {
-                                "id": "opt_2",
-                                "text": "Dự báo thời tiết"
+                                "id": "opt_1775550262278",
+                                "text": "B. Bảo quản thực phẩm ở nơi có nhiệt độ cao.",
+                                "inCorrectAnswer": null,
+                                "correctAnswer": null
                             },
                             {
-                                "id": "opt_3",
-                                "text": "Tình yêu đôi lứa"
+                                "id": "opt_1775550264780",
+                                "text": "C. Để đảm bảo thực phẩm an toàn, chúng ta cần rửa sạch trước khi ăn và chế biến. ",
+                                "correctAnswer": null,
+                                "inCorrectAnswer": null
                             },
                             {
-                                "id": "opt_4",
-                                "text": "Không có ý nghĩa gì"
+                                "id": "opt_1775550267464",
+                                "text": "D. Thực phẩm an toàn được nuôi, trồng, bảo quản và chế biến hợp vệ sinh.",
+                                "correctAnswer": null,
+                                "inCorrectAnswer": null
                             }
-                        ],
-                        "correctAnswer": "opt_2"
+                        ]
                     }
                 },
                 {
-                    "id": "q_1762243374721",
-                    "type": "QUIZ_SINGLE_CHOICE",
-                    "label": "Trắc nghiệm",
+                    "id": "q_1775550248747",
+                    "type": "QUIZ_MULTIPLE_TRUE_FALSE",
+                    "label": "Nhiều đúng / Sai",
+                    "skills": [],
                     "ordinalNumber": 4,
                     "points": 1,
                     "gradingType": "auto",
@@ -198,32 +223,40 @@
                             }
                         },
                         "isAdvanced": false,
-                        "questionText": "<p>Đâu là nhạc cụ đặc trưng của dân tộc ở địa phương tỉnh Đồng Nai?</p>",
+                        "questionText": "",
                         "options": [
                             {
-                                "id": "opt_1",
-                                "text": "Ghita"
+                                "id": "a",
+                                "text": "A. Đại bàng ăn cỏ để sinh tồn.\t",
+                                "correctAnswer": null,
+                                "inCorrectAnswer": null
                             },
                             {
-                                "id": "opt_2",
-                                "text": "Sáo trúc"
+                                "id": "opt_1775550335781",
+                                "text": "B. Sâu là thức ăn của chim sẻ.\t",
+                                "correctAnswer": null,
+                                "inCorrectAnswer": null
                             },
                             {
-                                "id": "opt_3",
-                                "text": "Piano"
+                                "id": "opt_1775550337447",
+                                "text": "C. Thức ăn của thằn lằn là châu chấu.\t",
+                                "correctAnswer": null,
+                                "inCorrectAnswer": null
                             },
                             {
-                                "id": "opt_4",
-                                "text": "Kèn bầu"
+                                "id": "opt_1775550338847",
+                                "text": "D. Tôm là thức ăn của sư tử.",
+                                "inCorrectAnswer": null,
+                                "correctAnswer": null
                             }
-                        ],
-                        "correctAnswer": "opt_4"
+                        ]
                     }
                 },
                 {
-                    "id": "q_1762243375165",
-                    "type": "QUIZ_SINGLE_CHOICE",
-                    "label": "Trắc nghiệm",
+                    "id": "q_1775550393496",
+                    "type": "QUIZ_MULTIPLE_TRUE_FALSE",
+                    "label": "Nhiều đúng / Sai",
+                    "skills": [],
                     "ordinalNumber": 5,
                     "points": 1,
                     "gradingType": "auto",
@@ -246,32 +279,40 @@
                             }
                         },
                         "isAdvanced": false,
-                        "questionText": "<p>Đâu là di sản văn hóa vật thể?</p>",
+                        "questionText": "",
                         "options": [
                             {
-                                "id": "opt_1",
-                                "text": "Văn miếu Trấn Biên"
+                                "id": "a",
+                                "text": "A. Khi thực phẩm bị nhiễm nấm mốc, chỉ cần rửa sạch hoặc nấu chín là có thể ăn được.",
+                                "correctAnswer": null,
+                                "inCorrectAnswer": null
                             },
                             {
-                                "id": "opt_2",
-                                "text": "Đền thờ Nguyễn Hữu Cảnh"
+                                "id": "opt_1775550398148",
+                                "text": "B. Tất cả thực phẩm được bảo quản bằng cách ướp muối.",
+                                "inCorrectAnswer": null,
+                                "correctAnswer": null
                             },
                             {
-                                "id": "opt_3",
-                                "text": "Nhà lao Tân Hiệp"
+                                "id": "opt_1775550400632",
+                                "text": "C. Khi để ở nơi nóng ẩm, thực phẩm sẽ nhanh bị hỏng do nhiễm nấm mốc.",
+                                "correctAnswer": null,
+                                "inCorrectAnswer": null
                             },
                             {
-                                "id": "opt_4",
-                                "text": "Tất cả đáp án trên đều đúng"
+                                "id": "opt_1775550402332",
+                                "text": "D. Có nhiều cách để bảo quản thực phẩm như ướp muối, ướp đường, hun khói…",
+                                "correctAnswer": null,
+                                "inCorrectAnswer": null
                             }
-                        ],
-                        "correctAnswer": "opt_4"
+                        ]
                     }
                 },
                 {
-                    "id": "q_1762243375561",
-                    "type": "QUIZ_SINGLE_CHOICE",
-                    "label": "Trắc nghiệm",
+                    "id": "q_1775550499666",
+                    "type": "QUIZ_MATCHING",
+                    "label": "Ghép nối",
+                    "skills": [],
                     "ordinalNumber": 6,
                     "points": 1,
                     "gradingType": "auto",
@@ -293,33 +334,52 @@
                                 "image": []
                             }
                         },
-                        "isAdvanced": false,
-                        "questionText": "<p>Đâu là địa điểm du lịch nổi tiếng tại Đồng Nai?</p>",
-                        "options": [
+                        "isAdvanced": true,
+                        "questionText": "",
+                        "columnA": [
                             {
-                                "id": "opt_1",
-                                "text": "Suối Mơ"
+                                "id": "a1775550505900",
+                                "text": "Thịt mỡ, bơ, dầu ăn, vừng, lạc,..."
                             },
                             {
-                                "id": "opt_2",
-                                "text": "Phố cổ Hội An"
+                                "id": "a1775550507581",
+                                "text": "Thịt, cá, tôm, phô mai, trứng,..."
                             },
                             {
-                                "id": "opt_3",
-                                "text": "Bến Cần Giờ"
+                                "id": "a1775550508915",
+                                "text": "Rau củ quả, trái cây, sữa,..."
                             },
                             {
-                                "id": "opt_4",
-                                "text": "Sông Sài Gòn"
+                                "id": "a1775550510897",
+                                "text": "Cơm, bánh mì, khoai tây, ngô, ..."
                             }
                         ],
-                        "correctAnswer": "opt_1"
+                        "columnB": [
+                            {
+                                "id": "b1775550505900",
+                                "text": "Chất béo"
+                            },
+                            {
+                                "id": "b1775550507581",
+                                "text": "Chất đạm"
+                            },
+                            {
+                                "id": "b1775550508915",
+                                "text": "Vi-ta-min và chất khoáng"
+                            },
+                            {
+                                "id": "b1775550510897",
+                                "text": "Chất bột đường"
+                            }
+                        ],
+                        "correctPairs": []
                     }
                 },
                 {
-                    "id": "q_1762243375986",
-                    "type": "QUIZ_SINGLE_CHOICE",
-                    "label": "Trắc nghiệm",
+                    "id": "q_1775551086496",
+                    "type": "QUIZ_MATCHING",
+                    "label": "Ghép nối",
+                    "skills": [],
                     "ordinalNumber": 7,
                     "points": 1,
                     "gradingType": "auto",
@@ -342,34 +402,53 @@
                             }
                         },
                         "isAdvanced": false,
-                        "questionText": "<p>Khí hậu tỉnh Đồng Nai phù hợp để trồng loại cây nào sau đây?</p>",
-                        "options": [
+                        "questionText": "",
+                        "columnA": [
                             {
-                                "id": "opt_1",
-                                "text": "Cao su"
+                                "id": "a1775551090064",
+                                "text": "Cá rô"
                             },
                             {
-                                "id": "opt_2",
-                                "text": "Vải"
+                                "id": "a1775551091781",
+                                "text": "Rắn"
                             },
                             {
-                                "id": "opt_3",
-                                "text": "Cẩm tú cầu"
+                                "id": "a1775551092880",
+                                "text": "Sóc"
                             },
                             {
-                                "id": "opt_4",
-                                "text": "Tất cả đáp án trên"
+                                "id": "a1775551094231",
+                                "text": "Châu chấu"
                             }
                         ],
-                        "correctAnswer": "opt_1"
+                        "columnB": [
+                            {
+                                "id": "b1775551090064",
+                                "text": "Động vật phù du"
+                            },
+                            {
+                                "id": "b1775551091781",
+                                "text": "Ếch"
+                            },
+                            {
+                                "id": "b1775551092880",
+                                "text": "Hạt dẻ"
+                            },
+                            {
+                                "id": "b1775551094231",
+                                "text": "Cỏ"
+                            }
+                        ],
+                        "correctPairs": []
                     }
                 },
                 {
-                    "id": "q_1762243376441",
-                    "type": "QUIZ_SINGLE_CHOICE",
-                    "label": "Trắc nghiệm",
+                    "id": "q_1775551144099",
+                    "type": "QUIZ_MATCHING",
+                    "label": "Ghép nối",
+                    "skills": [],
                     "ordinalNumber": 8,
-                    "points": 1,
+                    "points": 2,
                     "gradingType": "auto",
                     "config": {
                         "media": {
@@ -390,38 +469,57 @@
                             }
                         },
                         "isAdvanced": false,
-                        "questionText": "<p>Nghệ sĩ sáng chế và chơi nhạc cụ dân tộc nổi tiếng tại Đồng Nai tên là:</p>",
-                        "options": [
+                        "questionText": "",
+                        "columnA": [
                             {
-                                "id": "opt_1",
-                                "text": "Điểu Văn"
+                                "id": "a1775551147262",
+                                "text": "Chất đạm"
                             },
                             {
-                                "id": "opt_2",
-                                "text": "Điểu Cam"
+                                "id": "a1775551148448",
+                                "text": "Chất bột đường"
                             },
                             {
-                                "id": "opt_3",
-                                "text": "Điểu Liệt"
+                                "id": "a1775551149448",
+                                "text": "Chất béo"
                             },
                             {
-                                "id": "opt_4",
-                                "text": "Điểu Mĩ"
+                                "id": "a1775551150515",
+                                "text": "Vi-ta-min và chất khoáng"
                             }
                         ],
-                        "correctAnswer": "opt_3"
+                        "columnB": [
+                            {
+                                "id": "b1775551147262",
+                                "text": "Tham gia xây dựng và đổi mới cơ thể."
+                            },
+                            {
+                                "id": "b1775551148448",
+                                "text": "Cung cấp năng lượng chủ yếu cho mọi hoạt động của cơ thể."
+                            },
+                            {
+                                "id": "b1775551149448",
+                                "text": "Cung cấp và dự trữ năng lượng, giữ ấm cơ thể. Giúp hấp thụ các vi- ta- min tan trong dầu như vi- ta-min A, D, E, K."
+                            },
+                            {
+                                "id": "b1775551150515",
+                                "text": "Giúp cơ thể khỏe mạnh và phòng chống bệnh tật."
+                            }
+                        ],
+                        "correctPairs": []
                     }
                 },
                 {
-                    "id": "q_1762243376862",
-                    "type": "QUIZ_SINGLE_CHOICE",
-                    "label": "Trắc nghiệm",
+                    "id": "q_1775551905975",
+                    "type": "QUIZ_MATCHING",
+                    "label": "Ghép nối",
+                    "skills": [],
                     "ordinalNumber": 9,
-                    "points": 1,
+                    "points": 2,
                     "gradingType": "auto",
                     "config": {
                         "media": {
-                            "type": "YOUTUBE",
+                            "type": "FILE",
                             "sourceYT": {
                                 "id": "",
                                 "name": "",
@@ -434,42 +532,67 @@
                             },
                             "sourceFiles": {
                                 "file": [],
-                                "image": []
+                                "image": [
+                                    {
+                                        "id": "1JPOF_rWIFBgeypmgEtKsLprU6epCgM4X",
+                                        "name": "Ảnh màn hình 2026-04-07 lúc 15.42.43.png",
+                                        "source": "https://drive.google.com/file/d/1JPOF_rWIFBgeypmgEtKsLprU6epCgM4X/preview"
+                                    }
+                                ]
                             }
                         },
                         "isAdvanced": false,
-                        "questionText": "<p>Em sẽ làm gì để bảo vệ các di sản văn hóa địa phương?</p>",
-                        "options": [
+                        "questionText": "",
+                        "columnA": [
                             {
-                                "id": "opt_1",
-                                "text": "Quay video giới thiệu đến bạn bè "
+                                "id": "a1775551939558",
+                                "text": "(1)"
                             },
                             {
-                                "id": "opt_2",
-                                "text": "Làm poster tuyên truyền các di sản"
+                                "id": "a1775551940791",
+                                "text": "(2)"
                             },
                             {
-                                "id": "opt_3",
-                                "text": "Làm mô hình di sản để trưng bày"
+                                "id": "a1775551941842",
+                                "text": "(3)"
                             },
                             {
-                                "id": "opt_4",
-                                "text": "Tất cả các đáp án trên"
+                                "id": "a1775551943207",
+                                "text": "(4)"
                             }
                         ],
-                        "correctAnswer": "opt_4"
+                        "columnB": [
+                            {
+                                "id": "b1775551939558",
+                                "text": "Nấm men"
+                            },
+                            {
+                                "id": "b1775551940791",
+                                "text": "bánh"
+                            },
+                            {
+                                "id": "b1775551941842",
+                                "text": "rượu"
+                            },
+                            {
+                                "id": "b1775551943207",
+                                "text": "món ăn"
+                            }
+                        ],
+                        "correctPairs": []
                     }
                 },
                 {
-                    "id": "q_1762243377274",
-                    "type": "QUIZ_SINGLE_CHOICE",
-                    "label": "Trắc nghiệm",
+                    "id": "q_1775552025377",
+                    "type": "QUIZ_MATCHING",
+                    "label": "Ghép nối",
+                    "skills": [],
                     "ordinalNumber": 10,
-                    "points": 1,
+                    "points": 2,
                     "gradingType": "auto",
                     "config": {
                         "media": {
-                            "type": "YOUTUBE",
+                            "type": "FILE",
                             "sourceYT": {
                                 "id": "",
                                 "name": "",
@@ -482,30 +605,273 @@
                             },
                             "sourceFiles": {
                                 "file": [],
-                                "image": []
+                                "image": [
+                                    {
+                                        "id": "1GJf1U35G7v-jt8eHql4elGZj-Bhp0Y-h",
+                                        "name": "Ảnh màn hình 2026-04-07 lúc 15.55.03.png",
+                                        "source": "https://drive.google.com/file/d/1GJf1U35G7v-jt8eHql4elGZj-Bhp0Y-h/preview"
+                                    }
+                                ]
                             }
                         },
                         "isAdvanced": false,
-                        "questionText": "<p><span lang=\"VI\" dir=\"ltr\">“Nhà Bè nước chảy chia hai</span></p><p><span lang=\"VI\" dir=\"ltr\">Ai về Gia Định, Đồng Nai thì về.”</span></p><p><span lang=\"VI\" dir=\"ltr\">Câu ca dao nhắc đến địa danh Nhà Bè gắn với câu chuyện cảm động về nhân vật nào sau đây?</span></p>",
-                        "options": [
+                        "questionText": "",
+                        "columnA": [
                             {
-                                "id": "opt_1",
-                                "text": "Thủ Đức"
+                                "id": "a1775552136560",
+                                "text": "(1)"
                             },
                             {
-                                "id": "opt_2",
-                                "text": "Thủ Huồng"
+                                "id": "a1775552137758",
+                                "text": "(2)"
                             },
                             {
-                                "id": "opt_3",
-                                "text": "Huỳnh Văn Nghệ"
+                                "id": "a1775552138857",
+                                "text": "(3)"
                             },
                             {
-                                "id": "opt_4",
-                                "text": "Tô Hoài"
+                                "id": "a1775552140042",
+                                "text": "(4)"
                             }
                         ],
-                        "correctAnswer": "opt_2"
+                        "columnB": [
+                            {
+                                "id": "b1775552136560",
+                                "text": "bảo quản"
+                            },
+                            {
+                                "id": "b1775552137758",
+                                "text": "vi sinh vật"
+                            },
+                            {
+                                "id": "b1775552138857",
+                                "text": "dập nát"
+                            },
+                            {
+                                "id": "b1775552140042",
+                                "text": "sử dụng"
+                            }
+                        ],
+                        "correctPairs": []
+                    }
+                },
+                {
+                    "id": "q_1775552183776",
+                    "type": "QUIZ_MATCHING",
+                    "label": "Ghép nối",
+                    "skills": [],
+                    "ordinalNumber": 11,
+                    "points": 2,
+                    "gradingType": "auto",
+                    "config": {
+                        "media": {
+                            "type": "FILE",
+                            "sourceYT": {
+                                "id": "",
+                                "name": "",
+                                "source": ""
+                            },
+                            "sourceRecord": {
+                                "id": "",
+                                "name": "",
+                                "source": ""
+                            },
+                            "sourceFiles": {
+                                "file": [],
+                                "image": [
+                                    {
+                                        "id": "10dXnLMBga7g9TAeyVMlTQB3bF_eFS_cm",
+                                        "name": "Ảnh màn hình 2026-04-07 lúc 15.56.48.png",
+                                        "source": "https://drive.google.com/file/d/10dXnLMBga7g9TAeyVMlTQB3bF_eFS_cm/preview"
+                                    }
+                                ]
+                            }
+                        },
+                        "isAdvanced": false,
+                        "questionText": "",
+                        "columnA": [
+                            {
+                                "id": "a1775552232911",
+                                "text": "(1)"
+                            },
+                            {
+                                "id": "a1775552234509",
+                                "text": "(2)"
+                            },
+                            {
+                                "id": "a1775552235524",
+                                "text": "(3)"
+                            },
+                            {
+                                "id": "a1775552236525",
+                                "text": "(4)"
+                            }
+                        ],
+                        "columnB": [
+                            {
+                                "id": "b1775552232911",
+                                "text": "chăm sóc"
+                            },
+                            {
+                                "id": "b1775552234509",
+                                "text": "bảo vệ"
+                            },
+                            {
+                                "id": "b1775552235524",
+                                "text": "chống rét"
+                            },
+                            {
+                                "id": "b1775552236525",
+                                "text": "vun xới"
+                            }
+                        ],
+                        "correctPairs": []
+                    }
+                },
+                {
+                    "id": "q_1775552280875",
+                    "type": "QUIZ_MATCHING",
+                    "label": "Ghép nối",
+                    "skills": [],
+                    "ordinalNumber": 12,
+                    "points": 2,
+                    "gradingType": "auto",
+                    "config": {
+                        "media": {
+                            "type": "FILE",
+                            "sourceYT": {
+                                "id": "",
+                                "name": "",
+                                "source": ""
+                            },
+                            "sourceRecord": {
+                                "id": "",
+                                "name": "",
+                                "source": ""
+                            },
+                            "sourceFiles": {
+                                "file": [],
+                                "image": [
+                                    {
+                                        "id": "1Ui3W3SN0vW6TcQiwKJdjrMBT5da8dPeX",
+                                        "name": "Ảnh màn hình 2026-04-07 lúc 15.58.22.png",
+                                        "source": "https://drive.google.com/file/d/1Ui3W3SN0vW6TcQiwKJdjrMBT5da8dPeX/preview"
+                                    }
+                                ]
+                            }
+                        },
+                        "isAdvanced": false,
+                        "questionText": "",
+                        "columnA": [
+                            {
+                                "id": "a1775552373132",
+                                "text": "(1)"
+                            },
+                            {
+                                "id": "a1775552374440",
+                                "text": "(2)"
+                            },
+                            {
+                                "id": "a1775552375598",
+                                "text": "(3)"
+                            },
+                            {
+                                "id": "a1775552376626",
+                                "text": "(4)"
+                            }
+                        ],
+                        "columnB": [
+                            {
+                                "id": "b1775552373132",
+                                "text": "chất dinh dưỡng"
+                            },
+                            {
+                                "id": "b1775552374440",
+                                "text": "thức ăn"
+                            },
+                            {
+                                "id": "b1775552375598",
+                                "text": "năng lượng"
+                            },
+                            {
+                                "id": "b1775552376626",
+                                "text": "cơ thể"
+                            }
+                        ],
+                        "correctPairs": []
+                    }
+                },
+                {
+                    "id": "q_1775552820664",
+                    "type": "QUIZ_MATCHING",
+                    "label": "Ghép nối",
+                    "skills": [],
+                    "ordinalNumber": 13,
+                    "points": 2,
+                    "gradingType": "auto",
+                    "config": {
+                        "media": {
+                            "type": "FILE",
+                            "sourceYT": {
+                                "id": "",
+                                "name": "",
+                                "source": ""
+                            },
+                            "sourceRecord": {
+                                "id": "",
+                                "name": "",
+                                "source": ""
+                            },
+                            "sourceFiles": {
+                                "file": [],
+                                "image": [
+                                    {
+                                        "id": "1I4yoFUe5YcdKR2mytLOdBtGv5YJJk1sQ",
+                                        "name": "Ảnh màn hình 2026-04-07 lúc 16.14.03.png",
+                                        "source": "https://drive.google.com/file/d/1I4yoFUe5YcdKR2mytLOdBtGv5YJJk1sQ/preview"
+                                    }
+                                ]
+                            }
+                        },
+                        "isAdvanced": false,
+                        "questionText": "",
+                        "columnA": [
+                            {
+                                "id": "a1775553280237",
+                                "text": "(1)"
+                            },
+                            {
+                                "id": "a1775553281483",
+                                "text": "(2)"
+                            },
+                            {
+                                "id": "a1775553282416",
+                                "text": "(3)"
+                            },
+                            {
+                                "id": "a1775553283669",
+                                "text": "(4)"
+                            }
+                        ],
+                        "columnB": [
+                            {
+                                "id": "b1775553280237",
+                                "text": "tổng hợp"
+                            },
+                            {
+                                "id": "b1775553281483",
+                                "text": "tác dụng"
+                            },
+                            {
+                                "id": "b1775553282416",
+                                "text": "thực vật"
+                            },
+                            {
+                                "id": "b1775553283669",
+                                "text": "động vật"
+                            }
+                        ],
+                        "correctPairs": []
                     }
                 }
             ]

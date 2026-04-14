@@ -71,7 +71,7 @@
 						<!-- Hiện 1 câu + nút prev/next -->
 						<template v-else>
 							<v-card-text class="px-2 pt-2 pb-0">
-								<QuestionCard :question="currentQuestion"
+								<QuestionCard :key="currentQuestion.id" :question="currentQuestion"
 									:question-number="getGlobalQuestionNumberByQuestionId(currentQuestion.id)"
 									:answer="getAnswerForChild(currentQuestion)"
 									:grading="userAnswers[currentQuestion.id]?.grading" :readonly="isSubmitted"
