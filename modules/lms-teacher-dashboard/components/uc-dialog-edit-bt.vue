@@ -30,6 +30,7 @@
 
 <script>
 	export default {
+		inject: ['snackbarRef', 'iframeRef', 'confirmRef'],
 		props: {
 			modelValue: Boolean,
 			item: Object,
@@ -66,7 +67,7 @@
 							LessonID: this.form.ResourceID,
 							NienKhoa: vueData.NienKhoa
 						}, res => {
-							Vue.$toast.success('Cập nhật bài học thành công', { position: "top" })
+							this.snackbarRef.value.showSnackbar({ message: 'Cập nhật bài học thành công', color: 'success' })
 							vueData.apiCall3()
 							this.$emit('update:modelValue', false)
 						})
@@ -77,7 +78,7 @@
 							Instructions: this.form.Instructions,
 							NienKhoa: vueData.NienKhoa
 						}, res => {
-							Vue.$toast.success('Cập nhật bài tập thành công', { position: "top" })
+							this.snackbarRef.value.showSnackbar({ message: 'Cập nhật bài tập thành công', color: 'success' })
 							vueData.apiCall3()
 							this.$emit('update:modelValue', false)
 						})

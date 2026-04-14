@@ -59,6 +59,7 @@
 
 <script>
 export default {
+	inject: ['snackbarRef', 'iframeRef', 'confirmRef'],
 	emits: ['update:isOpen'],
 	props: {
 		KhoiItem: Object,
@@ -121,19 +122,14 @@ export default {
 						NienKhoa: vueData.NienKhoa,
 						HocKi: 1
 					}, res => {
-						Vue.$toast.success('Tạo bài tập thành công', { position: "top" })
-						this.clearData();
-						this.CloseModal();
+					this.snackbarRef.value.showSnackbar({ message: 'Tạo bài tập thành công', color: 'success' })
+					this.clearData();
+					this.CloseModal();
 
-						vueData.apiCall3()
-
-						openWindow({
-							title: "Soạn bài tập",
-							url: `/lms_tc_asm_builder?AssignmentID=${res?.data[0].AssignmentID}`,
-							id: "WinSoanBaiTap",
-							onclose: {
-								"EXE": "apiCall3()"
-							}
+					this.iframeRef.value.openWindow({
+						title: "Soạn bài tập",
+						url: `/lms_tc_asm_builder?AssignmentID=${res?.data[0].AssignmentID}`,
+						onclose: () => vueData.apiCall3()
 						});
 					},
 						err => {

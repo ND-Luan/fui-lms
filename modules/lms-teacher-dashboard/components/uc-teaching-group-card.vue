@@ -127,6 +127,7 @@
 <script>
 export default {
 	name: 'uc-teaching-group-card',
+	inject: ['snackbarRef', 'iframeRef', 'confirmRef'],
 	props: {
 		group: Object,
 		isLibraryView: {
@@ -149,11 +150,10 @@ export default {
 	},
 	methods: {
 		onOpenWindow(title, url) {
-			openWindow({
-				title, url,
-				onclose: {
-					EXE: "vueData.initPage()"
-				}
+			this.iframeRef.value.openWindow({
+				title,
+				url,
+				onclose: () => vueData.initPage()
 			})
 		},
 		getSubjectIcon(subjectName) {

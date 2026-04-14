@@ -77,7 +77,9 @@ export default {
         const urlParams = new URLSearchParams(window.location.search);
 
         // Parse boolean ngay từ đầu, tránh so sánh string rải rác trong code
-        const isSendToClass = urlParams.get('Is_SendToClass') !== 'false';
+        // Is_SendToClass=0 hoặc Is_SendToClass=false → false; còn lại → true
+        const _isSTC = urlParams.get('Is_SendToClass');
+        const isSendToClass = _isSTC !== '0' && _isSTC !== 'false';
 
         return {
             urlParams,

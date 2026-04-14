@@ -150,3 +150,14 @@
     padding-top: 4px;
     padding-bottom: 4px;
 }
+
+
+.submission-stats-card .v-col {
+	padding: 16px;
+}
+
+.text-truncate {
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}

@@ -130,6 +130,7 @@
 </template>
 <script>
 export default {
+	inject: ['snackbarRef', 'iframeRef', 'confirmRef'],
 	props: ["selectedLibery", "isOpen"],
 	emits: ["update:isOpen", 'update:selectedLibery'],
 	data() {
@@ -313,34 +314,25 @@ export default {
 		editGiaoBaiTapDialog(item) {
 			if (item?.ResourceType == "ASSIGNMENT") {
 				if (item.Is_AssignedToClass === 1) {
-					openWindow({
+					this.iframeRef.value.openWindow({
 						title: "Sửa bài tập",
 						url: `/lms_tc_asm_builder?AssignmentID=${item?.AssignmentID}&AssignToClassID=${item?.AssignToClassID}`,
-						id: "33",
-						onclose: {
-							EXE: "apiCall3()"
-						}
+						onclose: () => vueData.apiCall3()
 					});
 				} else {
-					openWindow({
+					this.iframeRef.value.openWindow({
 						title: "Sửa bài tập",
 						url: `/lms_tc_asm_builder?AssignmentID=${item?.AssignmentID}&AssignToStudentID=${item?.AssignToStudentID}`,
-						id: "33",
-						onclose: {
-							EXE: "apiCall3()"
-						}
+						onclose: () => vueData.apiCall3()
 					});
 				}
 
 			}
 			else if (item?.ResourceType == "LESSON") {
-				openWindow({
+				this.iframeRef.value.openWindow({
 					title: "Sửa bài học",
 					url: `lms_tc_lesson_builder?LessonID=${item?.ResourceID}`,
-					id: "WINSUABAIHOC",
-					onclose: {
-						EXE: "apiCall3()"
-					}
+					onclose: () => vueData.apiCall3()
 				});
 			}
 		},
@@ -358,16 +350,13 @@ export default {
 					DueDate: this.editData[index].DueDate,
 					LimitAssigned: this.editData[index].LimitAssigned
 				}, (res) => {
-					Vue.$toast.success("Sửa ngày thành công", { position: "top" });
+					this.snackbarRef.value.showSnackbar({ message: 'Sửa ngày thành công', color: 'success' })
 					this.$emit('update:selectedLibery', { ...this.selectedLibery, AssignedDetails: this.editData })
 					// vueData.apiCall3()
 				},
 					err => {
 						// xử lý khi lỗi
-						Vue.$toast.error(err?.response?.data?.Message || 'Có lỗi xảy ra, vui lòng kiểm tra lại dữ liệu nhập vào!', {
-							position:
-								"top"
-						});
+						this.snackbarRef.value.showSnackbar({ message: err?.response?.data?.Message || 'Có lỗi xảy ra, vui lòng kiểm tra lại dữ liệu nhập vào!', color: 'error' })
 					}
 				);
 
@@ -390,17 +379,15 @@ export default {
 				.format('YYYY-MM-DD HH:mm:ss');
 		},
 		onRedirectToASM(item) {
-
 			let url = null
 			if (item.ResourceType === 'ASSIGNMENT') {
 				url = `/lms_tc_asm_builder?AssignmentID=${item.AssignmentID}`
 			} else if (item.ResourceType === 'LESSON') {
 				url = `/lms_tc_lesson_builder?LessonID=${item.ResourceID}`
 			}
-			openWindow({
+			this.iframeRef.value.openWindow({
 				title: item.Title,
-				url: url,
-				id: "7777",
+				url,
 			});
 		},
 		saveEditLimitAssigned(item) {
@@ -411,16 +398,13 @@ export default {
 					DueDate: this.editDataLimitAssigned[index].DueDate,
 					LimitAssigned: this.editDataLimitAssigned[index].LimitAssigned
 				}, (res) => {
-					Vue.$toast.success("Sửa số lần cho phép nộp thành công", { position: "top" });
+					this.snackbarRef.value.showSnackbar({ message: 'Sửa số lần cho phép nộp thành công', color: 'success' })
 					this.$emit('update:selectedLibery', { ...this.selectedLibery, AssignedDetails: this.editDataLimitAssigned })
 					// vueData.apiCall3()
 				},
 					err => {
 						// xử lý khi lỗi
-						Vue.$toast.error(err?.response?.data?.Message || 'Có lỗi xảy ra, vui lòng kiểm tra lại dữ liệu nhập vào!', {
-							position:
-								"top"
-						});
+						this.snackbarRef.value.showSnackbar({ message: err?.response?.data?.Message || 'Có lỗi xảy ra, vui lòng kiểm tra lại dữ liệu nhập vào!', color: 'error' })
 					}
 				);
 

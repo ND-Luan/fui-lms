@@ -6,7 +6,8 @@
 			<template #title>
 				<div class="d-flex align-center">
 					<span class="text-h6">{{ $t('message.ControlPanel') }}</span>
-					<v-btn class="ms-3" v-if="vueData.user.UserID == 'NA0000022' || vueData.user.UserID == 'NV0000134' " @click="onHandleOpenChangeGV">
+					<v-btn class="ms-3" v-if="vueData.user.UserID == 'NA0000022' || vueData.user.UserID == 'NV0000134'"
+						@click="onHandleOpenChangeGV">
 						Chọn GV
 					</v-btn>
 				</div>
@@ -33,7 +34,7 @@
 			<!-- BÀI TẬP CẦN CHẤM -->
 			<div class="flex-1-0 mb-2 rounded bg-white">
 				<v-expansion-panels v-model="assignmentNeedGradingPanel" variant="accordion" multiple>
-					<v-expansion-panel >
+					<v-expansion-panel>
 						<v-expansion-panel-title class="pa-2" style="min-height: 38px">
 							<span class="text-body-1 font-weight-medium">{{ $t('message.AssignmentsToGrade') }}</span>
 						</v-expansion-panel-title>
@@ -48,11 +49,12 @@
 			<div class="flex-1-0 w-100  bg-white rounded" v-for="mh in DSMonHocActive">
 				<v-card>
 					<v-toolbar color="white">
-						<v-toolbar-title style="margin-left: 8px; margin-right: 8px; min-height: 38px; display: grid " class="align-center">
-							<div class="d-flex w-100" >
+						<v-toolbar-title style="margin-left: 8px; margin-right: 8px; min-height: 38px; display: grid "
+							class="align-center">
+							<div class="d-flex w-100">
 								<span class="text-primary font-weight-medium" style="font-size: 16px !important">{{
 									$t('message.Subject') }}: {{
-										mh.MonHocName == 'Ngoại ngữ' ? 'English' : mh.MonHocName}}</span>
+										mh.MonHocName == 'Ngoại ngữ' ? 'English' : mh.MonHocName }}</span>
 								<v-spacer></v-spacer>
 
 								<v-menu transition="slide-y-transition">
@@ -62,10 +64,8 @@
 											}}</v-btn>
 									</template>
 									<v-list>
-										<v-list-item
-											v-for="KhoiItem in mh.groups"
-											:value="KhoiItem.KhoiID" :key="KhoiItem.KhoiID"
-											@click="OpenModalAddNoiDung(KhoiItem)">
+										<v-list-item v-for="KhoiItem in mh.groups" :value="KhoiItem.KhoiID"
+											:key="KhoiItem.KhoiID" @click="OpenModalAddNoiDung(KhoiItem)">
 											<v-list-item-title>{{ $t('message.Grade') }} {{
 												KhoiItem.KhoiID }}</v-list-item-title>
 										</v-list-item>
@@ -77,9 +77,8 @@
 							<div class="d-flex flex-column w-100">
 								<v-divider></v-divider>
 								<v-tabs v-model="mh.activeTab" bg-color="transparent" class="mb-1">
-									<v-tab
-										v-for="KhoiItem in mh.groupsWithWeeks"
-										:value="KhoiItem.KhoiID" :key="KhoiItem.KhoiID">{{ $t('message.Grade') }} {{
+									<v-tab v-for="KhoiItem in mh.groupsWithWeeks" :value="KhoiItem.KhoiID"
+										:key="KhoiItem.KhoiID">{{ $t('message.Grade') }} {{
 											KhoiItem.KhoiID }}
 									</v-tab>
 								</v-tabs>
@@ -88,15 +87,14 @@
 					</v-toolbar>
 
 					<v-tabs-window v-model="mh.activeTab">
-						<v-tabs-window-item
-							v-for="(KhoiItem, index) in mh.groups"
-							:value="KhoiItem.KhoiID" :key="KhoiItem.KhoiID">
+						<v-tabs-window-item v-for="(KhoiItem, index) in mh.groups" :value="KhoiItem.KhoiID"
+							:key="KhoiItem.KhoiID">
 							<v-card>
 								<v-card-text class="pa-2">
 									<v-row dense>
 										<v-col cols="12" md="12">
-											<v-expansion-panels variant="popout"
-												:model-value="KhoiItem.allIndices" multiple>
+											<v-expansion-panels variant="popout" :model-value="KhoiItem.allIndices"
+												multiple>
 												<p v-if="KhoiItem.weeks.length == 0">{{
 													$t('message.EmptyLessonAndAssignment')
 												}}</p>
@@ -108,11 +106,9 @@
 														{{ week.Tuan_HienThi }}
 													</v-expansion-panel-title>
 													<v-expansion-panel-text>
-														<v-expansion-panels
-															:model-value="week.allClassIndices"
+														<v-expansion-panels :model-value="week.allClassIndices"
 															multiple>
-															<v-expansion-panel
-																v-for="classItem in week.sortedClasses"
+															<v-expansion-panel v-for="classItem in week.sortedClasses"
 																:key="classItem.LopID" class="mb-1">
 																<div v-if="classItem.LopID != -1">
 																	<v-expansion-panel-title
@@ -143,11 +139,15 @@
 																			<div class="class-actions">
 																				<v-tooltip location="top">
 																					<template #activator="{ props }">
-																						<v-btn v-bind="props" icon size="small" variant="text" color="purple" @click.stop="xemTinhTrang(classItem)">
+																						<v-btn v-bind="props" icon
+																							size="small" variant="text"
+																							color="purple"
+																							@click.stop="xemTinhTrang(classItem)">
 																							<v-icon>mdi-table-eye</v-icon>
 																						</v-btn>
 																					</template>
-																					<span>{{ $t('message.ViewGradebook') }}</span>
+																					<span>{{ $t('message.ViewGradebook')
+																						}}</span>
 																				</v-tooltip>
 																			</div>
 																		</div>
@@ -199,6 +199,7 @@
 <script>
 export default {
 	name: 'uc-lms-tc-dashboard-v2',
+	inject: ['snackbarRef', 'iframeRef', 'confirmRef'],
 	data() {
 		const toggle = localStorage.getItem('IsLanguage') ? (localStorage.getItem('IsLanguage') == 'true' ? true : false) : false
 		this.$i18n.locale = toggle ? "en" : "vi"
@@ -349,13 +350,10 @@ export default {
 			}, 0);
 		},
 		xemTinhTrang(assignment) {
-			openWindow({
+			this.iframeRef.value.openWindow({
 				title: "Sổ điểm lớp học",
 				url: `/lms-teacher-gradebook?LopID=${assignment.LopID}&MonHocID=${assignment.MonHocID}&HocKi=${vueData.NienKhoaItem?.HocKi}&AssignType=CLASS`,
-				id: "WinGiaoBaiTap",
-				onclose: {
-					EXE: "vueData.initPage()"
-				}
+				onclose: () => vueData.initPage()
 			});
 		},
 		OpenModalAddNoiDung(KhoiItem) {
@@ -366,9 +364,9 @@ export default {
 			this.isShowMyLiberies = true;
 		},
 		OpenDashboard() {
-			openWindow({
+			this.iframeRef.value.openWindow({
+				title: 'Theo dõi học tập',
 				url: `/lms-teacher-theo-doi-hoc-tap?HocKi=${vueData.NienKhoaItem.HocKi}`,
-				title: 'Theo dõi học tập'
 			})
 		},
 		onHandleOpenChangeGV() {

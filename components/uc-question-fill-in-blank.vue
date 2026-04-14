@@ -38,14 +38,14 @@
 			<template v-if="isGrade && submissionstatus >= 2">
 				<div v-if="hasAnyAnswer" class="d-flex flex-wrap align-center ga-2 mt-2">
 					<!-- Render lại chuỗi với các blank (readonly) -->
-					<span v-for="(part, idx) in (question.config?.parts || [])" :key="'view-' + idx">
+					<!-- <span v-for="(part, idx) in (question.config?.parts || [])" :key="'view-' + idx">
 						<span v-if="part.type === 'text'">{{ part.value }}</span>
 						<span v-else-if="part.type === 'blank'">
 							<v-chip size="small" color="primary" variant="tonal" class="mx-1">
 								{{ userAnswers[part.id] || '…' }}
 							</v-chip>
 						</span>
-					</span>
+					</span> -->
 				</div>
 				<div v-else class="mt-2 text-red">
 					<div class="student-answer-panel rounded bg-indigo-lighten-5 pa-2">
@@ -120,9 +120,19 @@
 		<!-- 6) Đáp án đúng (chỉ hiện khi chấm hoặc đã trả bài) -->
 		<div v-if="isGradedView" class="mt-2">
 			<strong>{{$i18n.locale == 'en' ? 'Correct answers':'Đáp án đúng' }}:</strong>
-			<v-chip color="green" size="small" v-for="ansCorrect in correctAnswersList" class="ml-1">
-				{{ ansCorrect }}
-			</v-chip>
+			<template v-if="correctAnswersGrouped.length === 1">
+				<v-chip color="green" size="small" v-for="(ans, ansIndex) in correctAnswersGrouped[0].answers" :key="'correct-' + ansIndex" class="ml-1">
+					{{ ans }}
+				</v-chip>
+			</template>
+			<template v-else>
+				<div v-for="group in correctAnswersGrouped" :key="'group-' + group.blankIndex" class="d-flex align-center flex-wrap ga-1 mt-1">
+					<span class="text-caption text-medium-emphasis mr-1">{{ $i18n.locale == 'en' ? 'Blank' : 'Chỗ trống' }} {{ group.blankIndex }}:</span>
+					<v-chip color="green" size="small" v-for="(ans, ansIndex) in group.answers" :key="'ans-' + group.blankIndex + '-' + ansIndex">
+						{{ ans }}
+					</v-chip>
+				</div>
+			</template>
 		</div>
 
 		<!-- 7) Điểm từng câu (v-chip, chỉ hiện khi đã trả bài) -->
@@ -207,13 +217,20 @@
 				return vals.some(v => (v ?? '').toString().trim().length > 0)
 			},
 	
-			// Danh sách đáp án đúng (lấy phần tử đầu của mỗi blank)
-			correctAnswersList() {
+			// Danh sách đáp án đúng nhóm theo từng blank
+			correctAnswersGrouped() {
 				const parts = this.question?.config?.parts || []
+				let blankIndex = 0
 				return parts
 					.filter(p => p.type === 'blank')
-					.map(p => (p.acceptedAnswers && p.acceptedAnswers.length > 0 ? p.acceptedAnswers[0] : ''))
-					.filter(Boolean)
+					.map(p => {
+						blankIndex++
+						const accepted = Array.isArray(p.acceptedAnswers) ? p.acceptedAnswers : [p.acceptedAnswers]
+						return {
+							blankIndex,
+							answers: accepted.map(a => (a == null ? '' : String(a).trim())).filter(Boolean)
+						}
+					})
 			},
 	
 			// Tự chấm: điểm = (số blank đúng / tổng blank) * points (làm tròn 2 chữ số khi hiển thị gợi ý)

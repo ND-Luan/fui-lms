@@ -1,5 +1,5 @@
 async function initialize() {
-   console.log('hello')
+  console.log('hello')
 }
 function secondsToMinuteSecond(totalSeconds) {
   if (!Number.isFinite(totalSeconds) || totalSeconds < 0) {

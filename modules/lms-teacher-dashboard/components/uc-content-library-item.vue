@@ -210,6 +210,7 @@
 <script>
 	export default {
 		name: 'uc-content-library-item',
+		inject: ['snackbarRef', 'iframeRef', 'confirmRef'],
 		props: {
 			item: { type: Object, required: true }
 		},
@@ -366,42 +367,36 @@
 				} else if (this.item.ResourceType === 'LESSON') {
 					url = `/lms_tc_lesson_builder?LessonID=${this.item.ResourceID}`
 				}
-				openWindow({
-					title: "",
+				this.iframeRef.value.openWindow({
+					title: this.item.Title || '',
 					url,
-					onclose: {
-						EXE: "apiCall3()"
-					}
+					onclose: () => vueData.apiCall3()
 				});
 			},
 			goToClassDetail(item) {
-				openWindow({
+				this.iframeRef.value.openWindow({
 					title: "Thống kê nộp bài theo lớp",
 					url: `/lms-tc-lesson-assign?assignmentID=${item?.ResourceID}&resourceType=${item.ResourceType}`,
-					id: "WinGiaoBaiTap",
-					onclose: {
-						EXE: "apiCall3()"
-					}
+					onclose: () => vueData.apiCall3()
 				});
 			},
 			onDelete() {
-				const $this = this
-				confirm({
-					title: `Xác nhận xóa ${this.item.ResourceType === 'ASSIGNMENT' ? 'bài tập' : 'bài học'} - ${this.item.Title}`,
-					action: function () {
-						if ($this.item.ResourceType === 'ASSIGNMENT') {
-							ajaxCALL('lms/EL_Assignment_Delete', {
-								AssignmentID: $this.item.ResourceID
-							}, res => {
-								vueData.apiCall3()
-							})
-						} else {
-							ajaxCALL('lms/EL_Lesson_Delete', {
-								LessonID: $this.item.ResourceID
-							}, res => {
-								vueData.apiCall3()
-							})
-						}
+				this.confirmRef.value.show({
+					title: `Xác nhận xóa ${this.item.ResourceType === 'ASSIGNMENT' ? 'bài tập' : 'bài học'} - ${this.item.Title}`
+				}).then(ok => {
+					if (!ok) return
+					if (this.item.ResourceType === 'ASSIGNMENT') {
+						ajaxCALL('lms/EL_Assignment_Delete', {
+							AssignmentID: this.item.ResourceID
+						}, res => {
+							vueData.apiCall3()
+						})
+					} else {
+						ajaxCALL('lms/EL_Lesson_Delete', {
+							LessonID: this.item.ResourceID
+						}, res => {
+							vueData.apiCall3()
+						})
 					}
 				})
 			},
@@ -479,16 +474,13 @@
 						AssignmentID: this.editData.AssignmentID,
 						JsonClassItems: payload
 					}, (res) => {
-						Vue.$toast.success("Sửa ngày thành công");
+						this.snackbarRef.value.showSnackbar({ message: 'Sửa ngày thành công', color: 'success' })
 						this.getAssignClass()
 						vueData.apiCall4()
 					},
 						err => {
 							// xử lý khi lỗi
-							Vue.$toast.error(err?.response?.data?.Message || 'Có lỗi xảy ra, vui lòng kiểm tra lại dữ liệu nhập vào!', {
-								position:
-									"top"
-							});
+							this.snackbarRef.value.showSnackbar({ message: err?.response?.data?.Message || 'Có lỗi xảy ra, vui lòng kiểm tra lại dữ liệu nhập vào!', color: 'error' })
 						}
 					);
 				}
@@ -497,22 +489,17 @@
 			},
 			editGiaoBaiTapDialog(id, index) {
 				if (id?.ResourceType == "ASSIGNMENT") {
-					openWindow({
+					this.iframeRef.value.openWindow({
 						title: "Sửa bài tập",
 						url: `/lms_tc_asm_builder?AssignmentID=${id?.AssignmentID}&AssignToClassID=${id?.AssignToClassID}`,
-						onclose: {
-							EXE: "apiCall3()"
-						}
+						onclose: () => vueData.apiCall3()
 					});
 				}
 				else if (id?.ResourceType == "LESSON") {
-					openWindow({
+					this.iframeRef.value.openWindow({
 						title: "Sửa bài học",
 						url: `lms_tc_lesson_builder?LessonID=${id?.ResourceID}`,
-						id: "WINSUABAIHOC",
-						onclose: {
-							EXE: "apiCall3()"
-						}
+						onclose: () => vueData.apiCall3()
 					});
 				}
 			},
@@ -548,15 +535,12 @@
 							});
 						}
 					}
-					Vue.$toast.success("Giao bài thành công");
+					this.snackbarRef.value.showSnackbar({ message: 'Giao bài thành công', color: 'success' })
 					this.assignDialog = false;
 				},
 					err => {
 						// xử lý khi lỗi
-						Vue.$toast.error(err?.response?.data?.Message || 'Có lỗi xảy ra, vui lòng kiểm tra lại dữ liệu nhập vào!', {
-							position:
-								"top"
-						});
+						this.snackbarRef.value.showSnackbar({ message: err?.response?.data?.Message || 'Có lỗi xảy ra, vui lòng kiểm tra lại dữ liệu nhập vào!', color: 'error' })
 					});
 	
 			},
@@ -578,14 +562,13 @@
 						AssignmentID: row.AssignmentID,
 						JsonClassItems: payload
 					}, (res) => {
-						Vue.$toast.success("Thay đổi trạng thái thành công");
+						this.snackbarRef.value.showSnackbar({ message: 'Thay đổi trạng thái thành công', color: 'success' })
 						this.getAssignClass()
 						vueData.apiCall4()
 					});
 				} catch (err) {
 					row.Status = prev
-					// (tùy chọn) báo lỗi
-					Vue.$toast?.error?.('Cập nhật trạng thái thất bại')
+					this.snackbarRef.value.showSnackbar({ message: 'Cập nhật trạng thái thất bại', color: 'error' })
 					console.error(err)
 				} finally {
 					row._loading = false

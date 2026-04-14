@@ -225,23 +225,69 @@
 
 				<!-- QUIZ_FILL_IN_BLANK -->
 				<div v-else-if="selectedQuestionData.type === 'QUIZ_FILL_IN_BLANK'">
-					<p class="text-caption">{{ $t('message.Structure') }}</p>
-					<div v-for="(part, index) in selectedQuestionData.config.parts" :key="index"
-						class="d-flex flex-wrap align-center mb-2">
-						<v-text-field v-if="part.type === 'text'" :model-value="part.value"
-						@update:model-value="updatePart(index, 'value', $event)" :placeholder="$t('message.TextContent')"
-						variant="outlined" density="compact" hide-details :clearable="false" />
+					<p class="text-caption mb-2">{{ $t('message.Structure') }}</p>
 
-					<v-text-field v-if="part.type === 'blank'" :model-value="part.acceptedAnswers[0]"
-						@update:model-value="updatePart(index, 'acceptedAnswers', [$event])"
-						:placeholder="$t('message.CorrectAnswer')" variant="outlined" density="compact" hide-details
-							class="ml-2" :clearable="false" />
-						<v-btn icon size="small" @click="removePart(index)" class="ml-1">
+					<div v-for="(part, index) in selectedQuestionData.config.parts" :key="index"
+						class="d-flex align-start mb-2 ga-2">
+
+						<!-- Type badge -->
+						<v-chip
+							size="x-small" variant="tonal"
+							:color="part.type === 'blank' ? 'indigo' : 'default'"
+							class="mt-2 flex-shrink-0"
+						>{{ part.type === 'blank' ? 'Trống' : 'Văn bản' }}</v-chip>
+
+						<!-- Text part -->
+						<v-text-field
+							v-if="part.type === 'text'"
+							:model-value="part.value"
+							@update:model-value="updatePart(index, 'value', $event)"
+							:placeholder="$t('message.TextContent')"
+							variant="outlined" density="compact" hide-details :clearable="false" class="flex-grow-1"
+						/>
+
+						<!-- Blank part -->
+						<div
+							v-else-if="part.type === 'blank'"
+							class="flex-grow-1 rounded pa-2"
+							style="border: 1.5px dashed #9E9E9E;"
+						>
+							<!-- Danh sách đáp án đúng -->
+							<div v-if="getAnswersWithId(part.id, part).length > 0" class="d-flex flex-wrap ga-1 mb-2">
+								<v-chip
+									v-for="ans in getAnswersWithId(part.id, part)"
+									:key="ans.id"
+									size="small"
+									:color="editingBlankState[part.id] && editingBlankState[part.id].editingId === ans.id ? 'primary' : 'success'"
+									variant="tonal"
+									:prepend-icon="editingBlankState[part.id] && editingBlankState[part.id].editingId === ans.id ? 'mdi-pencil' : 'mdi-check'"
+									closable
+									@click="selectAnswerForEdit(part.id, ans.id)"
+									@click:close.stop="removeAcceptedAnswer(part.id, index, ans.id)"
+								>{{ ans.value }}</v-chip>
+							</div>
+							<p v-else class="text-caption text-medium-emphasis mb-2">Chưa có đáp án đúng</p>
+
+							<!-- Input nhập/sửa đáp án -->
+							<v-text-field
+								:model-value="editingBlankState[part.id] ? editingBlankState[part.id].inputValue : ''"
+								@update:model-value="setBlankInput(part.id, $event)"
+								@keydown.enter.prevent="commitBlankAnswer(part.id, index, part)"
+								variant="outlined" density="compact" hide-details :clearable="false"
+								:placeholder="editingBlankState[part.id] && editingBlankState[part.id].editingId !== null ? 'Sửa đáp án...' : 'Thêm đáp án đúng...'"
+								append-inner-icon="mdi-keyboard-return"
+							/>
+						</div>
+
+						<v-btn icon size="small" variant="text" color="default" @click="removePart(index)" class="mt-1">
 							<v-icon>mdi-close</v-icon>
 						</v-btn>
 					</div>
-					<v-btn size="small" @click="addPart('text')" variant="tonal" class="mr-2 mt-2">{{ $t('message.AddText') }}</v-btn>
-					<v-btn size="small" @click="addPart('blank')" variant="tonal" class="mt-2">{{ $t('message.AddBlank') }}</v-btn>
+
+					<div class="d-flex ga-2 mt-1">
+						<v-btn size="small" @click="addPart('text')" variant="tonal" prepend-icon="mdi-format-text">{{ $t('message.AddText') }}</v-btn>
+						<v-btn size="small" @click="addPart('blank')" variant="tonal" color="indigo" prepend-icon="mdi-form-textbox">{{ $t('message.AddBlank') }}</v-btn>
+					</div>
 				</div>
 				<!-- QUIZ_MATCHING (QUIZ_MATCHING_V2 kept for backward compat with existing data) -->
 				<div v-else-if="['QUIZ_MATCHING', 'QUIZ_MATCHING_V2'].includes(selectedQuestionData.type)">
@@ -317,10 +363,15 @@
 				isQuestionTextField: false,
 				isShowModalImportFromHocLieu: false,
 				isShowModalSkill: false,
-				skills: new Map()
+				skills: new Map(),
+				editingBlankState: {}
 			}
 		},
-		watch: {},
+		watch: {
+			item() {
+				this.editingBlankState = {}
+			}
+		},
 		computed: {
 			selectedGroupData() {
 				if (!this.item || this.item.type !== 'group') return null;
@@ -449,6 +500,83 @@
 				const ng = JSON.parse(JSON.stringify(this.groups));
 				ng[this.item.groupIndex].questions[this.item.qIndex].config.options.splice(optionIndex, 1);
 				this.updateGroups(ng);
+			},
+			getAcceptedAnswers(part) {
+				if (!part) return [];
+				const raw = Array.isArray(part.acceptedAnswers)
+					? part.acceptedAnswers
+					: (part.acceptedAnswers != null ? [part.acceptedAnswers] : []);
+				return this.normalizeAcceptedAnswers(raw);
+			},
+			normalizeAnswerKey(value) {
+				return String(value ?? '')
+					.trim()
+					.replace(/\s+/g, '')
+					.toLowerCase();
+			},
+			normalizeAcceptedAnswers(values) {
+				if (!Array.isArray(values)) return [];
+				const out = [];
+				const seen = new Set();
+				for (const item of values) {
+					const txt = String(item ?? '').trim();
+					if (!txt) continue;
+					const key = this.normalizeAnswerKey(txt);
+					if (!key || seen.has(key)) continue;
+					seen.add(key);
+					out.push(txt);
+				}
+				return out;
+			},
+			getAnswersWithId(partId, part) {
+				if (!this.editingBlankState[partId]) {
+					const answers = this.getAcceptedAnswers(part)
+					this.editingBlankState[partId] = {
+						inputValue: '',
+						editingId: null,
+						answersWithId: answers.map(v => ({ id: 'a' + Date.now() + '_' + Math.floor(Math.random() * 99999), value: v }))
+					}
+				}
+				return this.editingBlankState[partId].answersWithId
+			},
+			setBlankInput(partId, value) {
+				if (!this.editingBlankState[partId]) {
+					this.editingBlankState[partId] = { inputValue: '', editingId: null, answersWithId: [] }
+				}
+				this.editingBlankState[partId].inputValue = value
+			},
+			selectAnswerForEdit(partId, answerId) {
+				const state = this.editingBlankState[partId]
+				if (!state) return
+				const ans = state.answersWithId.find(a => a.id === answerId)
+				if (!ans) return
+				state.inputValue = ans.value
+				state.editingId = answerId
+			},
+			commitBlankAnswer(partId, partIndex, part) {
+				const state = this.editingBlankState[partId]
+				const inputVal = String(state?.inputValue ?? '').trim()
+				if (!inputVal) return
+				if (state.editingId !== null) {
+					const entry = state.answersWithId.find(a => a.id === state.editingId)
+					if (entry) entry.value = inputVal
+				} else {
+					const isDupe = state.answersWithId.some(a => this.normalizeAnswerKey(a.value) === this.normalizeAnswerKey(inputVal))
+					if (!isDupe) state.answersWithId.push({ id: 'a' + Date.now(), value: inputVal })
+				}
+				state.inputValue = ''
+				state.editingId = null
+				this.updatePart(partIndex, 'acceptedAnswers', state.answersWithId.map(a => a.value))
+			},
+			removeAcceptedAnswer(partId, partIndex, answerId) {
+				const state = this.editingBlankState[partId]
+				if (!state) return
+				state.answersWithId = state.answersWithId.filter(a => a.id !== answerId)
+				if (state.editingId === answerId) {
+					state.inputValue = ''
+					state.editingId = null
+				}
+				this.updatePart(partIndex, 'acceptedAnswers', state.answersWithId.map(a => a.value))
 			},
 			updatePart(partIndex, key, value) { const ng = JSON.parse(JSON.stringify(this.groups)); ng[this.item.groupIndex].questions[this.item.qIndex].config.parts[partIndex][key] = value; this.updateGroups(ng); },
 			addPart(type) { const ng = JSON.parse(JSON.stringify(this.groups)); const parts = ng[this.item.groupIndex].questions[this.item.qIndex].config.parts; if (type === 'text') { parts.push({ type: 'text', value: ' ' }); } else { parts.push({ type: 'blank', id: `blank_${Date.now()}`, acceptedAnswers: [] }); } this.updateGroups(ng); },

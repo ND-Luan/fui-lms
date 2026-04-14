@@ -17,7 +17,8 @@
 						</span> <span v-if="task.TenLopHoacNhom">• {{ task.TenLopHoacNhom }}</span>
 						<v-spacer></v-spacer>
 						<div class="d-flex flex-wrap flex-md-nowrap justify-center mb-1">
-							<v-chip variant="text" size="x-small" color="success" prepend-icon="mdi-file-upload-outline" class="me-0 pe-2">
+							<v-chip variant="text" size="x-small" color="success" prepend-icon="mdi-file-upload-outline"
+								class="me-0 pe-2">
 								{{ $t('message.Submitted') }}:{{ task.SubmittedCount }}/{{ task.TotalStudents }}
 							</v-chip>
 							<v-chip :color="statusInfo.color" size="x-small" variant="text" class="me-0 pa-0">
@@ -32,25 +33,12 @@
 							{{ formatDate(task.DueDate) }} ({{ dueDateInfo.text }})
 						</div>
 						<v-spacer></v-spacer>
-						<v-btn v-tooltip=" task.IsHided ? 'Hiện bài tập' : 'Ẩn bài tập'" size="x-small" :icon=" task.IsHided ? 'mdi-eye-outline' : 'mdi-eye-off-outline'" @click.stop="handleHide(task)"></v-btn>
+						<v-btn v-tooltip="task.IsHided ? 'Hiện bài tập' : 'Ẩn bài tập'" size="x-small"
+							:icon="task.IsHided ? 'mdi-eye-outline' : 'mdi-eye-off-outline'"
+							@click.stop="handleHide(task)"></v-btn>
 					</div>
 				</div>
 			</div>
-			<v-dialog v-model="isOpen" fullscreen>
-				<v-card id="ChamBaiDialog" style="overflow: hidden;">
-					<v-card-title class="d-flex bg-primary ChamBaiDialog" style="max-height: 48px">
-						<span class="text-white">Giao Bài Tập Theo {{ task?.AssignType == 'STUDENT' ? 'Học Sinh'
-							: 'Lớp' }}</span>
-						<v-spacer></v-spacer>
-						<v-btn class="text-white" @click="onClose()" variant="text" icon="mdi-close"></v-btn>
-					</v-card-title>
-					<v-card-text class="pa-0 e">
-						<iframe class="position-absolute focus-task" :src="url" width="100%" allow="fullscreen"
-							style="border:none;"
-							:style="{ 'height': gradeAssignment ? 'calc(100dvh)' : 'calc(100dvh - 64px)' }"></iframe>
-					</v-card-text>
-				</v-card>
-			</v-dialog>
 		</v-card-text>
 	</v-card>
 </template>
@@ -58,6 +46,7 @@
 <script>
 export default {
 	name: 'uc-teacher-focus-card',
+	inject: ['snackbarRef', 'iframeRef', 'confirmRef'],
 	props: {
 		task: {
 			type: Object,
@@ -65,15 +54,9 @@ export default {
 		}
 	},
 	data() {
-		return {
-			isOpen: false,
-			url: '',
-			gradeAssignment: false
-		}
+		return {}
 	},
-	mounted() {
-		window.addEventListener(`message`, (event) => this.handleMessage(event))
-	},
+	mounted() { },
 	computed: {
 		// Thông tin trạng thái để quyết định màu sắc, icon và text
 		statusInfo() {
@@ -110,14 +93,12 @@ export default {
 			return { text: this.$i18n.locale == 'en' ? ` ${diffDays} days left` : `còn ${diffDays} ngày`, colorClass: 'text-success' };
 		}
 	},
-	unmounted() {
-		window.removeEventListener("message", this.handleMessage())
-	},
+	unmounted() { },
 	methods: {
 		// Xử lý sự kiện click nút "Chấm ngay"
 		goToGradingPage() {
 			// Ví dụ: openWindow({ url: `/lms_tc_grade_assignment?AssignToClassID=${this.task.AssignToClassID}` })
-			Toast.info({ text: `Mở trang chấm bài cho "${this.task.Title}"...` });
+			this.snackbarRef.value.showSnackbar({ message: `Mở trang chấm bài cho "${this.task.Title}"...`, color: 'info' })
 			console.log("Navigate to grading page for AssignToClassID:", this.task.AssignToClassID);
 
 		},
@@ -131,25 +112,12 @@ export default {
 			});
 		},
 		chamBai(assignment) {
-			console.log('assignment', assignment)
-			this.url = `https://lms.lhbs.vn/lms_Assignment-Class-Detail?AssignToClassID=${assignment?.AssignToClassID}&LopID=${assignment?.LopID}&MonHocID=${assignment?.MonHocID}&AssignType=${assignment?.AssignType}&KhoiID=${assignment?.KhoiID}`
-			this.isOpen = true
-		},
-		onClose() {
-			this.isOpen = false
-			vueData.apiCall1()
-		},
-		handleMessage(event) {
-			if (!event || !event.data || !event.data.type) return
-			if (event.origin === 'https://lms.lhbs.vn' && event.data.type === "fromIframe") {
-				if (event.data.value == 'hide') {
-					this.gradeAssignment = true
-					document.getElementsByClassName('ChamBaiDialog')[0].style.setProperty("display", "none", "important");
-				} else {
-					this.gradeAssignment = false
-					document.getElementsByClassName('ChamBaiDialog')[0].style.setProperty("display", "flex", "important");
-				}
-			}
+			const url = `https://lms.lhbs.vn/lms_Assignment-Class-Detail?AssignToClassID=${assignment?.AssignToClassID}&LopID=${assignment?.LopID}&MonHocID=${assignment?.MonHocID}&AssignType=${assignment?.AssignType}&KhoiID=${assignment?.KhoiID}`
+			this.iframeRef.value.openWindow({
+				title: assignment?.Title || 'Chấm bài',
+				url,
+				onclose: () => vueData.apiCall1()
+			})
 		},
 		handleHide(task) {
 			task.IsHided = !task.IsHided

@@ -138,7 +138,7 @@
 <script>
 export default {
 
-
+	inject: ['snackbarRef', 'iframeRef', 'confirmRef'],
 	emits: ['update:isOpen', 'CreateContent'],
 	props: {
 		isOpen: {
@@ -260,43 +260,39 @@ export default {
 			} else if (item.ResourceType === 'LESSON') {
 				url = `/lms_tc_lesson_builder?LessonID=${item.ResourceID}`
 			}
-			openWindow({
+			this.iframeRef.value.openWindow({
 				title: item.Title,
 				url,
-				onclose: {}
 			});
 
 		},
 		onDeleteItem(item) {
-			const $this = this
-			confirm({
-				title: `Xác nhận xóa ${item.ResourceType === 'ASSIGNMENT' ? 'bài tập' : 'bài học'} - ${item.Title}`,
-				action: function () {
-					if (item.ResourceType === 'ASSIGNMENT') {
-						ajaxCALL('lms/EL_Assignment_Delete', {
-							AssignmentID: item.ResourceID
-						}, res => {
-							vueData.initPage()
-							Vue.$toast.success("Xóa bài tập thành công!", { position: "top" });
-						})
-					} else {
-						ajaxCALL('lms/EL_Lesson_Delete', {
-							LessonID: item.ResourceID
-						}, res => {
-							vueData.initPage()
-							Vue.$toast.success("Xóa bài học thành công!", { position: "top" });
-						})
-					}
+			this.confirmRef.value.show({
+				title: `Xác nhận xóa ${item.ResourceType === 'ASSIGNMENT' ? 'bài tập' : 'bài học'} - ${item.Title}`
+			}).then(ok => {
+				if (!ok) return
+				if (item.ResourceType === 'ASSIGNMENT') {
+					ajaxCALL('lms/EL_Assignment_Delete', {
+						AssignmentID: item.ResourceID
+					}, res => {
+						vueData.initPage()
+						this.snackbarRef.value.showSnackbar({ message: 'Xóa bài tập thành công!', color: 'success' })
+					})
+				} else {
+					ajaxCALL('lms/EL_Lesson_Delete', {
+						LessonID: item.ResourceID
+					}, res => {
+						vueData.initPage()
+						this.snackbarRef.value.showSnackbar({ message: 'Xóa bài học thành công!', color: 'success' })
+					})
 				}
 			})
 		},
 		onOpenKhoNoiDung() {
-			openWindow({
-				url: 'https://lms.lhbs.vn/kho-noi-dung-cong-khai?NienKhoa=' + vueData.NienKhoa,
+			this.iframeRef.value.openWindow({
 				title: 'Kho nội dung',
-				onclose: {
-					"EXE": "vueData.apiCall3()"
-				}
+				url: 'https://lms.lhbs.vn/kho-noi-dung-cong-khai?NienKhoa=' + vueData.NienKhoa,
+				onclose: () => vueData.apiCall3()
 			})
 		},
 	}

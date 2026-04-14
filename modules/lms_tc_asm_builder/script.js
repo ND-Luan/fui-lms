@@ -55,7 +55,14 @@ function isCheckAnswerQuestionNotChoose(question) {
         }
         if (!config.parts.find(x => x.type === 'blank')) flag = true
         for (var part of config.parts) {
-            if (part.type === "blank" && (part.acceptedAnswers?.length === 0 || part.acceptedAnswers[0]?.length === 0)) {
+            if (part.type !== "blank") continue
+            const accepted = Array.isArray(part.acceptedAnswers)
+                ? part.acceptedAnswers
+                : (part.acceptedAnswers != null ? [part.acceptedAnswers] : [])
+            const normalized = accepted
+                .map(x => normalizeAcceptedAnswerKey(x))
+                .filter(Boolean)
+            if (normalized.length === 0) {
                 flag = true
             }
         }
@@ -66,6 +73,12 @@ function isCheckAnswerQuestionNotChoose(question) {
         }
     }
     return flag
+}
+function normalizeAcceptedAnswerKey(value) {
+    return String(value ?? '')
+        .trim()
+        .replace(/\s+/g, '')
+        .toLowerCase()
 }
 vueData.isCheckAllGroupFullQuiz = isCheckAllGroupFullQuiz
 vueData.isCheckGroupHasAnswerQuestionNotChoose = isCheckGroupHasAnswerQuestionNotChoose

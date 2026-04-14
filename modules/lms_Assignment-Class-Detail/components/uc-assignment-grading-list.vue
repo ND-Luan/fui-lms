@@ -316,25 +316,12 @@
 			</template>
 		</v-data-table>
 	</v-card>
-	<v-dialog v-model="isOpen" fullscreen>
-		<v-card class="ChamBaiDialog" id="ChamBaiDialog" style=" position: sticky; top: 0 ;z-index:9999">
-			<v-card-title class="d-flex bg-primary" style="max-height: 48px;"
-				:style="{ display: displayHeaderChamBai === true ? 'flex !important' : 'none !important' }">
-				<span class="text-white">{{ $t('message.GradeAssignment') }}</span>
-				<v-spacer></v-spacer>
-				<v-btn class="text-white" @click="onClose()" icon="mdi-close" size="small" variant="text" />
-			</v-card-title>
-			<v-card-text class="pa-0 glass-Assignment" style="position: relative; height: 100vh;">
-				<iframe class="position-absolute grade-list" :src="url" width="100%" allow="fullscreen"
-					style="border:none;height: calc(100dvh - 48px);"></iframe>
-			</v-card-text>
-		</v-card>
-	</v-dialog>
 </template>
 
 <script>
 export default {
 	name: 'uc-baocaobaitapdanop',
+	inject: ['snackbarRef', 'iframeRef', 'confirmRef'],
 	props: {
 		assigntoclassid: Number,
 		assignmentid: Number,
@@ -367,7 +354,6 @@ export default {
 				'RESUBMIT': this.$t('message.ResubmissionRequested')
 			},
 			isOpen: false,
-			url: "",
 			isMobile: mobile,
 			_,
 			studentSubmissionsOriginal: [],
@@ -379,10 +365,15 @@ export default {
 		}
 	},
 	created() {
-		window.addEventListener('storage', this.onStorageChange);
+		window.addEventListener('storage', this.onStorageChange)
+		window.addEventListener('message', this._iframeClosedHandler = (e) => {
+			if (e.data?.type === 'iframeRef_closed')
+				this.loadAllDataForAssignment(vueData.AssignToClassID_FromURL)
+		})
 	},
 	beforeUnmount() {
-		window.removeEventListener('storage', this.onStorageChange);
+		window.removeEventListener('storage', this.onStorageChange)
+		window.removeEventListener('message', this._iframeClosedHandler)
 	},
 	computed: {
 		assignmentTitle() {
@@ -448,18 +439,7 @@ export default {
 		lopid(newVal, oldVal) {
 		},
 		isOpen(val) {
-			if (val) {
-				let dom = document.getElementsByClassName("v-toolbar")[2]
-				if (dom) {
-					dom.style.display = 'none'
-
-				}
-			} else {
-				let dom = document.getElementsByClassName("v-toolbar")[2]
-				if (dom) {
-					dom.style.display = 'block'
-				}
-			}
+			// reserved
 		},
 		studentSelected: function (val) {
 			if (val) {
@@ -858,48 +838,24 @@ export default {
 			if (score < 5.0) return 'score-bad'; if (score < 7.0) return 'score-average'; return 'score-good';
 		},
 		viewClassReport() {
-			openWindow({
-				title: "Xem báo cáo nộp bài",
+			this.iframeRef.value.openWindow({
+				title: 'Xem báo cáo nộp bài',
 				url: `/lms-teacher-score?AssignToClassID=${vueData.AssignToClassID_FromURL}`,
-				id: "WinBaoCaoNopBai999",
-				onclose: {
-				}
-			});
+			})
 		},
 		chamBai(item) {
-			const $this = this
-			openWindow({
-				title: "Thao tác",
+			this.iframeRef.value.openWindow({
+				title: 'Thao tác',
 				url: `https://lms.lhbs.vn/lms_tc_grade_asm?SubmissionID=${item.SubmissionID}`,
-				id: "WinBaoCaoNopBai00",
-				onclose: {
-					"EXE": ""
-				}
-			});
+				onclose: () => this.loadAllDataForAssignment(vueData.AssignToClassID_FromURL)
+			})
 		},
 		RedirectToGrade(item) {
-			this.emitToParent()
-			this.url = `https://lms.lhbs.vn/lms_tc_grade_asm?SubmissionID=${item.SubmissionID}&AssignType=${vueData.AssignType}`
-			this.isOpen = true
-
-		},
-		async onClose() {
-			this.isOpen = false
-			window.parent.postMessage(
-				{ type: "fromIframe", value: "show" },
-				"*"
-			)
-			if (vueData.AssignType == 'CLASS') {
-
-			}
-			// await this.initialize()
-			await this.loadAllDataForAssignment(vueData.AssignToClassID_FromURL)
-		},
-		emitToParent() {
-			window.parent.postMessage(
-				{ type: "fromIframe", value: "hide" },
-				"*"
-			)
+			this.iframeRef.value.openWindow({
+				title: this.$t('message.GradeAssignment'),
+				url: `https://lms.lhbs.vn/lms_tc_grade_asm?SubmissionID=${item.SubmissionID}&AssignType=${vueData.AssignType}`,
+				onclose: () => this.loadAllDataForAssignment(vueData.AssignToClassID_FromURL)
+			})
 		},
 		getAllAssigned(hocsinh) {
 			return this.studentSubmissionsOriginal.filter(item => item.HocSinhID == hocsinh.HocSinhID)

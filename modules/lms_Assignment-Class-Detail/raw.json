@@ -1,1 +1,51 @@
-{"data":[{"KhoiID_FromURL":"parseInt(KhoiID)","LopID_FromURL":"LopID","AssignToClassID_FromURL":"parseInt(AssignToClassID)","AssignToStudentID_FromURL":"parseInt(AssignToStudentID)","MonHocID_FromURL":"parseInt(MonHocID)","loading":false,"domHeaderLength":0,"AssignType":"AssignType","keyComp":0,"NienKhoa":null,"NienKhoaItem":null,"HocKi":null},{"getNienKhoa":{"API":"lms/NienKhoa_Get","OUT":"DSNienKhoa","CALLBACK":{"EXE":"vueData.NienKhoa = vueData.DSNienKhoa.find(x=> x.IsActive)?.NienKhoa ?? 0; vueData.NienKhoaItem = vueData.DSNienKhoa.find(x=> x.IsActive)"}}},{"CALL":"getNienKhoa"}],"watch":{},"controls":[{"prop":"fluid pa-0","rows":[{"prop":":no-gutters='true'","cols":[{"el":"uc-assignment-grading-list","attr":{"v-if":"AssignType =='CLASS' && NienKhoa",":khoiid":"parseInt(KhoiID_FromURL)",":lopid":"LopID_FromURL",":assigntoclassid":"AssignToClassID_FromURL",":monhocid":"parseInt(MonHocID_FromURL)","ref":"test",":key":"keyComp"},"w":12},{"el":"uc-assignment-grading-list-student","attr":{"v-if":"AssignType  =='STUDENT' && NienKhoa",":khoiid":"parseInt(KhoiID_FromURL)",":lopid":"LopID_FromURL",":assigntoclassid":"AssignToClassID_FromURL",":monhocid":"parseInt(MonHocID_FromURL)","ref":"test",":key":"keyComp"},"w":12}]}]}],"set":{"menu":false,"menuLeft":false}}
+{
+    "data": [
+        {
+            "KhoiID_FromURL": "parseInt(KhoiID)",
+            "LopID_FromURL": "LopID",
+            "AssignToClassID_FromURL": "parseInt(AssignToClassID)",
+            "AssignToStudentID_FromURL": "parseInt(AssignToStudentID)",
+            "MonHocID_FromURL": "parseInt(MonHocID)",
+            "loading": false,
+            "domHeaderLength": 0,
+            "AssignType": "AssignType",
+            "keyComp": 0,
+            "NienKhoa": null,
+            "NienKhoaItem": null,
+            "HocKi": null
+        },
+        {
+            "getNienKhoa": {
+                "API": "lms/NienKhoa_Get",
+                "OUT": "DSNienKhoa",
+                "CALLBACK": {
+                    "EXE": "vueData.NienKhoa = vueData.DSNienKhoa.find(x=> x.IsActive)?.NienKhoa ?? 0; vueData.NienKhoaItem = vueData.DSNienKhoa.find(x=> x.IsActive)"
+                }
+            }
+        },
+        {
+            "CALL": "getNienKhoa"
+        }
+    ],
+    "watch": {},
+    "controls": [
+        {
+            "prop": "fluid pa-0",
+            "rows": [
+                {
+                    "prop": ":no-gutters='true'",
+                    "cols": [
+                        {
+                            "el": "uc-main-layout",
+                            "w": 12
+                        }
+                    ]
+                }
+            ]
+        }
+    ],
+    "set": {
+        "menu": false,
+        "menuLeft": false
+    }
+}

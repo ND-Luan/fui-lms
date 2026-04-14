@@ -257,6 +257,7 @@
 					visible: false,
 					loading: false,
 					data: null,
+					hd: null,
 				},
 				leaderboardModal: {
 					visible: false,
@@ -347,6 +348,7 @@
 				this.summaryModal.visible = true;
 				this.summaryModal.loading = true;
 				this.summaryModal.data = null;
+				this.summaryModal.hd = hd;
 				try {
 					const res = await ajaxCALLPromise('lms/EL_Student_GetSubmissionSummary', {
 						SubmissionID: hd.ObjectID,
@@ -364,11 +366,17 @@
 				}
 			},
 	
-			onNavigateToDetails(assignToClassID) {
+			onNavigateToDetails() {
 				this.summaryModal.visible = false;
+				const hd = this.summaryModal.hd;
+				if (!hd) return;
+				const HocSinhID = this.HocSinh?.HocSinhID;
+				const url = hd.Is_SendToClass
+					? `/lms-student-assignment?AssignToClassID=${hd.AssignID}&LanNop=${hd.LanNop}&tab=detail&HocSinhID=${HocSinhID}`
+					: `/lms-student-assignment?AssignToStudentID=${hd.AssignID}&Is_SendToClass=0&LanNop=${hd.LanNop}&tab=detail&HocSinhID=${HocSinhID}`;
 				this.$refs.iframeWindow.openWindow({
 					title: 'Chi tiết bài làm',
-					url: `/lms-student-assignment?AssignToClassID=${assignToClassID}&tab=detail&HocSinhID=${this.HocSinh?.HocSinhID}`,
+					url,
 				});
 			},
 	
