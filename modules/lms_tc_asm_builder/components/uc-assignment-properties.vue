@@ -227,7 +227,7 @@
 				<div v-else-if="selectedQuestionData.type === 'QUIZ_FILL_IN_BLANK'">
 					<p class="text-caption mb-2">{{ $t('message.Structure') }}</p>
 
-					<div v-for="(part, index) in selectedQuestionData.config.parts" :key="index"
+					<div v-for="(part, index) in selectedQuestionData.config.parts" :key="getPartKey(part, index)"
 						class="d-flex align-start mb-2 ga-2">
 
 						<!-- Type badge -->
@@ -370,6 +370,9 @@
 		watch: {
 			item() {
 				this.editingBlankState = {}
+				this.isQuestionTextField = false
+				this.isShowModalImportFromHocLieu = false
+				this.isShowModalSkill = false
 			}
 		},
 		computed: {
@@ -407,9 +410,13 @@
 			}
 		},
 		methods: {
+			getPartKey(part, index) {
+				return part.type === 'blank' ? part.id : ('text_' + index)
+			},
 			onPointInput(value) {
 				const normalized = vueData.normalizeNumberInput(value);
-				this.updateQuestion('points', normalized);
+				// Clamp to 0 minimum — negative points not allowed
+				this.updateQuestion('points', (isNaN(normalized) || normalized < 0) ? 0 : normalized);
 			},
 			onScoringModeChange(value) {
 				const ng = JSON.parse(JSON.stringify(this.groups));
@@ -579,11 +586,17 @@
 				this.updatePart(partIndex, 'acceptedAnswers', state.answersWithId.map(a => a.value))
 			},
 			updatePart(partIndex, key, value) { const ng = JSON.parse(JSON.stringify(this.groups)); ng[this.item.groupIndex].questions[this.item.qIndex].config.parts[partIndex][key] = value; this.updateGroups(ng); },
-			addPart(type) { const ng = JSON.parse(JSON.stringify(this.groups)); const parts = ng[this.item.groupIndex].questions[this.item.qIndex].config.parts; if (type === 'text') { parts.push({ type: 'text', value: ' ' }); } else { parts.push({ type: 'blank', id: `blank_${Date.now()}`, acceptedAnswers: [] }); } this.updateGroups(ng); },
-			removePart(partIndex) { const ng = JSON.parse(JSON.stringify(this.groups)); ng[this.item.groupIndex].questions[this.item.qIndex].config.parts.splice(partIndex, 1); this.updateGroups(ng); },
+			addPart(type) { const ng = JSON.parse(JSON.stringify(this.groups)); const parts = ng[this.item.groupIndex].questions[this.item.qIndex].config.parts; if (type === 'text') { parts.push({ type: 'text', value: ' ' }); } else { parts.push({ type: 'blank', id: `blank_${crypto.randomUUID()}`, acceptedAnswers: [] }); } this.updateGroups(ng); },
+			removePart(partIndex) {
+				const ng = JSON.parse(JSON.stringify(this.groups));
+				const parts = ng[this.item.groupIndex].questions[this.item.qIndex].config.parts;
+				const blankCount = parts.filter(p => p.type === 'blank').length;
+				if (parts[partIndex].type === 'blank' && blankCount <= 1) return; // prevent removing last blank
+				parts.splice(partIndex, 1);
+				this.updateGroups(ng);
+			},
 			addPair() {
-				const newIndex = Date.now();
-				const aId = `a${newIndex}`; const bId = `b${newIndex}`;
+				const aId = crypto.randomUUID(); const bId = crypto.randomUUID();
 				const newA = [...this.selectedQuestionData.config.columnA, { id: aId, text: '' }];
 				const newB = [...this.selectedQuestionData.config.columnB, { id: bId, text: '' }];
 				const newPairs = [...this.selectedQuestionData.config.correctPairs, { from: aId, to: bId }];
@@ -591,9 +604,10 @@
 			},
 			removePair(index) {
 				if (this.selectedQuestionData.config.columnA.length > 1) {
+					const removedAId = this.selectedQuestionData.config.columnA[index].id;
 					const newA = [...this.selectedQuestionData.config.columnA]; newA.splice(index, 1);
 					const newB = [...this.selectedQuestionData.config.columnB]; newB.splice(index, 1);
-					const newPairs = [...this.selectedQuestionData.config.correctPairs]; newPairs.splice(index, 1);
+					const newPairs = this.selectedQuestionData.config.correctPairs.filter(p => p.from !== removedAId);
 					this.selectedQuestionData.config = { ...this.selectedQuestionData.config, columnA: newA, columnB: newB, correctPairs: newPairs };
 				}
 			},
@@ -609,7 +623,12 @@
 				this.isShowModalImportFromHocLieu = true
 			},
 			bindingImport(val) {
-				this.groups[this.item.groupIndex].questions = [...this.groups[this.item.groupIndex].questions, val]
+				const cloned = JSON.parse(JSON.stringify(val))
+				cloned.id = `q_${crypto.randomUUID()}`
+				// Correct ordinalNumber based on actual total question count across all groups
+				const totalQuestions = this.groups.reduce((sum, g) => sum + (g.questions?.length || 0), 0)
+				cloned.ordinalNumber = totalQuestions + 1
+				this.groups[this.item.groupIndex].questions = [...this.groups[this.item.groupIndex].questions, cloned]
 			},
 			onOpenModalKiNang() {
 				this.isShowModalSkill = true

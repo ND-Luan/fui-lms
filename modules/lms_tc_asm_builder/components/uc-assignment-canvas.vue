@@ -203,7 +203,7 @@ export default {
 		addGroup() {
 			const newGroups = [...this.groups];
 			newGroups.push({
-				id: `group_${Date.now()}`,
+				id: `group_${crypto.randomUUID()}`,
 				title: `${this.$i18n.locale == 'en' ? 'Section' : 'Phần'} ${newGroups.length + 1}`,
 				description: '',
 				media: {
@@ -364,6 +364,7 @@ export default {
 			}
 
 			// Cập nhật
+			this._reorderOrdinalNumbers(newGroups)
 			this.$emit('update:groups', newGroups);
 			this.$emit('update:selectedItem', {
 				type: 'question',
@@ -374,6 +375,15 @@ export default {
 			// Clear state
 			this.draggedQuestion = null;
 			this.dragOverPosition = null;
+		},
+
+		_reorderOrdinalNumbers(groups) {
+			let number = 0
+			groups.forEach(group => {
+				group.questions.forEach(q => {
+					q.ordinalNumber = ++number
+				})
+			})
 		},
 
 		// Handlers for empty groups
@@ -409,6 +419,7 @@ export default {
 			// Add to target (empty group)
 			newGroups[targetGroupIndex].questions.push(question);
 
+			this._reorderOrdinalNumbers(newGroups)
 			this.$emit('update:groups', newGroups);
 			this.$emit('update:selectedItem', {
 				type: 'question',

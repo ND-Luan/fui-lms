@@ -102,7 +102,7 @@ const _defaultMedia = () => ({
 })
 function buildNewQuestion(componentInfo, ordinalNumber) {
     const q = {
-        id: `q_${Date.now()}`,
+        id: `q_${crypto.randomUUID()}`,
         type: componentInfo.type,
         label: componentInfo.label,
         skills: [],
@@ -118,15 +118,15 @@ function buildNewQuestion(componentInfo, ordinalNumber) {
     switch (componentInfo.type) {
         case 'QUIZ_SINGLE_CHOICE':
             q.config.options = [
-                { id: 'opt_1', text: '' }, { id: 'opt_2', text: '' },
-                { id: 'opt_3', text: '' }, { id: 'opt_4', text: '' }
+                { id: crypto.randomUUID(), text: '' }, { id: crypto.randomUUID(), text: '' },
+                { id: crypto.randomUUID(), text: '' }, { id: crypto.randomUUID(), text: '' }
             ]
             q.config.correctAnswer = null
             break
         case 'QUIZ_MULTIPLE_CHOICE':
             q.config.options = [
-                { id: 'opt_1', text: '' }, { id: 'opt_2', text: '' },
-                { id: 'opt_3', text: '' }, { id: 'opt_4', text: '' }
+                { id: crypto.randomUUID(), text: '' }, { id: crypto.randomUUID(), text: '' },
+                { id: crypto.randomUUID(), text: '' }, { id: crypto.randomUUID(), text: '' }
             ]
             q.config.correctAnswers = []
             q.config.scoringMode = 'equal'
@@ -142,7 +142,7 @@ function buildNewQuestion(componentInfo, ordinalNumber) {
         case 'QUIZ_FILL_IN_BLANK':
             q.config.parts = [
                 { type: 'text', value: 'Điền vào ' },
-                { type: 'blank', id: 'blank_1', acceptedAnswers: ['chỗ trống'] },
+                { type: 'blank', id: `blank_${crypto.randomUUID()}`, acceptedAnswers: ['chỗ trống'] },
                 { type: 'text', value: ' này.' }
             ]
             break

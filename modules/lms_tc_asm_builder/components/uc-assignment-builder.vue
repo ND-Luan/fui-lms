@@ -307,6 +307,10 @@ export default {
 			relativeTimeNow: null,
 			isLibraryDrawerOpen: false,
 			isPropertiesDrawerOpen: false,
+			isSaving: false,
+			_skipNextAutoSave: false,
+			autoSaveTimer: null,
+			relativeTimeTimer: null,
 		}
 	},
 	mounted() {
@@ -365,25 +369,37 @@ export default {
 	methods: {
 		scheduleAutoSave() {
 			if (!this.isEditMode) return
+			// Skip auto-save triggered by initial data load
+			if (this._skipNextAutoSave) {
+				this._skipNextAutoSave = false
+				return
+			}
 			clearTimeout(this.autoSaveTimer)
 			this.autoSaveTimer = setTimeout(async () => {
-				const groups = this.assignment.AssignmentConfig?.groups || []
-				const isNotFullQuiz = vueData.isCheckAllGroupFullQuiz(groups)
-				const payload = {
-					assignment: this.assignment,
-					isPublishing: false,
-					Is_Full_Quiz: !isNotFullQuiz,
-					setting: this.setting,
-				}
-				this.autoSaveStatus = 'saving'
-				await this.onAutoSave(payload)
-				this.lastSavedAt = Date.now()
-				this.relativeTimeNow = Date.now()
-				this.autoSaveStatus = 'saved'
-				clearInterval(this.relativeTimeTimer)
-				this.relativeTimeTimer = setInterval(() => {
+				// Skip if a manual save is already in progress
+				if (this.isSaving) return
+				this.isSaving = true
+				try {
+					const groups = this.assignment.AssignmentConfig?.groups || []
+					const isNotFullQuiz = vueData.isCheckAllGroupFullQuiz(groups)
+					const payload = {
+						assignment: this.assignment,
+						isPublishing: false,
+						Is_Full_Quiz: !isNotFullQuiz,
+						setting: this.setting,
+					}
+					this.autoSaveStatus = 'saving'
+					await this.onAutoSave(payload)
+					this.lastSavedAt = Date.now()
 					this.relativeTimeNow = Date.now()
-				}, 10000)
+					this.autoSaveStatus = 'saved'
+					clearInterval(this.relativeTimeTimer)
+					this.relativeTimeTimer = setInterval(() => {
+						this.relativeTimeNow = Date.now()
+					}, 10000)
+				} finally {
+					this.isSaving = false
+				}
 			}, 2000)
 		},
 		formatNumber(value, decimals = 2) {
@@ -518,7 +534,7 @@ export default {
 				newGroups[newGroups.length - 1].questions.push(newQuestion);
 			} else {
 				newGroups.push({
-					id: `group_${Date.now()}`,
+					id: `group_${crypto.randomUUID()}`,
 					title: 'Phần 1',
 					description: '',
 					media: {
@@ -589,14 +605,21 @@ export default {
 				setting: this.setting
 			};
 			console.log('payload', payload)
+			// Cancel any pending auto-save and guard against concurrent saves
 			clearTimeout(this.autoSaveTimer)
-			this.autoSaveStatus = 'saving'
-			await this.onSave(payload)
-			this.lastSavedAt = Date.now()
-			this.relativeTimeNow = Date.now()
-			this.autoSaveStatus = 'saved'
-			clearInterval(this.relativeTimeTimer)
-			this.relativeTimeTimer = setInterval(() => { this.relativeTimeNow = Date.now() }, 10000)
+			if (this.isSaving) return
+			this.isSaving = true
+			try {
+				this.autoSaveStatus = 'saving'
+				await this.onSave(payload)
+				this.lastSavedAt = Date.now()
+				this.relativeTimeNow = Date.now()
+				this.autoSaveStatus = 'saved'
+				clearInterval(this.relativeTimeTimer)
+				this.relativeTimeTimer = setInterval(() => { this.relativeTimeNow = Date.now() }, 10000)
+			} finally {
+				this.isSaving = false
+			}
 		},
 		// ==== Helpers hiển thị ====
 		formattedDate(dateStr) {
@@ -753,6 +776,8 @@ export default {
 		initialAssignment: {
 			handler(newVal) {
 				if (newVal) {
+					// Prevent the deep assignment watcher from triggering auto-save on initial load
+					this._skipNextAutoSave = true
 					this.assignment = JSON.parse(JSON.stringify(newVal));
 				}
 			},

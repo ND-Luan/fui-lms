@@ -436,9 +436,9 @@
 					// Validate content based on type
 					this.validateQuestionContent(item.type, item.config);
 	
-					// Transform to internal format
+					// Transform to internal format — always regenerate ID to prevent collisions
 					const question = {
-						id: item.id || `json_q_${Date.now()}_${index}`,
+						id: `q_${crypto.randomUUID()}`,
 						type: item.type,
 						points: item.points || 1,
 						config: this.normalizeQuestionContent(item.type, item.config)
@@ -497,10 +497,11 @@
 				const normalized = { ...content };
 	
 				if (normalized.options && Array.isArray(normalized.options)) {
-					normalized.options = normalized.options.map((option, index) => ({
-						id: option.id || String.fromCharCode(97 + index), // a, b, c...
-						text: option.text || '',
-						...option
+					// Always regenerate option IDs to prevent collisions with existing questions
+					normalized.options = normalized.options.map((option) => ({
+						...option,
+						id: crypto.randomUUID(),
+						text: option.text || ''
 					}));
 				}
 	

@@ -86,7 +86,7 @@ export default {
             version: '1.2',
             type: 'GROUPED_MIXED',
             groups: [{
-              id: 'group_' + Date.now(),
+              id: 'group_' + crypto.randomUUID(),
               title: IsLanguage ? 'Section 1' : 'Phần 1',
               description: '',
               AdvancedFeatures: { isShuffleQuestions: false, isShuffleAnswers: false },
@@ -122,7 +122,8 @@ export default {
       let MaxScore = 0
       for (const group of groups) {
         for (const question of group.questions) {
-          MaxScore += question.points
+          const pts = Number(question.points)
+          MaxScore += (isNaN(pts) || pts < 0) ? 0 : pts
         }
       }
       dataToSend.MaxScore = MaxScore

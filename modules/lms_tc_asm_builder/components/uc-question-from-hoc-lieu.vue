@@ -9,7 +9,7 @@
                     <v-icon>mdi-close</v-icon>
                 </v-btn>
             </v-card-title>
-            <v-card-text>
+            <v-card-text style="max-height: calc(100dvh - 200px); overflow-y: auto;">
                 <v-data-table :headers="headers" :items="DataHocLieu" :items-per-page="-1" hide-default-footer
                     class="border" show-expand>
                     <template v-slot:item.data-table-expand="{ internalItem, isExpanded, toggleExpand }">
@@ -257,11 +257,11 @@ export default {
                     newQuestion.config.options = data.options
                     break;
                 case 'QUIZ_FILL_IN_BLANK':
-                    newQuestion.config.parts = data.parts.map(p => {
+                    newQuestion.config.parts = (data.parts || []).map(p => {
                         if (p.type === 'blank') {
                             return {
                                 type: p.type,
-                                id: 'blank_' + Date.now(),
+                                id: `blank_${crypto.randomUUID()}`,
                                 acceptedAnswers: [p.correctAnswer]
                             }
                         }
@@ -271,9 +271,9 @@ export default {
                     })
                     break;
                 case 'QUIZ_MATCHING':
-                    newQuestion.config.columnA = data.columnA
-                    newQuestion.config.columnB = data.columnB
-                    newQuestion.config.correctPairs = data.correctPairs
+                    newQuestion.config.columnA = data.columnA || []
+                    newQuestion.config.columnB = data.columnB || []
+                    newQuestion.config.correctPairs = data.correctPairs || []
                     break;
             }
 

@@ -35,6 +35,13 @@ export default {
     },
     async mounted() {
         await this.setupMathJax()
+        // Immediate watcher fires before DOM is ready, so typeset again now that ref is available
+        if (this.content && this.$refs.contentContainer) {
+            if (window.MathJax && window.MathJax.typesetPromise) {
+                window.MathJax.typesetPromise([this.$refs.contentContainer])
+                    .catch(err => console.error('MathJax render error:', err))
+            }
+        }
     },
     methods: {
         escapeHtmlTags(content) {

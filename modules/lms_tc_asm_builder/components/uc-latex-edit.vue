@@ -7,9 +7,9 @@
 						Bấm <v-icon color="success" size="small">mdi-pencil</v-icon> để soạn
 					</div>
 					<uc-latex-view v-else ref="contentContainer" class="cursor-pointer uc-latex-edit"
-						:content="renderedContent" />
+						:content="renderedContent" :escapeHtml="false" />
 				</div>
-				<uc-latex-view v-else ref="contentContainer" class="uc-latex-edit" :content="renderedContent" />
+				<uc-latex-view v-else ref="contentContainer" class="uc-latex-edit" :content="renderedContent" :escapeHtml="false" />
 			</div>
 		</template>
 
@@ -25,7 +25,7 @@
 							<div v-if="previewEmpty" class="text-grey">
 								<em>Không có nội dung...</em>
 							</div>
-							<uc-latex-view v-else ref="previewContainer" v-model:content="previewContent" />
+							<uc-latex-view v-else ref="previewContainer" v-model:content="previewContent" :escapeHtml="false" />
 						</div>
 					</div>
 				</v-card-text>
