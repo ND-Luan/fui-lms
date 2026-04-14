@@ -562,12 +562,6 @@
 
 								<div class="d-flex flex-wrap align-center ga-2"
 									v-if="![0, 1, 4].includes(submission?.SubmissionStatus)">
-									<v-chip v-if="autoSaveStatus" size="x-small" :color="autoSaveStatus === 'saving' ? 'grey' : 'success'" variant="tonal">
-										<v-icon v-if="autoSaveStatus === 'saving'" start size="12" class="mdi-spin">mdi-loading</v-icon>
-										<v-icon v-else start size="12">mdi-check-circle-outline</v-icon>
-										<span v-if="autoSaveStatus === 'saving'">{{ IsEngLish ? 'Saving...' : 'Đang lưu...' }}</span>
-										<span v-else>{{ IsEngLish ? 'Auto-saved' : 'Đã lưu tự động' }}<span v-if="lastSavedRelative"> — {{ lastSavedRelative }}</span></span>
-									</v-chip>
 									<v-btn @click="saveGrading(false)" color="grey-darken-1" variant="outlined"
 										size="small" :loading="isSaving">
 										<v-icon start size="16">mdi-content-save-outline</v-icon>
@@ -689,7 +683,6 @@
 			onPublishGrades: { type: Function, default: () => { } },
 			onOpenPublishDialog: { type: Function, default: () => { } },
 			onInitPage: { type: Function, default: () => { } },
-			onAutoSaveDraft: { type: Function, default: () => { } },
 		},
 		data() {
 			this.$i18n.locale = (localStorage.getItem('IsLanguage') && localStorage.getItem('IsLanguage') == 'true') ? 'en' : 'vi'
@@ -711,29 +704,16 @@
 				vueData,
 				mobile,
 				IsOpenModal_Require_Resend: false,
-				autoSaveStatus: null,
-				lastSavedAt: null,
-				relativeTimeNow: null,
+
 			}
 		},
 		mounted() {
 			if (this.mobile) this.viewMode = 'all'
 		},
-		beforeUnmount() {
-			clearTimeout(this.autoSaveTimer)
-			clearInterval(this.relativeTimeTimer)
-		},
+		beforeUnmount() {},
+
 		computed: {
-			lastSavedRelative() {
-				if (!this.lastSavedAt) return ''
-				const now = this.relativeTimeNow || Date.now()
-				const diff = Math.floor((now - this.lastSavedAt) / 1000)
-				if (diff < 10) return 'vừa lưu'
-				if (diff < 60) return `${diff} giây trước`
-				return `${Math.floor(diff / 60)} phút trước`
-			},
-	
-			totalQuestions() {
+			totalQuestions(){
 				if (!this.assignment?.groups) return 0;
 				return this.assignment.groups.reduce((total, group) => total + group.questions.length, 0);
 			},
@@ -807,27 +787,7 @@
 				this.isLoading = false
 			},
 	
-			scheduleAutoSave() {
-				if ([0, 1, 4].includes(this.submission?.SubmissionStatus)) return
-				clearTimeout(this.autoSaveTimer)
-				this.autoSaveTimer = setTimeout(async () => {
-					this.autoSaveStatus = 'saving'
-					const payload = {
-						SubmissionID: this.submission.SubmissionID,
-						Score: this.gradingSummary.totalScore,
-						TeacherComment: this.gradingSummary.teacherComment,
-						SubmissionContent: JSON.stringify({ answers: this.gradingData }),
-					}
-					await this.onAutoSaveDraft(payload)
-					this.lastSavedAt = Date.now()
-					this.relativeTimeNow = Date.now()
-					this.autoSaveStatus = 'saved'
-					clearInterval(this.relativeTimeTimer)
-					this.relativeTimeTimer = setInterval(() => {
-						this.relativeTimeNow = Date.now()
-					}, 10000)
-				}, 1500)
-			},
+
 			isQuestionGraded(questionId) {
 				const grading = this.gradingData[questionId]?.grading;
 				return grading && (grading.manualScore !== null && grading.manualScore !== undefined);
@@ -842,7 +802,6 @@
 					...this.gradingData[questionId],
 					answerData: newAnswer
 				}
-				this.scheduleAutoSave()
 			},
 			async saveGrading(isPublishing) {
 				const $this = this
@@ -896,7 +855,6 @@
 						this.calculateTotalScore();
 					}, 0);
 				}
-				this.scheduleAutoSave()
 			},
 			async calculateTotalScore() {
 				let total = 0;
@@ -1042,8 +1000,6 @@
 				handler: 'processData',
 				immediate: true,
 			},
-			'gradingSummary.totalScore'() { this.scheduleAutoSave() },
-			'gradingSummary.teacherComment'() { this.scheduleAutoSave() },
 			mobile: function (val) {
 				if (val) this.viewMode = 'all'
 				else this.viewMode = 'single'

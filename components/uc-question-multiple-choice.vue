@@ -73,7 +73,7 @@
 
 		<!-- (5) Điểm -->
 		<!-- Điểm câu – hiển thị khi đã trả bài (status == 4) -->
-		<div v-if="submissionstatus == 4" class="mt-2">
+		<div v-if="submissionstatus == 4 || isGrade" class="mt-2">
 			<strong>{{ $i18n.locale == 'en' ? 'Score' : 'Điểm' }}:</strong>
 			<v-chip size="small" :color="scoreChipColor" variant="tonal">
 				<v-icon start size="16">mdi-star</v-icon>
@@ -161,14 +161,19 @@
 			},
 			totalScore() {
 				if (!this.isGrade) return 0;
+				const mode = this.question.config.scoringMode || 'equal';
 				let c = 0;
 				const totalCorrect = this.question.config.correctAnswers.length;
 				this.question.config.correctAnswers.forEach(opt => {
 					if (this.answer.includes(opt)) c++;
 				});
-				const rawScore = (c / totalCorrect) * this.question.points;
-				// làm tròn 2 chữ số sau dấu phẩy
-				return Math.round(rawScore * 100) / 100;
+				if (mode === 'partial') {
+					const partialMap = { 1: 0.1, 2: 0.25, 3: 0.5, 4: 1.0 };
+					return partialMap[c] ?? 0;
+				}
+				// equal: chia đều theo số đáp án đúng
+				if (!totalCorrect) return 0;
+				return Math.round((c / totalCorrect) * this.question.points * 100) / 100;
 			},
 			isSelected(optionId) { return this.internalAnswer.includes(optionId) },
 			isOptionCorrect(optionId) {

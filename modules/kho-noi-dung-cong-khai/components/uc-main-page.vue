@@ -11,7 +11,7 @@
 					:disabled="!FormData.KhoiID" style="min-width: 200px;max-width: fit-content"></v-select>
 				<v-btn variant="outlined" @click="getResourcePublic()" color="primary"><v-icon start class="me-1">mdi-refresh</v-icon> {{ $t('message.Refresh')}}</v-btn>
 			</div>
-			<v-data-table :items="DataResourcePublic" :headers :hide-default-footer="true" class="custom-table">
+			<v-data-table :items="DataResourcePublic" :headers :items-per-page="-1" :hide-default-footer="true" class="custom-table">
 				<template v-slot:item.Preview="{ item }">
 					<v-btn v-if="item.ResourceType == 'ASSIGNMENT'" color="primary" @click="PreviewContent(item)"
 						variant="outlined" size="small"><v-icon start class="me-1">mdi-eye-outline</v-icon>{{ $t('message.Preview') }}</v-btn>

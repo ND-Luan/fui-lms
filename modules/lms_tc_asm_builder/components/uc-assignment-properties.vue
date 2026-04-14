@@ -76,7 +76,7 @@
 					<v-col cols="6">
 						<v-text-field :model-value="selectedQuestionData.points" @update:model-value="onPointInput"
 							:label="$t('message.Score')" type="text" variant="outlined" density="compact"
-							:clearable="false" />
+						:clearable="false" :disabled="isPartialScoring" />
 					</v-col>
 					<v-col cols="6">
 						<v-select :model-value="selectedQuestionData.gradingType || 'auto'"
@@ -131,6 +131,26 @@
 				</div>
 				<!-- QUIZ_MULTIPLE_CHOICE -->
 				<div v-else-if="selectedQuestionData.type === 'QUIZ_MULTIPLE_CHOICE'">
+					<div class="mb-3">
+						<v-select
+							density="compact" variant="outlined" hide-details
+							:model-value="selectedQuestionData.config.scoringMode || 'equal'"
+							@update:model-value="onScoringModeChange($event)"
+							:items="[
+								{ value: 'equal', title: 'Tính điểm chia đều' },
+								{ value: 'partial', title: 'Tính điểm theo từng ý' }
+							]"
+							label="Cách tính điểm"
+						/>
+						<v-alert v-if="(selectedQuestionData.config.scoringMode || 'equal') === 'partial'"
+							class="mt-2" density="compact" variant="tonal" color="info" type="info">
+							<div class="text-caption">
+								<b>Tính điểm theo từng ý :</b><br>
+								Đúng 1 ý: 0,1đ &nbsp;·&nbsp; Đúng 2 ý: 0,25đ &nbsp;·&nbsp; Đúng 3 ý: 0,5đ &nbsp;·&nbsp; Đúng cả 4 ý: 1,0đ<br>
+								<span class="font-weight-medium">Bắt buộc: 4 đáp án, điểm tối đa 1,0đ.</span>
+							</div>
+						</v-alert>
+					</div>
 					<v-row dense v-for="(option, index) in selectedQuestionData.config.options" :key="option.id" align="center">
 						<v-col cols="2" class="d-flex justify-center">
 							<v-checkbox :model-value="selectedQuestionData.config.correctAnswers" :value="option.id"
@@ -145,10 +165,10 @@
 							<uc-latex-edit v-else v-model:content="option.text" />
 						</v-col>
 						<v-col cols="1" class="d-flex justify-center">
-							<v-icon size="20" class="cursor-pointer text-red" @click="removeOption(index)">mdi-close</v-icon>
-						</v-col>
-					</v-row>
-					<v-btn block size="small" @click="addOption" variant="tonal" class="mt-2">
+						<v-icon v-if="(selectedQuestionData.config.scoringMode || 'equal') !== 'partial'" size="20" class="cursor-pointer text-red" @click="removeOption(index)">mdi-close</v-icon>
+					</v-col>
+				</v-row>
+					<v-btn v-if="(selectedQuestionData.config.scoringMode || 'equal') !== 'partial'" block size="small" @click="addOption" variant="tonal" class="mt-2">
 						<v-icon start>mdi-plus</v-icon>{{ $t('message.MoreAnswer') }}
 					</v-btn>
 				</div>
@@ -162,6 +182,26 @@
 				</div>
 				<!-- QUIZ_MULTIPLE_TRUE_FALSE -->
 				<div v-else-if="selectedQuestionData.type === 'QUIZ_MULTIPLE_TRUE_FALSE'">
+					<div class="mb-3">
+						<v-select
+							density="compact" variant="outlined" hide-details
+							:model-value="selectedQuestionData.config.scoringMode || 'equal'"
+							@update:model-value="onScoringModeChange($event)"
+							:items="[
+								{ value: 'equal', title: 'Tính điểm chia đều' },
+								{ value: 'partial', title: 'Tính điểm theo từng ý' }
+							]"
+							label="Cách tính điểm"
+						/>
+						<v-alert v-if="(selectedQuestionData.config.scoringMode || 'equal') === 'partial'"
+							class="mt-2" density="compact" variant="tonal" color="info" type="info">
+							<div class="text-caption">
+								<b>Tính điểm theo từng ý :</b><br>
+								Đúng 1 ý: 0,1đ &nbsp;·&nbsp; Đúng 2 ý: 0,25đ &nbsp;·&nbsp; Đúng 3 ý: 0,5đ &nbsp;·&nbsp; Đúng cả 4 ý: 1,0đ<br>
+								<span class="font-weight-medium">Bắt buộc: 4 đáp án, điểm tối đa 1,0đ.</span>
+							</div>
+						</v-alert>
+					</div>
 					<v-row v-for="(option, index) in selectedQuestionData.config.options" :key="index" dense align="center">
 						<v-col class="d-flex justify-space-evenly" cols="3">
 						<v-checkbox v-model="option.correctAnswer" color="primary" hide-details
@@ -174,11 +214,11 @@
 								@update:model-value="updateOptionText(index, $event)"
 								variant="outlined" density="compact" hide-details :clearable="false"
 								placeholder="Nhập nội dung đáp án..." />
-							<v-btn v-if="selectedQuestionData.config.options.length > 2" icon="mdi-delete-outline"
-								variant="text" size="small" color="red" @click="removeOption(index)" />
-						</v-col>
-					</v-row>
-					<v-btn prepend-icon="mdi-plus" variant="text" color="primary" @click="addOption('options')">
+<v-btn v-if="selectedQuestionData.config.options.length > 2 && (selectedQuestionData.config.scoringMode || 'equal') !== 'partial'" icon="mdi-delete-outline"
+							variant="text" size="small" color="red" @click="removeOption(index)" />
+					</v-col>
+				</v-row>
+					<v-btn v-if="(selectedQuestionData.config.scoringMode || 'equal') !== 'partial'" prepend-icon="mdi-plus" variant="text" color="primary" @click="addOption('options')">
 						{{ $t('message.MoreAnswer') }}
 					</v-btn>
 				</div>
@@ -307,12 +347,37 @@
 			},
 			IsEngLish: function () {
 				return this.$i18n.locale == 'en'
+			},
+			isPartialScoring() {
+				if (!this.selectedQuestionData) return false;
+				const type = this.selectedQuestionData.type;
+				if (!['QUIZ_MULTIPLE_CHOICE', 'QUIZ_MULTIPLE_TRUE_FALSE'].includes(type)) return false;
+				return (this.selectedQuestionData.config.scoringMode || 'equal') === 'partial';
 			}
 		},
 		methods: {
 			onPointInput(value) {
 				const normalized = vueData.normalizeNumberInput(value);
 				this.updateQuestion('points', normalized);
+			},
+			onScoringModeChange(value) {
+				const ng = JSON.parse(JSON.stringify(this.groups));
+				const q = ng[this.item.groupIndex].questions[this.item.qIndex];
+				q.config.scoringMode = value;
+				if (value === 'partial') {
+					q.points = 1.0;
+					// Ensure exactly 4 options
+					while (q.config.options.length < 4) {
+						const ts = Date.now() + q.config.options.length;
+						if (q.type === 'QUIZ_MULTIPLE_TRUE_FALSE') {
+							q.config.options.push({ id: `opt_${ts}`, text: '', correctAnswer: null, inCorrectAnswer: null });
+						} else {
+							q.config.options.push({ id: `opt_${ts}`, text: '' });
+						}
+					}
+					if (q.config.options.length > 4) q.config.options = q.config.options.slice(0, 4);
+				}
+				this.updateGroups(ng);
 			},
 
 			isAutoGradable(type) { return vueData.isAutoGradable(type) },

@@ -3,7 +3,7 @@
         <uc-assignment-grader v-if="dataReady" ref="assignmentGrader" :submission-data="submissionData"
             :on-save-grading-draft="saveGradingDraft" :on-publish-grades="publishGrades"
             :on-open-publish-dialog="openPublishDialog" :on-init-page="initPage"
-            :on-auto-save-draft="autoSaveDraft" />
+/>
 
         <uc-dialog v-model="confirmPublishDialog" title="Xác nhận Trả bài" done-text="Xác nhận & Trả bài"
             @onSubmit="publishGradesFinal">
@@ -54,9 +54,6 @@ export default {
             } else {
                 this.snackbarRef.value.showSnackbar({ message: 'Không thể tải dữ liệu bài nộp.', color: 'error' })
             }
-        },
-        async autoSaveDraft(payload) {
-            await fetchPromise('lms/EL_Teacher_SaveGradeDraft', payload, { cache: false })
         },
         async saveGradingDraft(payload) {
             const res = await fetchPromise('lms/EL_Teacher_SaveGradeDraft', payload, { cache: false })

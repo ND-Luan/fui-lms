@@ -113,8 +113,17 @@ export default {
 		hasGrading() { return this.grading && this.isGrade; },
 		totalScore() {
 			if (!this.isGrade) return 0;
-			let c = 0; this.question.config.options.forEach(opt => { if (this.answer?.[opt.id] === opt.correctAnswer) c++; });
-			return (c / this.question.config.options.length) * this.question.points;
+			const mode = this.question.config.scoringMode || 'equal';
+			let c = 0;
+			this.question.config.options.forEach(opt => { if (this.answer?.[opt.id] === opt.correctAnswer) c++; });
+			if (mode === 'partial') {
+				const partialMap = { 1: 0.1, 2: 0.25, 3: 0.5, 4: 1.0 };
+				return partialMap[c] ?? 0;
+			}
+			// equal: chia đều theo số options
+			const total = this.question.config.options.length;
+			if (!total) return 0;
+			return Math.round((c / total) * this.question.points * 100) / 100;
 		},
 		guideText() { return this.question?.config?.submissionNote || this.question?.config?.instruction || '' },
 		displayScore() {

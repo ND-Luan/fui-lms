@@ -86,9 +86,23 @@ export default {
 		const isFromLinkParent = urlParams.get('IsFromLinkParent') === 'true'
 		const hocSinhID = parseInt(urlParams.get('HocSinhID'))
 
-		if (vueData.user.GroupID === 2) {
+		// GroupID=2: Phụ huynh — phải vào qua link phụ huynh, kiểm tra quyền sở hữu
+		// GroupID=1: Nhân viên có con — nếu vào qua link phụ huynh thì xử lý như phụ huynh, ngược lại dùng userAccount.UserID
+		// GroupID=3: Học sinh — dùng thẳng userAccount.UserID
+		const groupID = vueData.user.GroupID
+		if (groupID === 2 || (groupID === 1 && isFromLinkParent && hocSinhID)) {
 			if (!isFromLinkParent || !hocSinhID) {
+				// groupID=2 không có param → chặn
 				await this.confirmRef.value.show({ title: 'Bạn không có quyền truy cập trang này', hideCancel: true })
+				redirect('/ph-report')
+				return
+			}
+			// Verify HocSinhID từ URL có trong danh sách con của người dùng (chặn IDOR)
+			// StudentID từ API trả về là string → so sánh bằng == (loose) để tránh type mismatch
+			const dsHocSinh = await ajaxCALLPromise('student/Calen_GetInfoStudentByPhuHuynhID')
+			const isOwned = dsHocSinh?.some(x => Number(x.StudentID ?? x.HocSinhID) === hocSinhID)
+			if (!isOwned) {
+				await this.confirmRef.value.show({ title: 'Bạn không có quyền xem thông tin học sinh này', hideCancel: true })
 				redirect('/ph-report')
 				return
 			}
@@ -177,6 +191,8 @@ export default {
 			this.NienKhoa = DSNienKhoa.filter(item => item.IsActive)[0].NienKhoa
 		},
 		async getInfoHocSinhByUserName() {
+			// GroupID=2 (phụ huynh) hoặc GroupID=1 vào qua link phụ huynh: lấy HocSinhID từ URL đã được verify
+			// GroupID=1 (nhân viên bình thường) & GroupID=3 (học sinh): lấy thẳng từ userAccount
 			const hocSinhID = this.isFromLinkParent
 				? this.hocSinhIDFromUrl
 				: this.userAccount.UserID

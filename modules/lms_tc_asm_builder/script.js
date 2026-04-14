@@ -116,6 +116,7 @@ function buildNewQuestion(componentInfo, ordinalNumber) {
                 { id: 'opt_3', text: '' }, { id: 'opt_4', text: '' }
             ]
             q.config.correctAnswers = []
+            q.config.scoringMode = 'equal'
             break
         case 'QUIZ_TRUE_FALSE':
             q.config.statement = 'Mệnh đề cần xác định đúng/sai.'
@@ -123,6 +124,7 @@ function buildNewQuestion(componentInfo, ordinalNumber) {
             break
         case 'QUIZ_MULTIPLE_TRUE_FALSE':
             q.config.options = [{ id: 'a', text: '', correctAnswer: null, inCorrectAnswer: null }]
+            q.config.scoringMode = 'equal'
             break
         case 'QUIZ_FILL_IN_BLANK':
             q.config.parts = [

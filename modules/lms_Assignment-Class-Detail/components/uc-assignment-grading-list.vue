@@ -583,21 +583,16 @@ export default {
 					}
 					else if (question.type === "QUIZ_MULTIPLE_CHOICE") {
 						const arr1 = question.config.correctAnswers
-						const arr2 = answerData
-						// const isSame = arr1.length === arr2.length && arr1.every(item => arr2.includes(item));
-						// if (isSame) {
-						// 	Score += question.points
-						// 	manualScore = question.points
-						// }
+						const mode = question.config.scoringMode || 'equal'
 						let correctIndex = 0
-						arr1.forEach(opt => {
-							if (answerData.includes(opt)) {
-								correctIndex++
-							}
-						});
-						Score += (correctIndex / arr1.length) * question.points;
-						manualScore = (correctIndex / arr1.length) * question.points
-
+						arr1.forEach(opt => { if (answerData.includes(opt)) correctIndex++ })
+						if (mode === 'partial') {
+							const partialMap = { 1: 0.1, 2: 0.25, 3: 0.5, 4: 1.0 }
+							manualScore = partialMap[correctIndex] ?? 0
+						} else {
+							manualScore = arr1.length ? Math.round((correctIndex / arr1.length) * question.points * 100) / 100 : 0
+						}
+						Score += manualScore
 					}
 					else if (question.type === "QUIZ_TRUE_FALSE") {
 						if (question.config.correctAnswer == answerData) {
@@ -606,16 +601,17 @@ export default {
 						}
 					}
 					else if (question.type === "QUIZ_MULTIPLE_TRUE_FALSE") {
-						let flag = false
-						for (var option of question.config.options) {
-							if (option.correctAnswer === answerData[option.id]) {
-								flag = true
-							}
+						const mode = question.config.scoringMode || 'equal'
+						let c = 0
+						question.config.options.forEach(opt => { if (opt.correctAnswer === answerData[opt.id]) c++ })
+						if (mode === 'partial') {
+							const partialMap = { 1: 0.1, 2: 0.25, 3: 0.5, 4: 1.0 }
+							manualScore = partialMap[c] ?? 0
+						} else {
+							const total = question.config.options.length
+							manualScore = total ? Math.round((c / total) * question.points * 100) / 100 : 0
 						}
-						if (flag) {
-							Score += question.points
-							manualScore = question.points
-						}
+						Score += manualScore
 					}
 					else if (question.type === "QUIZ_MATCHING") {
 						let numberOfCorrect = 0

@@ -63,15 +63,6 @@
 								<template #append>
 									<v-chip size="x-small" class="mr-1">{{ question.type }}</v-chip>
 									<div class="d-flex align-center">
-										<v-btn icon size="small" variant="text" :disabled="qIndex === 0"
-											@click.stop="moveQuestion(groupIndex, qIndex, 'up')">
-											<v-icon size="16">mdi-chevron-up</v-icon>
-										</v-btn>
-										<v-btn icon size="small" variant="text"
-											:disabled="qIndex === group.questions.length - 1"
-											@click.stop="moveQuestion(groupIndex, qIndex, 'down')">
-											<v-icon size="16">mdi-chevron-down</v-icon>
-										</v-btn>
 										<v-btn icon size="x-small" variant="text"
 											@click.stop="removeQuestion(groupIndex, qIndex)">
 											<v-icon>mdi-close</v-icon>
