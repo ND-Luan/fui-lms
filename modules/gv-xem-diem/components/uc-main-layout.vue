@@ -2,7 +2,11 @@
     <Global>
         <template #header>
             <v-card>
-                <v-card-title>{{ TitlePage }} • {{ TitleCap }}</v-card-title>
+                <v-card-title>{{ TitlePage }} • {{ TitleCap }}
+                    <v-chip variant="text" color="primary" class="font-weight-medium">
+                        Tổng số học sinh: {{ DSHocSinhQLD.length }}
+                    </v-chip>
+                </v-card-title>
                 <v-card-text>
                     <v-row align="center">
                         <v-col cols="12" sm="3">
@@ -32,13 +36,6 @@
                             </v-btn>
                         </v-col>
                     </v-row>
-                    <v-row align="center" class="mt-0">
-                        <v-col class="d-flex align-center ga-2 flex-wrap">
-                            <v-chip variant="text" color="primary" class="font-weight-medium">
-                                Tổng số học sinh: {{ DSHocSinhQLD.length }}
-                            </v-chip>
-                        </v-col>
-                    </v-row>
                 </v-card-text>
             </v-card>
         </template>
@@ -58,72 +55,88 @@
                                 <template #item.TX1="{ item, value }">
                                     <div class="d-flex ga-2 align-center justify-center">
                                         <span>{{ value }}</span>
-                                        <v-chip v-if="IsCompareLMS && renderItemLMS(item, 'TX1')" color="primary"
+                                        <v-chip v-if="IsCompareLMS && renderItemLMS(item, 'TX1')"
+                                            :color="renderItemLMSIsLock(item, 'TX1') ? 'success' : 'orange'"
                                             size="small">
                                             {{ renderItemLMS(item, 'TX1') }}
+                                            <v-tooltip activator="parent" location="top">{{ renderItemLMSIsLock(item, 'TX1') ? 'Đã khóa' : 'Chưa khóa' }}</v-tooltip>
                                         </v-chip>
                                     </div>
                                 </template>
                                 <template #item.TX2="{ item, value }">
                                     <div class="d-flex ga-2 align-center justify-center">
                                         <span>{{ value }}</span>
-                                        <v-chip v-if="IsCompareLMS && renderItemLMS(item, 'TX2')" color="primary"
+                                        <v-chip v-if="IsCompareLMS && renderItemLMS(item, 'TX2')"
+                                            :color="renderItemLMSIsLock(item, 'TX2') ? 'success' : 'orange'"
                                             size="small">
                                             {{ renderItemLMS(item, 'TX2') }}
+                                            <v-tooltip activator="parent" location="top">{{ renderItemLMSIsLock(item, 'TX2') ? 'Đã khóa' : 'Chưa khóa' }}</v-tooltip>
                                         </v-chip>
                                     </div>
                                 </template>
                                 <template #item.TX3="{ item, value }">
                                     <div class="d-flex ga-2 align-center justify-center">
                                         <span>{{ value }}</span>
-                                        <v-chip v-if="IsCompareLMS && renderItemLMS(item, 'TX3')" color="primary"
+                                        <v-chip v-if="IsCompareLMS && renderItemLMS(item, 'TX3')"
+                                            :color="renderItemLMSIsLock(item, 'TX3') ? 'success' : 'orange'"
                                             size="small">
                                             {{ renderItemLMS(item, 'TX3') }}
+                                            <v-tooltip activator="parent" location="top">{{ renderItemLMSIsLock(item, 'TX3') ? 'Đã khóa' : 'Chưa khóa' }}</v-tooltip>
                                         </v-chip>
                                     </div>
                                 </template>
                                 <template #item.TX4="{ item, value }">
                                     <div class="d-flex ga-2 align-center justify-center">
                                         <span>{{ value }}</span>
-                                        <v-chip v-if="IsCompareLMS && renderItemLMS(item, 'TX4')" color="primary"
+                                        <v-chip v-if="IsCompareLMS && renderItemLMS(item, 'TX4')"
+                                            :color="renderItemLMSIsLock(item, 'TX4') ? 'success' : 'orange'"
                                             size="small">
                                             {{ renderItemLMS(item, 'TX4') }}
+                                            <v-tooltip activator="parent" location="top">{{ renderItemLMSIsLock(item, 'TX4') ? 'Đã khóa' : 'Chưa khóa' }}</v-tooltip>
                                         </v-chip>
                                     </div>
                                 </template>
                                 <template #item.TX5="{ item, value }">
                                     <div class="d-flex ga-2 align-center justify-center">
                                         <span>{{ value }}</span>
-                                        <v-chip v-if="IsCompareLMS && renderItemLMS(item, 'TX5')" color="primary"
+                                        <v-chip v-if="IsCompareLMS && renderItemLMS(item, 'TX5')"
+                                            :color="renderItemLMSIsLock(item, 'TX5') ? 'success' : 'orange'"
                                             size="small">
                                             {{ renderItemLMS(item, 'TX5') }}
+                                            <v-tooltip activator="parent" location="top">{{ renderItemLMSIsLock(item, 'TX5') ? 'Đã khóa' : 'Chưa khóa' }}</v-tooltip>
                                         </v-chip>
                                     </div>
                                 </template>
                                 <template #item.GK="{ item, value }">
                                     <div class="d-flex ga-2 align-center justify-center">
                                         <span>{{ value }}</span>
-                                        <v-chip v-if="IsCompareLMS && renderItemLMS(item, 'GK')" color="primary"
+                                        <v-chip v-if="IsCompareLMS && renderItemLMS(item, 'GK')"
+                                            :color="renderItemLMSIsLock(item, 'GK') ? 'success' : 'orange'"
                                             size="small">
                                             {{ renderItemLMS(item, 'GK') }}
+                                            <v-tooltip activator="parent" location="top">{{ renderItemLMSIsLock(item, 'GK') ? 'Đã khóa' : 'Chưa khóa' }}</v-tooltip>
                                         </v-chip>
                                     </div>
                                 </template>
                                 <template #item.CK="{ item, value }">
                                     <div class="d-flex ga-2 align-center justify-center">
                                         <span>{{ value }}</span>
-                                        <v-chip v-if="IsCompareLMS && renderItemLMS(item, 'CK')" color="primary"
+                                        <v-chip v-if="IsCompareLMS && renderItemLMS(item, 'CK')"
+                                            :color="renderItemLMSIsLock(item, 'CK') ? 'success' : 'orange'"
                                             size="small">
                                             {{ renderItemLMS(item, 'CK') }}
+                                            <v-tooltip activator="parent" location="top">{{ renderItemLMSIsLock(item, 'CK') ? 'Đã khóa' : 'Chưa khóa' }}</v-tooltip>
                                         </v-chip>
                                     </div>
                                 </template>
                                 <template #item.DTB="{ item, value }">
                                     <div class="d-flex ga-2 align-center justify-center">
                                         <span>{{ value }}</span>
-                                        <v-chip v-if="IsCompareLMS && renderItemLMS(item, 'DTB')" color="primary"
+                                        <v-chip v-if="IsCompareLMS && renderItemLMS(item, 'DTB')"
+                                            :color="renderItemLMSIsLock(item, 'DTB') ? 'success' : 'orange'"
                                             size="small">
                                             {{ renderItemLMS(item, 'DTB') }}
+                                            <v-tooltip activator="parent" location="top">{{ renderItemLMSIsLock(item, 'DTB') ? 'Đã khóa' : 'Chưa khóa' }}</v-tooltip>
                                         </v-chip>
                                     </div>
                                 </template>
@@ -483,6 +496,7 @@ export default {
             )
             if (!itemHocSinhMon) return diem
 
+            console.log("itemHocSinhMon", itemHocSinhMon)
             const monHocCode = itemHocSinhMon.MonHocCode.toLowerCase()
             const semester = this.Semester.value
             if (key === 'TX1') {
@@ -516,13 +530,73 @@ export default {
             } else if (key === 'TX5') {
                 diem = itemHocSinhMon['TX_L5_' + semester] ?? null
             } else if (key === 'GK') {
-                diem = itemHocSinhMon['DiemGK_' + semester] ?? null
+                if (monHocCode === 'anh') {
+                    if (semester === 'HK1') diem = itemHocSinhMon['S1_Mid_Total_Point'] ?? null
+                    if (semester === 'HK2') diem = itemHocSinhMon['S2_Mid_Total_Point'] ?? null
+                }
+                else {
+                    diem = itemHocSinhMon['DiemGK_' + semester] ?? null
+                }
             } else if (key === 'CK') {
-                diem = itemHocSinhMon['DiemCK_' + semester] ?? null
+                if (monHocCode === 'anh') {
+                    if (semester === 'HK1') diem = itemHocSinhMon['S1_Final_Total_Point'] ?? null
+                    if (semester === 'HK2') diem = itemHocSinhMon['S2_Final_Total_Point'] ?? null
+                }
+                else {
+                    diem = itemHocSinhMon['DiemCK_' + semester] ?? null
+                }
             } else if (key === 'DTB') {
                 diem = itemHocSinhMon['DiemTB_' + semester] ?? null
             }
             return diem
+        },
+
+        renderItemLMSIsLock(itemTable, key) {
+            if (!this.DSHocSinh_LMS?.length) return null
+            const itemHocSinhMon = this.DSHocSinh_LMS.find(x =>
+                x.MonHocCode.toLowerCase() === itemTable.MonHocID.toLowerCase()
+                && x.HocSinhID === itemTable.HocSinhID,
+            )
+            if (!itemHocSinhMon) return null
+
+            const monHocCode = itemHocSinhMon.MonHocCode.toLowerCase()
+            const semester = this.Semester.value
+            let maCotDiem = null
+
+            if (key === 'TX1') {
+                maCotDiem = monHocCode === 'anh'
+                    ? (semester === 'HK1' ? 'Theme1_Total' : 'Theme5_Total')
+                    : `TX_L1_${semester}`
+            } else if (key === 'TX2') {
+                maCotDiem = monHocCode === 'anh'
+                    ? (semester === 'HK1' ? 'Theme2_Total' : 'Theme6_Total')
+                    : `TX_L2_${semester}`
+            } else if (key === 'TX3') {
+                maCotDiem = monHocCode === 'anh'
+                    ? (semester === 'HK1' ? 'Theme3_Total' : 'Theme7_Total')
+                    : `TX_L3_${semester}`
+            } else if (key === 'TX4') {
+                maCotDiem = monHocCode === 'anh'
+                    ? (semester === 'HK1' ? 'Theme4_Total' : 'Theme8_Total')
+                    : `TX_L4_${semester}`
+            } else if (key === 'TX5') {
+                maCotDiem = `TX_L5_${semester}`
+            } else if (key === 'GK') {
+                maCotDiem = monHocCode === 'anh'
+                    ? (semester === 'HK1' ? 'S1_Mid_Total_Point' : 'S2_Mid_Total_Point')
+                    : `DiemGK_${semester}`
+            } else if (key === 'CK') {
+                maCotDiem = monHocCode === 'anh'
+                    ? (semester === 'HK1' ? 'S1_Final_Total_Point' : 'S2_Final_Total_Point')
+                    : `DiemCK_${semester}`
+            } else if (key === 'DTB') {
+                maCotDiem = `DiemTB_${semester}`
+            }
+
+            if (!maCotDiem) return null
+            const lockKey = `${maCotDiem}_IsLock`
+            if (!Object.prototype.hasOwnProperty.call(itemHocSinhMon, lockKey)) return null
+            return itemHocSinhMon[lockKey]
         },
 
         async onLoadBangDiemLMS() {
@@ -551,6 +625,7 @@ export default {
                     }
                     for (const cd of arrMonHoc) {
                         newObj[cd.MaCotDiem] = cd.KetQuaDanhGia_VI
+                        newObj[`${cd.MaCotDiem}_IsLock`] = cd.IsLock
                     }
                     obj.DSCotDiem.push(newObj)
                 }
