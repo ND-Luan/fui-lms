@@ -59,7 +59,8 @@
                                             :color="renderItemLMSIsLock(item, 'TX1') ? 'success' : 'orange'"
                                             size="small">
                                             {{ renderItemLMS(item, 'TX1') }}
-                                            <v-tooltip activator="parent" location="top">{{ renderItemLMSIsLock(item, 'TX1') ? 'Đã khóa' : 'Chưa khóa' }}</v-tooltip>
+                                            <v-tooltip activator="parent" location="top">{{ renderItemLMSIsLock(item,
+                                                'TX1') ? 'Đã khóa' : 'Chưa khóa' }}</v-tooltip>
                                         </v-chip>
                                     </div>
                                 </template>
@@ -70,7 +71,8 @@
                                             :color="renderItemLMSIsLock(item, 'TX2') ? 'success' : 'orange'"
                                             size="small">
                                             {{ renderItemLMS(item, 'TX2') }}
-                                            <v-tooltip activator="parent" location="top">{{ renderItemLMSIsLock(item, 'TX2') ? 'Đã khóa' : 'Chưa khóa' }}</v-tooltip>
+                                            <v-tooltip activator="parent" location="top">{{ renderItemLMSIsLock(item,
+                                                'TX2') ? 'Đã khóa' : 'Chưa khóa' }}</v-tooltip>
                                         </v-chip>
                                     </div>
                                 </template>
@@ -81,7 +83,8 @@
                                             :color="renderItemLMSIsLock(item, 'TX3') ? 'success' : 'orange'"
                                             size="small">
                                             {{ renderItemLMS(item, 'TX3') }}
-                                            <v-tooltip activator="parent" location="top">{{ renderItemLMSIsLock(item, 'TX3') ? 'Đã khóa' : 'Chưa khóa' }}</v-tooltip>
+                                            <v-tooltip activator="parent" location="top">{{ renderItemLMSIsLock(item,
+                                                'TX3') ? 'Đã khóa' : 'Chưa khóa' }}</v-tooltip>
                                         </v-chip>
                                     </div>
                                 </template>
@@ -92,7 +95,8 @@
                                             :color="renderItemLMSIsLock(item, 'TX4') ? 'success' : 'orange'"
                                             size="small">
                                             {{ renderItemLMS(item, 'TX4') }}
-                                            <v-tooltip activator="parent" location="top">{{ renderItemLMSIsLock(item, 'TX4') ? 'Đã khóa' : 'Chưa khóa' }}</v-tooltip>
+                                            <v-tooltip activator="parent" location="top">{{ renderItemLMSIsLock(item,
+                                                'TX4') ? 'Đã khóa' : 'Chưa khóa' }}</v-tooltip>
                                         </v-chip>
                                     </div>
                                 </template>
@@ -103,7 +107,8 @@
                                             :color="renderItemLMSIsLock(item, 'TX5') ? 'success' : 'orange'"
                                             size="small">
                                             {{ renderItemLMS(item, 'TX5') }}
-                                            <v-tooltip activator="parent" location="top">{{ renderItemLMSIsLock(item, 'TX5') ? 'Đã khóa' : 'Chưa khóa' }}</v-tooltip>
+                                            <v-tooltip activator="parent" location="top">{{ renderItemLMSIsLock(item,
+                                                'TX5') ? 'Đã khóa' : 'Chưa khóa' }}</v-tooltip>
                                         </v-chip>
                                     </div>
                                 </template>
@@ -114,7 +119,8 @@
                                             :color="renderItemLMSIsLock(item, 'GK') ? 'success' : 'orange'"
                                             size="small">
                                             {{ renderItemLMS(item, 'GK') }}
-                                            <v-tooltip activator="parent" location="top">{{ renderItemLMSIsLock(item, 'GK') ? 'Đã khóa' : 'Chưa khóa' }}</v-tooltip>
+                                            <v-tooltip activator="parent" location="top">{{ renderItemLMSIsLock(item,
+                                                'GK') ? 'Đã khóa' : 'Chưa khóa' }}</v-tooltip>
                                         </v-chip>
                                     </div>
                                 </template>
@@ -125,7 +131,8 @@
                                             :color="renderItemLMSIsLock(item, 'CK') ? 'success' : 'orange'"
                                             size="small">
                                             {{ renderItemLMS(item, 'CK') }}
-                                            <v-tooltip activator="parent" location="top">{{ renderItemLMSIsLock(item, 'CK') ? 'Đã khóa' : 'Chưa khóa' }}</v-tooltip>
+                                            <v-tooltip activator="parent" location="top">{{ renderItemLMSIsLock(item,
+                                                'CK') ? 'Đã khóa' : 'Chưa khóa' }}</v-tooltip>
                                         </v-chip>
                                     </div>
                                 </template>
@@ -136,7 +143,8 @@
                                             :color="renderItemLMSIsLock(item, 'DTB') ? 'success' : 'orange'"
                                             size="small">
                                             {{ renderItemLMS(item, 'DTB') }}
-                                            <v-tooltip activator="parent" location="top">{{ renderItemLMSIsLock(item, 'DTB') ? 'Đã khóa' : 'Chưa khóa' }}</v-tooltip>
+                                            <v-tooltip activator="parent" location="top">{{ renderItemLMSIsLock(item,
+                                                'DTB') ? 'Đã khóa' : 'Chưa khóa' }}</v-tooltip>
                                         </v-chip>
                                     </div>
                                 </template>
@@ -154,7 +162,7 @@
         </div>
 
         <uc-dialog v-model="IsShowDialogKeoDiem" title="Chọn cột kéo điểm" doneText="Xác nhận kéo"
-            @onSubmit="onSubmitKeoDiem">
+            :persistent="IsPullingDiem" @onSubmit="onSubmitKeoDiem">
             <div class="d-flex ga-2 mb-3">
                 <v-btn size="small" variant="outlined" color="primary" :disabled="IsPullingDiem"
                     @click="selectAllKeoDiemColumns">
@@ -182,7 +190,7 @@
 
 <script>
 export default {
-    inject: ['snackbarRef', 'iframeRef'],
+    inject: ['snackbarRef', 'iframeRef', 'confirmRef'],
 
     data() {
         return {
@@ -496,7 +504,6 @@ export default {
             )
             if (!itemHocSinhMon) return diem
 
-            console.log("itemHocSinhMon", itemHocSinhMon)
             const monHocCode = itemHocSinhMon.MonHocCode.toLowerCase()
             const semester = this.Semester.value
             if (key === 'TX1') {
@@ -534,6 +541,11 @@ export default {
                     if (semester === 'HK1') diem = itemHocSinhMon['S1_Mid_Total_Point'] ?? null
                     if (semester === 'HK2') diem = itemHocSinhMon['S2_Mid_Total_Point'] ?? null
                 }
+                else if (monHocCode === 'ai') {
+                    
+                    if (semester === 'HK1') diem = itemHocSinhMon['DiemCD1_' + semester] ?? null
+                    if (semester === 'HK2') diem = itemHocSinhMon['DiemCD2_' + semester] ?? null
+                }
                 else {
                     diem = itemHocSinhMon['DiemGK_' + semester] ?? null
                 }
@@ -541,6 +553,10 @@ export default {
                 if (monHocCode === 'anh') {
                     if (semester === 'HK1') diem = itemHocSinhMon['S1_Final_Total_Point'] ?? null
                     if (semester === 'HK2') diem = itemHocSinhMon['S2_Final_Total_Point'] ?? null
+                }
+                else if (monHocCode === 'ai') {
+                    if (semester === 'HK1') diem = itemHocSinhMon['DiemCD1_' + semester] ?? null
+                    if (semester === 'HK2') diem = itemHocSinhMon['DiemCD2_' + semester] ?? null
                 }
                 else {
                     diem = itemHocSinhMon['DiemCK_' + semester] ?? null
@@ -582,13 +598,21 @@ export default {
             } else if (key === 'TX5') {
                 maCotDiem = `TX_L5_${semester}`
             } else if (key === 'GK') {
-                maCotDiem = monHocCode === 'anh'
-                    ? (semester === 'HK1' ? 'S1_Mid_Total_Point' : 'S2_Mid_Total_Point')
-                    : `DiemGK_${semester}`
+                if (monHocCode === 'anh') {
+                    maCotDiem = semester === 'HK1' ? 'S1_Mid_Total_Point' : 'S2_Mid_Total_Point'
+                } else if (monHocCode === 'ai') {
+                    maCotDiem = semester === 'HK1' ? `DiemCD1_${semester}` : `DiemCD2_${semester}`
+                } else {
+                    maCotDiem = `DiemGK_${semester}`
+                }
             } else if (key === 'CK') {
-                maCotDiem = monHocCode === 'anh'
-                    ? (semester === 'HK1' ? 'S1_Final_Total_Point' : 'S2_Final_Total_Point')
-                    : `DiemCK_${semester}`
+                if (monHocCode === 'anh') {
+                    maCotDiem = semester === 'HK1' ? 'S1_Final_Total_Point' : 'S2_Final_Total_Point'
+                } else if (monHocCode === 'ai') {
+                    maCotDiem = semester === 'HK1' ? `DiemCD1_${semester}` : `DiemCD2_${semester}`
+                } else {
+                    maCotDiem = `DiemCK_${semester}`
+                }
             } else if (key === 'DTB') {
                 maCotDiem = `DiemTB_${semester}`
             }
@@ -641,53 +665,51 @@ export default {
         },
 
         async fnKeoDiem(selectedColumns = []) {
-            const $this = this
-            confirm({
-                title: 'Xác nhận kéo điểm?',
-                action: async () => {
-                    const dataToPull = $this.buildPayloadBySelectedColumns($this.DSHocSinh_API_QLD, selectedColumns)
-                    if (!dataToPull.length) {
-                        $this.snackbarRef.value.show({ message: 'Không có dữ liệu để kéo điểm', color: 'warning' })
-                        return
-                    }
+            const ok = await this.confirmRef.value.show({ title: 'Xác nhận kéo điểm?' })
+            if (!ok) return
 
-                    const taskMap = new Map()
-                    for (const item of dataToPull) {
-                        const key = `${item.HocSinhID}__${item.MonHocID}`
-                        if (!taskMap.has(key)) {
-                            taskMap.set(key, {
-                                HocSinhID: item.HocSinhID,
-                                MonHocID: item.MonHocID,
-                                JsonData: [],
-                            })
-                        }
-                        taskMap.get(key).JsonData.push(item)
-                    }
-                    const tasks = [...taskMap.values()]
-                    $this.IsPullingDiem = true
-                    $this.PullProgressTotal = tasks.length
-                    $this.PullProgressCurrent = 0
-                    $this.PullProgressText = 'Đang chuẩn bị kéo điểm...'
+            const dataToPull = this.buildPayloadBySelectedColumns(this.DSHocSinh_API_QLD, selectedColumns)
+            if (!dataToPull.length) {
+                this.snackbarRef.value.showSnackbar({ message: 'Không có dữ liệu để kéo điểm', color: 'warning' })
+                return
+            }
 
-                    try {
-                        for (const task of tasks) {
-                            $this.PullProgressCurrent += 1
-                            $this.PullProgressText = `Đang kéo HS ${task.HocSinhID} - môn ${task.MonHocID} (${$this.PullProgressCurrent}/${$this.PullProgressTotal})`
-                            await fetchPromise(`lms/fn_HocSinh_KeoDiem_C${vueData.CapID}`, {
-                                JsonData: task.JsonData,
-                            }, { cache: false })
-                        }
+            const taskMap = new Map()
+            for (const item of dataToPull) {
+                const key = `${item.HocSinhID}__${item.MonHocID}`
+                if (!taskMap.has(key)) {
+                    taskMap.set(key, {
+                        HocSinhID: item.HocSinhID,
+                        MonHocID: item.MonHocID,
+                        JsonData: [],
+                    })
+                }
+                taskMap.get(key).JsonData.push(item)
+            }
+            const tasks = [...taskMap.values()]
+            this.IsPullingDiem = true
+            this.PullProgressTotal = tasks.length
+            this.PullProgressCurrent = 0
+            this.PullProgressText = 'Đang chuẩn bị kéo điểm...'
 
-                        $this.PullProgressText = `Hoàn tất (${$this.PullProgressTotal}/${$this.PullProgressTotal})`
-                        $this.snackbarRef.value.show({ message: 'Kéo điểm thành công', color: 'success' })
-                        $this.IsShowDialogKeoDiem = false
-                    } catch (error) {
-                        $this.snackbarRef.value.show({ message: 'Kéo điểm thất bại', color: 'error' })
-                    } finally {
-                        $this.resetPullProgress()
-                    }
-                },
-            })
+            try {
+                for (const task of tasks) {
+                    this.PullProgressCurrent += 1
+                    this.PullProgressText = `Đang kéo HS ${task.HocSinhID} - môn ${task.MonHocID} (${this.PullProgressCurrent}/${this.PullProgressTotal})`
+                    await fetchPromise(`lms/fn_HocSinh_KeoDiem_C${vueData.CapID}`, {
+                        JsonData: task.JsonData,
+                    }, { cache: false, silent: true })
+                }
+
+                this.PullProgressText = `Hoàn tất (${this.PullProgressTotal}/${this.PullProgressTotal})`
+                this.snackbarRef.value.showSnackbar({ message: 'Kéo điểm thành công', color: 'success' })
+                this.IsShowDialogKeoDiem = false
+                await this.onLoadBangDiemLMS()
+            } catch (error) {
+                this.snackbarRef.value.showSnackbar({ message: 'Kéo điểm thất bại', color: 'error' })
+            } finally {
+                this.resetPullProgress()
+            }
         },
     },
 }
