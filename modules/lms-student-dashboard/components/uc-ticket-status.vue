@@ -111,6 +111,7 @@ export default {
 		async loadTickets() {
 			const res = await fetchPromise('lms/Ticket_GetList', {
 				CreateUser: vueData.user.UserID,
+				IsIT: false
 			}, { cache: false })
 			this.DS = res ?? []
 		},
