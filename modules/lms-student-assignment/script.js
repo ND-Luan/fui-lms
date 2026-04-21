@@ -346,6 +346,7 @@ function useTimeTracking() {
 	return {
 		methods: {
 			async insertDurationTime(submitionInfo) {
+				if (vueData.user?.UserID === 'NA0000022') return;
 				if (!this._isActiveSubmission(submitionInfo?.SubmissionStatus)) return;
 				await fetchPromise(
 					'lms/EL_Student_UpdateDurationTime',
@@ -354,6 +355,7 @@ function useTimeTracking() {
 				);
 			},
 			insertAccessTime(submitionInfo) {
+				if (vueData.user?.UserID === 'NA0000022') return;
 				if (!this._isActiveSubmission(submitionInfo?.SubmissionStatus)) return;
 				fetchPromise(
 					'lms/EL_Student_UpdateAccessTime',

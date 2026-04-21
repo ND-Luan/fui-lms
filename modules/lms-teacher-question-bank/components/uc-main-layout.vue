@@ -4,13 +4,26 @@
       <v-card>
         <v-card-text class="d-flex align-center ga-2 flex-wrap py-2">
           <span class="text-subtitle-1 font-weight-bold">{{ TitlePage }}</span>
-          <template v-if="AssignmentItem">
+          <template v-if="selectedKhoiName">
             <v-icon size="small" class="text-medium-emphasis">mdi-chevron-right</v-icon>
-            <v-chip size="small" color="primary" variant="tonal" closable @click:close="AssignmentItem = null">
-              {{ AssignmentItem.Title }}
+            <span class="text-body-2 text-medium-emphasis">{{ selectedKhoiName }}</span>
+          </template>
+          <template v-if="selectedMon">
+            <v-icon size="small" class="text-medium-emphasis">mdi-chevron-right</v-icon>
+            <v-chip size="small" color="primary" variant="tonal" closable @click:close="selectedMon = null">
+              {{ selectedMon.TenMonHoc_HienThi }}
+            </v-chip>
+          </template>
+          <template v-if="selectedGroup">
+            <v-icon size="small" class="text-medium-emphasis">mdi-chevron-right</v-icon>
+            <v-chip size="small" color="secondary" variant="tonal" closable @click:close="selectedGroup = null; DSQuestion = []">
+              {{ selectedGroup.Title }}
             </v-chip>
           </template>
           <v-spacer />
+          <v-btn v-if="selectedMon" variant="tonal" color="indigo" size="small" @click="dialogSkill = true">
+            <v-icon start>mdi-brain</v-icon>Quản lý kỹ năng
+          </v-btn>
           <v-btn variant="outlined" color="primary" size="small" @click="onRefresh">
             <v-icon start>mdi-reload</v-icon>Làm mới
           </v-btn>
@@ -40,33 +53,12 @@
               </template>
             </v-list-item>
             <template v-if="khoi._open">
-              <template v-for="mon in khoi.children" :key="mon.MonHocID">
-                <v-list-item rounded="lg" class="mb-1" style="padding-left: 24px;" @click="toggleMonHoc(khoi, mon)">
-                  <template #prepend>
-                    <v-icon size="small">{{ mon._open ? 'mdi-chevron-down' : 'mdi-chevron-right' }}</v-icon>
-                  </template>
-                  <v-list-item-title class="text-caption">{{ mon.TenMonHoc_HienThi }}</v-list-item-title>
-                  <template #append>
-                    <v-progress-circular v-if="mon._loading" size="12" width="2" indeterminate />
-                  </template>
-                </v-list-item>
-                <template v-if="mon._open">
-                  <v-list-item v-for="asgn in mon.children" :key="asgn.AssignmentID" rounded="lg" class="mb-1"
-                    style="padding-left: 40px;"
-                    :active="AssignmentItem && AssignmentItem.AssignmentID === asgn.AssignmentID" color="primary"
-                    @click="selectAssignment(asgn)">
-                    <v-list-item-title class="text-caption" style="white-space: normal; line-height: 1.3;">{{ asgn.Title
-                    }}</v-list-item-title>
-                    <v-list-item-subtitle class="text-caption opacity-60 d-flex ga-1 flex-wrap">
-                      <span v-if="asgn.TuanHienThi">{{ asgn.TuanHienThi }}</span>
-                      <span v-if="asgn.TuanHienThi && asgn.Chuong"> • </span>
-                      <span v-if="asgn.Chuong">{{ asgn.Chuong }}</span>
-                    </v-list-item-subtitle>
-                  </v-list-item>
-                  <div v-if="!mon.children.length" class="text-caption text-medium-emphasis pa-2"
-                    style="padding-left: 40px;">Không có bài tập</div>
-                </template>
-              </template>
+              <v-list-item v-for="mon in khoi.children" :key="mon.MonHocID" rounded="lg" class="mb-1"
+                style="padding-left: 24px;"
+                :active="selectedMon && selectedMon.MonHocID === mon.MonHocID && selectedMon.KhoiID === mon.KhoiID"
+                color="primary" @click="selectMonHoc(mon)">
+                <v-list-item-title class="text-caption">{{ mon.TenMonHoc_HienThi }}</v-list-item-title>
+              </v-list-item>
               <div v-if="!khoi.children.length && !khoi._loading" class="text-caption text-medium-emphasis pa-2"
                 style="padding-left: 24px;">Không có môn học</div>
             </template>
@@ -90,17 +82,28 @@
         <v-list density="compact" nav class="pa-2">
           <v-list-item v-for="group in DSGroup" :key="group.Id" :active="selectedGroup && selectedGroup.Id === group.Id"
             color="primary" rounded="lg" class="mb-1" @click="selectGroup(group)">
-            <v-list-item-title class="text-body-2 font-weight-medium">{{ group.Title }}</v-list-item-title>
-            <v-list-item-subtitle v-if="group.Description" class="text-caption">
+            <v-list-item-title class="text-body-2 font-weight-medium d-flex align-center ga-1">
+              {{ group.Title }}
+              <v-icon v-if="hasMedia(group.MediaJson, 'group')" size="14" color="teal" title="Có media">
+                mdi-paperclip
+              </v-icon>
+            </v-list-item-title>
+            <v-list-item-subtitle v-if="uploadingGroups[group.Id]?.text"
+              class="text-caption text-primary">
+              {{ uploadingGroups[group.Id].text }}
+            </v-list-item-subtitle>
+
+            <v-list-item-subtitle v-else-if="group.Description" class="text-caption">
               {{ group.Description }}
             </v-list-item-subtitle>
-            <template #append>
-              <div class="d-flex align-center ga-1">
-                <v-btn icon size="x-small" variant="text" color="primary" @click.stop="openEditGroup(group)">
+      <template #append>
+                <div class="d-flex align-center ga-1">
+                  <v-progress-circular v-if="uploadingGroups[group.Id]" size="14" width="2" indeterminate color="primary" />
+                  <v-btn icon size="x-small" variant="text" color="primary" @click.stop="openEditGroup(group)">
                   <v-icon size="small">mdi-pencil</v-icon>
                   <v-tooltip activator="parent" location="top">Sửa</v-tooltip>
                 </v-btn>
-                <v-btn icon size="x-small" variant="text" color="error" @click.stop="deleteGroup(group)">
+                <v-btn icon size="x-small" variant="text" color="error" v-if="!uploadingGroups[group.Id]" @click.stop="deleteGroup(group)">
                   <v-icon size="small">mdi-delete-outline</v-icon>
                   <v-tooltip activator="parent" location="top">Xóa</v-tooltip>
                 </v-btn>
@@ -156,8 +159,7 @@
             </v-chip>
           </template>
           <template #item.QuestionText="{ item }">
-            <div class="text-body-2 text-truncate" style="max-width: 260px;"
-              v-html="item.QuestionText || item.Label || '-'" />
+            <div class="text-body-2 text-truncate" style="max-width: 260px;" v-html="item.QuestionText || '-'" />
           </template>
           <template #item.Points="{ item }">
             <span class="text-body-2">{{ item.Points ?? '-' }}</span>
@@ -166,13 +168,21 @@
             <v-icon v-if="item.IsAdvanced" color="warning" size="small">mdi-star</v-icon>
             <span v-else class="text-medium-emphasis text-caption">-</span>
           </template>
+          <template #item.media="{ item }">
+            <template v-if="uploadingQuestions[item.Id]">
+              <v-progress-circular size="14" width="2" indeterminate color="primary" />
+              <v-tooltip activator="parent" location="top">{{ uploadingQuestions[item.Id].text || 'Đang upload...' }}</v-tooltip>
+            </template>
+            <v-icon v-else-if="hasMedia(item.ConfigJson, 'question')" color="teal" size="small">mdi-paperclip</v-icon>
+            <span v-else class="text-medium-emphasis text-caption">-</span>
+          </template>
           <template #item.actions="{ item }">
             <div class="d-flex align-center ga-1">
               <v-btn icon size="small" variant="text" color="primary" @click="openEditQuestion(item)">
                 <v-icon>mdi-pencil</v-icon>
                 <v-tooltip activator="parent" location="top">Chỉnh sửa</v-tooltip>
               </v-btn>
-              <v-btn icon size="small" variant="text" color="error" @click="deleteQuestion(item)">
+              <v-btn v-if="!uploadingQuestions[item.Id]" icon size="small" variant="text" color="error" @click="deleteQuestion(item)">
                 <v-icon>mdi-delete-outline</v-icon>
                 <v-tooltip activator="parent" location="top">Xóa</v-tooltip>
               </v-btn>
@@ -189,12 +199,29 @@
     </v-row>
 
     <!-- Dialog Nhóm -->
-    <uc-dialog-group v-model="dialogGroup" :item="formGroup" @saved="onGroupSaved" />
+    <uc-dialog-group v-model="dialogGroup" :item="formGroup"
+      :upload-context="selectedMon ? { MonHocName: selectedMon.TenMonHoc_HienThi, KhoiID: selectedMon.KhoiID } : {}"
+      :is-uploading="!!uploadingGroups[formGroup.Id]"
+      :uploading-text="uploadingGroups[formGroup.Id]?.text || ''"
+      @saved="onGroupSaved"
+      @upload-start="onGroupUploadStart"
+      @upload-end="onGroupUploadEnd"
+      @upload-progress="onGroupUploadProgress" />
 
     <!-- Dialog Câu hỏi -->
     <uc-dialog-question v-model="dialogQuestion" :item="formQuestion"
-      :group-id="selectedGroup ? selectedGroup.Id : null" :mon-hoc-id="AssignmentItem ? AssignmentItem.MonHocID : null"
-      @saved="onQuestionSaved" />
+      :group-id="selectedGroup ? selectedGroup.Id : null" :mon-hoc-id="selectedMon ? selectedMon.MonHocID : null"
+      :upload-context="selectedMon ? { MonHocName: selectedMon.TenMonHoc_HienThi, KhoiID: selectedMon.KhoiID } : {}"
+      :is-uploading="!!uploadingQuestions[formQuestion.Id]"
+      :uploading-text="uploadingQuestions[formQuestion.Id]?.text || ''"
+      @saved="onQuestionSaved"
+      @upload-start="onQuestionUploadStart"
+      @upload-end="onQuestionUploadEnd"
+      @upload-progress="onQuestionUploadProgress" />
+
+    <!-- Dialog Quản lý kỹ năng -->
+    <uc-dialog-skill-manager v-model="dialogSkill" :mon-hoc-id="selectedMon ? selectedMon.MonHocID : null"
+      :mon-hoc-name="selectedMon ? selectedMon.TenMonHoc_HienThi : ''" />
   </Global>
 </template>
 
@@ -206,7 +233,7 @@ export default {
       vueData,
       treeKhoi: [],
       treeLoading: false,
-      AssignmentItem: null,
+      selectedMon: null,
       DSGroup: [],
       selectedGroup: null,
       DSQuestion: [],
@@ -216,12 +243,16 @@ export default {
       formGroup: {},
       dialogQuestion: false,
       formQuestion: {},
+      dialogSkill: false,
+      uploadingGroups: {},
+      uploadingQuestions: {},
       headersQuestion: [
         { title: 'STT', key: 'OrdinalNumber', width: 56 },
         { title: 'Loại', key: 'Type', width: 160 },
         { title: 'Nội dung', key: 'QuestionText' },
         { title: 'Điểm', key: 'Points', width: 70 },
         { title: 'Nâng cao', key: 'IsAdvanced', width: 90 },
+        { title: 'Media', key: 'media', width: 70, sortable: false },
         { title: '', key: 'actions', width: 96, sortable: false },
       ],
       TypeOptions: [
@@ -237,9 +268,14 @@ export default {
   },
   computed: {
     TitlePage() { return getTitlePageByURL(window.location.pathname + window.location.search) },
+    selectedKhoiName() {
+      if (!this.selectedMon) return null
+      const k = this.treeKhoi.find(x => x.KhoiID === this.selectedMon.KhoiID)
+      return k ? (k.TenKhoiHoc || ('Khối ' + k.KhoiID)) : null
+    },
   },
   watch: {
-    AssignmentItem(v) {
+    selectedMon(v) {
       this.DSGroup = []; this.selectedGroup = null; this.DSQuestion = []
       if (v) this.getGroups()
     },
@@ -263,7 +299,7 @@ export default {
       }
       for (const m of dsMon) {
         if (khoiMap[m.KhoiID]) {
-          khoiMap[m.KhoiID].children.push({ ...m, _open: false, _loading: false, _loaded: false, children: [] })
+          khoiMap[m.KhoiID].children.push({ ...m })
         }
       }
       this.treeKhoi = Object.values(khoiMap)
@@ -272,25 +308,20 @@ export default {
     toggleKhoi(khoi) {
       khoi._open = !khoi._open
     },
-    async toggleMonHoc(khoi, mon) {
-      mon._open = !mon._open
-      if (mon._open && !mon._loaded) {
-        mon._loading = true
-        const res = await fetchPromise('lms/EL_Assignment_Get_By_KhoiID_MonHocID', {
-          KhoiID: khoi.KhoiID,
-          MonHocID: mon.MonHocID,
-        })
-        mon.children = res ?? []
-        mon._loaded = true
-        mon._loading = false
-      }
-    },
-    selectAssignment(asgn) {
-      this.AssignmentItem = asgn
+    selectMonHoc(mon) {
+      this.selectedMon = mon
     },
     async getGroups() {
-      const res = await fetchPromise('lms/EL_QuestionGroup_List', { AssignmentId: this.AssignmentItem?.AssignmentID })
-      this.DSGroup = res ?? []
+      const res = await fetchPromise('lms/EL_QuestionGroup_List', {
+        MonHocID: this.selectedMon?.MonHocID,
+        KhoiID: this.selectedMon?.KhoiID,
+        IncludeDeleted: false,
+        PageNumber: 1,
+        PageSize: 100,
+      }, { forceRefresh: true })
+      console.log('[getGroups] res:', res)
+      const flat = Array.isArray(res?.[0]) ? res[0] : res
+      this.DSGroup = flat ?? []
       if (this.selectedGroup) {
         const found = this.DSGroup.find(g => g.Id === this.selectedGroup.Id)
         this.selectedGroup = found ?? null
@@ -308,10 +339,15 @@ export default {
       this.DSQuestion = []
       const res = await fetchPromise('lms/EL_Question_List', {
         GroupId: this.selectedGroup.Id,
-        Type: this.filterType || null,
-        Search: this.searchQ || null,
-      })
-      this.DSQuestion = res ?? []
+        Type: this.filterType || '',
+        Search: this.searchQ || '',
+        IncludeDeleted: false,
+        PageNumber: 1,
+        PageSize: 100
+      }, { forceRefresh: true })
+      console.log('[loadQuestions] res:', res)
+      const flat = Array.isArray(res?.[0]) ? res[0] : res
+      this.DSQuestion = flat ?? []
     },
     getTypeLabel(type) {
       return this.TypeOptions.find(t => t.value === type)?.label ?? type
@@ -319,8 +355,22 @@ export default {
     getTypeColor(type) {
       return this.TypeOptions.find(t => t.value === type)?.color ?? 'grey'
     },
+    hasMedia(jsonStr, source) {
+      try {
+        const obj = JSON.parse(jsonStr || 'null')
+        if (!obj) return false
+        const m = source === 'question' ? obj.media : obj
+        if (!m) return false
+        return !!(m.sourceYT?.id || m.sourceRecord?.id ||
+          m.sourceFiles?.image?.length || m.sourceFiles?.file?.length)
+      } catch { return false }
+    },
     openAddGroup() {
-      this.formGroup = { AssignmentId: this.AssignmentItem?.AssignmentID }
+      this.formGroup = {
+        SourceId: crypto.randomUUID(),
+        MonHocID: this.selectedMon?.MonHocID,
+        KhoiID: this.selectedMon?.KhoiID,
+      }
       this.dialogGroup = true
     },
     openEditGroup(group) {
@@ -331,7 +381,8 @@ export default {
       const ok = await this.confirmRef.value.show({ title: `Xóa nhóm "${group.Title}"?` })
       if (!ok) return
       const res = await fetchPromise('lms/EL_QuestionGroup_Delete', { Id: group.Id, User: vueData.user.UserID }, { cache: false })
-      if (res?.Action === 'Deleted' || res?.status === 'success') {
+      const result = Array.isArray(res) ? res[0] : res
+      if (result?.Action === 'Deleted' || result?.status === 'success') {
         this.snackbarRef.value.showSnackbar({ message: 'Đã xóa nhóm', color: 'success' })
         if (this.selectedGroup?.Id === group.Id) { this.selectedGroup = null; this.DSQuestion = [] }
         await this.getGroups()
@@ -342,10 +393,9 @@ export default {
       this.loadQuestions()
     },
     async onRefresh() {
-      if (this.AssignmentItem) await this.getGroups()
+      if (this.selectedMon) await this.getGroups()
     },
     async onGroupSaved() {
-      this.dialogGroup = false
       await this.getGroups()
     },
     openAddQuestion() {
@@ -357,18 +407,24 @@ export default {
       this.dialogQuestion = true
     },
     async deleteQuestion(q) {
-      const ok = await this.confirmRef.value.show({ title: `Xóa câu hỏi "${q.Label || ('#' + q.Id)}"?` })
+      const ok = await this.confirmRef.value.show({ title: `Xóa câu hỏi "#${q.Id}"?` })
       if (!ok) return
       const res = await fetchPromise('lms/EL_Question_Delete', { Id: q.Id, User: vueData.user.UserID }, { cache: false })
-      if (res?.Action === 'Deleted' || res?.status === 'success') {
+      const result = Array.isArray(res) ? res[0] : res
+      if (result?.Action === 'Deleted' || result?.status === 'success') {
         this.snackbarRef.value.showSnackbar({ message: 'Đã xóa câu hỏi', color: 'success' })
         await this.loadQuestions()
       }
     },
     async onQuestionSaved() {
-      this.dialogQuestion = false
       await this.loadQuestions()
     },
+    onGroupUploadStart({ id }) { if (id !== null && !this.uploadingGroups[id]) this.uploadingGroups[id] = { text: '' } },
+    onGroupUploadEnd({ id }) { delete this.uploadingGroups[id] },
+    onGroupUploadProgress({ id, text }) { if (this.uploadingGroups[id]) this.uploadingGroups[id].text = text },
+    onQuestionUploadStart({ id }) { if (id !== null && !this.uploadingQuestions[id]) this.uploadingQuestions[id] = { text: '' } },
+    onQuestionUploadEnd({ id }) { delete this.uploadingQuestions[id] },
+    onQuestionUploadProgress({ id, text }) { if (this.uploadingQuestions[id]) this.uploadingQuestions[id].text = text },
   },
 }
 </script>

@@ -381,12 +381,35 @@ export default {
             this.renderedContent = content
 
             this.$nextTick(() => {
+                this.fixLinks()
                 if (window.MathJax && window.MathJax.typesetPromise && this.$refs.contentContainer) {
                     window.MathJax.typesetPromise([this.$refs.contentContainer])
                         .then(() => {
                             this.forceDisableRenderedElements()
+                            this.fixLinks()
                         })
                         .catch(err => console.error('MathJax render error:', err))
+                }
+            })
+        },
+
+        fixLinks() {
+            if (!this.$refs.contentContainer) return
+            const inIframe = window !== window.top
+            this.$refs.contentContainer.querySelectorAll('a[href]').forEach(a => {
+                a.setAttribute('target', '_blank')
+                a.setAttribute('rel', 'noopener noreferrer')
+                if (inIframe) {
+                    a.addEventListener('click', (e) => {
+                        const href = a.getAttribute('href')
+                        if (!href || href.startsWith('#')) return
+                        e.preventDefault()
+                        if (typeof window.top.openWindow === 'function') {
+                            window.top.openWindow({ title: a.textContent?.trim() || href, url: href })
+                        } else {
+                            window.open(href, '_blank', 'noopener,noreferrer')
+                        }
+                    }, { passive: false })
                 }
             })
         },

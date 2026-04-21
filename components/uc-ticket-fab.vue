@@ -35,20 +35,25 @@
 						<!-- Attachment upload -->
 						<div class="mb-3">
 							<p class="text-body-2 mb-1">Ảnh đính kèm (tùy chọn)</p>
-							<v-btn variant="outlined" size="small" @click="$refs.fileInput.click()"
-								:loading="isUploading">
-								<v-icon start>mdi-image-plus</v-icon>
-								Chọn ảnh
-							</v-btn>
+						<div class="d-flex align-center ga-2 flex-wrap">
+					<v-btn variant="outlined" size="small" @click="$refs.fileInput.click()">
+							<v-icon start>mdi-image-plus</v-icon>
+							Chọn ảnh
+						</v-btn>
+						<v-btn variant="outlined" size="small" :loading="isCapturing" @click="captureScreenshot">
+							<v-icon start>mdi-camera</v-icon>
+							Chụp lại màn hình
+						</v-btn>
+						</div>
 							<input ref="fileInput" type="file" accept="image/*" multiple style="display:none;"
 								@change="handleFileChange" />
 
-							<div v-if="attachments.length" class="d-flex flex-wrap ga-2 mt-2">
+						<div v-if="attachments.length" class="d-flex flex-wrap ga-2 mt-3">
 								<div v-for="(att, i) in attachments" :key="i"
 									style="position: relative; width: 72px; height: 72px;">
 									<v-img :src="att.previewUrl" width="72" height="72" cover
 										style="border-radius: 6px; cursor: pointer;"
-										@click="previewImage(att.fileId)" />
+										@click="previewImage(att.previewUrl)" />
 									<v-btn icon size="x-small" variant="elevated" color="info"
 										style="position: absolute; bottom: -6px; left: -6px;"
 										@click.stop="openAnnotate(i)">
@@ -284,7 +289,6 @@ export default {
 			isShow: false,
 			activeTab: 'create',
 			isSubmitting: false,
-			isUploading: false,
 			isLoadingHistory: false,
 			form: {
 				Title: '',
@@ -293,7 +297,8 @@ export default {
 				Browser: '',
 				Os: '',
 			},
-			attachments: [],  // [{ name, fileId }]
+			isCapturing: false,
+			attachments: [],  // [{ name, file|blob, previewUrl, fileId? }]
 			history: [],
 			imagePreview: {
 				show: false,
@@ -325,9 +330,9 @@ export default {
 		}
 	},
 	mounted() {
-		if (!window.html2canvas) {
+		if (!window.htmlToImage) {
 			const s = document.createElement('script')
-			s.src = 'https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js'
+			s.src = 'https://cdn.jsdelivr.net/npm/html-to-image@1.11.11/dist/html-to-image.js'
 			document.head.appendChild(s)
 		}
 	},
@@ -335,44 +340,31 @@ export default {
 		async openDialog() {
 			await this.resetForm()
 			this.activeTab = 'create'
-			this.captureScreenshot()  // capture before dialog renders (DOM still clean)
 			this.isShow = true
+			// Capture sau khi dialog đã hiện — dùng setTimeout để nhường JS event loop
+			setTimeout(() => { this.captureScreenshot() }, 300)
 		},
 		async captureScreenshot() {
+			this.isCapturing = true
 			try {
-				if (!window.html2canvas) {
+				if (!window.htmlToImage) {
 					await new Promise((resolve, reject) => {
 						const s = document.createElement('script')
-						s.src = 'https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js'
+						s.src = 'https://cdn.jsdelivr.net/npm/html-to-image@1.11.11/dist/html-to-image.js'
 						s.onload = resolve
 						s.onerror = reject
 						document.head.appendChild(s)
 					})
 				}
-				const canvas = await window.html2canvas(document.body, {
-					useCORS: true,
-					logging: false,
-				})
-				const blob = await new Promise(res => canvas.toBlob(res, 'image/png'))
-				if (!blob) return
-				const previewUrl = URL.createObjectURL(blob)
-				const file = new File([blob], 'screenshot.png', { type: 'image/png' })
-				const formData = new FormData()
-				formData.append('file', file)
-				const res = await fetch('https://file.lhbs.vn/lms/upload/FileData', {
-					method: 'POST',
-					body: formData,
-					headers: { Authorization: $awt },
-				})
-				const json = await res.json()
-				const fileId = json?.Files?.[0]?.FILE_ID
-				if (fileId) {
-					this.attachments.push({ name: 'screenshot.png', fileId, previewUrl })
-				} else {
-					URL.revokeObjectURL(previewUrl)
+				const blob = await window.htmlToImage.toBlob(document.body, { cacheBust: false, skipFonts: true })
+				if (blob) {
+					const previewUrl = URL.createObjectURL(blob)
+				this.attachments.push({ name: 'screenshot.png', blob, previewUrl, originalPreviewUrl: previewUrl })
 				}
 			} catch (err) {
 				console.warn('Screenshot capture failed', err)
+			} finally {
+				this.isCapturing = false
 			}
 		},
 		async getOsName() {
@@ -424,33 +416,10 @@ export default {
 		async handleFileChange(e) {
 			const files = Array.from(e.target.files)
 			if (!files.length) return
-
-			this.isUploading = true
 			for (const file of files) {
 				const previewUrl = URL.createObjectURL(file)
-				try {
-					const formData = new FormData()
-					formData.append('file', file)
-					const res = await fetch('https://file.lhbs.vn/lms/upload/FileData', {
-						method: 'POST',
-						body: formData,
-						headers: {
-							Authorization: $awt,
-						}
-					})
-					const json = await res.json()
-					const fileId = json?.Files?.[0]?.FILE_ID
-					if (fileId) {
-						this.attachments.push({ name: file.name, fileId, previewUrl })
-					} else {
-						URL.revokeObjectURL(previewUrl)
-					}
-				} catch (err) {
-					URL.revokeObjectURL(previewUrl)
-					console.error('Upload error', err)
-				}
+				this.attachments.push({ name: file.name, file, previewUrl, originalPreviewUrl: previewUrl })
 			}
-			this.isUploading = false
 			this.$refs.fileInput.value = ''
 		},
 		removeAttachment(index) {
@@ -458,12 +427,35 @@ export default {
 			if (att?.previewUrl) URL.revokeObjectURL(att.previewUrl)
 			this.attachments.splice(index, 1)
 		},
+		async uploadPendingAttachments() {
+			for (const att of this.attachments) {
+				if (att.fileId) continue
+				const fileObj = att.blob
+					? new File([att.blob], att.name, { type: 'image/png' })
+					: att.file
+				if (!fileObj) continue
+				try {
+					const formData = new FormData()
+					formData.append('file', fileObj)
+					const res = await fetch('https://file.lhbs.vn/lms/upload/FileData', {
+						method: 'POST',
+						body: formData,
+						headers: { Authorization: $awt },
+					})
+					const json = await res.json()
+					att.fileId = json?.Files?.[0]?.FILE_ID ?? null
+				} catch (err) {
+					console.error('Upload error', err)
+				}
+			}
+		},
 		async submitTicket() {
 			if (!this.form.Title?.trim() || !this.form.Description?.trim()) {
 				this.snackbarRef.value.showSnackbar({ message: 'Vui lòng điền tiêu đề và mô tả', color: 'warning' })
 				return
 			}
 			this.isSubmitting = true
+			await this.uploadPendingAttachments()
 			const attachmentJSON = this.attachments.length
 				? JSON.stringify(this.attachments.map(a => ({
 					FileID: a.fileId,
@@ -522,8 +514,11 @@ export default {
 				this.detailDialog.newComment = ''
 			}
 		},
-		previewImage(fileId) {
-			this.imagePreview.url = vueData.v_Set.urlReadFile + 'FileData/' + fileId
+		previewImage(arg) {
+			if (!arg) return
+			this.imagePreview.url = (arg.startsWith('blob:') || arg.startsWith('data:') || arg.startsWith('http'))
+				? arg
+				: vueData.v_Set.urlReadFile + 'FileData/' + arg
 			this.imagePreview.show = true
 		},
 		statusColor(status) {
@@ -542,7 +537,8 @@ export default {
 		// ── Annotation / Paint ──────────────────────────────────────
 		openAnnotate(index) {
 			const att = this.attachments[index]
-			if (!att?.previewUrl) return
+			const bgUrl = att?.originalPreviewUrl || att?.previewUrl
+			if (!bgUrl) return
 			this.annotateDialog = {
 				show: true,
 				attachmentIndex: index,
@@ -567,7 +563,7 @@ export default {
 					this.annotateDialog.imageEl = img
 					this.annotateRedraw()
 				}
-				img.src = att.previewUrl
+				img.src = bgUrl
 			})
 		},
 		annotateGetPos(e) {
@@ -782,12 +778,26 @@ export default {
 		annotateTouchMove(e) { this.annotateMove(e.touches[0]) },
 		annotateConfirm() {
 			const idx = this.annotateDialog.attachmentIndex
-			// Giữ nguyên ảnh gốc (fileId + previewUrl), chỉ lưu shapes riêng
-			this.attachments[idx] = {
-				...this.attachments[idx],
-				annotationShapes: [...this.annotateDialog.shapes],
-			}
-			this.attachments = [...this.attachments]  // trigger reactivity
+			const canvas = this.$refs.annotateCanvas
+			const att = this.attachments[idx]
+			const originalUrl = att.originalPreviewUrl || att.previewUrl
+			// Export canvas (ảnh gốc + annotations) thành blob mới để preview
+			canvas.toBlob(blob => {
+				// Chỉ revoke previewUrl nếu nó KHÁC originalPreviewUrl (tức là đã từng bake trước đó)
+				if (att.previewUrl && att.previewUrl !== originalUrl) {
+					URL.revokeObjectURL(att.previewUrl)
+				}
+				const newPreviewUrl = URL.createObjectURL(blob)
+				this.attachments[idx] = {
+					...att,
+					blob,
+					previewUrl: newPreviewUrl,
+					originalPreviewUrl: originalUrl,
+					annotationShapes: [...this.annotateDialog.shapes],
+					fileId: null,
+				}
+				this.attachments = [...this.attachments]
+			}, 'image/png')
 			this.annotateDialog.show = false
 		},
 	},
