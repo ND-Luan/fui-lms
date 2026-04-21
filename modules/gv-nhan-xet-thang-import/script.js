@@ -1,50 +1,30 @@
 function convertHocSinh() {
-    // Chuyển đổi danh sách object thành mảng hai chiều
+    const isCuoiKi = [5, 12].includes(vueData.currentThangObj?.Thang)
+    const isThang5 = vueData.currentThangObj?.Thang === 5
     const tableData = vueData.dataSource_API.map((s) => {
-        const DiemToan = null
-        const NhanXetToan_HTML = null
-        const DiemTiengViet = null
-        const NhanXetTiengViet_HTML = null
-        const NhanXetMonHocKhac_HTML = null
-        const HoatDongGiaoDucKhac_HTML = null
-        const PhamChatNangLuc_HTML = null
-        //C2 - C3
-        const NoiDungKienThuc_HTML = null
-        const NoiDungNangLuc_HTML = null
-        const NoiDungHoatDongKhac_HTML = null
-        let arr = [
-            s.HocSinhID,
-            s.SoDanhBo,
-            s.HoTen
-        ]
-        const arrC1 = [
-            DiemToan,
-            NhanXetToan_HTML,
-            DiemTiengViet,
-            NhanXetTiengViet_HTML,
-            NhanXetMonHocKhac_HTML,
-            HoatDongGiaoDucKhac_HTML,
-            PhamChatNangLuc_HTML
-        ]
-        const arrC2_C3 = [
-            NoiDungKienThuc_HTML,
-            NoiDungNangLuc_HTML,
-            NoiDungHoatDongKhac_HTML
-        ]
-        if (vueData.dataSource_API[0].CapID === 1) arr = [...arr, ...arrC1]
-        else arr = [...arr, ...arrC2_C3]
+        let arr = [s.HocSinhID, s.SoDanhBo, s.HoTen]
+        const cap = vueData.dataSource_API[0].CapID
+        if (cap === 1) {
+            arr = [...arr, null, null, null, null, null, null, null]
+        } else if (cap === 2 || cap === 3) {
+            if (isCuoiKi) {
+                arr = [...arr, null, null, null]
+                if (isThang5) arr.push(null)
+            } else {
+                arr = [...arr, null, null, null]
+            }
+        }
         return arr
-    }
-    )
+    })
     vueData.dataSource = tableData
 }
 function convertHocSinhToAPI() {
     vueData.JSON_NhanXetThang = []
+    const isCuoiKi = [5, 12].includes(vueData.currentThangObj?.Thang)
+    const isThang5 = vueData.currentThangObj?.Thang === 5
     const tableData = vueData.dataSource.map((s) => {
         const hsl = vueData.dataSource_API.find(h => h.HocSinhID == s.HocSinhID)
-        console.log('hsl', hsl, s);
         if (hsl?.CapID === 1) {
-            console.log('s')
             return {
                 HocSinhID: s.HocSinhID,
                 SoDanhBo: s.SoDanhBo,
@@ -61,19 +41,31 @@ function convertHocSinhToAPI() {
                 HSLopID: hsl.HSLopID
             }
         } else if (hsl?.CapID === 2 || hsl?.CapID === 3) {
-            return {
+            const base = {
                 HocSinhID: s.HocSinhID,
                 SoDanhBo: s.SoDanhBo,
                 HoTen: s.HoTen,
-                NoiDungKienThuc_HTML: s.NoiDungKienThuc_HTML || null,
-                NoiDungNangLuc_HTML: s.NoiDungNangLuc_HTML || null,
-                NoiDungHoatDongKhac_HTML: s.NoiDungHoatDongKhac_HTML || null,
                 LopID: vueData.LopID,
                 Lop_NhanXetThangID: vueData.Lop_NhanXetThangID,
-                HSLopID: hsl.HSLopID,
-                DiemToan: s.DiemToan || null,
-                DiemTiengViet: s.DiemTiengViet || null,
+                HSLopID: hsl.HSLopID
             }
+            if (isCuoiKi) {
+                base.UuDiem = s.UuDiem || null
+                base.NhuocDiem = s.NhuocDiem || null
+                base.DeXuat = s.DeXuat || null
+                if (isThang5) {
+                    const nxt = s.NhanXetGVCN || null
+                    if (nxt && nxt.length > 500) {
+                        Toast.warning({ text: `Học sinh <b>${s.HoTen}</b>: Nhận xét ghi học bạ vượt quá 500 ký tự (${nxt.length} ký tự). Dữ liệu sẽ được cắt bớt còn 500 ký tự.` })
+                    }
+                    base.NhanXetGVCN = nxt ? nxt.slice(0, 500) : null
+                }
+            } else {
+                base.NoiDungKienThuc_HTML = s.NoiDungKienThuc_HTML || null
+                base.NoiDungNangLuc_HTML = s.NoiDungNangLuc_HTML || null
+                base.NoiDungHoatDongKhac_HTML = s.NoiDungHoatDongKhac_HTML || null
+            }
+            return base
         }
     })
     vueData.JSON_NhanXetThang = tableData
@@ -141,7 +133,7 @@ function renderColumn() {
             },
             {
                 "type": "text",
-                "title": "Nhận xét Toán",
+                "title": "Nhận xét môn Toán",
                 "name": "NhanXetToan_HTML",
                 "width": 300,
                 "backGroundColor": null,
@@ -158,7 +150,7 @@ function renderColumn() {
             },
             {
                 "type": "text",
-                "title": "Nhận xét Tiếng Việt",
+                "title": "Nhận xét môn Tiếng Việt",
                 "name": "NhanXetTiengViet_HTML",
                 "width": 300,
                 "backGroundColor": null,
@@ -195,59 +187,31 @@ function renderColumn() {
         ]
     }
     else {
-        columns = [
-            {
-                "type": "text",
-                "title": "Mã học sinh",
-                "name": "HocSinhID",
-                "width": 120,
-                "backGroundColor": null,
-                "wrap": true
-            },
-            {
-                "type": "text",
-                "title": "Số Danh Bộ",
-                "name": "SoDanhBo",
-                "width": 120,
-                "backGroundColor": null,
-                "wrap": true
-            },
-            {
-                "type": "text",
-                "title": "Họ tên học sinh",
-                "name": "HoTen",
-                "width": 300,
-                "backGroundColor": null,
-                "wrap": true
-            },
-            {
-                "type": "text",
-                "title": "Nội dung kiến thức",
-                "name": "NoiDungKienThuc_HTML",
-                "width": 300,
-                "backGroundColor": null,
-                "wrap": true,
-                "align": "left"
-            },
-            {
-                "type": "text",
-                "title": "Nội dung năng lực",
-                "name": "NoiDungNangLuc_HTML",
-                "width": 300,
-                "backGroundColor": null,
-                "wrap": true,
-                "align": "left"
-            },
-            {
-                "type": "text",
-                "title": "Nội dung hoạt động khác",
-                "name": "NoiDungHoatDongKhac_HTML",
-                "width": 300,
-                "backGroundColor": null,
-                "wrap": true,
-                "align": "left"
-            }
+        const isCuoiKi = [5, 12].includes(vueData.currentThangObj?.Thang)
+        const isThang5 = vueData.currentThangObj?.Thang === 5
+        const baseColumns = [
+            { "type": "text", "title": "Mã học sinh", "name": "HocSinhID", "width": 120, "backGroundColor": null, "wrap": true },
+            { "type": "text", "title": "Số Danh Bộ", "name": "SoDanhBo", "width": 120, "backGroundColor": null, "wrap": true },
+            { "type": "text", "title": "Họ tên học sinh", "name": "HoTen", "width": 300, "backGroundColor": null, "wrap": true }
         ]
+        let additionalColumns = []
+        if (isCuoiKi) {
+            additionalColumns = [
+                { "type": "text", "title": "Ưu điểm", "name": "UuDiem", "width": 300, "backGroundColor": null, "wrap": true, "align": "left" },
+                { "type": "text", "title": "Nhược điểm", "name": "NhuocDiem", "width": 300, "backGroundColor": null, "wrap": true, "align": "left" },
+                { "type": "text", "title": "Đề xuất", "name": "DeXuat", "width": 300, "backGroundColor": null, "wrap": true, "align": "left" }
+            ]
+            if (isThang5) {
+                additionalColumns.push({ "type": "text", "title": "Nhận xét ghi học bạ", "name": "NhanXetGVCN", "width": 300, "backGroundColor": null, "wrap": true, "align": "left" })
+            }
+        } else {
+            additionalColumns = [
+                { "type": "text", "title": "Về học tập", "name": "NoiDungKienThuc_HTML", "width": 300, "backGroundColor": null, "wrap": true, "align": "left" },
+                { "type": "text", "title": "Về nền nếp", "name": "NoiDungNangLuc_HTML", "width": 300, "backGroundColor": null, "wrap": true, "align": "left" },
+                { "type": "text", "title": "Mong muốn phối hợp", "name": "NoiDungHoatDongKhac_HTML", "width": 300, "backGroundColor": null, "wrap": true, "align": "left" }
+            ]
+        }
+        columns = [...baseColumns, ...additionalColumns]
     }
     vueData.columns = columns
 }

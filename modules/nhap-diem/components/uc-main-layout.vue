@@ -137,9 +137,6 @@
 								<v-icon start size="small">mdi-lock-check</v-icon>
 								Chốt &amp; khóa ngay
 							</v-btn>
-							<v-btn size="small" color="success" variant="text" @click.stop="onOpenLockDialog">
-								Tự chọn cột
-							</v-btn>
 						</div>
 					</div>
 				</v-alert>

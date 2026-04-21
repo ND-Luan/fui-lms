@@ -1,8 +1,8 @@
 <template>
 	<div v-if="vueData.user && vueData.user.UserID">
 		<!-- FAB Button -->
-		<v-btn icon color="error" size="small" style="position: fixed; bottom: 80px; right: 24px; z-index: 9999;"
-			elevation="4" @click="openDialog">
+		<v-btn icon color="error" size="small" :style="fabStyle"
+			elevation="4" @mousedown="fabDragStart" @touchstart.prevent="fabDragStart" @click="fabClick">
 			<v-icon>mdi-bug-outline</v-icon>
 			<v-tooltip activator="parent" location="left">Báo lỗi</v-tooltip>
 		</v-btn>
@@ -286,6 +286,7 @@ export default {
 	data() {
 		return {
 			vueData,
+			fab: { x: null, y: null, hasMoved: false },
 			isShow: false,
 			activeTab: 'create',
 			isSubmitting: false,
@@ -329,7 +330,25 @@ export default {
 			},
 		}
 	},
+	computed: {
+		fabStyle() {
+			if (this.fab.x !== null && this.fab.y !== null) {
+				return `position: fixed; left: ${this.fab.x}px; top: ${this.fab.y}px; z-index: 9999; touch-action: none; user-select: none;`
+			}
+			return 'position: fixed; bottom: 80px; right: 24px; z-index: 9999; touch-action: none; user-select: none;'
+		},
+	},
 	mounted() {
+		try {
+			const saved = localStorage.getItem('uc-ticket-fab-pos')
+			if (saved) {
+				const pos = JSON.parse(saved)
+				if (typeof pos.rx === 'number' && typeof pos.ry === 'number') {
+					this.fab.x = Math.max(0, Math.min(window.innerWidth - 40, pos.rx * window.innerWidth))
+					this.fab.y = Math.max(0, Math.min(window.innerHeight - 40, pos.ry * window.innerHeight))
+				}
+			}
+		} catch { }
 		if (!window.htmlToImage) {
 			const s = document.createElement('script')
 			s.src = 'https://cdn.jsdelivr.net/npm/html-to-image@1.11.11/dist/html-to-image.js'
@@ -337,6 +356,54 @@ export default {
 		}
 	},
 	methods: {
+		fabDragStart(e) {
+			const isTouch = e.type === 'touchstart'
+			const clientX = isTouch ? e.touches[0].clientX : e.clientX
+			const clientY = isTouch ? e.touches[0].clientY : e.clientY
+			const el = (e.currentTarget.$el ?? e.currentTarget)
+			const rect = el.getBoundingClientRect()
+			const startFabX = this.fab.x !== null ? this.fab.x : rect.left
+			const startFabY = this.fab.y !== null ? this.fab.y : rect.top
+			const offsetX = clientX - rect.left
+			const offsetY = clientY - rect.top
+			this.fab.hasMoved = false
+			const onMove = (ev) => {
+				if (ev.cancelable) ev.preventDefault()
+				const cx = ev.type === 'touchmove' ? ev.touches[0].clientX : ev.clientX
+				const cy = ev.type === 'touchmove' ? ev.touches[0].clientY : ev.clientY
+				if (!this.fab.hasMoved && (Math.abs(cx - clientX) > 4 || Math.abs(cy - clientY) > 4)) {
+					this.fab.hasMoved = true
+					this.fab.x = startFabX
+					this.fab.y = startFabY
+				}
+				if (this.fab.hasMoved) {
+					this.fab.x = Math.max(0, Math.min(window.innerWidth - rect.width, cx - offsetX))
+					this.fab.y = Math.max(0, Math.min(window.innerHeight - rect.height, cy - offsetY))
+				}
+			}
+			const onEnd = () => {
+				document.removeEventListener('mousemove', onMove)
+				document.removeEventListener('mouseup', onEnd)
+				document.removeEventListener('touchmove', onMove)
+				document.removeEventListener('touchend', onEnd)
+				if (this.fab.hasMoved && this.fab.x !== null) {
+					try {
+						localStorage.setItem('uc-ticket-fab-pos', JSON.stringify({
+							rx: this.fab.x / window.innerWidth,
+							ry: this.fab.y / window.innerHeight,
+						}))
+					} catch { }
+				}
+			}
+			document.addEventListener('mousemove', onMove)
+			document.addEventListener('mouseup', onEnd)
+			document.addEventListener('touchmove', onMove, { passive: false })
+			document.addEventListener('touchend', onEnd)
+		},
+		fabClick() {
+			if (this.fab.hasMoved) return
+			this.openDialog()
+		},
 		async openDialog() {
 			await this.resetForm()
 			this.activeTab = 'create'

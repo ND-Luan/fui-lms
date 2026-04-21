@@ -8,17 +8,17 @@
 						<v-chip :color="ThangObj?.MauTinhTrang">{{ ThangObj?.TenTinhTrang }}</v-chip>
 					</div>
 				</v-card-title>
-				<v-card-text>
-					<v-row>
-						<v-col cols="3">
+				<v-card-text class="pb-0 px-0">
+					<v-row dense>
+						<v-col cols="2">
 							<v-select v-model="LopItem" label="Chọn lớp" :items="DSLop" item-title="TenLop"
-								item-value="LopID" return-object />
+								item-value="LopID" return-object :hide-details="true" class="ms-1" />
 						</v-col>
-						<v-col cols="3">
+						<v-col cols="2">
 							<v-select v-model="ThangObj" label="Chọn tháng" :items="DSThang"
-								item-title="Thang_HienThi_VI" item-value="Lop_NhanXetThangID" return-object>
+								item-title="Thang_HienThi" item-value="Lop_NhanXetThangID" return-object :hide-details="true">
 								<template v-slot:item="{ props, item }">
-									<v-list-item v-bind="props" :title="item.raw.Thang_HienThi_VI">
+									<v-list-item v-bind="props" :title="item.raw.Thang_HienThi">
 										<template #append>
 											<v-chip :color="item.raw.MauTinhTrang">{{ item.raw.TenTinhTrang }}</v-chip>
 										</template>
@@ -26,23 +26,48 @@
 								</template>
 							</v-select>
 						</v-col>
-						<v-col class="d-flex ga-2">
-							<v-menu>
-								<template v-slot:activator="{ props }">
-									<v-btn color="primary" variant="outlined" prepend-icon="mdi-cog" v-bind="props">
-										Thao tác
+						<v-col>
+							<v-btn color="primary" variant="outlined" prepend-icon="mdi-refresh" @click="onRefresh">
+								Làm mới
+							</v-btn>
+						</v-col>
+						<v-col cols="12" class="pb-4">
+							<div class="d-flex justify-space-between align-center">
+								<div class="d-flex align-center justify-center">
+									<span class="text-title">
+										<span>Các học sinh đã lưu:
+											<v-chip size="small" color="primary" class="font-weight-medium">
+												({{ renderTextDSHocSinhDaLuu() }} / {{ items.length }})
+											</v-chip>
+										</span>
+									</span>
+									<div v-if="ThangObj?.ReasonReject && ThangObj.TinhTrang === 3">
+										&nbsp;Lý do từ chối: <span class="text-red">{{ ThangObj?.ReasonReject }}</span>
+									</div>
+								</div>
+								<div class="d-flex ga-2">
+									<v-btn prepend-icon="mdi-file-excel" color="success" variant="outlined"
+										:disabled="items.length === 0 || isReadOnly"
+										@click="onImport">
+										Import dữ liệu từ Excel
 									</v-btn>
-								</template>
-								<v-list>
-									<v-list-item title="Làm mới" @click="onRefresh" />
-									<v-list-item v-if="ThangObj?.TinhTrang === 0 || ThangObj?.TinhTrang === 1"
-										title="Lưu tạm tất cả" @click="onSave" />
-									<v-list-item v-if="ThangObj?.TinhTrang === 1" title="Gửi tổ trưởng"
-										@click="onSendToTruong" />
-									<v-list-item v-if="ThangObj?.TinhTrang === 0 || ThangObj?.TinhTrang === 1"
-										title="Import Excel" @click="onImport" />
-								</v-list>
-							</v-menu>
+									<v-btn prepend-icon="mdi-content-save" color="info" variant="outlined"
+										:disabled="items.length === 0 || isReadOnly"
+										@click="onSave">
+										Lưu tạm tất cả
+									</v-btn>
+									<v-btn v-if="CapID === 1" prepend-icon="mdi-send" color="primary" variant="outlined"
+										class="me-1" :disabled="items.length === 0 || isReadOnly"
+										@click="onSendToTruong">
+										Gửi tổ trưởng
+									</v-btn>
+									<v-btn v-if="CapID === 2 || CapID === 3" prepend-icon="mdi-send" color="primary" variant="outlined"
+										class="me-1" :disabled="items.length === 0 || isReadOnly"
+										@click="onSendToBGH">
+										Gửi BGH
+									</v-btn>
+								</div>
+							</div>
 						</v-col>
 					</v-row>
 				</v-card-text>
@@ -51,7 +76,7 @@
 
 		<v-divider />
 		<v-data-table :headers="headers" :items="items" items-per-page="-1" hide-default-footer
-			style="max-height: calc(100dvh - 200px); overflow-y: auto;">
+			style="height: calc(100dvh - 119px); overflow-y: auto;">
 
 			<!-- ─── Học sinh ─── -->
 			<template #item.HocSinh="{ item }">
@@ -171,21 +196,27 @@
 
 			<!-- ─── Cấp 2 & 3: Cuối kỳ (T12, T5) ─── -->
 			<template #item.UuDiem="{ item }">
-				<div style="padding: 10px; max-width: 250px;">
+				<div style="padding: 10px;">
 					<uc-quill-editor :key="'UuDiem' + item.HocSinhID" v-model="item.UuDiem" :spellcheck="false"
 						:readOnly="isReadOnly" />
 				</div>
 			</template>
 			<template #item.NhuocDiem="{ item }">
-				<div style="padding: 10px; max-width: 250px;">
+				<div style="padding: 10px;">
 					<uc-quill-editor :key="'NhuocDiem' + item.HocSinhID" v-model="item.NhuocDiem" :spellcheck="false"
 						:readOnly="isReadOnly" />
 				</div>
 			</template>
 			<template #item.DeXuat="{ item }">
-				<div style="padding: 10px; max-width: 250px;">
+				<div style="padding: 10px;">
 					<uc-quill-editor :key="'DeXuat' + item.HocSinhID" v-model="item.DeXuat" :spellcheck="false"
 						:readOnly="isReadOnly" />
+				</div>
+			</template>
+			<template #item.NhanXetGVCN="{ item }">
+				<div style="padding: 10px;">
+					<uc-quill-editor :key="'NhanXetGVCN' + item.HocSinhID" v-model="item.NhanXetGVCN"
+						:spellcheck="false" :readOnly="isReadOnly" :maxLength="500" />
 				</div>
 			</template>
 
@@ -214,6 +245,24 @@
 				<v-btn @click="onSaveDraft(item)" text="Lưu tạm" color="primary" variant="outlined" />
 			</template>
 		</v-data-table>
+
+		<!-- Copy dialog -->
+		<v-dialog v-model="IsShowDialogCopy" width="500">
+			<v-card title="Sao chép nhận xét tháng">
+				<v-card-text>
+					<v-select v-model="ThangObj_Copy" label="Chọn tháng sao chép"
+						:items="DSThang.filter(x => x.Lop_NhanXetThangID !== ThangObj?.Lop_NhanXetThangID)"
+						item-title="Thang_HienThi" return-object />
+					<v-select v-model="ThangObj" label="Tháng đang chọn" :items="DSThang"
+						item-title="Thang_HienThi" return-object :readonly="true" />
+				</v-card-text>
+				<v-card-actions>
+					<v-spacer />
+					<v-btn @click="IsShowDialogCopy = false">Đóng</v-btn>
+					<v-btn color="primary" @click="onConfirmCopy">Xác nhận</v-btn>
+				</v-card-actions>
+			</v-card>
+		</v-dialog>
 	</Global>
 </template>
 
@@ -221,8 +270,8 @@
 	export default {
 	    name: 'NhanXetThang',
 	
-	    // Inject snackbarRef được provide từ app root (qua Global.vue)
-	    inject: ['snackbarRef'],
+	    // Inject snackbarRef, iframeRef được provide từ app root (qua Global.vue)
+	    inject: ['snackbarRef', 'iframeRef', 'confirmRef'],
 	
 	    data() {
 	        return {
@@ -233,6 +282,8 @@
 	            headers: [],
 	            items: [],
 	            isLowScreen: window.innerWidth < 1366,
+	            IsShowDialogCopy: false,
+	            ThangObj_Copy: null,
 	        }
 	    },
 	
@@ -242,13 +293,17 @@
 	            this.isLowScreen = window.innerWidth < 1366
 	        }
 	        window.addEventListener('resize', this._resizeHandler)
+
 	    },
 	
 	    beforeUnmount() {
 	        window.removeEventListener('resize', this._resizeHandler)
 	    },
-	
+
 	    computed: {
+	        CapID() {
+	            return vueData.CapID
+	        },
 	        TitleCap() {
 	            return renderText(parseInt(vueData.capid))
 	        },
@@ -449,6 +504,17 @@
 	            return { firstDay, lastDay }
 	        },
 	
+	        validateNhanXetGVCN(itemsToCheck) {
+	            const MAX = 500
+	            const overLimit = itemsToCheck.filter(item => item.NhanXetGVCN && item.NhanXetGVCN.length > MAX)
+	            if (overLimit.length > 0) {
+	                const names = overLimit.map(item => `<b>${item.HoTen}</b> (${item.NhanXetGVCN.length} ký tự)`).join(', ')
+	                this.$toast('warning', `Nhận xét ghi học bạ vượt quá 500 ký tự: ${names}. Vui lòng chỉnh lại trước khi lưu.`)
+	                return false
+	            }
+	            return true
+	        },
+
 	        buildSavePayload() {
 	            return this.items.map(item => ({
 	                ...item,
@@ -467,32 +533,52 @@
 	        },
 	
 	        onImport() {
-	            // TODO
+	            if (!this.LopItem) {
+	                this.$toast('error', 'Vui lòng chọn lớp')
+	                return
+	            }
+	            if (!this.ThangObj) {
+	                this.$toast('error', 'Vui lòng chọn tháng')
+	                return
+	            }
+	            this.iframeRef.value.openWindow({
+	                title: 'Import Excel nhận xét tháng',
+	                icon: 'mdi-file-excel',
+	                url: `/gv-nhan-xet-thang-import?lopid=${this.LopItem.LopID}&lop_nxtid=${this.ThangObj.Lop_NhanXetThangID}&nienkhoa=${vueData.NienKhoa}`,
+	                onclose: () => {
+	                    if (JSON.parse(localStorage.getItem('IsImportNXT'))) {
+	                        localStorage.removeItem('IsImportNXT')
+	                        this.getThang(true)
+	                        this.getNhanXetThang(true)
+	                    }
+	                },
+	            })
 	        },
 	
 	        async onSave() {
+	            if (!this.validateNhanXetGVCN(this.items)) return
+	            const ok = await this.confirmRef.value.show({ title: 'Xác nhận lưu tạm tất cả nhận xét tháng?' })
+	            if (!ok) return
 	            const JSON_NhanXetThang = this.buildSavePayload()
-	
-	            const [isSave1, isSave2] = await fetchBatchPromise([
-	                { url: 'lms/NhanXetThang_Ins', params: { JSON_NhanXetThang } },
-	                {
-	                    url: 'lms/NhanXetThang_Upd_TinhTrang',
-	                    params: {
-	                        TinhTrang: 1,
-	                        Lop_NhanXetThangID: this.ThangObj.Lop_NhanXetThangID,
-	                        ReasonReject: '',
-	                    },
-	                },
-	            ])
-	
-	            if (isSave1 && isSave2) {
-	                this.$toast('success', 'Cập nhật nhận xét tháng thành công')
-	                this.getThang(true)
-	                this.getNhanXetThang(true)
-	            }
+	            const promise = fetchPromise('lms/NhanXetThang_Ins', { JSON_NhanXetThang })
+	                .then(() => fetchPromise('lms/NhanXetThang_Upd_TinhTrang', {
+	                    TinhTrang: 1,
+	                    Lop_NhanXetThangID: this.ThangObj.Lop_NhanXetThangID,
+	                    ReasonReject: '',
+	                }))
+	                .then(() => {
+	                    this.getThang(true)
+	                    this.getNhanXetThang(true)
+	                })
+	            this.$toastPromise(promise, {
+	                loadingText: 'Đang lưu tạm tất cả...',
+	                successText: 'Lưu tạm tất cả nhận xét tháng thành công',
+	                errorPrefix: 'Lưu thất bại',
+	            })
 	        },
 	
 	        onSaveDraft(item) {
+	            if (!this.validateNhanXetGVCN([item])) return
 	            item.DKHocTiep = item.DKHocTiep ?? false
 	            const promise = fetchPromise('lms/NhanXetThang_Ins_By_NhanXetThangID', {
 	                ...item,
@@ -507,7 +593,19 @@
 	            promise.then(() => this.getNhanXetThang(true))
 	        },
 	
+	        renderTextDSHocSinhDaLuu() {
+	            let count = 0
+	            for (const item of this.items) {
+	                if (item.NhanXetThangID > 0) count++
+	            }
+	            return count
+	        },
+	
 	        onSendToTruong() {
+	            if (this.renderTextDSHocSinhDaLuu() !== this.items.length) {
+	                this.$toast('warning', 'Vui lòng lưu hết tất cả học sinh trước khi gửi tổ trưởng')
+	                return
+	            }
 	            const promise = fetchPromise('lms/NhanXetThang_Upd_TinhTrang', {
 	                TinhTrang: 2,
 	                Lop_NhanXetThangID: this.ThangObj.Lop_NhanXetThangID,
@@ -518,6 +616,43 @@
 	            })
 	            promise.then(() => {
 	                this.getThang(true)
+	                this.getNhanXetThang(true)
+	            })
+	        },
+	
+	        onSendToBGH() {
+	            if (this.renderTextDSHocSinhDaLuu() !== this.items.length) {
+	                this.$toast('warning', 'Vui lòng lưu hết tất cả học sinh trước khi gửi')
+	                return
+	            }
+	            const promise = fetchPromise('lms/NhanXetThang_Upd_TinhTrang', {
+	                TinhTrang: 2,
+	                Lop_NhanXetThangID: this.ThangObj.Lop_NhanXetThangID,
+	                ReasonReject: '',
+	            })
+	            this.$toastPromise(promise, {
+	                successText: 'Gửi BGH thành công',
+	            })
+	            promise.then(() => {
+	                this.getThang(true)
+	                this.getNhanXetThang(true)
+	            })
+	        },
+	
+	        onConfirmCopy() {
+	            if (!this.ThangObj_Copy) {
+	                this.$toast('warning', 'Vui lòng chọn tháng sao chép')
+	                return
+	            }
+	            const promise = fetchPromise('lms/NhanXetThang_Copy', {
+	                Lop_NhanXetThangID: this.ThangObj.Lop_NhanXetThangID,
+	                Lop_NhanXetThangID_Copy: this.ThangObj_Copy.Lop_NhanXetThangID,
+	            })
+	            this.$toastPromise(promise, {
+	                successText: 'Sao chép thành công',
+	            })
+	            promise.then(() => {
+	                this.IsShowDialogCopy = false
 	                this.getNhanXetThang(true)
 	            })
 	        },
@@ -584,9 +719,12 @@
 	                    if (this.isCuoiKi) {
 	                        headers = [
 	                            ...headers,
-	                            { title: 'Ưu điểm', value: 'UuDiem', align: 'center', minWidth: 250 },
-	                            { title: 'Nhược điểm', value: 'NhuocDiem', align: 'center', minWidth: 250 },
-	                            { title: 'Đề xuất', value: 'DeXuat', align: 'center', minWidth: 250 },
+	                            { title: 'Ưu điểm', value: 'UuDiem', align: 'center', minWidth: 200 },
+	                            { title: 'Nhược điểm', value: 'NhuocDiem', align: 'center', minWidth: 200 },
+	                            { title: 'Đề xuất', value: 'DeXuat', align: 'center', minWidth: 200 },
+	                            ...(this.ThangObj?.Thang === 5
+	                                ? [{ title: 'Nhận xét ghi học bạ', value: 'NhanXetGVCN', align: 'center', minWidth: 200 }]
+	                                : []),
 	                        ]
 	                    } else {
 	                        headers = [

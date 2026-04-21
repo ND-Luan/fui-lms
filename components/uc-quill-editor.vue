@@ -1,15 +1,22 @@
 <template>
-	<!-- Container cho Quill Editor -->
-	<div :ref="'quillContainer_' + uniqueId" v-bind="$attrs" class="fpScrollbar " style="
+	<div>
+		<!-- Container cho Quill Editor -->
+		<div :ref="'quillContainer_' + uniqueId" v-bind="$attrs" class="fpScrollbar " style="
     height: 200px; 
     white-space: pre-wrap;
   word-wrap: break-word; 
   overflow-wrap: break-word;">
+		</div>
+		<div v-if="maxLength" style="text-align: right; font-size: 11px; padding-right: 4px; margin-top: 2px;"
+			:style="{ color: charCount >= maxLength ? '#d32f2f' : charCount >= maxLength * 0.9 ? '#e65100' : '#9e9e9e' }">
+			{{ charCount }} / {{ maxLength }}
+		</div>
 	</div>
 </template>
 
 <script>
 	export default {
+	    inheritAttrs: false,
 	    props: {
 	        modelValue: {
 	            type: String,
@@ -18,13 +25,18 @@
 	        readOnly: {
 	            type: Boolean,
 	            default: false
+	        },
+	        maxLength: {
+	            type: Number,
+	            default: null
 	        }
 	    },
 	    data() {
 	        return {
 	            quill: null, // Biến lưu trữ instance của Quill
 	            uniqueId: _.uniqueId(), // Tạo unique id cho Quill Editor
-	            toolbar: ['bold', 'italic', 'underline'] // Thanh công cụ
+	            toolbar: ['bold', 'italic', 'underline'], // Thanh công cụ
+	            charCount: 0
 	        };
 	    },
 	    mounted() {
@@ -76,8 +88,21 @@
 	            // // this.quill.clipboard.dangerouslyPasteHTML(0, this.modelValue);
 	            // this.quill.setText(this.modelValue || ''); // Chèn văn bản thuần
 	
-	            // Lắng nghe thay đổi và phát ra dữ liệu văn bản
-	            this.quill.on('text-change', () => {
+            // Khởi tạo charCount từ nội dung ban đầu
+            this.charCount = Math.max(0, this.quill.getText().length - 1)
+
+            // Lắng nghe thay đổi và phát ra dữ liệu văn bản
+            this.quill.on('text-change', () => {
+                const text = this.quill.getText()
+                const length = Math.max(0, text.length - 1)
+
+                if (this.maxLength && length > this.maxLength) {
+                    this.quill.deleteText(this.maxLength, text.length)
+                    this.charCount = this.maxLength
+                    return
+                }
+
+                this.charCount = length
 	                const plainText = this.quill.getText().trim(); // Văn bản dạng plain text
 	                this.$emit('update:modelValue', plainText);
 	            });

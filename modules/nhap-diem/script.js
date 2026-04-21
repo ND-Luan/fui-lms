@@ -199,8 +199,6 @@ const DataProcessor = {
         return DSCotDiem_ByMaNhomCotDiem.filter(cotDiem => {
             const display = displayColumns.find(d => d.value === cotDiem.value);
             if (display?.isLocked) return false;
-            const sampleCol = apiData.find(x => x.MaCotDiem === cotDiem.value);
-            if (sampleCol?.LoaiCotDiem === 'Công thức') return false;
             return DSHocSinh.every(hs => {
                 const val = hs[cotDiem.value];
                 return val !== null && val !== undefined && val !== '';

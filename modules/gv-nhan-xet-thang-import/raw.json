@@ -6,9 +6,22 @@
         {
             "LopID": "lopid",
             "Lop_NhanXetThangID": "lop_nxtid",
+            "NienKhoa": "nienkhoa",
             "JSON_NhanXetThang": [],
             "columns": [],
-            "dataSource": []
+            "dataSource": [],
+            "currentThangObj": null
+        },
+        {
+            "API": "lms/NhanXetThang_Lop_Get_GV",
+            "IN": {
+                "NienKhoa": "vueData.NienKhoa",
+                "LopID": "vueData.LopID"
+            },
+            "OUT": "DS_Thang",
+            "CALLBACK": {
+                "EXE": "vueData.currentThangObj = vueData.DS_Thang.find(t => t.Lop_NhanXetThangID == vueData.Lop_NhanXetThangID)"
+            }
         },
         {
             "EXE": "initColumn()"

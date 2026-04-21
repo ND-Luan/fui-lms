@@ -69,11 +69,11 @@ function processGroupedDashboardData(response) {
             if (!a.Is_Tuan_Active && b.Is_Tuan_Active) return 1;
             // Nếu cả 2 đều ở tương lai so với tuần hiện tại
             if (a.TuanHocID > currentId && b.TuanHocID > currentId) {
-                return a.TuanHocID - b.TuanHocID; // tăng dần
+                return b.TuanHocID - a.TuanHocID; // giảm dần
             }
             // Nếu cả 2 đều ở quá khứ so với tuần hiện tại
             if (a.TuanHocID < currentId && b.TuanHocID < currentId) {
-                return b.TuanHocID - a.TuanHocID; // giảm dần
+                return a.TuanHocID - b.TuanHocID; // tăng dần
             }
             // Nếu 1 cái quá khứ, 1 cái tương lai
             return a.TuanHocID > currentId ? -1 : 1;

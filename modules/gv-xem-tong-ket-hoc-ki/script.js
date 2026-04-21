@@ -58,7 +58,7 @@ async function exportGiayKhen() {
     console.log('priority', priority)
     const sortDSHocSinh_By_DanhHieu = vueData.DSHocSinh
         .map(x => {
-            if (x.TenLop === '10C1' || x.TenLop === '10C2') x.TenLop = '10C'
+            if (x.TenLop === '10B1' || x.TenLop === '10B2') x.TenLop = '10C'
             if (x.TenLop === '11C1' || x.TenLop === '11C2') x.TenLop = '11C'
             if (x.TenLop === '12C1' || x.TenLop === '12C2') x.TenLop = '12C'
             return {
@@ -182,7 +182,7 @@ function TongKet_GetDTBMonHocByKhoiLopHangLoat(lopid) {
     return new Promise(resolve => {
         ajaxCALL(`https://tapi.lhbs.vn/diemc${vueData.CapID}/LMS_GetTongKetDTBMonHocByLop`,
             {
-                KhoiID: vueData.KhoiID,
+                KhoiID: vueData.KhoiItem?.KhoiID,
                 LopID: lopid,
                 HocKy: vueData.Semester.value,
                 NienKhoa: vueData.NienKhoa
@@ -224,8 +224,7 @@ function handleHeaders() {
             'NT', 'AI', 'toan', 'tin', 'van', 'anh',
             'gdcd', 'cn', 'td',
             // 'DTB',
-            'HocLuc', 'KQRenLuyen',
-            // 'DanhHieu',
+            'HocLuc', 'KQRenLuyen', 'DanhHieu',
             'Phep', 'KhongPhep', 'TongBuoiNghi',
             'UuDiem', 'NhuocDiem', 'DeXuat', 'HocSinhLopID',
             'SoQuyetDinhKT',
@@ -237,8 +236,7 @@ function handleHeaders() {
             "GDDP", "GDKT-PL", "gdqp", "HDTN", "JA", "toan", "ly", "hoa",
             "sinh", "tin", "van", "su", "dia", "anh", "td",
             // "DTB",
-            "HocLuc", "KQRenLuyen",
-            // "DanhHieu",
+            "HocLuc", "KQRenLuyen", "DanhHieu",
             "Phep", "KhongPhep",
             "TongBuoiNghi", "UuDiem", "NhuocDiem", "DeXuat",
             "HocSinhLopID",
@@ -250,14 +248,14 @@ function handleHeaders() {
     let columnThongTinHocSinh = []
     const columnMapping = {
         STT: { width: 1, type: 'hidden' },
-        HocSinhID: { width: 80, title: "Mã học sinh" },
+        HocSinhID: { width: 100, title: "Mã học sinh" },
         HoTen: { width: 180, align: 'left', title: "Họ tên" },
         TenLop: { width: 50, title: 'Lớp' },
         UuDiem: { width: 600, title: 'Ưu điểm', align: 'left' },
         NhuocDiem: { width: 450, title: 'Nhược điểm', align: 'left' },
         DeXuat: { width: 700, title: 'Đề xuất', align: 'left' },
         NgaySinh: { width: 100 },
-        // DanhHieu: { width: 120, title: 'Danh hiệu' },
+        DanhHieu: { width: 120, title: 'Danh hiệu' },
         DanhGia: { width: 130, title: 'Đánh giá' },
         DTB: { title: 'ĐTB' },
         Phep: { title: 'vP' },
@@ -317,7 +315,6 @@ function handleData() {
     const flatArrDSKhenThuong = vueData.DSKhenThuong.flat()
     for (var item of vueData.DSHocSinh) {
         const objHS = flatArrDSKhenThuong.find(x => x.HocSinhID == item.HocSinhID)
-        item.DanhHieu = objHS?.DanhHieu ?? ''
         item.NgayKhenThuong_EN = objHS?.NgayKhenThuong_EN ?? ''
         item.NgayKhenThuong_VI = objHS?.NgayKhenThuong_VI ?? ''
         item.SoQuyetDinhKT = objHS?.SoQuyetDinhKT ?? ''

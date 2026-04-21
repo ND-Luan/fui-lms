@@ -120,7 +120,7 @@ export default {
 						MonHocID: this.KhoiItem.MonHocID,
 						KhoiID: this.KhoiItem.KhoiID,
 						NienKhoa: vueData.NienKhoa,
-						HocKi: 1
+					HocKi: vueData.NienKhoaItem?.HocKi ?? 1
 					}, res => {
 					this.snackbarRef.value.showSnackbar({ message: 'Tạo bài tập thành công', color: 'success' })
 					this.clearData();
@@ -144,7 +144,7 @@ export default {
 						MonHocID: this.KhoiItem.MonHocID,
 						KhoiID: this.KhoiItem.KhoiID,
 						NienKhoa: vueData.NienKhoa,
-						HocKi: 1,
+						HocKi: vueData.NienKhoaItem?.HocKi ?? 1,
 						Status: 1
 					}, res => {
 						Vue.$toast.success('Tạo bài học thành công', { position: "top" })

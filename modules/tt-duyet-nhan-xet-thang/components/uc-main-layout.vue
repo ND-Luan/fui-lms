@@ -231,6 +231,12 @@
           </div>
         </template>
 
+        <template #item.NhanXetGVCN="{ item }">
+          <div style="padding: 10px; max-width: 360px;">
+            <div class="compact-comment" v-html="formatComment(item.NhanXetGVCN)"></div>
+          </div>
+        </template>
+
         <template #item.NoiDungKienThuc_HTML="{ item }">
           <div style="padding: 10px; max-width: 360px;">
             <div class="compact-comment" v-html="formatComment(item.NoiDungKienThuc_HTML)"></div>
@@ -513,6 +519,9 @@ export default {
             columns.push({ key: 'UuDiem', title: 'Ưu điểm', width: 360, sortable: false })
             columns.push({ key: 'NhuocDiem', title: 'Nhược điểm', width: 360, sortable: false })
             columns.push({ key: 'DeXuat', title: 'Đề xuất', width: 360, sortable: false })
+            if (this.ThangObj?.Thang === 5) {
+              columns.push({ key: 'NhanXetGVCN', title: 'Nhận xét ghi học bạ', width: 360, sortable: false })
+            }
           } else {
             columns.push({ key: 'NoiDungKienThuc_HTML', title: 'Về học tập', width: 360, sortable: false })
             columns.push({ key: 'NoiDungNangLuc_HTML', title: 'Về nền nếp', width: 360, sortable: false })
