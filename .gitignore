@@ -1,0 +1,6 @@
+# Service Account credentials — NEVER commit to git
+*firebase-adminsdk*.json
+notilms-e405e-*.json
+
+# Functions dependencies
+functions/node_modules/

@@ -1,0 +1,65 @@
+TONG HOP SOLUTION FE - SO DAU BAI VI PHAM
+
+1.  MUC TIEU
+
+-   Hien thi danh sach loai vi pham
+-   Hien thi chi tiet theo tung loai (theo HocSinhID)
+-   Toi uu performance
+
+2.  API DANG CO
+
+API 1 - Tong hop: Endpoint: quansinh/GVCN_SoDauBai_TongHopTheoLoaiViPham
+
+Payload: { “TuNgay”: “2026-04-01”, “DenNgay”: “2026-04-21”, “LopHocID”:
+2450 }
+
+Response: - LoaiViPham - TenViPham - SoLuong
+
+------------------------------------------------------------------------
+
+API 2 - Chi tiet: Endpoint:
+quansinh/GVCN_SoDauBai_TongHopTheoLoaiViPham_ChiTiet
+
+Payload: { “TuNgay”: “2026-04-01”, “DenNgay”: “2026-04-21”, “LopHocID”:
+2450, “LoaiViPham”: 2 }
+
+Response: - HocSinhID - Ho, Ten - Ngay, Thu, Buoi, Tiet - TenMonHoc -
+GiaoVien - GhiChu
+
+3.  FLOW FE
+
+B1: Goi API tong hop B2: Filter SoLuong > 0 B3: Lazy load chi tiet khi
+user click
+
+4.  DATA STRUCTURE
+
+state = { list: [], detailMap: {}, loadingMap: {} }
+
+5.  LOAD DETAIL
+
+-   Neu da co data thi khong goi lai
+-   Goi API khi click
+-   Luu cache vao detailMap
+
+6.  UI GOI Y
+
+Accordion: - Vang (2) - Vao tre (2)
+
+Click moi load chi tiet
+
+7.  HIEN THI CHI TIET
+
+Option 1: Table
+
+Option 2: Group theo HocSinhID
+
+8.  LOI CAN TRANH
+
+-   Goi API tuan tu
+-   Goi toan bo ngay tu dau
+-   Khong cache
+
+9.  KET LUAN
+
+-   API hien tai dung duoc
+-   Nen dung lazy load + cache

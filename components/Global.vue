@@ -3,6 +3,7 @@
 		<GlobalLoading />
 		<GlobalApiErrorDialog />
 		<GlobalStaleDataBanner />
+		<GlobalFirebaseMessaging />
 		<GlobalUiSnackbar ref="snackbarRef" />
 		<GlobalIframeWindow ref="iframeWin" />
 		<GlobalConfirmDialog ref="confirmRef" />

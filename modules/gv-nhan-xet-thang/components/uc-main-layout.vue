@@ -174,20 +174,33 @@
 						{{ mon.TenMonHoc }}
 					</v-chip>
 
-					<template v-if="item.LoaiViPham_Group?.length > 0">
-						<v-divider class="mt-2" />
-						<span class="font-weight-medium text-body-2">Loại vi phạm</span>
-						<div v-for="lvp in item.LoaiViPham_Group" :key="lvp.LoaiViPham">
-							<div class="text-body-2 text-left">• {{ lvp.TenViPham }}</div>
-							<div v-for="ngayVP in lvp.Ngay" :key="ngayVP.Ngay" class="text-body-2 text-left ml-2">
-								<p>Ngày: {{ ngayVP.Ngay }}</p>
-								<div v-for="ngay in ngayVP.DSNgay" :key="ngay.Buoi" class="ml-2">
-									<p>{{ ngay.Buoi }}</p>
-									<v-chip v-for="buoi in ngay.DS" :key="buoi.Tiet + buoi.TenMonHoc" class="mt-1"
-										size="small" color="orange">
-										Tiết: {{ buoi.Tiet }} - {{ buoi.TenMonHoc }}
-									</v-chip>
-								</div>
+					<template v-if="getViPhamCuaHocSinh(item.HocSinhID).length > 0">
+						<v-divider class="mt-1" />
+						<div v-for="lvp in getViPhamCuaHocSinh(item.HocSinhID)" :key="lvp.LoaiViPham"
+							class="mt-1">
+							<v-chip size="x-small" color="error" variant="tonal"
+								style="cursor: pointer; height: auto; white-space: normal;"
+								@click="toggleViPhamExpand(item.HocSinhID, lvp.LoaiViPham)">
+								<v-progress-circular v-if="viPhamLoadingMap[lvp.LoaiViPham]"
+									indeterminate size="10" width="2" class="me-1" />
+								{{ tenViPhamVI(lvp.TenViPham) }} ({{ lvp.SoLuong_HS }} {{ lvp.LoaiViPham === 2 ? 'ngày' : 'tiết' }})
+							</v-chip>
+							<div v-if="viPhamExpandedMap[item.HocSinhID + '_' + lvp.LoaiViPham]"
+								class="mt-1 ms-2">
+								<!-- LoaiViPham 2: hiển thị theo ngày (unique) -->
+								<template v-if="lvp.LoaiViPham === 2">
+									<div v-for="ngay in [...new Set(getViPhamChiTiet(item.HocSinhID, lvp.LoaiViPham).map(r => r.Ngay))]"
+										:key="ngay" class="text-caption text-medium-emphasis">
+										{{ formatNgayViPham(ngay) }}
+									</div>
+								</template>
+								<!-- Các vi phạm khác: hiển thị theo tiết -->
+								<template v-else>
+									<div v-for="(row, idx) in getViPhamChiTiet(item.HocSinhID, lvp.LoaiViPham)"
+										:key="idx" class="text-caption text-medium-emphasis">
+										{{ formatNgayViPham(row.Ngay) }} · Tiết {{ row.Tiet }} · {{ row.TenMonHoc }}
+									</div>
+								</template>
 							</div>
 						</div>
 					</template>
@@ -284,6 +297,10 @@
 	            isLowScreen: window.innerWidth < 1366,
 	            IsShowDialogCopy: false,
 	            ThangObj_Copy: null,
+	            DSTongHop_ViPham: [],
+	            viPhamDetailMap: {},
+	            viPhamLoadingMap: {},
+	            viPhamExpandedMap: {},
 	        }
 	    },
 	
@@ -404,9 +421,13 @@
 	        },
 	
 	        // ─────────────────────────────────────────
-	        // convertItems — gắn NgayNghi + LoaiViPham_Group vào từng học sinh
-	        // ─────────────────────────────────────────
-	        async convertItems() {
+        // convertItems — gắn NgayNghi + gọi API 1 tổng hợp vi phạm
+        // ─────────────────────────────────────────
+        async convertItems() {
+	            this.viPhamDetailMap = {}
+	            this.viPhamLoadingMap = {}
+	            this.viPhamExpandedMap = {}
+	
 	            const { firstDay, lastDay } = this.getFirstAndLastDay(
 	                vueData.NienKhoa,
 	                this.ThangObj?.Thang
@@ -428,73 +449,68 @@
 	                }
 	            })
 	
-	            // Fetch chi tiết vi phạm cho từng loại (chỉ khi cấp 2/3 + phuHuynh view)
-	            const dsTongHop = (vueData.DSTongHop_LoaiViPham ?? []).filter(x => x.SoLuong > 0)
-	            if (!dsTongHop.length) return
-	
-	            const fetchViPham = (LoaiViPham) =>
-	                new Promise(resolve => {
-	                    ajaxCALL(
-	                        'quansinh/GVCN_SoDauBai_TongHopTheoLoaiViPham_ChiTiet',
-	                        { TuNgay: firstDay, DenNgay: lastDay, LopHocID: this.LopItem.LopID, LoaiViPham },
-	                        res => resolve(res.data)
-	                    )
-	                })
-	
-	            const DSHocSinh_ViPham = await Promise.all(
-	                dsTongHop.map(async item => {
-	                    const data = await fetchViPham(item.LoaiViPham)
-	                    return { ...item, data }
-	                })
-	            )
-	
-	            // Flatten
-	            const flatList = DSHocSinh_ViPham.flatMap(viPham =>
-	                viPham.data.map(hs => ({ ...hs, ...viPham }))
-	            )
-	
-	            // Gắn vào từng học sinh
-	            this.items = this.items.map(x => ({
-	                ...x,
-	                LoaiViPham: flatList.filter(n => n.HocSinhID === x.HocSinhID),
-	                LoaiViPham_Group: this.transformData(
-	                    flatList.filter(n => n.HocSinhID === x.HocSinhID)
-	                ),
-	            }))
+	            // API 1: lấy tổng hợp loại vi phạm theo lớp + tháng
+	            this.DSTongHop_ViPham = await fetchPromise(
+	                'quansinh/GVCN_SoDauBai_TongHopTheoLoaiViPham',
+	                { TuNgay: firstDay, DenNgay: lastDay, LopHocID: this.LopItem.LopID },
+	                { cache: false }
+	            ) ?? []
+
+	            // API 2: eager-load chi tiết song song cho các loại có vi phạm
+	            // để hiển thị đúng per-student trong từng row của bảng
+	            const dsCoViPham = this.DSTongHop_ViPham.filter(x => x.SoLuong > 0)
+	            if (dsCoViPham.length > 0) {
+	                await Promise.all(dsCoViPham.map(lvp => this.loadViPhamDetail(lvp.LoaiViPham)))
+	            }
 	        },
-	
+
 	        // ─────────────────────────────────────────
-	        // transformData — nhóm vi phạm theo LoaiViPham > Ngay > Buoi
+	        // Vi phạm — accordion per student
 	        // ─────────────────────────────────────────
-	        transformData(data) {
-	            const grouped = {}
-	            data.forEach(({ LoaiViPham, Ngay, TenViPham, HocSinhID, Ho, Ten,
-	                Thu, Buoi, Tiet, TenMonHoc, GiaoVien, GhiChu, SoLuong }) => {
-	
-	                if (!grouped[LoaiViPham]) {
-	                    grouped[LoaiViPham] = { TenViPham, LoaiViPham, Ngay: [] }
-	                }
-	
-	                let dateGroup = grouped[LoaiViPham].Ngay.find(d => d.Ngay === Ngay)
-	                if (!dateGroup) {
-	                    dateGroup = { Ngay, DSNgay: [] }
-	                    grouped[LoaiViPham].Ngay.push(dateGroup)
-	                }
-	
-	                let sessionGroup = dateGroup.DSNgay.find(s => s.Buoi === Buoi)
-	                if (!sessionGroup) {
-	                    sessionGroup = { Buoi, DS: [] }
-	                    dateGroup.DSNgay.push(sessionGroup)
-	                }
-	
-	                sessionGroup.DS.push({
-	                    HocSinhID, Ho, Ten, Thu, Ngay, Buoi, Tiet,
-	                    TenMonHoc, GiaoVien, GhiChu, LoaiViPham, TenViPham, SoLuong,
-	                })
-	            })
-	            return Object.values(grouped)
+	        toggleViPhamExpand(hocSinhID, loaiViPham) {
+	            const key = hocSinhID + '_' + loaiViPham
+	            this.viPhamExpandedMap = { ...this.viPhamExpandedMap, [key]: !this.viPhamExpandedMap[key] }
 	        },
-	
+
+	        // Trả về danh sách loại vi phạm + số lần vi phạm riêng của từng học sinh
+	        getViPhamCuaHocSinh(hocSinhID) {
+	            return this.DSTongHop_ViPham
+	                .filter(x => x.SoLuong > 0)
+	                .map(lvp => {
+	                    const rows = (this.viPhamDetailMap[lvp.LoaiViPham] ?? [])
+	                        .filter(x => x.HocSinhID === hocSinhID)
+	                    const soLuong = lvp.LoaiViPham === 2
+	                        ? new Set(rows.map(r => r.Ngay)).size
+	                        : rows.length
+	                    return { ...lvp, SoLuong_HS: soLuong }
+	                })
+	                .filter(x => x.SoLuong_HS > 0)
+	        },
+
+	        async loadViPhamDetail(loaiViPham) {
+	            this.viPhamLoadingMap = { ...this.viPhamLoadingMap, [loaiViPham]: true }
+	            const { firstDay, lastDay } = this.getFirstAndLastDay(vueData.NienKhoa, this.ThangObj?.Thang)
+	            const data = await fetchPromise(
+	                'quansinh/GVCN_SoDauBai_TongHopTheoLoaiViPham_ChiTiet',
+	                { TuNgay: firstDay, DenNgay: lastDay, LopHocID: this.LopItem.LopID, LoaiViPham: loaiViPham },
+	                { cache: false }
+	            )
+	            this.viPhamDetailMap = { ...this.viPhamDetailMap, [loaiViPham]: data ?? [] }
+	            this.viPhamLoadingMap = { ...this.viPhamLoadingMap, [loaiViPham]: false }
+	        },
+
+	        getViPhamChiTiet(hocSinhID, loaiViPham) {
+	            return (this.viPhamDetailMap[loaiViPham] ?? []).filter(x => x.HocSinhID === hocSinhID)
+	        },
+
+	        tenViPhamVI(ten) {
+	            return (ten ?? '').split('/')[0].trim()
+	        },
+
+	        formatNgayViPham(ngay) {
+	            return ngay ? String(ngay).slice(0, 5) : ''
+	        },
+
 	        // ─────────────────────────────────────────
 	        // Helpers
 	        // ─────────────────────────────────────────

@@ -541,6 +541,13 @@ export default {
 			if (res) {
 				this.snackbarRef.value.showSnackbar({ message: 'Báo lỗi đã được gửi thành công!', color: 'success' })
 				this.isShow = false
+				// Gửi push notification tới admin (fire-and-forget)
+				window.fcm?.sendNotification({
+					topic: window.fcm.ADMIN_TOPIC,
+					title: 'Báo lỗi mới từ ' + (vueData.user?.HoTen ?? vueData.user?.UserID ?? 'người dùng'),
+					body: this.form.Title,
+					data: { url: this.form.Url },
+				})
 			}
 		},
 		async loadHistory() {
