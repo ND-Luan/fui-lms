@@ -78,8 +78,11 @@ export default {
 
         // Parse boolean ngay từ đầu, tránh so sánh string rải rác trong code
         // Is_SendToClass=0 hoặc Is_SendToClass=false → false; còn lại → true
+        // Nếu Is_SendToClass không có trong URL, tự suy từ sự hiện diện của AssignToStudentID
         const _isSTC = urlParams.get('Is_SendToClass');
-        const isSendToClass = _isSTC !== '0' && _isSTC !== 'false';
+        const isSendToClass = _isSTC === null
+            ? !urlParams.get('AssignToStudentID')
+            : _isSTC !== '0' && _isSTC !== 'false';
 
         return {
             urlParams,

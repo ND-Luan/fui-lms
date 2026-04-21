@@ -34,7 +34,7 @@
 
 						<!-- Attachment upload -->
 						<div class="mb-3">
-							<p class="text-body-2 mb-1">Ảnh đính kèm (tùy chọn)</p>
+							<p class="text-body-2 mb-1">Ảnh đính kèm *</p>
 						<div class="d-flex align-center ga-2 flex-wrap">
 					<v-btn variant="outlined" size="small" @click="$refs.fileInput.click()">
 							<v-icon start>mdi-image-plus</v-icon>
@@ -519,6 +519,10 @@ export default {
 		async submitTicket() {
 			if (!this.form.Title?.trim() || !this.form.Description?.trim()) {
 				this.snackbarRef.value.showSnackbar({ message: 'Vui lòng điền tiêu đề và mô tả', color: 'warning' })
+				return
+			}
+			if (!this.attachments.length) {
+				this.snackbarRef.value.showSnackbar({ message: 'Vui lòng đính kèm ít nhất 1 ảnh', color: 'warning' })
 				return
 			}
 			this.isSubmitting = true

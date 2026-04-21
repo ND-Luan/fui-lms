@@ -74,9 +74,6 @@
 		watch: {
 			dsnienkhoacustom: function (v) {
 				this.DSNienKhoa = v
-			},
-			"vueData.NienKhoaItem.NienKhoaID": function (x) {
-				console.log(x)
 			}
 		},
 		async mounted() {
