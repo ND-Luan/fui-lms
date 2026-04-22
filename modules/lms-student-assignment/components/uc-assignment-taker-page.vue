@@ -118,16 +118,51 @@ export default {
             AssignmentConfigAfterShuffle: null,
 
             // Guard flag — chặn loadAssignmentData chạy đồng thời
-            _isLoadingAssignment: false,
+            isLoadingAssignment: false,
 
             // Alert tính năng mới đánh dấu câu hỏi
             showFlagFeatureAlert: false,
+
+            // Guard cho beforeunload
+            beforeunloadHandler: null,
         };
+    },
+
+    computed: {
+        // true khi bài đang trong trạng thái chưa nộp (0=chưa làm, 1=DRAFT)
+        isActiveDirty() {
+            if (!this.dataReady) return false;
+            return (this.submitionInfo?.SubmissionStatus ?? 0) < 2;
+        },
+    },
+
+    watch: {
+        // Thông báo cho parent (iframe wrapper) mỗi khi trạng thái dirty thay đổi
+        isActiveDirty(val) {
+            window.parent.postMessage({ type: 'lms:assignment:dirty', isDirty: val }, '*');
+        },
     },
 
     mounted() {
         this.callNienKhoa_Get();
         this._initFlagFeatureAlert();
+
+        // Chặn đóng tab browser khi bài đang làm chưa nộp
+        this.beforeunloadHandler = (e) => {
+            if (this.isActiveDirty) {
+                e.preventDefault();
+                e.returnValue = '';
+            }
+        };
+        window.addEventListener('beforeunload', this.beforeunloadHandler);
+    },
+
+    beforeUnmount() {
+        if (this.beforeunloadHandler) {
+            window.removeEventListener('beforeunload', this.beforeunloadHandler);
+        }
+        // Khi trang làm bài bị huỷ mount (đóng iframe), reset dirty để parent biết
+        window.parent.postMessage({ type: 'lms:assignment:dirty', isDirty: false }, '*');
     },
 
     methods: {
@@ -207,8 +242,8 @@ export default {
 
         async loadAssignmentData(AssignToClassID, AssignToStudentID) {
             // Guard: chặn gọi đồng thời, tránh race condition
-            if (this._isLoadingAssignment) return;
-            this._isLoadingAssignment = true;
+            if (this.isLoadingAssignment) return;
+            this.isLoadingAssignment = true;
 
             try {
                 const isSendToStudent = !this.isSendToClass;
@@ -246,7 +281,7 @@ export default {
                 console.error('Lỗi loadAssignmentData:', err);
             } finally {
                 // Luôn release guard dù thành công hay lỗi
-                this._isLoadingAssignment = false;
+                this.isLoadingAssignment = false;
             }
         },
 

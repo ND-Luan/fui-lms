@@ -38,7 +38,9 @@
 <script>
 	export default {
 		name: 'UcIframeWindow',
-	
+
+		inject: ['confirmRef'],
+
 		props: {
 			title: { type: String, default: '' },
 			url: { type: String, default: '' },
@@ -46,9 +48,9 @@
 			defaultWidth: { type: String, default: '1100px' },
 			defaultHeight: { type: String, default: '88vh' },
 		},
-	
+
 		emits: ['closed'],
-	
+
 		data() {
 			return {
 				isOpen: false,
@@ -60,10 +62,27 @@
 				currentIcon: '',
 				width: this.defaultWidth,
 				height: this.defaultHeight,
-				_onclose: null,
+				// Dùng tên không có _ prefix vì Vue 3 proxy bỏ qua getter cho _ prefixed keys
+				oncloseCb: null,
+				iframeDirty: false,
+				msgHandler: null,
 			};
 		},
-	
+
+		mounted() {
+			this.msgHandler = (e) => {
+				if (!e.data || e.data.type !== 'lms:assignment:dirty') return;
+				this.iframeDirty = !!e.data.isDirty;
+			};
+			window.addEventListener('message', this.msgHandler);
+		},
+
+		beforeUnmount() {
+			if (this.msgHandler) {
+				window.removeEventListener('message', this.msgHandler);
+			}
+		},
+
 		methods: {
 			// Gọi từ bên ngoài: this.$refs.win.openWindow({ title, url, icon, onclose })
 			openWindow({ title = '', url = '', icon = '', width, height, onclose = null } = {}) {
@@ -72,37 +91,49 @@
 				this.currentIcon = icon || this.icon;
 				this.width = width || this.defaultWidth;
 				this.height = height || this.defaultHeight;
-				this._onclose = onclose;
-	
+				this.oncloseCb = onclose;
+				this.iframeDirty = false; // reset dirty khi mở cửa sổ mới
+
 				this.loading = true;
 				this.hasError = false;
 				this.isOpen = true;
 			},
-	
-			// Bấm X → đóng + chạy callback
-			closeWindow() {
+
+			// Bấm X → kiểm tra dirty trước khi đóng
+			async closeWindow() {
+				if (this.iframeDirty) {
+					const ok = await this.confirmRef.value.show({
+						title: 'Bài đang làm chưa được nộp. Bạn có chắc muốn đóng không?',
+					});
+					if (!ok) return;
+				}
+				this.doClose();
+			},
+
+			doClose() {
 				this.isOpen = false;
 				this.currentUrl = '';
-	
+				this.iframeDirty = false;
+
 				// Hỗ trợ Function lẫn { EXE: '...' } giống openWindow cũ
-				const cb = this._onclose;
+				const cb = this.oncloseCb;
 				if (typeof cb === 'function') {
 					cb();
 				} else if (cb?.EXE) {
 					try { eval(cb.EXE); } catch (e) { console.warn('[IframeWindow] onclose EXE lỗi:', e); }
 				}
-	
+
 				this.$emit('closed');
-				this._onclose = null;
+				this.oncloseCb = null;
 			},
-	
+
 			reloadIframe() {
 				if (!this.$refs.iframeRef) return;
 				this.loading = true;
 				this.hasError = false;
 				this.$refs.iframeRef.src = this.currentUrl;
 			},
-	
+
 			onIframeLoad() { this.loading = false; },
 			onIframeError() { this.loading = false; this.hasError = true; },
 		},
