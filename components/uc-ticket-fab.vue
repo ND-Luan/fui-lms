@@ -175,6 +175,12 @@
 						<p class="text-caption font-weight-medium">{{ c.CreateUser }} · {{ formatDate(c.CreateTime) }}
 						</p>
 						<p class="text-body-2">{{ c.Content }}</p>
+						<div v-if="c._attachments?.length" class="d-flex flex-wrap ga-1 mt-1">
+							<v-chip v-for="(att, ai) in c._attachments" :key="ai" size="x-small" color="primary"
+								variant="tonal" style="cursor: pointer;" @click="previewImage(att.FileID)">
+								<v-icon start size="12">mdi-image-outline</v-icon>Ảnh {{ ai + 1 }}
+							</v-chip>
+						</div>
 					</div>
 
 					<!-- Add comment -->
@@ -567,9 +573,14 @@ export default {
 				TicketID: item.TicketID,
 				IsIT: 0,
 			}, { cache: false })
-			this.detailDialog.ticket = res?.[0] ?? item
+			const comments = res?.[2] ?? []
+			const commentAtts = res?.[4] ?? []
+			for (const c of comments) {
+				c._attachments = commentAtts.filter(a => a.CommentID === c.CommentID)
+			}
+			this.detailDialog.ticket = res?.[0]?.[0] ?? item
 			this.detailDialog.attachments = res?.[1] ?? []
-			this.detailDialog.comments = res?.[2] ?? []
+			this.detailDialog.comments = comments
 			this.detailDialog.newComment = ''
 			this.detailDialog.show = true
 		},

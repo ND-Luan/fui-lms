@@ -95,18 +95,40 @@
 					<span class="text-caption text-medium-emphasis">{{ c.CreatedByName ?? c.CreateUser }} · {{ formatDate(c.CreatedAt ?? c.CreateTime) }}</span>
 				</div>
 				<p class="text-body-2">{{ c.Content }}</p>
+				<div v-if="c._attachments?.length" class="d-flex flex-wrap ga-1 mt-1">
+					<div v-for="(att, ai) in c._attachments" :key="ai"
+						style="width:56px;height:56px;cursor:pointer;border-radius:6px;overflow:hidden;"
+						@click="previewImage(att.FileID)">
+						<v-img :src="imgUrl(att.FileID)" width="56" height="56" cover />
+					</div>
+				</div>
 			</div>
 
 			<!-- Add comment -->
 			<v-divider class="my-3" />
 			<p class="text-body-2 font-weight-medium mb-2">Thêm phản hồi</p>
-			<v-textarea
-				v-model="newComment"
-				label="Nội dung"
-				rows="2"
-				hide-details
-				class="mb-2"
-			/>
+			<v-textarea v-model="newComment" label="Nội dung" rows="2" hide-details class="mb-2" />
+			<!-- Attachment -->
+			<div class="d-flex align-center ga-2 flex-wrap mb-2">
+				<v-btn variant="outlined" size="small" @click="$refs.commentFileInput.click()">
+					<v-icon start>mdi-image-plus</v-icon>Chọn ảnh
+				</v-btn>
+			</div>
+			<input ref="commentFileInput" type="file" accept="image/*" multiple style="display:none;"
+				@change="handleCommentFileChange" />
+			<div v-if="commentAttachments.length" class="d-flex flex-wrap ga-2 mb-2">
+				<div v-for="(att, i) in commentAttachments" :key="i"
+					style="position:relative;width:64px;height:64px;">
+					<v-img :src="att.previewUrl" width="64" height="64" cover
+						style="border-radius:6px;cursor:pointer;"
+						@click="previewLocalImage(att.previewUrl)" />
+					<v-btn icon size="x-small" variant="elevated" color="error"
+						style="position:absolute;top:-6px;right:-6px;"
+						@click.stop="removeCommentAttachment(i)">
+						<v-icon size="12">mdi-close</v-icon>
+					</v-btn>
+				</div>
+			</div>
 			<div class="d-flex align-center ga-3">
 				<v-checkbox v-model="isInternal" label="Ghi chú nội bộ (chỉ IT thấy)" hide-details density="compact" />
 				<v-spacer />
@@ -154,6 +176,7 @@ export default {
 			newComment: '',
 			isInternal: false,
 			isSendingComment: false,
+			commentAttachments: [],
 			imagePreview: {
 				show: false,
 				url: '',
@@ -181,10 +204,16 @@ export default {
 			this.comments = []
 			this.newComment = ''
 			this.isInternal = false
-			const res = await fetchPromise('lms/Ticket_GetDetail', { TicketID: ticketId, IsIT: 1 }, { cache: false })
+			const res = await fetchPromise('lms/Ticket_GetDetail', { TicketID: ticketId, IsIT: true }, { cache: false })
 			this.ticket = res?.[0]?.[0] ?? null
 			this.attachments = res?.[1] ?? []
-			this.comments = res?.[2] ?? []
+			const comments = res?.[2] ?? []
+			const commentAtts = res?.[4] ?? []
+			for (const c of comments) {
+				c._attachments = commentAtts.filter(a => a.CommentID === c.CommentID)
+			}
+			this.comments = comments
+			this.commentAttachments = []
 			if (this.ticket) {
 				this.editStatus = this.ticket.Status
 				this.editAssignedTo = this.ticket.AssignedTo ?? this.devUser?.UserID ?? ''
@@ -223,25 +252,72 @@ export default {
 			}
 		},
 		async sendComment() {
-			if (!this.newComment?.trim()) return
+			if (!this.newComment?.trim() && !this.commentAttachments.length) return
 			this.isSendingComment = true
+			await this.uploadCommentAttachments()
+			const uploadedAtts = this.commentAttachments.filter(a => a.fileId)
+			const attachmentJSON = uploadedAtts.length
+				? JSON.stringify(uploadedAtts.map(a => ({ FileID: a.fileId, Annotation: null })))
+				: null
 			const res = await fetchPromise('lms/Ticket_AddComment', {
 				TicketID: this.ticket.TicketID,
-				Content: this.newComment.trim(),
+				Content: this.newComment.trim() || '',
 				IsInternal: this.isInternal ? 1 : 0,
+				AttachmentJSON: attachmentJSON,
 			}, { cache: false })
 			this.isSendingComment = false
 			if (res) {
 				this.snackbarRef.value.showSnackbar({ message: 'Đã gửi phản hồi', color: 'success' })
+				const newAtts = this.commentAttachments.filter(a => a.fileId).map(a => ({ FileID: a.fileId }))
 				this.comments.push({
 					Content: this.newComment.trim(),
 					IsInternal: this.isInternal ? 1 : 0,
 					CreatedByName: this.devUser?.UserID ?? vueData.user.UserID,
 					CreatedAt: new Date().toISOString(),
+					_attachments: newAtts,
 				})
 				this.newComment = ''
 				this.isInternal = false
+				this.commentAttachments = []
 			}
+		},
+		async handleCommentFileChange(e) {
+			const files = Array.from(e.target.files)
+			for (const file of files) {
+				this.commentAttachments.push({ name: file.name, file, previewUrl: URL.createObjectURL(file) })
+			}
+			this.$refs.commentFileInput.value = ''
+		},
+		removeCommentAttachment(i) {
+			const att = this.commentAttachments[i]
+			if (att?.previewUrl) URL.revokeObjectURL(att.previewUrl)
+			this.commentAttachments.splice(i, 1)
+		},
+		async uploadCommentAttachments() {
+			for (const att of this.commentAttachments) {
+				if (att.fileId) continue
+				const fileObj = att.file
+				if (!fileObj) continue
+				try {
+					const formData = new FormData()
+					formData.append('file', fileObj)
+					const res = await fetch('https://file.lhbs.vn/lms/upload/FileData', {
+						method: 'POST', body: formData,
+						headers: { Authorization: $awt },
+					})
+					const json = await res.json()
+					att.fileId = json?.Files?.[0]?.FILE_ID ?? null
+				} catch (err) {
+					console.error('Upload error', err)
+				}
+			}
+		},
+		imgUrl(fileId) {
+			return vueData.v_Set.urlReadFile + 'FileData/' + fileId
+		},
+		previewLocalImage(url) {
+			this.imagePreview.url = url
+			this.imagePreview.show = true
 		},
 		formatDate(dt) {
 			if (!dt) return ''

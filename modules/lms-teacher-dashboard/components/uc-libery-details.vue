@@ -10,7 +10,7 @@
 
 				<div class="d-flex mb-4 ga-2">
 					<v-chip class="pe-0" variant="text" color="#7C3AED">{{ $t('message.Grade') }} {{ formData.KhoiID
-						}}</v-chip>
+					}}</v-chip>
 					<v-chip class="pa-0" variant="text" color="#7C3AED">{{ formData.Tuan_HienThi }}</v-chip>
 				</div>
 
@@ -53,7 +53,13 @@
 			</div>
 			<div class="mt-3"
 				v-if="selectedLibery?.AssignedClassNames?.length > 0 && formData.ResourceType != 'LESSON'">
-				<v-data-table :headers="headersAssignedClass" :items="assignedClassList" :hide-default-footer="true">
+				<div class="d-flex justify-end px-2 mb-2">
+					<v-btn size="small" color="primary" variant="outlined" @click="saveAllLimitAssigned">
+						<v-icon start>mdi-content-save-outline</v-icon>Lưu giới hạn lần nộp
+					</v-btn>
+				</div>
+				<v-data-table :headers="headersAssignedClass" :items="assignedClassList" :hide-default-footer="true"
+					:items-per-page="-1" style="overflow: auto; max-height: 497px">
 					<template v-slot:item.TenHoacLopNhom="{ item }">
 						<span @click="() => console.log('item', item)">{{ item.TenLopHoacNhom }}</span>
 					</template>
@@ -72,20 +78,21 @@
 						</div>
 					</template>
 					<template v-slot:item.LimitAssigned="{ item }">
-						<div class="text-center d-flex ga-2 align-center justify-center w-100">
-							<v-text-field v-if="editDialogLimitAssigned[getIndexToEdit(item)]" :clearable="false"
-								density="compact" class="my-2"
+						<div class="text-center d-flex align-center justify-center w-100">
+							<v-text-field
+								v-if="editDataLimitAssigned[getIndexToEdit(item)]"
+								:clearable="false"
+								density="compact"
+								class="my-2"
+								type="number"
+								min="1"
+								hide-details
 								v-model="editDataLimitAssigned[getIndexToEdit(item)].LimitAssigned"
-								label="Số lần cho phép nộp" variant="outlined">
-								<template v-slot:append-inner>
-									<v-icon @click="saveEditLimitAssigned(item)" color="success" icon="mdi-check" />
-								</template>
-							</v-text-field>
-							<span v-if="!editDialogLimitAssigned[getIndexToEdit(item)]">{{ item.LimitAssigned ?? '-'
-							}}</span>
-							<v-btn v-if="!editDialogLimitAssigned[getIndexToEdit(item)]" icon="mdi-pencil"
-								size="x-small" variant="text" color="primary" :disabled="!item.Is_Full_Quiz"
-								@click="openEditLimitAssigned(item)" />
+								variant="outlined"
+								:disabled="!item.Is_Full_Quiz"
+								style="min-width: 80px; max-width: 110px;"
+							/>
+							<span v-else>{{ item.LimitAssigned ?? '-' }}</span>
 						</div>
 					</template>
 					<template v-slot:item.MaxScore="{ item }">
@@ -103,7 +110,8 @@
 				v-if="selectedLibery?.AssignedClassNames?.length > 0 && formData.ResourceType == 'LESSON'">
 				<v-data-table
 					:headers="headersAssignedClass.filter(i => !['DueDate', 'MaxScore', 'LimitAssigned'].includes(i.key))"
-					:items="assignedClassList" :hide-default-footer="true">
+					:items="assignedClassList" :hide-default-footer="true" :items-per-page="-1"
+					style="overflow: auto; max-height: 497px">
 					<template v-slot:item.TenHoacLopNhom="{ item }">
 						<span @click="() => console.log('item', item)">{{ item.TenLopHoacNhom }}</span>
 					</template>
@@ -137,7 +145,6 @@ export default {
 		return {
 			formData: {},
 			editDialog: [],
-			editDialogLimitAssigned: [],
 			editDataLimitAssigned: [],
 			editData: [],
 			editIndex: null,
@@ -305,12 +312,7 @@ export default {
 			this.editIndex = index
 			this.editDialog[index] = true
 		},
-		openEditLimitAssigned(cls) {
-			let index = this.getIndexToEdit(cls)
-			this.editDataLimitAssigned[index] = { ...cls } // clone dữ liệu để tránh thay đổi trực tiếp
-			this.editIndex = index
-			this.editDialogLimitAssigned[index] = true
-		},
+
 		editGiaoBaiTapDialog(item) {
 			if (item?.ResourceType == "ASSIGNMENT") {
 				if (item.Is_AssignedToClass === 1) {
@@ -345,11 +347,22 @@ export default {
 					time: dayjs(this.editData[index].DueDate).format('HH:mm')
 				});
 
-				ajaxCALL("/lms/EL_Teacher_AssignToClass_Upd_ByAssignToClassID", {
-					AssignToClassID: this.editData[index].AssignToClassID,
-					DueDate: this.editData[index].DueDate,
-					LimitAssigned: this.editData[index].LimitAssigned
-				}, (res) => {
+				const isStudent = item.Is_AssignedToClass === 0
+				const apiUrl = isStudent
+					? '/lms/EL_Teacher_AssignToStudent_Upd_ByAssignToStudentID'
+					: '/lms/EL_Teacher_AssignToClass_Upd_ByAssignToClassID'
+				const payload = isStudent
+					? {
+						AssignToStudentID: this.editData[index].AssignToStudentID,
+						DueDate: this.editData[index].DueDate,
+						LimitAssigned: this.editData[index].LimitAssigned
+					  }
+					: {
+						AssignToClassID: this.editData[index].AssignToClassID,
+						DueDate: this.editData[index].DueDate,
+						LimitAssigned: this.editData[index].LimitAssigned
+					  }
+				ajaxCALL(apiUrl, payload, (res) => {
 					this.snackbarRef.value.showSnackbar({ message: 'Sửa ngày thành công', color: 'success' })
 					this.$emit('update:selectedLibery', { ...this.selectedLibery, AssignedDetails: this.editData })
 					// vueData.apiCall3()
@@ -390,30 +403,32 @@ export default {
 				url,
 			});
 		},
-		saveEditLimitAssigned(item) {
-			let index = this.getIndexToEdit(item)
-			if (index != null) {
-				ajaxCALL("/lms/EL_Teacher_AssignToClass_Upd_ByAssignToClassID", {
-					AssignToClassID: this.editDataLimitAssigned[index].AssignToClassID,
-					DueDate: this.editDataLimitAssigned[index].DueDate,
-					LimitAssigned: this.editDataLimitAssigned[index].LimitAssigned
-				}, (res) => {
-					this.snackbarRef.value.showSnackbar({ message: 'Sửa số lần cho phép nộp thành công', color: 'success' })
-					this.$emit('update:selectedLibery', { ...this.selectedLibery, AssignedDetails: this.editDataLimitAssigned })
-					// vueData.apiCall3()
-				},
-					err => {
-						// xử lý khi lỗi
-						this.snackbarRef.value.showSnackbar({ message: err?.response?.data?.Message || 'Có lỗi xảy ra, vui lòng kiểm tra lại dữ liệu nhập vào!', color: 'error' })
-					}
-				);
-
+		async saveAllLimitAssigned() {
+			const ok = await this.confirmRef.value.show({ title: 'Xác nhận lưu giới hạn lần nộp?' })
+			if (!ok) return
+			try {
+				const calls = this.editDataLimitAssigned.map(row => {
+					const isStudent = row.Is_AssignedToClass === 0
+					const apiUrl = isStudent
+						? '/lms/EL_Teacher_AssignToStudent_Upd_ByAssignToStudentID'
+						: '/lms/EL_Teacher_AssignToClass_Upd_ByAssignToClassID'
+					const payload = isStudent
+						? { AssignToStudentID: row.AssignToStudentID, DueDate: row.DueDate, LimitAssigned: row.LimitAssigned }
+						: { AssignToClassID: row.AssignToClassID, DueDate: row.DueDate, LimitAssigned: row.LimitAssigned }
+					return fetchPromise(apiUrl, payload, { cache: false })
+				})
+				await Promise.all(calls)
+				this.snackbarRef.value.showSnackbar({ message: 'Lưu giới hạn lần nộp thành công', color: 'success' })
+				this.$emit('update:selectedLibery', { ...this.selectedLibery, AssignedDetails: this.editDataLimitAssigned })
+			} catch (err) {
+				this.snackbarRef.value.showSnackbar({ message: err?.response?.data?.Message || 'Có lỗi xảy ra, vui lòng thử lại!', color: 'error' })
 			}
-			this.editDialogLimitAssigned[index] = false
 		},
 		getIndexToEdit(item) {
-			let index = this.assignedClassList.findIndex(cls => cls.AssignToClassID === item.AssignToClassID)
-			return index
+			if (item.Is_AssignedToClass === 0) {
+				return this.assignedClassList.findIndex(cls => cls.AssignToStudentID === item.AssignToStudentID)
+			}
+			return this.assignedClassList.findIndex(cls => cls.AssignToClassID === item.AssignToClassID)
 		}
 	}
 }
