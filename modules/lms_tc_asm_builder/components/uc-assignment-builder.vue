@@ -486,8 +486,11 @@ export default {
 			Vue.$toast.success("Lưu bài và giao bài thành công!", { position: 'top' });
 			this.isOpenDialogForAssignToStudent = false
 			// Quay về trang dashboard
-
-			window.open("/lms-teacher-dashboard", '_parent');
+			if (window !== window.top) {
+				window.parent.postMessage({ type: 'iframeRef_closeWindow' }, '*')
+			} else {
+				window.open("/lms-teacher-dashboard", '_parent')
+			}
 		},
 		async onAssignToStudentAndSave() {
 			if (this.deadlines?.date == null || this.deadlines?.time == null) {
@@ -507,6 +510,12 @@ export default {
 			})
 			if (!ok) return
 			await this._doAssign()
+			this.isOpenDialogForAssignToStudent = false
+			if (window !== window.top) {
+				window.parent.postMessage({ type: 'iframeRef_closeWindow' }, '*')
+			} else {
+				window.open('/lms-teacher-dashboard', '_parent')
+			}
 		},
 		_confirm() {
 			if (!this.confirmRef?.value?.show) {

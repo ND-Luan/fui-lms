@@ -263,6 +263,7 @@ export default {
 			this.iframeRef.value.openWindow({
 				title: item.Title,
 				url,
+				onclose: () => vueData.initPage()
 			});
 
 		},

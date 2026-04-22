@@ -35,10 +35,17 @@ function isCheckAnswerQuestionNotChoose(question) {
     let flag = false
     const config = question.config
     if (!config) return flag
-    if (question.type === "QUIZ_SINGLE_CHOICE")
+    if (question.type === "QUIZ_SINGLE_CHOICE") {
         if (!config.correctAnswer) flag = true
-    if (question.type === "QUIZ_MULTIPLE_CHOICE")
-        if (config.correctAnswers.length === 0) flag = true
+        else if (Array.isArray(config.options) && !config.options.some(o => o.id === config.correctAnswer)) flag = true
+    }
+    if (question.type === "QUIZ_MULTIPLE_CHOICE") {
+        if (!config.correctAnswers || config.correctAnswers.length === 0) flag = true
+        else if (Array.isArray(config.options)) {
+            const optionIds = config.options.map(o => o.id)
+            if (!config.correctAnswers.every(id => optionIds.includes(id))) flag = true
+        }
+    }
     if (question.type === "QUIZ_TRUE_FALSE")
         if (config.correctAnswer === null) flag = true
     if (question.type === "QUIZ_MULTIPLE_TRUE_FALSE") {
@@ -136,7 +143,7 @@ function buildNewQuestion(componentInfo, ordinalNumber) {
             q.config.correctAnswer = true
             break
         case 'QUIZ_MULTIPLE_TRUE_FALSE':
-            q.config.options = [{ id: 'a', text: '', correctAnswer: null, inCorrectAnswer: null }]
+            q.config.options = [{ id: crypto.randomUUID(), text: '', correctAnswer: null, inCorrectAnswer: null }]
             q.config.scoringMode = 'equal'
             break
         case 'QUIZ_FILL_IN_BLANK':

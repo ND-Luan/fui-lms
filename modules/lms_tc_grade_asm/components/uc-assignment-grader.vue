@@ -683,6 +683,7 @@
 			onPublishGrades: { type: Function, default: () => { } },
 			onOpenPublishDialog: { type: Function, default: () => { } },
 			onInitPage: { type: Function, default: () => { } },
+			onAutoSaveDraft: { type: Function, default: () => { } },
 		},
 		data() {
 			this.$i18n.locale = (localStorage.getItem('IsLanguage') && localStorage.getItem('IsLanguage') == 'true') ? 'en' : 'vi'
@@ -704,6 +705,9 @@
 				vueData,
 				mobile,
 				IsOpenModal_Require_Resend: false,
+				autoSaveStatus: null,
+				lastSavedRelative: '',
+				_autoSaveTimer: null,
 
 			}
 		},
@@ -802,6 +806,27 @@
 					...this.gradingData[questionId],
 					answerData: newAnswer
 				}
+				this.triggerAutoSave()
+			},
+			triggerAutoSave() {
+				if (!this.submission?.SubmissionID) return
+				clearTimeout(this._autoSaveTimer)
+				this.autoSaveStatus = 'saving'
+				this._autoSaveTimer = setTimeout(async () => {
+					const payload = {
+						SubmissionID: this.submission.SubmissionID,
+						Score: this.gradingSummary.totalScore,
+						TeacherComment: this.gradingSummary.teacherComment,
+						SubmissionContent: JSON.stringify({ answers: this.gradingData })
+					}
+					try {
+						await this.onAutoSaveDraft(payload)
+						this.autoSaveStatus = 'saved'
+						this.lastSavedRelative = new Date().toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })
+					} catch (e) {
+						this.autoSaveStatus = null
+					}
+				}, 800)
 			},
 			async saveGrading(isPublishing) {
 				const $this = this

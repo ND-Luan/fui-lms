@@ -11,9 +11,9 @@
 
 				<!-- Thanh công cụ chính -->
 				<v-btn-toggle v-model="tool" mandatory density="compact" variant="outlined" divided>
-					<!-- <v-btn value="text" title="Thêm nhận xét">
+					<v-btn value="text" title="Thêm nhận xét">
 						<v-icon>mdi-format-text</v-icon>
-					</v-btn> -->
+					</v-btn>
 					<v-btn value="correct" title="Đánh dấu Đúng">
 						<v-icon color="success">mdi-check-circle-outline</v-icon>
 					</v-btn>
@@ -35,7 +35,7 @@
 			</v-toolbar>
 
 			<!-- THANH CÔNG CỤ PHỤ (chỉ hiện khi đang chọn Text) -->
-			<v-toolbar v-if="activeObject && activeObject.type === 'i-text'" density="compact" color="grey-lighten-3">
+			<v-toolbar v-if="activeObject && (activeObject.type === 'i-text' || activeObject.type === 'text')" density="compact" color="grey-lighten-3">
 				<v-select :items="['Arial', 'Times New Roman', 'Courier New']" v-model="activeObjectProps.fontFamily"
 					@update:model-value="updateActiveObject" density="compact" hide-details variant="solo"
 					style="max-width: 150px;"></v-select>
@@ -64,6 +64,21 @@
 				<canvas ref="canvasEl"></canvas>
 			</v-card-text>
 		</v-card>
+
+		<!-- Sub-dialog nhập văn bản (tránh vấn đề keyboard trong v-dialog fullscreen) -->
+		<v-dialog v-model="textInput.show" width="360" :close-on-back="false">
+			<v-card>
+				<v-card-title>Nhập nhận xét</v-card-title>
+				<v-card-text class="pt-2">
+					<v-text-field v-model="textInput.value" label="Nội dung" autofocus hide-details
+						variant="outlined" density="compact" @keyup.enter="textConfirm" />
+				</v-card-text>
+				<v-card-actions>
+					<v-btn color="primary" variant="elevated" @click="textConfirm">OK</v-btn>
+					<v-btn variant="text" @click="textInput.show = false">Hủy</v-btn>
+				</v-card-actions>
+			</v-card>
+		</v-dialog>
 	</v-dialog>
 </template>
 
@@ -92,18 +107,23 @@
 					fill: '#E53935'
 				},
 				currentScale: 1, // Lưu scale hiện tại
-				originalImageSize: { width: 0, height: 0 } // Lưu kích thước ảnh gốc
-	
+				originalImageSize: { width: 0, height: 0 }, // Lưu kích thước ảnh gốc
+				textInput: { show: false, x: 0, y: 0, value: '' }
 			};
 		},
 		watch: {
 			visible(newVal) {
 				if (newVal) {
+					if (window !== window.top) {
+						window.parent.postMessage({ type: 'iframeRef_hideToolbar' }, '*')
+					}
 					this.$nextTick(() => {
 						setTimeout(() => { this.initializeCanvas(); }, 100);
-	
 					});
 				} else {
+					if (window !== window.top) {
+						window.parent.postMessage({ type: 'iframeRef_showToolbar' }, '*')
+					}
 					localStorage.setItem("IsShowHeader_ChamBai", true)
 				}
 			}
@@ -208,7 +228,7 @@
 	
 			updateActiveObjectState(e) {
 				this.activeObject = this.fabricCanvas.getActiveObject();
-				if (this.activeObject && this.activeObject.type === 'i-text') {
+				if (this.activeObject && (this.activeObject.type === 'i-text' || this.activeObject.type === 'text')) {
 					this.activeObjectProps.fontFamily = this.activeObject.fontFamily;
 					this.activeObjectProps.fontSize = this.activeObject.fontSize;
 					this.activeObjectProps.fontWeight = this.activeObject.fontWeight;
@@ -244,17 +264,26 @@
 				}
 			},
 			addText(x, y) {
-				const text = new fabric.IText('Nhận xét...', {
-					left: x, top: y, fontFamily: 'Arial',
-					fontSize: 24, fill: '#E53935',
+				this.textInput = { show: true, x, y, value: '' };
+			},
+			textConfirm() {
+				if (!this.textInput.value.trim()) { this.textInput.show = false; return; }
+				const text = new fabric.Text(this.textInput.value.trim(), {
+					left: this.textInput.x,
+					top: this.textInput.y,
+					fontFamily: this.activeObjectProps.fontFamily,
+					fontSize: this.activeObjectProps.fontSize,
+					fontWeight: this.activeObjectProps.fontWeight,
+					fontStyle: this.activeObjectProps.fontStyle,
+					fill: this.activeObjectProps.fill,
 					padding: 7,
 					backgroundColor: 'rgba(255, 255, 255, 0.8)',
 					cornerColor: 'blue', cornerSize: 10, transparentCorners: false
 				});
 				this.fabricCanvas.add(text).setActiveObject(text);
-				text.enterEditing();
-				text.selectAll();
 				this.fabricCanvas.renderAll();
+				this.textInput.show = false;
+				this.textInput.value = '';
 			},
 			addIcon(type, x, y) {
 				const isCorrect = type === 'check';

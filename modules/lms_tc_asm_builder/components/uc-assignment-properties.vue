@@ -501,11 +501,27 @@
 			updateQuestion(key, value) { const ng = JSON.parse(JSON.stringify(this.groups)); ng[this.item.groupIndex].questions[this.item.qIndex][key] = value; this.updateGroups(ng); },
 			updateQuestionConfig(key, value) { const ng = JSON.parse(JSON.stringify(this.groups)); ng[this.item.groupIndex].questions[this.item.qIndex].config[key] = value; this.updateGroups(ng); },
 			updateOptionText(optionIndex, text) { const ng = JSON.parse(JSON.stringify(this.groups)); ng[this.item.groupIndex].questions[this.item.qIndex].config.options[optionIndex].text = text; this.updateGroups(ng); },
-			addOption() { const ng = JSON.parse(JSON.stringify(this.groups)); ng[this.item.groupIndex].questions[this.item.qIndex].config.options.push({ id: `opt_${Date.now()}`, text: 'Lựa chọn mới' }); this.updateGroups(ng); },
-			removeOption(optionIndex) {
-				console.log('optionIndex', optionIndex)
+			addOption() {
 				const ng = JSON.parse(JSON.stringify(this.groups));
-				ng[this.item.groupIndex].questions[this.item.qIndex].config.options.splice(optionIndex, 1);
+				const q = ng[this.item.groupIndex].questions[this.item.qIndex];
+				const isMTF = q.type === 'QUIZ_MULTIPLE_TRUE_FALSE';
+				const newOption = isMTF
+					? { id: `opt_${Date.now()}`, text: 'Lựa chọn mới', correctAnswer: null, inCorrectAnswer: null }
+					: { id: `opt_${Date.now()}`, text: 'Lựa chọn mới' };
+				q.config.options.push(newOption);
+				this.updateGroups(ng);
+			},
+			removeOption(optionIndex) {
+				const ng = JSON.parse(JSON.stringify(this.groups));
+				const q = ng[this.item.groupIndex].questions[this.item.qIndex];
+				const removedId = q.config.options[optionIndex]?.id;
+				q.config.options.splice(optionIndex, 1);
+				if (removedId) {
+					if (q.config.correctAnswer === removedId) q.config.correctAnswer = null;
+					if (Array.isArray(q.config.correctAnswers)) {
+						q.config.correctAnswers = q.config.correctAnswers.filter(id => id !== removedId);
+					}
+				}
 				this.updateGroups(ng);
 			},
 			getAcceptedAnswers(part) {

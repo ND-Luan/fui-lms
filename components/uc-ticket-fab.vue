@@ -429,10 +429,22 @@ export default {
 						document.head.appendChild(s)
 					})
 				}
-				const blob = await window.htmlToImage.toBlob(document.body, { cacheBust: false, skipFonts: true })
+				const fullCanvas = await window.htmlToImage.toCanvas(document.body, { cacheBust: false, skipFonts: true })
+				const dpr = window.devicePixelRatio || 1
+				const vw = window.innerWidth
+				const vh = window.innerHeight
+				const sx = Math.round(window.scrollX * dpr)
+				const sy = Math.round(window.scrollY * dpr)
+				const sw = Math.round(vw * dpr)
+				const sh = Math.round(vh * dpr)
+				const clip = document.createElement('canvas')
+				clip.width = sw
+				clip.height = sh
+				clip.getContext('2d').drawImage(fullCanvas, sx, sy, sw, sh, 0, 0, sw, sh)
+				const blob = await new Promise(res => clip.toBlob(res, 'image/png'))
 				if (blob) {
 					const previewUrl = URL.createObjectURL(blob)
-				this.attachments.push({ name: 'screenshot.png', blob, previewUrl, originalPreviewUrl: previewUrl })
+					this.attachments.push({ name: 'screenshot.png', blob, previewUrl, originalPreviewUrl: previewUrl })
 				}
 			} catch (err) {
 				console.warn('Screenshot capture failed', err)

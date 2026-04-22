@@ -7,7 +7,7 @@
 		<GlobalUiSnackbar ref="snackbarRef" />
 		<GlobalIframeWindow ref="iframeWin" />
 		<GlobalConfirmDialog ref="confirmRef" />
-		<uc-ticket-fab />
+		<uc-ticket-fab v-if="!isInIframe" />
 		<v-responsive>
 			<v-app theme="light">
 				<div ref="headerRef">
@@ -30,6 +30,7 @@ export default {
 	data() {
 		return {
 			headerHeight: 0,
+			isInIframe: window !== window.top,
 		}
 	},
 	mounted() {

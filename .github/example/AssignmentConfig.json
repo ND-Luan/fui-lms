@@ -3,8 +3,8 @@
     "type": "GROUPED_MIXED",
     "groups": [
         {
-            "id": "group_1775549732913",
-            "title": "Phần 1",
+            "id": "group_1776761089933",
+            "title": "Section 1",
             "media": {
                 "type": "YOUTUBE",
                 "sourceYT": {
@@ -29,11 +29,2382 @@
             },
             "questions": [
                 {
-                    "id": "q_1775549933657",
+                    "id": "q_a5354157-a246-401d-945a-e3e7293820de",
+                    "type": "QUIZ_SINGLE_CHOICE",
+                    "points": 1,
+                    "config": {
+                        "media": {
+                            "type": "YOUTUBE",
+                            "sourceYT": {
+                                "id": "",
+                                "source": "",
+                                "name": ""
+                            },
+                            "sourceRecord": {
+                                "id": "",
+                                "source": "",
+                                "name": ""
+                            },
+                            "sourceFiles": {
+                                "file": [],
+                                "image": []
+                            }
+                        },
+                        "isAdvanced": false,
+                        "questionText": "<p>Nước biển và đại dương có mấy sự vận động?</p>",
+                        "options": [
+                            {
+                                "id": "68cc0d42-ee76-4468-88ca-7971d634afb7",
+                                "text": "5."
+                            },
+                            {
+                                "id": "b78341cc-d7af-4a63-9f22-711c8d70a650",
+                                "text": "3."
+                            },
+                            {
+                                "id": "ff6d2ce3-fc44-4710-87f6-9827f1bb7af8",
+                                "text": "2."
+                            },
+                            {
+                                "id": "aa6efd9a-a053-4683-a151-9c0ce67f7ac8",
+                                "text": "4."
+                            }
+                        ],
+                        "correctAnswer": "opt_2"
+                    },
+                    "ordinalNumber": 1
+                },
+                {
+                    "id": "q_dcfd86b8-8462-4ac3-afa1-d55257557064",
+                    "type": "QUIZ_SINGLE_CHOICE",
+                    "points": 1,
+                    "config": {
+                        "media": {
+                            "type": "YOUTUBE",
+                            "sourceYT": {
+                                "id": "",
+                                "source": "",
+                                "name": ""
+                            },
+                            "sourceRecord": {
+                                "id": "",
+                                "source": "",
+                                "name": ""
+                            },
+                            "sourceFiles": {
+                                "file": [],
+                                "image": []
+                            }
+                        },
+                        "isAdvanced": false,
+                        "questionText": "<p>Các dòng biển nóng thường có hướng chảy từ</p>",
+                        "options": [
+                            {
+                                "id": "c475757d-6b61-4d3d-b6b6-18fa3e7f14c2",
+                                "text": "vĩ độ cao về vĩ độ thấp."
+                            },
+                            {
+                                "id": "6843f973-8064-40cd-9929-4f8d77f16931",
+                                "text": "vĩ độ thấp về vĩ độ cao."
+                            },
+                            {
+                                "id": "0473f4d8-4b25-4091-adff-31f1af697627",
+                                "text": "bán cầu Bắc xuống Nam."
+                            },
+                            {
+                                "id": "13a7facf-94ce-4144-8988-9fc06d2b8d07",
+                                "text": "bán cầu Nam lên Bắc."
+                            }
+                        ],
+                        "correctAnswer": "opt_2"
+                    },
+                    "ordinalNumber": 2
+                },
+                {
+                    "id": "q_64cdab14-4014-4441-b34c-9504fbb909b9",
+                    "type": "QUIZ_SINGLE_CHOICE",
+                    "points": 1,
+                    "config": {
+                        "media": {
+                            "type": "YOUTUBE",
+                            "sourceYT": {
+                                "id": "",
+                                "source": "",
+                                "name": ""
+                            },
+                            "sourceRecord": {
+                                "id": "",
+                                "source": "",
+                                "name": ""
+                            },
+                            "sourceFiles": {
+                                "file": [],
+                                "image": []
+                            }
+                        },
+                        "isAdvanced": false,
+                        "questionText": "<p>Sức hút của Mặt Trời và Mặt Trăng là nguyên nhân chủ yếu hình thành hiện tượng tự nhiên nào sau đây?</p>",
+                        "options": [
+                            {
+                                "id": "c49979b4-0161-4125-b3ca-beeb13af07d5",
+                                "text": "Dòng biển."
+                            },
+                            {
+                                "id": "2968efc5-cc1f-4b01-a5ce-4279361cab62",
+                                "text": "Sóng ngầm."
+                            },
+                            {
+                                "id": "f3d4eeba-fa10-4260-829e-7fc52596507e",
+                                "text": "Sóng biển."
+                            },
+                            {
+                                "id": "f0cc29e9-7245-4722-9629-103da2baea7f",
+                                "text": "Thủy triều."
+                            }
+                        ],
+                        "correctAnswer": "opt_4"
+                    },
+                    "ordinalNumber": 3
+                },
+                {
+                    "id": "q_05729d6c-57bd-48af-b364-c645b6c0acc6",
+                    "type": "QUIZ_SINGLE_CHOICE",
+                    "points": 1,
+                    "config": {
+                        "media": {
+                            "type": "YOUTUBE",
+                            "sourceYT": {
+                                "id": "",
+                                "source": "",
+                                "name": ""
+                            },
+                            "sourceRecord": {
+                                "id": "",
+                                "source": "",
+                                "name": ""
+                            },
+                            "sourceFiles": {
+                                "file": [],
+                                "image": []
+                            }
+                        },
+                        "isAdvanced": false,
+                        "questionText": "<p>Trên các biển và đại dương có những loại dòng biển nào sau đây?</p>",
+                        "options": [
+                            {
+                                "id": "74e7df28-8a31-4218-a71b-084dbd1dd40d",
+                                "text": "Dòng biển nóng và dòng biển lạnh."
+                            },
+                            {
+                                "id": "3ee80152-f8ea-4310-8f28-f787c8f80069",
+                                "text": "Dòng biển lạnh và dòng biển nguội."
+                            },
+                            {
+                                "id": "47ffc29c-e742-4622-ac61-29a0874955a1",
+                                "text": "Dòng biển nóng và dòng biển trắng."
+                            },
+                            {
+                                "id": "f983a8a5-7e4b-4eb9-b7c1-160f78d6bcda",
+                                "text": "Dòng biển trắng và dòng biển nguội."
+                            }
+                        ],
+                        "correctAnswer": "opt_1"
+                    },
+                    "ordinalNumber": 4
+                },
+                {
+                    "id": "q_c35eeb46-d25b-495f-8a5e-3fd9137e53d6",
+                    "type": "QUIZ_SINGLE_CHOICE",
+                    "points": 1,
+                    "config": {
+                        "media": {
+                            "type": "YOUTUBE",
+                            "sourceYT": {
+                                "id": "",
+                                "source": "",
+                                "name": ""
+                            },
+                            "sourceRecord": {
+                                "id": "",
+                                "source": "",
+                                "name": ""
+                            },
+                            "sourceFiles": {
+                                "file": [],
+                                "image": []
+                            }
+                        },
+                        "isAdvanced": false,
+                        "questionText": "<p>Độ muối trung bình của đại dương là</p>",
+                        "options": [
+                            {
+                                "id": "8bebd760-b7bb-4191-9a7a-8e7f6c498b6d",
+                                "text": "32‰."
+                            },
+                            {
+                                "id": "f99ac275-770a-4d57-aeb3-4b39532cce33",
+                                "text": "34‰."
+                            },
+                            {
+                                "id": "a038922e-fea1-4619-ab7f-395011324a0d",
+                                "text": "35‰."
+                            },
+                            {
+                                "id": "d21f538b-8a76-420e-acc8-caa1fc4e0d32",
+                                "text": "33‰."
+                            }
+                        ],
+                        "correctAnswer": "opt_3"
+                    },
+                    "ordinalNumber": 5
+                },
+                {
+                    "id": "q_534ce663-0aaf-4752-b607-db8ba449d9e2",
+                    "type": "QUIZ_SINGLE_CHOICE",
+                    "points": 1,
+                    "config": {
+                        "media": {
+                            "type": "YOUTUBE",
+                            "sourceYT": {
+                                "id": "",
+                                "source": "",
+                                "name": ""
+                            },
+                            "sourceRecord": {
+                                "id": "",
+                                "source": "",
+                                "name": ""
+                            },
+                            "sourceFiles": {
+                                "file": [],
+                                "image": []
+                            }
+                        },
+                        "isAdvanced": false,
+                        "questionText": "<p>Hình thức dao động theo chiều thẳng đứng của nước biển và đại dương gọi là</p>",
+                        "options": [
+                            {
+                                "id": "24bb800a-d119-4a3a-b973-dcc65fc57bc0",
+                                "text": "sóng biển."
+                            },
+                            {
+                                "id": "25f92beb-8a9b-4835-8627-242d34cf78e7",
+                                "text": "dòng biển."
+                            },
+                            {
+                                "id": "a7ef1f30-727f-441d-abbe-0f6982266396",
+                                "text": "thủy triều."
+                            },
+                            {
+                                "id": "a33c2db3-f396-4f91-a6d5-67108239e7ad",
+                                "text": "triều cường."
+                            }
+                        ],
+                        "correctAnswer": "opt_3"
+                    },
+                    "ordinalNumber": 6
+                },
+                {
+                    "id": "q_7523b286-5926-4f58-977e-255749024784",
+                    "type": "QUIZ_SINGLE_CHOICE",
+                    "points": 1,
+                    "config": {
+                        "media": {
+                            "type": "YOUTUBE",
+                            "sourceYT": {
+                                "id": "",
+                                "source": "",
+                                "name": ""
+                            },
+                            "sourceRecord": {
+                                "id": "",
+                                "source": "",
+                                "name": ""
+                            },
+                            "sourceFiles": {
+                                "file": [],
+                                "image": []
+                            }
+                        },
+                        "isAdvanced": false,
+                        "questionText": "<p>Nguyên nhân chủ yếu gây ra sóng thần là do</p>",
+                        "options": [
+                            {
+                                "id": "deb76dea-fc91-47ee-8790-144520288aa0",
+                                "text": "bão, lốc xoáy trên các đại dương."
+                            },
+                            {
+                                "id": "a4b1f4d0-c13c-4c7d-8c02-b9a7fa28ea61",
+                                "text": "chuyển động của dòng khí xoáy."
+                            },
+                            {
+                                "id": "5e4529df-45f2-4abc-a27c-e87049fd2d02",
+                                "text": "sự thay đổi áp suất của khí quyển."
+                            },
+                            {
+                                "id": "fe86867c-a2cf-4383-8209-85c59ada971e",
+                                "text": "động đất ngầm dưới đáy biển."
+                            }
+                        ],
+                        "correctAnswer": "opt_4"
+                    },
+                    "ordinalNumber": 7
+                },
+                {
+                    "id": "q_88bd1ce2-8313-4b9e-a21b-f81c3221c589",
+                    "type": "QUIZ_SINGLE_CHOICE",
+                    "points": 1,
+                    "config": {
+                        "media": {
+                            "type": "YOUTUBE",
+                            "sourceYT": {
+                                "id": "",
+                                "source": "",
+                                "name": ""
+                            },
+                            "sourceRecord": {
+                                "id": "",
+                                "source": "",
+                                "name": ""
+                            },
+                            "sourceFiles": {
+                                "file": [],
+                                "image": []
+                            }
+                        },
+                        "isAdvanced": false,
+                        "questionText": "<p>Nguồn gốc sinh ra thành phần hữu cơ trong đất là</p>",
+                        "options": [
+                            {
+                                "id": "6659edac-f57d-49ca-9f6e-e4675e7a18c1",
+                                "text": "sinh vật."
+                            },
+                            {
+                                "id": "0ef6b393-49b0-4581-a340-1f0a2f4203dd",
+                                "text": "đá mẹ."
+                            },
+                            {
+                                "id": "ef17470c-b741-4eb8-9137-b27f926b2fc8",
+                                "text": "địa hình."
+                            },
+                            {
+                                "id": "59ac01fa-a86d-46b3-ad2c-92dbc1935eb5",
+                                "text": "khí hậu."
+                            }
+                        ],
+                        "correctAnswer": "opt_1"
+                    },
+                    "ordinalNumber": 8
+                },
+                {
+                    "id": "q_14390a3f-7316-445b-af88-d94886383ba4",
+                    "type": "QUIZ_SINGLE_CHOICE",
+                    "points": 1,
+                    "config": {
+                        "media": {
+                            "type": "YOUTUBE",
+                            "sourceYT": {
+                                "id": "",
+                                "source": "",
+                                "name": ""
+                            },
+                            "sourceRecord": {
+                                "id": "",
+                                "source": "",
+                                "name": ""
+                            },
+                            "sourceFiles": {
+                                "file": [],
+                                "image": []
+                            }
+                        },
+                        "isAdvanced": false,
+                        "questionText": "<p>Khí hậu ôn đới lục địa có nhóm đất chính nào sau đây?</p>",
+                        "options": [
+                            {
+                                "id": "d440b568-071b-445b-b58f-f892a40aee25",
+                                "text": "Đất pốtdôn."
+                            },
+                            {
+                                "id": "3fe9b403-0a03-4db7-94c8-3a13ae9837fa",
+                                "text": "Đất đen."
+                            },
+                            {
+                                "id": "03000ab8-3b98-47b2-8de8-456cc3cf2716",
+                                "text": "Đất đỏ vàng."
+                            },
+                            {
+                                "id": "756c2a54-69d7-4a29-99b6-702c1d42f577",
+                                "text": "Đất nâu đỏ."
+                            }
+                        ],
+                        "correctAnswer": "opt_2"
+                    },
+                    "ordinalNumber": 9
+                },
+                {
+                    "id": "q_370c1f79-5d6b-4ec5-afe1-56027aaee408",
+                    "type": "QUIZ_SINGLE_CHOICE",
+                    "points": 1,
+                    "config": {
+                        "media": {
+                            "type": "YOUTUBE",
+                            "sourceYT": {
+                                "id": "",
+                                "source": "",
+                                "name": ""
+                            },
+                            "sourceRecord": {
+                                "id": "",
+                                "source": "",
+                                "name": ""
+                            },
+                            "sourceFiles": {
+                                "file": [],
+                                "image": []
+                            }
+                        },
+                        "isAdvanced": false,
+                        "questionText": "<p>Ở khu vực rừng nhiệt đới ẩm có loại đất nào sau đây?</p>",
+                        "options": [
+                            {
+                                "id": "937e8fb4-e5f6-43ef-883b-1ca0cd74dbf3",
+                                "text": "Xám."
+                            },
+                            {
+                                "id": "0a22448f-413d-4336-90b5-c72855e438e4",
+                                "text": "Feralit."
+                            },
+                            {
+                                "id": "440f9203-7ef4-42f3-948b-5823b2ab91bd",
+                                "text": "Đen."
+                            },
+                            {
+                                "id": "c6e823ca-8c51-4301-9d46-1029ce3935c6",
+                                "text": "Pốtdôn."
+                            }
+                        ],
+                        "correctAnswer": "opt_2"
+                    },
+                    "ordinalNumber": 10
+                },
+                {
+                    "id": "q_abea0a48-4595-40ba-98ae-e065fc491be5",
+                    "type": "QUIZ_SINGLE_CHOICE",
+                    "points": 1,
+                    "config": {
+                        "media": {
+                            "type": "YOUTUBE",
+                            "sourceYT": {
+                                "id": "",
+                                "source": "",
+                                "name": ""
+                            },
+                            "sourceRecord": {
+                                "id": "",
+                                "source": "",
+                                "name": ""
+                            },
+                            "sourceFiles": {
+                                "file": [],
+                                "image": []
+                            }
+                        },
+                        "isAdvanced": false,
+                        "questionText": "<p>Thổ nhưỡng là gì?</p>",
+                        "options": [
+                            {
+                                "id": "b5bec95d-6a38-435e-b0ae-bb62db382327",
+                                "text": "Lớp vật chất vụn bở trên bề mặt lục địa, hình thành từ quá trình phong hóa."
+                            },
+                            {
+                                "id": "72911ac7-0e8a-4771-85a4-8e1ce332ee81",
+                                "text": "Lớp vật chất tơi xốp ở bề mặt lục địa và các đảo, được đặc trưng bởi độ phì."
+                            },
+                            {
+                                "id": "74ba046e-885b-43d1-925b-2b7154216bcf",
+                                "text": "Lớp vật chất vụn bở, trên đó con người tiến hành các hoạt động trồng trọt."
+                            },
+                            {
+                                "id": "8f696661-b05b-42a3-972e-f890ab4c77a0",
+                                "text": "Lớp vật chất tự nhiên, được con người cải tạo đưa vào sản xuất nông nghiệp."
+                            }
+                        ],
+                        "correctAnswer": "opt_2"
+                    },
+                    "ordinalNumber": 11
+                },
+                {
+                    "id": "q_d4147fb0-5768-4a08-9860-1f75074f5caa",
+                    "type": "QUIZ_SINGLE_CHOICE",
+                    "points": 1,
+                    "config": {
+                        "media": {
+                            "type": "YOUTUBE",
+                            "sourceYT": {
+                                "id": "",
+                                "source": "",
+                                "name": ""
+                            },
+                            "sourceRecord": {
+                                "id": "",
+                                "source": "",
+                                "name": ""
+                            },
+                            "sourceFiles": {
+                                "file": [],
+                                "image": []
+                            }
+                        },
+                        "isAdvanced": false,
+                        "questionText": "<p>Các thành phần chính của lớp đất là</p>",
+                        "options": [
+                            {
+                                "id": "65450a4e-2bdb-4fde-9040-aa7c4d9c4a45",
+                                "text": "không khí, nước, chất hữu cơ và vô cơ."
+                            },
+                            {
+                                "id": "43a01b83-75d1-4518-8b29-4dfc8fd98b17",
+                                "text": "cơ giới, không khí, chất vô cơ và mùn."
+                            },
+                            {
+                                "id": "612d9a73-dbca-4e95-b677-77327f1d0a16",
+                                "text": "chất hữu cơ, nước, không khí và sinh vật."
+                            },
+                            {
+                                "id": "995e06f0-c34a-43ec-a231-b77b4099d3b2",
+                                "text": "nước, không khí, chất hữu cơ và độ phì."
+                            }
+                        ],
+                        "correctAnswer": "opt_3"
+                    },
+                    "ordinalNumber": 12
+                },
+                {
+                    "id": "q_94de61be-27af-4bf0-8fde-51f82358c195",
+                    "type": "QUIZ_SINGLE_CHOICE",
+                    "points": 1,
+                    "config": {
+                        "media": {
+                            "type": "YOUTUBE",
+                            "sourceYT": {
+                                "id": "",
+                                "source": "",
+                                "name": ""
+                            },
+                            "sourceRecord": {
+                                "id": "",
+                                "source": "",
+                                "name": ""
+                            },
+                            "sourceFiles": {
+                                "file": [],
+                                "image": []
+                            }
+                        },
+                        "isAdvanced": false,
+                        "questionText": "<p>Đặc điểm nào sau đây không đúng với thành phần hữu cơ trong đất?</p>",
+                        "options": [
+                            {
+                                "id": "1331da9d-7a24-4f66-b558-18be66a50bb0",
+                                "text": "Thành phần quan trọng nhất của đất."
+                            },
+                            {
+                                "id": "d6c78a5b-7fc1-4316-8d5a-a71bb9198246",
+                                "text": "Chiếm một tỉ lệ nhỏ trong lớp đất."
+                            },
+                            {
+                                "id": "05cca293-779d-4227-be21-746321fa41ed",
+                                "text": "Đá mẹ là sinh ra thành phần hữu cơ."
+                            },
+                            {
+                                "id": "b0399633-f5cc-4b6f-b268-702c51c844ce",
+                                "text": "Thường ở tầng trên cùng của đất."
+                            }
+                        ],
+                        "correctAnswer": "opt_3"
+                    },
+                    "ordinalNumber": 13
+                },
+                {
+                    "id": "q_44aadd0f-465c-4953-a706-9848957366e0",
+                    "type": "QUIZ_SINGLE_CHOICE",
+                    "points": 1,
+                    "config": {
+                        "media": {
+                            "type": "YOUTUBE",
+                            "sourceYT": {
+                                "id": "",
+                                "source": "",
+                                "name": ""
+                            },
+                            "sourceRecord": {
+                                "id": "",
+                                "source": "",
+                                "name": ""
+                            },
+                            "sourceFiles": {
+                                "file": [],
+                                "image": []
+                            }
+                        },
+                        "isAdvanced": false,
+                        "questionText": "<p>Nguồn gốc sinh ra thành phần khoáng trong đất là</p>",
+                        "options": [
+                            {
+                                "id": "f27b3fa6-3cbb-44b8-b290-b845454d241d",
+                                "text": "khí hậu."
+                            },
+                            {
+                                "id": "db33ea42-a8e8-487e-99d4-1bd098ae1437",
+                                "text": "địa hình."
+                            },
+                            {
+                                "id": "10714f45-f3f1-4b33-b488-e7432d0dfeb4",
+                                "text": "đá mẹ."
+                            },
+                            {
+                                "id": "175693c4-ee24-420e-89a7-588fe098b7cd",
+                                "text": "sinh vật."
+                            }
+                        ],
+                        "correctAnswer": "opt_3"
+                    },
+                    "ordinalNumber": 14
+                },
+                {
+                    "id": "q_a1147013-e734-40fe-b9ec-b0f39410169b",
+                    "type": "QUIZ_SINGLE_CHOICE",
+                    "points": 1,
+                    "config": {
+                        "media": {
+                            "type": "YOUTUBE",
+                            "sourceYT": {
+                                "id": "",
+                                "source": "",
+                                "name": ""
+                            },
+                            "sourceRecord": {
+                                "id": "",
+                                "source": "",
+                                "name": ""
+                            },
+                            "sourceFiles": {
+                                "file": [],
+                                "image": []
+                            }
+                        },
+                        "isAdvanced": false,
+                        "questionText": "<p>Thành phần hữu cơ của lớp đất có đặc điểm nào sau đây?</p>",
+                        "options": [
+                            {
+                                "id": "658a0fb9-f310-4048-b2f1-2bd001b04882",
+                                "text": "Chiếm một tỉ lệ lớn trong lớp đất."
+                            },
+                            {
+                                "id": "67a44f63-b617-4527-9806-a031af3849b5",
+                                "text": "Thành phần quan trọng nhất của đất."
+                            },
+                            {
+                                "id": "9116542d-5ac6-4a30-aa6a-e7685fb933cd",
+                                "text": "Tồn tại ở giữa các khe hở của đất."
+                            },
+                            {
+                                "id": "96956e30-953a-4b72-b9ab-2cf07afc8187",
+                                "text": "Nằm ở tầng dưới cùng của lớp đất."
+                            }
+                        ],
+                        "correctAnswer": "opt_2"
+                    },
+                    "ordinalNumber": 15
+                },
+                {
+                    "id": "q_150b3d4d-eaea-4770-afab-fc16146ba1f7",
+                    "type": "QUIZ_SINGLE_CHOICE",
+                    "points": 1,
+                    "config": {
+                        "media": {
+                            "type": "YOUTUBE",
+                            "sourceYT": {
+                                "id": "",
+                                "source": "",
+                                "name": ""
+                            },
+                            "sourceRecord": {
+                                "id": "",
+                                "source": "",
+                                "name": ""
+                            },
+                            "sourceFiles": {
+                                "file": [],
+                                "image": []
+                            }
+                        },
+                        "isAdvanced": false,
+                        "questionText": "<p>Tầng nào sau đây của đất chứa các sản phẩm phong hóa bị biến đổi để hình thành đất?</p>",
+                        "options": [
+                            {
+                                "id": "08fd6900-8cb2-435d-af02-a8764013a252",
+                                "text": "Tích tụ."
+                            },
+                            {
+                                "id": "d4653c1c-c140-429d-a171-eff53ad5caf9",
+                                "text": "Thảm mùn."
+                            },
+                            {
+                                "id": "fd4a8468-c6c4-423a-bf7e-0892b367659e",
+                                "text": "Đá mẹ."
+                            },
+                            {
+                                "id": "d954334e-30fa-4aa2-aed4-16592d6ebf45",
+                                "text": "Hữu cơ."
+                            }
+                        ],
+                        "correctAnswer": "opt_1"
+                    },
+                    "ordinalNumber": 16
+                },
+                {
+                    "id": "q_bf76b6b7-993f-439f-9361-54879131ec7e",
+                    "type": "QUIZ_SINGLE_CHOICE",
+                    "points": 1,
+                    "config": {
+                        "media": {
+                            "type": "YOUTUBE",
+                            "sourceYT": {
+                                "id": "",
+                                "source": "",
+                                "name": ""
+                            },
+                            "sourceRecord": {
+                                "id": "",
+                                "source": "",
+                                "name": ""
+                            },
+                            "sourceFiles": {
+                                "file": [],
+                                "image": []
+                            }
+                        },
+                        "isAdvanced": false,
+                        "questionText": "<p>Khu vực Đông Nam Á có nhóm đất chính nào?</p>",
+                        "options": [
+                            {
+                                "id": "14e7cf16-2953-4a33-a1aa-a505d80b2770",
+                                "text": "Đất pốtdôn hoặc đất đài nguyên."
+                            },
+                            {
+                                "id": "6505f858-b44f-4e7a-a28b-8edca871ec50",
+                                "text": "Đất đỏ vàng cận nhiệt ẩm, đất đen."
+                            },
+                            {
+                                "id": "09cf9844-949b-4c5e-848e-75e0583314fb",
+                                "text": "Đất đỏ hoặc đất nâu đỏ xavan."
+                            },
+                            {
+                                "id": "0fdd6af1-d643-4a2a-b5bb-cecd6a92633e",
+                                "text": "Đất feralit hoặc đất đen nhiệt đới."
+                            }
+                        ],
+                        "correctAnswer": "opt_4"
+                    },
+                    "ordinalNumber": 17
+                },
+                {
+                    "id": "q_751489a1-07d0-4025-afb9-9c6f7a5dee74",
+                    "type": "QUIZ_SINGLE_CHOICE",
+                    "points": 1,
+                    "config": {
+                        "media": {
+                            "type": "YOUTUBE",
+                            "sourceYT": {
+                                "id": "",
+                                "source": "",
+                                "name": ""
+                            },
+                            "sourceRecord": {
+                                "id": "",
+                                "source": "",
+                                "name": ""
+                            },
+                            "sourceFiles": {
+                                "file": [],
+                                "image": []
+                            }
+                        },
+                        "isAdvanced": false,
+                        "questionText": "<p>Loại đất nào sau đây thường được dùng để trồng cây lúa nước?</p>",
+                        "options": [
+                            {
+                                "id": "850994a7-1bd7-4862-89d4-e7fe73e4183f",
+                                "text": "Đất phù sa."
+                            },
+                            {
+                                "id": "1fc28463-9e41-4732-be9c-28e4b953a4ec",
+                                "text": "Đất đỏ badan."
+                            },
+                            {
+                                "id": "1e9d2101-b899-4761-829f-6a69ac93ef12",
+                                "text": "Đất feralit."
+                            },
+                            {
+                                "id": "9ed1ad74-c539-4046-88d0-9aa2b26ceaaf",
+                                "text": "Đất đen, xám."
+                            }
+                        ],
+                        "correctAnswer": "opt_1"
+                    },
+                    "ordinalNumber": 18
+                },
+                {
+                    "id": "q_00807011-b43a-4926-860b-8707e96cbacf",
+                    "type": "QUIZ_SINGLE_CHOICE",
+                    "points": 1,
+                    "config": {
+                        "media": {
+                            "type": "YOUTUBE",
+                            "sourceYT": {
+                                "id": "",
+                                "source": "",
+                                "name": ""
+                            },
+                            "sourceRecord": {
+                                "id": "",
+                                "source": "",
+                                "name": ""
+                            },
+                            "sourceFiles": {
+                                "file": [],
+                                "image": []
+                            }
+                        },
+                        "isAdvanced": false,
+                        "questionText": "<p>Hai yếu tố của khí hậu ảnh hưởng trực tiếp đến quá trình hình thành đất là</p>",
+                        "options": [
+                            {
+                                "id": "766fa444-23ff-4005-bff9-69cfd80f703c",
+                                "text": "bức xạ và lượng mưa."
+                            },
+                            {
+                                "id": "d8d937c3-6b56-467b-b2fd-1647b7d216d7",
+                                "text": "độ ẩm và lượng mưa."
+                            },
+                            {
+                                "id": "2582e7d1-17b1-4e67-8ee3-d0585ac00285",
+                                "text": "nhiệt độ và lượng mưa."
+                            },
+                            {
+                                "id": "1267a9eb-4d0c-48d0-9ff9-15f8a97b2d18",
+                                "text": "nhiệt độ và ánh sáng."
+                            }
+                        ],
+                        "correctAnswer": "opt_3"
+                    },
+                    "ordinalNumber": 19
+                },
+                {
+                    "id": "q_635d0237-51b5-4f5d-848f-99749a67c9b5",
+                    "type": "QUIZ_SINGLE_CHOICE",
+                    "points": 1,
+                    "config": {
+                        "media": {
+                            "type": "YOUTUBE",
+                            "sourceYT": {
+                                "id": "",
+                                "source": "",
+                                "name": ""
+                            },
+                            "sourceRecord": {
+                                "id": "",
+                                "source": "",
+                                "name": ""
+                            },
+                            "sourceFiles": {
+                                "file": [],
+                                "image": []
+                            }
+                        },
+                        "isAdvanced": false,
+                        "questionText": "<p>Loại đất nào sau đây thường được dùng để trồng cây công nghiệp lâu năm?</p>",
+                        "options": [
+                            {
+                                "id": "3bb2263d-0902-4327-adbc-b78c2ca4f352",
+                                "text": "Đất đỏ badan."
+                            },
+                            {
+                                "id": "01e09d55-be99-4a1d-a424-033cdc8552f6",
+                                "text": "Đất phù sa."
+                            },
+                            {
+                                "id": "5affc463-6ada-4c1f-9f44-b8171e1053e4",
+                                "text": "Đất cát pha."
+                            },
+                            {
+                                "id": "1a5e1d9c-4d90-4657-98f4-9c57075e10be",
+                                "text": "Đất xám."
+                            }
+                        ],
+                        "correctAnswer": "opt_1"
+                    },
+                    "ordinalNumber": 20
+                },
+                {
+                    "id": "q_09a3eb73-374c-4452-b4b1-f6eec47b05a1",
+                    "type": "QUIZ_SINGLE_CHOICE",
+                    "points": 1,
+                    "config": {
+                        "media": {
+                            "type": "YOUTUBE",
+                            "sourceYT": {
+                                "id": "",
+                                "source": "",
+                                "name": ""
+                            },
+                            "sourceRecord": {
+                                "id": "",
+                                "source": "",
+                                "name": ""
+                            },
+                            "sourceFiles": {
+                                "file": [],
+                                "image": []
+                            }
+                        },
+                        "isAdvanced": false,
+                        "questionText": "<p>Sinh vật trên Trái Đất tập trung chủ yếu ở</p>",
+                        "options": [
+                            {
+                                "id": "0fff241f-566f-4d36-b6b0-8ce7f258c1ee",
+                                "text": "đới ôn hòa và đới lạnh."
+                            },
+                            {
+                                "id": "8b61e8dc-ce58-4811-8b26-8aaa709decad",
+                                "text": "xích đạo và nhiệt đới."
+                            },
+                            {
+                                "id": "9e681e0f-913f-47ab-89ea-5ff2ab38dc4f",
+                                "text": "đới nóng và đới ôn hòa."
+                            },
+                            {
+                                "id": "9d7d54ec-d778-494b-8b17-b5ec8155a66b",
+                                "text": "đới lạnh và đới nóng."
+                            }
+                        ],
+                        "correctAnswer": "opt_2"
+                    },
+                    "ordinalNumber": 21
+                },
+                {
+                    "id": "q_f977ff3d-4ba1-4eb1-b1a4-ef82ca72cfd0",
+                    "type": "QUIZ_SINGLE_CHOICE",
+                    "points": 1,
+                    "config": {
+                        "media": {
+                            "type": "YOUTUBE",
+                            "sourceYT": {
+                                "id": "",
+                                "source": "",
+                                "name": ""
+                            },
+                            "sourceRecord": {
+                                "id": "",
+                                "source": "",
+                                "name": ""
+                            },
+                            "sourceFiles": {
+                                "file": [],
+                                "image": []
+                            }
+                        },
+                        "isAdvanced": false,
+                        "questionText": "<p>Rừng lá kim thường phân bố tương ứng với kiểu khí hậu nào sau đây?</p>",
+                        "options": [
+                            {
+                                "id": "857578e3-c19a-4909-9d45-8acde2046c4e",
+                                "text": "Nhiệt đới ẩm gió mùa."
+                            },
+                            {
+                                "id": "ee44c36b-a0e9-46a2-85c2-ad95b1af10ea",
+                                "text": "Ôn đới lục địa."
+                            },
+                            {
+                                "id": "918f6213-4a68-4d4e-9fff-a4861ab007c5",
+                                "text": "Ôn đới địa trung hải."
+                            },
+                            {
+                                "id": "9a80ad24-bc9f-4193-b4c2-03b98edb0004",
+                                "text": "Ôn đới hải dương."
+                            }
+                        ],
+                        "correctAnswer": "opt_2"
+                    },
+                    "ordinalNumber": 22
+                },
+                {
+                    "id": "q_4f2f3391-75fe-43d2-9eb7-8d7d501a6a20",
+                    "type": "QUIZ_SINGLE_CHOICE",
+                    "points": 1,
+                    "config": {
+                        "media": {
+                            "type": "YOUTUBE",
+                            "sourceYT": {
+                                "id": "",
+                                "source": "",
+                                "name": ""
+                            },
+                            "sourceRecord": {
+                                "id": "",
+                                "source": "",
+                                "name": ""
+                            },
+                            "sourceFiles": {
+                                "file": [],
+                                "image": []
+                            }
+                        },
+                        "isAdvanced": false,
+                        "questionText": "<p>Các thảm thực vật trên Trái Đất thường phân bố theo sự thay đổi nào sau đây?</p>",
+                        "options": [
+                            {
+                                "id": "a4a8b3fd-443c-4c66-8e54-4c54d319b1f8",
+                                "text": "Dạng và hướng địa hình."
+                            },
+                            {
+                                "id": "a299259f-b800-4534-bb7f-bc5d46b09d3d",
+                                "text": "Độ cao và hướng sườn."
+                            },
+                            {
+                                "id": "786d1c2a-0018-4179-80f4-9626f356f5f7",
+                                "text": "Vĩ độ và độ cao địa hình."
+                            },
+                            {
+                                "id": "80827a5c-3719-4caf-b743-fd856ee7bb6c",
+                                "text": "Vị trí gần, xa đại dương."
+                            }
+                        ],
+                        "correctAnswer": "opt_3"
+                    },
+                    "ordinalNumber": 23
+                },
+                {
+                    "id": "q_9d9aebfa-1e94-472d-8dd4-51e3d0314f01",
+                    "type": "QUIZ_SINGLE_CHOICE",
+                    "points": 1,
+                    "config": {
+                        "media": {
+                            "type": "YOUTUBE",
+                            "sourceYT": {
+                                "id": "",
+                                "source": "",
+                                "name": ""
+                            },
+                            "sourceRecord": {
+                                "id": "",
+                                "source": "",
+                                "name": ""
+                            },
+                            "sourceFiles": {
+                                "file": [],
+                                "image": []
+                            }
+                        },
+                        "isAdvanced": false,
+                        "questionText": "<p>Khí hậu nhiệt đới gió mùa có kiểu thảm thực vật chính nào sau đây?</p>",
+                        "options": [
+                            {
+                                "id": "d3f0d695-a9ab-42f8-a799-3007323c5f31",
+                                "text": "Rừng hỗn hợp."
+                            },
+                            {
+                                "id": "95f42f2e-0d76-4d18-b6ab-9644c1ef8be2",
+                                "text": "Rừng cận nhiệt ẩm."
+                            },
+                            {
+                                "id": "e4c6b187-3b6c-425a-8c55-55c4139149dc",
+                                "text": "Rừng lá rộng."
+                            },
+                            {
+                                "id": "ec6cf9ff-a5ea-4bec-b0d2-2c7116cb7594",
+                                "text": "Rừng nhiệt đới ẩm."
+                            }
+                        ],
+                        "correctAnswer": "opt_4"
+                    },
+                    "ordinalNumber": 24
+                },
+                {
+                    "id": "q_fd14be1e-6263-465a-b2c4-44333f9f93f9",
+                    "type": "QUIZ_SINGLE_CHOICE",
+                    "points": 1,
+                    "config": {
+                        "media": {
+                            "type": "YOUTUBE",
+                            "sourceYT": {
+                                "id": "",
+                                "source": "",
+                                "name": ""
+                            },
+                            "sourceRecord": {
+                                "id": "",
+                                "source": "",
+                                "name": ""
+                            },
+                            "sourceFiles": {
+                                "file": [],
+                                "image": []
+                            }
+                        },
+                        "isAdvanced": false,
+                        "questionText": "<p>Những loài thực vật tiêu biểu ở miền cực có khí hậu lạnh giá là</p>",
+                        "options": [
+                            {
+                                "id": "713ecdff-f1ef-4902-991c-9da863f5c937",
+                                "text": "cây lá kim."
+                            },
+                            {
+                                "id": "5f02cc6b-e77f-4aa0-ad53-1a77e660f301",
+                                "text": "cây lá cứng."
+                            },
+                            {
+                                "id": "7c9b6a20-f59b-47d7-af0b-400b572b06d7",
+                                "text": "rêu, địa y."
+                            },
+                            {
+                                "id": "9bd21388-a5d0-4734-bfd3-581a60dac33c",
+                                "text": "sồi, dẻ, lim."
+                            }
+                        ],
+                        "correctAnswer": "opt_3"
+                    },
+                    "ordinalNumber": 25
+                },
+                {
+                    "id": "q_e9b4b212-b77a-4e45-aee4-5a3f18218ca5",
+                    "type": "QUIZ_SINGLE_CHOICE",
+                    "points": 1,
+                    "config": {
+                        "media": {
+                            "type": "YOUTUBE",
+                            "sourceYT": {
+                                "id": "",
+                                "source": "",
+                                "name": ""
+                            },
+                            "sourceRecord": {
+                                "id": "",
+                                "source": "",
+                                "name": ""
+                            },
+                            "sourceFiles": {
+                                "file": [],
+                                "image": []
+                            }
+                        },
+                        "isAdvanced": false,
+                        "questionText": "<p>Các loài động vật nào sau đây thuộc loài động vật di cư?</p>",
+                        "options": [
+                            {
+                                "id": "11d56aab-0d75-4015-957d-2d6cc2bce573",
+                                "text": "Gấu trắng Bắc Cực."
+                            },
+                            {
+                                "id": "2ea63611-a112-4cbd-a2fe-3e5f73aa3fc0",
+                                "text": "Vượn cáo nhiệt đới."
+                            },
+                            {
+                                "id": "cd0f82de-c38c-49b9-a73e-b1474e3f2f01",
+                                "text": "Các loài chim."
+                            },
+                            {
+                                "id": "9cc79e48-9d79-49a7-9779-35b8fda6c974",
+                                "text": "Thú túi châu Phi."
+                            }
+                        ],
+                        "correctAnswer": "opt_3"
+                    },
+                    "ordinalNumber": 26
+                },
+                {
+                    "id": "q_636372a5-6da8-4800-93d7-0a6473d198f7",
+                    "type": "QUIZ_SINGLE_CHOICE",
+                    "points": 1,
+                    "config": {
+                        "media": {
+                            "type": "YOUTUBE",
+                            "sourceYT": {
+                                "id": "",
+                                "source": "",
+                                "name": ""
+                            },
+                            "sourceRecord": {
+                                "id": "",
+                                "source": "",
+                                "name": ""
+                            },
+                            "sourceFiles": {
+                                "file": [],
+                                "image": []
+                            }
+                        },
+                        "isAdvanced": false,
+                        "questionText": "<p>Rừng mưa nhiệt đới phân bố chủ yếu ở nơi có khí hậu</p>",
+                        "options": [
+                            {
+                                "id": "56d7c721-376e-46d3-9ab3-fde45699a18e",
+                                "text": "nóng, khô, lượng mưa nhỏ."
+                            },
+                            {
+                                "id": "1dbf9829-015f-4c12-a359-c3d678b14344",
+                                "text": "mưa nhiều, ít nắng, ẩm lớn."
+                            },
+                            {
+                                "id": "58893fc3-52dd-4e9d-98a9-e259b3406bf0",
+                                "text": "nóng, ẩm, lượng mưa lớn."
+                            },
+                            {
+                                "id": "2148081e-dc2d-4652-a522-9b10a88c6b11",
+                                "text": "ít mưa, khô ráo, nhiều nắng."
+                            }
+                        ],
+                        "correctAnswer": "opt_3"
+                    },
+                    "ordinalNumber": 27
+                },
+                {
+                    "id": "q_c7d7dc0a-d7fc-4b6b-86d3-210e076a8d51",
+                    "type": "QUIZ_SINGLE_CHOICE",
+                    "points": 1,
+                    "config": {
+                        "media": {
+                            "type": "YOUTUBE",
+                            "sourceYT": {
+                                "id": "",
+                                "source": "",
+                                "name": ""
+                            },
+                            "sourceRecord": {
+                                "id": "",
+                                "source": "",
+                                "name": ""
+                            },
+                            "sourceFiles": {
+                                "file": [],
+                                "image": []
+                            }
+                        },
+                        "isAdvanced": false,
+                        "questionText": "<p>Sự đa dạng của sinh vật được thể hiện ở sự đa dạng của</p>",
+                        "options": [
+                            {
+                                "id": "66aefcfc-941b-4b1b-9e36-dde7dfbcd201",
+                                "text": "số lượng loài."
+                            },
+                            {
+                                "id": "00ca8306-fe2a-41e4-82f6-d574442f57a4",
+                                "text": "môi trường sống."
+                            },
+                            {
+                                "id": "42cd2b4d-2915-4c60-9423-ba61cd9c667e",
+                                "text": "nguồn cấp gen."
+                            },
+                            {
+                                "id": "54aad47f-ff85-4528-a8f8-765adc910f36",
+                                "text": "thành phần loài."
+                            }
+                        ],
+                        "correctAnswer": "opt_1"
+                    },
+                    "ordinalNumber": 28
+                },
+                {
+                    "id": "q_512d8e30-44c6-4d0d-8320-f1a0511c80bc",
+                    "type": "QUIZ_SINGLE_CHOICE",
+                    "points": 1,
+                    "config": {
+                        "media": {
+                            "type": "YOUTUBE",
+                            "sourceYT": {
+                                "id": "",
+                                "source": "",
+                                "name": ""
+                            },
+                            "sourceRecord": {
+                                "id": "",
+                                "source": "",
+                                "name": ""
+                            },
+                            "sourceFiles": {
+                                "file": [],
+                                "image": []
+                            }
+                        },
+                        "isAdvanced": false,
+                        "questionText": "<p>Rừng nhiệt đới được chia thành hai kiểu chính nào sau đây?</p>",
+                        "options": [
+                            {
+                                "id": "21ad461f-d009-42af-91ee-5c48a55968f1",
+                                "text": "Rừng mưa nhiệt đới và rừng nhiệt đới gió mùa."
+                            },
+                            {
+                                "id": "006dd0ca-8bd1-492b-9a44-3f17869fdb07",
+                                "text": "Rừng mưa nhiệt đới và rừng cận nhiệt đới mùa."
+                            },
+                            {
+                                "id": "ce49b74d-700d-45c6-b00e-bff56c26f1ee",
+                                "text": "Rừng nhiệt đới ẩm và rừng nhiệt đới xích đạo."
+                            },
+                            {
+                                "id": "65acd9b1-278d-4475-8f1a-3d7ff4de986c",
+                                "text": "Rừng nhiệt đới khô và rừng cận nhiệt gió mùa."
+                            }
+                        ],
+                        "correctAnswer": "opt_1"
+                    },
+                    "ordinalNumber": 29
+                },
+                {
+                    "id": "q_d342e1d6-e810-4b7b-a015-814f55569aaf",
+                    "type": "QUIZ_SINGLE_CHOICE",
+                    "points": 1,
+                    "config": {
+                        "media": {
+                            "type": "YOUTUBE",
+                            "sourceYT": {
+                                "id": "",
+                                "source": "",
+                                "name": ""
+                            },
+                            "sourceRecord": {
+                                "id": "",
+                                "source": "",
+                                "name": ""
+                            },
+                            "sourceFiles": {
+                                "file": [],
+                                "image": []
+                            }
+                        },
+                        "isAdvanced": false,
+                        "questionText": "<p>Nhân tố tự nhiên nào sau đây có ảnh hưởng đến sự phân bố sinh vật trên Trái Đất rõ nhất?</p>",
+                        "options": [
+                            {
+                                "id": "896bba43-5804-4956-8678-8abc758a0b68",
+                                "text": "Khí hậu."
+                            },
+                            {
+                                "id": "96341f99-f52b-4a97-bb80-ba9008f578ba",
+                                "text": "Thổ nhưỡng."
+                            },
+                            {
+                                "id": "36822bbf-30f0-4d61-ab0b-586dfd08409d",
+                                "text": "Địa hình."
+                            },
+                            {
+                                "id": "2882c6e0-8947-4622-96cf-5f91cb2168da",
+                                "text": "Nguồn nước."
+                            }
+                        ],
+                        "correctAnswer": "opt_1"
+                    },
+                    "ordinalNumber": 30
+                },
+                {
+                    "id": "q_edc045ac-005f-4a59-9370-69d0535ced7b",
+                    "type": "QUIZ_SINGLE_CHOICE",
+                    "points": 1,
+                    "config": {
+                        "media": {
+                            "type": "YOUTUBE",
+                            "sourceYT": {
+                                "id": "",
+                                "source": "",
+                                "name": ""
+                            },
+                            "sourceRecord": {
+                                "id": "",
+                                "source": "",
+                                "name": ""
+                            },
+                            "sourceFiles": {
+                                "file": [],
+                                "image": []
+                            }
+                        },
+                        "isAdvanced": false,
+                        "questionText": "<p>Rừng nhiệt đới phân bố chủ yếu ở</p>",
+                        "options": [
+                            {
+                                "id": "11b61860-22a6-40ed-b127-e1efff6c2a99",
+                                "text": "vùng cận cực."
+                            },
+                            {
+                                "id": "c5941790-0094-4bfe-ac58-fbff67042643",
+                                "text": "vùng ôn đới."
+                            },
+                            {
+                                "id": "f9597631-3c1e-44e4-9102-c074390a0156",
+                                "text": "hai bên chí tuyến."
+                            },
+                            {
+                                "id": "0261289a-29b5-4c73-ba04-6644c5440bfa",
+                                "text": "hai bên xích đạo."
+                            }
+                        ],
+                        "correctAnswer": "opt_4"
+                    },
+                    "ordinalNumber": 31
+                },
+                {
+                    "id": "q_db5c59ce-7bb1-4512-b946-b30248c0bf1a",
+                    "type": "QUIZ_SINGLE_CHOICE",
+                    "points": 1,
+                    "config": {
+                        "media": {
+                            "type": "YOUTUBE",
+                            "sourceYT": {
+                                "id": "",
+                                "source": "",
+                                "name": ""
+                            },
+                            "sourceRecord": {
+                                "id": "",
+                                "source": "",
+                                "name": ""
+                            },
+                            "sourceFiles": {
+                                "file": [],
+                                "image": []
+                            }
+                        },
+                        "isAdvanced": false,
+                        "questionText": "<p>Rừng nào sau đây được mệnh danh là “lá phổi xanh” của Trái Đất?</p>",
+                        "options": [
+                            {
+                                "id": "c54ecbbf-5396-416e-9aa9-f3df62e5571f",
+                                "text": "Rừng cận nhiệt đới."
+                            },
+                            {
+                                "id": "06720b8d-d625-43a8-88e3-7f7b4dd5603d",
+                                "text": "Rừng ôn đới."
+                            },
+                            {
+                                "id": "7c7bbde4-d6f7-4724-8593-4a075734b480",
+                                "text": "Rừng nhiệt đới."
+                            },
+                            {
+                                "id": "de04db8c-bf40-48ef-89ca-d73e1033a4de",
+                                "text": "Rừng lá kim."
+                            }
+                        ],
+                        "correctAnswer": "opt_3"
+                    },
+                    "ordinalNumber": 32
+                },
+                {
+                    "id": "q_b66d4fd1-8a75-42ea-8437-19ffd935efd0",
+                    "type": "QUIZ_SINGLE_CHOICE",
+                    "points": 1,
+                    "config": {
+                        "media": {
+                            "type": "YOUTUBE",
+                            "sourceYT": {
+                                "id": "",
+                                "source": "",
+                                "name": ""
+                            },
+                            "sourceRecord": {
+                                "id": "",
+                                "source": "",
+                                "name": ""
+                            },
+                            "sourceFiles": {
+                                "file": [],
+                                "image": []
+                            }
+                        },
+                        "isAdvanced": false,
+                        "questionText": "<p>Ở đới nào sau đây thiên nhiên thay đổi theo bốn mùa rõ nét nhất?</p>",
+                        "options": [
+                            {
+                                "id": "4361e6a5-de79-4eea-b548-f82732c1cd9e",
+                                "text": "Nhiệt đới."
+                            },
+                            {
+                                "id": "b06278f6-d709-405b-85a6-149ebf19a33b",
+                                "text": "Cận nhiệt đới."
+                            },
+                            {
+                                "id": "0d932dc2-88a8-427f-a7c9-10bfaeeff1a7",
+                                "text": "Ôn đới."
+                            },
+                            {
+                                "id": "cdcd64c8-997a-4be7-82ca-f4d0eea12421",
+                                "text": "Hàn đới."
+                            }
+                        ],
+                        "correctAnswer": "opt_3"
+                    },
+                    "ordinalNumber": 33
+                },
+                {
+                    "id": "q_c2d88a36-5e47-4043-9a1f-9e3a13564fe3",
+                    "type": "QUIZ_SINGLE_CHOICE",
+                    "points": 1,
+                    "config": {
+                        "media": {
+                            "type": "YOUTUBE",
+                            "sourceYT": {
+                                "id": "",
+                                "source": "",
+                                "name": ""
+                            },
+                            "sourceRecord": {
+                                "id": "",
+                                "source": "",
+                                "name": ""
+                            },
+                            "sourceFiles": {
+                                "file": [],
+                                "image": []
+                            }
+                        },
+                        "isAdvanced": false,
+                        "questionText": "<p>Khu vực nào sau đây có dân cư thưa thớt?</p>",
+                        "options": [
+                            {
+                                "id": "501766ae-f05e-409a-bd13-40d8580f509e",
+                                "text": "Nam Á."
+                            },
+                            {
+                                "id": "21569350-b635-46cd-acf6-ed0f27ab9151",
+                                "text": "Tây Âu."
+                            },
+                            {
+                                "id": "ab89a982-18eb-4f5b-a267-fd5619d0307a",
+                                "text": "Bắc Á."
+                            },
+                            {
+                                "id": "c5b92b6e-4ba7-41c1-88e2-5ad05f09ecb5",
+                                "text": "Bra-xin."
+                            }
+                        ],
+                        "correctAnswer": "opt_3"
+                    },
+                    "ordinalNumber": 34
+                },
+                {
+                    "id": "q_4dea12f6-143e-4cd4-810e-9621e794b3f7",
+                    "type": "QUIZ_SINGLE_CHOICE",
+                    "points": 1,
+                    "config": {
+                        "media": {
+                            "type": "YOUTUBE",
+                            "sourceYT": {
+                                "id": "",
+                                "source": "",
+                                "name": ""
+                            },
+                            "sourceRecord": {
+                                "id": "",
+                                "source": "",
+                                "name": ""
+                            },
+                            "sourceFiles": {
+                                "file": [],
+                                "image": []
+                            }
+                        },
+                        "isAdvanced": false,
+                        "questionText": "<p>Hai khu vực nào sau đây ở châu Á có mật độ dân số cao nhất?</p>",
+                        "options": [
+                            {
+                                "id": "c683ff66-1741-43e3-b8f5-014189b26cc2",
+                                "text": "Bắc Á, Nam Á."
+                            },
+                            {
+                                "id": "c08d5b77-c4c7-4e62-9d21-1958e1231238",
+                                "text": "Đông Nam Á, Tây Á."
+                            },
+                            {
+                                "id": "6d583586-e265-4424-a9c6-034948b3c24a",
+                                "text": "Nam Á, Đông Á."
+                            },
+                            {
+                                "id": "ccd83a9e-c2f4-4ac9-a5c8-1a88f9c9a9bf",
+                                "text": "Đông Á, Tây Nam Á."
+                            }
+                        ],
+                        "correctAnswer": "opt_3"
+                    },
+                    "ordinalNumber": 35
+                },
+                {
+                    "id": "q_e2e88524-85d7-4355-ae8e-425edf3e62fd",
+                    "type": "QUIZ_SINGLE_CHOICE",
+                    "points": 1,
+                    "config": {
+                        "media": {
+                            "type": "YOUTUBE",
+                            "sourceYT": {
+                                "id": "",
+                                "source": "",
+                                "name": ""
+                            },
+                            "sourceRecord": {
+                                "id": "",
+                                "source": "",
+                                "name": ""
+                            },
+                            "sourceFiles": {
+                                "file": [],
+                                "image": []
+                            }
+                        },
+                        "isAdvanced": false,
+                        "questionText": "<p>Dân cư trên thế giới thường tập trung đông ở đồng bằng là do</p>",
+                        "options": [
+                            {
+                                "id": "44ac2097-9f57-4812-a658-de1c519442ed",
+                                "text": "ít chịu ảnh hưởng của thiên tai (bão, hạn hán)."
+                            },
+                            {
+                                "id": "55e69d34-2f74-4c62-84e4-1b086843a350",
+                                "text": "có nhiều khoáng sản, nguồn nước phong phú."
+                            },
+                            {
+                                "id": "c4d58005-3600-4dbb-95a2-c4ec4554d877",
+                                "text": "thuận lợi cho cư trú, giao lưu phát triển kinh tế."
+                            },
+                            {
+                                "id": "f2dbcb76-3eef-4acb-8c30-4cdf3ef89132",
+                                "text": "khí hậu mát mẻ, ổn định và tài nguyên đa dạng."
+                            }
+                        ],
+                        "correctAnswer": "opt_3"
+                    },
+                    "ordinalNumber": 36
+                },
+                {
+                    "id": "q_16bc0713-ea01-45b4-9686-231d0554cf54",
+                    "type": "QUIZ_SINGLE_CHOICE",
+                    "points": 1,
+                    "config": {
+                        "media": {
+                            "type": "YOUTUBE",
+                            "sourceYT": {
+                                "id": "",
+                                "source": "",
+                                "name": ""
+                            },
+                            "sourceRecord": {
+                                "id": "",
+                                "source": "",
+                                "name": ""
+                            },
+                            "sourceFiles": {
+                                "file": [],
+                                "image": []
+                            }
+                        },
+                        "isAdvanced": false,
+                        "questionText": "<p>Châu lục nào sau đây tập trung đông dân nhất thế giới?</p>",
+                        "options": [
+                            {
+                                "id": "4dad114e-8f2f-4beb-a476-c8344705e898",
+                                "text": "Châu Á."
+                            },
+                            {
+                                "id": "5e9a8108-987a-4223-8f6d-e9054230df89",
+                                "text": "Châu Mĩ."
+                            },
+                            {
+                                "id": "7658721d-ae14-4fe2-a44d-a04bc9ab29ae",
+                                "text": "Châu Âu."
+                            },
+                            {
+                                "id": "2c9ec1f3-8078-4b7b-b241-f05de7f82bc9",
+                                "text": "Châu Phi."
+                            }
+                        ],
+                        "correctAnswer": "opt_1"
+                    },
+                    "ordinalNumber": 37
+                },
+                {
+                    "id": "q_3b444db8-3590-42d5-8d68-be478557023b",
+                    "type": "QUIZ_SINGLE_CHOICE",
+                    "points": 1,
+                    "config": {
+                        "media": {
+                            "type": "YOUTUBE",
+                            "sourceYT": {
+                                "id": "",
+                                "source": "",
+                                "name": ""
+                            },
+                            "sourceRecord": {
+                                "id": "",
+                                "source": "",
+                                "name": ""
+                            },
+                            "sourceFiles": {
+                                "file": [],
+                                "image": []
+                            }
+                        },
+                        "isAdvanced": false,
+                        "questionText": "<p>Dân cư thường tập trung đông ở khu vực nào sau đây?</p>",
+                        "options": [
+                            {
+                                "id": "7dad58c2-b0ad-4b41-91a1-a56e3c372925",
+                                "text": "Miền núi, mỏ khoáng sản."
+                            },
+                            {
+                                "id": "85088645-483f-489f-bd61-12abdfd9005b",
+                                "text": "Vùng đồng bằng, ven biển."
+                            },
+                            {
+                                "id": "46cd16e4-1a42-4283-855e-782e85a0c1ba",
+                                "text": "Các thung lũng, hẻm vực."
+                            },
+                            {
+                                "id": "0beccad2-0428-419e-bbc4-80083e9449b7",
+                                "text": "Các ốc đảo và cao nguyên."
+                            }
+                        ],
+                        "correctAnswer": "opt_2"
+                    },
+                    "ordinalNumber": 38
+                },
+                {
+                    "id": "q_d27d496c-406d-433d-9252-89dc42e3bf84",
+                    "type": "QUIZ_SINGLE_CHOICE",
+                    "points": 1,
+                    "config": {
+                        "media": {
+                            "type": "YOUTUBE",
+                            "sourceYT": {
+                                "id": "",
+                                "source": "",
+                                "name": ""
+                            },
+                            "sourceRecord": {
+                                "id": "",
+                                "source": "",
+                                "name": ""
+                            },
+                            "sourceFiles": {
+                                "file": [],
+                                "image": []
+                            }
+                        },
+                        "isAdvanced": false,
+                        "questionText": "<p>Chức năng hoạt động kinh tế ở đô thị chủ yếu là</p>",
+                        "options": [
+                            {
+                                "id": "57c6294f-4e8a-4c7f-88c0-fdf640b49f0b",
+                                "text": "công nghiệp, tiểu thủ công nghiệp."
+                            },
+                            {
+                                "id": "81348b9b-9e6f-4ccf-b7a3-5ec0c52cba18",
+                                "text": "dịch vụ, xây dựng, thủ công nghiệp."
+                            },
+                            {
+                                "id": "2703b296-25da-424f-b7e0-3168f50f099f",
+                                "text": "dịch vụ, công nghiệp và xây dựng."
+                            },
+                            {
+                                "id": "7bb1138b-2220-46a6-be65-ffc96be764df",
+                                "text": "nông nghiệp, tiểu thủ công nghiệp."
+                            }
+                        ],
+                        "correctAnswer": "opt_3"
+                    },
+                    "ordinalNumber": 39
+                },
+                {
+                    "id": "q_21569d19-46f4-4edb-8397-c66575e6fa7b",
+                    "type": "QUIZ_SINGLE_CHOICE",
+                    "points": 1,
+                    "config": {
+                        "media": {
+                            "type": "YOUTUBE",
+                            "sourceYT": {
+                                "id": "",
+                                "source": "",
+                                "name": ""
+                            },
+                            "sourceRecord": {
+                                "id": "",
+                                "source": "",
+                                "name": ""
+                            },
+                            "sourceFiles": {
+                                "file": [],
+                                "image": []
+                            }
+                        },
+                        "isAdvanced": false,
+                        "questionText": "<p>Dân cư phân bố thưa thớt ở những khu vực nào sau đây?</p>",
+                        "options": [
+                            {
+                                "id": "948f483c-dd3d-4c5b-b0bc-1fb3f9b89dec",
+                                "text": "Các trục giao thông."
+                            },
+                            {
+                                "id": "1dd4bc2e-e7df-4787-8b58-644f082802a0",
+                                "text": "Đồng bằng, trung du."
+                            },
+                            {
+                                "id": "fd322953-ea6a-49bb-8a8e-9c16512aa9de",
+                                "text": "Ven biển, ven sông."
+                            },
+                            {
+                                "id": "5b2459e6-63bc-4888-a1f4-ab2312e51ff2",
+                                "text": "Hoang mạc, hải đảo."
+                            }
+                        ],
+                        "correctAnswer": "opt_4"
+                    },
+                    "ordinalNumber": 40
+                },
+                {
+                    "id": "q_487a2cbf-9e97-4c32-8e43-bd4b482b20a8",
+                    "type": "QUIZ_SINGLE_CHOICE",
+                    "points": 1,
+                    "config": {
+                        "media": {
+                            "type": "YOUTUBE",
+                            "sourceYT": {
+                                "id": "",
+                                "source": "",
+                                "name": ""
+                            },
+                            "sourceRecord": {
+                                "id": "",
+                                "source": "",
+                                "name": ""
+                            },
+                            "sourceFiles": {
+                                "file": [],
+                                "image": []
+                            }
+                        },
+                        "isAdvanced": false,
+                        "questionText": "<p>Siêu đô thị Bắc Kinh thuộc quốc gia nào dưới đây?</p>",
+                        "options": [
+                            {
+                                "id": "6044353c-fc80-44b6-94dc-5eb7b50b8a3d",
+                                "text": "Nhật Bản."
+                            },
+                            {
+                                "id": "783de89f-7370-4fc3-ad0c-39a87cab4eba",
+                                "text": "Trung Quốc."
+                            },
+                            {
+                                "id": "f2782e7f-df7f-419a-bc1c-7ac799665f1e",
+                                "text": "Hàn Quốc."
+                            },
+                            {
+                                "id": "fa602500-34ba-4695-84ab-0b851a4bff1e",
+                                "text": "Triều Tiên."
+                            }
+                        ],
+                        "correctAnswer": "opt_2"
+                    },
+                    "ordinalNumber": 41
+                },
+                {
+                    "id": "q_b8b2f941-cbc5-4bd7-9a66-19a3e1929380",
+                    "type": "QUIZ_SINGLE_CHOICE",
+                    "points": 1,
+                    "config": {
+                        "media": {
+                            "type": "YOUTUBE",
+                            "sourceYT": {
+                                "id": "",
+                                "source": "",
+                                "name": ""
+                            },
+                            "sourceRecord": {
+                                "id": "",
+                                "source": "",
+                                "name": ""
+                            },
+                            "sourceFiles": {
+                                "file": [],
+                                "image": []
+                            }
+                        },
+                        "isAdvanced": false,
+                        "questionText": "<p>Quá trình đô thị hóa trên thế giới có đặc điểm nào sau đây?</p>",
+                        "options": [
+                            {
+                                "id": "e9c6630d-ce4b-4839-989c-5eb8ed8582cf",
+                                "text": "Dân cư tập trung vào các thành phố lớn, cực lớn."
+                            },
+                            {
+                                "id": "35a0ba1e-2301-4496-b04d-173544fe9dd9",
+                                "text": "Phổ biến các hoạt động sản xuất nông - lâm - ngư."
+                            },
+                            {
+                                "id": "01246c13-f4db-4fd3-a56a-8d16b277234d",
+                                "text": "Tỉ lệ người sống ở vùng nông thôn ngày càng tăng."
+                            },
+                            {
+                                "id": "79ad2af5-7ace-44b9-9109-3667daed9f51",
+                                "text": "Thất nghiệp ở đô thị và nông thôn ngày càng tăng."
+                            }
+                        ],
+                        "correctAnswer": "opt_1"
+                    },
+                    "ordinalNumber": 42
+                },
+                {
+                    "id": "q_1419c1bc-91f2-44fc-aadb-c82fa4586845",
+                    "type": "QUIZ_SINGLE_CHOICE",
+                    "points": 1,
+                    "config": {
+                        "media": {
+                            "type": "YOUTUBE",
+                            "sourceYT": {
+                                "id": "",
+                                "source": "",
+                                "name": ""
+                            },
+                            "sourceRecord": {
+                                "id": "",
+                                "source": "",
+                                "name": ""
+                            },
+                            "sourceFiles": {
+                                "file": [],
+                                "image": []
+                            }
+                        },
+                        "isAdvanced": false,
+                        "questionText": "<p>Các nguồn tài nguyên trên Trái Đất phân bố</p>",
+                        "options": [
+                            {
+                                "id": "7a0bec58-586e-4eb2-ab22-47bdd92f1252",
+                                "text": "đồng đều."
+                            },
+                            {
+                                "id": "8eb87b20-176f-4cea-8428-508442b71ce9",
+                                "text": "phân tán."
+                            },
+                            {
+                                "id": "e0128788-c5c3-46e5-9f9a-cfdf125c3ba0",
+                                "text": "không đều."
+                            },
+                            {
+                                "id": "5fdc2559-cd90-4b7b-b180-f0d5f1a891db",
+                                "text": "tập trung."
+                            }
+                        ],
+                        "correctAnswer": "opt_3"
+                    },
+                    "ordinalNumber": 43
+                },
+                {
+                    "id": "q_b0dd83e4-611f-41ad-b322-9d823534f4ba",
+                    "type": "QUIZ_SINGLE_CHOICE",
+                    "points": 1,
+                    "config": {
+                        "media": {
+                            "type": "YOUTUBE",
+                            "sourceYT": {
+                                "id": "",
+                                "source": "",
+                                "name": ""
+                            },
+                            "sourceRecord": {
+                                "id": "",
+                                "source": "",
+                                "name": ""
+                            },
+                            "sourceFiles": {
+                                "file": [],
+                                "image": []
+                            }
+                        },
+                        "isAdvanced": false,
+                        "questionText": "<p>Tài nguyên nào sau đây là tài nguyên vô tận?</p>",
+                        "options": [
+                            {
+                                "id": "2cdd95d8-f587-4d27-9a8e-dcba3fa62cbd",
+                                "text": "Năng lượng Mặt Trời, không khí."
+                            },
+                            {
+                                "id": "db4f79cb-1d8b-4f6a-875e-78b1eb7bec86",
+                                "text": "Thổ nhưỡng, không khí, địa hình."
+                            },
+                            {
+                                "id": "eea14a1a-d634-4d40-bc7f-364fdc9e7b5d",
+                                "text": "Không khí, khoáng sản và nước."
+                            },
+                            {
+                                "id": "f813df8b-0424-427d-94f9-781fb659a7cc",
+                                "text": "Năng lượng Mặt Trời, khoáng sản."
+                            }
+                        ],
+                        "correctAnswer": "opt_1"
+                    },
+                    "ordinalNumber": 44
+                },
+                {
+                    "id": "q_511a33c0-f77a-4460-9735-98c019fed151",
+                    "type": "QUIZ_SINGLE_CHOICE",
+                    "points": 1,
+                    "config": {
+                        "media": {
+                            "type": "YOUTUBE",
+                            "sourceYT": {
+                                "id": "",
+                                "source": "",
+                                "name": ""
+                            },
+                            "sourceRecord": {
+                                "id": "",
+                                "source": "",
+                                "name": ""
+                            },
+                            "sourceFiles": {
+                                "file": [],
+                                "image": []
+                            }
+                        },
+                        "isAdvanced": false,
+                        "questionText": "<p>Tài nguyên nào sau đây thể hiện rõ nhất sự hạn chế của các nguồn tài nguyên trong tự nhiên?</p>",
+                        "options": [
+                            {
+                                "id": "bfa7eb1a-cbdb-4be5-8a52-dfe380ef8849",
+                                "text": "Khoáng sản."
+                            },
+                            {
+                                "id": "07bb9585-ab6e-4079-b0aa-e67542956049",
+                                "text": "Nguồn nước."
+                            },
+                            {
+                                "id": "b1d3c2d9-77ce-410d-8787-366521b59af9",
+                                "text": "Khí hậu."
+                            },
+                            {
+                                "id": "0876eebb-c6c5-42aa-8be9-0f42d9eee838",
+                                "text": "Thổ nhưỡng"
+                            }
+                        ],
+                        "correctAnswer": "opt_1"
+                    },
+                    "ordinalNumber": 45
+                },
+                {
+                    "id": "q_fc637831-a7d1-45d3-8c6d-6d352b304cd6",
+                    "type": "QUIZ_SINGLE_CHOICE",
+                    "points": 1,
+                    "config": {
+                        "media": {
+                            "type": "YOUTUBE",
+                            "sourceYT": {
+                                "id": "",
+                                "source": "",
+                                "name": ""
+                            },
+                            "sourceRecord": {
+                                "id": "",
+                                "source": "",
+                                "name": ""
+                            },
+                            "sourceFiles": {
+                                "file": [],
+                                "image": []
+                            }
+                        },
+                        "isAdvanced": false,
+                        "questionText": "<p>Ngành kinh tế nào sau đây chịu ảnh hưởng rõ rệt nhất của điều kiện tự nhiên?</p>",
+                        "options": [
+                            {
+                                "id": "bde1e5bd-906d-439c-b334-68709acd408e",
+                                "text": "Công nghiệp."
+                            },
+                            {
+                                "id": "931e9b88-1b0b-462f-94db-10d4ee93bb9e",
+                                "text": "Thương mại."
+                            },
+                            {
+                                "id": "d5a70360-3ac4-48eb-9b4c-3eec89fd403f",
+                                "text": "Nông nghiệp."
+                            },
+                            {
+                                "id": "4610027d-1e7c-42d6-aeff-50d944dd36b7",
+                                "text": "Giao thông."
+                            }
+                        ],
+                        "correctAnswer": "opt_3"
+                    },
+                    "ordinalNumber": 46
+                },
+                {
+                    "id": "q_4dfe848f-02b8-4da1-8d2a-50f5a414d5af",
+                    "type": "QUIZ_SINGLE_CHOICE",
+                    "points": 1,
+                    "config": {
+                        "media": {
+                            "type": "YOUTUBE",
+                            "sourceYT": {
+                                "id": "",
+                                "source": "",
+                                "name": ""
+                            },
+                            "sourceRecord": {
+                                "id": "",
+                                "source": "",
+                                "name": ""
+                            },
+                            "sourceFiles": {
+                                "file": [],
+                                "image": []
+                            }
+                        },
+                        "isAdvanced": false,
+                        "questionText": "<p>Nguyên nhân cơ bản nhiệt độ Trái Đất hiện nay ngày càng tăng lên là do</p>",
+                        "options": [
+                            {
+                                "id": "536e6f3a-7e7d-4098-a509-0b32a0f742b4",
+                                "text": "hiệu ứng nhà kính."
+                            },
+                            {
+                                "id": "0f0b4e22-cb7e-4090-a6a6-05a013ce2adf",
+                                "text": "sự suy giảm sinh vật."
+                            },
+                            {
+                                "id": "5bfa242d-dd14-4710-b3ca-ffcc79432f9c",
+                                "text": "mưa acid, băng tan."
+                            },
+                            {
+                                "id": "b3a18d58-4ab8-4383-839f-543639a4c3f9",
+                                "text": "ô nhiễm môi trường."
+                            }
+                        ],
+                        "correctAnswer": "opt_1"
+                    },
+                    "ordinalNumber": 47
+                },
+                {
+                    "id": "q_a5fae402-2af4-48c8-b091-f859efb9ae00",
+                    "type": "QUIZ_SINGLE_CHOICE",
+                    "points": 1,
+                    "config": {
+                        "media": {
+                            "type": "YOUTUBE",
+                            "sourceYT": {
+                                "id": "",
+                                "source": "",
+                                "name": ""
+                            },
+                            "sourceRecord": {
+                                "id": "",
+                                "source": "",
+                                "name": ""
+                            },
+                            "sourceFiles": {
+                                "file": [],
+                                "image": []
+                            }
+                        },
+                        "isAdvanced": false,
+                        "questionText": "<p>Tài nguyên thiên nhiên bị suy thoái là do</p>",
+                        "options": [
+                            {
+                                "id": "2a54b63c-9f69-43f0-b12d-0c8d7aefa4ee",
+                                "text": "chiến tranh, thiên tai."
+                            },
+                            {
+                                "id": "3d152cf1-6f0c-4707-bbc6-ead9779c2369",
+                                "text": "khai thác quá mức."
+                            },
+                            {
+                                "id": "f43e16d9-f2bd-4137-95b8-cfe11f5d1e3f",
+                                "text": "phát triển nông nghiệp."
+                            },
+                            {
+                                "id": "a7b1d1d9-c598-4d56-beb6-8c089893af47",
+                                "text": "dân số đông và trẻ."
+                            }
+                        ],
+                        "correctAnswer": "opt_2"
+                    },
+                    "ordinalNumber": 48
+                },
+                {
+                    "id": "q_f51e0af0-c148-4490-a8e4-1b15e03833fa",
+                    "type": "QUIZ_SINGLE_CHOICE",
+                    "points": 1,
+                    "config": {
+                        "media": {
+                            "type": "YOUTUBE",
+                            "sourceYT": {
+                                "id": "",
+                                "source": "",
+                                "name": ""
+                            },
+                            "sourceRecord": {
+                                "id": "",
+                                "source": "",
+                                "name": ""
+                            },
+                            "sourceFiles": {
+                                "file": [],
+                                "image": []
+                            }
+                        },
+                        "isAdvanced": false,
+                        "questionText": "<p>Hội nghị nào sau đây thể hiện sự nỗ lực chung của thế giới trong vấn đề bảo vệ môi trường?</p>",
+                        "options": [
+                            {
+                                "id": "df84e943-5a0f-4f9e-9b16-82749e8c77b8",
+                                "text": "Hội nghị Cộng đồng châu Âu."
+                            },
+                            {
+                                "id": "94256d59-c90e-4ebd-b84c-70f9c5f3f190",
+                                "text": "Hội nghị Thượng đỉnh G20."
+                            },
+                            {
+                                "id": "c3ead6f4-281d-4312-ade8-4b3c7b126d78",
+                                "text": "Hội nghị Thượng đỉnh Trái Đất."
+                            },
+                            {
+                                "id": "0fd94b62-a1db-4b2c-8981-274e001d8ec2",
+                                "text": "Hội nghị các nước ASEAN."
+                            }
+                        ],
+                        "correctAnswer": "opt_3"
+                    },
+                    "ordinalNumber": 49
+                },
+                {
+                    "id": "q_2eda464b-a5ef-4b23-96e5-50d2f183709f",
+                    "type": "QUIZ_SINGLE_CHOICE",
+                    "points": 1,
+                    "config": {
+                        "media": {
+                            "type": "YOUTUBE",
+                            "sourceYT": {
+                                "id": "",
+                                "source": "",
+                                "name": ""
+                            },
+                            "sourceRecord": {
+                                "id": "",
+                                "source": "",
+                                "name": ""
+                            },
+                            "sourceFiles": {
+                                "file": [],
+                                "image": []
+                            }
+                        },
+                        "isAdvanced": false,
+                        "questionText": "<p>Tác động tiêu cực của con người đến phân bố động, thực vật trên Trái Đất không phải là</p>",
+                        "options": [
+                            {
+                                "id": "3e2fb0cd-00a3-43f8-a634-163f816cbc64",
+                                "text": "lai tạo ra nhiều giống."
+                            },
+                            {
+                                "id": "69ca54d8-cf3a-4706-86af-8f9cd0ffa9ce",
+                                "text": "đốt rừng làm nương rẫy."
+                            },
+                            {
+                                "id": "ccc74125-5291-48d3-b906-dd2dfe8a07ba",
+                                "text": "tăng cường phá rừng."
+                            },
+                            {
+                                "id": "adc25a6e-8e87-4ad6-bb0c-0cff8e64fdbd",
+                                "text": "săn bắn động vật rừng."
+                            }
+                        ],
+                        "correctAnswer": "opt_1"
+                    },
+                    "ordinalNumber": 50
+                },
+                {
+                    "id": "q_fc0a07fb-7557-428d-ad72-7500ff167a34",
+                    "type": "QUIZ_SINGLE_CHOICE",
+                    "points": 1,
+                    "config": {
+                        "media": {
+                            "type": "YOUTUBE",
+                            "sourceYT": {
+                                "id": "",
+                                "source": "",
+                                "name": ""
+                            },
+                            "sourceRecord": {
+                                "id": "",
+                                "source": "",
+                                "name": ""
+                            },
+                            "sourceFiles": {
+                                "file": [],
+                                "image": []
+                            }
+                        },
+                        "isAdvanced": false,
+                        "questionText": "<p>Các điều kiện tự nhiên có ảnh hưởng đến đời sống hằng ngày của con người là</p>",
+                        "options": [
+                            {
+                                "id": "3360d1ba-46f6-4682-a9de-b5ab15e0388a",
+                                "text": "địa hình, sinh vật, nguồn vốn và khí hậu."
+                            },
+                            {
+                                "id": "7d7488da-8b80-4b27-8038-4059b8c30893",
+                                "text": "khí hậu, địa hình, nguồn nước và đất đai."
+                            },
+                            {
+                                "id": "b2178183-cb75-4a3d-89c9-37e67646d3ed",
+                                "text": "nguồn nước, dân số, khí hậu và địa hình."
+                            },
+                            {
+                                "id": "1666ad66-55c4-4b99-b524-5ed15ab1bf70",
+                                "text": "đất đai, nguồn vốn, dân số và chính sách."
+                            }
+                        ],
+                        "correctAnswer": "opt_2"
+                    },
+                    "ordinalNumber": 51
+                }
+            ]
+        },
+        {
+            "id": "group_717bf15d-b852-43b7-be65-e676f518b9d7",
+            "title": "Section 2",
+            "description": "",
+            "media": {
+                "type": "YOUTUBE",
+                "sourceYT": {
+                    "id": "",
+                    "source": "",
+                    "name": ""
+                },
+                "sourceIMGs": [],
+                "sourceRecord": {
+                    "id": "",
+                    "source": "",
+                    "name": ""
+                },
+                "sourceFiles": {
+                    "file": [],
+                    "image": []
+                }
+            },
+            "questions": [
+                {
+                    "id": "q_038098c5-0cfb-4e58-9f10-a4a1a76891b2",
                     "type": "QUIZ_MULTIPLE_TRUE_FALSE",
                     "label": "Nhiều đúng / Sai",
                     "skills": [],
-                    "ordinalNumber": 1,
+                    "ordinalNumber": 52,
                     "points": 1,
                     "gradingType": "auto",
                     "config": {
@@ -55,41 +2426,285 @@
                             }
                         },
                         "isAdvanced": false,
-                        "questionText": "",
+                        "questionText": "<p><strong>Cho đoạn thông tin sau&nbsp;</strong></p><p>Quá trình hình thành đất chịu ảnh hưởng của nhiều nhân tố, trong đó quan trọng là đá mẹ, khí hậu, sinh vật. Đá mẹ là nguồn cung cấp vật chất vô cơ cho đất, quyết định thành phần khoáng vật, ảnh hưởng đến màu sắc và tính chất của đất. Ví dụ: những loại đất hình thành trên đá granit thường có màu xám; hình thành trên đá badan thường có màu nâu, đỏ.</p>",
                         "options": [
                             {
                                 "id": "a",
-                                "text": "A. Nấm hương có hình tròn, màu nâu.",
-                                "correctAnswer": null,
-                                "inCorrectAnswer": null
+                                "text": "Quá trình hình thành đất chịu ảnh hưởng của nhiều nhân tố",
+                                "correctAnswer": true,
+                                "inCorrectAnswer": false
                             },
                             {
-                                "id": "opt_1775549961142",
-                                "text": "B. Nấm mốc thường phát triển trong môi trường ấm nóng và ẩm ướt.\t",
-                                "correctAnswer": null,
-                                "inCorrectAnswer": null
+                                "id": "opt_1776761564297",
+                                "text": "Nguồn cung cấp chất hữu cơ cho đất là đá mẹ",
+                                "inCorrectAnswer": true,
+                                "correctAnswer": false
                             },
                             {
-                                "id": "opt_1775549969793",
-                                "text": "C. Các loại nấm đều có màu đỏ.\t",
-                                "inCorrectAnswer": null,
-                                "correctAnswer": null
+                                "id": "opt_1776761566056",
+                                "text": "Đá mẹ quyết định thành phần và khoáng chất của đất",
+                                "correctAnswer": true,
+                                "inCorrectAnswer": false
                             },
                             {
-                                "id": "opt_1775549978959",
-                                "text": "D. Tất cả các loại nấm đều có dạng hình tròn.\t",
-                                "inCorrectAnswer": null,
-                                "correctAnswer": null
+                                "id": "opt_1776761567993",
+                                "text": "Những loại đất hình thành trên các loại đá khác nhau thì có tính chất, thành phần và màu sắc khác nhau.",
+                                "correctAnswer": true,
+                                "inCorrectAnswer": false
+                            }
+                        ],
+                        "scoringMode": "equal"
+                    }
+                },
+                {
+                    "id": "q_aa5a803e-80e1-48d4-aec2-9fc830a9617c",
+                    "type": "QUIZ_MULTIPLE_TRUE_FALSE",
+                    "label": "Nhiều đúng / Sai",
+                    "skills": [],
+                    "ordinalNumber": 53,
+                    "points": 1,
+                    "gradingType": "auto",
+                    "config": {
+                        "media": {
+                            "type": "YOUTUBE",
+                            "sourceYT": {
+                                "id": "",
+                                "name": "",
+                                "source": ""
+                            },
+                            "sourceRecord": {
+                                "id": "",
+                                "name": "",
+                                "source": ""
+                            },
+                            "sourceFiles": {
+                                "file": [],
+                                "image": []
+                            }
+                        },
+                        "isAdvanced": false,
+                        "questionText": "<p><strong>Cho đoạn thông tin sau&nbsp;</strong></p><p>Khí hậu tham gia vào quá trình hình thành đất được biểu hiện qua lượng mưa và nhiệt độ. Lượng mưa quyết định mức độ rửa trôi; nhiệt độ thúc đẩy quá trình hoà tan và tích tụ chất hữu cơ.</p><p>Sinh vật đóng vai trò quan trọng trong quá trình hình thành đất; góp phần tích tụ, phân huỷ và biến đổi chất hữu cơ. Thực vật tổng hợp chất hữu cơ từ những chất vô cơ. Vi sinh vật phân giải xác sinh vật cung cấp nguồn chất hữu cơ cho đất. Động vật (giun, dế, kiến,...) làm đất tơi xốp hơn.</p>",
+                        "options": [
+                            {
+                                "id": "a",
+                                "text": "Quá trình hình thành đất chịu ảnh hưởng của nhiều nhân tố",
+                                "correctAnswer": true,
+                                "inCorrectAnswer": false
+                            },
+                            {
+                                "id": "opt_1776761630153",
+                                "text": "Khí hậu không tham gia trực tiếp vào quá trình hình thành đất.",
+                                "inCorrectAnswer": true,
+                                "correctAnswer": false
+                            },
+                            {
+                                "id": "opt_1776761632600",
+                                "text": "Thực vật có vai trò tổng hợp chất hữu cơ cho đất.",
+                                "correctAnswer": true,
+                                "inCorrectAnswer": false
+                            },
+                            {
+                                "id": "opt_1776761634321",
+                                "text": "Vi sinh vật phân giải xác sinh vật cung cấp nguồn chất hữu cơ cho đất, làm tăng độ mùn của đất.",
+                                "correctAnswer": true,
+                                "inCorrectAnswer": false
+                            }
+                        ],
+                        "scoringMode": "equal"
+                    }
+                },
+                {
+                    "id": "q_1766e8d0-b9e7-4bc6-bbc0-8b48dcb62172",
+                    "type": "QUIZ_MULTIPLE_TRUE_FALSE",
+                    "label": "Nhiều đúng / Sai",
+                    "skills": [],
+                    "ordinalNumber": 54,
+                    "points": 1,
+                    "gradingType": "auto",
+                    "config": {
+                        "media": {
+                            "type": "YOUTUBE",
+                            "sourceYT": {
+                                "id": "",
+                                "name": "",
+                                "source": ""
+                            },
+                            "sourceRecord": {
+                                "id": "",
+                                "name": "",
+                                "source": ""
+                            },
+                            "sourceFiles": {
+                                "file": [],
+                                "image": []
+                            }
+                        },
+                        "isAdvanced": false,
+                        "questionText": "<p><strong>Cho đoạn thông tin sau&nbsp;</strong></p><p>Con người sinh sống ở hầu khắp mọi nơi trên bề mặt Trái Đất nhưng phân bố không đều. Để biết tình trạng phân bố dân cư, người ta căn cứ vào mật độ dân số. Những nơi có nguồn nước ngọt dồi dào, khí hậu và giao thông thuận lợi, các hoạt động sản xuất phát triển,... thì dân cư đông. Ngược lại, những nơi khô hạn, khí hậu khắc nghiệt, địa hình núi cao, sản xuất không thuận lợi,... thì dân cư thưa hơn.</p><p>Hiện nay, có những khu vực dân cư tập trung đông đúc, như phía đông và phía nam châu Á,... Tuy nhiên, có những nơi dân cư phân bố rất thưa thớt, gần như không có người sinh sống như các hoang mạc ở châu Phi, châu Đại Dương,... hoặc những vùng lạnh giá...</p>",
+                        "options": [
+                            {
+                                "id": "a",
+                                "text": "Con người sống ở hầu khắp mọi nơi trên bề mặt Trái đất nhưng không đều.",
+                                "correctAnswer": true,
+                                "inCorrectAnswer": false
+                            },
+                            {
+                                "id": "opt_1776761713369",
+                                "text": "Những nơi có điều kiện tự nhiên khắc nghiệt là nơi dân cư tập trung đông đúc.",
+                                "inCorrectAnswer": true,
+                                "correctAnswer": false
+                            },
+                            {
+                                "id": "opt_1776761714777",
+                                "text": "Những nơi khô hạn, địa hình núi cao dân cư thưa thớt vì không thuận lợi cho sản xuất.",
+                                "correctAnswer": true,
+                                "inCorrectAnswer": false
+                            },
+                            {
+                                "id": "opt_1776761716201",
+                                "text": "Nơi có dân cư tập trung đông dân nhất thế giới là châu Á, châu Đại Dương vì những nơi này có điều kiện khí hậu ôn hoà",
+                                "inCorrectAnswer": true,
+                                "correctAnswer": false
+                            }
+                        ],
+                        "scoringMode": "equal"
+                    }
+                },
+                {
+                    "id": "q_590c73fa-98cf-473a-9961-0af7ddebab3d",
+                    "type": "QUIZ_MULTIPLE_TRUE_FALSE",
+                    "label": "Nhiều đúng / Sai",
+                    "skills": [],
+                    "ordinalNumber": 55,
+                    "points": 1,
+                    "gradingType": "auto",
+                    "config": {
+                        "media": {
+                            "type": "YOUTUBE",
+                            "sourceYT": {
+                                "id": "",
+                                "name": "",
+                                "source": ""
+                            },
+                            "sourceRecord": {
+                                "id": "",
+                                "name": "",
+                                "source": ""
+                            },
+                            "sourceFiles": {
+                                "file": [],
+                                "image": []
+                            }
+                        },
+                        "isAdvanced": false,
+                        "questionText": "<p><strong>Cho đoạn thông tin sau đây</strong></p><p>Phát triển bền vững là sự phát triển nhằm thỏa mãn các nhu cầu của thế hệ hiện tại của con người nhưng không làm tổn hại tới khả năng đáp ứng các nhu cầu của thế hệ tương lai.</p><p>Phải đặt mục tiêu phát triển bền vững bởi vì trong suốt lịch sử phát triển của mình, con người đã luôn khai thác tài nguyên thiên nhiên nhằm phục vụ cho cuộc sống. Thế nhưng, không phải tài nguyên nào cũng là vô hạn mà sẽ dần cạn kiệt (ví dụ như khoáng sản). Do đó, biết cách khai thác tài nguyên thiên nhiên hợp lí, sử dụng tiết kiệm, phát triển công nghệ tìm tài nguyên thay thế chính là những biện pháp khai thác tài nguyên một cách thông minh của con người, là chìa khóa mở cửa vào tương lai của các thế hệ hôm nay và mai sau.</p>",
+                        "options": [
+                            {
+                                "id": "a",
+                                "text": "Khoáng sản thuộc loại tài nguyên hữu hạn",
+                                "correctAnswer": true,
+                                "inCorrectAnswer": false
+                            },
+                            {
+                                "id": "opt_1776761783911",
+                                "text": "Một trong những nguyên nhân cần đặt mục tiêu cho sự phát triển bền vững là do con người đã khai thác quá mức gây cạn kiệt nguồn tài nguyên.",
+                                "correctAnswer": true,
+                                "inCorrectAnswer": false
+                            },
+                            {
+                                "id": "opt_1776761785433",
+                                "text": "Con người khai thác tài nguyên thiên nhiên hợp lí, tiết kiệm, tìm tài nguyên thay thế là chìa khóa mở cửa vào tương lai của các thế hệ hôm nay và mai sau.",
+                                "correctAnswer": true,
+                                "inCorrectAnswer": false
+                            },
+                            {
+                                "id": "opt_1776761786929",
+                                "text": "Trong quá trình lịch sử của mình, con người đã khai thác tài nguyên nhưng không làm tổn hại đến khả năng đáp ứng các nhu cầu của thế hệ tương lai.",
+                                "inCorrectAnswer": true,
+                                "correctAnswer": false
+                            }
+                        ],
+                        "scoringMode": "equal"
+                    }
+                }
+            ]
+        },
+        {
+            "id": "group_7e68e2ae-8ece-4dd6-8277-b27eae5a7123",
+            "title": "Section 3",
+            "description": "",
+            "media": {
+                "type": "YOUTUBE",
+                "sourceYT": {
+                    "id": "",
+                    "source": "",
+                    "name": ""
+                },
+                "sourceIMGs": [],
+                "sourceRecord": {
+                    "id": "",
+                    "source": "",
+                    "name": ""
+                },
+                "sourceFiles": {
+                    "file": [],
+                    "image": []
+                }
+            },
+            "questions": [
+                {
+                    "id": "q_4843cf85-30a9-4066-8943-c0511f3e86d6",
+                    "type": "QUIZ_FILL_IN_BLANK",
+                    "label": "Điền vào chỗ trống",
+                    "skills": [],
+                    "ordinalNumber": 56,
+                    "points": 1,
+                    "gradingType": "auto",
+                    "config": {
+                        "media": {
+                            "type": "YOUTUBE",
+                            "sourceYT": {
+                                "id": "",
+                                "name": "",
+                                "source": ""
+                            },
+                            "sourceRecord": {
+                                "id": "",
+                                "name": "",
+                                "source": ""
+                            },
+                            "sourceFiles": {
+                                "file": [],
+                                "image": []
+                            }
+                        },
+                        "isAdvanced": false,
+                        "questionText": "<p>Cho bảng số liệu sau đây</p><p style=\"text-align:center;\"><strong>Bảng số liệu tỉ lệ các thành phần có trong đất (đơn vị: %)</strong></p><figure class=\"table\"><table style=\"border-bottom:none;border-left:none;border-right:none;border-top:none;\"><tbody><tr><td style=\"border-bottom:1.0pt solid windowtext;border-left:1.0pt solid windowtext;border-right:1.0pt solid windowtext;border-top:1.0pt solid windowtext;padding:0cm 5.4pt;vertical-align:top;width:93.5pt;\">Thành phần</td><td style=\"border-bottom:1.0pt solid windowtext;border-left:1.0pt none windowtext;border-right:1.0pt solid windowtext;border-top:1.0pt solid windowtext;padding:0cm 5.4pt;vertical-align:top;width:93.5pt;\">Không khí</td><td style=\"border-bottom:1.0pt solid windowtext;border-left:1.0pt none windowtext;border-right:1.0pt solid windowtext;border-top:1.0pt solid windowtext;padding:0cm 5.4pt;vertical-align:top;width:93.5pt;\">Nước</td><td style=\"border-bottom:1.0pt solid windowtext;border-left:1.0pt none windowtext;border-right:1.0pt solid windowtext;border-top:1.0pt solid windowtext;padding:0cm 5.4pt;vertical-align:top;width:93.5pt;\">Chất vô cơ</td><td style=\"border-bottom:1.0pt solid windowtext;border-left:1.0pt none windowtext;border-right:1.0pt solid windowtext;border-top:1.0pt solid windowtext;padding:0cm 5.4pt;vertical-align:top;width:93.5pt;\">Chất hữu cơ</td></tr><tr><td style=\"border-bottom:1.0pt solid windowtext;border-left:1.0pt solid windowtext;border-right:1.0pt solid windowtext;border-top:1.0pt none windowtext;padding:0cm 5.4pt;vertical-align:top;width:93.5pt;\">Số %</td><td style=\"border-bottom:1.0pt solid windowtext;border-left:none;border-right:1.0pt solid windowtext;border-top:none;padding:0cm 5.4pt;vertical-align:top;width:93.5pt;\"><p style=\"text-align:center;\">25</p></td><td style=\"border-bottom:1.0pt solid windowtext;border-left:none;border-right:1.0pt solid windowtext;border-top:none;padding:0cm 5.4pt;vertical-align:top;width:93.5pt;\"><p style=\"text-align:center;\">25</p></td><td style=\"border-bottom:1.0pt solid windowtext;border-left:none;border-right:1.0pt solid windowtext;border-top:none;padding:0cm 5.4pt;vertical-align:top;width:93.5pt;\"><p style=\"text-align:center;\">45</p></td><td style=\"border-bottom:1.0pt solid windowtext;border-left:none;border-right:1.0pt solid windowtext;border-top:none;padding:0cm 5.4pt;vertical-align:top;width:93.5pt;\"><p style=\"text-align:center;\">5</p></td></tr></tbody></table></figure><p>Thành phần có tỉ lệ lớn nhất có trong đất là mấy %?</p>",
+                        "parts": [
+                            {
+                                "type": "text",
+                                "value": ""
+                            },
+                            {
+                                "type": "blank",
+                                "id": "blank_539de517-86c3-49bd-bc9b-32c6ebedc237",
+                                "acceptedAnswers": [
+                                    "chỗ trống"
+                                ]
+                            },
+                            {
+                                "type": "text",
+                                "value": " này."
                             }
                         ]
                     }
                 },
                 {
-                    "id": "q_1775550115359",
-                    "type": "QUIZ_MULTIPLE_TRUE_FALSE",
-                    "label": "Nhiều đúng / Sai",
+                    "id": "q_f7f57643-59f5-4f45-998e-88725b1a326f",
+                    "type": "QUIZ_FILL_IN_BLANK",
+                    "label": "Điền vào chỗ trống",
                     "skills": [],
-                    "ordinalNumber": 2,
+                    "ordinalNumber": 57,
                     "points": 1,
                     "gradingType": "auto",
                     "config": {
@@ -111,42 +2726,25 @@
                             }
                         },
                         "isAdvanced": false,
-                        "questionText": "",
-                        "options": [
+                        "questionText": "<p>Cho bảng số liệu sau đây</p><p style=\"text-align:center;\"><strong>Bảng số liệu tỉ lệ các thành phần có trong đất (đơn vị: %)</strong></p><figure class=\"table\"><table style=\"border-bottom:none;border-left:none;border-right:none;border-top:none;\"><tbody><tr><td style=\"border-bottom:1.0pt solid windowtext;border-left:1.0pt solid windowtext;border-right:1.0pt solid windowtext;border-top:1.0pt solid windowtext;padding:0cm 5.4pt;vertical-align:top;width:93.5pt;\">Thành phần</td><td style=\"border-bottom:1.0pt solid windowtext;border-left:1.0pt none windowtext;border-right:1.0pt solid windowtext;border-top:1.0pt solid windowtext;padding:0cm 5.4pt;vertical-align:top;width:93.5pt;\">Không khí</td><td style=\"border-bottom:1.0pt solid windowtext;border-left:1.0pt none windowtext;border-right:1.0pt solid windowtext;border-top:1.0pt solid windowtext;padding:0cm 5.4pt;vertical-align:top;width:93.5pt;\">Nước</td><td style=\"border-bottom:1.0pt solid windowtext;border-left:1.0pt none windowtext;border-right:1.0pt solid windowtext;border-top:1.0pt solid windowtext;padding:0cm 5.4pt;vertical-align:top;width:93.5pt;\">Chất vô cơ</td><td style=\"border-bottom:1.0pt solid windowtext;border-left:1.0pt none windowtext;border-right:1.0pt solid windowtext;border-top:1.0pt solid windowtext;padding:0cm 5.4pt;vertical-align:top;width:93.5pt;\">Chất hữu cơ</td></tr><tr><td style=\"border-bottom:1.0pt solid windowtext;border-left:1.0pt solid windowtext;border-right:1.0pt solid windowtext;border-top:1.0pt none windowtext;padding:0cm 5.4pt;vertical-align:top;width:93.5pt;\">Số %</td><td style=\"border-bottom:1.0pt solid windowtext;border-left:none;border-right:1.0pt solid windowtext;border-top:none;padding:0cm 5.4pt;vertical-align:top;width:93.5pt;\"><p style=\"text-align:center;\">25</p></td><td style=\"border-bottom:1.0pt solid windowtext;border-left:none;border-right:1.0pt solid windowtext;border-top:none;padding:0cm 5.4pt;vertical-align:top;width:93.5pt;\"><p style=\"text-align:center;\">25</p></td><td style=\"border-bottom:1.0pt solid windowtext;border-left:none;border-right:1.0pt solid windowtext;border-top:none;padding:0cm 5.4pt;vertical-align:top;width:93.5pt;\"><p style=\"text-align:center;\">45</p></td><td style=\"border-bottom:1.0pt solid windowtext;border-left:none;border-right:1.0pt solid windowtext;border-top:none;padding:0cm 5.4pt;vertical-align:top;width:93.5pt;\"><p style=\"text-align:center;\">5</p></td></tr></tbody></table></figure><p>Chất hữu cơ và chất vô cơ chênh lệch nhau mấy %?</p>",
+                        "parts": [
                             {
-                                "id": "a",
-                                "text": "A. Dựa vào các chất dinh dưỡng có trong thức ăn, người ta chia thức ăn thành 5 nhóm. ",
-                                "correctAnswer": null,
-                                "inCorrectAnswer": null
-                            },
-                            {
-                                "id": "opt_1775550119992",
-                                "text": "B. Chất xơ không có giá trị dinh dưỡng nhưng rất cần thiết, đảm bảo cho cơ quan tiêu hoá hoạt động bình thường.\t",
-                                "correctAnswer": null,
-                                "inCorrectAnswer": null
-                            },
-                            {
-                                "id": "opt_1775550130476",
-                                "text": "C. Hoa quả cần được bảo quản trong ngăn mát tủ lạnh.\t",
-                                "correctAnswer": null,
-                                "inCorrectAnswer": null
-                            },
-                            {
-                                "id": "opt_1775550132511",
-                                "text": "D. Khi thấy thực phẩm có dấu hiệu bị mốc, chúng ta cần cạo lớp mốc đi và ăn phần còn lại. ",
-                                "inCorrectAnswer": null,
-                                "correctAnswer": null
+                                "type": "blank",
+                                "id": "blank_6b9cac42-bea3-45b9-b6b8-3d63b889759f",
+                                "acceptedAnswers": [
+                                    "chỗ trống"
+                                ]
                             }
                         ]
                     }
                 },
                 {
-                    "id": "q_1775550244346",
-                    "type": "QUIZ_MULTIPLE_TRUE_FALSE",
-                    "label": "Nhiều đúng / Sai",
+                    "id": "q_27073ce4-58c3-4b81-bf7d-254ebc354858",
+                    "type": "QUIZ_FILL_IN_BLANK",
+                    "label": "Điền vào chỗ trống",
                     "skills": [],
-                    "ordinalNumber": 3,
-                    "points": 2,
+                    "ordinalNumber": 58,
+                    "points": 1,
                     "gradingType": "auto",
                     "config": {
                         "media": {
@@ -167,41 +2765,32 @@
                             }
                         },
                         "isAdvanced": false,
-                        "questionText": "",
-                        "options": [
+                        "questionText": "<p>Cho bảng số liệu sau đây</p><p style=\"text-align:center;\"><strong>Bảng số liệu tỉ lệ các thành phần có trong đất (đơn vị: %)</strong></p><figure class=\"table\"><table style=\"border-bottom:none;border-left:none;border-right:none;border-top:none;\"><tbody><tr><td style=\"border-bottom:1.0pt solid windowtext;border-left:1.0pt solid windowtext;border-right:1.0pt solid windowtext;border-top:1.0pt solid windowtext;padding:0cm 5.4pt;vertical-align:top;width:93.5pt;\">Thành phần</td><td style=\"border-bottom:1.0pt solid windowtext;border-left:1.0pt none windowtext;border-right:1.0pt solid windowtext;border-top:1.0pt solid windowtext;padding:0cm 5.4pt;vertical-align:top;width:93.5pt;\">Không khí</td><td style=\"border-bottom:1.0pt solid windowtext;border-left:1.0pt none windowtext;border-right:1.0pt solid windowtext;border-top:1.0pt solid windowtext;padding:0cm 5.4pt;vertical-align:top;width:93.5pt;\">Nước</td><td style=\"border-bottom:1.0pt solid windowtext;border-left:1.0pt none windowtext;border-right:1.0pt solid windowtext;border-top:1.0pt solid windowtext;padding:0cm 5.4pt;vertical-align:top;width:93.5pt;\">Chất vô cơ</td><td style=\"border-bottom:1.0pt solid windowtext;border-left:1.0pt none windowtext;border-right:1.0pt solid windowtext;border-top:1.0pt solid windowtext;padding:0cm 5.4pt;vertical-align:top;width:93.5pt;\">Chất hữu cơ</td></tr><tr><td style=\"border-bottom:1.0pt solid windowtext;border-left:1.0pt solid windowtext;border-right:1.0pt solid windowtext;border-top:1.0pt none windowtext;padding:0cm 5.4pt;vertical-align:top;width:93.5pt;\">Số %</td><td style=\"border-bottom:1.0pt solid windowtext;border-left:none;border-right:1.0pt solid windowtext;border-top:none;padding:0cm 5.4pt;vertical-align:top;width:93.5pt;\"><p style=\"text-align:center;\">25</p></td><td style=\"border-bottom:1.0pt solid windowtext;border-left:none;border-right:1.0pt solid windowtext;border-top:none;padding:0cm 5.4pt;vertical-align:top;width:93.5pt;\"><p style=\"text-align:center;\">25</p></td><td style=\"border-bottom:1.0pt solid windowtext;border-left:none;border-right:1.0pt solid windowtext;border-top:none;padding:0cm 5.4pt;vertical-align:top;width:93.5pt;\"><p style=\"text-align:center;\">45</p></td><td style=\"border-bottom:1.0pt solid windowtext;border-left:none;border-right:1.0pt solid windowtext;border-top:none;padding:0cm 5.4pt;vertical-align:top;width:93.5pt;\"><p style=\"text-align:center;\">5</p></td></tr></tbody></table></figure><p>Thành phần có tỉ lệ nhỏ nhất có trong đất là mấy %?</p>",
+                        "parts": [
                             {
-                                "id": "a",
-                                "text": "A. Chúng ta cần lựa chọn những thực phẩm có nguồn gốc rõ ràng và không có dấu hiệu bị hư hỏng.",
-                                "correctAnswer": null,
-                                "inCorrectAnswer": null
+                                "type": "text",
+                                "value": "Điền vào "
                             },
                             {
-                                "id": "opt_1775550262278",
-                                "text": "B. Bảo quản thực phẩm ở nơi có nhiệt độ cao.",
-                                "inCorrectAnswer": null,
-                                "correctAnswer": null
+                                "type": "blank",
+                                "id": "blank_f937dc4c-941f-47e4-a9cf-846fa0ccf843",
+                                "acceptedAnswers": [
+                                    "chỗ trống"
+                                ]
                             },
                             {
-                                "id": "opt_1775550264780",
-                                "text": "C. Để đảm bảo thực phẩm an toàn, chúng ta cần rửa sạch trước khi ăn và chế biến. ",
-                                "correctAnswer": null,
-                                "inCorrectAnswer": null
-                            },
-                            {
-                                "id": "opt_1775550267464",
-                                "text": "D. Thực phẩm an toàn được nuôi, trồng, bảo quản và chế biến hợp vệ sinh.",
-                                "correctAnswer": null,
-                                "inCorrectAnswer": null
+                                "type": "text",
+                                "value": " này."
                             }
                         ]
                     }
                 },
                 {
-                    "id": "q_1775550248747",
-                    "type": "QUIZ_MULTIPLE_TRUE_FALSE",
-                    "label": "Nhiều đúng / Sai",
+                    "id": "q_33ace550-eabb-4d17-b019-24045eb84420",
+                    "type": "QUIZ_FILL_IN_BLANK",
+                    "label": "Điền vào chỗ trống",
                     "skills": [],
-                    "ordinalNumber": 4,
+                    "ordinalNumber": 59,
                     "points": 1,
                     "gradingType": "auto",
                     "config": {
@@ -223,655 +2812,24 @@
                             }
                         },
                         "isAdvanced": false,
-                        "questionText": "",
-                        "options": [
+                        "questionText": "<p>Cho bảng số liệu sau đây</p><p style=\"text-align:center;\"><strong>Bảng số liệu tỉ lệ các thành phần có trong đất (đơn vị: %)</strong></p><figure class=\"table\"><table style=\"border-bottom:none;border-left:none;border-right:none;border-top:none;\"><tbody><tr><td style=\"border-bottom:1.0pt solid windowtext;border-left:1.0pt solid windowtext;border-right:1.0pt solid windowtext;border-top:1.0pt solid windowtext;padding:0cm 5.4pt;vertical-align:top;width:93.5pt;\">Thành phần</td><td style=\"border-bottom:1.0pt solid windowtext;border-left:1.0pt none windowtext;border-right:1.0pt solid windowtext;border-top:1.0pt solid windowtext;padding:0cm 5.4pt;vertical-align:top;width:93.5pt;\">Không khí</td><td style=\"border-bottom:1.0pt solid windowtext;border-left:1.0pt none windowtext;border-right:1.0pt solid windowtext;border-top:1.0pt solid windowtext;padding:0cm 5.4pt;vertical-align:top;width:93.5pt;\">Nước</td><td style=\"border-bottom:1.0pt solid windowtext;border-left:1.0pt none windowtext;border-right:1.0pt solid windowtext;border-top:1.0pt solid windowtext;padding:0cm 5.4pt;vertical-align:top;width:93.5pt;\">Chất vô cơ</td><td style=\"border-bottom:1.0pt solid windowtext;border-left:1.0pt none windowtext;border-right:1.0pt solid windowtext;border-top:1.0pt solid windowtext;padding:0cm 5.4pt;vertical-align:top;width:93.5pt;\">Chất hữu cơ</td></tr><tr><td style=\"border-bottom:1.0pt solid windowtext;border-left:1.0pt solid windowtext;border-right:1.0pt solid windowtext;border-top:1.0pt none windowtext;padding:0cm 5.4pt;vertical-align:top;width:93.5pt;\">Số %</td><td style=\"border-bottom:1.0pt solid windowtext;border-left:none;border-right:1.0pt solid windowtext;border-top:none;padding:0cm 5.4pt;vertical-align:top;width:93.5pt;\"><p style=\"text-align:center;\">25</p></td><td style=\"border-bottom:1.0pt solid windowtext;border-left:none;border-right:1.0pt solid windowtext;border-top:none;padding:0cm 5.4pt;vertical-align:top;width:93.5pt;\"><p style=\"text-align:center;\">25</p></td><td style=\"border-bottom:1.0pt solid windowtext;border-left:none;border-right:1.0pt solid windowtext;border-top:none;padding:0cm 5.4pt;vertical-align:top;width:93.5pt;\"><p style=\"text-align:center;\">45</p></td><td style=\"border-bottom:1.0pt solid windowtext;border-left:none;border-right:1.0pt solid windowtext;border-top:none;padding:0cm 5.4pt;vertical-align:top;width:93.5pt;\"><p style=\"text-align:center;\">5</p></td></tr></tbody></table></figure><p>Chất hữu cơ và nước chênh lệch nhau mấy %?</p>",
+                        "parts": [
                             {
-                                "id": "a",
-                                "text": "A. Đại bàng ăn cỏ để sinh tồn.\t",
-                                "correctAnswer": null,
-                                "inCorrectAnswer": null
+                                "type": "text",
+                                "value": "Điền vào "
                             },
                             {
-                                "id": "opt_1775550335781",
-                                "text": "B. Sâu là thức ăn của chim sẻ.\t",
-                                "correctAnswer": null,
-                                "inCorrectAnswer": null
+                                "type": "blank",
+                                "id": "blank_e3aa9170-c909-4b28-a0fb-a781451a8051",
+                                "acceptedAnswers": [
+                                    "chỗ trống"
+                                ]
                             },
                             {
-                                "id": "opt_1775550337447",
-                                "text": "C. Thức ăn của thằn lằn là châu chấu.\t",
-                                "correctAnswer": null,
-                                "inCorrectAnswer": null
-                            },
-                            {
-                                "id": "opt_1775550338847",
-                                "text": "D. Tôm là thức ăn của sư tử.",
-                                "inCorrectAnswer": null,
-                                "correctAnswer": null
+                                "type": "text",
+                                "value": " này."
                             }
                         ]
-                    }
-                },
-                {
-                    "id": "q_1775550393496",
-                    "type": "QUIZ_MULTIPLE_TRUE_FALSE",
-                    "label": "Nhiều đúng / Sai",
-                    "skills": [],
-                    "ordinalNumber": 5,
-                    "points": 1,
-                    "gradingType": "auto",
-                    "config": {
-                        "media": {
-                            "type": "YOUTUBE",
-                            "sourceYT": {
-                                "id": "",
-                                "name": "",
-                                "source": ""
-                            },
-                            "sourceRecord": {
-                                "id": "",
-                                "name": "",
-                                "source": ""
-                            },
-                            "sourceFiles": {
-                                "file": [],
-                                "image": []
-                            }
-                        },
-                        "isAdvanced": false,
-                        "questionText": "",
-                        "options": [
-                            {
-                                "id": "a",
-                                "text": "A. Khi thực phẩm bị nhiễm nấm mốc, chỉ cần rửa sạch hoặc nấu chín là có thể ăn được.",
-                                "correctAnswer": null,
-                                "inCorrectAnswer": null
-                            },
-                            {
-                                "id": "opt_1775550398148",
-                                "text": "B. Tất cả thực phẩm được bảo quản bằng cách ướp muối.",
-                                "inCorrectAnswer": null,
-                                "correctAnswer": null
-                            },
-                            {
-                                "id": "opt_1775550400632",
-                                "text": "C. Khi để ở nơi nóng ẩm, thực phẩm sẽ nhanh bị hỏng do nhiễm nấm mốc.",
-                                "correctAnswer": null,
-                                "inCorrectAnswer": null
-                            },
-                            {
-                                "id": "opt_1775550402332",
-                                "text": "D. Có nhiều cách để bảo quản thực phẩm như ướp muối, ướp đường, hun khói…",
-                                "correctAnswer": null,
-                                "inCorrectAnswer": null
-                            }
-                        ]
-                    }
-                },
-                {
-                    "id": "q_1775550499666",
-                    "type": "QUIZ_MATCHING",
-                    "label": "Ghép nối",
-                    "skills": [],
-                    "ordinalNumber": 6,
-                    "points": 1,
-                    "gradingType": "auto",
-                    "config": {
-                        "media": {
-                            "type": "YOUTUBE",
-                            "sourceYT": {
-                                "id": "",
-                                "name": "",
-                                "source": ""
-                            },
-                            "sourceRecord": {
-                                "id": "",
-                                "name": "",
-                                "source": ""
-                            },
-                            "sourceFiles": {
-                                "file": [],
-                                "image": []
-                            }
-                        },
-                        "isAdvanced": true,
-                        "questionText": "",
-                        "columnA": [
-                            {
-                                "id": "a1775550505900",
-                                "text": "Thịt mỡ, bơ, dầu ăn, vừng, lạc,..."
-                            },
-                            {
-                                "id": "a1775550507581",
-                                "text": "Thịt, cá, tôm, phô mai, trứng,..."
-                            },
-                            {
-                                "id": "a1775550508915",
-                                "text": "Rau củ quả, trái cây, sữa,..."
-                            },
-                            {
-                                "id": "a1775550510897",
-                                "text": "Cơm, bánh mì, khoai tây, ngô, ..."
-                            }
-                        ],
-                        "columnB": [
-                            {
-                                "id": "b1775550505900",
-                                "text": "Chất béo"
-                            },
-                            {
-                                "id": "b1775550507581",
-                                "text": "Chất đạm"
-                            },
-                            {
-                                "id": "b1775550508915",
-                                "text": "Vi-ta-min và chất khoáng"
-                            },
-                            {
-                                "id": "b1775550510897",
-                                "text": "Chất bột đường"
-                            }
-                        ],
-                        "correctPairs": []
-                    }
-                },
-                {
-                    "id": "q_1775551086496",
-                    "type": "QUIZ_MATCHING",
-                    "label": "Ghép nối",
-                    "skills": [],
-                    "ordinalNumber": 7,
-                    "points": 1,
-                    "gradingType": "auto",
-                    "config": {
-                        "media": {
-                            "type": "YOUTUBE",
-                            "sourceYT": {
-                                "id": "",
-                                "name": "",
-                                "source": ""
-                            },
-                            "sourceRecord": {
-                                "id": "",
-                                "name": "",
-                                "source": ""
-                            },
-                            "sourceFiles": {
-                                "file": [],
-                                "image": []
-                            }
-                        },
-                        "isAdvanced": false,
-                        "questionText": "",
-                        "columnA": [
-                            {
-                                "id": "a1775551090064",
-                                "text": "Cá rô"
-                            },
-                            {
-                                "id": "a1775551091781",
-                                "text": "Rắn"
-                            },
-                            {
-                                "id": "a1775551092880",
-                                "text": "Sóc"
-                            },
-                            {
-                                "id": "a1775551094231",
-                                "text": "Châu chấu"
-                            }
-                        ],
-                        "columnB": [
-                            {
-                                "id": "b1775551090064",
-                                "text": "Động vật phù du"
-                            },
-                            {
-                                "id": "b1775551091781",
-                                "text": "Ếch"
-                            },
-                            {
-                                "id": "b1775551092880",
-                                "text": "Hạt dẻ"
-                            },
-                            {
-                                "id": "b1775551094231",
-                                "text": "Cỏ"
-                            }
-                        ],
-                        "correctPairs": []
-                    }
-                },
-                {
-                    "id": "q_1775551144099",
-                    "type": "QUIZ_MATCHING",
-                    "label": "Ghép nối",
-                    "skills": [],
-                    "ordinalNumber": 8,
-                    "points": 2,
-                    "gradingType": "auto",
-                    "config": {
-                        "media": {
-                            "type": "YOUTUBE",
-                            "sourceYT": {
-                                "id": "",
-                                "name": "",
-                                "source": ""
-                            },
-                            "sourceRecord": {
-                                "id": "",
-                                "name": "",
-                                "source": ""
-                            },
-                            "sourceFiles": {
-                                "file": [],
-                                "image": []
-                            }
-                        },
-                        "isAdvanced": false,
-                        "questionText": "",
-                        "columnA": [
-                            {
-                                "id": "a1775551147262",
-                                "text": "Chất đạm"
-                            },
-                            {
-                                "id": "a1775551148448",
-                                "text": "Chất bột đường"
-                            },
-                            {
-                                "id": "a1775551149448",
-                                "text": "Chất béo"
-                            },
-                            {
-                                "id": "a1775551150515",
-                                "text": "Vi-ta-min và chất khoáng"
-                            }
-                        ],
-                        "columnB": [
-                            {
-                                "id": "b1775551147262",
-                                "text": "Tham gia xây dựng và đổi mới cơ thể."
-                            },
-                            {
-                                "id": "b1775551148448",
-                                "text": "Cung cấp năng lượng chủ yếu cho mọi hoạt động của cơ thể."
-                            },
-                            {
-                                "id": "b1775551149448",
-                                "text": "Cung cấp và dự trữ năng lượng, giữ ấm cơ thể. Giúp hấp thụ các vi- ta- min tan trong dầu như vi- ta-min A, D, E, K."
-                            },
-                            {
-                                "id": "b1775551150515",
-                                "text": "Giúp cơ thể khỏe mạnh và phòng chống bệnh tật."
-                            }
-                        ],
-                        "correctPairs": []
-                    }
-                },
-                {
-                    "id": "q_1775551905975",
-                    "type": "QUIZ_MATCHING",
-                    "label": "Ghép nối",
-                    "skills": [],
-                    "ordinalNumber": 9,
-                    "points": 2,
-                    "gradingType": "auto",
-                    "config": {
-                        "media": {
-                            "type": "FILE",
-                            "sourceYT": {
-                                "id": "",
-                                "name": "",
-                                "source": ""
-                            },
-                            "sourceRecord": {
-                                "id": "",
-                                "name": "",
-                                "source": ""
-                            },
-                            "sourceFiles": {
-                                "file": [],
-                                "image": [
-                                    {
-                                        "id": "1JPOF_rWIFBgeypmgEtKsLprU6epCgM4X",
-                                        "name": "Ảnh màn hình 2026-04-07 lúc 15.42.43.png",
-                                        "source": "https://drive.google.com/file/d/1JPOF_rWIFBgeypmgEtKsLprU6epCgM4X/preview"
-                                    }
-                                ]
-                            }
-                        },
-                        "isAdvanced": false,
-                        "questionText": "",
-                        "columnA": [
-                            {
-                                "id": "a1775551939558",
-                                "text": "(1)"
-                            },
-                            {
-                                "id": "a1775551940791",
-                                "text": "(2)"
-                            },
-                            {
-                                "id": "a1775551941842",
-                                "text": "(3)"
-                            },
-                            {
-                                "id": "a1775551943207",
-                                "text": "(4)"
-                            }
-                        ],
-                        "columnB": [
-                            {
-                                "id": "b1775551939558",
-                                "text": "Nấm men"
-                            },
-                            {
-                                "id": "b1775551940791",
-                                "text": "bánh"
-                            },
-                            {
-                                "id": "b1775551941842",
-                                "text": "rượu"
-                            },
-                            {
-                                "id": "b1775551943207",
-                                "text": "món ăn"
-                            }
-                        ],
-                        "correctPairs": []
-                    }
-                },
-                {
-                    "id": "q_1775552025377",
-                    "type": "QUIZ_MATCHING",
-                    "label": "Ghép nối",
-                    "skills": [],
-                    "ordinalNumber": 10,
-                    "points": 2,
-                    "gradingType": "auto",
-                    "config": {
-                        "media": {
-                            "type": "FILE",
-                            "sourceYT": {
-                                "id": "",
-                                "name": "",
-                                "source": ""
-                            },
-                            "sourceRecord": {
-                                "id": "",
-                                "name": "",
-                                "source": ""
-                            },
-                            "sourceFiles": {
-                                "file": [],
-                                "image": [
-                                    {
-                                        "id": "1GJf1U35G7v-jt8eHql4elGZj-Bhp0Y-h",
-                                        "name": "Ảnh màn hình 2026-04-07 lúc 15.55.03.png",
-                                        "source": "https://drive.google.com/file/d/1GJf1U35G7v-jt8eHql4elGZj-Bhp0Y-h/preview"
-                                    }
-                                ]
-                            }
-                        },
-                        "isAdvanced": false,
-                        "questionText": "",
-                        "columnA": [
-                            {
-                                "id": "a1775552136560",
-                                "text": "(1)"
-                            },
-                            {
-                                "id": "a1775552137758",
-                                "text": "(2)"
-                            },
-                            {
-                                "id": "a1775552138857",
-                                "text": "(3)"
-                            },
-                            {
-                                "id": "a1775552140042",
-                                "text": "(4)"
-                            }
-                        ],
-                        "columnB": [
-                            {
-                                "id": "b1775552136560",
-                                "text": "bảo quản"
-                            },
-                            {
-                                "id": "b1775552137758",
-                                "text": "vi sinh vật"
-                            },
-                            {
-                                "id": "b1775552138857",
-                                "text": "dập nát"
-                            },
-                            {
-                                "id": "b1775552140042",
-                                "text": "sử dụng"
-                            }
-                        ],
-                        "correctPairs": []
-                    }
-                },
-                {
-                    "id": "q_1775552183776",
-                    "type": "QUIZ_MATCHING",
-                    "label": "Ghép nối",
-                    "skills": [],
-                    "ordinalNumber": 11,
-                    "points": 2,
-                    "gradingType": "auto",
-                    "config": {
-                        "media": {
-                            "type": "FILE",
-                            "sourceYT": {
-                                "id": "",
-                                "name": "",
-                                "source": ""
-                            },
-                            "sourceRecord": {
-                                "id": "",
-                                "name": "",
-                                "source": ""
-                            },
-                            "sourceFiles": {
-                                "file": [],
-                                "image": [
-                                    {
-                                        "id": "10dXnLMBga7g9TAeyVMlTQB3bF_eFS_cm",
-                                        "name": "Ảnh màn hình 2026-04-07 lúc 15.56.48.png",
-                                        "source": "https://drive.google.com/file/d/10dXnLMBga7g9TAeyVMlTQB3bF_eFS_cm/preview"
-                                    }
-                                ]
-                            }
-                        },
-                        "isAdvanced": false,
-                        "questionText": "",
-                        "columnA": [
-                            {
-                                "id": "a1775552232911",
-                                "text": "(1)"
-                            },
-                            {
-                                "id": "a1775552234509",
-                                "text": "(2)"
-                            },
-                            {
-                                "id": "a1775552235524",
-                                "text": "(3)"
-                            },
-                            {
-                                "id": "a1775552236525",
-                                "text": "(4)"
-                            }
-                        ],
-                        "columnB": [
-                            {
-                                "id": "b1775552232911",
-                                "text": "chăm sóc"
-                            },
-                            {
-                                "id": "b1775552234509",
-                                "text": "bảo vệ"
-                            },
-                            {
-                                "id": "b1775552235524",
-                                "text": "chống rét"
-                            },
-                            {
-                                "id": "b1775552236525",
-                                "text": "vun xới"
-                            }
-                        ],
-                        "correctPairs": []
-                    }
-                },
-                {
-                    "id": "q_1775552280875",
-                    "type": "QUIZ_MATCHING",
-                    "label": "Ghép nối",
-                    "skills": [],
-                    "ordinalNumber": 12,
-                    "points": 2,
-                    "gradingType": "auto",
-                    "config": {
-                        "media": {
-                            "type": "FILE",
-                            "sourceYT": {
-                                "id": "",
-                                "name": "",
-                                "source": ""
-                            },
-                            "sourceRecord": {
-                                "id": "",
-                                "name": "",
-                                "source": ""
-                            },
-                            "sourceFiles": {
-                                "file": [],
-                                "image": [
-                                    {
-                                        "id": "1Ui3W3SN0vW6TcQiwKJdjrMBT5da8dPeX",
-                                        "name": "Ảnh màn hình 2026-04-07 lúc 15.58.22.png",
-                                        "source": "https://drive.google.com/file/d/1Ui3W3SN0vW6TcQiwKJdjrMBT5da8dPeX/preview"
-                                    }
-                                ]
-                            }
-                        },
-                        "isAdvanced": false,
-                        "questionText": "",
-                        "columnA": [
-                            {
-                                "id": "a1775552373132",
-                                "text": "(1)"
-                            },
-                            {
-                                "id": "a1775552374440",
-                                "text": "(2)"
-                            },
-                            {
-                                "id": "a1775552375598",
-                                "text": "(3)"
-                            },
-                            {
-                                "id": "a1775552376626",
-                                "text": "(4)"
-                            }
-                        ],
-                        "columnB": [
-                            {
-                                "id": "b1775552373132",
-                                "text": "chất dinh dưỡng"
-                            },
-                            {
-                                "id": "b1775552374440",
-                                "text": "thức ăn"
-                            },
-                            {
-                                "id": "b1775552375598",
-                                "text": "năng lượng"
-                            },
-                            {
-                                "id": "b1775552376626",
-                                "text": "cơ thể"
-                            }
-                        ],
-                        "correctPairs": []
-                    }
-                },
-                {
-                    "id": "q_1775552820664",
-                    "type": "QUIZ_MATCHING",
-                    "label": "Ghép nối",
-                    "skills": [],
-                    "ordinalNumber": 13,
-                    "points": 2,
-                    "gradingType": "auto",
-                    "config": {
-                        "media": {
-                            "type": "FILE",
-                            "sourceYT": {
-                                "id": "",
-                                "name": "",
-                                "source": ""
-                            },
-                            "sourceRecord": {
-                                "id": "",
-                                "name": "",
-                                "source": ""
-                            },
-                            "sourceFiles": {
-                                "file": [],
-                                "image": [
-                                    {
-                                        "id": "1I4yoFUe5YcdKR2mytLOdBtGv5YJJk1sQ",
-                                        "name": "Ảnh màn hình 2026-04-07 lúc 16.14.03.png",
-                                        "source": "https://drive.google.com/file/d/1I4yoFUe5YcdKR2mytLOdBtGv5YJJk1sQ/preview"
-                                    }
-                                ]
-                            }
-                        },
-                        "isAdvanced": false,
-                        "questionText": "",
-                        "columnA": [
-                            {
-                                "id": "a1775553280237",
-                                "text": "(1)"
-                            },
-                            {
-                                "id": "a1775553281483",
-                                "text": "(2)"
-                            },
-                            {
-                                "id": "a1775553282416",
-                                "text": "(3)"
-                            },
-                            {
-                                "id": "a1775553283669",
-                                "text": "(4)"
-                            }
-                        ],
-                        "columnB": [
-                            {
-                                "id": "b1775553280237",
-                                "text": "tổng hợp"
-                            },
-                            {
-                                "id": "b1775553281483",
-                                "text": "tác dụng"
-                            },
-                            {
-                                "id": "b1775553282416",
-                                "text": "thực vật"
-                            },
-                            {
-                                "id": "b1775553283669",
-                                "text": "động vật"
-                            }
-                        ],
-                        "correctPairs": []
                     }
                 }
             ]

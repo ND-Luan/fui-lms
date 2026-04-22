@@ -497,12 +497,21 @@
 				const normalized = { ...content };
 	
 				if (normalized.options && Array.isArray(normalized.options)) {
-					// Always regenerate option IDs to prevent collisions with existing questions
-					normalized.options = normalized.options.map((option) => ({
-						...option,
-						id: crypto.randomUUID(),
-						text: option.text || ''
-					}));
+					// Regenerate option IDs to prevent collisions, but remap correctAnswer(s) to match new IDs
+					const idMap = new Map();
+					normalized.options = normalized.options.map((option) => {
+						const newId = crypto.randomUUID();
+						idMap.set(option.id, newId);
+						return { ...option, id: newId, text: option.text || '' };
+					});
+					// Remap correctAnswer (QUIZ_SINGLE_CHOICE)
+					if (normalized.correctAnswer != null) {
+						normalized.correctAnswer = idMap.get(normalized.correctAnswer) ?? normalized.correctAnswer;
+					}
+					// Remap correctAnswers (QUIZ_MULTIPLE_CHOICE)
+					if (Array.isArray(normalized.correctAnswers)) {
+						normalized.correctAnswers = normalized.correctAnswers.map(id => idMap.get(id) ?? id);
+					}
 				}
 	
 				return normalized;

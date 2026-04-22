@@ -13,7 +13,7 @@
             <v-card v-if="current" class="ifw__card" :style="!current.fullscreen && !$vuetify.display.smAndDown ? 'height:' + current.height : ''">
 
                 <!-- Titlebar — luôn hiển thị của item trên cùng -->
-                <v-toolbar density="compact" color="primary" class="ifw__toolbar" flat>
+                <v-toolbar v-show="!current.hideToolbar" density="compact" color="primary" class="ifw__toolbar" flat>
                     <v-icon size="18" class="ml-2 mr-2">{{ current.icon || 'mdi-web' }}</v-icon>
                     <v-toolbar-title class="ifw__title text-truncate">{{ current.title }}</v-toolbar-title>
                     <v-spacer />
@@ -72,7 +72,29 @@ export default {
     },
 
     mounted() {
+        this._onCloseCallbacks = []
         this._msgHandler = (e) => {
+            if (e.data?.type === 'iframeRef_closeWindow') {
+                if (window !== window.top) {
+                    window.parent.postMessage({ type: 'iframeRef_closeWindow' }, '*')
+                } else {
+                    this.closeWindow()
+                }
+                return
+            }
+            if (e.data?.type === 'iframeRef_closed') {
+                const cb = this._onCloseCallbacks.pop()
+                if (typeof cb === 'function') cb()
+                return
+            }
+            if (e.data?.type === 'iframeRef_hideToolbar') {
+                if (this.current) this.current.hideToolbar = true
+                return
+            }
+            if (e.data?.type === 'iframeRef_showToolbar') {
+                if (this.current) this.current.hideToolbar = false
+                return
+            }
             if (e.data?.type !== 'iframeRef_openWindow') return
             // Nếu mình cũng đang trong iframe → bubble lên tiếp
             if (window !== window.top) {
@@ -89,6 +111,7 @@ export default {
                 fullscreen: true,
                 loading: true,
                 hasError: false,
+                hideToolbar: false,
                 onclose: reloadOnClose ? () => {
                     // Gửi iframeRef_closed vào iframe bên dưới (index stack.length - 1 sau khi pop)
                     this.$nextTick(() => {
@@ -117,6 +140,9 @@ export default {
         openWindow({ title = '', url = '', icon = '', width, height, onclose = null } = {}) {
             // Đang trong iframe → bubble lên parent xử lý
             if (window !== window.top) {
+                if (typeof onclose === 'function') {
+                    this._onCloseCallbacks.push(onclose)
+                }
                 window.parent.postMessage({
                     type: 'iframeRef_openWindow',
                     title, url, icon, width, height,
@@ -134,6 +160,7 @@ export default {
                 fullscreen: true,
                 loading: true,
                 hasError: false,
+                hideToolbar: false,
                 onclose,
             });
         },

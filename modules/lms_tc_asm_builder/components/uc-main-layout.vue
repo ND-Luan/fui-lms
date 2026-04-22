@@ -151,7 +151,11 @@ export default {
       this.snackbarRef.value.showSnackbar({ message: 'Lưu bài tập thành công', color: 'success' })
       const urlParams = new URLSearchParams(window.location.search)
       if (urlParams.get('AssignToClassID') && !this.isEditMode) {
-        window.open('/lms-teacher-dashboard', '_parent')
+        if (window !== window.top) {
+          window.parent.postMessage({ type: 'iframeRef_closeWindow' }, '*')
+        } else {
+          window.open('/lms-teacher-dashboard', '_parent')
+        }
         return
       }
       if (!this.isEditMode && res?.[0]?.AssignmentID) {

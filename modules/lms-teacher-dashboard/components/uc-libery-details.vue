@@ -319,13 +319,13 @@ export default {
 					this.iframeRef.value.openWindow({
 						title: "Sửa bài tập",
 						url: `/lms_tc_asm_builder?AssignmentID=${item?.AssignmentID}&AssignToClassID=${item?.AssignToClassID}`,
-						onclose: () => vueData.apiCall3()
+						onclose: () => vueData.initPage()
 					});
 				} else {
 					this.iframeRef.value.openWindow({
 						title: "Sửa bài tập",
 						url: `/lms_tc_asm_builder?AssignmentID=${item?.AssignmentID}&AssignToStudentID=${item?.AssignToStudentID}`,
-						onclose: () => vueData.apiCall3()
+						onclose: () => vueData.initPage()
 					});
 				}
 

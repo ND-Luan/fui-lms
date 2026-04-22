@@ -129,7 +129,7 @@ export default {
 					this.iframeRef.value.openWindow({
 						title: "Soạn bài tập",
 						url: `/lms_tc_asm_builder?AssignmentID=${res?.data[0].AssignmentID}`,
-						onclose: () => vueData.apiCall3()
+							onclose: () => vueData.initPage()
 						});
 					},
 						err => {
