@@ -806,6 +806,13 @@
 					...this.gradingData[questionId],
 					answerData: newAnswer
 				}
+				// Sync studentAnswers so :answer prop (used by chip display) reflects FileAnnotation updates
+				if (this.studentAnswers[questionId]) {
+					this.studentAnswers[questionId] = {
+						...this.studentAnswers[questionId],
+						answerData: newAnswer
+					}
+				}
 				this.triggerAutoSave()
 			},
 			triggerAutoSave() {

@@ -137,6 +137,7 @@
 		<!-- THÊM DÒNG NÀY -->
 		<uc-image-annotator-test v-model:visible="annotator.visible" :file-url="annotator.fileUrl"
 			:original-file="annotator.currentFileObject" :initial-annotations="annotator.initialData"
+			:readonly="annotator.readonly"
 			@save="handleSaveAnnotation" />
 		<!-- <uc-image-annotator v-if="annotator.visible" v-model:visible="annotator.visible" :file-url="annotator.fileUrl"
 			:original-file="annotator.currentFileObject" :initial-annotations="annotator.initialData"
@@ -155,6 +156,23 @@
 		</v-dialog>
 
 		<uc-loading-page v-model="loadingPage.isLoading" v-model:text="loadingPage.text" />
+
+		<!-- Annotation viewer (read-only) -->
+		<v-dialog v-model="annotationViewer.show" max-width="1200" scrollable>
+			<v-card>
+				<v-toolbar density="compact" color="primary">
+					<v-toolbar-title class="text-truncate">{{ annotationViewer.name }}</v-toolbar-title>
+					<v-spacer />
+					<v-btn icon color="white" @click="annotationViewer.show = false">
+						<v-icon>mdi-close</v-icon>
+					</v-btn>
+				</v-toolbar>
+				<v-card-text class="pa-2 d-flex justify-center" style="background:#e0e0e0;">
+					<v-img :src="annotationViewer.src" contain max-height="80vh" />
+				</v-card-text>
+			</v-card>
+		</v-dialog>
+
 		<v-dialog v-model="isOpenFile" fullscreen>
 			<iframe class="iframeFile" :src="file?.source + '?v=' + Date.now()" frameborder="0"
 				style="width:100%; height:600px; border:none; overflow:hidden;" scrolling="no"></iframe>
@@ -192,9 +210,11 @@
 					fileUrl: '',
 					initialData: {},
 					currentFileId: null,
-					currentFileObject: null
+					currentFileObject: null,
+					readonly: false
 				},
-				keyComp: 0
+				keyComp: 0,
+				annotationViewer: { show: false, src: '', name: '' }
 			}
 		},
 		computed: {
@@ -467,6 +487,7 @@
 				this.annotator.initialData = annotations
 				this.annotator.currentFileId = file.id;
 				this.annotator.currentFileObject = file;
+				this.annotator.readonly = false;
 	
 				this.annotator.visible = true;
 				console.log('this.annotator', this.annotator)
@@ -514,11 +535,26 @@
 				});
 			},
 			onOpenFile(file) {
-				let source = file.source
-				if (this.submissionstatus === 4) {
-					source = file?.FileAnnotation?.source ?? source
+				// Nếu là ảnh có annotation → mở annotator ở chế độ xem (read-only)
+				// Học sinh chỉ thấy annotation khi đã trả bài (submissionstatus === 4)
+				if (this.isImageFile(file.name) && file?.FileAnnotation?.annotations && (this.isGrade || this.submissionstatus === 4)) {
+					let annotations = {}
+					try { annotations = JSON.parse(file.FileAnnotation.annotations) } catch (e) {}
+					this.annotator.fileUrl = file.source || '';
+					this.annotator.initialData = annotations;
+					this.annotator.currentFileId = file.id;
+					this.annotator.currentFileObject = file;
+					this.annotator.readonly = true;
+					this.annotator.visible = true;
+					return
 				}
-				window.open(source, '_blank')
+				// Fallback: ảnh không có annotation hoặc file không phải ảnh
+				if (this.isImageFile(file.name)) {
+					const src = file?.FileAnnotation?.source || file.source
+					this.annotationViewer = { show: true, src, name: file.name }
+					return
+				}
+				window.open(file.source, '_blank')
 			},
 			onclose() {
 				this.isOpenFile = false

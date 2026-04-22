@@ -217,13 +217,12 @@
 		<!-- ── LEADERBOARD MODAL ── -->
 		<uc-leaderboard v-model:isOpen="leaderboardModal.visible" :data="leaderboardModal.data" :isMobile />
 
-		<uc-iframe-window ref="iframeWindow" />
 	</div>
 </template>
 
 <script>
 	export default {
-		inject: ['topbarCtx'],
+		inject: ['topbarCtx', 'iframeRef'],
 		props: {
 			NienKhoa: Number,
 			HocSinh: Object,
@@ -374,7 +373,7 @@
 				const url = hd.Is_SendToClass
 					? `/lms-student-assignment?AssignToClassID=${hd.AssignID}&LanNop=${hd.LanNop}&tab=detail&HocSinhID=${HocSinhID}`
 					: `/lms-student-assignment?AssignToStudentID=${hd.AssignID}&Is_SendToClass=0&LanNop=${hd.LanNop}&tab=detail&HocSinhID=${HocSinhID}`;
-				this.$refs.iframeWindow.openWindow({
+				this.iframeRef.value.openWindow({
 					title: 'Chi tiết bài làm',
 					url,
 				});
@@ -385,7 +384,7 @@
 				url += hd.Is_SendToClass
 					? `&AssignToClassID=${hd.AssignID}&HocSinhID=${this.HocSinh?.HocSinhID}`
 					: `&AssignToStudentID=${hd.AssignID}&HocSinhID=${this.HocSinh?.HocSinhID}`;
-				this.$refs.iframeWindow.openWindow({
+				this.iframeRef.value.openWindow({
 					title: 'Chi tiết - ' + hd.Title,
 					url,
 				});
@@ -418,7 +417,7 @@
 					: `/lms-student-assignment?AssignToStudentID=${hd.AssignID}&Is_Resubmit=1&HocSinhID=${this.HocSinh.HocSinhID}`;
 	
 				const $this = this
-				this.$refs.iframeWindow.openWindow({
+				this.iframeRef.value.openWindow({
 					title: 'Làm lại - ' + hd.Title,
 					url,
 					onclose: () => {
@@ -432,7 +431,7 @@
 					? `/lms-student-assignment?AssignToClassID=${hd.AssignID}&LanNop=${hd.LanNop}&HocSinhID=${this.HocSinh?.HocSinhID}`
 					: `/lms-student-assignment?AssignToStudentID=${hd.AssignID}&LanNop=${hd.LanNop}&HocSinhID=${this.HocSinh?.HocSinhID}`;
 				const $this = this
-				this.$refs.iframeWindow.openWindow({
+				this.iframeRef.value.openWindow({
 					title: 'Tiếp tục - ' + hd.Title,
 					url,
 					onclose: () => { $this.loadData(); },
@@ -442,7 +441,7 @@
 				const assignToClassID = hd.AssignID // ← dùng AssignID, không phải ObjectID
 				if (!assignToClassID) return Vue.$toast?.error('Không tìm thấy thông tin bài học.')
 	
-				this.$refs.iframeWindow.openWindow({
+				this.iframeRef.value.openWindow({
 					title: 'Bài học - ' + hd.Title,
 					url: `/lms-student-lesson-viewer?AssignToClassID=${assignToClassID}&HocSinhID=${this.HocSinh?.HocSinhID}`,
 					onclose: () => { this.loadData() }

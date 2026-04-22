@@ -2,7 +2,8 @@
 	<v-dialog :model-value="visible" @update:model-value="closeDialog" fullscreen hide-overlay
 		transition="dialog-bottom-transition" scrim="false" persistent>
 		<v-card>
-			<v-toolbar dark color="primary" density="compact">
+			<!-- Toolbar edit mode -->
+			<v-toolbar v-if="!readonly" dark color="primary" density="compact">
 				<v-btn icon dark @click="closeDialog">
 					<v-icon>mdi-close</v-icon>
 				</v-btn>
@@ -34,8 +35,17 @@
 				</v-btn>
 			</v-toolbar>
 
-			<!-- THANH CÔNG CỤ PHỤ (chỉ hiện khi đang chọn Text) -->
-			<v-toolbar v-if="activeObject && (activeObject.type === 'i-text' || activeObject.type === 'text')" density="compact" color="grey-lighten-3">
+			<!-- Toolbar readonly mode -->
+			<v-toolbar v-if="readonly" dark color="primary" density="compact">
+				<v-btn icon dark @click="closeDialog">
+					<v-icon>mdi-close</v-icon>
+				</v-btn>
+				<v-toolbar-title>Xem chú thích</v-toolbar-title>
+				<v-spacer></v-spacer>
+			</v-toolbar>
+
+			<!-- THANH CÔNG CỤ PHỤ (chỉ hiện khi đang chọn Text và không phải readonly) -->
+			<v-toolbar v-if="!readonly && activeObject && (activeObject.type === 'i-text' || activeObject.type === 'text')" density="compact" color="grey-lighten-3">
 				<v-select :items="['Arial', 'Times New Roman', 'Courier New']" v-model="activeObjectProps.fontFamily"
 					@update:model-value="updateActiveObject" density="compact" hide-details variant="solo"
 					style="max-width: 150px;"></v-select>
@@ -89,7 +99,8 @@
 			visible: Boolean,
 			fileUrl: String,
 			initialAnnotations: Object,
-			originalFile: Object
+			originalFile: Object,
+			readonly: { type: Boolean, default: false }
 		},
 		emits: ['update:visible', 'save'],
 		data() {
@@ -112,12 +123,13 @@
 			};
 		},
 		watch: {
-			visible(newVal) {
+		visible(newVal) {
 				if (newVal) {
 					if (window !== window.top) {
 						window.parent.postMessage({ type: 'iframeRef_hideToolbar' }, '*')
 					}
-					this.$nextTick(() => {
+					this.$nextTick(async () => {
+						await this.loadFabric();
 						setTimeout(() => { this.initializeCanvas(); }, 100);
 					});
 				} else {
@@ -129,6 +141,16 @@
 			}
 		},
 		methods: {
+			loadFabric() {
+				if (window.fabric) return Promise.resolve();
+				return new Promise((resolve, reject) => {
+					const script = document.createElement('script');
+					script.src = 'https://cdnjs.cloudflare.com/ajax/libs/fabric.js/5.3.1/fabric.min.js';
+					script.onload = resolve;
+					script.onerror = () => reject(new Error('Không thể tải fabric.js'));
+					document.head.appendChild(script);
+				});
+			},
 			async initializeCanvas() {
 				if (this.fabricCanvas) this.fabricCanvas.dispose();
 				const canvasEl = this.$refs.canvasEl;
@@ -201,29 +223,34 @@
 								top: obj.top * scaleRatioY,
 								scaleX: obj.scaleX * scaleRatioX,
 								scaleY: obj.scaleY * scaleRatioY,
-								...(obj.fontSize && { fontSize: obj.fontSize * Math.min(scaleRatioX, scaleRatioY) })
-							}));
-	
-							// Load từng object vào canvas
-							scaledObjects.forEach(objData => {
-								fabric.util.enlivenObjects([objData], (objects) => {
-									objects.forEach(obj => {
-										this.fabricCanvas.add(obj);
-									});
-									this.fabricCanvas.renderAll();
+						}));
+
+						// Load từng object vào canvas
+						scaledObjects.forEach(objData => {
+							fabric.util.enlivenObjects([objData], (objects) => {
+								objects.forEach(obj => {
+									if (this.readonly) { obj.selectable = false; obj.evented = false; }
+									this.fabricCanvas.add(obj);
 								});
+								this.fabricCanvas.renderAll();
 							});
-	
+						});
+
 						} catch (e) {
 							console.error("Lỗi khi tải dữ liệu chú thích cũ:", e);
 						}
 					}
 				}, { crossOrigin: 'anonymous' });
 	
-				this.fabricCanvas.on('mouse:down', this.handleCanvasClick);
-				this.fabricCanvas.on('selection:created', this.updateActiveObjectState);
-				this.fabricCanvas.on('selection:updated', this.updateActiveObjectState);
-				this.fabricCanvas.on('selection:cleared', this.updateActiveObjectState);
+				if (this.readonly) {
+					this.fabricCanvas.selection = false;
+					this.fabricCanvas.forEachObject(obj => { obj.selectable = false; obj.evented = false; });
+				} else {
+					this.fabricCanvas.on('mouse:down', this.handleCanvasClick);
+					this.fabricCanvas.on('selection:created', this.updateActiveObjectState);
+					this.fabricCanvas.on('selection:updated', this.updateActiveObjectState);
+					this.fabricCanvas.on('selection:cleared', this.updateActiveObjectState);
+				}
 			},
 	
 			updateActiveObjectState(e) {

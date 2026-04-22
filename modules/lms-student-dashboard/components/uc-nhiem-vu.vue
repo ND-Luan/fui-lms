@@ -86,13 +86,12 @@
 				</v-col>
 			</v-row>
 		</div>
-		<uc-iframe-window ref="iframeWindow" />
 	</div>
 </template>
 
 <script>
 	export default {
-		inject: ['topbarCtx'],
+		inject: ['topbarCtx', 'iframeRef'],
 		props: {
 			NienKhoa: Number,
 			HocSinh: Object,
@@ -183,7 +182,7 @@
 					} else {
 						url += stringatsClassID
 					}
-					this.$refs.iframeWindow.openWindow({
+					this.iframeRef.value.openWindow({
 						title: nv.Title,
 						url,
 						onclose: () => {
@@ -191,7 +190,7 @@
 						}
 					});
 				} else if (type === 'lesson') {
-					this.$refs.iframeWindow.openWindow({
+					this.iframeRef.value.openWindow({
 						title: nv.Title,
 						url: `/lms-student-lesson-viewer?AssignToClassID=${id}&HocSinhID=${this.HocSinh?.HocSinhID}`,
 						onclose: () => {

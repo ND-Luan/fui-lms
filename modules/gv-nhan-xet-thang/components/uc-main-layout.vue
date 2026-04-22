@@ -449,7 +449,7 @@ export default {
 			// API 1: lấy tổng hợp loại vi phạm theo lớp + tháng
 			try {
 				this.DSTongHop_ViPham = await fetchPromise(
-					'quansinh/GVCN_SoDauBai_TongHopTheoLoaiViPham',
+					'quansinh/LMS_SoDauBai_TongHopTheoLoaiViPham',
 					{ TuNgay: firstDay, DenNgay: lastDay, LopHocID: this.LopItem.LopID },
 					{ cache: false }
 				) ?? []
@@ -493,7 +493,7 @@ export default {
 			try {
 				const { firstDay, lastDay } = this.getFirstAndLastDay(vueData.NienKhoa, this.ThangObj?.Thang)
 				const data = await fetchPromise(
-					'quansinh/GVCN_SoDauBai_TongHopTheoLoaiViPham_ChiTiet',
+					'quansinh/LMS_SoDauBai_TongHopTheoLoaiViPham_ChiTiet',
 					{ TuNgay: firstDay, DenNgay: lastDay, LopHocID: this.LopItem.LopID, LoaiViPham: loaiViPham },
 					{ cache: false }
 				)

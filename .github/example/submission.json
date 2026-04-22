@@ -1,0 +1,43 @@
+{
+    "answers": {
+        "q_f49218bb-8a73-4050-ab02-7db8cfdd67da": {
+            "answerData": [
+                {
+                    "id": "5462C1A9D0824D7EB003BA1487B2E042",
+                    "name": "cartoon-style-summer-scene-with-window-view.jpg",
+                    "source": "https://file.lhbs.vn/lms/FileData/5462C1A9D0824D7EB003BA1487B2E042",
+                    "FileAnnotation": {
+                        "id": "5462C1A9D0824D7EB003BA1487B2E042",
+                        "name": "[ANNOTATED]_cartoon-style-summer-scene-with-window-view.jpg",
+                        "source": "https://file.lhbs.vn/lms/FileData/5462C1A9D0824D7EB003BA1487B2E042?v=1776845951529",
+                        "annotations": "{\"version\":\"5.3.0\",\"objects\":[{\"type\":\"text\",\"version\":\"5.3.0\",\"originX\":\"left\",\"originY\":\"top\",\"left\":3555.75,\"top\":231,\"width\":183.47,\"height\":136.4,\"fill\":\"#311B92\",\"stroke\":null,\"strokeWidth\":1,\"strokeDashArray\":null,\"strokeLineCap\":\"butt\",\"strokeDashOffset\":0,\"strokeLineJoin\":\"miter\",\"strokeUniform\":false,\"strokeMiterLimit\":4,\"scaleX\":5.03,\"scaleY\":5.03,\"angle\":0,\"flipX\":false,\"flipY\":false,\"opacity\":1,\"shadow\":null,\"visible\":true,\"backgroundColor\":\"rgba(255, 255, 255, 0.8)\",\"fillRule\":\"nonzero\",\"paintFirst\":\"fill\",\"globalCompositeOperation\":\"source-over\",\"skewX\":0,\"skewY\":0,\"fontFamily\":\"Arial\",\"fontWeight\":\"bold\",\"fontSize\":120.70466321243526,\"text\":\"111\",\"underline\":false,\"overline\":false,\"linethrough\":false,\"textAlign\":\"left\",\"fontStyle\":\"italic\",\"lineHeight\":1.16,\"textBackgroundColor\":\"\",\"charSpacing\":0,\"styles\":[],\"direction\":\"ltr\",\"path\":null,\"pathStartOffset\":0,\"pathSide\":\"left\",\"pathAlign\":\"baseline\"},{\"type\":\"path\",\"version\":\"5.3.0\",\"originX\":\"center\",\"originY\":\"center\",\"left\":2373.86,\"top\":1421.15,\"width\":17.5,\"height\":13.41,\"fill\":\"#4CAF50\",\"stroke\":\"white\",\"strokeWidth\":0.5,\"strokeDashArray\":null,\"strokeLineCap\":\"butt\",\"strokeDashOffset\":0,\"strokeLineJoin\":\"miter\",\"strokeUniform\":false,\"strokeMiterLimit\":4,\"scaleX\":12.57,\"scaleY\":12.57,\"angle\":0,\"flipX\":false,\"flipY\":false,\"opacity\":1,\"shadow\":null,\"visible\":true,\"backgroundColor\":\"\",\"fillRule\":\"nonzero\",\"paintFirst\":\"fill\",\"globalCompositeOperation\":\"source-over\",\"skewX\":0,\"skewY\":0,\"path\":[[\"M\",21,7],[\"L\",9,19],[\"L\",3.5,13.5],[\"L\",4.91,12.09],[\"L\",9,16.17],[\"L\",19.59,5.59],[\"L\",21,7],[\"Z\"]]}],\"backgroundImage\":{\"type\":\"image\",\"version\":\"5.3.0\",\"originX\":\"left\",\"originY\":\"top\",\"left\":0,\"top\":0,\"width\":5824,\"height\":3264,\"fill\":\"rgb(0,0,0)\",\"stroke\":null,\"strokeWidth\":0,\"strokeDashArray\":null,\"strokeLineCap\":\"butt\",\"strokeDashOffset\":0,\"strokeLineJoin\":\"miter\",\"strokeUniform\":false,\"strokeMiterLimit\":4,\"scaleX\":1,\"scaleY\":1,\"angle\":0,\"flipX\":false,\"flipY\":false,\"opacity\":1,\"shadow\":null,\"visible\":true,\"backgroundColor\":\"\",\"fillRule\":\"nonzero\",\"paintFirst\":\"fill\",\"globalCompositeOperation\":\"source-over\",\"skewX\":0,\"skewY\":0,\"cropX\":0,\"cropY\":0,\"src\":\"blob:https://lms.lhbs.vn/8dd5aba4-14f9-4f2f-9479-d9fc84d29c94\",\"crossOrigin\":\"anonymous\",\"filters\":[]}}"
+                    }
+                }
+            ],
+            "flag": false,
+            "grading": {
+                "teacherComment": "",
+                "comment": "",
+                "manualScore": null
+            }
+        },
+        "q_50c7f472-9485-4e7c-b8cc-101b9cf806bd": {
+            "answerData": null,
+            "flag": false,
+            "grading": {
+                "comment": null,
+                "teacherComment": null,
+                "manualScore": null
+            }
+        },
+        "q_9d7b2f29-7bf9-40ed-b6f5-4a080550a87b": {
+            "answerData": null,
+            "flag": false,
+            "grading": {
+                "comment": null,
+                "teacherComment": null,
+                "manualScore": null
+            }
+        }
+    }
+}

@@ -115,7 +115,6 @@
 			</v-card>
 		</div>
 
-		<uc-iframe-window ref="iframeWindow" />
 
 		<!-- MOBILE FILTER BOTTOM SHEET -->
 		<v-bottom-sheet v-model="showFilterSheet">
@@ -144,6 +143,7 @@
 <script>
 export default {
 	name: 'UcStoreQuestion',
+	inject: ['iframeRef'],
 	props: {
 		HocSinh: { type: Object, default: () => ({}) },
 		NienKhoa: { type: Number, default: null },
@@ -259,7 +259,7 @@ export default {
 			url += item.Is_SendToClass
 				? `AssignToClassID=${item.AssignToClassID}`
 				: `AssignToStudentID=${item.AssignToStudentID}`;
-			this.$refs.iframeWindow.openWindow({
+			this.iframeRef.value.openWindow({
 				title: item.AssignmentTitle,
 				url,
 				onclose: () => { this.getDS(); },

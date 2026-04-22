@@ -129,13 +129,12 @@
 
 		<uc-student-gradebook-dialog v-model:visible="gradebookVisible" :mon-hoc-id="gradebookMonHocId"
 			:hoc-sinh-id="hocSinhID" :subject-name="gradebookMonHocName" :isMobile />
-		<uc-iframe-window ref="iframeWindow" />
 	</div>
 </template>
 
 <script>
 	export default {
-		inject: ['topbarCtx'],
+		inject: ['topbarCtx', 'iframeRef'],
 		props: {
 			NienKhoa: Number,
 			HocSinh: Object,
@@ -245,7 +244,7 @@
 			onOpenWindow(ct) {
 				const isLesson = ct.ResourceType === 'LESSON'
 	
-				this.$refs.iframeWindow.openWindow({
+				this.iframeRef.value.openWindow({
 					title: `Xem lại ${isLesson ? 'bài học' : 'bài tập'} ${ct.Title}`,
 					url: isLesson
 						? `/lms-student-lesson-viewer?AssignToClassID=${ct.AssignToClassID}&HocSinhID=${this.HocSinh.HocSinhID}`
