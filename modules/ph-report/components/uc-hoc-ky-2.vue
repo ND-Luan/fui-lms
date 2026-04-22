@@ -475,7 +475,7 @@
 							<v-expansion-panel-text>
 								<div v-if="item.id == 1">
 									<v-data-table class="table-bordered" :items="dataHK_1_C2_C3.Diem" :headers="headers"
-										hide-default-footer>
+										:hide-default-footer="-1" :items-per-page="-1">
 										<template v-slot:item.TenMon="{ item }">
 											<v-icon class="mr-2"
 												:color="DSMonHoc.find(x => x.MonHocName === item.TenMon)?.Color">
@@ -520,7 +520,8 @@
 									</div>
 								</div>
 								<div v-if="item.id == 2">
-									<v-data-table :items="dataHK_2_C2_C3.Diem" :headers="headers" hide-default-footer>
+									<v-data-table :items="dataHK_2_C2_C3.Diem" :headers="headers"
+										:hide-default-footer="-1" :items-per-page="-1">
 										<template v-slot:item.TenMon="{ item }">
 											<v-icon class="mr-2"
 												:color="DSMonHoc.find(x => x.MonHocName === item.TenMon)?.Color">
@@ -564,7 +565,7 @@
 								</div>
 								<div v-if="item.id == 3">
 									<v-data-table :items="dataCN_C2_C3.Diem" :headers="headersCaNam"
-										hide-default-footer>
+										:hide-default-footer="-1" :items-per-page="-1">
 										<template v-slot:item.TenMon="{ item }">
 											<v-icon class="mr-2"
 												:color="DSMonHoc.find(x => x.MonHocName === item.TenMon)?.Color">

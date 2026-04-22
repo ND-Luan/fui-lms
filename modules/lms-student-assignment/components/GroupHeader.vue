@@ -42,7 +42,7 @@
 					<v-img v-for="file in group.media.sourceFiles.image" :key="file.source"
 						:src="'https://drive.google.com/thumbnail?id=' + getDriveFileId(file.source) + '&sz=w1000'"
 						:lazy-src="'https://drive.google.com/thumbnail?id=' + getDriveFileId(file.source) + '&sz=w1000'"
-						class="rounded-lg" max-height="350">
+						class="rounded-lg" height="400">
 						<template #placeholder>
 							<v-row align="center" class="fill-height ma-0" justify="center">
 								<v-progress-circular color="grey-lighten-5" indeterminate />
