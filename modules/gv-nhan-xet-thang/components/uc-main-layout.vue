@@ -728,10 +728,15 @@ export default {
 			return { firstDay, lastDay }
 		},
 
-		// Tháng 1 & 5: range vi phạm từ 05/09 năm học (theo quy định Bộ GD) → cuối tháng được chọn
+		// Tháng 1: TuNgay = NienKhoa-09-05; Tháng 5: TuNgay = (NienKhoa+1)-01-01
 		getViPhamDateRange(thangObj) {
-			if (thangObj?.Thang === 1 || thangObj?.Thang === 5) {
+			if (thangObj?.Thang === 1) {
 				const firstDay = dayjs(`${parseInt(vueData.NienKhoa)}-09-05`).format('YYYY-MM-DD')
+				const lastDay = dayjs(`${thangObj.Nam}-${thangObj.Thang}-01`).endOf('month').format('YYYY-MM-DD')
+				return { firstDay, lastDay }
+			}
+			if (thangObj?.Thang === 5) {
+				const firstDay = dayjs(`${parseInt(vueData.NienKhoa) + 1}-01-01`).format('YYYY-MM-DD')
 				const lastDay = dayjs(`${thangObj.Nam}-${thangObj.Thang}-01`).endOf('month').format('YYYY-MM-DD')
 				return { firstDay, lastDay }
 			}

@@ -3,11 +3,11 @@
 		<GlobalLoading />
 		<GlobalApiErrorDialog />
 		<GlobalStaleDataBanner />
-		<GlobalFirebaseMessaging />
 		<GlobalUiSnackbar ref="snackbarRef" />
 		<GlobalIframeWindow ref="iframeWin" />
 		<GlobalConfirmDialog ref="confirmRef" />
 		<uc-ticket-fab v-if="!isInIframe" />
+		<uc-ticket-status v-if="!isInIframe" />
 		<v-responsive>
 			<v-app theme="light">
 				<div ref="headerRef">

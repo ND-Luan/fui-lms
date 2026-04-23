@@ -1,139 +1,132 @@
 <template>
-	<v-navigation-drawer v-model="isOpen" temporary location="end" width="400">
-		<v-list-item prepend-icon="" class="bg-white position-sticky top-0" style="z-index: 50; height: 50px">
-			<template #prepend>
-				<v-icon size="small">mdi-library-shelves</v-icon>
-			</template>
-			<span class="text-subtitle-1 font-weight-bold">{{ $t('message.MyDocument') }}</span>
-			<template v-slot:append>
-				<v-btn icon @click="CloseLiberies">
-					<v-icon>mdi-close</v-icon>
-				</v-btn>
-			</template>
-		</v-list-item>
-		<v-divider></v-divider>
+<v-navigation-drawer v-model="isOpen" temporary location="end" width="400">
+<div class="lib-root">
 
-		<div class="pa-2 " style="display: flex;flex-direction: row; flex-wrap: wrap; gap: 4px;">
-			<span class="text-subtitle-1 font-weight-medium">{{ $t('message.ListSubjects') }}: </span><br>
-			<v-btn v-for="(item, index) in DSMonHoc" :key="index" size="small" :value="item.MonHocName" variant="tonal"
-				active-color="green" @click="getLiberies(item)" :active="item.MonHocName === selected.MonHocName" color="blue-grey">
-				<span class="text-subtitle-2" style="font-size: .775rem !important;">{{ item.MonHocName == 'Ngoại ngữ' ?
-					($i18n.locale ==
-						'en' ? 'English' : item.MonHocName) : item.MonHocName }}</span>
-			</v-btn>
-			<span v-if="DSMonHoc && DSMonHoc.length == 0" class="text-red text-caption">{{ $t('message.NotFoundSubject')
-			}}</span>
-		</div>
-		<v-divider></v-divider>
-		<div class="pa-2 d-flex ga-2" v-if="DSMonHoc.length > 0">
-			<v-spacer></v-spacer>
-			<v-btn color="brown" variant="outlined" size="small" @click="onOpenKhoNoiDung()"
-				v-tooltip="$i18n.locale == 'en' ? 'Content Library' : 'Kho nội dung'">
-				<v-icon>mdi-archive-outline</v-icon>
-				<span class="text-subtitle-2" style="font-size: .775rem !important;">
-					{{ $t('message.ContentLibrary') }}
-				</span>
-			</v-btn>
-			<v-menu transition="slide-y-transition">
-				<template v-slot:activator="{ props }">
-					<v-btn color="primary" variant="outlined" size="small" v-bind="props" v-tooltip="tooltipCreateContent">
-						<v-icon>mdi-plus</v-icon>
-						<span class="text-subtitle-2" style="font-size: .775rem !important;">{{
-							$t('message.CreateContent') }}</span>
-					</v-btn>
-				</template>
-				<v-list>
-					<v-list-item v-for="KhoiItem in selectedGroups"
-						:value="KhoiItem.KhoiID" :key="KhoiItem.KhoiID" @click="OpenModalAddNoiDung(KhoiItem)">
-						<v-list-item-title>{{ $t('message.Grade') }} {{ KhoiItem.KhoiID }}</v-list-item-title>
-					</v-list-item>
-				</v-list>
-			</v-menu>
-		</div>
-		<v-divider></v-divider>
-		<div class="d-flex flex-column ga-2  overflow-y">
-			<div v-for="KhoiItem in selectedLibraries"
-				class="bg-grey-lighten-4 pa-2">
-				<span class="text-subtitle-1 font-weight-medium">{{ $t('message.Grade') }} {{ KhoiItem.KhoiID }}</span>
-				<v-expansion-panels :model-value="KhoiItem.allIndices"
-					variant="accordion" multiple class="border-t pt-1">
-					<v-expansion-panel v-for="(week, index) in KhoiItem.weeks" :key="index"
-						class="mb-1 custom-panel-liberies">
-						<v-expansion-panel-title class="text-body-2 text-white "
-							style="background-color: #009688; min-height: 30px !important ; height: 30px;">
-							<div>
-							</div>
-							{{ week.title }}
-						</v-expansion-panel-title>
+<!-- Header -->
+<v-list-item prepend-icon="" class="bg-white" style="flex-shrink:0; height:50px; border-bottom:1px solid var(--border-color)">
+<template #prepend>
+<v-icon size="small">mdi-library-shelves</v-icon>
+</template>
+<span class="text-subtitle-1 font-weight-bold">{{ $t('message.MyDocument') }}</span>
+<template v-slot:append>
+<v-btn icon @click="CloseLiberies">
+<v-icon>mdi-close</v-icon>
+</v-btn>
+</template>
+</v-list-item>
 
-						<v-expansion-panel-text class="d-flex flex-column">
-							<div v-for="(item, indexw) in week.flatItems"
-								class="flex-md-4 flex-sm-12 d-flex align-center flex-grow-1 px-1 py-2  mb-md-0"
-								style="min-width: 0;cursor: pointer;"
-								@click="onSelectedLibery(item, week.flatItems)">
-								<v-icon :color="item._info.color" size="22" class="mr-2">
-									{{ item._info.icon }}
-								</v-icon>
-								<div class="item-details">
-									<div class="item-title text-wrap break-words three-lines"
-										style="font-weight: 400; font-size: 0.875rem !important;">
-										{{ item.Title }}
-									</div>
-									<div v-if="item.Instructions && item.Instructions.length > 0"
-										class=" text-wrap break-words two-lines"
-										style=" font-size: 0.775rem !important;">
-										<span class="font-weight-bold">{{ $t('message.Instructions') }}:</span> {{
-											item.Instructions }}
-									</div>
-								</div>
-								<v-spacer></v-spacer>
-								<div class="d-flex align-center ga-2">
-									<v-chip :color="item._status.color" class="font-weight-medium" variant="text" size="small">
-										{{ item._status.text }}
-									</v-chip>
-								</div>
-								<v-menu transition="slide-y-transition">
-									<template v-slot:activator="{ props }">
-										<v-btn size="small" variant="text" icon="mdi-dots-vertical" v-bind="props">
-										</v-btn>
-									</template>
-									<v-list>
-										<v-list-item @click="onRedirectToASM(item)">
-											<v-list-item-title class="text-subtitle-2"><v-icon color="primary"
-													size="small" class="mr-1">mdi-archive-eye-outline</v-icon>{{
-														$t('message.ViewDetail')
-													}}</v-list-item-title>
-										</v-list-item>
-										<v-list-item @click="onDeleteItem(item)">
-											<v-list-item-title class="text-subtitle-2" v-if="$i18n.locale == 'vi'">
-												<v-icon color="red" size="small"
-													class="mr-1">mdi-trash-can-outline</v-icon>{{
-														$t('message.Delete') }}
-												{{ item.ResourceType == 'LESSON' ? 'bài học' : 'bài tập' }}
-											</v-list-item-title>
-											<v-list-item-title class="text-subtitle-2" v-else>
-												<v-icon color="red" size="small"
-													class="mr-1">mdi-trash-can-outline</v-icon>{{
-														$t('message.Delete') }}
-												{{ item.ResourceType == 'LESSON' ? 'lesson' : 'assignment' }}
-											</v-list-item-title>
-										</v-list-item>
-									</v-list>
-								</v-menu>
-							</div>
-						</v-expansion-panel-text>
-					</v-expansion-panel>
-				</v-expansion-panels>
-			</div>
-		</div>
-		<div class=" d-flex border-t pa-2 bg-white" style="position: absolute; bottom: 0; width: 100%;">
-			<v-spacer></v-spacer>
-			<v-btn color="primary" variant="text" @click="CloseLiberies">Đóng</v-btn>
-		</div>
-		<uc-libery-details v-if="isShowModalLiberyDetails" v-model:isOpen="isShowModalLiberyDetails"
-			v-model:selectedLibery="selectedLibery" :key="keyComp" :DSAssignedClass="DSAssignedClass"
-			@update:selectedLibery="() => { vueData.apiCall3() }" />
-	</v-navigation-drawer>
+<!-- Subject filter pills -->
+<div class="lib-filter-row">
+<button v-for="(item, index) in DSMonHoc" :key="index"
+class="lib-pill" :class="{ active: item.MonHocName === selected.MonHocName }"
+@click="getLiberies(item)">
+{{ item.MonHocName == 'Ngoại ngữ' ? ($i18n.locale == 'en' ? 'English' : item.MonHocName) : item.MonHocName }}
+</button>
+<span v-if="DSMonHoc.length === 0" class="text-red text-caption">{{ $t('message.NotFoundSubject') }}</span>
+</div>
+
+<!-- Khoi filter pills -->
+<div class="lib-filter-row lib-filter-row--khoi" v-if="availableKhois.length > 1">
+<button class="lib-pill lib-pill--sm" :class="{ active: selectedKhoi === null }" @click="selectedKhoi = null">
+{{ $i18n.locale == 'en' ? 'All' : 'Tất cả' }}
+</button>
+<button v-for="k in availableKhois" :key="k"
+class="lib-pill lib-pill--sm" :class="{ active: selectedKhoi === k }"
+@click="selectedKhoi = k">
+{{ $t('message.Grade') }} {{ k }}
+</button>
+</div>
+
+<!-- Actions -->
+<div class="lib-actions" v-if="DSMonHoc.length > 0">
+<v-btn color="brown" variant="outlined" size="small" @click="onOpenKhoNoiDung()"
+v-tooltip="$i18n.locale == 'en' ? 'Content Library' : 'Kho nội dung'">
+<v-icon>mdi-archive-outline</v-icon>
+<span style="font-size:.775rem">{{ $t('message.ContentLibrary') }}</span>
+</v-btn>
+<v-menu transition="slide-y-transition">
+<template v-slot:activator="{ props }">
+<v-btn color="primary" variant="outlined" size="small" v-bind="props">
+<v-icon>mdi-plus</v-icon>
+<span style="font-size:.775rem">{{ $t('message.CreateContent') }}</span>
+</v-btn>
+</template>
+<v-list>
+<v-list-item v-for="KhoiItem in selectedGroups" :value="KhoiItem.KhoiID" :key="KhoiItem.KhoiID"
+@click="OpenModalAddNoiDung(KhoiItem)">
+<v-list-item-title>{{ $t('message.Grade') }} {{ KhoiItem.KhoiID }}</v-list-item-title>
+</v-list-item>
+</v-list>
+</v-menu>
+</div>
+
+<!-- Search -->
+<div class="lib-search">
+<v-text-field v-model="librarySearch" density="compact" variant="outlined" hide-details
+placeholder="Tìm kiếm..." prepend-inner-icon="mdi-magnify" />
+</div>
+
+<!-- Flat item list -->
+<div class="lib-body">
+<!-- Skeleton loading -->
+<template v-if="isLibraryLoading">
+<div v-for="n in 5" :key="'skel-'+n" class="lib-bt-item" style="pointer-events:none;opacity:.7">
+<div class="lib-bt-icon" style="background:#EAF2FC;flex-shrink:0">
+<v-skeleton-loader type="avatar" width="15" height="15" style="margin:auto" />
+</div>
+<div class="lib-bt-body" style="flex:1;gap:4px">
+<v-skeleton-loader type="text" width="72%" />
+<v-skeleton-loader type="text" width="40%" />
+<v-skeleton-loader type="chip" width="80px" />
+</div>
+</div>
+</template>
+<template v-else>
+<div v-if="flatLibraryItems.length === 0" class="lib-empty">
+<v-icon size="36" class="mb-2 opacity-40">mdi-book-open-blank-variant-outline</v-icon>
+<span>{{ selected ? 'Không có tài liệu nào' : 'Chọn môn học để xem' }}</span>
+</div>
+<div v-for="item in flatLibraryItems" :key="item.ResourceID"
+class="lib-bt-item" @click="onSelectedLibery(item, item._siblings)">
+<div class="lib-bt-icon" :style="{ background: item._info.color === 'blue' ? '#EAF2FC' : '#E8F5E9' }">
+<v-icon size="15" :color="item._info.color">{{ item._info.icon }}</v-icon>
+</div>
+<div class="lib-bt-body">
+<div class="lib-bt-name">{{ item.Title }}</div>
+<div class="lib-bt-meta">{{ item._monHocName }} · {{ $t('message.Grade') }} {{ item._khoi }} · {{ item._week }}</div>
+<div class="lib-bt-footer">
+<span class="lib-pill-status" :style="getStatusStyle(item._status.color)">{{ item._status.text }}</span>
+</div>
+</div>
+<v-menu transition="slide-y-transition">
+<template v-slot:activator="{ props }">
+<v-btn size="x-small" variant="text" icon="mdi-dots-vertical" v-bind="props" @click.stop />
+</template>
+<v-list density="compact">
+<v-list-item @click.stop="onRedirectToASM(item)">
+<v-list-item-title class="text-subtitle-2">
+<v-icon color="primary" size="small" class="mr-1">mdi-archive-eye-outline</v-icon>
+{{ $t('message.ViewDetail') }}
+</v-list-item-title>
+</v-list-item>
+<v-list-item @click.stop="onDeleteItem(item)">
+<v-list-item-title class="text-subtitle-2">
+<v-icon color="red" size="small" class="mr-1">mdi-trash-can-outline</v-icon>
+{{ $t('message.Delete') }} {{ item.ResourceType == 'LESSON' ? ($i18n.locale == 'en' ? 'lesson' : 'bài học') : ($i18n.locale == 'en' ? 'assignment' : 'bài tập') }}
+</v-list-item-title>
+</v-list-item>
+</v-list>
+</v-menu>
+</div>
+</template>
+</div>
+
+<uc-libery-details v-if="isShowModalLiberyDetails" v-model:isOpen="isShowModalLiberyDetails"
+v-model:selectedLibery="selectedLibery" :key="keyComp" :DSAssignedClass="DSAssignedClass"
+@update:selectedLibery="() => { vueData.apiCall3() }" />
+
+</div>
+</v-navigation-drawer>
 </template>
 <script>
 export default {
@@ -200,6 +193,21 @@ export default {
 					}))
 				}))
 		},
+		availableKhois() {
+			return this.selectedLibraries.map(k => k.KhoiID)
+		},
+		flatLibraryItems() {
+			const s = this.librarySearch.toLowerCase()
+			const libs = this.selectedKhoi !== null
+				? this.selectedLibraries.filter(k => k.KhoiID === this.selectedKhoi)
+				: this.selectedLibraries
+			return libs.flatMap(khoi =>
+				khoi.weeks.flatMap(week => {
+					const siblings = week.flatItems
+					return week.flatItems.map(item => ({ ...item, _khoi: khoi.KhoiID, _week: week.title, _monHocName: khoi.MonHocName, _siblings: siblings }))
+				})
+			).filter(item => !s || item.Title.toLowerCase().includes(s))
+		},
 	},
 	watch: {
 		contentLibrary: function (newVal) {
@@ -207,11 +215,16 @@ export default {
 
 			}
 		},
+		selected() {
+			this.selectedKhoi = null
+		},
 	},
 	data() {
 
 		return {
 			keyComp: 0,
+			isLibraryLoading: false,
+			selectedKhoi: null,
 			indentLines: 'default',
 			separateRoots: false,
 			actionIcons: false,
@@ -219,12 +232,18 @@ export default {
 			isShowModalLiberyDetails: false,
 			DSMonHoc: [],
 			selected: '',
+			librarySearch: '',
 			selectedLibery: {},
 			vueData,
 			DSAssignedClass: []
 		}
 	},
 	methods: {
+		getStatusStyle(color) {
+			const m = { grey: { bg: '#F3F4F6', text: '#6B7280' }, orange: { bg: '#FAEEDA', text: '#BA7517' }, success: { bg: '#EAF3DE', text: '#3B6D11' } }
+			const c = m[color] || m.grey
+			return `background:${c.bg}; color:${c.text}; padding:2px 7px; border-radius:20px; font-size:10px; font-weight:600`
+		},
 		CloseLiberies() {
 			this.$emit('update:isOpen', false);
 			document.body.classList.remove('no-scroll');
@@ -263,9 +282,13 @@ export default {
 			this.iframeRef.value.openWindow({
 				title: item.Title,
 				url,
-				onclose: () => vueData.initPage()
+				onclose: () => this.refreshLibrary()
 			});
 
+		},
+		async refreshLibrary() {
+			this.isLibraryLoading = true
+			try { await vueData.apiCall3() } finally { this.isLibraryLoading = false }
 		},
 		onDeleteItem(item) {
 			this.confirmRef.value.show({
@@ -276,14 +299,14 @@ export default {
 					ajaxCALL('lms/EL_Assignment_Delete', {
 						AssignmentID: item.ResourceID
 					}, res => {
-						vueData.initPage()
+						this.refreshLibrary()
 						this.snackbarRef.value.showSnackbar({ message: 'Xóa bài tập thành công!', color: 'success' })
 					})
 				} else {
 					ajaxCALL('lms/EL_Lesson_Delete', {
 						LessonID: item.ResourceID
 					}, res => {
-						vueData.initPage()
+						this.refreshLibrary()
 						this.snackbarRef.value.showSnackbar({ message: 'Xóa bài học thành công!', color: 'success' })
 					})
 				}

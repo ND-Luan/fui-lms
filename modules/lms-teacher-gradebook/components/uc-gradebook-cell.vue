@@ -6,7 +6,7 @@
 			</div>
 			<div v-else-if="statusInfo.status === 'PENDING'">
 				<v-btn size="x-small" variant="outlined" color="primary"
-					@click.stop="$emit('grade', statusInfo.submissionId)">
+					@click.stop="$emit('grade', statusInfo.SubmissionID)">
 					<v-icon start class="me-1">mdi-clipboard-check-outline</v-icon>{{ $t('message.GradeAssignment') }}
 				</v-btn>
 			</div>
@@ -64,7 +64,7 @@
 	            // Chỉ emit nếu điểm thực sự thay đổi
 	            if (this.editedScore !== this.statusInfo.score) {
 	                this.$emit('update-score', {
-	                    submissionId: this.statusInfo.submissionId,
+                    submissionId: this.statusInfo.SubmissionID,
 	                    newScore: this.editedScore
 	                });
 	            }

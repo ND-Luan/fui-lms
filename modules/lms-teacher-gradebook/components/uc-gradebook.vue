@@ -75,7 +75,7 @@
 							<td class="fixed-col student-col-name ">{{ student.HoTen }}</td>
 							<td v-for="header in assignmentHeaders" :key="header.AssignToClassID" class="text-center">
 								<uc-gradebook-cell :cell-data="student[header.AssignToClassID]"
-									@grade="vueData.goToDetailedGradingPage" @update-score="updateStudentScore" />
+								@grade="chamBai" @update-score="updateStudentScore" />
 							</td>
 							<td class="fixed-col-right score-col text-center font-weight-bold">{{
 								calculateStudentAverage(student) }}</td>
@@ -99,6 +99,7 @@
 <script>
 export default {
 	name: 'uc-gradebook',
+	inject: ['snackbarRef', 'iframeRef', 'confirmRef'],
 	props: {
 		initialLopId: Number,
 		initialMonHocId: Number,
@@ -223,6 +224,14 @@ export default {
 			this.assignmentHeaders = [];
 			this.studentGrades = [];
 			this.columnStats = [];
+		},
+		chamBai(submissionId) {
+			if (!submissionId) return
+			this.iframeRef.value.openWindow({
+				title: 'Chấm bài',
+				url: `/lms_tc_grade_asm?SubmissionID=${submissionId}&AssignType=${vueData.AssignType}`,
+				onclose: () => this.fetchData()
+			})
 		},
 		test() {
 			CALL('CallTest')

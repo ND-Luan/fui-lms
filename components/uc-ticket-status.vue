@@ -20,7 +20,7 @@
 			<v-card v-if="detailDialog.ticket">
 				<v-card-title class="d-flex align-center ga-2">
 					<v-icon :color="alertColor(detailDialog.ticket.Status)">{{ alertIcon(detailDialog.ticket.Status)
-						}}</v-icon>
+					}}</v-icon>
 					<span class="text-body-1 font-weight-bold flex-grow-1" style="white-space: normal;">{{
 						detailDialog.ticket.Title }}</span>
 					<v-chip size="x-small" :color="alertColor(detailDialog.ticket.Status)" variant="tonal">
@@ -45,19 +45,21 @@
 						<v-timeline-item v-if="detailDialog.ticket.Status !== 'OPEN'"
 							:dot-color="alertColor(detailDialog.ticket.Status)" size="x-small">
 							<span class="text-caption font-weight-medium">{{ statusLabel(detailDialog.ticket.Status)
-								}}</span>
+							}}</span>
 						</v-timeline-item>
 					</v-timeline>
 
 					<!-- Comments -->
 					<template v-if="detailDialog.comments.length">
 						<v-divider class="mb-3" />
-							<p class="text-caption font-weight-bold text-medium-emphasis mb-2">Lịch sử trao đổi</p>
-							<div v-for="c in detailDialog.comments" :key="c.CommentID"
-								:class="['mb-2 pa-2 rounded', c.IsIT ? 'bg-grey-lighten-4' : 'bg-blue-lighten-5']">
-								<div class="d-flex align-center ga-1 mb-1">
-									<v-icon size="16" :color="c.IsIT ? 'primary' : 'blue-darken-2'">{{ c.IsIT ? 'mdi-account-tie' : 'mdi-account' }}</v-icon>
-									<span class="text-caption font-weight-medium">{{ c.IsIT ? (c.CreatedByName ?? 'Hỗ trợ') : (c.CreatedByName || 'Bạn') }}</span>
+						<p class="text-caption font-weight-bold text-medium-emphasis mb-2">Lịch sử trao đổi</p>
+						<div v-for="c in detailDialog.comments" :key="c.CommentID"
+							:class="['mb-2 pa-2 rounded', c.IsIT ? 'bg-grey-lighten-4' : 'bg-blue-lighten-5']">
+							<div class="d-flex align-center ga-1 mb-1">
+								<v-icon size="16" :color="c.IsIT ? 'primary' : 'blue-darken-2'">{{ c.IsIT ?
+									'mdi-account-tie' : 'mdi-account' }}</v-icon>
+								<span class="text-caption font-weight-medium">{{ c.IsIT ? (c.CreatedByName ?? 'Hỗ trợ')
+									: (c.CreatedByName || 'Bạn') }}</span>
 								<v-spacer />
 								<span class="text-caption text-medium-emphasis">{{ formatDate(c.CreatedAt) }}</span>
 							</div>
@@ -94,19 +96,16 @@
 						<div v-for="(att, i) in replyAttachments" :key="i"
 							style="position:relative;width:64px;height:64px;">
 							<v-img :src="att.previewUrl" width="64" height="64" cover
-								style="border-radius:6px;cursor:pointer;"
-								@click="openImagePreview(att.previewUrl)" />
+								style="border-radius:6px;cursor:pointer;" @click="openImagePreview(att.previewUrl)" />
 							<v-btn icon size="x-small" variant="elevated" color="error"
-								style="position:absolute;top:-6px;right:-6px;"
-								@click.stop="removeReplyAttachment(i)">
+								style="position:absolute;top:-6px;right:-6px;" @click.stop="removeReplyAttachment(i)">
 								<v-icon size="12">mdi-close</v-icon>
 							</v-btn>
 						</div>
 					</div>
 
 					<div class="d-flex justify-end">
-						<v-btn color="primary" size="small" variant="tonal"
-							:loading="detailDialog.isSending"
+						<v-btn color="primary" size="small" variant="tonal" :loading="detailDialog.isSending"
 							:disabled="!detailDialog.newComment?.trim() && !replyAttachments.length"
 							@click="sendComment">
 							<v-icon start>mdi-send</v-icon>Gửi
@@ -145,16 +144,22 @@ export default {
 				isSending: false,
 			},
 			imagePreview: { show: false, url: '' },
-		replyAttachments: [],
-		isCapturing: false,
+			replyAttachments: [],
+			isCapturing: false,
 		}
 	},
 	computed: {
 		DSActive() {
-			return this.DS.filter(t => t.UnreadUser > 0 && !this.dismissed.includes(t.TicketID))
+			return this.DS.filter(t =>
+				t.Status !== 'OPEN' &&
+				t.Status !== 'CANCELLED' &&
+				(t.UnreadUser > 0 || !this.dismissed.includes(t.TicketID))
+			)
 		},
 	},
 	mounted() {
+		const key = `ticket_seen_${vueData.user.UserID}`
+		this.dismissed = JSON.parse(localStorage.getItem(key) || '[]')
 		this.loadTickets()
 		if (!window.htmlToImage) {
 			const s = document.createElement('script')
@@ -166,7 +171,7 @@ export default {
 		async loadTickets() {
 			const res = await fetchPromise('lms/Ticket_GetList', {
 				CreateUser: vueData.user.UserID,
-				IsIT: false
+				IsIT: false,
 			}, { cache: false })
 			this.DS = res ?? []
 		},
@@ -185,6 +190,7 @@ export default {
 			this.detailDialog.newComment = ''
 			this.replyAttachments = []
 			this.detailDialog.show = true
+			this._persistSeen(item.TicketID)
 			ajaxCALL('lms/Ticket_MarkAsSeen', { TicketID: item.TicketID, IsIT: false }, () => {
 				const t = this.DS.find(x => x.TicketID === item.TicketID)
 				if (t) t.UnreadUser = 0
@@ -193,7 +199,13 @@ export default {
 		dismissTicket(ticketID) {
 			const t = this.DS.find(x => x.TicketID === ticketID)
 			if (t) t.UnreadUser = 0
-			ajaxCALL('lms/Ticket_MarkAsSeen', { TicketID: ticketID, IsIT: false }, () => {})
+			this._persistSeen(ticketID)
+			ajaxCALL('lms/Ticket_MarkAsSeen', { TicketID: ticketID, IsIT: false }, () => { })
+		},
+		_persistSeen(ticketID) {
+			if (this.dismissed.includes(ticketID)) return
+			this.dismissed.push(ticketID)
+			localStorage.setItem(`ticket_seen_${vueData.user.UserID}`, JSON.stringify(this.dismissed))
 		},
 		async sendComment() {
 			if (!this.detailDialog.newComment?.trim() && !this.replyAttachments.length) return
@@ -305,4 +317,3 @@ export default {
 	},
 }
 </script>
-

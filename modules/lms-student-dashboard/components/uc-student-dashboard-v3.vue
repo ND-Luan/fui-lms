@@ -24,9 +24,6 @@
 			<!-- ── TOPBAR MOBILE ── -->
 			<template #topbar-mobile>
 			</template>
-			<!-- Ticket status banner -->
-			<uc-ticket-status v-if="!isFromLinkParent" class="ma-2" />
-
 			<!-- Nội dung chính -->
 			<div v-if="activeKey === 0 && NienKhoa && studentInfoDetail?.HocSinhID">
 				<uc-nhiem-vu :NienKhoa :HocSinh="studentInfoDetail" :isMobile />

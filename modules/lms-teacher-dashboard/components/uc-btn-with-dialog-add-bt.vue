@@ -67,6 +67,14 @@ export default {
 			type: Boolean,
 			default: false,
 		},
+		tuanHocID: {
+			type: Number,
+			default: null,
+		},
+		defaultType: {
+			type: Number,
+			default: 0,
+		},
 	},
 	data() {
 		return {
@@ -76,7 +84,7 @@ export default {
 				Description: "",
 				TuanHocID: null,
 				Chuong: "",
-				type: 1
+				type: this.defaultType ?? 0
 			},
 			typeItems: [
 				{ text: this.$i18n.locale == 'en' ? 'Create lesson' : 'Tạo bài học', value: 1 },
@@ -88,7 +96,7 @@ export default {
 	mounted() { },
 	computed: {
 		DSTuan: function () {
-			this.form.TuanHocID = vueData.DSTuanHoc.find(tuan => tuan.Is_Active)?.TuanHocID
+			this.form.TuanHocID = this.tuanHocID || vueData.DSTuanHoc.find(tuan => tuan.Is_Active)?.TuanHocID
 			return vueData.DSTuanHoc
 		}
 

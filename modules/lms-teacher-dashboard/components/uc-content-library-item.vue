@@ -370,7 +370,7 @@
 				this.iframeRef.value.openWindow({
 					title: this.item.Title || '',
 					url,
-					onclose: () => vueData.initPage()
+					onclose: () => vueData.apiCall3()
 				});
 			},
 			goToClassDetail(item) {
@@ -492,7 +492,7 @@
 					this.iframeRef.value.openWindow({
 						title: "Sửa bài tập",
 						url: `/lms_tc_asm_builder?AssignmentID=${id?.AssignmentID}&AssignToClassID=${id?.AssignToClassID}`,
-						onclose: () => vueData.initPage()
+						onclose: () => vueData.apiCall3()
 					});
 				}
 				else if (id?.ResourceType == "LESSON") {

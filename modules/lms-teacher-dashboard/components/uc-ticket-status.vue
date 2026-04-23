@@ -52,12 +52,12 @@
 					<!-- Comments -->
 					<template v-if="detailDialog.comments.length">
 						<v-divider class="mb-3" />
-							<p class="text-caption font-weight-bold text-medium-emphasis mb-2">Lịch sử trao đổi</p>
-							<div v-for="c in detailDialog.comments" :key="c.CommentID"
-								:class="['mb-2 pa-2 rounded', c.IsIT ? 'bg-grey-lighten-4' : 'bg-blue-lighten-5']">
-								<div class="d-flex align-center ga-1 mb-1">
-									<v-icon size="16" :color="c.IsIT ? 'primary' : 'blue-darken-2'">{{ c.IsIT ? 'mdi-account-tie' : 'mdi-account' }}</v-icon>
-									<span class="text-caption font-weight-medium">{{ c.IsIT ? (c.CreatedByName ?? 'Hỗ trợ') : (c.CreatedByName || 'Bạn') }}</span>
+						<p class="text-caption font-weight-bold text-medium-emphasis mb-2">Lịch sử trao đổi</p>
+						<div v-for="c in detailDialog.comments" :key="c.CommentID"
+							:class="['mb-2 pa-2 rounded', c.IsIT ? 'bg-grey-lighten-4' : 'bg-blue-lighten-5']">
+							<div class="d-flex align-center ga-1 mb-1">
+								<v-icon size="16" :color="c.IsIT ? 'primary' : 'blue-darken-2'">{{ c.IsIT ? 'mdi-account-tie' : 'mdi-account' }}</v-icon>
+								<span class="text-caption font-weight-medium">{{ c.IsIT ? (c.CreatedByName ?? 'Hỗ trợ') : (c.CreatedByName || 'Bạn') }}</span>
 								<v-spacer />
 								<span class="text-caption text-medium-emphasis">{{ formatDate(c.CreatedAt) }}</span>
 							</div>
@@ -145,8 +145,8 @@ export default {
 				isSending: false,
 			},
 			imagePreview: { show: false, url: '' },
-		replyAttachments: [],
-		isCapturing: false,
+			replyAttachments: [],
+			isCapturing: false,
 		}
 	},
 	computed: {
@@ -166,7 +166,7 @@ export default {
 		async loadTickets() {
 			const res = await fetchPromise('lms/Ticket_GetList', {
 				CreateUser: vueData.user.UserID,
-				IsIT: false
+				IsIT: false,
 			}, { cache: false })
 			this.DS = res ?? []
 		},
@@ -305,4 +305,3 @@ export default {
 	},
 }
 </script>
-

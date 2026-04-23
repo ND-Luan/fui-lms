@@ -1,6 +1,6 @@
 <template>
 	<div class="assignment-row rounded-lg"
-		:style="{ 'border-left': '4px ' + 'solid ' + getBgColor(assignment.ResourceType) }">
+		:style="{ 'border-left': '4px ' + 'solid ' + getBgColor(assignment.ResourceType) }" style="padding: 4px 8px !important">
 		<!-- Cột thông tin bài tập -->
 		<div class="assignment-details">
 			<div class="assignment-title d-flex flex-md-row flex-column gap-2 align-md-center align-start">

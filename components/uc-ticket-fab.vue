@@ -411,41 +411,49 @@ export default {
 			this.openDialog()
 		},
 		async openDialog() {
+			// Capture trước khi mở dialog để ảnh không bị vướng UI dialog
+			this.isCapturing = true
+			let screenshotAttachment = null
+			try {
+				screenshotAttachment = await this._captureToAttachment()
+			} catch { }
+			this.isCapturing = false
+
 			await this.resetForm()
 			this.activeTab = 'create'
+			if (screenshotAttachment) this.attachments.push(screenshotAttachment)
 			this.isShow = true
-			// Capture sau khi dialog đã hiện — dùng setTimeout để nhường JS event loop
-			setTimeout(() => { this.captureScreenshot() }, 300)
+		},
+		async _captureToAttachment() {
+			if (!window.htmlToImage) {
+				await new Promise((resolve, reject) => {
+					const s = document.createElement('script')
+					s.src = 'https://cdn.jsdelivr.net/npm/html-to-image@1.11.11/dist/html-to-image.js'
+					s.onload = resolve
+					s.onerror = reject
+					document.head.appendChild(s)
+				})
+			}
+			const fullCanvas = await window.htmlToImage.toCanvas(document.body, { cacheBust: false, skipFonts: true })
+			const dpr = window.devicePixelRatio || 1
+			const sx = Math.round(window.scrollX * dpr)
+			const sy = Math.round(window.scrollY * dpr)
+			const sw = Math.round(window.innerWidth * dpr)
+			const sh = Math.round(window.innerHeight * dpr)
+			const clip = document.createElement('canvas')
+			clip.width = sw
+			clip.height = sh
+			clip.getContext('2d').drawImage(fullCanvas, sx, sy, sw, sh, 0, 0, sw, sh)
+			const blob = await new Promise(res => clip.toBlob(res, 'image/png'))
+			if (!blob) return null
+			const previewUrl = URL.createObjectURL(blob)
+			return { name: 'screenshot.png', blob, previewUrl, originalPreviewUrl: previewUrl }
 		},
 		async captureScreenshot() {
 			this.isCapturing = true
 			try {
-				if (!window.htmlToImage) {
-					await new Promise((resolve, reject) => {
-						const s = document.createElement('script')
-						s.src = 'https://cdn.jsdelivr.net/npm/html-to-image@1.11.11/dist/html-to-image.js'
-						s.onload = resolve
-						s.onerror = reject
-						document.head.appendChild(s)
-					})
-				}
-				const fullCanvas = await window.htmlToImage.toCanvas(document.body, { cacheBust: false, skipFonts: true })
-				const dpr = window.devicePixelRatio || 1
-				const vw = window.innerWidth
-				const vh = window.innerHeight
-				const sx = Math.round(window.scrollX * dpr)
-				const sy = Math.round(window.scrollY * dpr)
-				const sw = Math.round(vw * dpr)
-				const sh = Math.round(vh * dpr)
-				const clip = document.createElement('canvas')
-				clip.width = sw
-				clip.height = sh
-				clip.getContext('2d').drawImage(fullCanvas, sx, sy, sw, sh, 0, 0, sw, sh)
-				const blob = await new Promise(res => clip.toBlob(res, 'image/png'))
-				if (blob) {
-					const previewUrl = URL.createObjectURL(blob)
-					this.attachments.push({ name: 'screenshot.png', blob, previewUrl, originalPreviewUrl: previewUrl })
-				}
+				const att = await this._captureToAttachment()
+				if (att) this.attachments.push(att)
 			} catch (err) {
 				console.warn('Screenshot capture failed', err)
 			} finally {
