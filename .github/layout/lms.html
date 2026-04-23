@@ -1,0 +1,803 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quản lý bài tập</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+        :root{
+            --bg:#F5F4F0;--surface:#FFFFFF;--surface2:#F0EFEb;
+            --border:rgba(0,0,0,0.08);--border-md:rgba(0,0,0,0.14);
+            --text:#1A1A18;--text-2:#6B6B66;--text-3:#A8A89F;
+            --teal:#1D9E75;--teal-light:#E1F5EE;--teal-mid:#9FE1CB;--teal-dark:#085041;
+            --amber:#BA7517;--amber-light:#FAEEDA;
+            --red:#A32D2D;--red-light:#FCEBEB;
+            --green:#3B6D11;--green-light:#EAF3DE;
+            --blue:#185FA5;--blue-light:#E6F1FB;--blue-dark:#0C447C;
+            --radius-sm:6px;--radius-md:10px;--radius-lg:14px;
+            --font:'Be Vietnam Pro',sans-serif;
+        }
+        html,body{height:100%}
+        body{font-family:var(--font);background:var(--bg);color:var(--text);font-size:14px;line-height:1.5;display:flex;flex-direction:column;min-height:100vh}
+
+        /* TOPBAR */
+        .topbar{background:var(--surface);border-bottom:1px solid var(--border);padding:0 24px;height:52px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+        .app-name{font-size:15px;font-weight:600;color:var(--text);letter-spacing:-.02em}
+        .app-name span{color:var(--teal)}
+        .breadcrumb{display:flex;align-items:center;gap:6px}
+        .bc-chip{padding:4px 12px;border-radius:20px;font-size:12px;font-weight:500;transition:background .15s,color .15s}
+        .bc-done{background:var(--teal-light);color:var(--teal-dark);cursor:pointer}
+        .bc-done:hover{background:var(--teal-mid)}
+        .bc-active{background:var(--teal);color:#fff}
+        .bc-lock{background:var(--surface2);color:var(--text-3)}
+        .bc-sep{color:var(--text-3);font-size:11px}
+        .topbar-right{display:flex;align-items:center;gap:10px}
+        .avatar{width:32px;height:32px;border-radius:50%;background:var(--teal-light);color:var(--teal-dark);font-size:12px;font-weight:600;display:flex;align-items:center;justify-content:center}
+
+        /* LAYOUT */
+        .layout{display:flex;flex:1;overflow:hidden;min-height:0}
+
+        /* CASCADE SIDEBAR */
+        .cascade{width:256px;flex-shrink:0;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;overflow-y:auto}
+        .tier{border-bottom:1px solid var(--border)}
+        .tier:last-child{border-bottom:none;flex:1}
+        .tier-hd{padding:12px 16px 6px;display:flex;align-items:center;justify-content:space-between}
+        .tier-hd-label{font-size:10px;font-weight:600;color:var(--text-3);text-transform:uppercase;letter-spacing:.07em}
+        .tier-reset{font-size:11px;color:var(--teal);cursor:pointer;font-weight:500;background:none;border:none;padding:0}
+        .tier-reset:hover{color:var(--teal-dark);text-decoration:underline}
+        .tier-body{padding:4px 0 10px}
+        .t-item{display:flex;align-items:center;gap:9px;padding:8px 16px;font-size:13px;color:var(--text-2);cursor:pointer;transition:background .1s;user-select:none}
+        .t-item:hover{background:var(--surface2);color:var(--text)}
+        .t-item.active{background:var(--teal-light);color:var(--teal-dark);font-weight:500}
+        .t-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+        .t-label{flex:1}
+        .t-arrow{color:var(--text-3);font-size:12px;margin-left:auto}
+        .t-check{width:16px;height:16px;border-radius:50%;background:var(--teal);display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-left:auto}
+        .t-check svg{width:9px;height:9px}
+        .tier-locked{padding:10px 16px 12px;display:flex;align-items:center;gap:8px;color:var(--text-3);font-size:12px}
+        .tier-locked svg{flex-shrink:0;opacity:.5}
+
+        /* MAIN */
+        .main{flex:1;overflow-y:auto;padding:24px;display:flex;flex-direction:column;gap:16px;min-width:0}
+        .empty-state{display:flex;flex-direction:column;align-items:center;justify-content:center;flex:1;gap:10px;text-align:center;padding:60px 0;animation:fadeIn .2s ease}
+        .empty-icon{width:44px;height:44px;border-radius:50%;background:var(--surface2);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;margin-bottom:4px}
+        .empty-label{font-size:14px;font-weight:500;color:var(--text-2)}
+        .empty-sub{font-size:12px;color:var(--text-3)}
+        .panel-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+        .panel-title{font-size:16px;font-weight:600;color:var(--text);letter-spacing:-.02em}
+        .panel-sub{font-size:12px;color:var(--text-3);margin-top:2px}
+        .btn{display:inline-flex;align-items:center;gap:6px;padding:7px 14px;border-radius:var(--radius-md);font-size:13px;font-weight:500;cursor:pointer;border:1px solid var(--border-md);background:transparent;color:var(--text-2);transition:background .12s;font-family:var(--font);white-space:nowrap}
+        .btn:hover{background:var(--surface2)}
+        .btn-primary{background:var(--teal);color:#fff;border-color:var(--teal)}
+        .btn-primary:hover{background:#179166}
+        .stat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+        .stat-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-md);padding:14px 16px;animation:fadeIn .2s ease}
+        .stat-val{font-size:22px;font-weight:600;letter-spacing:-.03em}
+        .stat-label{font-size:11px;color:var(--text-3);margin-top:2px}
+        .stat-card.ok{border-top:2px solid var(--teal)}.stat-card.ok .stat-val{color:var(--teal-dark)}
+        .stat-card.warn{border-top:2px solid var(--amber)}.stat-card.warn .stat-val{color:var(--amber)}
+        .stat-card.danger{border-top:2px solid var(--red)}.stat-card.danger .stat-val{color:var(--red)}
+        .table-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden;animation:fadeIn .2s ease}
+        .table-card-head{padding:12px 18px;border-bottom:1px solid var(--border);background:var(--surface2);display:flex;align-items:center;justify-content:space-between}
+        .table-card-title{font-size:13px;font-weight:500}
+        table{width:100%;border-collapse:collapse;font-size:13px;table-layout:fixed}
+        thead th{padding:9px 18px;text-align:left;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--text-3);border-bottom:1px solid var(--border);background:var(--surface2)}
+        tbody td{padding:11px 18px;border-bottom:1px solid var(--border);color:var(--text);vertical-align:middle}
+        tbody tr:last-child td{border-bottom:none}
+        tbody tr:hover td{background:var(--surface2)}
+        .lop-badge{display:inline-flex;width:30px;height:30px;border-radius:var(--radius-sm);background:var(--teal-light);color:var(--teal-dark);font-size:12px;font-weight:600;align-items:center;justify-content:center}
+        .pill{display:inline-flex;padding:3px 9px;border-radius:20px;font-size:11px;font-weight:500;white-space:nowrap}
+        .pill.ok{background:var(--green-light);color:var(--green)}
+        .pill.warn{background:var(--amber-light);color:var(--amber)}
+        .pill.danger{background:var(--red-light);color:var(--red)}
+        .pill.blue{background:var(--blue-light);color:var(--blue-dark)}
+        .pill.sm{font-size:10px;padding:1px 6px}
+        .nop-wrap{display:flex;align-items:center;gap:8px}
+        .nop-bar{flex:1;height:4px;background:var(--surface2);border-radius:2px;overflow:hidden}
+        .nop-fill{height:100%;background:var(--teal);border-radius:2px;transition:width .3s ease}
+        .nop-text{font-size:12px;color:var(--text-2);white-space:nowrap;min-width:36px;text-align:right}
+        .view-btn{padding:4px 10px;border-radius:var(--radius-sm);font-size:11px;font-weight:500;border:1px solid var(--border-md);background:transparent;color:var(--text-2);cursor:pointer;font-family:var(--font);transition:background .1s}
+        .view-btn:hover{background:var(--surface2)}
+
+        /* CHAM SIDEBAR */
+        .cham-sidebar{width:288px;flex-shrink:0;background:var(--surface);border-left:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden}
+        .cham-hd{padding:13px 16px 10px;border-bottom:1px solid var(--border);background:var(--surface2);flex-shrink:0}
+        .cham-hd-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:9px}
+        .cham-title{font-size:13px;font-weight:600;color:var(--text);display:flex;align-items:center;gap:7px}
+        .cham-badge{display:inline-flex;align-items:center;justify-content:center;min-width:20px;height:20px;padding:0 5px;border-radius:20px;background:var(--red-light);color:var(--red);font-size:11px;font-weight:600}
+        .filter-row{display:flex;gap:4px;flex-wrap:wrap}
+        .fbtn{padding:3px 10px;border-radius:20px;font-size:11px;font-weight:500;cursor:pointer;border:1px solid var(--border-md);background:transparent;color:var(--text-2);font-family:var(--font);transition:background .1s,color .1s}
+        .fbtn:hover{background:var(--surface2)}
+        .fbtn.active{background:var(--teal);color:#fff;border-color:var(--teal)}
+        .cham-list{flex:1;overflow-y:auto}
+
+        /* Bài tập item trong sidebar */
+        .bt-item{display:flex;align-items:flex-start;gap:10px;padding:11px 14px;border-bottom:1px solid var(--border);cursor:pointer;transition:background .1s;user-select:none}
+        .bt-item:last-child{border-bottom:none}
+        .bt-item:hover{background:var(--surface2)}
+        .bt-item-icon{width:34px;height:34px;border-radius:var(--radius-sm);display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px}
+        .bt-item-body{flex:1;min-width:0}
+        .bt-item-name{font-size:12px;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+        .bt-item-meta{font-size:11px;color:var(--text-3);margin-top:2px}
+        .bt-item-footer{display:flex;align-items:center;gap:5px;margin-top:5px}
+        .bt-item-right{display:flex;align-items:center;flex-shrink:0;color:var(--text-3)}
+
+        /* TRANG CHẤM BÀI */
+        .cham-page{display:none;flex:1;flex-direction:column;overflow:hidden;animation:fadeIn .2s ease}
+        .cham-page.open{display:flex}
+        .cham-page-bar{background:var(--surface);border-bottom:1px solid var(--border);padding:0 24px;height:48px;display:flex;align-items:center;gap:14px;flex-shrink:0}
+        .cham-page-back{display:flex;align-items:center;gap:6px;font-size:13px;font-weight:500;color:var(--text-2);cursor:pointer;padding:6px 10px;border-radius:var(--radius-sm);transition:background .1s;border:none;background:none;font-family:var(--font)}
+        .cham-page-back:hover{background:var(--surface2);color:var(--text)}
+        .cham-page-title{font-size:14px;font-weight:600;color:var(--text)}
+        .cham-page-sub{font-size:12px;color:var(--text-3)}
+        .cham-page-body{flex:1;overflow:hidden;display:flex;min-height:0}
+
+        /* Danh sách học sinh (trái) */
+        .hs-list-pane{width:280px;flex-shrink:0;border-right:1px solid var(--border);background:var(--surface);overflow-y:auto;display:flex;flex-direction:column}
+        .hs-list-hd{padding:10px 16px;border-bottom:1px solid var(--border);background:var(--surface2);display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+        .hs-list-label{font-size:11px;font-weight:600;color:var(--text-3);text-transform:uppercase;letter-spacing:.06em}
+        .hs-item{display:flex;align-items:center;gap:10px;padding:10px 16px;border-bottom:1px solid var(--border);cursor:pointer;transition:background .1s;user-select:none}
+        .hs-item:last-child{border-bottom:none}
+        .hs-item:hover{background:var(--surface2)}
+        .hs-item.sel{background:var(--teal-light)}
+        .hs-av{width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;flex-shrink:0}
+        .hs-name{flex:1;font-size:12px;font-weight:500;color:var(--text)}
+        .hs-score{font-size:13px;font-weight:600}
+
+        /* Panel chấm (phải) */
+        .cham-panel{flex:1;overflow-y:auto;padding:24px;display:flex;flex-direction:column;gap:18px;background:var(--bg)}
+        .cp-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden}
+        .cp-card-hd{padding:12px 18px;border-bottom:1px solid var(--border);background:var(--surface2);font-size:13px;font-weight:500}
+        .cp-card-body{padding:16px 18px}
+        .field-label{font-size:10px;font-weight:600;color:var(--text-3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px}
+        .score-grid{display:flex;gap:6px;flex-wrap:wrap}
+        .score-btn{width:38px;height:38px;border-radius:var(--radius-sm);font-size:13px;font-weight:600;cursor:pointer;border:1px solid var(--border-md);background:var(--surface2);color:var(--text-2);font-family:var(--font);transition:background .1s,color .1s;display:flex;align-items:center;justify-content:center}
+        .score-btn:hover{background:var(--teal-light);color:var(--teal-dark)}
+        .score-btn.picked{background:var(--teal);color:#fff;border-color:var(--teal)}
+        .tag-wrap{display:flex;gap:5px;flex-wrap:wrap}
+        .tag{padding:4px 10px;border-radius:20px;font-size:12px;border:1px solid var(--border-md);color:var(--text-2);cursor:pointer;transition:background .1s;font-family:var(--font)}
+        .tag:hover,.tag.sel{background:var(--teal-light);color:var(--teal-dark);border-color:var(--teal-mid)}
+        .note-area{width:100%;padding:10px 12px;border:1px solid var(--border-md);border-radius:var(--radius-sm);font-size:13px;font-family:var(--font);resize:none;outline:none;min-height:72px;color:var(--text)}
+        .note-area:focus{border-color:var(--teal)}
+        .cham-actions{display:flex;gap:8px}
+        .nav-hs{display:flex;align-items:center;justify-content:space-between;font-size:12px;color:var(--text-3)}
+        .nav-btn{padding:5px 12px;border-radius:var(--radius-sm);font-size:12px;font-weight:500;border:1px solid var(--border-md);background:transparent;color:var(--text-2);cursor:pointer;font-family:var(--font);transition:background .1s}
+        .nav-btn:hover{background:var(--surface2)}
+        .score-display{display:inline-flex;align-items:center;justify-content:center;width:40px;height:40px;border-radius:var(--radius-md);font-size:18px;font-weight:600}
+        .score-display.high{background:var(--teal-light);color:var(--teal-dark)}
+        .score-display.mid{background:var(--amber-light);color:var(--amber)}
+        .score-display.low{background:var(--red-light);color:var(--red)}
+        .score-display.empty{background:var(--surface2);color:var(--text-3)}
+
+        /* Progress strip */
+        .prog-strip{display:flex;align-items:center;gap:8px;padding:8px 14px;background:var(--surface2);border-top:1px solid var(--border);flex-shrink:0}
+        .prog-bar-out{flex:1;height:4px;background:var(--border);border-radius:2px;overflow:hidden}
+        .prog-bar-in{height:100%;background:var(--teal);border-radius:2px;transition:width .4s ease}
+        .prog-txt{font-size:11px;color:var(--text-2);white-space:nowrap}
+
+        @keyframes fadeIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
+    </style>
+</head>
+<body>
+
+<!-- TOPBAR -->
+<div class="topbar">
+    <div style="display:flex;align-items:center;gap:20px">
+        <div class="app-name">Edu<span>Track</span></div>
+        <div class="breadcrumb" id="breadcrumb"></div>
+    </div>
+    <div class="topbar-right">
+        <div class="avatar">GV</div>
+    </div>
+</div>
+
+<!-- LAYOUT CHÍNH -->
+<div class="layout" id="layout-main">
+
+    <!-- CASCADE SIDEBAR -->
+    <div class="cascade">
+        <div class="tier">
+            <div class="tier-hd"><span class="tier-hd-label">Khối lớp</span></div>
+            <div class="tier-body" id="grade-items"></div>
+        </div>
+        <div class="tier">
+            <div class="tier-hd">
+                <span class="tier-hd-label">Môn học</span>
+                <button class="tier-reset" id="mon-reset" style="display:none" onclick="resetFrom(1)">đổi khối</button>
+            </div>
+            <div class="tier-body" id="mon-items">
+                <div class="tier-locked">
+                    <svg width="13" height="13" viewBox="0 0 16 16" fill="none"><rect x="3" y="7" width="10" height="8" rx="2" stroke="currentColor" stroke-width="1.5"/><path d="M5 7V5a3 3 0 016 0v2" stroke="currentColor" stroke-width="1.5"/></svg>
+                    Chọn khối trước
+                </div>
+            </div>
+        </div>
+        <div class="tier">
+            <div class="tier-hd">
+                <span class="tier-hd-label">Tuần học</span>
+                <button class="tier-reset" id="tuan-reset" style="display:none" onclick="resetFrom(2)">đổi môn</button>
+            </div>
+            <div class="tier-body" id="tuan-items">
+                <div class="tier-locked">
+                    <svg width="13" height="13" viewBox="0 0 16 16" fill="none"><rect x="3" y="7" width="10" height="8" rx="2" stroke="currentColor" stroke-width="1.5"/><path d="M5 7V5a3 3 0 016 0v2" stroke="currentColor" stroke-width="1.5"/></svg>
+                    Chọn môn trước
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MAIN -->
+    <div class="main" id="main"></div>
+
+    <!-- CHẤM BÀI SIDEBAR -->
+    <div class="cham-sidebar">
+        <div class="cham-hd">
+            <div class="cham-hd-top">
+                <div class="cham-title">
+                    <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M3 8l3.5 3.5L13 4" stroke="var(--teal)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    Bài tập cần chấm
+                    <span class="cham-badge" id="cham-badge">0</span>
+                </div>
+            </div>
+            <div class="filter-row">
+                <button class="fbtn active" onclick="setFilter('all',this)">Tất cả</button>
+                <button class="fbtn" onclick="setFilter('pending',this)">Chờ chấm</button>
+                <button class="fbtn" onclick="setFilter('graded',this)">Đã chấm</button>
+            </div>
+        </div>
+        <div class="prog-strip">
+            <div class="prog-bar-out"><div class="prog-bar-in" id="prog-bar" style="width:0%"></div></div>
+            <span class="prog-txt" id="prog-txt">0/0 đã chấm</span>
+        </div>
+        <div class="cham-list" id="cham-list"></div>
+    </div>
+
+</div><!-- /layout-main -->
+
+<!-- TRANG CHẤM BÀI (ẩn mặc định, thay thế layout khi mở) -->
+<div class="cham-page" id="cham-page">
+    <div class="cham-page-bar">
+        <button class="cham-page-back" onclick="closeChamPage()">
+            <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M10 3L5 8l5 5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            Quay lại
+        </button>
+        <div style="width:1px;height:20px;background:var(--border)"></div>
+        <div>
+            <div class="cham-page-title" id="cp-title">—</div>
+            <div class="cham-page-sub" id="cp-sub">—</div>
+        </div>
+        <div style="flex:1"></div>
+        <div id="cp-prog-label" style="font-size:12px;color:var(--text-3)"></div>
+    </div>
+    <div class="cham-page-body">
+        <!-- Danh sách học sinh -->
+        <div class="hs-list-pane">
+            <div class="hs-list-hd">
+                <span class="hs-list-label">Học sinh</span>
+                <span id="hs-count-label" style="font-size:11px;color:var(--text-3)"></span>
+            </div>
+            <div id="hs-list"></div>
+        </div>
+        <!-- Panel chấm -->
+        <div class="cham-panel" id="cham-panel">
+            <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;flex:1;gap:10px;color:var(--text-3);padding:60px 0">
+                <svg width="36" height="36" viewBox="0 0 36 36" fill="none"><circle cx="18" cy="18" r="16" stroke="currentColor" stroke-width="1.5" opacity=".3"/><path d="M12 18l4 4 8-8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" opacity=".5"/></svg>
+                <span style="font-size:13px">Chọn học sinh để bắt đầu chấm</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+/* ═══════════════ DỮ LIỆU GỐC ═══════════════ */
+const GRADES=[
+    {id:1,label:'Khối 1',dot:'#378ADD',mons:[
+        {id:'toan',name:'Toán',dot:'#378ADD'},{id:'tv',name:'Tiếng Việt',dot:'#1D9E75'},
+        {id:'tnxh',name:'TN & XH',dot:'#BA7517'},{id:'mt',name:'Mỹ thuật',dot:'#7F77DD'},{id:'td',name:'Thể dục',dot:'#888780'}]},
+    {id:2,label:'Khối 2',dot:'#1D9E75',mons:[
+        {id:'toan',name:'Toán',dot:'#378ADD'},{id:'tv',name:'Tiếng Việt',dot:'#1D9E75'},
+        {id:'tnxh',name:'TN & XH',dot:'#BA7517'},{id:'ta',name:'Tiếng Anh',dot:'#7F77DD'},{id:'td',name:'Thể dục',dot:'#888780'}]},
+    {id:3,label:'Khối 3',dot:'#BA7517',mons:[
+        {id:'toan',name:'Toán',dot:'#378ADD'},{id:'tv',name:'Tiếng Việt',dot:'#1D9E75'},
+        {id:'ta',name:'Tiếng Anh',dot:'#7F77DD'},{id:'tnxh',name:'TN & XH',dot:'#BA7517'},
+        {id:'mt',name:'Mỹ thuật',dot:'#D85A30'},{id:'td',name:'Thể dục',dot:'#888780'}]},
+    {id:4,label:'Khối 4',dot:'#7F77DD',mons:[
+        {id:'toan',name:'Toán',dot:'#378ADD'},{id:'tv',name:'Tiếng Việt',dot:'#1D9E75'},
+        {id:'ta',name:'Tiếng Anh',dot:'#7F77DD'},{id:'kh',name:'Khoa học',dot:'#D85A30'},
+        {id:'ls',name:'Lịch sử',dot:'#BA7517'},{id:'td',name:'Thể dục',dot:'#888780'},{id:'mt',name:'Mỹ thuật',dot:'#D4537E'}]},
+    {id:5,label:'Khối 5',dot:'#D85A30',mons:[
+        {id:'toan',name:'Toán',dot:'#378ADD'},{id:'tv',name:'Tiếng Việt',dot:'#1D9E75'},
+        {id:'ta',name:'Tiếng Anh',dot:'#7F77DD'},{id:'kh',name:'Khoa học',dot:'#D85A30'},
+        {id:'ls',name:'Lịch sử',dot:'#BA7517'},{id:'td',name:'Thể dục',dot:'#888780'},{id:'dl',name:'Địa lý',dot:'#D4537E'}]}
+];
+const CURRENT_WEEK=18;
+const WEEKS=[
+    {id:18,label:'Tuần 18',date:'20/01 – 26/01',ok:1,warn:1,danger:1},
+    {id:17,label:'Tuần 17',date:'13/01 – 19/01',ok:3,warn:0,danger:0},
+    {id:16,label:'Tuần 16',date:'06/01 – 12/01',ok:3,warn:0,danger:0},
+    {id:15,label:'Tuần 15',date:'30/12 – 05/01',ok:2,warn:0,danger:1}
+];
+const BT={
+    18:[
+        {lop:'4A',ten:'Phép nhân có nhớ (tr.42)',st:'ok',nop:28,total:30},
+        {lop:'4B',ten:'Phép nhân có nhớ (tr.42)',st:'warn',nop:19,total:32},
+        {lop:'4C',ten:'Chia số có dư (tr.45)',st:'danger',nop:12,total:31}
+    ],
+    17:[
+        {lop:'4A',ten:'Bảng chia 7',st:'ok',nop:30,total:30},
+        {lop:'4B',ten:'Bảng chia 7',st:'ok',nop:31,total:32},
+        {lop:'4C',ten:'Bảng chia 7',st:'ok',nop:29,total:31}
+    ],
+    16:[
+        {lop:'4A',ten:'Góc nhọn, góc tù (tr.30)',st:'ok',nop:30,total:30},
+        {lop:'4B',ten:'Góc nhọn, góc tù (tr.30)',st:'ok',nop:32,total:32},
+        {lop:'4C',ten:'Góc nhọn, góc tù (tr.30)',st:'ok',nop:31,total:31}
+    ],
+    15:[
+        {lop:'4A',ten:'Biểu đồ cột (tr.28)',st:'ok',nop:30,total:30},
+        {lop:'4B',ten:'Biểu đồ cột (tr.28)',st:'ok',nop:32,total:32},
+        {lop:'4C',ten:'Tìm số trung bình cộng',st:'danger',nop:20,total:31}
+    ]
+};
+const ST_LABEL={ok:'Hoàn thành',warn:'Đang chờ',danger:'Quá hạn'};
+
+/* ═══════════════ DỮ LIỆU BÀI TẬP CẦN CHẤM ═══════════════
+   Mỗi entry = 1 bài tập của 1 lớp cụ thể
+   students = danh sách học sinh đã nộp
+*/
+const BAITAP_CHAM=[
+    {
+        id:1, ten:'Phép nhân có nhớ (tr.42)', lop:'4A', mon:'Toán', tuan:'Tuần 18', monDot:'#378ADD',
+        deadline:'26/01', tongNop:28, tongLop:30,
+        students:[
+            {id:1,name:'Nguyễn Thị An',av:'NA',color:'#1D9E75',nopLuc:'07:42',score:null,tags:[],note:''},
+            {id:2,name:'Trần Văn Bình',av:'TB',color:'#378ADD',nopLuc:'08:15',score:null,tags:[],note:''},
+            {id:3,name:'Lê Minh Châu',av:'LC',color:'#BA7517',nopLuc:'08:30',score:8,tags:['Làm đủ bài'],note:''},
+            {id:4,name:'Phạm Thu Dung',av:'PD',color:'#7F77DD',nopLuc:'08:55',score:null,tags:[],note:''},
+            {id:5,name:'Hoàng Văn Em',av:'HE',color:'#D85A30',nopLuc:'09:10',score:7,tags:[],note:''},
+            {id:6,name:'Vũ Thị Phương',av:'VP',color:'#D4537E',nopLuc:'09:22',score:10,tags:['Xuất sắc'],note:'Bài làm rất tốt'},
+            {id:7,name:'Đặng Minh Giang',av:'DG',color:'#1D9E75',nopLuc:'09:45',score:null,tags:[],note:''},
+            {id:8,name:'Bùi Thị Hà',av:'BH',color:'#378ADD',nopLuc:'10:01',score:6,tags:[],note:''},
+        ]
+    },
+    {
+        id:2, ten:'Chính tả bài 3 – Mùa xuân', lop:'2B', mon:'Tiếng Việt', tuan:'Tuần 18', monDot:'#1D9E75',
+        deadline:'26/01', tongNop:20, tongLop:28,
+        students:[
+            {id:9, name:'Cao Văn An',av:'CA',color:'#378ADD',nopLuc:'07:15',score:null,tags:[],note:''},
+            {id:10,name:'Dương Thị Bình',av:'DB',color:'#1D9E75',nopLuc:'07:40',score:null,tags:[],note:''},
+            {id:11,name:'Lý Minh Cường',av:'LC',color:'#BA7517',nopLuc:'08:00',score:9,tags:['Trình bày sạch'],note:''},
+            {id:12,name:'Trịnh Thị Duyên',av:'TD',color:'#7F77DD',nopLuc:'08:20',score:null,tags:[],note:''},
+            {id:13,name:'Ngô Văn Đức',av:'ND',color:'#D85A30',nopLuc:'09:00',score:null,tags:[],note:''},
+        ]
+    },
+    {
+        id:3, ten:'Unit 5 – Exercise A+B', lop:'3C', mon:'Tiếng Anh', tuan:'Tuần 18', monDot:'#7F77DD',
+        deadline:'26/01', tongNop:25, tongLop:30,
+        students:[
+            {id:14,name:'Hoàng Anh Kiệt',av:'HK',color:'#7F77DD',nopLuc:'07:30',score:null,tags:[],note:''},
+            {id:15,name:'Phan Thị Lan',av:'PL',color:'#D4537E',nopLuc:'07:55',score:8,tags:[],note:''},
+            {id:16,name:'Mai Văn Lộc',av:'ML',color:'#378ADD',nopLuc:'08:10',score:null,tags:[],note:''},
+            {id:17,name:'Tô Thị Mai',av:'TM',color:'#1D9E75',nopLuc:'08:40',score:null,tags:[],note:''},
+        ]
+    },
+    {
+        id:4, ten:'Bài 12 – Ánh sáng và bóng tối', lop:'5A', mon:'Khoa học', tuan:'Tuần 17', monDot:'#D85A30',
+        deadline:'19/01', tongNop:29, tongLop:31,
+        students:[
+            {id:18,name:'Bùi Thị Hà',av:'BH',color:'#BA7517',nopLuc:'06:50',score:null,tags:[],note:''},
+            {id:19,name:'Đinh Văn Hải',av:'DH',color:'#378ADD',nopLuc:'07:10',score:9,tags:['Xuất sắc'],note:''},
+            {id:20,name:'Lê Thị Huyền',av:'LH',color:'#1D9E75',nopLuc:'07:30',score:null,tags:[],note:''},
+            {id:21,name:'Phạm Minh Khôi',av:'PK',color:'#7F77DD',nopLuc:'08:00',score:null,tags:[],note:''},
+        ]
+    },
+    {
+        id:5, ten:'Biểu đồ cột (tr.28)', lop:'4C', mon:'Toán', tuan:'Tuần 15', monDot:'#378ADD',
+        deadline:'05/01', tongNop:20, tongLop:31,
+        students:[
+            {id:22,name:'Cao Thị Lan',av:'CL',color:'#D4537E',nopLuc:'07:00',score:5,tags:['Thiếu bước'],note:'Cần xem lại'},
+            {id:23,name:'Dương Văn Minh',av:'DM',color:'#378ADD',nopLuc:'07:20',score:null,tags:[],note:''},
+            {id:24,name:'Hà Thị Ngọc',av:'HN',color:'#1D9E75',nopLuc:'07:50',score:null,tags:[],note:''},
+        ]
+    }
+];
+
+const QUICK_TAGS=['Trình bày sạch','Làm đủ bài','Thiếu bước','Sai phép tính','Xuất sắc','Cần rèn thêm'];
+
+/* ═══════════════ STATE ═══════════════ */
+let sel={grade:null,mon:null,tuan:null};
+let chamFilter='all';
+let activeBT=null;   // bài tập đang chấm
+let activeHsId=null; // học sinh đang chấm
+let tempScore=null;
+let tempTags=[];
+let tempNote='';
+
+/* ═══════════════ HELPERS GỐC ═══════════════ */
+function checkmark(){return`<div class="t-check"><svg viewBox="0 0 9 9" fill="none"><path d="M1.5 4.5l2.5 2.5 3.5-4" stroke="white" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></div>`}
+function lockIcon(){return`<svg width="13" height="13" viewBox="0 0 16 16" fill="none"><rect x="3" y="7" width="10" height="8" rx="2" stroke="currentColor" stroke-width="1.5"/><path d="M5 7V5a3 3 0 016 0v2" stroke="currentColor" stroke-width="1.5"/></svg>`}
+function pillHtml(cls,text){return`<span class="pill sm ${cls}">${text}</span>`}
+
+function renderGrades(){
+    document.getElementById('grade-items').innerHTML=GRADES.map(g=>`
+    <div class="t-item${sel.grade===g.id?' active':''}" onclick="pickGrade(${g.id})">
+      <span class="t-dot" style="background:${g.dot}"></span>
+      <span class="t-label">${g.label}</span>
+      ${sel.grade===g.id?checkmark():'<span class="t-arrow">›</span>'}
+    </div>`).join('');
+}
+
+function renderMons(){
+    const el=document.getElementById('mon-items');
+    const rst=document.getElementById('mon-reset');
+    if(!sel.grade){el.innerHTML=`<div class="tier-locked">${lockIcon()} Chọn khối trước</div>`;rst.style.display='none';return}
+    rst.style.display='inline';
+    const grade=GRADES.find(g=>g.id===sel.grade);
+    el.innerHTML=grade.mons.map(m=>`
+    <div class="t-item${sel.mon===m.id?' active':''}" onclick="pickMon('${m.id}')">
+      <span class="t-dot" style="background:${m.dot}"></span>
+      <span class="t-label">${m.name}</span>
+      ${sel.mon===m.id?checkmark():'<span class="t-arrow">›</span>'}
+    </div>`).join('');
+}
+
+function renderTuans(){
+    const el=document.getElementById('tuan-items');
+    const rst=document.getElementById('tuan-reset');
+    if(!sel.mon){el.innerHTML=`<div class="tier-locked">${lockIcon()} Chọn môn trước</div>`;rst.style.display='none';return}
+    rst.style.display='inline';
+    const currentWk=WEEKS.find(w=>w.id===CURRENT_WEEK);
+    const otherWks=WEEKS.filter(w=>w.id!==CURRENT_WEEK);
+    function weekItem(w,isCurrent){
+        const pills=(w.danger?pillHtml('danger',w.danger):'')+(w.warn?pillHtml('warn',w.warn):'')+(w.ok?pillHtml('ok',w.ok):'');
+        const isActive=sel.tuan===w.id;
+        const currentBadge=isCurrent?`<span style="font-size:10px;font-weight:600;color:var(--teal);background:var(--teal-light);padding:1px 6px;border-radius:20px;margin-right:4px;flex-shrink:0">Hiện tại</span>`:'';
+        return`<div class="t-item${isActive?' active':''}" onclick="pickTuan(${w.id})" style="${isCurrent?'border-left:2px solid var(--teal);padding-left:14px;':''}">
+        <span class="t-label" style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">${w.label}${isCurrent?currentBadge:''}</span>
+        <span style="display:flex;gap:3px;flex-shrink:0">${pills}</span>
+        ${isActive?checkmark():'<span class="t-arrow" style="margin-left:4px">›</span>'}
+      </div>`;
+    }
+    el.innerHTML=weekItem(currentWk,true)+
+        `<div style="margin:6px 16px 4px;border-top:1px solid var(--border);"></div>
+     <div style="padding:4px 16px 2px;font-size:10px;font-weight:600;color:var(--text-3);text-transform:uppercase;letter-spacing:0.07em">Các tuần trước</div>`+
+        otherWks.map(w=>weekItem(w,false)).join('');
+}
+
+function renderMain(){
+    const el=document.getElementById('main');
+    if(!sel.tuan){
+        let label='Chọn Khối rồi chọn Môn để bắt đầu';
+        let sub='Tuần hiện tại sẽ được chọn tự động';
+        if(sel.grade&&!sel.mon){label='Chọn môn học';sub='Tuần hiện tại sẽ tự hiện bài tập ngay'}
+        el.innerHTML=`<div class="empty-state">
+        <div class="empty-icon"><svg width="20" height="20" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="8" stroke="#A8A89F" stroke-width="1.5"/><path d="M10 5v5l3.5 2" stroke="#A8A89F" stroke-width="1.5" stroke-linecap="round"/></svg></div>
+        <div class="empty-label">${label}</div><div class="empty-sub">${sub}</div></div>`;
+        return;
+    }
+    const grade=GRADES.find(g=>g.id===sel.grade);
+    const mon=grade.mons.find(m=>m.id===sel.mon);
+    const wk=WEEKS.find(w=>w.id===sel.tuan);
+    const rows=BT[sel.tuan]||[];
+    const done=rows.filter(r=>r.st==='ok').length;
+    const warn=rows.filter(r=>r.st==='warn').length;
+    const danger=rows.filter(r=>r.st==='danger').length;
+    const tableRows=rows.map(r=>{
+        const pct=Math.round((r.nop/r.total)*100);
+        return`<tr>
+        <td style="width:70px"><span class="lop-badge">${r.lop}</span></td>
+        <td>${r.ten}</td>
+        <td style="width:120px"><span class="pill ${r.st}">${ST_LABEL[r.st]}</span></td>
+        <td style="width:130px"><div class="nop-wrap"><div class="nop-bar"><div class="nop-fill" style="width:${pct}%"></div></div><span class="nop-text">${r.nop}/${r.total}</span></div></td>
+        <td style="width:64px;text-align:right"><button class="view-btn">Xem</button></td>
+      </tr>`;
+    }).join('');
+    const isCurrent=sel.tuan===CURRENT_WEEK;
+    el.innerHTML=`
+    <div class="panel-head">
+      <div>
+        <div class="panel-title" style="display:flex;align-items:center;gap:10px">${mon.name} · ${wk.label}
+          ${isCurrent?`<span style="font-size:11px;font-weight:600;background:var(--teal);color:#fff;padding:3px 10px;border-radius:20px;letter-spacing:0.02em">Tuần hiện tại</span>`:`<span style="font-size:11px;font-weight:500;background:var(--surface2);color:var(--text-3);padding:3px 10px;border-radius:20px;border:1px solid var(--border)">Tuần cũ</span>`}
+        </div>
+        <div class="panel-sub">${grade.label} &nbsp;·&nbsp; ${wk.date}</div>
+      </div>
+      ${isCurrent?`<button class="btn btn-primary" onclick="alert('Thêm bài tập')"><svg width="13" height="13" viewBox="0 0 14 14" fill="none"><path d="M7 2v10M2 7h10" stroke="white" stroke-width="1.8" stroke-linecap="round"/></svg>Thêm bài tập</button>`:`<button class="btn" style="opacity:.5;cursor:not-allowed" disabled><svg width="13" height="13" viewBox="0 0 16 16" fill="none"><rect x="3" y="7" width="10" height="8" rx="2" stroke="currentColor" stroke-width="1.5"/><path d="M5 7V5a3 3 0 016 0v2" stroke="currentColor" stroke-width="1.5"/></svg>Chỉ xem</button>`}
+    </div>
+    ${!isCurrent?`<div style="background:var(--amber-light);border:1px solid rgba(186,117,23,0.25);border-radius:var(--radius-md);padding:10px 14px;display:flex;align-items:center;gap:10px;font-size:12px;color:var(--amber)">
+      <svg width="15" height="15" viewBox="0 0 16 16" fill="none" style="flex-shrink:0"><path d="M8 2l6 11H2L8 2z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><path d="M8 6v4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><circle cx="8" cy="12" r=".75" fill="currentColor"/></svg>
+      Bạn đang xem tuần cũ. Chuyển về <strong style="cursor:pointer;text-decoration:underline" onclick="pickTuan(${CURRENT_WEEK})">Tuần hiện tại</strong> để thêm mới.
+    </div>`:''}
+    <div class="stat-grid">
+      <div class="stat-card ok"><div class="stat-val">${done}</div><div class="stat-label">Lớp hoàn thành</div></div>
+      <div class="stat-card warn"><div class="stat-val">${warn}</div><div class="stat-label">Đang chờ nộp</div></div>
+      <div class="stat-card danger"><div class="stat-val">${danger}</div><div class="stat-label">Quá hạn</div></div>
+    </div>
+    <div class="table-card">
+      <div class="table-card-head"><div class="table-card-title">Danh sách lớp & bài tập</div><span style="font-size:12px;color:var(--text-3)">${rows.length} lớp</span></div>
+      <table><thead><tr><th style="width:70px">Lớp</th><th>Tên bài tập</th><th style="width:120px">Trạng thái</th><th style="width:130px">Tiến độ nộp</th><th style="width:64px"></th></tr></thead>
+      <tbody>${tableRows}</tbody></table>
+    </div>`;
+}
+
+function renderBreadcrumb(){
+    const grade=sel.grade?GRADES.find(g=>g.id===sel.grade):null;
+    const mon=(grade&&sel.mon)?grade.mons.find(m=>m.id===sel.mon):null;
+    const wk=sel.tuan?WEEKS.find(w=>w.id===sel.tuan):null;
+    const steps=[
+        {label:grade?grade.label:'Khối',done:!!sel.grade,active:!sel.grade,step:0},
+        {label:mon?mon.name:'Môn',done:!!sel.mon,active:sel.grade&&!sel.mon,step:1},
+        {label:wk?wk.label:'Tuần',done:!!sel.tuan,active:false,step:2},
+        {label:'Bài tập',done:false,active:!!sel.tuan,step:3}
+    ];
+    document.getElementById('breadcrumb').innerHTML=steps.map((s,i)=>{
+        let cls=s.active?'bc-active':s.done?'bc-done':'bc-lock';
+        const onclick=s.done?`onclick="resetFrom(${s.step})"`:'';
+        return(i>0?'<span class="bc-sep">›</span>':'')+`<span class="bc-chip ${cls}" ${onclick}>${s.label}</span>`;
+    }).join('');
+}
+
+function pickGrade(id){if(sel.grade===id)return;sel={grade:id,mon:null,tuan:null};render()}
+function pickMon(id){if(sel.mon===id)return;sel.mon=id;sel.tuan=CURRENT_WEEK;render()}
+function pickTuan(id){sel.tuan=id;render()}
+function resetFrom(step){
+    if(step===0)sel={grade:null,mon:null,tuan:null};
+    else if(step===1){sel.mon=null;sel.tuan=null}
+    else if(step===2){sel.tuan=null}
+    render();
+}
+function render(){renderGrades();renderMons();renderTuans();renderMain();renderBreadcrumb()}
+
+/* ═══════════════ CHẤM BÀI SIDEBAR ═══════════════ */
+function filteredBT(){
+    if(chamFilter==='all') return BAITAP_CHAM;
+    if(chamFilter==='pending') return BAITAP_CHAM.filter(bt=>bt.students.some(s=>s.score===null));
+    if(chamFilter==='graded') return BAITAP_CHAM.filter(bt=>bt.students.every(s=>s.score!==null));
+    return BAITAP_CHAM;
+}
+
+function setFilter(f,btn){
+    chamFilter=f;
+    document.querySelectorAll('.fbtn').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    renderChamSidebar();
+}
+
+function renderChamSidebar(){
+    const total=BAITAP_CHAM.length;
+    const totalSv=BAITAP_CHAM.reduce((a,bt)=>a+bt.students.length,0);
+    const gradedSv=BAITAP_CHAM.reduce((a,bt)=>a+bt.students.filter(s=>s.score!==null).length,0);
+    const pendingBT=BAITAP_CHAM.filter(bt=>bt.students.some(s=>s.score===null)).length;
+
+    document.getElementById('cham-badge').textContent=pendingBT;
+    const pct=totalSv>0?Math.round((gradedSv/totalSv)*100):0;
+    document.getElementById('prog-bar').style.width=pct+'%';
+    document.getElementById('prog-txt').textContent=`${gradedSv}/${totalSv} học sinh đã chấm`;
+
+    const list=filteredBT();
+    if(list.length===0){
+        document.getElementById('cham-list').innerHTML=`<div style="padding:28px 16px;text-align:center;color:var(--text-3);font-size:12px">Không có bài tập nào</div>`;
+        return;
+    }
+
+    document.getElementById('cham-list').innerHTML=list.map(bt=>{
+        const gradedCount=bt.students.filter(s=>s.score!==null).length;
+        const totalSt=bt.students.length;
+        const allDone=gradedCount===totalSt;
+        const pct2=totalSt>0?Math.round((gradedCount/totalSt)*100):0;
+        const stPill=allDone
+            ?`<span class="pill ok sm">Đã chấm xong</span>`
+            :`<span class="pill blue sm">Còn ${totalSt-gradedCount} chưa chấm</span>`;
+
+        return`<div class="bt-item" onclick="openChamPage(${bt.id})">
+            <div class="bt-item-icon" style="background:${bt.monDot}18">
+                <svg width="15" height="15" viewBox="0 0 16 16" fill="none"><rect x="2" y="2" width="12" height="12" rx="2" stroke="${bt.monDot}" stroke-width="1.4"/><path d="M5 6h6M5 9h4" stroke="${bt.monDot}" stroke-width="1.3" stroke-linecap="round"/></svg>
+            </div>
+            <div class="bt-item-body">
+                <div class="bt-item-name">${bt.ten}</div>
+                <div class="bt-item-meta">${bt.lop} · ${bt.mon} · ${bt.tuan}</div>
+                <div class="bt-item-footer">
+                    ${stPill}
+                    <span style="font-size:10px;color:var(--text-3)">HH: ${bt.deadline}</span>
+                </div>
+                <div style="margin-top:6px;display:flex;align-items:center;gap:6px">
+                    <div class="prog-bar-out" style="height:3px"><div class="prog-bar-in" style="width:${pct2}%"></div></div>
+                    <span style="font-size:10px;color:var(--text-3);white-space:nowrap">${gradedCount}/${totalSt}</span>
+                </div>
+            </div>
+            <div class="bt-item-right">
+                <svg width="13" height="13" viewBox="0 0 16 16" fill="none"><path d="M6 4l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </div>
+        </div>`;
+    }).join('');
+}
+
+/* ═══════════════ TRANG CHẤM BÀI ═══════════════ */
+function openChamPage(btId){
+    activeBT=BAITAP_CHAM.find(b=>b.id===btId);
+    activeHsId=null;
+    tempScore=null; tempTags=[]; tempNote='';
+
+    document.getElementById('cp-title').textContent=`${activeBT.ten}`;
+    document.getElementById('cp-sub').textContent=`${activeBT.lop} · ${activeBT.mon} · ${activeBT.tuan}`;
+
+    document.getElementById('layout-main').style.display='none';
+    document.getElementById('cham-page').classList.add('open');
+
+    renderHsList();
+    updateCpProgress();
+    renderChamPanel();
+}
+
+function closeChamPage(){
+    document.getElementById('cham-page').classList.remove('open');
+    document.getElementById('layout-main').style.display='flex';
+    activeBT=null; activeHsId=null;
+    renderChamSidebar();
+}
+
+function updateCpProgress(){
+    if(!activeBT) return;
+    const graded=activeBT.students.filter(s=>s.score!==null).length;
+    const total=activeBT.students.length;
+    document.getElementById('cp-prog-label').textContent=`Đã chấm ${graded}/${total} học sinh`;
+    document.getElementById('hs-count-label').textContent=`${total} bài nộp`;
+}
+
+function renderHsList(){
+    document.getElementById('hs-list').innerHTML=activeBT.students.map(s=>{
+        const scoreCls=s.score===null?'empty':s.score>=8?'high':s.score>=5?'mid':'low';
+        const scoreHtml=s.score!==null?`<span class="score-display ${scoreCls}" style="width:30px;height:30px;font-size:13px">${s.score}</span>`:`<span class="score-display empty" style="width:30px;height:30px;font-size:11px">—</span>`;
+        return`<div class="hs-item${activeHsId===s.id?' sel':''}" onclick="selectHs(${s.id})" id="hsi-${s.id}">
+            <div class="hs-av" style="background:${s.color}22;color:${s.color}">${s.av}</div>
+            <div style="flex:1;min-width:0">
+                <div class="hs-name">${s.name}</div>
+                <div style="font-size:11px;color:var(--text-3)">Nộp ${s.nopLuc}</div>
+            </div>
+            ${scoreHtml}
+        </div>`;
+    }).join('');
+}
+
+function selectHs(hsId){
+    // lưu nếu đang chấm dở
+    if(activeHsId!==null) commitTemp();
+
+    activeHsId=hsId;
+    const s=activeBT.students.find(x=>x.id===hsId);
+    tempScore=s.score;
+    tempTags=[...s.tags];
+    tempNote=s.note||'';
+
+    // cập nhật active
+    document.querySelectorAll('.hs-item').forEach(el=>el.classList.remove('sel'));
+    const el=document.getElementById('hsi-'+hsId);
+    if(el) el.classList.add('sel');
+
+    renderChamPanel();
+}
+
+function commitTemp(){
+    if(activeHsId===null) return;
+    const s=activeBT.students.find(x=>x.id===activeHsId);
+    if(tempScore!==null){
+        s.score=tempScore; s.tags=[...tempTags]; s.note=tempNote;
+    }
+}
+
+function renderChamPanel(){
+    const panel=document.getElementById('cham-panel');
+    if(activeHsId===null){
+        panel.innerHTML=`<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;flex:1;gap:10px;color:var(--text-3);padding:60px 0">
+            <svg width="36" height="36" viewBox="0 0 36 36" fill="none"><circle cx="18" cy="18" r="16" stroke="currentColor" stroke-width="1.5" opacity=".3"/><path d="M12 18l4 4 8-8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" opacity=".5"/></svg>
+            <span style="font-size:13px">Chọn học sinh để bắt đầu chấm</span></div>`;
+        return;
+    }
+    const s=activeBT.students.find(x=>x.id===activeHsId);
+    const idx=activeBT.students.indexOf(s);
+    const hasPrev=idx>0;
+    const hasNext=idx<activeBT.students.length-1;
+
+    panel.innerHTML=`
+    <div class="nav-hs">
+        <button class="nav-btn" onclick="navHs(-1)" ${!hasPrev?'disabled style="opacity:.4;cursor:default"':''}>← Trước</button>
+        <span>${idx+1} / ${activeBT.students.length} học sinh</span>
+        <button class="nav-btn" onclick="navHs(1)" ${!hasNext?'disabled style="opacity:.4;cursor:default"':''}>Tiếp theo →</button>
+    </div>
+
+    <div class="cp-card">
+        <div class="cp-card-hd" style="display:flex;align-items:center;gap:10px">
+            <div class="hs-av" style="background:${s.color}22;color:${s.color};width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600">${s.av}</div>
+            <div>
+                <div style="font-size:13px;font-weight:600">${s.name}</div>
+                <div style="font-size:11px;color:var(--text-3)">Nộp lúc ${s.nopLuc}</div>
+            </div>
+        </div>
+        <div class="cp-card-body">
+            <div class="field-label">Điểm số (0 – 10)</div>
+            <div class="score-grid">
+                ${[0,1,2,3,4,5,6,7,8,9,10].map(n=>`<button class="score-btn${tempScore===n?' picked':''}" onclick="pickScore(${n},this)">${n}</button>`).join('')}
+            </div>
+        </div>
+    </div>
+
+    <div class="cp-card">
+        <div class="cp-card-hd">Nhận xét nhanh</div>
+        <div class="cp-card-body">
+            <div class="tag-wrap">
+                ${QUICK_TAGS.map(t=>`<span class="tag${tempTags.includes(t)?' sel':''}" onclick="toggleTag('${t}',this)">${t}</span>`).join('')}
+            </div>
+        </div>
+    </div>
+
+    <div class="cp-card">
+        <div class="cp-card-hd">Ghi chú</div>
+        <div class="cp-card-body">
+            <textarea class="note-area" placeholder="Nhận xét chi tiết cho học sinh này..." oninput="tempNote=this.value">${tempNote}</textarea>
+        </div>
+    </div>
+
+    <div class="cham-actions">
+        <button class="btn" style="flex:1" onclick="saveAndNext()">Lưu & chuyển tiếp →</button>
+        <button class="btn btn-primary" style="flex:1" onclick="saveCurrent()">
+            <svg width="13" height="13" viewBox="0 0 16 16" fill="none"><path d="M3 8l3.5 3.5L13 4" stroke="white" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            Lưu điểm
+        </button>
+    </div>
+    ${s.score!==null?`<div style="font-size:11px;color:var(--text-3);text-align:center;margin-top:-8px">Đã lưu trước đó · đang sửa</div>`:''}`;
+}
+
+function pickScore(n,btn){
+    tempScore=n;
+    document.querySelectorAll('.score-btn').forEach(b=>b.classList.remove('picked'));
+    btn.classList.add('picked');
+}
+
+function toggleTag(tag,el){
+    const idx=tempTags.indexOf(tag);
+    if(idx>-1) tempTags.splice(idx,1); else tempTags.push(tag);
+    el.classList.toggle('sel');
+}
+
+function saveCurrent(){
+    if(tempScore===null){alert('Vui lòng chọn điểm trước!');return}
+    commitTemp();
+    renderHsList();
+    updateCpProgress();
+    renderChamSidebar();
+    // refresh panel để cập nhật trạng thái "đã lưu"
+    renderChamPanel();
+}
+
+function saveAndNext(){
+    if(tempScore===null){alert('Vui lòng chọn điểm trước!');return}
+    commitTemp();
+    renderHsList();
+    updateCpProgress();
+    renderChamSidebar();
+    const idx=activeBT.students.findIndex(x=>x.id===activeHsId);
+    if(idx<activeBT.students.length-1){
+        selectHs(activeBT.students[idx+1].id);
+    } else {
+        activeHsId=null;
+        renderChamPanel();
+        alert('Đã chấm xong tất cả học sinh trong bài này!');
+    }
+}
+
+function navHs(dir){
+    commitTemp();
+    const idx=activeBT.students.findIndex(x=>x.id===activeHsId);
+    const next=activeBT.students[idx+dir];
+    if(next) selectHs(next.id);
+}
+
+/* ── INIT ── */
+render();
+renderChamSidebar();
+</script>
+</body>
+</html>

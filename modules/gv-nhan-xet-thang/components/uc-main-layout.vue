@@ -73,6 +73,10 @@
 		</template>
 
 		<v-divider />
+		<div v-if="isLoadingViPham" class="d-flex align-center ga-3 px-4 py-2">
+			<v-progress-circular indeterminate size="18" width="2" color="primary" />
+			<span class="text-body-2 text-medium-emphasis">{{ viPhamLoadingText }}</span>
+		</div>
 		<v-data-table :headers="headers" :items="items" items-per-page="-1" hide-default-footer
 			style="height: calc(100dvh - 119px); overflow-y: auto;">
 
@@ -338,10 +342,13 @@ export default {
 			viPhamLoadingMap: {},
 			viPhamExpandedMap: {},
 			DSLopHoc: [],
+			mainLopHocID: null,
 			DSTongHop_ViPham_Nhom: {},
 			viPhamDetailMap_Nhom: {},
 			viPhamLoadingMap_Nhom: {},
 			viPhamExpandedMap_Nhom: {},
+			isLoadingViPham: false,
+			viPhamLoadingText: '',
 		}
 	},
 
@@ -468,67 +475,89 @@ export default {
 			this.viPhamDetailMap = {}
 			this.viPhamLoadingMap = {}
 			this.viPhamExpandedMap = {}
-
-			const { firstDay, lastDay } = this.getFirstAndLastDay(
-				vueData.NienKhoa,
-				this.ThangObj?.Thang
-			)
-
-			// Gắn NgayNghi từ DSChuyenCan_TreVang (được fetch cùng NhanXetThang_Get hoặc riêng)
-			this.items = this.items.map(x => {
-				const existDSTreVang = (vueData.DSChuyenCan_TreVang ?? [])
-					.find(n => n.HocSinhID === x.HocSinhID)
-				const dsNhom = (() => {
-					try { return typeof x.DSNhom === 'string' ? JSON.parse(x.DSNhom) : (x.DSNhom ?? []) }
-					catch { return [] }
-				})()
-				return {
-					...x,
-					firstDay,
-					lastDay,
-					LopID: this.LopItem.LopID,
-					DSNhom: dsNhom,
-					NgayNghi: {
-						MonVang: existDSTreVang ? JSON.parse(existDSTreVang.MonVang) : [],
-						TongSoTiet: existDSTreVang?.TongSoTiet || null,
-					},
-				}
-			})
-
-			// API 1: lấy tổng hợp loại vi phạm theo lớp + tháng
+			this.mainLopHocID = null
+			this.isLoadingViPham = true
+			this.viPhamLoadingText = 'Đang tải tổng hợp vi phạm...'
 			try {
-				this.DSTongHop_ViPham = await fetchPromise(
-					'quansinh/LMS_SoDauBai_TongHopTheoLoaiViPham',
-					{ TuNgay: firstDay, DenNgay: lastDay, LopHocID: this.LopItem.LopID },
-					{ cache: false }
-				) ?? []
+				const { firstDay, lastDay } = this.getFirstAndLastDay(
+					vueData.NienKhoa,
+					this.ThangObj?.Thang
+				)
+				const { firstDay: viPhamFirstDay, lastDay: viPhamLastDay } = this.getViPhamDateRange(this.ThangObj)
 
-				// API 2: eager-load chi tiết song song cho các loại có vi phạm
-				// để hiển thị đúng per-student trong từng row của bảng
-				const dsCoViPham = this.DSTongHop_ViPham.filter(x => x.SoLuong > 0)
-				if (dsCoViPham.length > 0) {
-					await Promise.all(dsCoViPham.map(lvp => this.loadViPhamDetail(lvp.LoaiViPham)))
-				}
-			} catch {
-				this.DSTongHop_ViPham = []
-			}
+				// Gắn NgayNghi từ DSChuyenCan_TreVang (được fetch cùng NhanXetThang_Get hoặc riêng)
+				this.items = this.items.map(x => {
+					const existDSTreVang = (vueData.DSChuyenCan_TreVang ?? [])
+						.find(n => n.HocSinhID === x.HocSinhID)
+					const dsNhom = (() => {
+						try { return typeof x.DSNhom === 'string' ? JSON.parse(x.DSNhom) : (x.DSNhom ?? []) }
+						catch { return [] }
+					})()
+					return {
+						...x,
+						firstDay,
+						lastDay,
+						LopID: this.LopItem.LopID,
+						DSNhom: dsNhom,
+						NgayNghi: {
+							MonVang: existDSTreVang ? JSON.parse(existDSTreVang.MonVang) : [],
+							TongSoTiet: existDSTreVang?.TongSoTiet || null,
+						},
+					}
+				})
 
-			// Nhóm học vi phạm (Cấp 2 & 3)
-			if (vueData.CapID === 2 || vueData.CapID === 3) {
+				// Resolve LopHocID trong hệ quansinh (khác với LopItem.LopID của LMS)
 				await this.getLopHocBackground()
-				this.items = this.items.map(item => ({
-					...item,
-					DSNhom: item.DSNhom.map(nhom => ({
-						...nhom,
-						LopHocID: this.DSLopHoc.find(x => x.TenLop === nhom.TenNhom)?.LopHocID ?? null,
-					})),
-				}))
-				const uniqueLopHocIDs = [...new Set(
-					this.items.flatMap(x => x.DSNhom.map(n => n.LopHocID)).filter(Boolean)
-				)]
-				if (uniqueLopHocIDs.length > 0) {
-					await this.loadNhomViPham(uniqueLopHocIDs, firstDay, lastDay)
+				this.mainLopHocID = this.DSLopHoc.find(x => x.TenLop === this.LopItem.TenLop)?.LopHocID ?? null
+
+				// API 1: lấy tổng hợp loại vi phạm theo lớp + tháng
+				if (this.mainLopHocID) {
+					try {
+						this.DSTongHop_ViPham = await fetchPromise(
+							'quansinh/LMS_SoDauBai_TongHopTheoLoaiViPham',
+							{ TuNgay: viPhamFirstDay, DenNgay: viPhamLastDay, LopHocID: this.mainLopHocID },
+							{ cache: false }
+						) ?? []
+
+						// API 2: eager-load chi tiết song song cho các loại có vi phạm
+						const dsCoViPham = this.DSTongHop_ViPham.filter(x => x.SoLuong > 0)
+						if (dsCoViPham.length > 0) {
+							let done = 0
+							const total = dsCoViPham.length
+							this.viPhamLoadingText = `Đang tải chi tiết vi phạm (0/${total})...`
+							await Promise.all(dsCoViPham.map(async lvp => {
+								await this.loadViPhamDetail(lvp.LoaiViPham)
+								done++
+								this.viPhamLoadingText = `Đang tải chi tiết vi phạm (${done}/${total})...`
+							}))
+						}
+					} catch {
+						this.DSTongHop_ViPham = []
+					}
 				}
+
+				// Nhóm học vi phạm (Cấp 2 & 3) — DSLopHoc đã có từ getLopHocBackground() ở trên
+				if (vueData.CapID === 2 || vueData.CapID === 3) {
+					this.items = this.items.map(item => ({
+						...item,
+						DSNhom: item.DSNhom.map(nhom => ({
+							...nhom,
+							LopHocID: this.DSLopHoc.find(x => x.TenLop === nhom.TenNhom)?.LopHocID ?? null,
+						})),
+					}))
+					const uniqueLopHocIDs = [...new Set(
+						this.items.flatMap(x => x.DSNhom.map(n => n.LopHocID)).filter(Boolean)
+					)]
+					if (uniqueLopHocIDs.length > 0) {
+						this.viPhamLoadingText = `Đang tải vi phạm nhóm học (0/${uniqueLopHocIDs.length})...`
+						await this.loadNhomViPham(uniqueLopHocIDs, viPhamFirstDay, viPhamLastDay, (done, total) => {
+							this.viPhamLoadingText = `Đang tải vi phạm nhóm học (${done}/${total})...`
+						})
+					}
+				}
+			} finally {
+				this.isLoadingViPham = false
+				this.viPhamLoadingText = ''
 			}
 		},
 
@@ -558,10 +587,10 @@ export default {
 		async loadViPhamDetail(loaiViPham) {
 			this.viPhamLoadingMap = { ...this.viPhamLoadingMap, [loaiViPham]: true }
 			try {
-				const { firstDay, lastDay } = this.getFirstAndLastDay(vueData.NienKhoa, this.ThangObj?.Thang)
+				const { firstDay, lastDay } = this.getViPhamDateRange(this.ThangObj)
 				const data = await fetchPromise(
 					'quansinh/LMS_SoDauBai_TongHopTheoLoaiViPham_ChiTiet',
-					{ TuNgay: firstDay, DenNgay: lastDay, LopHocID: this.LopItem.LopID, LoaiViPham: loaiViPham },
+					{ TuNgay: firstDay, DenNgay: lastDay, LopHocID: this.mainLopHocID, LoaiViPham: loaiViPham },
 					{ cache: false }
 				)
 				this.viPhamDetailMap = { ...this.viPhamDetailMap, [loaiViPham]: data ?? [] }
@@ -602,11 +631,13 @@ export default {
 			}
 		},
 
-		async loadNhomViPham(lopHocIDs, firstDay, lastDay) {
+		async loadNhomViPham(lopHocIDs, firstDay, lastDay, progressCallback = null) {
 			this.DSTongHop_ViPham_Nhom = {}
 			this.viPhamDetailMap_Nhom = {}
 			this.viPhamLoadingMap_Nhom = {}
 			this.viPhamExpandedMap_Nhom = {}
+			let done = 0
+			const total = lopHocIDs.length
 			await Promise.all(lopHocIDs.map(async lopHocID => {
 				try {
 					const ds = await fetchPromise(
@@ -621,6 +652,9 @@ export default {
 					}
 				} catch {
 					this.DSTongHop_ViPham_Nhom = { ...this.DSTongHop_ViPham_Nhom, [lopHocID]: [] }
+				} finally {
+					done++
+					if (progressCallback) progressCallback(done, total)
 				}
 			}))
 		},
@@ -692,6 +726,16 @@ export default {
 			const firstDay = dayjs(`${year}-${month}-01`).startOf('month').format('YYYY-MM-DD')
 			const lastDay = dayjs(`${year}-${month}-01`).endOf('month').format('YYYY-MM-DD')
 			return { firstDay, lastDay }
+		},
+
+		// Tháng 1 & 5: range vi phạm từ 05/09 năm học (theo quy định Bộ GD) → cuối tháng được chọn
+		getViPhamDateRange(thangObj) {
+			if (thangObj?.Thang === 1 || thangObj?.Thang === 5) {
+				const firstDay = dayjs(`${parseInt(vueData.NienKhoa)}-09-05`).format('YYYY-MM-DD')
+				const lastDay = dayjs(`${thangObj.Nam}-${thangObj.Thang}-01`).endOf('month').format('YYYY-MM-DD')
+				return { firstDay, lastDay }
+			}
+			return this.getFirstAndLastDay(vueData.NienKhoa, thangObj?.Thang)
 		},
 
 		validateNhanXetGVCN(itemsToCheck) {
