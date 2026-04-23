@@ -201,6 +201,45 @@
 							</div>
 						</div>
 					</template>
+
+					<!-- ─── Nhóm học ─── -->
+					<template v-if="item.DSNhom?.some(n => n.LopHocID && getViPhamCuaHocSinhTrongNhom(item.HocSinhID, n.LopHocID).length > 0)">
+						<v-divider class="mt-2 mb-1" />
+						<!-- <div class="text-caption text-medium-emphasis mb-1">Nhóm học:</div> -->
+						<template v-for="nhom in item.DSNhom" :key="nhom.NhomID">
+							<div v-if="nhom.LopHocID && getViPhamCuaHocSinhTrongNhom(item.HocSinhID, nhom.LopHocID).length > 0" class="mb-1">
+								<!-- <v-chip size="x-small" color="indigo" variant="tonal">{{ nhom.TenNhom }}</v-chip> -->
+								<div v-for="lvp in getViPhamCuaHocSinhTrongNhom(item.HocSinhID, nhom.LopHocID)"
+									:key="nhom.NhomID + '_' + lvp.LoaiViPham" class="ms-2 mt-1">
+									<v-chip size="x-small" color="error" variant="tonal"
+										style="cursor: pointer; height: auto; white-space: normal;"
+										@click="toggleViPhamExpandNhom(item.HocSinhID, nhom.LopHocID, lvp.LoaiViPham)">
+										<v-progress-circular
+											v-if="viPhamLoadingMap_Nhom[nhom.LopHocID + '_' + lvp.LoaiViPham]"
+											indeterminate size="10" width="2" class="me-1" />
+										{{ tenViPhamVI(lvp.TenViPham) }} ({{ lvp.SoLuong_HS }} {{ lvp.LoaiViPham === 2 ?
+											'ngày' : 'tiết' }})
+									</v-chip>
+									<div v-if="viPhamExpandedMap_Nhom[item.HocSinhID + '_' + nhom.LopHocID + '_' + lvp.LoaiViPham]"
+										class="mt-1 ms-2">
+										<template v-if="lvp.LoaiViPham === 2">
+											<div v-for="ngay in [...new Set(getViPhamChiTietNhom(item.HocSinhID, nhom.LopHocID, lvp.LoaiViPham).map(r => r.Ngay))]"
+												:key="ngay" class="text-caption text-medium-emphasis">
+												{{ formatNgayViPham(ngay) }}
+											</div>
+										</template>
+										<template v-else>
+											<div v-for="(row, idx) in getViPhamChiTietNhom(item.HocSinhID, nhom.LopHocID, lvp.LoaiViPham)"
+												:key="idx" class="text-caption text-medium-emphasis">
+												{{ formatNgayViPham(row.Ngay) }} · Tiết {{ row.Tiet }} · {{
+													row.TenMonHoc }}
+											</div>
+										</template>
+									</div>
+								</div>
+							</div>
+						</template>
+					</template>
 				</div>
 			</template>
 
@@ -298,6 +337,11 @@ export default {
 			viPhamDetailMap: {},
 			viPhamLoadingMap: {},
 			viPhamExpandedMap: {},
+			DSLopHoc: [],
+			DSTongHop_ViPham_Nhom: {},
+			viPhamDetailMap_Nhom: {},
+			viPhamLoadingMap_Nhom: {},
+			viPhamExpandedMap_Nhom: {},
 		}
 	},
 
@@ -434,11 +478,16 @@ export default {
 			this.items = this.items.map(x => {
 				const existDSTreVang = (vueData.DSChuyenCan_TreVang ?? [])
 					.find(n => n.HocSinhID === x.HocSinhID)
+				const dsNhom = (() => {
+					try { return typeof x.DSNhom === 'string' ? JSON.parse(x.DSNhom) : (x.DSNhom ?? []) }
+					catch { return [] }
+				})()
 				return {
 					...x,
 					firstDay,
 					lastDay,
 					LopID: this.LopItem.LopID,
+					DSNhom: dsNhom,
 					NgayNghi: {
 						MonVang: existDSTreVang ? JSON.parse(existDSTreVang.MonVang) : [],
 						TongSoTiet: existDSTreVang?.TongSoTiet || null,
@@ -462,6 +511,24 @@ export default {
 				}
 			} catch {
 				this.DSTongHop_ViPham = []
+			}
+
+			// Nhóm học vi phạm (Cấp 2 & 3)
+			if (vueData.CapID === 2 || vueData.CapID === 3) {
+				await this.getLopHocBackground()
+				this.items = this.items.map(item => ({
+					...item,
+					DSNhom: item.DSNhom.map(nhom => ({
+						...nhom,
+						LopHocID: this.DSLopHoc.find(x => x.TenLop === nhom.TenNhom)?.LopHocID ?? null,
+					})),
+				}))
+				const uniqueLopHocIDs = [...new Set(
+					this.items.flatMap(x => x.DSNhom.map(n => n.LopHocID)).filter(Boolean)
+				)]
+				if (uniqueLopHocIDs.length > 0) {
+					await this.loadNhomViPham(uniqueLopHocIDs, firstDay, lastDay)
+				}
 			}
 		},
 
@@ -508,6 +575,105 @@ export default {
 			return (this.viPhamDetailMap[loaiViPham] ?? []).filter(x => x.HocSinhID === hocSinhID)
 		},
 
+		// ─────────────────────────────────────────
+		// Background LopHocID lookup + nhóm vi phạm
+		// ─────────────────────────────────────────
+		async getLopHocBackground() {
+			if (!this.LopItem) return
+			// LopItem.KhoiID là số khối thực (1–12) từ LMS
+			// Cần tìm KhoiID tương ứng trong hệ quansinh qua TenKhoi
+			const khoiNum = this.DSLop.find(x => x.LopID === this.LopItem.LopID)?.KhoiID
+			if (!khoiNum) return
+			console.log("khoiNum", khoiNum)
+			try {
+				const dsKhoi = await fetchPromise('quansinh/Basic_KhoiSelectByNamHocID', {
+					NamHocID: vueData.NienKhoa,
+					DonViID: 1,
+				})
+				if (!dsKhoi?.length) return
+				const matchedKhoi = dsKhoi.find(k => k.TenKhoi === 'Khối ' + khoiNum)
+				if (!matchedKhoi) return
+				this.DSLopHoc = await fetchPromise('quansinh/Basic_LopHocSelectByKhoiNamHocID', {
+					NamHocID: vueData.NienKhoa,
+					KhoiID: matchedKhoi.KhoiID,
+				}) ?? []
+			} catch {
+				// non-critical, fail silently
+			}
+		},
+
+		async loadNhomViPham(lopHocIDs, firstDay, lastDay) {
+			this.DSTongHop_ViPham_Nhom = {}
+			this.viPhamDetailMap_Nhom = {}
+			this.viPhamLoadingMap_Nhom = {}
+			this.viPhamExpandedMap_Nhom = {}
+			await Promise.all(lopHocIDs.map(async lopHocID => {
+				try {
+					const ds = await fetchPromise(
+						'quansinh/LMS_SoDauBai_TongHopTheoLoaiViPham',
+						{ TuNgay: firstDay, DenNgay: lastDay, LopHocID: lopHocID },
+						{ cache: false }
+					) ?? []
+					this.DSTongHop_ViPham_Nhom = { ...this.DSTongHop_ViPham_Nhom, [lopHocID]: ds }
+					const dsCoViPham = ds.filter(x => x.SoLuong > 0)
+					if (dsCoViPham.length > 0) {
+						await Promise.all(dsCoViPham.map(lvp => this.loadViPhamDetailNhom(lopHocID, lvp.LoaiViPham, firstDay, lastDay)))
+					}
+				} catch {
+					this.DSTongHop_ViPham_Nhom = { ...this.DSTongHop_ViPham_Nhom, [lopHocID]: [] }
+				}
+			}))
+		},
+
+		async loadViPhamDetailNhom(lopHocID, loaiViPham, firstDay, lastDay) {
+			const loadingKey = lopHocID + '_' + loaiViPham
+			this.viPhamLoadingMap_Nhom = { ...this.viPhamLoadingMap_Nhom, [loadingKey]: true }
+			try {
+				const data = await fetchPromise(
+					'quansinh/LMS_SoDauBai_TongHopTheoLoaiViPham_ChiTiet',
+					{ TuNgay: firstDay, DenNgay: lastDay, LopHocID: lopHocID, LoaiViPham: loaiViPham },
+					{ cache: false }
+				)
+				const prevNhom = this.viPhamDetailMap_Nhom[lopHocID] ?? {}
+				this.viPhamDetailMap_Nhom = {
+					...this.viPhamDetailMap_Nhom,
+					[lopHocID]: { ...prevNhom, [loaiViPham]: data ?? [] },
+				}
+			} catch {
+				const prevNhom = this.viPhamDetailMap_Nhom[lopHocID] ?? {}
+				this.viPhamDetailMap_Nhom = {
+					...this.viPhamDetailMap_Nhom,
+					[lopHocID]: { ...prevNhom, [loaiViPham]: [] },
+				}
+			} finally {
+				this.viPhamLoadingMap_Nhom = { ...this.viPhamLoadingMap_Nhom, [loadingKey]: false }
+			}
+		},
+
+		getViPhamCuaHocSinhTrongNhom(hocSinhID, lopHocID) {
+			const dsTongHop = this.DSTongHop_ViPham_Nhom[lopHocID] ?? []
+			return dsTongHop
+				.filter(x => x.SoLuong > 0)
+				.map(lvp => {
+					const rows = (this.viPhamDetailMap_Nhom[lopHocID]?.[lvp.LoaiViPham] ?? [])
+						.filter(x => x.HocSinhID === hocSinhID)
+					const soLuong = lvp.LoaiViPham === 2
+						? new Set(rows.map(r => r.Ngay)).size
+						: rows.length
+					return { ...lvp, SoLuong_HS: soLuong }
+				})
+				.filter(x => x.SoLuong_HS > 0)
+		},
+
+		getViPhamChiTietNhom(hocSinhID, lopHocID, loaiViPham) {
+			return (this.viPhamDetailMap_Nhom[lopHocID]?.[loaiViPham] ?? []).filter(x => x.HocSinhID === hocSinhID)
+		},
+
+		toggleViPhamExpandNhom(hocSinhID, lopHocID, loaiViPham) {
+			const key = hocSinhID + '_' + lopHocID + '_' + loaiViPham
+			this.viPhamExpandedMap_Nhom = { ...this.viPhamExpandedMap_Nhom, [key]: !this.viPhamExpandedMap_Nhom[key] }
+		},
+
 		tenViPhamVI(ten) {
 			return (ten ?? '').split('/')[0].trim()
 		},
@@ -519,7 +685,10 @@ export default {
 		// ─────────────────────────────────────────
 		// Helpers
 		// ─────────────────────────────────────────
-		getFirstAndLastDay(year, month) {
+		getFirstAndLastDay(nienKhoa, month) {
+			// Months 1–8 fall in the second calendar year of the academic year (e.g. NienKhoa 2024 → 2025)
+			// Months 9–12 fall in the first calendar year (e.g. NienKhoa 2024 → 2024)
+			const year = month >= 9 ? parseInt(nienKhoa) : parseInt(nienKhoa) + 1
 			const firstDay = dayjs(`${year}-${month}-01`).startOf('month').format('YYYY-MM-DD')
 			const lastDay = dayjs(`${year}-${month}-01`).endOf('month').format('YYYY-MM-DD')
 			return { firstDay, lastDay }
