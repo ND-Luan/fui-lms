@@ -67,6 +67,7 @@ export default {
                     this.apiCall1(),
                     this.apiCall2(),
                     this.apiCall3(),
+                    this.apiCall4(),
                     this.getFocusTasksStudent(),
                 ])
             } catch (error) {

@@ -162,10 +162,10 @@
     flex: 1;
     min-height: 0;
     overflow-y: auto;
-    padding: 20px;
+    padding: 8px;
     display: flex;
     flex-direction: column;
-    gap: 14px;
+    gap: 8px;
     min-width: 0;
 }
 
@@ -192,7 +192,7 @@
 .lms-stat-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    gap: 10px;
+    gap: 8px;
 }
 .lms-stat-card {
     background: #fff;

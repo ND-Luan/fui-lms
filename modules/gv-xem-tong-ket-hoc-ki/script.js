@@ -123,63 +123,78 @@ function TongKet_GetDTBMonHocByKhoiLop() {
     vueData.DSKhenThuong = []
     if (vueData.Is_InCaKhoi) {
         getDSLop()
-    } else {
-        if (vueData.LopItem.LopID == '2238' || vueData.LopItem.LopID == '2239') {
-            for (var item of ['2238', '2239']) {
-                TongKet_GetDTBMonHocByKhoiLopHangLoat(item)
-                ajaxCALL('lms/KhenThuong_Get', {
-                    LopID: item
-                }, res => {
-                    vueData.DSKhenThuong.push(res.data)
-                    initSpread()
-                })
+        return
+    }
+
+    // Detect paired classes by base TenLop (e.g. "12C1","12C2" share base "12C")
+    const selectedTenLop = vueData.LopItem.TenLop ?? ''
+    const baseName = selectedTenLop.replace(/\d+$/, '')
+    const isNamedWithDigit = baseName !== selectedTenLop
+    const pairedLops = isNamedWithDigit
+        ? vueData.DSLop.filter(l =>
+            !String(l.LopID).includes('N') &&
+            String(l.LopID) !== String(vueData.LopItem.LopID) &&
+            (l.TenLop ?? '').replace(/\d+$/, '') === baseName
+          )
+        : []
+
+    if (pairedLops.length > 0) {
+        const allLops = [vueData.LopItem, ...pairedLops]
+        ;(async () => {
+            const khenThuongArr = await Promise.all(
+                allLops.map(l => fetchPromise('lms/KhenThuong_Get', { LopID: l.LopID }))
+            )
+            khenThuongArr.forEach(kt => vueData.DSKhenThuong.push(kt))
+            for (const lop of allLops) {
+                await TongKet_GetDTBMonHocByKhoiLopHangLoat(lop.LopID)
             }
-            return
-        }
-        if (vueData.LopItem.LopID == '2255' || vueData.LopItem.LopID == '2256') {
-            for (var item of ['2255', '2256']) {
-                TongKet_GetDTBMonHocByKhoiLopHangLoat(item)
-                ajaxCALL('lms/KhenThuong_Get', {
-                    LopID: item
+        })()
+        return
+    }
+
+    ;(async () => {
+        await new Promise(resolve => {
+            ajaxCALL(`https://tapi.lhbs.vn/diemc${vueData.CapID}/LMS_GetTongKetDTBMonHocByLop`,
+                {
+                    KhoiID: vueData.KhoiID,
+                    LopID: vueData.LopItem.LopID,
+                    HocKy: vueData.Semester.value,
+                    NienKhoa: vueData.NienKhoa
                 }, res => {
-                    vueData.DSKhenThuong.push(res.data)
-                    initSpread()
+                    vueData.DSHocSinh_API_TongKet = res.data
+                    vueData.dataDiem = res.data
+                    resolve()
                 })
+        })
+        const khenThuong = await fetchPromise('lms/KhenThuong_Get', { LopID: vueData.LopItem.LopID })
+        vueData.DSKhenThuong.push(khenThuong)
+        initSpread()
+        await mergeNhanXetThang(vueData.LopItem.LopID)
+    })()
+}
+async function mergeNhanXetThang(lopid) {
+    try {
+        const dsNhanXet = await fetchPromise('lms/NhanXetThang_Thang1_Thang5_Get', {
+            LopID: lopid,
+            HocKi: vueData.Semester.value,
+            NienKhoa: vueData.NienKhoa
+        })
+        if (!Array.isArray(dsNhanXet) || dsNhanXet.length === 0) return
+        for (var item of vueData.DSHocSinh) {
+            const obj = dsNhanXet.find(x => x.HocSinhID == item.HocSinhID)
+            if (obj) {
+                item.UuDiem = obj.UuDiem ?? item.UuDiem ?? ''
+                item.NhuocDiem = obj.NhuocDiem ?? item.NhuocDiem ?? ''
+                item.DeXuat = obj.DeXuat ?? item.DeXuat ?? ''
             }
-            return
         }
-        if (vueData.LopItem.LopID == '2250' || vueData.LopItem.LopID == '2251') {
-            for (var item of ['2250', '2251']) {
-                TongKet_GetDTBMonHocByKhoiLopHangLoat(item)
-                ajaxCALL('lms/KhenThuong_Get', {
-                    LopID: item
-                }, res => {
-                    vueData.DSKhenThuong.push(res.data)
-                    initSpread()
-                })
-            }
-            return
-        }
-        ajaxCALL(`https://tapi.lhbs.vn/diemc${vueData.CapID}/LMS_GetTongKetDTBMonHocByLop`,
-            {
-                KhoiID: vueData.KhoiID,
-                LopID: vueData.LopItem.LopID,
-                HocKy: vueData.Semester.value,
-                NienKhoa: vueData.NienKhoa
-            }, res => {
-                vueData.DSHocSinh_API_TongKet = res.data
-                vueData.dataDiem = res.data
-                ajaxCALL('lms/KhenThuong_Get', {
-                    LopID: vueData.LopItem.LopID
-                }, res => {
-                    vueData.DSKhenThuong.push(res.data)
-                    initSpread()
-                })
-            })
+        vueData.keyComp++
+    } catch (e) {
+        console.error('mergeNhanXetThang error', e)
     }
 }
-function TongKet_GetDTBMonHocByKhoiLopHangLoat(lopid) {
-    return new Promise(resolve => {
+async function TongKet_GetDTBMonHocByKhoiLopHangLoat(lopid) {
+    await new Promise(resolve => {
         ajaxCALL(`https://tapi.lhbs.vn/diemc${vueData.CapID}/LMS_GetTongKetDTBMonHocByLop`,
             {
                 KhoiID: vueData.KhoiItem?.KhoiID,
@@ -193,6 +208,7 @@ function TongKet_GetDTBMonHocByKhoiLopHangLoat(lopid) {
                 resolve()
             })
     })
+    await mergeNhanXetThang(lopid)
 }
 function renderDSHocSinh_QLD() {
     const _dsHocSinh = []

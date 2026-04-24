@@ -210,6 +210,14 @@ export default {
 		},
 	},
 	watch: {
+		DSMonHocActive(newVal) {
+			this.DSMonHoc = [...newVal]
+			this.$nextTick(() => {
+				if (this.DSMonHoc.length > 0 && !this.DSMonHoc.find(m => m.MonHocName === this.selected?.MonHocName)) {
+					this.selected = this.DSMonHoc[0]
+				}
+			})
+		},
 		contentLibrary: function (newVal) {
 			if (newVal && this.isShowModalLiberyDetails) {
 

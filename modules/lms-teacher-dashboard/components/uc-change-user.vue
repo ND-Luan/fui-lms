@@ -17,6 +17,7 @@
 
 <script>
 export default {
+	inject: ['snackbarRef'],
 	props: ["isOpen", 'giaovienid'],
 	emits: ['update:isOpen'],
 	data() {
@@ -31,20 +32,16 @@ export default {
 	computed: {},
 	watch: {},
 	methods: {
-		GET_EL_GiaoVien_Test_In_Web_Get() {
-			let params = {}
-			ajaxCALL('lms/EL_GiaoVien_Test_In_Web_Get', params, res => {
-				this.usersList = res.data
-			})
+		async GET_EL_GiaoVien_Test_In_Web_Get() {
+			const data = await fetchPromise('lms/EL_GiaoVien_Test_In_Web_Get', {})
+			this.usersList = data ?? []
 		},
-		Update_EL_GiaoVien_Test_In_Web_Upd_Active() {
+		async Update_EL_GiaoVien_Test_In_Web_Upd_Active() {
 			if (!this.GiaoVienID) return
-			let params = {
-				GiaoVienID: this.GiaoVienID
-			}
-			ajaxCALL('lms/EL_GiaoVien_Test_In_Web_Upd_Active', params, res => {
-				vueData.initPage()
-			})
+			const res = await fetchPromise('lms/EL_GiaoVien_Test_In_Web_Upd_Active', { GiaoVienID: this.GiaoVienID }, { cache: false })
+			this.$emit('update:isOpen', false)
+			this.snackbarRef.value.showSnackbar({ message: 'Đổi giáo viên thành công', color: 'success' })
+			vueData.initPage()
 		}
 	},
 }

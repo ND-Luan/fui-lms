@@ -79,6 +79,7 @@
 					</template>
 					<template v-slot:item.LimitAssigned="{ item }">
 						<div class="text-center d-flex align-center justify-center w-100">
+							<!-- :disabled="!item.Is_Full_Quiz" -->
 							<v-text-field
 								v-if="editDataLimitAssigned[getIndexToEdit(item)]"
 								:clearable="false"
@@ -89,10 +90,15 @@
 								hide-details
 								v-model="editDataLimitAssigned[getIndexToEdit(item)].LimitAssigned"
 								variant="outlined"
-								:disabled="!item.Is_Full_Quiz"
 								style="min-width: 80px; max-width: 110px;"
 							/>
-							<span v-else>{{ item.LimitAssigned ?? '-' }}</span>
+							<!-- <v-tooltip v-if="editDataLimitAssigned[getIndexToEdit(item)] && !item.Is_Full_Quiz" location="top">
+								<template #activator="{ props }">
+									<v-icon v-bind="props" size="small" color="warning" class="ms-1">mdi-help-circle-outline</v-icon>
+								</template>
+								Giới hạn lần nộp chỉ áp dụng cho bài tập loại "Toàn bộ câu hỏi" (Full Quiz)
+							</v-tooltip>
+							<span v-if="!editDataLimitAssigned[getIndexToEdit(item)]">{{ item.LimitAssigned ?? '-' }}</span> -->
 						</div>
 					</template>
 					<template v-slot:item.MaxScore="{ item }">
