@@ -130,6 +130,7 @@ export default {
 		}
 	},
 	mounted() {
+		vueData.refreshFocusTask = () => this.GET_EL_Teacher_GetMyClasses()
 		this.GET_EL_Teacher_GetMyClasses()
 	},
 	watch: {
@@ -180,11 +181,8 @@ export default {
 	},
 	methods: {
 		async GET_EL_Teacher_GetMyClasses() {
-			let params = {
-				HocKi: vueData.NienKhoaItem.HocKi
-			}
-			let response = await this.API_Promise('EL_Teacher_GetMyClasses', params)
-			this.DSKhoi = response.reduce((result, item) => {
+			const response = await fetchPromise('lms/EL_Teacher_GetMyClasses', { HocKi: vueData.NienKhoaItem.HocKi }, { cache: false })
+			this.DSKhoi = (response ?? []).reduce((result, item) => {
 				let obj = result.find(i => i.KhoiID == item.KhoiID)
 				if (!obj) {
 					result.push({ TenKhoi: 'Khối ' + item.KhoiID, KhoiID: item.KhoiID, CapID: item.CapID })
@@ -194,33 +192,21 @@ export default {
 			this.KhoiIDSelected = this.DSKhoi[0]?.KhoiID ?? null
 		},
 		async GET_EL_Teacher_Dashboard_Lop_Get_ByKhoiID() {
-			let params = {
+			const response = await fetchPromise('lms/EL_Teacher_Dashboard_Lop_Get_ByKhoiID', {
 				KhoiID: this.KhoiIDSelected,
 				NienKhoa: vueData.NienKhoa,
 				HocKi: vueData.NienKhoaItem.HocKi
-			}
-			let response = await this.API_Promise('EL_Teacher_Dashboard_Lop_Get_ByKhoiID', params)
-			this.DSLop = response
+			}, { cache: false })
+			this.DSLop = response ?? []
 			this.LopNhomIDSelected = null
 		},
 		async GET_EL_Teacher_Dashboard_Assignment_Get_ByLopID() {
-			let params = {
+			const response = await fetchPromise('lms/EL_Teacher_Dashboard_Assignment_Get_ByLopID', {
 				LopID: this.LopNhomIDSelected,
 				NienKhoa: vueData.NienKhoa,
 				HocKi: vueData.NienKhoaItem.HocKi
-			}
-			let response = await this.API_Promise('EL_Teacher_Dashboard_Assignment_Get_ByLopID', params)
-			console.log('r', response)
-			this.FocusTaskList = response
-
-
-		},
-		API_Promise(url, params) {
-			return new Promise((resolve, reject) => {
-				ajaxCALL('lms/' + url, params, res => {
-					resolve(res.data)
-				})
-			})
+			}, { cache: false })
+			this.FocusTaskList = response ?? []
 		},
 		chamBai(task) {
 			const url = `https://lms.lhbs.vn/lms_Assignment-Class-Detail?AssignToClassID=${task?.AssignToClassID}&LopID=${task?.LopID}&MonHocID=${task?.MonHocID}&AssignType=${task?.AssignType}&KhoiID=${task?.KhoiID}`

@@ -46,20 +46,20 @@ export default {
             }
         },
         async apiCall2() {
-            const res = await fetchPromise('lms/EL_Teacher_GetRecentActivities', { PageSize: 10, HocKi: vueData.NienKhoaItem?.HocKi })
-            vueData.activities = res.data
+            const res = await fetchPromise('lms/EL_Teacher_GetRecentActivities', { PageSize: 10, HocKi: vueData.NienKhoaItem?.HocKi }, { cache: false })
+            vueData.activities = res
         },
         async apiCall3() {
-            const res = await fetchPromise('lms/EL_Teacher_GetMyContentLibrary', { NienKhoa: vueData.NienKhoa })
+            const res = await fetchPromise('lms/EL_Teacher_GetMyContentLibrary', { NienKhoa: vueData.NienKhoa }, { cache: false })
             vueData.contentLibrary = processLibraryData(res)
         },
         async apiCall4() {
-            const res = await fetchPromise('lms/EL_Teacher_GetFocusTasks', { HocKi: vueData.NienKhoaItem?.HocKi })
-            vueData.focusTasks = res.data
+            const res = await fetchPromise('lms/EL_Teacher_GetFocusTasks', { HocKi: vueData.NienKhoaItem?.HocKi }, { cache: false })
+            vueData.focusTasks = res
         },
         async getFocusTasksStudent() {
-            const res = await fetchPromise('lms/EL_Teacher_GetFocusTasks_Student', {})
-            vueData.focusTasks_student = res.data
+            const res = await fetchPromise('lms/EL_Teacher_GetFocusTasks_Student', {}, { cache: false })
+            vueData.focusTasks_student = res
         },
         async initPage() {
             try {
@@ -70,6 +70,7 @@ export default {
                     this.apiCall4(),
                     this.getFocusTasksStudent(),
                 ])
+                vueData.refreshFocusTask?.()
             } catch (error) {
                 console.error('Một trong các API đã thất bại:', error)
                 this.snackbarRef.value.showSnackbar({ message: 'Tải dữ liệu dashboard thất bại.', color: 'error' })

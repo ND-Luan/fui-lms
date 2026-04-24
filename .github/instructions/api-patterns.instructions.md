@@ -16,6 +16,14 @@ applyTo: "modules/**/*.vue,modules/**/script.js,imports/**/*.js"
 
 ## `fetchPromise` — reads and mutations
 
+> **`fetchPromise` returns the data array/object directly** — it is already unwrapped.  
+> Do **not** use `.data` on the result. Access the value directly:
+> ```js
+> const res = await fetchPromise('module/endpoint', params)
+> this.DS = res ?? []          // ✅ correct
+> this.DS = res.data ?? []     // ❌ wrong — res.data is undefined
+> ```
+
 ```js
 // Read
 async getData() {
@@ -24,15 +32,15 @@ async getData() {
     HocKi: vueData.NienKhoaItem.HocKi,
     LopID: this.LopItem.LopID,
   })
-  this.DS = res.data ?? []
+  this.DS = res ?? []
 }
 
 // Mutation — always preceded by confirmRef dialog, always { cache: false }
 async onSave() {
-  const ok = await this._confirm()?.show({ title: 'Xác nhận lưu?' })
+  const ok = await this.confirmRef.value.show({ title: 'Xác nhận lưu?' })
   if (!ok) return
   const res = await fetchPromise('module/save', { ...this.formData }, { cache: false })
-  if (res?.status === 'success' || res?.data) {
+  if (res?.status === 'success' || res) {
     this.snackbarRef.value.showSnackbar({ message: 'Lưu thành công', color: 'success' })
     this.getData()
   }
@@ -88,8 +96,8 @@ async mounted() {
     { url: 'khoi/list', params: { CapID: vueData.CapID } },
     { url: 'monhoc/list', params: { NienKhoa: vueData.NienKhoa } },
   ])
-  this.DSKhoi = resKhoi.data ?? []
-  this.DSMonHoc = resMonHoc.data ?? []
+  this.DSKhoi = resKhoi ?? []
+  this.DSMonHoc = resMonHoc ?? []
 }
 ```
 

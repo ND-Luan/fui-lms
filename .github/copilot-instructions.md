@@ -140,7 +140,7 @@ export default {
         NienKhoa: vueData.NienKhoa,
         HocKi: vueData.NienKhoaItem.HocKi,
       })
-      this.DS = res.data ?? []
+      this.DS = res ?? []
     },
     async onSave() {
       const ok = await this.confirmRef.value.show({ title: 'Xác nhận lưu?' })
@@ -163,7 +163,7 @@ export default {
 | Insert / update / delete | `fetchPromise(url, params, { cache: false })` — always preceded by `this.confirmRef.value.show()` |
 | Parallel reads | `fetchBatchPromise([{ url, params }, ...])` |
 
-`fetchPromise` returns `res.data` array by default (5-min cache). Use `{ cache: false }` for all mutations to bypass cache.
+`fetchPromise` returns the **data directly** (already unwrapped) — do **not** use `.data` on the result. Use `{ cache: false }` for all mutations to bypass the 5-min cache.
 
 ### Vuetify rules
 - `#header` slot root: plain `<v-card>` — **no** `rounded`, `elevation`, `border`, `class`
