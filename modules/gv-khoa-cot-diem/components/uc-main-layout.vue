@@ -37,7 +37,7 @@
         <v-data-table v-model="DSSelected" :headers="headers" :items="DS" item-value="MaCotDiem" :show-select="true"
             items-per-page="-1" hide-default-footer hover style="max-height: calc(100dvh - 77px); overflow-y: auto;">
             <template #item.actions="{ item }">
-                <v-btn size="small" :color="item.IsLocked ? 'warning' : 'success'" variant="tonal"
+                <v-btn size="small" :color="item.IsLocked ? 'warning' : 'success'" variant="outlined"
                     @click="onClickToggle(item)">
                     <v-icon start>{{ item.IsLocked ? 'mdi-lock-open' : 'mdi-lock' }}</v-icon>
                     {{ item.IsLocked ? 'Mở khóa' : 'Khóa' }}

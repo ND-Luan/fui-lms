@@ -125,7 +125,6 @@ function TongKet_GetDTBMonHocByKhoiLop() {
         getDSLop()
         return
     }
-
     // Detect paired classes by base TenLop (e.g. "12C1","12C2" share base "12C")
     const selectedTenLop = vueData.LopItem.TenLop ?? ''
     const baseName = selectedTenLop.replace(/\d+$/, '')
@@ -137,7 +136,6 @@ function TongKet_GetDTBMonHocByKhoiLop() {
             (l.TenLop ?? '').replace(/\d+$/, '') === baseName
           )
         : []
-
     if (pairedLops.length > 0) {
         const allLops = [vueData.LopItem, ...pairedLops]
         ;(async () => {
@@ -151,7 +149,6 @@ function TongKet_GetDTBMonHocByKhoiLop() {
         })()
         return
     }
-
     ;(async () => {
         await new Promise(resolve => {
             ajaxCALL(`https://tapi.lhbs.vn/diemc${vueData.CapID}/LMS_GetTongKetDTBMonHocByLop`,

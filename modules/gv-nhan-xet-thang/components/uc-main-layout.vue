@@ -77,7 +77,7 @@
 			<v-progress-circular indeterminate size="18" width="2" color="primary" />
 			<span class="text-body-2 text-medium-emphasis">{{ viPhamLoadingText }}</span>
 		</div>
-		<v-data-table :headers="headers" :items="items" items-per-page="-1" hide-default-footer
+		<v-data-table :key="keyTable" :headers="headers" :items="items" items-per-page="-1" hide-default-footer
 			style="height: calc(100dvh - 119px); overflow-y: auto;">
 
 			<!-- ─── Học sinh ─── -->
@@ -104,14 +104,14 @@
 
 			<template #item.NhanXetGVCN_VePhuHuynh_HTML="{ item }">
 				<div style="padding: 10px; max-width: 250px;">
-					<uc-quill-editor :key="'NhanXetGVCN_VePhuHuynh_HTML' + item.HocSinhID"
+					<uc-quill-editor :key="'NhanXetGVCN_VePhuHuynh_HTML' + item.HocSinhID + ThangObj?.Lop_NhanXetThangID"
 						v-model="item.NhanXetGVCN_VePhuHuynh_HTML" :spellcheck="false" :readOnly="isReadOnly" />
 				</div>
 			</template>
 
 			<template #item.NhanXetGVCN_VeHocSinh_HTML="{ item }">
 				<div style="padding: 10px; max-width: 250px;">
-					<uc-quill-editor :key="'NhanXetGVCN_VeHocSinh_HTML' + item.HocSinhID"
+					<uc-quill-editor :key="'NhanXetGVCN_VeHocSinh_HTML' + item.HocSinhID + ThangObj?.Lop_NhanXetThangID"
 						v-model="item.NhanXetGVCN_VeHocSinh_HTML" :spellcheck="false" :readOnly="isReadOnly" />
 				</div>
 			</template>
@@ -119,7 +119,7 @@
 			<!-- ─── Cấp 1: Các cột nhận xét môn ─── -->
 			<template #item.NhanXetToan_HTML="{ item }">
 				<div style="padding: 10px; max-width: 280px;">
-					<uc-quill-editor :key="'NhanXetToan_HTML' + item.HocSinhID" v-model="item.NhanXetToan_HTML"
+					<uc-quill-editor :key="'NhanXetToan_HTML' + item.HocSinhID + ThangObj?.Lop_NhanXetThangID" v-model="item.NhanXetToan_HTML"
 						:spellcheck="false" style="height: 150px;" :readOnly="isReadOnly" />
 					<v-text-field class="mt-2" v-model="item.DiemToan" placeholder="Nhập điểm..."
 						messages="*Lưu ý: Thang điểm 10" variant="filled" :clearable="false" suffix="Điểm"
@@ -129,7 +129,7 @@
 
 			<template #item.NhanXetTiengViet_HTML="{ item }">
 				<div style="padding: 10px; max-width: 280px;">
-					<uc-quill-editor :key="'NhanXetTiengViet_HTML' + item.HocSinhID"
+					<uc-quill-editor :key="'NhanXetTiengViet_HTML' + item.HocSinhID + ThangObj?.Lop_NhanXetThangID"
 						v-model="item.NhanXetTiengViet_HTML" :spellcheck="false" style="height: 150px;"
 						:readOnly="isReadOnly" />
 					<v-text-field class="mt-2" v-model="item.DiemTiengViet" placeholder="Nhập điểm..."
@@ -140,21 +140,21 @@
 
 			<template #item.NhanXetMonHocKhac_HTML="{ item }">
 				<div style="padding: 10px; max-width: 280px;">
-					<uc-quill-editor :key="'NhanXetMonHocKhac_HTML' + item.HocSinhID"
+					<uc-quill-editor :key="'NhanXetMonHocKhac_HTML' + item.HocSinhID + ThangObj?.Lop_NhanXetThangID"
 						v-model="item.NhanXetMonHocKhac_HTML" :spellcheck="false" :readOnly="isReadOnly" />
 				</div>
 			</template>
 
 			<template #item.HoatDongGiaoDucKhac_HTML="{ item }">
 				<div style="padding: 10px; max-width: 280px;">
-					<uc-quill-editor :key="'HoatDongGiaoDucKhac_HTML' + item.HocSinhID"
+					<uc-quill-editor :key="'HoatDongGiaoDucKhac_HTML' + item.HocSinhID + ThangObj?.Lop_NhanXetThangID"
 						v-model="item.HoatDongGiaoDucKhac_HTML" :spellcheck="false" :readOnly="isReadOnly" />
 				</div>
 			</template>
 
 			<template #item.PhamChatNangLuc_HTML="{ item }">
 				<div style="padding: 10px; max-width: 280px;">
-					<uc-quill-editor :key="'PhamChatNangLuc_HTML' + item.HocSinhID" v-model="item.PhamChatNangLuc_HTML"
+					<uc-quill-editor :key="'PhamChatNangLuc_HTML' + item.HocSinhID + ThangObj?.Lop_NhanXetThangID" v-model="item.PhamChatNangLuc_HTML"
 						:spellcheck="false" :readOnly="isReadOnly" />
 				</div>
 			</template>
@@ -250,25 +250,25 @@
 			<!-- ─── Cấp 2 & 3: Cuối kỳ (T12, T5) ─── -->
 			<template #item.UuDiem="{ item }">
 				<div style="padding: 10px;">
-					<uc-quill-editor :key="'UuDiem' + item.HocSinhID" v-model="item.UuDiem" :spellcheck="false"
+					<uc-quill-editor :key="'UuDiem' + item.HocSinhID + ThangObj?.Lop_NhanXetThangID" v-model="item.UuDiem" :spellcheck="false"
 						:readOnly="isReadOnly" />
 				</div>
 			</template>
 			<template #item.NhuocDiem="{ item }">
 				<div style="padding: 10px;">
-					<uc-quill-editor :key="'NhuocDiem' + item.HocSinhID" v-model="item.NhuocDiem" :spellcheck="false"
+					<uc-quill-editor :key="'NhuocDiem' + item.HocSinhID + ThangObj?.Lop_NhanXetThangID" v-model="item.NhuocDiem" :spellcheck="false"
 						:readOnly="isReadOnly" />
 				</div>
 			</template>
 			<template #item.DeXuat="{ item }">
 				<div style="padding: 10px;">
-					<uc-quill-editor :key="'DeXuat' + item.HocSinhID" v-model="item.DeXuat" :spellcheck="false"
+					<uc-quill-editor :key="'DeXuat' + item.HocSinhID + ThangObj?.Lop_NhanXetThangID" v-model="item.DeXuat" :spellcheck="false"
 						:readOnly="isReadOnly" />
 				</div>
 			</template>
 			<template #item.NhanXetGVCN="{ item }">
 				<div style="padding: 10px;">
-					<uc-quill-editor :key="'NhanXetGVCN' + item.HocSinhID" v-model="item.NhanXetGVCN"
+					<uc-quill-editor :key="'NhanXetGVCN' + item.HocSinhID + ThangObj?.Lop_NhanXetThangID" v-model="item.NhanXetGVCN"
 						:spellcheck="false" :readOnly="isReadOnly" :maxLength="500" />
 				</div>
 			</template>
@@ -276,19 +276,19 @@
 			<!-- ─── Cấp 2 & 3: Các tháng thường ─── -->
 			<template #item.NoiDungKienThuc_HTML="{ item }">
 				<div style="padding: 10px; min-width: 200px;">
-					<uc-quill-editor :key="'NoiDungKienThuc_HTML' + item.HocSinhID" v-model="item.NoiDungKienThuc_HTML"
+					<uc-quill-editor :key="'NoiDungKienThuc_HTML' + item.HocSinhID + ThangObj?.Lop_NhanXetThangID" v-model="item.NoiDungKienThuc_HTML"
 						:spellcheck="false" :readOnly="isReadOnly" />
 				</div>
 			</template>
 			<template #item.NoiDungNangLuc_HTML="{ item }">
 				<div style="padding: 10px; min-width: 200px;">
-					<uc-quill-editor :key="'NoiDungNangLuc_HTML' + item.HocSinhID" v-model="item.NoiDungNangLuc_HTML"
+					<uc-quill-editor :key="'NoiDungNangLuc_HTML' + item.HocSinhID + ThangObj?.Lop_NhanXetThangID" v-model="item.NoiDungNangLuc_HTML"
 						:spellcheck="false" :readOnly="isReadOnly" />
 				</div>
 			</template>
 			<template #item.NoiDungHoatDongKhac_HTML="{ item }">
 				<div style="padding: 10px; min-width: 200px;">
-					<uc-quill-editor :key="'NoiDungHoatDongKhac_HTML' + item.HocSinhID"
+					<uc-quill-editor :key="'NoiDungHoatDongKhac_HTML' + item.HocSinhID + ThangObj?.Lop_NhanXetThangID"
 						v-model="item.NoiDungHoatDongKhac_HTML" :spellcheck="false" :readOnly="isReadOnly" />
 				</div>
 			</template>
@@ -349,6 +349,7 @@ export default {
 			viPhamExpandedMap_Nhom: {},
 			isLoadingViPham: false,
 			viPhamLoadingText: '',
+			keyTable: 0 
 		}
 	},
 
@@ -459,10 +460,11 @@ export default {
 		},
 
 		async getNhanXetThang(forceRefresh = false) {
+			this.keyTable +=1
 			this.items = await fetchPromise('lms/NhanXetThang_Get', {
 				Lop_NhanXetThangID: this.ThangObj.Lop_NhanXetThangID,
 				LopID: this.LopItem.LopID,
-			}, { forceRefresh })
+			}, { forceRefresh: true })
 
 			await this.convertItems()
 			this.headers = this.renderHeader()
@@ -798,13 +800,15 @@ export default {
 			if (!this.validateNhanXetGVCN(this.items)) return
 			const ok = await this.confirmRef.value.show({ title: 'Xác nhận lưu tạm tất cả nhận xét tháng?' })
 			if (!ok) return
+
 			const JSON_NhanXetThang = this.buildSavePayload()
-			const promise = fetchPromise('lms/NhanXetThang_Ins', { JSON_NhanXetThang })
+			console.log("JSON_NhanXetThang", JSON_NhanXetThang)
+			const promise = fetchPromise('lms/NhanXetThang_Ins', { JSON_NhanXetThang }, {forceRefresh: true})
 				.then(() => fetchPromise('lms/NhanXetThang_Upd_TinhTrang', {
 					TinhTrang: 1,
 					Lop_NhanXetThangID: this.ThangObj.Lop_NhanXetThangID,
 					ReasonReject: '',
-				}))
+				}, {forceRefresh: true}))
 				.then(() => {
 					this.getThang(true)
 					this.getNhanXetThang(true)
@@ -823,7 +827,7 @@ export default {
 				...item,
 				LopID: this.LopItem.LopID,
 				Lop_NhanXetThangID: this.ThangObj.Lop_NhanXetThangID,
-			})
+			}, {forceRefresh: true})
 			this.$toastPromise(promise, {
 				loadingText: `Đang lưu ${item.HoTen}...`,
 				successText: `Lưu tạm ${item.HoTen} thành công`,
@@ -849,7 +853,7 @@ export default {
 				TinhTrang: 2,
 				Lop_NhanXetThangID: this.ThangObj.Lop_NhanXetThangID,
 				ReasonReject: '',
-			})
+			}, {forceRefresh: true})
 			this.$toastPromise(promise, {
 				successText: 'Gửi tổ trưởng thành công',
 			})
@@ -868,7 +872,7 @@ export default {
 				TinhTrang: 2,
 				Lop_NhanXetThangID: this.ThangObj.Lop_NhanXetThangID,
 				ReasonReject: '',
-			})
+			}, {forceRefresh: true})
 			this.$toastPromise(promise, {
 				successText: 'Gửi BGH thành công',
 			})
@@ -886,7 +890,7 @@ export default {
 			const promise = fetchPromise('lms/NhanXetThang_Copy', {
 				Lop_NhanXetThangID: this.ThangObj.Lop_NhanXetThangID,
 				Lop_NhanXetThangID_Copy: this.ThangObj_Copy.Lop_NhanXetThangID,
-			})
+			}, {forceRefresh: true})
 			this.$toastPromise(promise, {
 				successText: 'Sao chép thành công',
 			})

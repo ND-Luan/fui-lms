@@ -19,15 +19,16 @@
 							item-value="value" />
 					</v-col>
 					<v-col class="d-flex ga-2">
-						<v-btn @click="onSearch" color="primary" variant="outlined" prepend-icon="mdi-magnify" :disabled="!HocKi">
+						<v-btn @click="onSearch" color="primary" variant="outlined" prepend-icon="mdi-magnify"
+							:disabled="HocKi === null">
 							Tìm kiếm
 						</v-btn>
 						<v-btn @click="onExportExcel" color="green" variant="outlined" prepend-icon="mdi-file-excel"
-							:disabled="!HocKi || vueData.DSHocSinh.length === 0">
+							:disabled="HocKi === null || vueData.DSHocSinh.length === 0">
 							Xuất Excel
 						</v-btn>
 						<v-btn @click="onChotBaoCao" color="amber" variant="outlined" prepend-icon="mdi-check-circle"
-							:disabled="!HocKi || !BaoCaoItem || BaoCaoItem?.IsChotBaoCao">
+							:disabled="HocKi === null || !BaoCaoItem || BaoCaoItem?.IsChotBaoCao">
 							Chốt báo cáo
 						</v-btn>
 					</v-col>
@@ -87,6 +88,7 @@
 		watch: {
 			HocKi: function (HocKi) {
 				if (HocKi === null) return
+	
 				this.onSearch()
 			},
 			tab: function (tab) {
@@ -97,7 +99,7 @@
 		methods: {
 			async onSearch() {
 				vueData.DSHocSinh = []
-				if (!this.HocKi) return
+				if (this.HocKi === null) return
 				let data
 	
 				if (this.tab === 0) data = await this.onLoadTatCaKhoi()
