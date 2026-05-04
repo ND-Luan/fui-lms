@@ -1,9 +1,0 @@
-.hide-headers thead tr:nth-child(3){
-    display: none;
-}
-.jss_worksheet{
-    width: 100%;
-}
-.height-excel-tong-ket-hoc-ki .jss_content{
-        max-height: calc(100vh - 220px) !important;
-}

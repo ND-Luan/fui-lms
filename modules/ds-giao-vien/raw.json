@@ -1,1 +1,0 @@
-{"data":[{"EXE":"IsCheck_NotRoleParent(vueData.user)"},{"headers":[{"title":"ID","value":"GiaoVienID"},{"title":"Họ Tên","value":"HoTenGV"}],"items":[]},{"API":"lms/GiaoVien_Get","OUT":"items"}],"watch":{},"controls":[{"prop":"","rows":[{"prop":"","cols":[{"el":"f-table","attr":{"label":"Danh sách giáo viên",":headers":"headers",":items":"items"}}]}]}],"set":{}}
