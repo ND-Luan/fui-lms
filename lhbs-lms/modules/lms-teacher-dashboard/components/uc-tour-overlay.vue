@@ -18,15 +18,15 @@
 				<p class="text-body-2 text-medium-emphasis mb-3" style="line-height:1.5;">{{ body }}</p>
 				<div class="d-flex align-center ga-2">
 					<v-btn v-if="step > 0" size="small" variant="outlined" @click="$emit('prev')">
-						<v-icon start size="14">mdi-chevron-left</v-icon>Trước
+						<v-icon start size="14">mdi-chevron-left</v-icon>{{ $t('message.back') }}
 					</v-btn>
 					<v-spacer />
-					<v-btn size="small" variant="text" color="grey" @click="$emit('close')">Kết thúc</v-btn>
+					<v-btn size="small" variant="text" color="grey" @click="$emit('close')">{{ $t('message.EndTour') }}</v-btn>
 					<v-btn v-if="step < totalSteps - 1" size="small" color="primary" @click="$emit('next')">
-						Tiếp<v-icon end size="14">mdi-chevron-right</v-icon>
+						{{ $t('message.next') }}<v-icon end size="14">mdi-chevron-right</v-icon>
 					</v-btn>
 					<v-btn v-else size="small" color="success" variant="tonal" @click="$emit('close')">
-						<v-icon start size="14">mdi-check</v-icon>Xong
+						<v-icon start size="14">mdi-check</v-icon>{{ $t('message.Done') }}
 					</v-btn>
 				</div>
 			</div>

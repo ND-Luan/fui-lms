@@ -1,5 +1,5 @@
 <template>
-	<v-navigation-drawer v-model="isOpen" temporary location="end" width="400">
+	<v-navigation-drawer :model-value="isOpen" @update:model-value="val => { if (!val) CloseLiberies() }" temporary location="end" width="400">
 		<div class="lib-root">
 
 			<!-- Header -->
@@ -31,7 +31,7 @@
 			<div class="lib-filter-row lib-filter-row--khoi" v-if="availableKhois.length > 1">
 				<button class="lib-pill lib-pill--sm" :class="{ active: selectedKhoi === null }"
 					@click="selectedKhoi = null">
-					{{ $i18n.locale == 'en' ? 'All' : 'Tất cả' }}
+					{{ $t('message.All') }}
 				</button>
 				<button v-for="k in availableKhois" :key="k" class="lib-pill lib-pill--sm"
 					:class="{ active: selectedKhoi === k }" @click="selectedKhoi = k">
@@ -42,7 +42,7 @@
 			<!-- Actions -->
 			<div class="lib-actions" v-if="DSMonHoc.length > 0">
 				<v-btn color="brown" variant="outlined" size="small" @click="onOpenKhoNoiDung()"
-					v-tooltip="$i18n.locale == 'en' ? 'Content Library' : 'Kho nội dung'">
+					v-tooltip="$t('message.ContentLibrary')">
 					<v-icon>mdi-archive-outline</v-icon>
 					<span style="font-size:.775rem">{{ $t('message.ContentLibrary') }}</span>
 				</v-btn>
@@ -65,7 +65,7 @@
 			<!-- Search -->
 			<div class="lib-search">
 				<v-text-field v-model="librarySearch" density="compact" variant="outlined" hide-details
-					placeholder="Tìm kiếm..." prepend-inner-icon="mdi-magnify" />
+					:placeholder="$t('message.Search')" prepend-inner-icon="mdi-magnify" />
 			</div>
 
 			<!-- Flat item list -->
@@ -86,7 +86,7 @@
 				<template v-else>
 					<div v-if="flatLibraryItems.length === 0" class="lib-empty">
 						<v-icon size="36" class="mb-2 opacity-40">mdi-book-open-blank-variant-outline</v-icon>
-						<span>{{ selected ? 'Không có tài liệu nào' : 'Chọn môn học để xem' }}</span>
+						<span>{{ flatLibraryItems.length === 0 && selected ? $t('message.NoDocument') : $t('message.SelectSubjectToView') }}</span>
 					</div>
 					<div v-for="item in flatLibraryItems" :key="item.ResourceID" class="lib-bt-item"
 						@click="onSelectedLibery(item, item._siblings)">
@@ -119,9 +119,7 @@
 								<v-list-item @click.stop="onDeleteItem(item)">
 									<v-list-item-title class="text-subtitle-2">
 										<v-icon color="red" size="small" class="mr-1">mdi-trash-can-outline</v-icon>
-										{{ $t('message.Delete') }} {{ item.ResourceType == 'LESSON' ? ($i18n.locale ==
-										'en' ? 'lesson' : 'bài học') : ($i18n.locale == 'en' ? 'assignment' : 'bài tập')
-										}}
+								{{ $t('message.Delete') }} {{ item.ResourceType == 'LESSON' ? $t('message.Lesson').toLowerCase() : $t('message.Assignment').toLowerCase() }}
 									</v-list-item-title>
 								</v-list-item>
 							</v-list>
@@ -141,13 +139,13 @@
 <script>
 	export default {
 		inject: ['snackbarRef', 'iframeRef', 'confirmRef'],
-	emits: ['update:isOpen', 'CreateContent'],
+	emits: ['update:isOpen', 'create-content'],
 	props: {
 		isOpen: {
 			type: Boolean,
 			default: false
 		},
-		DSMonHocActive: {
+		dsMonHocActive: {
 			type: Array,
 			default: () => []
 		},
@@ -162,7 +160,7 @@
 	},
 	mounted() {
 		document.body.classList.add('no-scroll');
-		this.DSMonHoc = [...this.DSMonHocActive]
+		this.DSMonHoc = [...this.dsMonHocActive]
 		this.$nextTick(() => {
 			if (this.DSMonHoc.length > 0) this.selected = this.DSMonHoc[0];
 		})
@@ -192,9 +190,9 @@
 								: { icon: 'mdi-presentation-play', color: 'green' },
 							_status: (() => {
 								const m = {
-									1: { text: this.$i18n.locale == 'en' ? 'Drafting' : 'Đang soạn thảo', color: 'grey' },
-									2: { text: this.$i18n.locale == 'en' ? 'Ready to Assign' : 'Sẵn sàng giao', color: 'orange' },
-									3: { text: this.$i18n.locale == 'en' ? 'Assigned' : 'Đã giao', color: 'success' },
+										1: { text: this.$t('message.Drafting'), color: 'grey' },
+										2: { text: this.$t('message.ReadyToAssign'), color: 'orange' },
+										3: { text: this.$t('message.AssignedLabel'), color: 'success' },
 								}
 								return m[item.Status] || m[1]
 							})()
@@ -219,7 +217,7 @@
 		},
 	},
 	watch: {
-		DSMonHocActive(newVal) {
+		dsMonHocActive(newVal) {
 			this.DSMonHoc = [...newVal]
 			this.$nextTick(() => {
 				if (this.DSMonHoc.length > 0 && !this.DSMonHoc.find(m => m.MonHocName === this.selected?.MonHocName)) {
@@ -275,9 +273,9 @@
 		},
 		statusInfo(item) {
 			const statusMap = {
-				1: { text: this.$i18n.locale == 'en' ? 'Drafting' : 'Đang soạn thảo', color: 'grey' },
-				2: { text: this.$i18n.locale == 'en' ? 'Ready to Assign' : 'Sẵn sàng giao', color: 'orange' },
-				3: { text: this.$i18n.locale == 'en' ? `Assigned` : `Đã giao`, color: 'success' },
+				1: { text: this.$t('message.Drafting'), color: 'grey' },
+				2: { text: this.$t('message.ReadyToAssign'), color: 'orange' },
+				3: { text: this.$t('message.AssignedLabel'), color: 'success' },
 			};
 			return statusMap[item.Status] || statusMap[1];
 		},
@@ -287,7 +285,7 @@
 			this.isShowModalLiberyDetails = true
 		},
 		OpenModalAddNoiDung(item) {
-			this.$emit('CreateContent', item)
+			this.$emit('create-content', item)
 		},
 		onRedirectToASM(item) {
 			let url = null

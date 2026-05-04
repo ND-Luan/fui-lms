@@ -22,10 +22,10 @@
 						</v-img>
 						<v-icon size="88" color="primary" class="mt-2">mdi-school-outline</v-icon>
 						<p class="text-h6 text-primary font-weight-bold text-center">
-							Chào mừng đến với Dashboard Giáo viên
-						</p>
-						<p class="text-body-2 text-medium-emphasis text-center" style="max-width:340px;">
-							Quản lý bài tập, theo dõi tiến độ và chấm bài cho học sinh của bạn — tất cả từ một nơi duy nhất.
+						{{ $t('message.WelcomeTeacherDashboard') }}
+					</p>
+					<p class="text-body-2 text-medium-emphasis text-center" style="max-width:340px;">
+						{{ $t('message.WelcomeTeacherDesc') }}
 						</p>
 					</div>
 				</v-window-item>
@@ -38,15 +38,15 @@
 				<!-- Step 2: Overview -->
 				<v-window-item :value="2" style="min-height:calc(100dvh - 56px)">
 					<div class="d-flex flex-column ga-4 pa-6" style="height:100%;overflow-y:auto;">
-						<p class="text-h6 text-primary font-weight-bold">Tổng quan Dashboard</p>
-						<p class="text-body-2 text-medium-emphasis">Dashboard được chia thành 3 vùng chính:</p>
+<p class="text-h6 text-primary font-weight-bold">{{ $t('message.DashboardOverview') }}</p>
+					<p class="text-body-2 text-medium-emphasis">{{ $t('message.DashboardSections') }}</p>
 
 						<v-card variant="tonal" color="teal" class="pa-3 rounded-lg">
 							<div class="d-flex align-center ga-3">
 								<v-icon color="teal" size="28">mdi-view-list-outline</v-icon>
 								<div>
-									<div class="text-subtitle-2 font-weight-bold">Sidebar trái — Lọc nhanh</div>
-									<div class="text-caption text-medium-emphasis">Chọn Khối → Môn học → Tuần học để xem bài tập</div>
+								<div class="text-subtitle-2 font-weight-bold">{{ $t('message.LeftSidebarTitle') }}</div>
+								<div class="text-caption text-medium-emphasis">{{ $t('message.LeftSidebarDesc') }}</div>
 								</div>
 							</div>
 						</v-card>
@@ -55,8 +55,8 @@
 							<div class="d-flex align-center ga-3">
 								<v-icon color="primary" size="28">mdi-table</v-icon>
 								<div>
-									<div class="text-subtitle-2 font-weight-bold">Vùng giữa — Danh sách lớp</div>
-									<div class="text-caption text-medium-emphasis">Xem trạng thái bài tập và tiến độ từng lớp</div>
+								<div class="text-subtitle-2 font-weight-bold">{{ $t('message.CenterAreaTitle') }}</div>
+								<div class="text-caption text-medium-emphasis">{{ $t('message.CenterAreaDesc') }}</div>
 								</div>
 							</div>
 						</v-card>
@@ -65,8 +65,8 @@
 							<div class="d-flex align-center ga-3">
 								<v-icon color="deep-orange" size="28">mdi-check-circle-outline</v-icon>
 								<div>
-									<div class="text-subtitle-2 font-weight-bold">Sidebar phải — Bài cần chấm</div>
-									<div class="text-caption text-medium-emphasis">Danh sách bài tập đang chờ chấm điểm</div>
+								<div class="text-subtitle-2 font-weight-bold">{{ $t('message.RightSidebarTitle') }}</div>
+								<div class="text-caption text-medium-emphasis">{{ $t('message.RightSidebarDesc') }}</div>
 								</div>
 							</div>
 						</v-card>
@@ -74,9 +74,9 @@
 						<v-divider class="my-1" />
 
 						<v-btn color="primary" @click="$emit('start-tour'); $emit('done')">
-							<v-icon start>mdi-map-marker-path</v-icon>Bắt đầu hướng dẫn chi tiết
-						</v-btn>
-						<v-btn variant="text" color="grey" @click="$emit('done')">Bỏ qua, tự khám phá</v-btn>
+						<v-icon start>mdi-map-marker-path</v-icon>{{ $t('message.StartDetailedGuide') }}
+					</v-btn>
+					<v-btn variant="text" color="grey" @click="$emit('done')">{{ $t('message.SkipExploreMyself') }}</v-btn>
 					</div>
 				</v-window-item>
 
@@ -84,11 +84,11 @@
 
 			<v-card-actions style="flex-shrink:0;border-top:1px solid rgba(0,0,0,0.08);">
 				<v-btn v-if="step > 0" variant="outlined" @click="step--">
-					<v-icon start>mdi-chevron-left</v-icon>Quay lại
+					<v-icon start>mdi-chevron-left</v-icon>{{ $t('message.back') }}
 				</v-btn>
 				<v-spacer />
 				<v-btn v-if="step < 2" color="primary" @click="step++">
-					Tiếp theo<v-icon end>mdi-chevron-right</v-icon>
+					{{ $t('message.next') }}<v-icon end>mdi-chevron-right</v-icon>
 				</v-btn>
 			</v-card-actions>
 		</v-card>

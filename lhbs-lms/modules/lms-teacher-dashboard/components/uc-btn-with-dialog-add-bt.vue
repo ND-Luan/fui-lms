@@ -1,8 +1,8 @@
 <template>
-	<v-dialog v-model="isOpen" max-width="500">
+	<v-dialog :model-value="isOpen" @update:model-value="val => { if (!val) CloseModal() }" max-width="500">
 		<v-card>
 			<v-card-title class="d-flex align-center">
-				{{ $t('message.CreateContent') }} - {{ $t('message.Grade') }} {{ KhoiItem.KhoiID
+				{{ $t('message.CreateContent') }} - {{ $t('message.Grade') }} {{ khoiItem?.KhoiID
 				}}
 				<v-spacer />
 				<v-icon @click="CloseModal()">mdi-close</v-icon>
@@ -13,14 +13,14 @@
 						<v-col cols="12">
 							<!-- Thông tin Khối - Môn (bên trái) -->
 							<div class="d-flex align-center">
-								<v-avatar :color="getSubjectColor(KhoiItem?.MonHocName)" size="40" class="mr-4">
-									<v-icon color="white">{{ getSubjectIcon(KhoiItem?.MonHocName) }}</v-icon>
-								</v-avatar>
-								<div>
-									<div class="text-overline">{{ $t('message.Grade') }} {{ KhoiItem.KhoiID
-									}}</div>
-									<div class="text-h6">{{ $i18n.locale == 'en' && KhoiItem?.MonHocName == 'Ngoại ngữ'
-										? 'English' : KhoiItem?.MonHocName }}</div>
+							<v-avatar :color="getSubjectColor(khoiItem?.MonHocName)" size="40" class="mr-4">
+								<v-icon color="white">{{ getSubjectIcon(khoiItem?.MonHocName) }}</v-icon>
+							</v-avatar>
+							<div>
+								<div class="text-overline">{{ $t('message.Grade') }} {{ khoiItem?.KhoiID
+								}}</div>
+								<div class="text-h6">{{ $i18n.locale == 'en' && khoiItem?.MonHocName == 'Ngoại ngữ'
+									? 'English' : khoiItem?.MonHocName }}</div>
 								</div>
 							</div>
 						</v-col>
@@ -62,12 +62,15 @@ export default {
 	inject: ['snackbarRef', 'iframeRef', 'confirmRef'],
 	emits: ['update:isOpen'],
 	props: {
-		KhoiItem: Object,
+		khoiItem: {
+			type: Object,
+			default: () => ({}),
+		},
 		isOpen: {
 			type: Boolean,
 			default: false,
 		},
-		tuanHocID: {
+		tuanHocId: {
 			type: Number,
 			default: null,
 		},
@@ -96,7 +99,7 @@ export default {
 	mounted() { },
 	computed: {
 		DSTuan: function () {
-			this.form.TuanHocID = this.tuanHocID || vueData.DSTuanHoc.find(tuan => tuan.Is_Active)?.TuanHocID
+			this.form.TuanHocID = this.tuanHocId || vueData.DSTuanHoc.find(tuan => tuan.Is_Active)?.TuanHocID
 			return vueData.DSTuanHoc
 		}
 
@@ -125,8 +128,8 @@ export default {
 				if (this.form.type == 0) {
 					ajaxCALL('lms/EL_Assignment_Ins', {
 						...this.form,
-						MonHocID: this.KhoiItem.MonHocID,
-						KhoiID: this.KhoiItem.KhoiID,
+						MonHocID: this.khoiItem.MonHocID,
+						KhoiID: this.khoiItem.KhoiID,
 						NienKhoa: vueData.NienKhoa,
 					HocKi: vueData.NienKhoaItem?.HocKi ?? 1
 					}, res => {
@@ -149,8 +152,8 @@ export default {
 				else {
 					ajaxCALL('lms/EL_Lesson_Save', {
 						...this.form,
-						MonHocID: this.KhoiItem.MonHocID,
-						KhoiID: this.KhoiItem.KhoiID,
+						MonHocID: this.khoiItem.MonHocID,
+						KhoiID: this.khoiItem.KhoiID,
 						NienKhoa: vueData.NienKhoa,
 						HocKi: vueData.NienKhoaItem?.HocKi ?? 1,
 						Status: 1

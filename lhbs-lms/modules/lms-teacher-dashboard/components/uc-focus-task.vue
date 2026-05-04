@@ -7,13 +7,13 @@
 				<v-select v-model="KhoiIDSelected" :items="DSKhoi" item-title="TenKhoi" item-value="KhoiID"
 					density="compact" variant="outlined" hide-details style="flex:1" />
 				<v-btn size="x-small" variant="text"				v-show="LopNhomIDSelected"					:icon="IsShowHidedTask ? 'mdi-eye-off-outline' : 'mdi-eye-outline'"
-					v-tooltip="IsShowHidedTask ? 'Xem bài thường' : 'Xem bài đã ẩn'"
+				v-tooltip="IsShowHidedTask ? $t('message.ShowAssignment') : $t('message.HideAssignment')"
 					@click="IsShowHidedTask = !IsShowHidedTask" />
 			</div>
 			<div class="ft-filter-row" v-show="LopNhomIDSelected">
-				<button class="ft-fbtn" :class="{ active: StatusSelected === -1 }" @click="StatusSelected = -1">Tất cả</button>
-				<button class="ft-fbtn" :class="{ active: StatusSelected === 0 }" @click="StatusSelected = 0">Cần chấm</button>
-				<button class="ft-fbtn" :class="{ active: StatusSelected === 1 }" @click="StatusSelected = 1">Quá hạn</button>
+			<button class="ft-fbtn" :class="{ active: StatusSelected === -1 }" @click="StatusSelected = -1">{{ $t('message.All') }}</button>
+			<button class="ft-fbtn" :class="{ active: StatusSelected === 0 }" @click="StatusSelected = 0">{{ $t('message.NeedGrade') }}</button>
+			<button class="ft-fbtn" :class="{ active: StatusSelected === 1 }" @click="StatusSelected = 1">{{ $t('message.OverDue') }}</button>
 			</div>
 		</div>
 
@@ -23,14 +23,14 @@
 			<!-- No khoi yet -->
 			<div v-if="!KhoiIDSelected" class="ft-empty">
 				<v-icon size="32" class="mb-1 opacity-40">mdi-google-classroom</v-icon>
-				<span>Chọn khối để xem bài tập</span>
+				<span>{{ $t('message.ChooseGradeToView') }}</span>
 			</div>
 
 			<!-- CLASS LIST -->
 			<template v-else-if="!LopNhomIDSelected">
 				<div v-if="DSLop.length === 0" class="ft-empty">
 					<v-icon size="28" class="mb-1 opacity-40">mdi-google-classroom</v-icon>
-					<span>Không tìm thấy lớp</span>
+					<span>{{ $t('message.ClassNotFound') }}</span>
 				</div>
 				<div v-for="lop in DSLop" :key="lop.LopNhomID"
 					class="ft-bt-item" @click="LopNhomIDSelected = lop.LopNhomID">
@@ -39,10 +39,10 @@
 					</div>
 					<div class="ft-bt-body">
 						<div class="ft-bt-name">{{ lop.TenLop }}</div>
-						<div class="ft-bt-meta">{{ lop.TongBT }} bài tập</div>
-						<div class="ft-bt-footer" v-if="lop.BaiTapCanCham_PendingGrading + lop.BaiTapSapToi_Upcoming > 0">
-							<span class="ft-pill ft-pill-blue">
-								{{ lop.BaiTapCanCham_PendingGrading + lop.BaiTapSapToi_Upcoming }} cần chấm
+					<div class="ft-bt-meta">{{ lop.TongBT }} {{ $t('message.Assignment').toLowerCase() }}</div>
+					<div class="ft-bt-footer" v-if="lop.BaiTapCanCham_PendingGrading + lop.BaiTapSapToi_Upcoming > 0">
+						<span class="ft-pill ft-pill-blue">
+							{{ lop.BaiTapCanCham_PendingGrading + lop.BaiTapSapToi_Upcoming }} {{ $t('message.NeedGrade').toLowerCase() }}
 							</span>
 						</div>
 					</div>
@@ -54,11 +54,11 @@
 			<template v-else>
 				<div class="ft-back" @click="LopNhomIDSelected = null">
 					<v-icon size="14">mdi-arrow-left</v-icon>
-					<span>{{ DSLop.find(l => l.LopNhomID === LopNhomIDSelected)?.TenLop || 'Quay lại' }}</span>
+					<span>{{ DSLop.find(l => l.LopNhomID === LopNhomIDSelected)?.TenLop || $t('message.back') }}</span>
 				</div>
 				<div class="ft-search">
 					<v-text-field v-model="search" density="compact" variant="outlined" hide-details
-						placeholder="Tìm kiếm..." prepend-inner-icon="mdi-magnify" />
+						:placeholder="$t('message.Search')" prepend-inner-icon="mdi-magnify" />
 				</div>
 				<div v-if="FocusTaskListFilter.length === 0" class="ft-empty">
 					<v-icon size="28" class="mb-1 opacity-40">mdi-file-search-outline</v-icon>
@@ -74,9 +74,9 @@
 						<div class="ft-bt-meta">{{ task.TenLopHoacNhom }} · {{ task.MonHocName }}</div>
 						<div class="ft-bt-footer">
 							<span class="ft-pill" :class="getStatusPillClass(task.Status)">{{ getStatusText(task.Status) }}</span>
-							<span v-if="task.DueDate" class="ft-due">HH: {{ formatDate(task.DueDate) }}</span>						<v-btn icon size="x-small" variant="text" class="ml-auto"
+							<span v-if="task.DueDate" class="ft-due">{{ $t('message.DueDatePrefix') }}: {{ formatDate(task.DueDate) }}</span>						<v-btn icon size="x-small" variant="text" class="ml-auto"
 							:color="task.IsHided ? 'primary' : undefined"
-							v-tooltip="task.IsHided ? 'Hiện bài tập' : 'Ẩn bài tập'"
+							v-tooltip="task.IsHided ? $t('message.ShowAssignment') : $t('message.HideAssignment')"
 							@click.stop="toggleHide(task)">
 							<v-icon size="12">{{ task.IsHided ? 'mdi-eye-outline' : 'mdi-eye-off-outline' }}</v-icon>
 						</v-btn>						</div>
@@ -112,20 +112,6 @@
 			vueData, DSLop: [], LopNhomIDSelected: null, 
 			FocusTaskList: [], search: '', BaiTap_CanCham_All_Class: {},
 			StatusSelected:-1,
-			StatusLists:[
-				{
-					title: 'Tất cả',
-					value: -1
-				},
-				{
-					title: 'Cần chấm',
-					value: 0
-				},
-				{
-					title: 'Quá hạn',
-					value: 1
-				}
-			],
 			IsShowHidedTask:false,
 		}
 	},
@@ -177,7 +163,14 @@
 					return ['OVERDUE'].includes(item.Status)
 				}
 			})
-		}
+		},
+		StatusLists() {
+			return [
+				{ title: this.$t('message.All'), value: -1 },
+				{ title: this.$t('message.NeedGrade'), value: 0 },
+				{ title: this.$t('message.OverDue'), value: 1 },
+			]
+		},
 	},
 	methods: {
 		async GET_EL_Teacher_GetMyClasses() {
@@ -185,7 +178,7 @@
 			this.DSKhoi = (response ?? []).reduce((result, item) => {
 				let obj = result.find(i => i.KhoiID == item.KhoiID)
 				if (!obj) {
-					result.push({ TenKhoi: 'Khối ' + item.KhoiID, KhoiID: item.KhoiID, CapID: item.CapID })
+			result.push({ TenKhoi: this.$t('message.Grade') + ' ' + item.KhoiID, KhoiID: item.KhoiID, CapID: item.CapID })
 				}
 				return result
 			}, [])
@@ -230,7 +223,7 @@
 			return map[monHocName] || '#888780'
 		},
 		getStatusText(status) {
-			const map = { 'PENDING_GRADING': 'Cần chấm', 'OVERDUE': 'Quá hạn', 'UPCOMING': 'Sắp tới' }
+			const map = { 'PENDING_GRADING': this.$t('message.NeedGrade'), 'OVERDUE': this.$t('message.OverDue'), 'UPCOMING': this.$t('message.Coming') }
 			return map[status] || status
 		},
 		getStatusPillClass(status) {

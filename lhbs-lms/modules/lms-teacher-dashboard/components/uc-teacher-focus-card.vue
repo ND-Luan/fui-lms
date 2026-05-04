@@ -46,7 +46,7 @@
 					<div class="d-flex flex-column flex-lg-row ga-3">
 						<v-chip v-if="!isLibraryView && group.TotalPendingGradingCount > 0" color="error" variant="flat"
 							prepend-icon="mdi-alert-circle-outline">
-							Có {{ group.TotalPendingGradingCount }} bài cần chấm
+						{{ group.TotalPendingGradingCount }} {{ $t('message.NeedGrade') }}
 						</v-chip>
 
 						<uc-btn-with-dialog-add-bt :khoiid="group.KhoiID" :monhocid="group.MonHocID" :group />
@@ -83,7 +83,7 @@
 										</div>
 									</div>
 									<div class="class-actions">
-										<v-btn size="small" variant="tonal" color="purple" text="Xem sổ điểm"
+								<v-btn size="small" variant="tonal" color="purple" :text="$t('message.ViewGradebook')"
 											@click.stop="xemTinhTrang(classItem)" />
 									</div>
 								</div>
@@ -95,7 +95,7 @@
 										:key="assignment.AssignToClassID" :assignment="assignment" />
 								</div>
 								<div class="text-center text-grey pa-2" v-if="classItem.assignments.length === 0">
-									Lớp này chưa được giao bài tập nào.
+								{{ $t('message.ClassNotAssigned') }}
 								</div>
 							</v-expansion-panel-text>
 						</v-expansion-panel>
@@ -114,7 +114,7 @@
 						:key="item.ResourceType + item.ResourceID" :item="item" />
 					<p v-if="chapterGroup.items.filter(x => x.ResourceID > 0).length === 0"
 						class="text-center text-caption text-center">
-						Bạn chưa thêm Assignment hoặc Lesson. Vui lòng bấm tạo nội dung
+						{{ $t('message.NoLessonYet') }}
 					</p>
 				</div>
 			</div>

@@ -8,7 +8,7 @@
 					<span class="text-subtitle-1 font-weight-semibold">{{ $t('message.ControlPanel') }}</span>
 					<v-btn size="small" class="ms-2" variant="text"
 						v-if="vueData.user.UserID == 'NA0000022' || vueData.user.UserID == 'NV0000134'"
-						@click="onHandleOpenChangeGV">Chọn GV</v-btn>
+						@click="onHandleOpenChangeGV">{{ $t('message.ChooseTeacher') }}</v-btn>
 					<!-- BREADCRUMB -->
 					<div class="lms-breadcrumb ms-3">
 						<template v-for="(bc, i) in cascadeBreadcrumb" :key="i">
@@ -28,7 +28,7 @@
 				</v-btn>
 				<v-btn icon @click="startTour" class="me-1">
 					<v-icon>mdi-help-circle-outline</v-icon>
-					<v-tooltip activator="parent" location="bottom">Hướng dẫn sử dụng</v-tooltip>
+					<v-tooltip activator="parent" location="bottom">{{ $t('message.TourGuide') }}</v-tooltip>
 				</v-btn>
 				<v-btn-toggle v-model="toggle" size="small">
 					<v-btn :value="false" :disabled="!toggle" :color="!toggle ? 'green' : 'white'">
@@ -48,7 +48,7 @@
 			<div class="lms-cascade" ref="tourCascade">
 				<!-- Tier 1: Khối -->
 				<div class="lms-tier">
-					<div class="lms-tier-hd"><span class="lms-tier-label">Khối</span></div>
+					<div class="lms-tier-hd"><span class="lms-tier-label">{{ $t('message.Grade') }}</span></div>
 					<div class="lms-tier-body">
 						<!-- Skeleton khi đang tải -->
 						<template v-if="loadingGroups">
@@ -72,13 +72,12 @@
 				<!-- Tier 2: Môn -->
 				<div class="lms-tier">
 					<div class="lms-tier-hd">
-						<span class="lms-tier-label">Môn học</span>
-						<button v-if="cascadeKhoiID" class="lms-tier-reset" @click="resetCascadeFrom(1)">đổi
-							khối</button>
+						<span class="lms-tier-label">{{ $t('message.Subject') }}</span>
+						<button v-if="cascadeKhoiID" class="lms-tier-reset" @click="resetCascadeFrom(1)">{{ $t('message.ChangeGrade') }}</button>
 					</div>
 					<div class="lms-tier-body">
 						<div v-if="!cascadeKhoiID" class="lms-tier-locked">
-							<v-icon size="13">mdi-lock-outline</v-icon> Chọn khối trước
+							<v-icon size="13">mdi-lock-outline</v-icon> {{ $t('message.SelectGradeFirst') }}
 						</div>
 						<div v-for="m in DSMonCascade" v-else :key="m.MonHocName" class="lms-t-item"
 							:class="{ active: cascadeMonHocName === m.MonHocName }" @click="pickMon(m.MonHocName)">
@@ -94,13 +93,12 @@
 				<!-- Tier 3: Tuần -->
 				<div class="lms-tier lms-tier-flex">
 					<div class="lms-tier-hd">
-						<span class="lms-tier-label">Tuần học</span>
-						<button v-if="cascadeMonHocName" class="lms-tier-reset" @click="resetCascadeFrom(2)">đổi
-							môn</button>
+						<span class="lms-tier-label">{{ $t('message.WeekStudy') }}</span>
+						<button v-if="cascadeMonHocName" class="lms-tier-reset" @click="resetCascadeFrom(2)">{{ $t('message.ChangeSubject') }}</button>
 					</div>
 					<div class="lms-tier-body">
 						<div v-if="!cascadeMonHocName" class="lms-tier-locked">
-							<v-icon size="13">mdi-lock-outline</v-icon> Chọn môn trước
+							<v-icon size="13">mdi-lock-outline</v-icon> {{ $t('message.SelectSubjectFirst') }}
 						</div>
 						<template v-else>
 							<div v-for="w in DSTuanCascade" :key="w.TuanHocID" class="lms-t-item lms-t-item--week"
@@ -123,7 +121,7 @@
 								<div class="lms-t-label">
 									<div>{{ currentTuanFallback.Tuan_HienThi }}</div>
 									<div class="d-flex ga-1 mt-1">
-										<span class="lms-pill lms-pill-warn">Chưa có bài</span>
+										<span class="lms-pill lms-pill-warn">{{ $t('message.NoLessonYet') }}</span>
 									</div>
 								</div>
 								<v-icon v-if="cascadeTuanID === currentTuanFallback.TuanHocID" size="14"
@@ -142,10 +140,9 @@
 					<div class="lms-empty-state">
 						<v-icon size="44" class="mb-3 opacity-40">mdi-table-search</v-icon>
 						<p class="text-body-2 font-weight-medium text-medium-emphasis">
-							{{ !cascadeKhoiID ? 'Chọn khối để bắt đầu' : !cascadeMonHocName ? 'Chọn môn học' : 'Chọn
-							tuần học' }}
+							{{ !cascadeKhoiID ? $t('message.SelectGradeToStart') : !cascadeMonHocName ? $t('message.SelectSubjectFirst') : $t('message.SelectWeekStudy') }}
 						</p>
-						<p class="text-caption text-disabled">Tuần hiện tại sẽ được chọn tự động</p>
+						<p class="text-caption text-disabled">{{ $t('message.CurrentWeekAutoSelected') }}</p>
 					</div>
 				</template>
 
@@ -157,16 +154,16 @@
 								{{ cascadeMonHocName === 'Ngoại ngữ' ? 'English' : cascadeMonHocName }}
 								&nbsp;·&nbsp;{{ cascadeTuanHienThi }}
 							</div>
-							<div class="lms-panel-sub">Khối {{ cascadeKhoiID }}</div>
+							<div class="lms-panel-sub">{{ $t('message.Grade') }} {{ cascadeKhoiID }}</div>
 						</div>
 						<div v-if="cascadeKhoiItem" class="d-flex ga-2">
 							<v-btn color="teal" variant="outlined" size="small"
 								@click="OpenModalAddNoiDung(cascadeKhoiItem, 1)">
-								<v-icon start>mdi-plus</v-icon>Thêm bài học
+								<v-icon start>mdi-plus</v-icon>{{ $t('message.AddLesson') }}
 							</v-btn>
 							<v-btn color="primary" variant="outlined" size="small"
 								@click="OpenModalAddNoiDung(cascadeKhoiItem, 0)">
-								<v-icon start>mdi-plus</v-icon>Thêm bài tập
+								<v-icon start>mdi-plus</v-icon>{{ $t('message.AddAssignment') }}
 							</v-btn>
 						</div>
 					</div>
@@ -175,22 +172,22 @@
 					<div class="lms-stat-grid" ref="tourStatGrid">
 						<div class="lms-stat-card lms-stat-ok">
 							<div class="lms-stat-val">{{ centerStats.ok }}</div>
-							<div class="lms-stat-label">Lớp hoàn thành</div>
+							<div class="lms-stat-label">{{ $t('message.ClassCompleted') }}</div>
 						</div>
 						<div class="lms-stat-card lms-stat-warn">
 							<div class="lms-stat-val">{{ centerStats.warn }}</div>
-							<div class="lms-stat-label">Lớp cần chấm bài</div>
+							<div class="lms-stat-label">{{ $t('message.ClassNeedGrade') }}</div>
 						</div>
 						<div class="lms-stat-card lms-stat-danger">
 							<div class="lms-stat-val">{{ centerStats.danger }}</div>
-							<div class="lms-stat-label">Lớp chưa giao bài</div>
+							<div class="lms-stat-label">{{ $t('message.ClassNoAssignment') }}</div>
 						</div>
 					</div>
 
 					<!-- Classes + assignments -->
 					<div class="lms-table-card" ref="tourClassTable">
 						<div class="lms-table-card-head">
-							<span class="lms-table-card-title">Danh sách lớp &amp; bài tập</span>
+							<span class="lms-table-card-title">{{ $t('message.ClassAndAssignmentList') }}</span>
 							<span class="text-caption text-disabled">{{ centerClasses.length }} lớp</span>
 						</div>
 						<div v-if="centerClasses.length === 0"
@@ -260,11 +257,11 @@
 
 		</div><!-- /lms-layout -->
 
-		<uc-btn-with-dialog-add-bt v-model:isOpen="isShowModalAddNoiDung" v-if="isShowModalAddNoiDung" :KhoiItem
-			:tuanHocID="cascadeTuanID" :defaultType="defaultType" />
-		<uc-my-liberies v-model:isOpen="isShowMyLiberies" :DSMonHocActive :teachingGroups v-if="isShowMyLiberies"
-			v-model:contentLibrary="contentLibrary" @CreateContent="(item) => { this.OpenModalAddNoiDung(item) }" />
-		<uc-change-user v-if="isShowModalChangeUser" v-model:isOpen="isShowModalChangeUser"
+		<uc-btn-with-dialog-add-bt v-model:is-open="isShowModalAddNoiDung" v-if="isShowModalAddNoiDung" :khoi-item="KhoiItem"
+			:tuan-hoc-id="cascadeTuanID" :default-type="defaultType" />
+		<uc-my-liberies v-model:is-open="isShowMyLiberies" :ds-mon-hoc-active="DSMonHocActive" :teaching-groups="teachingGroups" v-if="isShowMyLiberies"
+			v-model:content-library="contentLibrary" @create-content="(item) => { this.OpenModalAddNoiDung(item) }" />
+		<uc-change-user v-if="isShowModalChangeUser" v-model:is-open="isShowModalChangeUser"
 			:giaovienid="vueData.GiaoVienID_Selected" />
 
 		<!-- Onboarding drawer (first-time only) -->
@@ -299,14 +296,14 @@
 				toggle,
 				filterStatus: [],
 				statuses: {
-					'PENDING_GRADING': { color: 'warning', icon: 'mdi-file-clock-outline', iconColor: '#fb8c00', text: this.$i18n.locale == 'en' ? 'Need Grade' : 'Cần chấm', cardClass: 'warning' },
-					'OVERDUE': { color: 'error', icon: 'mdi-calendar-remove', iconColor: '#f44336', text: this.$i18n.locale == 'en' ? 'Over Due' : 'Quá hạn', cardClass: 'urgent' },
-					'UPCOMING': { color: 'primary', icon: 'mdi-calendar-arrow-right', iconColor: '#1976d2', text: this.$i18n.locale == 'en' ? 'Coming' : 'Sắp tới', cardClass: 'primary' }
+					'PENDING_GRADING': { color: 'warning', icon: 'mdi-file-clock-outline', iconColor: '#fb8c00', text: this.$t('message.NeedGrade'), cardClass: 'warning' },
+					'OVERDUE': { color: 'error', icon: 'mdi-calendar-remove', iconColor: '#f44336', text: this.$t('message.OverDue'), cardClass: 'urgent' },
+					'UPCOMING': { color: 'primary', icon: 'mdi-calendar-arrow-right', iconColor: '#1976d2', text: this.$t('message.Coming'), cardClass: 'primary' }
 				},
 				filterArray: [
-					{ title: this.$i18n.locale == 'en' ? 'Need Grade' : 'Cần chấm', value: 'PENDING_GRADING' },
-					{ title: this.$i18n.locale == 'en' ? 'Over Due' : 'Quá hạn', value: 'OVERDUE' },
-					{ title: this.$i18n.locale == 'en' ? 'Coming' : 'Sắp tới', value: 'UPCOMING' }
+					{ title: this.$t('message.NeedGrade'), value: 'PENDING_GRADING' },
+					{ title: this.$t('message.OverDue'), value: 'OVERDUE' },
+					{ title: this.$t('message.Coming'), value: 'UPCOMING' }
 				],
 				KhoiFilter: null,
 				LopFilter: null,
@@ -323,13 +320,13 @@
 				tourActive: false,
 				tourStep: 0,
 				tourTargetRect: null,
-				tourSteps: [
-					{ ref: 'tourCascade', title: 'Lọc theo Khối → Môn → Tuần', body: 'Chọn lần lượt Khối → Môn học → Tuần học để xem bài tập các lớp của bạn.' },
-					{ ref: 'tourStatGrid', title: 'Tổng quan tiến độ', body: 'Xem nhanh: số lớp đã hoàn thành, lớp cần chấm bài và lớp chưa giao bài.' },
-					{ ref: 'tourClassTable', title: 'Danh sách lớp & bài tập', body: 'Xem chi tiết từng lớp. Nhấn biểu tượng bảng để mở sổ điểm lớp học.' },
-					{ ref: 'tourRightSidebar', title: 'Bài cần chấm', body: 'Danh sách bài tập đang chờ chấm điểm. Cập nhật tự động theo thời gian thực.' },
-					{ ref: 'tourBtnThuVien', title: 'Thư viện tài liệu', body: 'Quản lý và tạo tài liệu, bài giảng theo tuần học và môn học.' },
-					{ ref: 'tourBtnThongKe', title: 'Thống kê & báo cáo', body: 'Xem thống kê tổng hợp tiến độ học tập của học sinh theo lớp và môn học.' },
+				tourStepKeys: [
+					{ ref: 'tourCascade', titleKey: 'TourStep1Title', bodyKey: 'TourStep1Body' },
+					{ ref: 'tourStatGrid', titleKey: 'TourStep2Title', bodyKey: 'TourStep2Body' },
+					{ ref: 'tourClassTable', titleKey: 'TourStep3Title', bodyKey: 'TourStep3Body' },
+					{ ref: 'tourRightSidebar', titleKey: 'TourStep4Title', bodyKey: 'TourStep4Body' },
+					{ ref: 'tourBtnThuVien', titleKey: 'TourStep5Title', bodyKey: 'TourStep5Body' },
+					{ ref: 'tourBtnThongKe', titleKey: 'TourStep6Title', bodyKey: 'TourStep6Body' },
 				],
 				khoiDotColors: ['#378ADD', '#1D9E75', '#BA7517', '#7F77DD', '#D85A30', '#888780'],
 				monDotColors: {
@@ -351,6 +348,13 @@
 			contentLibrary: Array,
 		},
 		computed: {
+			tourSteps() {
+				return this.tourStepKeys.map(s => ({
+					ref: s.ref,
+					title: this.$t('message.' + s.titleKey),
+					body: this.$t('message.' + s.bodyKey),
+				}))
+			},
 			focusTaskFiltered() {
 				return this.focusTasks.concat(vueData.focusTasks_student).filter(task => {
 					// 1. Filter theo trạng thái (nhiều trạng thái)
@@ -374,10 +378,10 @@
 			DSKhoi() {
 				return this.focusTasks.reduce((acc, task) => {
 					if (task.KhoiID && !acc.some(x => x.value === task.KhoiID)) {
-						acc.push({ title: 'Khối ' + task.KhoiID, value: task.KhoiID });
+						acc.push({ title: this.$t('message.Grade') + ' ' + task.KhoiID, value: task.KhoiID });
 					}
 					return acc;
-				}, [{ title: 'Tất cả', value: -1 }]);
+				}, [{ title: this.$t('message.All'), value: -1 }]);
 			},
 			DSLop() {
 				return this.focusTasks.reduce((acc, task) => {
@@ -405,7 +409,7 @@
 						seen[g.KhoiID] = true
 						result.push({
 							KhoiID: g.KhoiID,
-							label: 'Khối ' + g.KhoiID,
+							label: this.$t('message.Grade') + ' ' + g.KhoiID,
 							dot: this.khoiDotColors[result.length % this.khoiDotColors.length]
 						})
 					}
@@ -469,11 +473,11 @@
 				return week ? week.Tuan_HienThi : null
 			},
 			cascadeBreadcrumb() {
-				const monLabel = this.cascadeMonHocName ? (this.cascadeMonHocName === 'Ngoại ngữ' ? 'English' : this.cascadeMonHocName) : 'Môn'
+				const monLabel = this.cascadeMonHocName ? (this.cascadeMonHocName === 'Ngoại ngữ' ? 'English' : this.cascadeMonHocName) : this.$t('message.Subject')
 				return [
-					{ label: this.cascadeKhoiID ? 'Khối ' + this.cascadeKhoiID : 'Khối', done: !!this.cascadeKhoiID, active: !this.cascadeKhoiID, step: 0 },
+					{ label: this.cascadeKhoiID ? this.$t('message.Grade') + ' ' + this.cascadeKhoiID : this.$t('message.Grade'), done: !!this.cascadeKhoiID, active: !this.cascadeKhoiID, step: 0 },
 					{ label: monLabel, done: !!this.cascadeMonHocName, active: !!this.cascadeKhoiID && !this.cascadeMonHocName, step: 1 },
-					{ label: this.cascadeTuanHienThi || 'Tuần', done: !!this.cascadeTuanID, active: !!this.cascadeMonHocName && !this.cascadeTuanID, step: 2 },
+					{ label: this.cascadeTuanHienThi || this.$t('message.WeekStudy'), done: !!this.cascadeTuanID, active: !!this.cascadeMonHocName && !this.cascadeTuanID, step: 2 },
 				]
 			},
 		},
@@ -563,7 +567,7 @@
 			},
 			xemTinhTrang(assignment) {
 				this.iframeRef.value.openWindow({
-					title: "Sổ điểm lớp học",
+					title: this.$t('message.ClassGradebook'),
 					url: `/lms-teacher-gradebook?LopID=${assignment.LopID}&MonHocID=${assignment.MonHocID}&HocKi=${vueData.NienKhoaItem?.HocKi}&AssignType=CLASS`,
 					onclose: () => vueData.initPage()
 				});
@@ -578,7 +582,7 @@
 			},
 			OpenDashboard() {
 				this.iframeRef.value.openWindow({
-					title: 'Theo dõi học tập',
+					title: this.$t('message.LearningTracking'),
 					url: `/lms-teacher-theo-doi-hoc-tap?HocKi=${vueData.NienKhoaItem.HocKi}`,
 				})
 			},
