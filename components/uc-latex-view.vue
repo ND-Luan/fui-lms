@@ -378,6 +378,9 @@ export default {
             // ✨ SAU ĐÓ mới preprocess MathML
             content = this.preprocessMathML(content)
 
+            // Convert newlines to <br> so plain-text content with \n renders correctly
+            content = content.replace(/\n/g, '<br>')
+
             this.renderedContent = content
 
             this.$nextTick(() => {

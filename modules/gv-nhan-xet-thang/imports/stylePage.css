@@ -10,3 +10,6 @@
 [v-cloak] {
     display: none;
   }
+
+.custom-height-uc-quill-editor { height: fit-content !important; min-height: 155px !important; }
+.custom-height-uc-quill-editor .ql-editor { padding: 10px !important; }

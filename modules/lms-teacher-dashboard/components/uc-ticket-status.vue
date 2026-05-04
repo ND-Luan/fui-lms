@@ -136,7 +136,7 @@ export default {
 	data() {
 		return {
 			DS: [],
-			dismissed: [],
+			seenStatuses: {},
 			detailDialog: {
 				show: false,
 				ticket: null,
@@ -151,10 +151,15 @@ export default {
 	},
 	computed: {
 		DSActive() {
-			return this.DS.filter(t => t.UnreadUser > 0 && !this.dismissed.includes(t.TicketID))
+			return this.DS.filter(t => {
+				if (t.Status === 'OPEN' || t.Status === 'CANCELLED') return false
+				return t.UnreadUser > 0 || this.seenStatuses[t.TicketID] !== t.Status
+			})
 		},
 	},
 	mounted() {
+		const key = `ticket_seenStatus_${vueData.user.UserID}`
+		this.seenStatuses = JSON.parse(localStorage.getItem(key) || '{}')
 		this.loadTickets()
 		if (!window.htmlToImage) {
 			const s = document.createElement('script')
@@ -185,6 +190,7 @@ export default {
 			this.detailDialog.newComment = ''
 			this.replyAttachments = []
 			this.detailDialog.show = true
+			this._persistSeen(item.TicketID)
 			ajaxCALL('lms/Ticket_MarkAsSeen', { TicketID: item.TicketID, IsIT: false }, () => {
 				const t = this.DS.find(x => x.TicketID === item.TicketID)
 				if (t) t.UnreadUser = 0
@@ -193,7 +199,14 @@ export default {
 		dismissTicket(ticketID) {
 			const t = this.DS.find(x => x.TicketID === ticketID)
 			if (t) t.UnreadUser = 0
+			this._persistSeen(ticketID)
 			ajaxCALL('lms/Ticket_MarkAsSeen', { TicketID: ticketID, IsIT: false }, () => {})
+		},
+		_persistSeen(ticketID) {
+			const t = this.DS.find(x => x.TicketID === ticketID)
+			if (!t) return
+			this.seenStatuses = { ...this.seenStatuses, [ticketID]: t.Status }
+			localStorage.setItem(`ticket_seenStatus_${vueData.user.UserID}`, JSON.stringify(this.seenStatuses))
 		},
 		async sendComment() {
 			if (!this.detailDialog.newComment?.trim() && !this.replyAttachments.length) return

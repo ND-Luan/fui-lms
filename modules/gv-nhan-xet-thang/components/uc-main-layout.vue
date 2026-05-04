@@ -46,6 +46,11 @@
 									</div>
 								</div>
 								<div class="d-flex ga-2">
+									<v-btn v-if="items.length > 0" :prepend-icon="isReviewMode ? 'mdi-pencil' : 'mdi-eye'"
+										:color="isReviewMode ? 'warning' : 'secondary'" variant="outlined"
+										@click="isReviewMode = !isReviewMode">
+										{{ isReviewMode ? 'Quay lại nhập liệu' : 'Xem lại' }}
+									</v-btn>
 									<v-btn prepend-icon="mdi-file-excel" color="success" variant="outlined"
 										:disabled="items.length === 0 || isReadOnly" @click="onImport">
 										Import dữ liệu từ Excel
@@ -104,14 +109,14 @@
 
 			<template #item.NhanXetGVCN_VePhuHuynh_HTML="{ item }">
 				<div style="padding: 10px; max-width: 250px;">
-					<uc-quill-editor :key="'NhanXetGVCN_VePhuHuynh_HTML' + item.HocSinhID + ThangObj?.Lop_NhanXetThangID"
+					<uc-quill-editor :key="'NhanXetGVCN_VePhuHuynh_HTML' + item.HocSinhID + ThangObj?.Lop_NhanXetThangID + quillKey"
 						v-model="item.NhanXetGVCN_VePhuHuynh_HTML" :spellcheck="false" :readOnly="isReadOnly" />
 				</div>
 			</template>
 
 			<template #item.NhanXetGVCN_VeHocSinh_HTML="{ item }">
 				<div style="padding: 10px; max-width: 250px;">
-					<uc-quill-editor :key="'NhanXetGVCN_VeHocSinh_HTML' + item.HocSinhID + ThangObj?.Lop_NhanXetThangID"
+					<uc-quill-editor :key="'NhanXetGVCN_VeHocSinh_HTML' + item.HocSinhID + ThangObj?.Lop_NhanXetThangID + quillKey"
 						v-model="item.NhanXetGVCN_VeHocSinh_HTML" :spellcheck="false" :readOnly="isReadOnly" />
 				</div>
 			</template>
@@ -119,7 +124,7 @@
 			<!-- ─── Cấp 1: Các cột nhận xét môn ─── -->
 			<template #item.NhanXetToan_HTML="{ item }">
 				<div style="padding: 10px; max-width: 280px;">
-					<uc-quill-editor :key="'NhanXetToan_HTML' + item.HocSinhID + ThangObj?.Lop_NhanXetThangID" v-model="item.NhanXetToan_HTML"
+					<uc-quill-editor :key="'NhanXetToan_HTML' + item.HocSinhID + ThangObj?.Lop_NhanXetThangID + quillKey" v-model="item.NhanXetToan_HTML"
 						:spellcheck="false" style="height: 150px;" :readOnly="isReadOnly" />
 					<v-text-field class="mt-2" v-model="item.DiemToan" placeholder="Nhập điểm..."
 						messages="*Lưu ý: Thang điểm 10" variant="filled" :clearable="false" suffix="Điểm"
@@ -129,7 +134,7 @@
 
 			<template #item.NhanXetTiengViet_HTML="{ item }">
 				<div style="padding: 10px; max-width: 280px;">
-					<uc-quill-editor :key="'NhanXetTiengViet_HTML' + item.HocSinhID + ThangObj?.Lop_NhanXetThangID"
+					<uc-quill-editor :key="'NhanXetTiengViet_HTML' + item.HocSinhID + ThangObj?.Lop_NhanXetThangID + quillKey"
 						v-model="item.NhanXetTiengViet_HTML" :spellcheck="false" style="height: 150px;"
 						:readOnly="isReadOnly" />
 					<v-text-field class="mt-2" v-model="item.DiemTiengViet" placeholder="Nhập điểm..."
@@ -140,21 +145,21 @@
 
 			<template #item.NhanXetMonHocKhac_HTML="{ item }">
 				<div style="padding: 10px; max-width: 280px;">
-					<uc-quill-editor :key="'NhanXetMonHocKhac_HTML' + item.HocSinhID + ThangObj?.Lop_NhanXetThangID"
+					<uc-quill-editor :key="'NhanXetMonHocKhac_HTML' + item.HocSinhID + ThangObj?.Lop_NhanXetThangID + quillKey"
 						v-model="item.NhanXetMonHocKhac_HTML" :spellcheck="false" :readOnly="isReadOnly" />
 				</div>
 			</template>
 
 			<template #item.HoatDongGiaoDucKhac_HTML="{ item }">
 				<div style="padding: 10px; max-width: 280px;">
-					<uc-quill-editor :key="'HoatDongGiaoDucKhac_HTML' + item.HocSinhID + ThangObj?.Lop_NhanXetThangID"
+					<uc-quill-editor :key="'HoatDongGiaoDucKhac_HTML' + item.HocSinhID + ThangObj?.Lop_NhanXetThangID + quillKey"
 						v-model="item.HoatDongGiaoDucKhac_HTML" :spellcheck="false" :readOnly="isReadOnly" />
 				</div>
 			</template>
 
 			<template #item.PhamChatNangLuc_HTML="{ item }">
 				<div style="padding: 10px; max-width: 280px;">
-					<uc-quill-editor :key="'PhamChatNangLuc_HTML' + item.HocSinhID + ThangObj?.Lop_NhanXetThangID" v-model="item.PhamChatNangLuc_HTML"
+					<uc-quill-editor :key="'PhamChatNangLuc_HTML' + item.HocSinhID + ThangObj?.Lop_NhanXetThangID + quillKey" v-model="item.PhamChatNangLuc_HTML"
 						:spellcheck="false" :readOnly="isReadOnly" />
 				</div>
 			</template>
@@ -250,25 +255,25 @@
 			<!-- ─── Cấp 2 & 3: Cuối kỳ (T12, T5) ─── -->
 			<template #item.UuDiem="{ item }">
 				<div style="padding: 10px;">
-					<uc-quill-editor :key="'UuDiem' + item.HocSinhID + ThangObj?.Lop_NhanXetThangID" v-model="item.UuDiem" :spellcheck="false"
+					<uc-quill-editor :key="'UuDiem' + item.HocSinhID + ThangObj?.Lop_NhanXetThangID + quillKey" v-model="item.UuDiem" :spellcheck="false"
 						:readOnly="isReadOnly" />
 				</div>
 			</template>
 			<template #item.NhuocDiem="{ item }">
 				<div style="padding: 10px;">
-					<uc-quill-editor :key="'NhuocDiem' + item.HocSinhID + ThangObj?.Lop_NhanXetThangID" v-model="item.NhuocDiem" :spellcheck="false"
+					<uc-quill-editor :key="'NhuocDiem' + item.HocSinhID + ThangObj?.Lop_NhanXetThangID + quillKey" v-model="item.NhuocDiem" :spellcheck="false"
 						:readOnly="isReadOnly" />
 				</div>
 			</template>
 			<template #item.DeXuat="{ item }">
 				<div style="padding: 10px;">
-					<uc-quill-editor :key="'DeXuat' + item.HocSinhID + ThangObj?.Lop_NhanXetThangID" v-model="item.DeXuat" :spellcheck="false"
+					<uc-quill-editor :key="'DeXuat' + item.HocSinhID + ThangObj?.Lop_NhanXetThangID + quillKey" v-model="item.DeXuat" :spellcheck="false"
 						:readOnly="isReadOnly" />
 				</div>
 			</template>
 			<template #item.NhanXetGVCN="{ item }">
 				<div style="padding: 10px;">
-					<uc-quill-editor :key="'NhanXetGVCN' + item.HocSinhID + ThangObj?.Lop_NhanXetThangID" v-model="item.NhanXetGVCN"
+					<uc-quill-editor :key="'NhanXetGVCN' + item.HocSinhID + ThangObj?.Lop_NhanXetThangID + quillKey" v-model="item.NhanXetGVCN"
 						:spellcheck="false" :readOnly="isReadOnly" :maxLength="500" />
 				</div>
 			</template>
@@ -276,20 +281,29 @@
 			<!-- ─── Cấp 2 & 3: Các tháng thường ─── -->
 			<template #item.NoiDungKienThuc_HTML="{ item }">
 				<div style="padding: 10px; min-width: 200px;">
-					<uc-quill-editor :key="'NoiDungKienThuc_HTML' + item.HocSinhID + ThangObj?.Lop_NhanXetThangID" v-model="item.NoiDungKienThuc_HTML"
+					<uc-quill-editor :key="'NoiDungKienThuc_HTML' + item.HocSinhID + ThangObj?.Lop_NhanXetThangID + quillKey" v-model="item.NoiDungKienThuc_HTML"
 						:spellcheck="false" :readOnly="isReadOnly" />
 				</div>
 			</template>
 			<template #item.NoiDungNangLuc_HTML="{ item }">
 				<div style="padding: 10px; min-width: 200px;">
-					<uc-quill-editor :key="'NoiDungNangLuc_HTML' + item.HocSinhID + ThangObj?.Lop_NhanXetThangID" v-model="item.NoiDungNangLuc_HTML"
+					<uc-quill-editor :key="'NoiDungNangLuc_HTML' + item.HocSinhID + ThangObj?.Lop_NhanXetThangID + quillKey" v-model="item.NoiDungNangLuc_HTML"
 						:spellcheck="false" :readOnly="isReadOnly" />
 				</div>
 			</template>
 			<template #item.NoiDungHoatDongKhac_HTML="{ item }">
 				<div style="padding: 10px; min-width: 200px;">
-					<uc-quill-editor :key="'NoiDungHoatDongKhac_HTML' + item.HocSinhID + ThangObj?.Lop_NhanXetThangID"
+					<uc-quill-editor :key="'NoiDungHoatDongKhac_HTML' + item.HocSinhID + ThangObj?.Lop_NhanXetThangID + quillKey"
 						v-model="item.NoiDungHoatDongKhac_HTML" :spellcheck="false" :readOnly="isReadOnly" />
+				</div>
+			</template>
+
+			<!-- ─── Xem lại: RenderNhanXet (cấp 2&3 tháng thường) ─── -->
+			<template #item.RenderNhanXet="{ item }">
+				<div style="padding: 10px; min-width: 300px;">
+					<uc-quill-editor :key="'RenderNhanXet' + item.HocSinhID + ThangObj?.Lop_NhanXetThangID + quillKey"
+						v-model="item.RenderNhanXet" :spellcheck="false" :readOnly="true"
+						class="custom-height-uc-quill-editor" />
 				</div>
 			</template>
 
@@ -332,10 +346,8 @@ export default {
 			DSThang: [],
 			LopItem: null,
 			ThangObj: null,
-			headers: [],
 			items: [],
-			isLowScreen: window.innerWidth < 1366,
-			IsShowDialogCopy: false,
+			isLowScreen: window.innerWidth < 1366,			isReviewMode: false,			IsShowDialogCopy: false,
 			ThangObj_Copy: null,
 			DSTongHop_ViPham: [],
 			viPhamDetailMap: {},
@@ -349,7 +361,8 @@ export default {
 			viPhamExpandedMap_Nhom: {},
 			isLoadingViPham: false,
 			viPhamLoadingText: '',
-			keyTable: 0 
+			keyTable: 0,
+			quillKey: 0,
 		}
 	},
 
@@ -376,9 +389,9 @@ export default {
 		TitlePage() {
 			return getTitlePageByURL(window.location.pathname + window.location.search)
 		},
-		/** Readonly khi tình trạng là Đã duyệt (2) hoặc Từ chối (4) */
+		/** Readonly khi tình trạng là Đã duyệt (2) hoặc Từ chối (4), hoặc đang xem lại */
 		isReadOnly() {
-			return this.ThangObj?.TinhTrang === 2 || this.ThangObj?.TinhTrang === 4
+			return this.isReviewMode || this.ThangObj?.TinhTrang === 2 || this.ThangObj?.TinhTrang === 4
 		},
 		/** Các khối KHÔNG cần cột tuyển thẳng / Flyers / DiemTA */
 		isKhoiCanLoai() {
@@ -389,6 +402,12 @@ export default {
 		isCuoiKi() {
 			return [12, 5].includes(this.ThangObj?.Thang)
 		},
+		headers() {
+			// Explicit dep: nếu isReviewMode hoặc ThangObj thay đổi, computed tự re-evaluate
+			const _r = this.isReviewMode
+			const _t = this.ThangObj
+			return this.renderHeader()
+		},
 	},
 
 	watch: {
@@ -396,16 +415,22 @@ export default {
 			if (!LopItem) return
 			this.ThangObj = null
 			this.items = []
+			this.isReviewMode = false
 			this.getThang()
 		},
 		ThangObj(ThangObj) {
 			if (!ThangObj) return
 			this.items = []
+			this.isReviewMode = false
 			this.getNhanXetThang()
 		},
 		isLowScreen() {
-			// Re-render header khi đổi breakpoint
-			if (this.ThangObj) this.headers = this.renderHeader()
+			// headers tự re-compute khi isLowScreen đổi (computed dependency)
+		},
+		isReviewMode() {
+			if (!this.ThangObj) return
+			// Chỉ remount quill editors (không remount cả table)
+			this.quillKey++
 		},
 	},
 
@@ -467,7 +492,6 @@ export default {
 			}, { forceRefresh: true })
 
 			await this.convertItems()
-			this.headers = this.renderHeader()
 		},
 
 		// ─────────────────────────────────────────
@@ -511,28 +535,28 @@ export default {
 				// Resolve LopHocID trong hệ quansinh (khác với LopItem.LopID của LMS)
 				await this.getLopHocBackground()
 				this.mainLopHocID = this.DSLopHoc.find(x => x.TenLop === this.LopItem.TenLop)?.LopHocID ?? null
+			// Capture vào local var để tránh race condition khi user đổi tháng nhanh
+			const lopHocID = this.mainLopHocID
 
-				// API 1: lấy tổng hợp loại vi phạm theo lớp + tháng
-				if (this.mainLopHocID) {
-					try {
-						this.DSTongHop_ViPham = await fetchPromise(
-							'quansinh/LMS_SoDauBai_TongHopTheoLoaiViPham',
-							{ TuNgay: viPhamFirstDay, DenNgay: viPhamLastDay, LopHocID: this.mainLopHocID },
-							{ cache: false }
-						) ?? []
+			// API 1: lấy tổng hợp loại vi phạm theo lớp + tháng
+			if (lopHocID) {
+				try {
+					this.DSTongHop_ViPham = await fetchPromise(
+						'quansinh/LMS_SoDauBai_TongHopTheoLoaiViPham',
+						{ TuNgay: viPhamFirstDay, DenNgay: viPhamLastDay, LopHocID: lopHocID },
+						{ cache: false }
+					) ?? []
 
-						// API 2: eager-load chi tiết song song cho các loại có vi phạm
-						const dsCoViPham = this.DSTongHop_ViPham.filter(x => x.SoLuong > 0)
-						if (dsCoViPham.length > 0) {
-							let done = 0
-							const total = dsCoViPham.length
-							this.viPhamLoadingText = `Đang tải chi tiết vi phạm (0/${total})...`
-							await Promise.all(dsCoViPham.map(async lvp => {
-								await this.loadViPhamDetail(lvp.LoaiViPham)
-								done++
-								this.viPhamLoadingText = `Đang tải chi tiết vi phạm (${done}/${total})...`
-							}))
-						}
+					// API 2: eager-load chi tiết song song cho các loại có vi phạm
+					const dsCoViPham = this.DSTongHop_ViPham.filter(x => x.SoLuong > 0)
+					if (dsCoViPham.length > 0) {
+						let done = 0
+						const total = dsCoViPham.length
+						this.viPhamLoadingText = `Đang tải chi tiết vi phạm (0/${total})...`
+						await Promise.all(dsCoViPham.map(async lvp => {
+							await this.loadViPhamDetail(lvp.LoaiViPham, lopHocID)
+						}))
+					}
 					} catch {
 						this.DSTongHop_ViPham = []
 					}
@@ -561,6 +585,8 @@ export default {
 				this.isLoadingViPham = false
 				this.viPhamLoadingText = ''
 			}
+			// Pre-compute RenderNhanXet (luôn có sẵn cho review mode, tránh race condition)
+			this.buildRenderNhanXet()
 		},
 
 		// ─────────────────────────────────────────
@@ -586,13 +612,13 @@ export default {
 				.filter(x => x.SoLuong_HS > 0)
 		},
 
-		async loadViPhamDetail(loaiViPham) {
+		async loadViPhamDetail(loaiViPham, lopHocID) {
 			this.viPhamLoadingMap = { ...this.viPhamLoadingMap, [loaiViPham]: true }
 			try {
 				const { firstDay, lastDay } = this.getViPhamDateRange(this.ThangObj)
 				const data = await fetchPromise(
 					'quansinh/LMS_SoDauBai_TongHopTheoLoaiViPham_ChiTiet',
-					{ TuNgay: firstDay, DenNgay: lastDay, LopHocID: this.mainLopHocID, LoaiViPham: loaiViPham },
+					{ TuNgay: firstDay, DenNgay: lastDay, LopHocID: lopHocID ?? this.mainLopHocID, LoaiViPham: loaiViPham },
 					{ cache: false }
 				)
 				this.viPhamDetailMap = { ...this.viPhamDetailMap, [loaiViPham]: data ?? [] }
@@ -844,6 +870,45 @@ export default {
 			return count
 		},
 
+		// ─────────────────────────────────────────
+		// Review mode: gộp các cột nhận xét thành RenderNhanXet
+		// ─────────────────────────────────────────
+		buildRenderNhanXet() {
+			function convertNewLineToP(text) {
+				if (!text) return ''
+				return text.split(/\n+/).map(line => `<p>${line}</p>`).join('')
+			}
+			this.items = this.items.map(x => {
+				let RenderNhanXet = ''
+				if (vueData.CapID === 1) {
+					RenderNhanXet = [
+						x.NhanXetToan_HTML ? `<b>Môn Toán${x.DiemToan ? ' (' + x.DiemToan + 'đ)' : ''}: </b>` + x.NhanXetToan_HTML + '<br/>' : '',
+						x.NhanXetTiengViet_HTML ? `<b>Tiếng Việt${x.DiemTiengViet ? ' (' + x.DiemTiengViet + 'đ)' : ''}: </b>` + x.NhanXetTiengViet_HTML + '<br/>' : '',
+						x.NhanXetMonHocKhac_HTML ? '<b>Môn học khác: </b>' + x.NhanXetMonHocKhac_HTML + '<br/>' : '',
+						x.HoatDongGiaoDucKhac_HTML ? '<b>Hoạt động GD khác: </b>' + x.HoatDongGiaoDucKhac_HTML + '<br/>' : '',
+						x.PhamChatNangLuc_HTML ? '<b>Phẩm chất - Năng lực: </b>' + x.PhamChatNangLuc_HTML + '<br/>' : '',
+					].join('')
+				} else {
+					const isCuoiKi = [12, 5].includes(x.Thang ?? this.ThangObj?.Thang)
+					if (isCuoiKi) {
+						RenderNhanXet = [
+							x.UuDiem ? ('<b>Ưu điểm: </b>' + convertNewLineToP(x.UuDiem) + '<br/>') : '<b>Ưu điểm: - </b><br/>',
+							x.NhuocDiem ? ('<b>Nhược điểm: </b>' + convertNewLineToP(x.NhuocDiem) + '<br/>') : '<b>Nhược điểm: - </b><br/>',
+							x.DeXuat ? ('<b>Đề xuất: </b>' + convertNewLineToP(x.DeXuat) + '<br/>') : '<b>Đề xuất: - </b><br/>',
+							x.NhanXetGVCN ? ('<b>Nhận xét học bạ: </b>' + convertNewLineToP(x.NhanXetGVCN) + '<br/>') : '',
+						].join('')
+					} else {
+						RenderNhanXet = (
+							(x.NoiDungKienThuc_HTML ? ('<b>Học tập: </b>' + convertNewLineToP(x.NoiDungKienThuc_HTML) + '<br/>') : '<b>Học tập: - </b><br/>')
+							+ (x.NoiDungNangLuc_HTML ? ('<b>Nền nếp: </b>' + convertNewLineToP(x.NoiDungNangLuc_HTML) + '<br/>') : '<b>Nền nếp: - </b><br/>')
+							+ (x.NoiDungHoatDongKhac_HTML ? ('<b>Mong muốn phối hợp: </b>' + convertNewLineToP(x.NoiDungHoatDongKhac_HTML) + '<br/>') : '<b>Mong muốn phối hợp: - </b><br/>')
+						)
+					}
+				}
+				return { ...x, RenderNhanXet }
+			})
+		},
+
 		onSendToTruong() {
 			if (this.renderTextDSHocSinhDaLuu() !== this.items.length) {
 				this.$toast('warning', 'Vui lòng lưu hết tất cả học sinh trước khi gửi tổ trưởng')
@@ -901,7 +966,7 @@ export default {
 		},
 
 		// ─────────────────────────────────────────
-		// renderHeader — đầy đủ logic GVCN / PhuHuynh view
+		// renderHeader — đầy đủ logic GVCN / PhuHuynh view / Review mode
 		// ─────────────────────────────────────────
 		renderHeader() {
 			const H_HocSinh = {
@@ -914,6 +979,42 @@ export default {
 			}
 
 			let headers = [H_HocSinh]
+
+			// ── Chế độ xem lại (review mode) ──
+			if (this.isReviewMode) {
+				if (vueData.CapID === 1) {
+					headers.push({
+						title: 'Nhận xét tổng hợp',
+						value: 'RenderNhanXet',
+						align: 'center',
+						minWidth: 500,
+					})
+				} else if (vueData.CapID === 2 || vueData.CapID === 3) {
+					headers.push({
+						title: 'Ngày nghỉ / Vi phạm',
+						value: 'NgayNghi',
+						align: 'center',
+						width: 220,
+					})
+					if (this.isCuoiKi) {
+						headers.push({
+							title: 'Nhận xét tổng hợp',
+							value: 'RenderNhanXet',
+							align: 'center',
+							minWidth: 400,
+						})
+					} else {
+						headers.push({
+							title: 'Nhận xét tổng hợp',
+							value: 'RenderNhanXet',
+							align: 'center',
+							minWidth: 350,
+						})
+					}
+				}
+				// Không hiện nút Lưu tạm khi xem lại
+				return headers
+			}
 
 			// ── Chế độ GVCN nhập liệu (Is_HienThiPhuHuynh = false) ──
 			if (!this.ThangObj?.Is_HienThiPhuHuynh) {

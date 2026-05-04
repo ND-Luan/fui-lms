@@ -313,7 +313,7 @@
 
 <script>
 export default {
-  inject: ['snackbarRef', 'iframeRef'],
+  inject: ['snackbarRef', 'iframeRef', 'confirmRef'],
   data() {
     return {
       vueData,
@@ -400,11 +400,16 @@ export default {
       this.DSLop = data.filter(x => !x.IsNhom)
     },
     async getDSThang() {
+      const currentID = this.ThangObj?.Lop_NhanXetThangID
       this.DSThang = await fetchPromise('lms/NhanXetThang_Lop_Get', {
         NienKhoa: vueData.NienKhoa,
         LopID: this.LopID,
-      })
-      this.ThangObj = this.DSThang.length > 0 ? this.DSThang[0] : null
+      }, { forceRefresh: true })
+      if (currentID) {
+        this.ThangObj = this.DSThang.find(x => x.Lop_NhanXetThangID === currentID) ?? (this.DSThang.length > 0 ? this.DSThang[0] : null)
+      } else {
+        this.ThangObj = this.DSThang.length > 0 ? this.DSThang[0] : null
+      }
     },
     async getItems() {
       this.items = await fetchPromise('lms/NhanXetThang_Get', {
@@ -419,7 +424,7 @@ export default {
       this.getItems()
     },
     async onApprove() {
-      const ok = await confirm({ title: 'Xác nhận Duyệt' })
+      const ok = await this.confirmRef.value.show({ title: 'Xác nhận Duyệt' })
       if (!ok) return
       await fetchPromise('lms/NhanXetThang_Upd_TinhTrang', {
         TinhTrang: 4,
@@ -446,7 +451,7 @@ export default {
       this.LopID = lopid
     },
     async onReject() {
-      const ok = await confirm({ title: 'Bạn có muốn từ chối nhận xét tháng' })
+      const ok = await this.confirmRef.value.show({ title: 'Bạn có muốn từ chối nhận xét tháng' })
       if (!ok) return
       await fetchPromise('lms/NhanXetThang_Upd_TinhTrang', {
         TinhTrang: 3,
@@ -581,7 +586,10 @@ export default {
       for (const item of this.items) {
         const plainText = buildPushMEText(item, capID, vueData.NienKhoa, this.ThangObj)
         if (!plainText) continue
-        const isSend = await ajaxCALLPromise('student/LMS_SendMessageToME', {
+        const isSend = await ajaxCALLPromise(
+          'student/LMS_SendMessageToME'
+          // 'lms/NienKhoa_Get'
+          , {
           HocSinhID: item.HocSinhID,
           NoiDung: plainText,
         })

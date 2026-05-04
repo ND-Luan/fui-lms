@@ -97,8 +97,17 @@
 							</v-chip>
 						</div>
 					</div>
-					<div v-else-if="element.ElementType === 'AUDIO'">
+					<div v-else-if="element.ElementType === 'AUDIO'" class="d-flex flex-column ga-2">
 						<label class="text-subtitle-2 mb-2 d-block">{{ $t('message.RecordOrUploadAudio') }}</label>
+						<div class="d-flex ga-2 mb-2">
+							<v-text-field v-model="element.ElementData.source" :placeholder="$t('message.PasteAudioLink')" :clearable="false" />
+							<v-btn color="primary" variant="outlined" @click="$refs.inputUploadAudio.click()">
+								<v-icon start class="me-1">mdi-upload</v-icon>
+								{{ $t('message.UploadAudio') }}
+							</v-btn>
+							<input ref="inputUploadAudio" type="file" accept="audio/*"
+								@change="(e) => handleChangeFile(e, 'UPLOAD_AUDIO')" style="display:none" />
+						</div>
 						<uc-audio-record v-model:file="fileRecordAudio" v-model:src="element.ElementData.source"
 							@handleSave="handleChangeFile(fileRecordAudio, element.ElementType)" />
 					</div>
@@ -300,6 +309,11 @@
 						name,
 						source,
 					})
+					await this.saveElement()
+				}
+				else if (ElementType === 'UPLOAD_AUDIO') {
+					const { id, name, source } = await this.uploadToGoogleDrive(file)
+					this.element.ElementData.source = source
 					await this.saveElement()
 				} else if (ElementType === 'AUDIO') {
 					const { id, name, source } = await this.uploadToGoogleDrive(file)
