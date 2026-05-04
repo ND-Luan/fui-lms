@@ -1,0 +1,1675 @@
+{
+    "data": [
+        {
+            "EXE": "IsCheck_NotRoleParent(vueData.user)"
+        },
+        {
+            "options": {
+                "scales": {
+                    "y": {
+                        "beginAtZero": true,
+                        "grace": "5%"
+                    }
+                },
+                "responsive": true,
+                "maintainAspectRatio": false
+            },
+            "options_Histogram": {
+                "scales": {
+                    "x": {
+                        "type": "linear"
+                    },
+                    "y": {
+                        "beginAtZero": true,
+                        "grace": "5%",
+                        "stacked": true
+                    }
+                }
+            },
+            "optionsChart1": {
+                "scales": {
+                    "y": {
+                        "beginAtZero": true
+                    }
+                },
+                "responsive": true,
+                "maintainAspectRatio": false
+            },
+            "optionsChart2": {
+                "scales": {
+                    "y": {
+                        "beginAtZero": true,
+                        "ticks": {
+                            "stepSize": 1,
+                            "suggestedMin": 0,
+                            "suggestedMax": 10,
+                            "precision": 1
+                        }
+                    }
+                },
+                "responsive": true,
+                "maintainAspectRatio": false
+            },
+            "optionsPIE_Lop": {
+                "responsive": true,
+                "maintainAspectRatio": false,
+                "plugins": {
+                    "title": {
+                        "display": true,
+                        "text": "Tỷ lệ học sinh đạt và chưa đạt GK1 theo lớp"
+                    }
+                }
+            },
+            "optionsPIE_Khoi": {
+                "responsive": true,
+                "maintainAspectRatio": false,
+                "plugins": {
+                    "title": {
+                        "display": true,
+                        "text": "Tỷ lệ học sinh đạt và chưa đạt GK1 theo khối"
+                    }
+                }
+            },
+            "DiemTrungBinh_API": [],
+            "TongDiem_API": [],
+            "DSKhoi": [],
+            "DSMonHoc": [],
+            "Chart1_KhoiID": null,
+            "Chart1_MonHocID": null,
+            "DataChart1": {
+                "DSKhoi": [],
+                "DSMonHoc": [],
+                "DiemTrungBinh": {
+                    "labels": [],
+                    "datasets": [
+                        {
+                            "label": ""
+                        }
+                    ]
+                }
+            },
+            "Chart2_KhoiID": null,
+            "Chart2_LopID": null,
+            "Chart2_MonHocID": null,
+            "DataChart2": {
+                "DSKhoi": [],
+                "DSLop": [],
+                "DSMonHoc": [],
+                "TongDiem": {}
+            },
+            "Chart3_KhoiID": null,
+            "Chart3_MonHocItem": null,
+            "Chart3_MaNhomCotDiem": null,
+            "Chart3_MaCotDiem": null,
+            "DataChart3": {
+                "DSKhoi": [],
+                "DSMonHoc": [],
+                "DSNhomDiem": [],
+                "DSCotDiem": [],
+                "TyLeHocSinh": {
+                    "labels": [
+                        ""
+                    ],
+                    "datasets": [
+                        {
+                            "label": "",
+                            "data": [
+                                1
+                            ]
+                        }
+                    ]
+                }
+            },
+            "Chart4_KhoiID": null,
+            "Chart4_LopID": null,
+            "Chart4_MonHocItem": null,
+            "Chart4_MaNhomCotDiem": null,
+            "Chart4_MaCotDiem": null,
+            "DataChart4": {
+                "DSKhoi": [],
+                "DSLop": [],
+                "DSMonHoc": [],
+                "DSNhomDiem": [],
+                "DSCotDiem": [],
+                "TyLeHocSinh": {
+                    "labels": [
+                        ""
+                    ],
+                    "datasets": [
+                        {
+                            "label": "",
+                            "data": [
+                                1
+                            ]
+                        }
+                    ]
+                }
+            },
+            "ChartHistogram_KhoiID": null,
+            "ChartHistogram_MonHocItem": null,
+            "ChartHistogram_MaNhomCotDiem": null,
+            "ChartHistogram_MaCotDiem": null,
+            "ChartTheme_MaCotDiem": null,
+            "DataChartHistoGram_DS": {
+                "DSKhoi": [],
+                "DSMonHoc": [],
+                "DSNhomDiem": [],
+                "DSCotDiem": []
+            },
+            "DataChartHistogram": {
+                "id": "chart-histogram",
+                "chart": {
+                    "type": "line",
+                    "height": 350
+                },
+                "xaxis": {
+                    "categories": []
+                },
+                "yaxis": {},
+                "series": [],
+                "options": {
+                    "plotOptions": {
+                        "bar": {
+                            "columnWidth": "100%",
+                            "endingShape": "flat"
+                        }
+                    }
+                }
+            },
+            "DataChartBoxPlot": {
+                "id": "chart-boxplot",
+                "series": [],
+                "chart": {
+                    "type": "boxPlot",
+                    "height": 350
+                },
+                "title": {
+                    "text": "",
+                    "align": "left"
+                },
+                "plotOptions": {
+                    "bar": {
+                        "horizontal": true,
+                        "barHeight": "40%"
+                    },
+                    "boxPlot": {
+                        "colors": {
+                            "upper": "#B6C454",
+                            "lower": "#EDBFB7"
+                        }
+                    }
+                },
+                "stroke": {
+                    "colors": [
+                        "#333"
+                    ]
+                }
+            },
+            "DataChartLine": {
+                "id": "chart-line",
+                "series": [],
+                "chart": {
+                    "height": 350,
+                    "type": "line",
+                    "zoom": {
+                        "enabled": false
+                    }
+                },
+                "grid": {
+                    "row": {
+                        "colors": [
+                            "#f3f3f3",
+                            "transparent"
+                        ],
+                        "opacity": 0.5
+                    }
+                },
+                "dataLabels": {
+                    "enabled": false
+                },
+                "stroke": {
+                    "curve": "straight"
+                },
+                "xaxis": {
+                    "categories": []
+                }
+            },
+            "List_DataChart_Histogram": [],
+            "DataChart_TongDiemTheoKhoi": {
+                "id": "chart-line-tong-diem-theo-khoi",
+                "series": [],
+                "chart": {
+                    "height": 350,
+                    "type": "line",
+                    "zoom": {
+                        "enabled": false
+                    }
+                },
+                "grid": {
+                    "row": {
+                        "colors": [
+                            "#f3f3f3",
+                            "transparent"
+                        ],
+                        "opacity": 0.5
+                    }
+                },
+                "dataLabels": {
+                    "enabled": false
+                },
+                "stroke": {
+                    "curve": "straight"
+                },
+                "xaxis": {
+                    "categories": []
+                }
+            },
+            "List_DataChartStatistic": [],
+            "List_DataChartStatistic_KyNang": [],
+            "List_DataChartStatistic_Theme": [],
+            "DataChart_Compare_GiuaKy_CuoiKi": {
+                "id": "chart-compare-giua-ky-cuoi-ki",
+                "series": [],
+                "chart": {
+                    "type": "bar",
+                    "height": 350,
+                    "stacked": true,
+                    "toolbar": {
+                        "show": true
+                    },
+                    "zoom": {
+                        "enabled": false
+                    }
+                },
+                "xaxis": {
+                    "categories": []
+                },
+                "plotOptions": {
+                    "bar": {
+                        "horizontal": false,
+                        "borderRadius": 10,
+                        "borderRadiusApplication": "end",
+                        "borderRadiusWhenStacked": "last",
+                        "dataLabels": {
+                            "total": {
+                                "enabled": true,
+                                "style": {
+                                    "fontSize": "13px",
+                                    "fontWeight": 900
+                                }
+                            }
+                        }
+                    }
+                },
+                "legend": {
+                    "position": "right",
+                    "offsetY": 40
+                },
+                "fill": {
+                    "opacity": 1
+                }
+            }
+        },
+        {
+            "CALL": [
+                {
+                    "EXE": "vueData.DataChart1.DSKhoi = renderDSKhoi()"
+                },
+                {
+                    "EXE": "vueData.DataChart2.DSKhoi = renderDSKhoi()"
+                },
+                {
+                    "EXE": "vueData.DataChart3.DSKhoi = renderDSKhoi()"
+                },
+                {
+                    "EXE": "vueData.DataChart4.DSKhoi = renderDSKhoi()"
+                },
+                {
+                    "EXE": "vueData.DataChartHistoGram_DS.DSKhoi = renderDSKhoi()"
+                },
+                {
+                    "EXE": "vueData.convertChartDiemTrungBinh = convertChartDiemTrungBinh"
+                },
+                {
+                    "EXE": "vueData.convertChartHistogram = convertChartHistogram"
+                }
+            ]
+        }
+    ],
+    "watch": {
+        "Chart1_KhoiID": {
+            "IF": "Chart1_KhoiID > 0",
+            "THEN": [
+                {
+                    "Chart1_MonHocID": null,
+                    "DataChart1.DSMonHoc": []
+                },
+                {
+                    "API": "lms/MonHoc_GetByKhoiID",
+                    "IN": {
+                        "NienKhoa": "vueData.NienKhoa",
+                        "KhoiID": "vueData.Chart1_KhoiID",
+                        "HocKi": "vueData.NienKhoaItem.HocKi"
+                    },
+                    "OUT": "DSMonHoc",
+                    "CALLBACK": {
+                        "DataChart1.DSMonHoc": "DSMonHoc"
+                    }
+                }
+            ]
+        },
+        "ChartHistogram_CapID": {
+            "IF": "ChartHistogram_CapID > 0",
+            "THEN": [
+                {
+                    "ChartHistogram_KhoiID": null,
+                    "ChartHistogram_MonHocItem": null,
+                    "ChartHistogram_MaNhomCotDiem": null,
+                    "ChartHistogram_MaCotDiem": null,
+                    "DataChartHistoGram_DS.DSKhoi": [],
+                    "DataChartHistoGram_DS.DSMonHoc": [],
+                    "DataChartHistoGram_DS.DSNhomDiem": [],
+                    "DataChartHistoGram_DS.DSCotDiem": []
+                },
+                {
+                    "EXE": "vueData.DataChartHistoGram_DS.DSKhoi = renderDSKhoi().filter(x=> x.CapID === ChartHistogram_CapID)"
+                }
+            ]
+        },
+        "ChartHistogram_KhoiID": {
+            "IF": "ChartHistogram_KhoiID > 0",
+            "THEN": [
+                {
+                    "ChartHistogram_MonHocItem": null,
+                    "ChartHistogram_MaNhomCotDiem": null,
+                    "ChartHistogram_MaCotDiem": null,
+                    "DataChartHistoGram_DS.DSMonHoc": [],
+                    "DataChartHistoGram_DS.DSNhomDiem": [],
+                    "DataChartHistoGram_DS.DSCotDiem": []
+                },
+                {
+                    "API": "lms/MonHoc_GetByKhoiID",
+                    "IN": {
+                        "NienKhoa": "vueData.NienKhoa",
+                        "KhoiID": "vueData.ChartHistogram_KhoiID",
+                        "HocKi": "vueData.NienKhoaItem.HocKi"
+                    },
+                    "OUT": "DSMonHoc",
+                    "CALLBACK": {
+                        "DataChartHistoGram_DS.DSMonHoc": "DSMonHoc"
+                    }
+                }
+            ]
+        },
+        "ChartHistogram_MonHocItem": {
+            "IF": "vueData.ChartHistogram_MonHocItem?.MonHocID > 0",
+            "THEN": [
+                {
+                    "ChartHistogram_MaNhomCotDiem": null,
+                    "ChartHistogram_MaCotDiem": null
+                },
+                {
+                    "API": "lms/NhomCauTrucDiem_Get_ByTemplateBangDiemID",
+                    "IN": {
+                        "TemplateBangDiemID": "vueData.ChartHistogram_MonHocItem.TemplateBangDiemID"
+                    },
+                    "OUT": "DSNhomDiem",
+                    "CALLBACK": {
+                        "DataChartHistoGram_DS.DSNhomDiem": "DSNhomDiem"
+                    }
+                }
+            ]
+        },
+        "ChartHistogram_MaNhomCotDiem": {
+            "IF": "vueData.ChartHistogram_MaNhomCotDiem?.length > 0",
+            "THEN": [
+                {
+                    "ChartHistogram_MaCotDiem": null
+                },
+                {
+                    "API": "lms/MaCotDiem_Get_ByMaNhomCotDiem",
+                    "IN": {
+                        "TemplateBangDiemID": "vueData.ChartHistogram_MonHocItem.TemplateBangDiemID",
+                        "MaNhomCotDiem": "vueData.ChartHistogram_MaNhomCotDiem"
+                    },
+                    "OUT": "DSCotDiem",
+                    "CALLBACK": {
+                        "DataChartHistoGram_DS.DSCotDiem": "DSCotDiem"
+                    }
+                }
+            ]
+        },
+        "Chart2_KhoiID": {
+            "IF": "Chart2_KhoiID > 0",
+            "THEN": [
+                {
+                    "Chart2_LopID": null,
+                    "Chart2_MonHocID": null,
+                    "DataChart2.DSMonHoc": []
+                },
+                {
+                    "API": "lms/Lop_Get_ByKhoiID",
+                    "IN": {
+                        "KhoiID": "vueData.Chart2_KhoiID"
+                    },
+                    "OUT": "DSLop",
+                    "CALLBACK": {
+                        "DataChart2.DSLop": "DSLop"
+                    }
+                }
+            ]
+        },
+        "Chart2_LopID": {
+            "IF": "Chart2_LopID > 0",
+            "THEN": [
+                {
+                    "Chart2_MonHocID": null
+                },
+                {
+                    "API": "lms/MonHoc_Get_ByLopID",
+                    "IN": {
+                        "NienKhoa": "vueData.NienKhoa",
+                        "LopID": "vueData.Chart2_LopID"
+                    },
+                    "OUT": "DSMonHoc",
+                    "CALLBACK": {
+                        "DataChart2.DSMonHoc": "DSMonHoc"
+                    }
+                }
+            ]
+        },
+        "Chart3_KhoiID": {
+            "IF": "Chart3_KhoiID > 0",
+            "THEN": [
+                {
+                    "Chart3_MonHocItem": null,
+                    "Chart3_MaNhomCotDiem": null,
+                    "Chart3_MaCotDiem": null,
+                    "DataChart3.DSMonHoc": [],
+                    "DataChart3.DSNhomDiem": [],
+                    "DataChart3.DSCotDiem": []
+                },
+                {
+                    "API": "lms/MonHoc_GetByKhoiID",
+                    "IN": {
+                        "NienKhoa": "vueData.NienKhoa",
+                        "KhoiID": "vueData.Chart3_KhoiID",
+                        "HocKi": "vueData.NienKhoaItem.HocKi"
+                    },
+                    "OUT": "DSMonHoc",
+                    "CALLBACK": {
+                        "DataChart3.DSMonHoc": "DSMonHoc"
+                    }
+                }
+            ]
+        },
+        "Chart3_MonHocItem": {
+            "IF": "vueData.Chart3_MonHocItem?.MonHocID > 0",
+            "THEN": {
+                "CALL": [
+                    {
+                        "Chart3_MaNhomCotDiem": null,
+                        "Chart3_MaCotDiem": null,
+                        "DataChart3.DSNhomDiem": [],
+                        "DataChart3.DSCotDiem": []
+                    },
+                    {
+                        "API": "lms/NhomCauTrucDiem_Get_ByTemplateBangDiemID",
+                        "IN": {
+                            "TemplateBangDiemID": "vueData.Chart3_MonHocItem.TemplateBangDiemID"
+                        },
+                        "OUT": "DSNhomDiem",
+                        "CALLBACK": {
+                            "DataChart3.DSNhomDiem": "DSNhomDiem"
+                        }
+                    }
+                ]
+            }
+        },
+        "Chart3_MaNhomCotDiem": {
+            "IF": "Chart3_MaNhomCotDiem?.length > 0",
+            "THEN": [
+                {
+                    "Chart3_MaCotDiem": null,
+                    "DataChart3.DSCotDiem": []
+                },
+                {
+                    "API": "lms/MaCotDiem_Get_ByMaNhomCotDiem",
+                    "IN": {
+                        "MaNhomCotDiem": "vueData.Chart3_MaNhomCotDiem",
+                        "TemplateBangDiemID": "vueData.Chart3_MonHocItem.TemplateBangDiemID"
+                    },
+                    "OUT": "DSCotDiem",
+                    "CALLBACK": {
+                        "DataChart3.DSCotDiem": "DSCotDiem"
+                    }
+                }
+            ]
+        },
+        "Chart4_KhoiID": {
+            "EXE": "console.log(1, vueData.Chart4_KhoiID)",
+            "IF": "vueData.Chart4_KhoiID",
+            "CALL": [
+                {
+                    "Chart4_LopID": null,
+                    "Chart4_MonHocItem": null,
+                    "Chart4_MaNhomCotDiem": null,
+                    "Chart4_MaCotDiem": null,
+                    "DataChart4.DSLop": [],
+                    "DataChart4.DSMonHoc": [],
+                    "DataChart4.DSNhomDiem": [],
+                    "DataChart4.DSCotDiem": []
+                },
+                {
+                    "API": "lms/Lop_Get_ByKhoiID",
+                    "IN": {
+                        "KhoiID": "vueData.Chart4_KhoiID"
+                    },
+                    "OUT": "DSLop",
+                    "CALLBACK": {
+                        "DataChart4.DSLop": "DSLop"
+                    }
+                }
+            ]
+        },
+        "Chart4_LopID": {
+            "IF": "vueData.Chart4_LopID !== null",
+            "THEN": [
+                {
+                    "Chart4_MonHocItem": null,
+                    "Chart4_MaNhomCotDiem": null,
+                    "Chart4_MaCotDiem": null
+                },
+                {
+                    "API": "lms/MonHoc_Get_ByLopID",
+                    "IN": {
+                        "NienKhoa": "vueData.NienKhoa",
+                        "LopID": "vueData.Chart4_LopID"
+                    },
+                    "OUT": "DSMonHoc",
+                    "CALLBACK": {
+                        "DataChart4.DSMonHoc": "DSMonHoc"
+                    }
+                }
+            ]
+        },
+        "Chart4_MonHocItem": {
+            "IF": "vueData.Chart4_MonHocItem?.MonHocID > 0",
+            "THEN": [
+                {
+                    "Chart4_MaNhomCotDiem": null,
+                    "DataChart4.DSNhomDiem": [],
+                    "Chart4_MaCotDiem": null,
+                    "DataChart4.DSCotDiem": []
+                },
+                {
+                    "API": "lms/NhomCauTrucDiem_Get_ByTemplateBangDiemID",
+                    "IN": {
+                        "TemplateBangDiemID": "vueData.Chart4_MonHocItem.TemplateBangDiemID"
+                    },
+                    "OUT": "DSNhomDiem",
+                    "CALLBACK": {
+                        "DataChart4.DSNhomDiem": "DSNhomDiem"
+                    }
+                }
+            ]
+        },
+        "Chart4_MaNhomCotDiem": {
+            "IF": "Chart4_MaNhomCotDiem?.length > 0",
+            "THEN": [
+                {
+                    "Chart4_MaCotDiem": null,
+                    "DataChart4.DSCotDiem": []
+                },
+                {
+                    "API": "lms/MaCotDiem_Get_ByMaNhomCotDiem",
+                    "IN": {
+                        "MaNhomCotDiem": "vueData.Chart4_MaNhomCotDiem",
+                        "TemplateBangDiemID": "vueData.Chart4_MonHocItem.TemplateBangDiemID"
+                    },
+                    "OUT": "DSCotDiem",
+                    "CALLBACK": {
+                        "DataChart4.DSCotDiem": "DSCotDiem"
+                    }
+                }
+            ]
+        }
+    },
+    "controls": [
+        {
+            "prop": "fluid",
+            "rows": [
+                {
+                    "prop": "",
+                    "cols": [
+                        {
+                            "el": "v-card",
+                            "innerHTML": [
+                                {
+                                    "el": "v-card-title",
+                                    "attr": {
+                                        "class": "text-primary"
+                                    },
+                                    "innerHTML": "Phân phối điểm"
+                                },
+                                {
+                                    "el": "v-row",
+                                    "innerHTML": [
+                                        {
+                                            "el": "v-col",
+                                            "innerHTML": [
+                                                {
+                                                    "el": "v-row",
+                                                    "innerHTML": [
+                                                        {
+                                                            "el": "v-select",
+                                                            "attr": {
+                                                                "v-model": "ChartHistogram_CapID",
+                                                                "label": "Chọn cấp",
+                                                                ":items": [
+                                                                    {
+                                                                        "title": "Cấp 1",
+                                                                        "value": 1
+                                                                    },
+                                                                    {
+                                                                        "title": "Cấp 2",
+                                                                        "value": 2
+                                                                    },
+                                                                    {
+                                                                        "title": "Cấp 3",
+                                                                        "value": 3
+                                                                    }
+                                                                ],
+                                                                "item-title": "title",
+                                                                "item-value": "value",
+                                                                ":rules": []
+                                                            }
+                                                        },
+                                                        {
+                                                            "el": "v-col",
+                                                            "innerHTML": [
+                                                                {
+                                                                    "el": "v-select",
+                                                                    "attr": {
+                                                                        "v-model": "ChartHistogram_KhoiID",
+                                                                        "label": "Chọn khối",
+                                                                        ":items": "DataChartHistoGram_DS.DSKhoi",
+                                                                        "item-title": "title",
+                                                                        "item-value": "value",
+                                                                        ":rules": []
+                                                                    }
+                                                                }
+                                                            ]
+                                                        },
+                                                        {
+                                                            "el": "v-col",
+                                                            "innerHTML": [
+                                                                {
+                                                                    "el": "v-select",
+                                                                    "attr": {
+                                                                        "v-model": "ChartHistogram_MonHocItem",
+                                                                        "label": "Chọn môn học",
+                                                                        ":items": "DataChartHistoGram_DS.DSMonHoc",
+                                                                        "item-title": "MonHocName",
+                                                                        "item-value": "MonHocID",
+                                                                        ":return-object": true,
+                                                                        ":rules": []
+                                                                    }
+                                                                }
+                                                            ]
+                                                        },
+                                                        {
+                                                            "el": "v-col",
+                                                            "innerHTML": [
+                                                                {
+                                                                    "el": "v-select",
+                                                                    "attr": {
+                                                                        "v-model": "ChartHistogram_MaNhomCotDiem",
+                                                                        "label": "Chọn nhóm điểm",
+                                                                        ":items": "DataChartHistoGram_DS.DSNhomDiem",
+                                                                        "item-title": "TenNhomCotDiem_VI",
+                                                                        "item-value": "MaNhomCotDiem",
+                                                                        ":rules": []
+                                                                    }
+                                                                }
+                                                            ]
+                                                        },
+                                                        {
+                                                            "el": "v-col",
+                                                            "innerHTML": [
+                                                                {
+                                                                    "el": "v-select",
+                                                                    "attr": {
+                                                                        "v-model": "ChartHistogram_MaCotDiem",
+                                                                        "label": "Chọn cột điểm",
+                                                                        ":items": "DataChartHistoGram_DS.DSCotDiem",
+                                                                        "item-title": "TenCotDiem_VI",
+                                                                        "item-value": "MaCotDiem",
+                                                                        ":rules": []
+                                                                    }
+                                                                }
+                                                            ]
+                                                        },
+                                                        {
+                                                            "el": "v-col",
+                                                            "innerHTML": [
+                                                                {
+                                                                    "el": "f-button",
+                                                                    "attr": {
+                                                                        "label": "Tìm kiếm",
+                                                                        "color": "primary",
+                                                                        "variant": "tonal",
+                                                                        ":action": [
+                                                                            {
+                                                                                "API": "lms/DashboardPhanPhoiDiem_Get",
+                                                                                "IN": {
+                                                                                    "NienKhoa": "vueData.NienKhoa",
+                                                                                    "KhoiID": "ChartHistogram_KhoiID",
+                                                                                    "MonHocID": "ChartHistogram_MonHocItem.MonHocID",
+                                                                                    "MaCotDiem": "ChartHistogram_MaCotDiem"
+                                                                                },
+                                                                                "OUT": "DataChartHistogram_RES",
+                                                                                "CALLBACK": [
+                                                                                    {
+                                                                                        "DataChartHistogram_API": "vueData.DataChartHistogram_RES[0]",
+                                                                                        "DataChartHistogram_Khoi_API": "vueData.DataChartHistogram_RES[1]"
+                                                                                    },
+                                                                                    {
+                                                                                        "EXE": "convertChartHistogram()"
+                                                                                    },
+                                                                                    {
+                                                                                        "EXE": "convertChartBoxPlot()"
+                                                                                    },
+                                                                                    {
+                                                                                        "EXE": "convertChartMultipleLop()"
+                                                                                    },
+                                                                                    {
+                                                                                        "EXE": "convertChartLine()"
+                                                                                    },
+                                                                                    {
+                                                                                        "EXE": "convertChartLineTongDiemTheoKhoi()"
+                                                                                    },
+                                                                                    {
+                                                                                        "EXE": "convertChartLineTongDiemTheoLop()"
+                                                                                    }
+                                                                                ]
+                                                                            },
+                                                                            {
+                                                                                "API": "lms/DashboardDiemKyNang_Get",
+                                                                                "IN": {
+                                                                                    "NienKhoa": 2024,
+                                                                                    "CapID": "ChartHistogram_CapID",
+                                                                                    "MonHocID": "ChartHistogram_MonHocItem.MonHocID",
+                                                                                    "MaNhomDiem": "ChartHistogram_MaNhomCotDiem"
+                                                                                },
+                                                                                "OUT": "DataChartLine_Statistic_API",
+                                                                                "CALLBACK": [
+                                                                                    {
+                                                                                        "EXE": "convertChartStatistic()"
+                                                                                    },
+                                                                                    {
+                                                                                        "EXE": "convertChartStatistic_KyNang()"
+                                                                                    },
+                                                                                    {
+                                                                                        "EXE": "convertChartStatistic_Theme()"
+                                                                                    }
+                                                                                ]
+                                                                            },
+                                                                            {
+                                                                                "API": "lms/DashboardTiLeDat_Compare_GiuaKy_CuoiKi_Get",
+                                                                                "IN": {
+                                                                                    "KhoiID": "ChartHistogram_KhoiID",
+                                                                                    "LopID": "ChartHistogram_LopID",
+                                                                                    "NienKhoa": "vueData.NienKhoa"
+                                                                                },
+                                                                                "OUT": "DataChartCompare_GiuaKy_CuoiKi_API",
+                                                                                "CALLBACK": [
+                                                                                    {
+                                                                                        "EXE": "convertChartCompareGiuaKyCuoiKi()"
+                                                                                    }
+                                                                                ]
+                                                                            }
+                                                                        ]
+                                                                    }
+                                                                }
+                                                            ]
+                                                        },
+                                                        {
+                                                            "el": "v-col",
+                                                            "attr": {
+                                                                "cols": 12
+                                                            },
+                                                            "innerHTML": [
+                                                                {
+                                                                    "el": "uc-chart-apex",
+                                                                    "attr": {
+                                                                        ":options": "DataChartHistogram"
+                                                                    }
+                                                                },
+                                                                {
+                                                                    "el": "uc-chart-apex",
+                                                                    "attr": {
+                                                                        ":options": "DataChartBoxPlot"
+                                                                    }
+                                                                },
+                                                                {
+                                                                    "el": "uc-chart-apex",
+                                                                    "attr": {
+                                                                        ":options": "DataChartLine"
+                                                                    }
+                                                                }
+                                                            ]
+                                                        },
+                                                        {
+                                                            "el": "v-col",
+                                                            "attr": {
+                                                                "cols": 4,
+                                                                "v-for": "(chart, index) in List_DataChart_Histogram"
+                                                            },
+                                                            "innerHTML": "<uc-chart-apex :key='index' :options='chart'/>"
+                                                        },
+                                                        {
+                                                            "el": "v-col",
+                                                            "attr": {
+                                                                "cols": 12
+                                                            },
+                                                            "innerHTML": [
+                                                                {
+                                                                    "el": "p",
+                                                                    "attr": {
+                                                                        "class": "text-h6 mb-2"
+                                                                    },
+                                                                    "innerHTML": "Tỉ lệ đạt giữa kỳ và cuối kì"
+                                                                },
+                                                                {
+                                                                    "el": "uc-chart-apex",
+                                                                    "attr": {
+                                                                        ":options": "DataChart_Compare_GiuaKy_CuoiKi"
+                                                                    }
+                                                                }
+                                                            ]
+                                                        },
+                                                        {
+                                                            "el": "v-col",
+                                                            "attr": {
+                                                                "cols": 12
+                                                            },
+                                                            "innerHTML": [
+                                                                {
+                                                                    "el": "p",
+                                                                    "attr": {
+                                                                        "class": "text-h6"
+                                                                    },
+                                                                    "innerHTML": "Mean, Median, and Standard Deviation of Total Scores (Listening, Language, Reading, Writing, Speaking) by Grade"
+                                                                },
+                                                                {
+                                                                    "el": "uc-chart-apex",
+                                                                    "attr": {
+                                                                        ":options": "DataChart_TongDiemTheoKhoi"
+                                                                    }
+                                                                }
+                                                            ]
+                                                        },
+                                                        {
+                                                            "el": "v-col",
+                                                            "attr": {
+                                                                "cols": 12
+                                                            },
+                                                            "innerHTML": [
+                                                                {
+                                                                    "el": "p",
+                                                                    "attr": {
+                                                                        "class": "text-h6 mb-2"
+                                                                    },
+                                                                    "innerHTML": "Kỹ năng theo khối"
+                                                                },
+                                                                {
+                                                                    "el": "v-row",
+                                                                    "innerHTML": [
+                                                                        {
+                                                                            "el": "v-col",
+                                                                            "attr": {
+                                                                                "cols": 6
+                                                                            },
+                                                                            "innerHTML": [
+                                                                                {
+                                                                                    "el": "v-select",
+                                                                                    "attr": {
+                                                                                        "v-model": "Chart_KyNang",
+                                                                                        "label": "Chọn nhóm điểm học kỳ",
+                                                                                        ":items": [
+                                                                                            {
+                                                                                                "title": "Điểm giữa kì HK1",
+                                                                                                "value": "S1_Mid"
+                                                                                            },
+                                                                                            {
+                                                                                                "title": "Điểm cuối HK1",
+                                                                                                "value": "S1_Final"
+                                                                                            },
+                                                                                            {
+                                                                                                "title": "Điểm giữa kì HK2",
+                                                                                                "value": "S2_Mid"
+                                                                                            },
+                                                                                            {
+                                                                                                "title": "Điểm cuối HK2",
+                                                                                                "value": "S2_Final"
+                                                                                            }
+                                                                                        ],
+                                                                                        "item-title": "title",
+                                                                                        "item-value": "value",
+                                                                                        ":rules": []
+                                                                                    }
+                                                                                }
+                                                                            ]
+                                                                        },
+                                                                        {
+                                                                            "el": "v-col",
+                                                                            "attr": {
+                                                                                "cols": 6
+                                                                            },
+                                                                            "innerHTML": [
+                                                                                {
+                                                                                    "el": "f-button",
+                                                                                    "attr": {
+                                                                                        "label": "Tìm kiếm",
+                                                                                        "color": "primary",
+                                                                                        "variant": "tonal",
+                                                                                        ":action": [
+                                                                                            {
+                                                                                                "API": "lms/DashboardDiemKyNang_Get",
+                                                                                                "IN": {
+                                                                                                    "NienKhoa": 2024,
+                                                                                                    "CapID": "ChartHistogram_CapID",
+                                                                                                    "MonHocID": "ChartHistogram_MonHocItem.MonHocID",
+                                                                                                    "MaNhomDiem": "Chart_KyNang"
+                                                                                                },
+                                                                                                "OUT": "DataChartLine_Statistic_API",
+                                                                                                "CALLBACK": [
+                                                                                                    {
+                                                                                                        "EXE": "convertChartStatistic()"
+                                                                                                    },
+                                                                                                    {
+                                                                                                        "EXE": "convertChartStatistic_KyNang()"
+                                                                                                    }
+                                                                                                ]
+                                                                                            }
+                                                                                        ]
+                                                                                    }
+                                                                                }
+                                                                            ]
+                                                                        },
+                                                                        {
+                                                                            "el": "v-col",
+                                                                            "attr": {
+                                                                                "cols": 12,
+                                                                                "v-if": "List_DataChartStatistic.length === 0"
+                                                                            },
+                                                                            "innerHTML": [
+                                                                                {
+                                                                                    "el": "uc-empty"
+                                                                                }
+                                                                            ]
+                                                                        },
+                                                                        {
+                                                                            "el": "v-col",
+                                                                            "attr": {
+                                                                                "cols": 4,
+                                                                                "v-for": "(chart, index) in List_DataChartStatistic",
+                                                                                "v-if": "List_DataChartStatistic.length > 0"
+                                                                            },
+                                                                            "innerHTML": "<uc-chart-apex :key='index' :options='chart'/>"
+                                                                        }
+                                                                    ]
+                                                                }
+                                                            ]
+                                                        },
+                                                        {
+                                                            "el": "v-col",
+                                                            "attr": {
+                                                                "cols": 12
+                                                            },
+                                                            "innerHTML": [
+                                                                {
+                                                                    "el": "p",
+                                                                    "attr": {
+                                                                        "class": "text-h6 mb-2"
+                                                                    },
+                                                                    "innerHTML": "Các kỹ năng từng lớp"
+                                                                },
+                                                                {
+                                                                    "el": "v-row",
+                                                                    "innerHTML": [
+                                                                        {
+                                                                            "el": "v-col",
+                                                                            "attr": {
+                                                                                "cols": 12,
+                                                                                "v-if": "List_DataChartStatistic_KyNang.length === 0"
+                                                                            },
+                                                                            "innerHTML": [
+                                                                                {
+                                                                                    "el": "uc-empty"
+                                                                                }
+                                                                            ]
+                                                                        },
+                                                                        {
+                                                                            "el": "v-col",
+                                                                            "attr": {
+                                                                                "cols": 6,
+                                                                                "v-for": "(chart, index) in List_DataChartStatistic_KyNang",
+                                                                                "v-if": "List_DataChartStatistic_KyNang.length > 0"
+                                                                            },
+                                                                            "innerHTML": "<uc-chart-apex :key='index' :options='chart'/>"
+                                                                        }
+                                                                    ]
+                                                                }
+                                                            ]
+                                                        },
+                                                        {
+                                                            "el": "v-col",
+                                                            "attr": {
+                                                                "cols": 12
+                                                            },
+                                                            "innerHTML": [
+                                                                {
+                                                                    "el": "p",
+                                                                    "attr": {
+                                                                        "class": "text-h6 mb-2"
+                                                                    },
+                                                                    "innerHTML": "Chủ đề"
+                                                                },
+                                                                {
+                                                                    "el": "v-row",
+                                                                    "innerHTML": [
+                                                                        {
+                                                                            "el": "v-col",
+                                                                            "attr": {
+                                                                                "cols": 6
+                                                                            },
+                                                                            "innerHTML": [
+                                                                                {
+                                                                                    "el": "v-select",
+                                                                                    "attr": {
+                                                                                        "v-model": "Chart_Theme",
+                                                                                        "label": "Chọn chủ đề",
+                                                                                        ":items": "DataChartHistoGram_DS.DSNhomDiem",
+                                                                                        "item-title": "TenNhomCotDiem_VI",
+                                                                                        "item-value": "MaNhomCotDiem",
+                                                                                        ":rules": []
+                                                                                    }
+                                                                                }
+                                                                            ]
+                                                                        },
+                                                                        {
+                                                                            "el": "v-col",
+                                                                            "attr": {
+                                                                                "cols": 6
+                                                                            },
+                                                                            "innerHTML": [
+                                                                                {
+                                                                                    "el": "f-button",
+                                                                                    "attr": {
+                                                                                        "label": "Tìm kiếm",
+                                                                                        "color": "primary",
+                                                                                        "variant": "tonal",
+                                                                                        ":action": [
+                                                                                            {
+                                                                                                "API": "lms/DashboardDiemKyNang_Get",
+                                                                                                "IN": {
+                                                                                                    "NienKhoa": 2024,
+                                                                                                    "CapID": "ChartHistogram_CapID",
+                                                                                                    "MonHocID": "ChartHistogram_MonHocItem.MonHocID",
+                                                                                                    "MaNhomDiem": "Chart_Theme"
+                                                                                                },
+                                                                                                "OUT": "DataChartLine_Statistic_API",
+                                                                                                "CALLBACK": [
+                                                                                                    {
+                                                                                                        "EXE": "convertChartStatistic_Theme()"
+                                                                                                    }
+                                                                                                ]
+                                                                                            }
+                                                                                        ]
+                                                                                    }
+                                                                                }
+                                                                            ]
+                                                                        },
+                                                                        {
+                                                                            "el": "v-col",
+                                                                            "attr": {
+                                                                                "cols": 12,
+                                                                                "v-if": "List_DataChartStatistic_Theme.length === 0"
+                                                                            },
+                                                                            "innerHTML": [
+                                                                                {
+                                                                                    "el": "uc-empty"
+                                                                                }
+                                                                            ]
+                                                                        },
+                                                                        {
+                                                                            "el": "v-col",
+                                                                            "attr": {
+                                                                                "cols": 6,
+                                                                                "v-for": "(chart, index) in List_DataChartStatistic_Theme",
+                                                                                "v-if": "List_DataChartStatistic_Theme.length > 0"
+                                                                            },
+                                                                            "innerHTML": "<uc-chart-apex :key='index' :options='chart'/>"
+                                                                        }
+                                                                    ]
+                                                                }
+                                                            ]
+                                                        }
+                                                    ]
+                                                }
+                                            ]
+                                        }
+                                    ]
+                                },
+                                {
+                                    "el": "v-row",
+                                    "innerHTML": [
+                                        {
+                                            "el": "v-col",
+                                            "innerHTML": [
+                                                {
+                                                    "el": "p",
+                                                    "attr": {
+                                                        "class": "mb-2 text-h6 text-primary"
+                                                    },
+                                                    "innerHTML": "So sánh điểm trung bình giữa kỳ và cuối kỳ 1 theo từng lớp"
+                                                },
+                                                {
+                                                    "el": "v-card-text",
+                                                    "innerHTML": [
+                                                        {
+                                                            "el": "v-row",
+                                                            "innerHTML": [
+                                                                {
+                                                                    "el": "v-col",
+                                                                    "innerHTML": [
+                                                                        {
+                                                                            "el": "v-select",
+                                                                            "attr": {
+                                                                                "v-model": "Chart1_KhoiID",
+                                                                                "label": "Chọn khối",
+                                                                                ":items": "DataChart1.DSKhoi",
+                                                                                "item-title": "title",
+                                                                                "item-value": "value",
+                                                                                ":rules": []
+                                                                            }
+                                                                        }
+                                                                    ]
+                                                                },
+                                                                {
+                                                                    "el": "v-col",
+                                                                    "innerHTML": [
+                                                                        {
+                                                                            "el": "v-select",
+                                                                            "attr": {
+                                                                                "v-model": "Chart1_MonHocID",
+                                                                                "label": "Chọn môn học",
+                                                                                ":items": "DataChart1.DSMonHoc",
+                                                                                "item-title": "MonHocName",
+                                                                                "item-value": "MonHocID",
+                                                                                ":rules": []
+                                                                            }
+                                                                        }
+                                                                    ]
+                                                                },
+                                                                {
+                                                                    "el": "v-col",
+                                                                    "innerHTML": [
+                                                                        {
+                                                                            "el": "f-button",
+                                                                            "attr": {
+                                                                                "label": "Tìm kiếm",
+                                                                                "color": "primary",
+                                                                                "variant": "tonal",
+                                                                                ":action": [
+                                                                                    {
+                                                                                        "API": "lms/DashboardDiemTrungBinh_Get",
+                                                                                        "IN": {
+                                                                                            "NienKhoa": 2024,
+                                                                                            "KhoiID": "vueData.Chart1_KhoiID",
+                                                                                            "MonHocID": "vueData.Chart1_MonHocID"
+                                                                                        },
+                                                                                        "OUT": "DiemTrungBinh_API",
+                                                                                        "CALLBACK": {
+                                                                                            "EXE": "convertChartDiemTrungBinh()"
+                                                                                        }
+                                                                                    }
+                                                                                ]
+                                                                            }
+                                                                        }
+                                                                    ]
+                                                                },
+                                                                {
+                                                                    "el": "v-col",
+                                                                    "attr": {
+                                                                        "cols": 12,
+                                                                        "style": "height: 400px"
+                                                                    },
+                                                                    "innerHTML": [
+                                                                        {
+                                                                            "el": "uc-chart",
+                                                                            "attr": {
+                                                                                "type": "bar",
+                                                                                ":data": "DataChart1.DiemTrungBinh",
+                                                                                ":options": "optionsChart1"
+                                                                            }
+                                                                        }
+                                                                    ]
+                                                                }
+                                                            ]
+                                                        }
+                                                    ]
+                                                }
+                                            ]
+                                        }
+                                    ]
+                                }
+                            ],
+                            "w": 12
+                        },
+                        {
+                            "el": "v-card",
+                            "innerHTML": [
+                                {
+                                    "el": "v-card-title",
+                                    "attr": {
+                                        "class": "text-primary"
+                                    },
+                                    "innerHTML": "Sự thay đổi điểm tổng giữa kỳ và cuối kỳ 1 của một học sinh"
+                                },
+                                {
+                                    "el": "v-card-text",
+                                    "innerHTML": [
+                                        {
+                                            "el": "v-row",
+                                            "innerHTML": [
+                                                {
+                                                    "el": "v-col",
+                                                    "innerHTML": [
+                                                        {
+                                                            "el": "v-select",
+                                                            "attr": {
+                                                                "v-model": "Chart2_KhoiID",
+                                                                "label": "Chọn khối",
+                                                                ":items": "DataChart2.DSKhoi",
+                                                                "item-title": "title",
+                                                                "item-value": "value",
+                                                                ":rules": []
+                                                            }
+                                                        }
+                                                    ]
+                                                },
+                                                {
+                                                    "el": "v-col",
+                                                    "innerHTML": [
+                                                        {
+                                                            "el": "v-select",
+                                                            "attr": {
+                                                                "v-model": "Chart2_LopID",
+                                                                "label": "Chọn lớp",
+                                                                ":items": "DataChart2.DSLop",
+                                                                "item-title": "TenLop",
+                                                                "item-value": "LopID",
+                                                                ":rules": []
+                                                            }
+                                                        }
+                                                    ]
+                                                },
+                                                {
+                                                    "el": "v-col",
+                                                    "innerHTML": [
+                                                        {
+                                                            "el": "v-select",
+                                                            "attr": {
+                                                                "v-model": "Chart2_MonHocID",
+                                                                "label": "Chọn môn học",
+                                                                ":items": "DataChart2.DSMonHoc",
+                                                                "item-title": "MonHocName",
+                                                                "item-value": "MonHocID",
+                                                                ":rules": []
+                                                            }
+                                                        }
+                                                    ]
+                                                },
+                                                {
+                                                    "el": "v-col",
+                                                    "innerHTML": [
+                                                        {
+                                                            "el": "f-button",
+                                                            "attr": {
+                                                                "label": "Tìm kiếm",
+                                                                "color": "primary",
+                                                                "variant": "tonal",
+                                                                ":action": {
+                                                                    "API": "lms/DashBoardThayDoiTongDiem_Get",
+                                                                    "IN": {
+                                                                        "NienKhoa": 2024,
+                                                                        "KhoiID": "vueData.Chart2_KhoiID",
+                                                                        "LopID": "vueData.Chart2_LopID",
+                                                                        "MonHocID": "vueData.Chart2_MonHocID"
+                                                                    },
+                                                                    "OUT": "TongDiem_API",
+                                                                    "CALLBACK": {
+                                                                        "EXE": "convertChartThayDoiTongDiem()"
+                                                                    }
+                                                                }
+                                                            }
+                                                        }
+                                                    ]
+                                                }
+                                            ]
+                                        }
+                                    ]
+                                },
+                                {
+                                    "el": "v-card-text",
+                                    "innerHTML": [
+                                        {
+                                            "el": "uc-empty",
+                                            "attr": {
+                                                "v-if": "TongDiem_API.length === 0"
+                                            }
+                                        },
+                                        {
+                                            "el": "uc-chart",
+                                            "attr": {
+                                                "v-if": "TongDiem_API.length > 0",
+                                                "ref": "barChart",
+                                                "type": "line",
+                                                ":data": "DataChart2.TongDiem",
+                                                ":options": "optionsChart2",
+                                                "height": "400"
+                                            }
+                                        }
+                                    ]
+                                }
+                            ],
+                            "w": 12
+                        },
+                        {
+                            "el": "v-card",
+                            "innerHTML": [
+                                {
+                                    "el": "v-card-title",
+                                    "attr": {
+                                        "class": "text-primary"
+                                    },
+                                    "innerHTML": "Tỷ lệ học sinh đạt và chưa đạt GK1"
+                                },
+                                {
+                                    "el": "v-card-text",
+                                    "innerHTML": [
+                                        {
+                                            "el": "v-row",
+                                            "innerHTML": [
+                                                {
+                                                    "el": "v-col",
+                                                    "innerHTML": [
+                                                        {
+                                                            "el": "v-card-text",
+                                                            "innerHTML": [
+                                                                {
+                                                                    "el": "v-row",
+                                                                    "innerHTML": [
+                                                                        {
+                                                                            "el": "v-col",
+                                                                            "innerHTML": [
+                                                                                {
+                                                                                    "el": "v-select",
+                                                                                    "attr": {
+                                                                                        "v-model": "Chart3_KhoiID",
+                                                                                        "label": "Chọn khối",
+                                                                                        ":items": "DataChart3.DSKhoi",
+                                                                                        "item-title": "title",
+                                                                                        "item-value": "value",
+                                                                                        ":rules": []
+                                                                                    }
+                                                                                }
+                                                                            ]
+                                                                        },
+                                                                        {
+                                                                            "el": "v-col",
+                                                                            "innerHTML": [
+                                                                                {
+                                                                                    "el": "v-select",
+                                                                                    "attr": {
+                                                                                        "v-model": "Chart3_MonHocItem",
+                                                                                        "label": "Chọn môn học",
+                                                                                        ":items": "DataChart3.DSMonHoc",
+                                                                                        "item-title": "MonHocName",
+                                                                                        "item-value": "MonHocID",
+                                                                                        ":return-object": true,
+                                                                                        ":rules": []
+                                                                                    }
+                                                                                }
+                                                                            ]
+                                                                        },
+                                                                        {
+                                                                            "el": "v-col",
+                                                                            "innerHTML": [
+                                                                                {
+                                                                                    "el": "v-select",
+                                                                                    "attr": {
+                                                                                        "v-model": "Chart3_MaNhomCotDiem",
+                                                                                        "label": "Chọn nhóm điểm",
+                                                                                        ":items": "DataChart3.DSNhomDiem",
+                                                                                        "item-title": "TenNhomCotDiem_VI",
+                                                                                        "item-value": "MaNhomCotDiem",
+                                                                                        ":rules": []
+                                                                                    }
+                                                                                }
+                                                                            ]
+                                                                        },
+                                                                        {
+                                                                            "el": "v-col",
+                                                                            "innerHTML": [
+                                                                                {
+                                                                                    "el": "v-select",
+                                                                                    "attr": {
+                                                                                        "v-model": "Chart3_MaCotDiem",
+                                                                                        "label": "Chọn cột điểm",
+                                                                                        ":items": "DataChart3.DSCotDiem",
+                                                                                        "item-title": "TenCotDiem_VI",
+                                                                                        "item-value": "MaCotDiem",
+                                                                                        ":rules": []
+                                                                                    }
+                                                                                }
+                                                                            ]
+                                                                        },
+                                                                        {
+                                                                            "el": "v-col",
+                                                                            "innerHTML": [
+                                                                                {
+                                                                                    "el": "f-button",
+                                                                                    "attr": {
+                                                                                        "label": "Tìm kiếm",
+                                                                                        "color": "primary",
+                                                                                        "variant": "tonal",
+                                                                                        ":action": {
+                                                                                            "API": "lms/DashboardTiLeDat_Get",
+                                                                                            "IN": {
+                                                                                                "NienKhoa": 2024,
+                                                                                                "KhoiID": "Chart3_KhoiID",
+                                                                                                "MaCotDiem": "Chart3_MaCotDiem"
+                                                                                            },
+                                                                                            "OUT": "TiLeDat_Chart3_API",
+                                                                                            "CALLBACK": {
+                                                                                                "EXE": "convertChartTyLeDatChart3()"
+                                                                                            }
+                                                                                        }
+                                                                                    }
+                                                                                }
+                                                                            ]
+                                                                        }
+                                                                    ]
+                                                                }
+                                                            ]
+                                                        },
+                                                        {
+                                                            "el": "v-card-text",
+                                                            "innerHTML": [
+                                                                {
+                                                                    "el": "uc-chart",
+                                                                    "attr": {
+                                                                        "type": "pie",
+                                                                        ":data": "DataChart3.TyLeHocSinh",
+                                                                        ":options": "optionsPIE_Khoi"
+                                                                    }
+                                                                }
+                                                            ]
+                                                        }
+                                                    ],
+                                                    "w": 6
+                                                },
+                                                {
+                                                    "el": "v-col",
+                                                    "innerHTML": [
+                                                        {
+                                                            "el": "v-card-text",
+                                                            "innerHTML": [
+                                                                {
+                                                                    "el": "v-row",
+                                                                    "innerHTML": [
+                                                                        {
+                                                                            "el": "v-col",
+                                                                            "innerHTML": [
+                                                                                {
+                                                                                    "el": "v-select",
+                                                                                    "attr": {
+                                                                                        "v-model": "Chart4_KhoiID",
+                                                                                        "label": "Chọn khối",
+                                                                                        ":items": "DataChart4.DSKhoi",
+                                                                                        "item-title": "title",
+                                                                                        "item-value": "value",
+                                                                                        ":rules": []
+                                                                                    }
+                                                                                }
+                                                                            ]
+                                                                        },
+                                                                        {
+                                                                            "el": "v-col",
+                                                                            "innerHTML": [
+                                                                                {
+                                                                                    "el": "v-select",
+                                                                                    "attr": {
+                                                                                        "v-model": "Chart4_LopID",
+                                                                                        "label": "Chọn lớp",
+                                                                                        ":items": "DataChart4.DSLop",
+                                                                                        "item-title": "TenLop",
+                                                                                        "item-value": "LopID",
+                                                                                        ":rules": []
+                                                                                    }
+                                                                                }
+                                                                            ]
+                                                                        },
+                                                                        {
+                                                                            "el": "v-col",
+                                                                            "innerHTML": [
+                                                                                {
+                                                                                    "el": "v-select",
+                                                                                    "attr": {
+                                                                                        "v-model": "Chart4_MonHocItem",
+                                                                                        "label": "Chọn môn học",
+                                                                                        ":items": "DataChart4.DSMonHoc",
+                                                                                        "item-title": "MonHocName",
+                                                                                        "item-value": "MonHocID",
+                                                                                        ":return-object": true,
+                                                                                        ":rules": []
+                                                                                    }
+                                                                                }
+                                                                            ]
+                                                                        },
+                                                                        {
+                                                                            "el": "v-col",
+                                                                            "innerHTML": [
+                                                                                {
+                                                                                    "el": "v-select",
+                                                                                    "attr": {
+                                                                                        "v-model": "Chart4_MaNhomCotDiem",
+                                                                                        "label": "Chọn nhóm điểm",
+                                                                                        ":items": "DataChart4.DSNhomDiem",
+                                                                                        "item-title": "TenNhomCotDiem_VI",
+                                                                                        "item-value": "MaNhomCotDiem",
+                                                                                        ":rules": []
+                                                                                    }
+                                                                                }
+                                                                            ]
+                                                                        },
+                                                                        {
+                                                                            "el": "v-col",
+                                                                            "innerHTML": [
+                                                                                {
+                                                                                    "el": "v-select",
+                                                                                    "attr": {
+                                                                                        "v-model": "Chart4_MaCotDiem",
+                                                                                        "label": "Chọn cột điểm",
+                                                                                        ":items": "DataChart4.DSCotDiem",
+                                                                                        "item-title": "TenCotDiem_VI",
+                                                                                        "item-value": "MaCotDiem",
+                                                                                        ":rules": []
+                                                                                    }
+                                                                                }
+                                                                            ]
+                                                                        },
+                                                                        {
+                                                                            "el": "v-col",
+                                                                            "innerHTML": [
+                                                                                {
+                                                                                    "el": "f-button",
+                                                                                    "attr": {
+                                                                                        "label": "Tìm kiếm",
+                                                                                        "color": "primary",
+                                                                                        "variant": "tonal",
+                                                                                        ":action": {
+                                                                                            "API": "lms/DashboardTiLeDat_Get",
+                                                                                            "IN": {
+                                                                                                "NienKhoa": 2024,
+                                                                                                "KhoiID": "Chart4_KhoiID",
+                                                                                                "LopID": "Chart4_LopID",
+                                                                                                "MaCotDiem": "Chart4_MaCotDiem"
+                                                                                            },
+                                                                                            "OUT": "TiLeDat_Chart4_API",
+                                                                                            "CALLBACK": {
+                                                                                                "EXE": "convertChartTyLeDatChart4()"
+                                                                                            }
+                                                                                        }
+                                                                                    }
+                                                                                }
+                                                                            ]
+                                                                        }
+                                                                    ]
+                                                                }
+                                                            ]
+                                                        },
+                                                        {
+                                                            "el": "v-card-text",
+                                                            "innerHTML": [
+                                                                {
+                                                                    "el": "uc-chart",
+                                                                    "attr": {
+                                                                        "type": "pie",
+                                                                        ":data": "DataChart4.TyLeHocSinh",
+                                                                        ":options": "optionsPIE_Lop"
+                                                                    }
+                                                                }
+                                                            ]
+                                                        }
+                                                    ],
+                                                    "w": 6
+                                                }
+                                            ]
+                                        }
+                                    ],
+                                    "attr": {}
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ]
+        }
+    ],
+    "set": {}
+}

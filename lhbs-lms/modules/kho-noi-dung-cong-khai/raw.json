@@ -1,0 +1,36 @@
+{
+    "data": [
+        {
+            "KhoiID": "parseInt(KhoiID)",
+            "MonHocID": "parseInt(MonHocID)",
+            "NienKhoa": "parseInt(NienKhoa)",
+            "NienKhoaItem": null
+        },
+        {
+            "EXE":"initPage()"
+        }
+    ],
+    "watch": {},
+    "controls": [
+        {
+            "prop": "fluid grid-list-md",
+            "rows": [
+                {
+                    "prop": "",
+                    "cols": [
+                        {
+                            "el": "uc-main-page",
+                            "attr": {
+                                "v-if": "NienKhoaItem"
+                            }
+                        }
+                    ]
+                }
+            ]
+        }
+    ],
+    "set": {
+        "menu": false,
+        "menuLeft": false
+    }
+}

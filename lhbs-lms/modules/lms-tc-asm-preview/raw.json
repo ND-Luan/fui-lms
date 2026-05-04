@@ -1,0 +1,126 @@
+{
+    "data": [
+        {
+            "HocSinhID": "vueData.user.UserName",
+            "dataReady": false,
+            "assignmentData": [],
+            "monHocName": "",
+            "confirmSubmitDialog": false,
+            "puseranswers": {},
+            "NienKhoa": null,
+            "assignmentInfo": {},
+            "userAnswersSubmitted": {},
+            "submitionInfo": {}
+        },
+        {
+            "NienKhoa_Get": {
+                "API": "/lms/NienKhoa_Get",
+                "OUT": "DSNienKhoa",
+                "CALLBACK": [
+                    {
+                        "EXE": "vueData.NienKhoa = vueData.DSNienKhoa.filter(item => item.IsActive)[0].NienKhoa"
+                    }
+                ]
+            }
+        },
+        {
+            "EXE": "initPage()"
+        },
+        {
+            "CALL": "NienKhoa_Get"
+        }
+    ],
+    "watch": {},
+    "controls": [
+        {
+            "prop": "fluid pa-0",
+            "rows": [
+                {
+                    "prop": ":no-gutters='true'",
+                    "cols": [
+                        {
+                            "w": 12,
+                            "el": "uc-assignment-taker",
+                            "attr": {
+                                "class": "pa-0",
+                                "ref": "assignmentTaker",
+                                "v-if": "dataReady === true",
+                                ":assignment-data": "assignmentData",
+                                "v-model:puseranswers": "puseranswers",
+                                ":mon-hoc-name": "monHocName",
+                                ":on-save-draft": "saveDraft",
+                                ":on-open-submit-dialog": "openSubmitDialog"
+                            }
+                        },
+                        {
+                            "el": "v-dialog",
+                            "attr": {
+                                "v-model": "confirmSubmitDialog",
+                                "max-width": "450",
+                                "style": "width: 450px"
+                            },
+                            "innerHTML": [
+                                {
+                                    "el": "v-card",
+                                    "innerHTML": [
+                                        {
+                                            "el": "v-card-title",
+                                            "innerHTML": "Xác nhận nộp bài"
+                                        },
+                                        {
+                                            "el": "v-card-text",
+                                            "innerHTML": "Bạn có chắc chắn muốn nộp bài không? Sau khi nộp, bạn sẽ không thể chỉnh sửa bài làm của mình."
+                                        },
+                                        {
+                                            "el": "v-card-text",
+                                            "attr": {
+                                                "v-if": "renderQuestionNotSubmit().length >0"
+                                            },
+                                            "innerHTML": "Còn những <span class='text-red'>{{renderQuestionNotSubmit()}}</span> chưa làm"
+                                        },
+                                        {
+                                            "el": "v-card-actions",
+                                            "innerHTML": [
+                                                {
+                                                    "el": "v-spacer"
+                                                },
+                                                {
+                                                    "el": "f-button",
+                                                    "attr": {
+                                                        "label": "Hủy",
+                                                        "variant": "text",
+                                                        ":action": [
+                                                            {
+                                                                "confirmSubmitDialog": false
+                                                            }
+                                                        ]
+                                                    }
+                                                },
+                                                {
+                                                    "el": "f-button",
+                                                    "attr": {
+                                                        "label": "Xác nhận Nộp",
+                                                        "color": "success",
+                                                        ":action": [
+                                                            {
+                                                                "EXE": "submitAssignmentFinal()"
+                                                            }
+                                                        ]
+                                                    }
+                                                }
+                                            ]
+                                        }
+                                    ]
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ]
+        }
+    ],
+    "set": {
+        "menu": false,
+        "menuLeft": false
+    }
+}

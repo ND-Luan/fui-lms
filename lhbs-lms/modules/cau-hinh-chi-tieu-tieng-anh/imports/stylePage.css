@@ -1,0 +1,11 @@
+.v-tabs .v-btn__content {
+    color: white !important;
+}
+.v-tabs .v-tab__slider{
+    color: white !important;
+}
+
+.select-style .v-select__selection {
+    width: 100%;
+    justify-content: center;
+}

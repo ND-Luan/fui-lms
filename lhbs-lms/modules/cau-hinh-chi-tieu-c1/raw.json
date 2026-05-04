@@ -1,0 +1,1 @@
+{"data":[{"isReady":false}],"watch":{"NienKhoa":{"EXE":"vueData.isReady = true"}},"controls":[{"prop":"fluid pa-0","rows":[{"prop":":no-gutters='true'","cols":[{"el":"uc-main-layout","attr":{"v-if":"isReady"}}]}]}],"set":{}}

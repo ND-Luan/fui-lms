@@ -1,0 +1,458 @@
+{
+    "data": [
+        {
+            "EXE": "IsCheck_NotRoleParent(vueData.user)"
+        },
+        {
+            "CapID": "parseInt(capid)",
+            "keyTable": 0,
+            "DSThang": [],
+            "DSLop": [],
+            "DSKhoi": [],
+            "items": [],
+            "headers_INIT": [
+                {
+                    "el": "div",
+                    "title": "Mã học sinh",
+                    "value": "HocSinhID",
+                    "innerHTML": [
+                        {
+                            "el": "t-button",
+                            "attr": {
+                                ":title": "item.HocSinhID",
+                                "url": "'/report-ket-qua-hoc-tap-thang-hoc-sinh?id=' + item.HocSinhID + '&lop_nxtid=' + vueData.ThangObj.Lop_NhanXetThangID"
+                            }
+                        },
+                        {
+                            "el": "p",
+                            "innerHTML": "SDB: {{item.SoDanhBo}}"
+                        }
+                    ],
+                    "minWidth": 100
+                },
+                {
+                    "key": "ho_ten",
+                    "el": "div",
+                    "title": "Họ tên",
+                    "minWidth": 350,
+                    "innerHTML": [
+                        {
+                            "el": "span",
+                            "attr": {
+                                "class": "font-weight-medium"
+                            },
+                            "innerHTML": "{{item.HoTen}}"
+                        },
+                        {
+                            "el": "uc-gender",
+                            "attr": {
+                                "v-model": "item.Nu"
+                            }
+                        },
+                        {
+                            "el": "p",
+                            "attr": {
+                                "class": "text-caption"
+                            },
+                            "innerHTML": "{{item.NgaySinh}}"
+                        }
+                    ]
+                },
+                {
+                    "key": "NoiDungKienThuc",
+                    "el": "div",
+                    "align": "center",
+                    "innerHTML": [
+                        {
+                            "el": "uc-quill-editor",
+                            "attr": {
+                                ":key": "'NoiDungKienThuc_HTML_' + item.HocSinhID",
+                                "v-model": "item.NoiDungKienThuc_HTML",
+                                ":spellcheck": "false"
+                            }
+                        }
+                    ],
+                    "title": "Nội dung kiến thức",
+                    "value": "NoiDungKienThuc",
+                    "width": 500
+                },
+                {
+                    "key": "NoiDungNangLuc",
+                    "el": "div",
+                    "align": "center",
+                    "innerHTML": [
+                        {
+                            "el": "uc-quill-editor",
+                            "attr": {
+                                ":key": "'NoiDungNangLuc_HTML_' + item.HocSinhID",
+                                "v-model": "item.NoiDungNangLuc_HTML",
+                                ":spellcheck": "false"
+                            }
+                        }
+                    ],
+                    "title": "Nội dung năng lực",
+                    "value": "NoiDungNangLuc",
+                    "width": 500
+                },
+                {
+                    "key": "NoiDungHoatDongKhac",
+                    "el": "div",
+                    "align": "center",
+                    "innerHTML": [
+                        {
+                            "el": "uc-quill-editor",
+                            "attr": {
+                                ":key": "'NoiDungHoatDongKhac_HTML_' + item.HocSinhID",
+                                "v-model": "item.NoiDungHoatDongKhac_HTML",
+                                ":spellcheck": "false"
+                            }
+                        }
+                    ],
+                    "title": "Nội dung hoạt động khác",
+                    "value": "NoiDungHoatDongKhac",
+                    "width": 500
+                },
+                {
+                    "key": "v_btn",
+                    "el": "v-btn",
+                    "attr": {
+                        "color": "primary",
+                        "variant": "tonal",
+                        "v-on:click": "() => vueData.onLuuTamByHocSinhID(item)"
+                    },
+                    "innerHTML": "Lưu tạm"
+                }
+            ],
+            "ThangObj": null,
+            "LopID": null,
+            "columnReject": {
+                "key": "reject",
+                "title": "Từ chối",
+                "value": "reject",
+                "el": "div",
+                "width": 200,
+                "align": "center",
+                "innerHTML": [
+                    {
+                        "el": "v-checkbox",
+                        "attr": {
+                            "v-model": "item.Is_Reject",
+                            "class": "checkbox-center",
+                            "label": "Từ chối",
+                            "color": "error",
+                            "hide-details": "true"
+                        }
+                    },
+                    {
+                        "el": "v-textarea",
+                        "attr": {
+                            "v-if": "item.Is_Reject && item.ReasonReject?.length > 0",
+                            "v-model": "item.ReasonReject"
+                        }
+                    }
+                ]
+            },
+            "headers": []
+        },
+        {
+            "Lop_Get_By_CapID": {
+                "API": "lms/Lop_Get_By_CapID",
+                "IN": {
+                    "NienKhoa": "vueData.NienKhoa",
+                    "CapID": "vueData.CapID"
+                },
+                "OUT": "DSLop"
+            }
+        },
+        {
+            "NhanXetThang_Lop_Get": {
+                "API": "lms/NhanXetThang_Lop_Get",
+                "IN": {
+                    "NienKhoa": "vueData.NienKhoa",
+                    "LopID": "vueData.LopID"
+                },
+                "OUT": "DSThang"
+            }
+        },
+        {
+            "NhanXetThang_Get": {
+                "API": "lms/NhanXetThang_Get",
+                "IN": {
+                    "Lop_NhanXetThangID": "vueData.ThangObj.Lop_NhanXetThangID",
+                    "LopID": "vueData.LopID"
+                },
+                "OUT": "items",
+                "CALLBACK": [
+                    {
+                        "keyTable": "keyTable + 1"
+                    }
+                ]
+            }
+        },
+        {
+            "NhanXetThang_Copy": {
+                "API": "lms/NhanXetThang_Copy",
+                "IN": {
+                    "Lop_NhanXetThangID": 0,
+                    "Lop_NhanXetThangID_Copy": 0
+                }
+            }
+        },
+        {
+            "EXE": "vueData.onLuuTamByHocSinhID = onLuuTamByHocSinhID"
+        },
+        {
+            "EXE": "vueData.renderLabelTable = renderLabelTable"
+        }
+    ],
+    "watch": {
+        "NienKhoa": {
+            "IF": "vueData.NienKhoa !== null",
+            "THEN": [
+                {
+                    "CALL": "Lop_Get_By_CapID"
+                }
+            ]
+        },
+        "LopID": {
+            "IF": "vueData.LopID !== null",
+            "THEN": [
+                {
+                    "ThangObj": null,
+                    "items": []
+                },
+                {
+                    "CALL": "NhanXetThang_Lop_Get"
+                },
+                {
+                    "EXE": "localStorage.setItem('LopID_C1_NXT', vueData.LopID)"
+                },
+                {
+                    "CALL": "NhanXetThang_Lop_Get"
+                }
+            ]
+        },
+        "ThangObj": {
+            "IF": "vueData.ThangObj !== null",
+            "THEN": [
+                {
+                    "EXE": "const result = fn_IsDisabledTinhTrangDiem({ TinhTrang: vueData.ThangObj.TinhTrang, type: 'GV' }); const { isDisabled } = result || {}; vueData.TinhTrang = isDisabled ?? false;"
+                },
+                {
+                    "CALL": "NhanXetThang_Get"
+                },
+                {
+                    "EXE": "localStorage.setItem('Thang_C1_NXT', JSON.stringify(vueData.ThangObj))"
+                },
+                {
+                    "EXE": "renderHeaderTable()"
+                }
+            ]
+        }
+    },
+    "controls": [
+        {
+            "prop": "fluid",
+            "rows": [
+                {
+                    "prop": "class='pt-0'",
+                    "cols": [
+                        {
+                            "el": "v-card",
+                            "attr": {
+                                "class": "sticky-filter "
+                            },
+                            "innerHTML": [
+                                {
+                                    "el": "v-card-title",
+                                    "innerHTML": "Tìm kiếm"
+                                },
+                                {
+                                    "el": "v-card-text",
+                                    "attr": {
+                                        "class": "pa-0"
+                                    },
+                                    "innerHTML": [
+                                        {
+                                            "el": "v-row",
+                                            "innerHTML": [
+                                                {
+                                                    "el": "v-col",
+                                                    "attr": {
+                                                        "cols": 3
+                                                    },
+                                                    "innerHTML": [
+                                                        {
+                                                            "el": "v-select",
+                                                            "attr": {
+                                                                "v-model": "LopID",
+                                                                "label": "Chọn lớp",
+                                                                ":items": "DSLop",
+                                                                "item-title": "TenLop",
+                                                                "item-value": "LopID"
+                                                            }
+                                                        }
+                                                    ]
+                                                },
+                                                {
+                                                    "el": "v-col",
+                                                    "attr": {
+                                                        "cols": 3
+                                                    },
+                                                    "innerHTML": [
+                                                        {
+                                                            "el": "v-autocomplete",
+                                                            "attr": {
+                                                                "v-model": "ThangObj",
+                                                                "label": "Chọn Tháng",
+                                                                ":items": "DSThang",
+                                                                "item-title": "Thang_HienThi",
+                                                                "item-value": "Thang",
+                                                                ":return-object": true
+                                                            },
+                                                            "innerHTML": [
+                                                                {
+                                                                    "el": "template",
+                                                                    "attr": {
+                                                                        "v-slot:item": "{ props, item }"
+                                                                    },
+                                                                    "innerHTML": "<uc-item-thang v-bind='props' :item='item' />"
+                                                                }
+                                                            ]
+                                                        }
+                                                    ]
+                                                },
+                                                {
+                                                    "el": "v-col",
+                                                    "innerHTML": [
+                                                        {
+                                                            "el": "f-button",
+                                                            "attr": {
+                                                                "label": "Làm mới",
+                                                                "color": "primary",
+                                                                "variant": "tonal",
+                                                                ":action": "NhanXetThang_Get"
+                                                            }
+                                                        }
+                                                    ]
+                                                }
+                                            ]
+                                        }
+                                    ]
+                                }
+                            ]
+                        },
+                        {
+                            "el": "div",
+                            "attr": {
+                                "class": "d-flex justify-space-between"
+                            },
+                            "innerHTML": [
+                                {
+                                    "el": "div",
+                                    "innerHTML": [
+                                        {
+                                            "el": "p",
+                                            "attr": {
+                                                "class": "text-title"
+                                            },
+                                            "innerHTML": "Tổng số học sinh: <v-chip color='primary' class='font-weight-medium'>{{items.length}}</v-chip>"
+                                        }
+                                    ]
+                                },
+                                {
+                                    "el": "div",
+                                    "attr": {
+                                        "class": "d-flex ga-2"
+                                    },
+                                    "innerHTML": [
+                                        {
+                                            "el": "f-button",
+                                            "attr": {
+                                                "label": "Từ chối",
+                                                ":disabled": "items.length === 0 || TinhTrang",
+                                                "color": "error",
+                                                "variant": "elevated",
+                                                ":action": [
+                                                    {
+                                                        "CONFIRM": "Bạn có muốn từ chối nhận xét tháng ",
+                                                        "CALL": [
+                                                            {
+                                                                "EXE": "processDataBeforePostAPI()"
+                                                            },
+                                                            {
+                                                                "API": "lms/NhanXetThang_Ins",
+                                                                "IN": {
+                                                                    "JSON_NhanXetThang": "vueData.JSON_NhanXetThang"
+                                                                },
+                                                                "CALLBACK": {
+                                                                    "API": "lms/NhanXetThang_Upd_TinhTrang",
+                                                                    "IN": {
+                                                                        "TinhTrang": 5,
+                                                                        "Lop_NhanXetThangID": "vueData.ThangObj.Lop_NhanXetThangID"
+                                                                    },
+                                                                    "MESS": "Từ chối thành công",
+                                                                    "CALLBACK": [
+                                                                        {
+                                                                            "CALL": "NhanXetThang_Lop_Get"
+                                                                        },
+                                                                        {
+                                                                            "CALL": "NhanXetThang_Get"
+                                                                        }
+                                                                    ]
+                                                                }
+                                                            }
+                                                        ]
+                                                    }
+                                                ]
+                                            }
+                                        },
+                                        {
+                                            "el": "f-button",
+                                            "attr": {
+                                                "label": "Duyệt",
+                                                ":disabled": "items.length === 0 || TinhTrang",
+                                                "color": "primary",
+                                                "variant": "elevated",
+                                                ":action": [
+                                                    {
+                                                        "API": "lms/NhanXetThang_Upd_TinhTrang",
+                                                        "IN": {
+                                                            "TinhTrang": 6,
+                                                            "Lop_NhanXetThangID": "vueData.ThangObj.Lop_NhanXetThangID"
+                                                        },
+                                                        "MESS": "Duyệt thành công",
+                                                        "CALLBACK": [
+                                                            {
+                                                                "CALL": "NhanXetThang_Lop_Get"
+                                                            },
+                                                            {
+                                                                "CALL": "NhanXetThang_Get"
+                                                            }
+                                                        ]
+                                                    }
+                                                ]
+                                            }
+                                        }
+                                    ]
+                                }
+                            ],
+                            "w": 12
+                        },
+                        {
+                            "el": "f-table",
+                            "attr": {
+                                ":key": "keyTable",
+                                ":label": "renderLabelTable()",
+                                ":items": "items",
+                                ":headers": "headers"
+                            },
+                            "w": 12
+                        }
+                    ]
+                }
+            ]
+        }
+    ],
+    "set": {}
+}

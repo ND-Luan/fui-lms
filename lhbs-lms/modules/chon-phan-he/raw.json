@@ -1,0 +1,168 @@
+{
+    "data": [
+        {
+            "EXE": "init()"
+        },
+        {
+            "EXE": "IsCheck_NotRoleParent(vueData.user)"
+        },
+        {
+            "EXE": "vueData.redirect  = redirect "
+        }
+    ],
+    "watch": {},
+    "controls": [
+        {
+            "prop": "fluid",
+            "rows": [
+                {
+                    "prop": "v-row--no-gutters",
+                    "cols": [
+                        {
+                            "el": "div",
+                            "attr": {
+                                "class": "d-flex justify-center align-center flex-column ga-8",
+                                "style": "height: 100dvh; background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);"
+                            },
+                            "innerHTML": [
+                                {
+                                    "el": "div",
+                                    "attr": {
+                                        "class": "text-center mb-8"
+                                    },
+                                    "innerHTML": [
+                                        {
+                                            "el": "img",
+                                            "attr": {
+                                                "src": "/_cdn/lhbs-lms/logo_lhbs_2.jpg",
+                                                "width": 120,
+                                                "height": 120,
+                                                "style": "border-radius: 20px; box-shadow: 0 8px 20px rgba(0,0,0,0.1);"
+                                            }
+                                        },
+                                        {
+                                            "el": "h1",
+                                            "attr": {
+                                                "class": "text-h4 font-weight-bold mt-4 text-primary"
+                                            },
+                                            "innerHTML": "LMS SYSTEM"
+                                        }
+                                    ]
+                                },
+                                {
+                                    "el": "v-card",
+                                    "attr": {
+                                        "width": 300,
+                                        "elevation": "3",
+                                        "class": "rounded-xl",
+                                        "style": "backdrop-filter: blur(10px); background: rgba(255,255,255,0.9);"
+                                    },
+                                    "innerHTML": [
+                                        {
+                                            "el": "v-card-title",
+                                            "attr": {
+                                                "class": "text-center"
+                                            },
+                                            "innerHTML": [
+                                                {
+                                                    "el": "span",
+                                                    "attr": {
+                                                        "class": "text-h6 font-weight-bold text-primary"
+                                                    },
+                                                    "innerHTML": "Chọn vai trò"
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            "el": "v-divider",
+                                            "attr": {
+                                                "class": "mx-4"
+                                            }
+                                        },
+                                        {
+                                            "el": "v-card-text",
+                                            "attr": {
+                                                "class": "d-flex ga-6 flex-column pa-6"
+                                            },
+                                            "innerHTML": [
+                                                {
+                                                    "el": "v-btn",
+                                                    "attr": {
+                                                        "variant": "elevated",
+                                                        "color": "primary",
+                                                        ":block": true,
+                                                        "class": "py-6 rounded-lg",
+                                                        "style": "transition: all 0.3s ease;",
+                                                        "v-on:click": "redirect('/')"
+                                                    },
+                                                    "innerHTML": [
+                                                        {
+                                                            "el": "v-icon",
+                                                            "attr": {
+                                                                ":start": true,
+                                                                "icon": "mdi-human-male-board",
+                                                                "class": "mr-2"
+                                                            }
+                                                        },
+                                                        {
+                                                            "el": "span",
+                                                            "innerHTML": "Giáo viên"
+                                                        }
+                                                    ]
+                                                },
+                                                {
+                                                    "el": "v-btn",
+                                                    "attr": {
+                                                        "variant": "elevated",
+                                                        "color": "primary",
+                                                        ":block": true,
+                                                        "class": "py-6 rounded-lg",
+                                                        "style": "transition: all 0.3s ease;",
+                                                        "v-on:click": "redirect('/ph-report')"
+                                                    },
+                                                    "innerHTML": [
+                                                        {
+                                                            "el": "v-icon",
+                                                            "attr": {
+                                                                ":start": true,
+                                                                "icon": "mdi-account-child",
+                                                                "class": "mr-2"
+                                                            }
+                                                        },
+                                                        {
+                                                            "el": "span",
+                                                            "innerHTML": "Phụ huynh"
+                                                        }
+                                                    ]
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            "el": "v-card-actions",
+                                            "attr": {
+                                                "class": "justify-center pb-4"
+                                            },
+                                            "innerHTML": [
+                                                {
+                                                    "el": "span",
+                                                    "attr": {
+                                                        "class": "text-caption text-grey"
+                                                    },
+                                                    "innerHTML": "© 2025 LMS System"
+                                                }
+                                            ]
+                                        }
+                                    ]
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ]
+        }
+    ],
+    "set": {
+        "menu": false,
+        "menuLeft": false
+    }
+}

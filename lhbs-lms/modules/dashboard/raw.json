@@ -1,0 +1,1 @@
+{"data":[],"watch":{},"controls":[{"prop":"fluid grid-list-md pa-0","rows":[{"prop":":no-gutters='true' v-if='IsLoadPage'","cols":[{"el":"uc-layout-admin"}]}]}],"set":{}}
