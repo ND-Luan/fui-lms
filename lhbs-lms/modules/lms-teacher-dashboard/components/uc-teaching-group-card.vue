@@ -44,12 +44,13 @@
 
 				<v-col cols="12" sm="6" md="7" class="d-flex align-center justify-center justify-md-end">
 					<div class="d-flex flex-column flex-lg-row ga-3">
-						<v-chip v-if="!isLibraryView && group.TotalPendingGradingCount > 0" color="error" variant="flat"
-							prepend-icon="mdi-alert-circle-outline">
+						<v-chip v-if="!isLibraryView &amp;&amp; group.TotalPendingGradingCount > 0" color="error"
+							variant="flat" prepend-icon="mdi-alert-circle-outline">
 							Có {{ group.TotalPendingGradingCount }} bài cần chấm
 						</v-chip>
 
-						<uc-btn-with-dialog-add-bt :khoiid="group.KhoiID" :monhocid="group.MonHocID" :group />
+						<uc-btn-with-dialog-add-bt :khoiid="group.KhoiID" :monhocid="group.MonHocID" :group="">
+						</uc-btn-with-dialog-add-bt>
 					</div>
 				</v-col>
 			</v-row>
@@ -76,7 +77,7 @@
 										<div class="class-meta mt-2">
 											<span>Sĩ số: {{ classItem.StudentCount }} học sinh</span>
 											<span class="pending-tag"
-												v-if="getPendingCount(classItem) > 0 && classItem.ResourceType == 'ASSIGNMENT'">
+												v-if="getPendingCount(classItem) > 0 &amp;&amp; classItem.ResourceType == 'ASSIGNMENT'">
 												<v-icon size="small" class="mr-1">mdi-alert-circle</v-icon>
 												{{ getPendingCount(classItem) }} bài cần chấm
 											</span>
@@ -84,7 +85,8 @@
 									</div>
 									<div class="class-actions">
 										<v-btn size="small" variant="tonal" color="purple" text="Xem sổ điểm"
-											@click.stop="xemTinhTrang(classItem)" />
+											@click.stop="xemTinhTrang(classItem)">
+										</v-btn>
 									</div>
 								</div>
 							</v-expansion-panel-title>
@@ -92,7 +94,8 @@
 							<v-expansion-panel-text>
 								<div>
 									<uc-assignment-status-row v-for="assignment in classItem.assignments"
-										:key="assignment.AssignToClassID" :assignment="assignment" />
+										:key="assignment.AssignToClassID" :assignment="assignment">
+									</uc-assignment-status-row>
 								</div>
 								<div class="text-center text-grey pa-2" v-if="classItem.assignments.length === 0">
 									Lớp này chưa được giao bài tập nào.
@@ -111,11 +114,12 @@
 
 				<div v-for="chapterGroup in weekGroup.chapters" :key="chapterGroup.title">
 					<uc-content-library-item v-for="item in chapterGroup.items.filter(x => x.ResourceID > 0)"
-						:key="item.ResourceType + item.ResourceID" :item="item" />
-					<p v-if="chapterGroup.items.filter(x => x.ResourceID > 0).length === 0"
-						class="text-center text-caption text-center">
-						Bạn chưa thêm Assignment hoặc Lesson. Vui lòng bấm tạo nội dung
-					</p>
+						:key="item.ResourceType + item.ResourceID" :item="item">
+						<p v-if="chapterGroup.items.filter(x => x.ResourceID > 0).length === 0"
+							class="text-center text-caption text-center">
+							Bạn chưa thêm Assignment hoặc Lesson. Vui lòng bấm tạo nội dung
+						</p>
+					</uc-content-library-item>
 				</div>
 			</div>
 		</v-list>
@@ -125,81 +129,81 @@
 </template>
 
 <script>
-export default {
-	name: 'uc-teaching-group-card',
-	inject: ['snackbarRef', 'iframeRef', 'confirmRef'],
-	props: {
-		group: Object,
-		isLibraryView: {
-			type: Boolean,
-			default: false
-		}
-	},
-	emits: ['view-class', 'grade-class', 'create-assignment'],
-	data() {
-		return {
-			isDialogEditBT: false,
-			panel: [0],
-
-		}
-	},
-	computed: {
-		showWeek: function () {
-			return []
-		}
-	},
-	methods: {
-		onOpenWindow(title, url) {
-			this.iframeRef.value.openWindow({
-				title,
-				url,
-				onclose: () => vueData.initPage()
-			})
+	export default {
+		name: 'uc-teaching-group-card',
+		inject: ['snackbarRef', 'iframeRef', 'confirmRef'],
+		props: {
+			group: Object,
+			isLibraryView: {
+				type: Boolean,
+				default: false
+			}
 		},
-		getSubjectIcon(subjectName) {
-			const name = (subjectName || '').toLowerCase();
-			if (name.includes('toán')) return 'mdi-calculator-variant';
-			if (name.includes('tin học') || name.includes('robotics')) return 'mdi-robot-industrial';
-			if (name.includes('văn') || name.includes('việt')) return 'mdi-book-open-page-variant';
-			if (name.includes('anh')) return 'mdi-translate';
-			if (name.includes('lý')) return 'mdi-atom';
-			if (name.includes('hóa')) return 'mdi-flask';
-			return 'mdi-school';
+		emits: ['view-class', 'grade-class', 'create-assignment'],
+		data() {
+			return {
+				isDialogEditBT: false,
+				panel: [0],
+	
+			}
 		},
-		getSubjectColor(subjectName) {
-			const name = (subjectName || '').toLowerCase();
-			if (name.includes('toán')) return 'blue';
-			if (name.includes('tin học') || name.includes('robotics')) return 'teal';
-			if (name.includes('văn') || name.includes('việt')) return 'red';
-			if (name.includes('anh')) return 'purple';
-			if (name.includes('lý')) return 'indigo';
-			if (name.includes('hóa')) return 'green';
-			return 'grey';
+		computed: {
+			showWeek: function () {
+				return []
+			}
 		},
-		getTypeColor(type) {
-			const resourceType = (type || '').toLowerCase();
-			if (resourceType.includes('ASSIGNMENT')) return 'blue';
-			if (resourceType.includes('LESSON') || name.includes('robotics')) return 'teal';
-
-			return 'grey';
-		},
-		getPendingCount(classItem) {
-			if (!classItem.assignments) return 0;
-			return classItem.assignments.reduce((sum, a) => {
-				return sum + (a.PendingGradingCount || 0);
-			}, 0);
-		},
-		xemTinhTrang(assignment) {
-			this.$emit('view-class', this.classItem);
-			// onOpenWindow('Tình trạng nộp bài', `/lms_Assignment-Class-Detail?Flag=1` )}
-			console.log(assignment);
-			// console.log(assignmentID)
-			openWindow({
-				title: "Sổ điểm Lớp học",
-				url: `/lms-teacher-gradebook?LopID=${assignment.LopID}&MonHocID=${assignment.MonHocID}&HocKi=${vueData.HocKiItem.HocKi}`,
-				id: "WinGiaoBaiTap"
-			});
+		methods: {
+			onOpenWindow(title, url) {
+				this.iframeRef.value.openWindow({
+					title,
+					url,
+					onclose: () => vueData.initPage()
+				})
+			},
+			getSubjectIcon(subjectName) {
+				const name = (subjectName || '').toLowerCase();
+				if (name.includes('toán')) return 'mdi-calculator-variant';
+				if (name.includes('tin học') || name.includes('robotics')) return 'mdi-robot-industrial';
+				if (name.includes('văn') || name.includes('việt')) return 'mdi-book-open-page-variant';
+				if (name.includes('anh')) return 'mdi-translate';
+				if (name.includes('lý')) return 'mdi-atom';
+				if (name.includes('hóa')) return 'mdi-flask';
+				return 'mdi-school';
+			},
+			getSubjectColor(subjectName) {
+				const name = (subjectName || '').toLowerCase();
+				if (name.includes('toán')) return 'blue';
+				if (name.includes('tin học') || name.includes('robotics')) return 'teal';
+				if (name.includes('văn') || name.includes('việt')) return 'red';
+				if (name.includes('anh')) return 'purple';
+				if (name.includes('lý')) return 'indigo';
+				if (name.includes('hóa')) return 'green';
+				return 'grey';
+			},
+			getTypeColor(type) {
+				const resourceType = (type || '').toLowerCase();
+				if (resourceType.includes('ASSIGNMENT')) return 'blue';
+				if (resourceType.includes('LESSON') || name.includes('robotics')) return 'teal';
+	
+				return 'grey';
+			},
+			getPendingCount(classItem) {
+				if (!classItem.assignments) return 0;
+				return classItem.assignments.reduce((sum, a) => {
+					return sum + (a.PendingGradingCount || 0);
+				}, 0);
+			},
+			xemTinhTrang(assignment) {
+				this.$emit('view-class', this.classItem);
+				// onOpenWindow('Tình trạng nộp bài', `/lms_Assignment-Class-Detail?Flag=1` )}
+				console.log(assignment);
+				// console.log(assignmentID)
+				openWindow({
+					title: "Sổ điểm Lớp học",
+					url: `/lms-teacher-gradebook?LopID=${assignment.LopID}&MonHocID=${assignment.MonHocID}&HocKi=${vueData.HocKiItem.HocKi}`,
+					id: "WinGiaoBaiTap"
+				})
+			}
 		}
 	}
-}
 </script>

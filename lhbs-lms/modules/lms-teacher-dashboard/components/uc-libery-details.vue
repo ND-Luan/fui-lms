@@ -140,11 +140,11 @@
 			</v-card-actions>
 		</v-card>
 	</v-dialog>
-
 </template>
+
 <script>
-export default {
-	inject: ['snackbarRef', 'iframeRef', 'confirmRef'],
+	export default {
+		inject: ['snackbarRef', 'iframeRef', 'confirmRef'],
 	props: ["selectedLibery", "isOpen"],
 	emits: ["update:isOpen", 'update:selectedLibery'],
 	data() {
@@ -437,5 +437,5 @@ export default {
 			return this.assignedClassList.findIndex(cls => cls.AssignToClassID === item.AssignToClassID)
 		}
 	}
-}
+	}
 </script>

@@ -1,5 +1,6 @@
 <template>
-	<v-navigation-drawer :model-value="isOpen" @update:model-value="val => { if (!val) CloseLiberies() }" temporary location="end" width="400">
+	<v-navigation-drawer :model-value="isOpen" @update:model-value="val => { if (!val) CloseLiberies() }" temporary
+		location="end" width="400">
 		<div class="lib-root">
 
 			<!-- Header -->
@@ -86,7 +87,8 @@
 				<template v-else>
 					<div v-if="flatLibraryItems.length === 0" class="lib-empty">
 						<v-icon size="36" class="mb-2 opacity-40">mdi-book-open-blank-variant-outline</v-icon>
-						<span>{{ flatLibraryItems.length === 0 && selected ? $t('message.NoDocument') : $t('message.SelectSubjectToView') }}</span>
+						<span>{{ flatLibraryItems.length === 0 && selected ? $t('message.NoDocument') :
+							$t('message.SelectSubjectToView') }}</span>
 					</div>
 					<div v-for="item in flatLibraryItems" :key="item.ResourceID" class="lib-bt-item"
 						@click="onSelectedLibery(item, item._siblings)">
@@ -119,7 +121,8 @@
 								<v-list-item @click.stop="onDeleteItem(item)">
 									<v-list-item-title class="text-subtitle-2">
 										<v-icon color="red" size="small" class="mr-1">mdi-trash-can-outline</v-icon>
-								{{ $t('message.Delete') }} {{ item.ResourceType == 'LESSON' ? $t('message.Lesson').toLowerCase() : $t('message.Assignment').toLowerCase() }}
+										{{ $t('message.Delete') }} {{ item.ResourceType == 'LESSON' ?
+										$t('message.Lesson').toLowerCase() : $t('message.Assignment').toLowerCase() }}
 									</v-list-item-title>
 								</v-list-item>
 							</v-list>

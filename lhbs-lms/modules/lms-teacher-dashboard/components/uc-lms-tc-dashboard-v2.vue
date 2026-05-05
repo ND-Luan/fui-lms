@@ -73,7 +73,8 @@
 				<div class="lms-tier">
 					<div class="lms-tier-hd">
 						<span class="lms-tier-label">{{ $t('message.Subject') }}</span>
-						<button v-if="cascadeKhoiID" class="lms-tier-reset" @click="resetCascadeFrom(1)">{{ $t('message.ChangeGrade') }}</button>
+						<button v-if="cascadeKhoiID" class="lms-tier-reset" @click="resetCascadeFrom(1)">{{
+							$t('message.ChangeGrade') }}</button>
 					</div>
 					<div class="lms-tier-body">
 						<div v-if="!cascadeKhoiID" class="lms-tier-locked">
@@ -94,7 +95,8 @@
 				<div class="lms-tier lms-tier-flex">
 					<div class="lms-tier-hd">
 						<span class="lms-tier-label">{{ $t('message.WeekStudy') }}</span>
-						<button v-if="cascadeMonHocName" class="lms-tier-reset" @click="resetCascadeFrom(2)">{{ $t('message.ChangeSubject') }}</button>
+						<button v-if="cascadeMonHocName" class="lms-tier-reset" @click="resetCascadeFrom(2)">{{
+							$t('message.ChangeSubject') }}</button>
 					</div>
 					<div class="lms-tier-body">
 						<div v-if="!cascadeMonHocName" class="lms-tier-locked">
@@ -124,8 +126,8 @@
 										<span class="lms-pill lms-pill-warn">{{ $t('message.NoLessonYet') }}</span>
 									</div>
 								</div>
-								<v-icon v-if="cascadeTuanID === currentTuanFallback.TuanHocID" size="14"
-									color="teal">mdi-check</v-icon>
+								<v-icon v-if="cascadeTuanID === currentTuanFallback.TuanHocID" size="14" color="teal">
+									mdi-check</v-icon>
 								<span v-else class="lms-t-arrow">›</span>
 							</div>
 						</template>
@@ -140,7 +142,8 @@
 					<div class="lms-empty-state">
 						<v-icon size="44" class="mb-3 opacity-40">mdi-table-search</v-icon>
 						<p class="text-body-2 font-weight-medium text-medium-emphasis">
-							{{ !cascadeKhoiID ? $t('message.SelectGradeToStart') : !cascadeMonHocName ? $t('message.SelectSubjectFirst') : $t('message.SelectWeekStudy') }}
+							{{ !cascadeKhoiID ? $t('message.SelectGradeToStart') : !cascadeMonHocName ?
+							$t('message.SelectSubjectFirst') : $t('message.SelectWeekStudy') }}
 						</p>
 						<p class="text-caption text-disabled">{{ $t('message.CurrentWeekAutoSelected') }}</p>
 					</div>
@@ -257,10 +260,11 @@
 
 		</div><!-- /lms-layout -->
 
-		<uc-btn-with-dialog-add-bt v-model:is-open="isShowModalAddNoiDung" v-if="isShowModalAddNoiDung" :khoi-item="KhoiItem"
-			:tuan-hoc-id="cascadeTuanID" :default-type="defaultType" />
-		<uc-my-liberies v-model:is-open="isShowMyLiberies" :ds-mon-hoc-active="DSMonHocActive" :teaching-groups="teachingGroups" v-if="isShowMyLiberies"
-			v-model:content-library="contentLibrary" @create-content="(item) => { this.OpenModalAddNoiDung(item) }" />
+		<uc-btn-with-dialog-add-bt v-model:is-open="isShowModalAddNoiDung" v-if="isShowModalAddNoiDung"
+			:khoi-item="KhoiItem" :tuan-hoc-id="cascadeTuanID" :default-type="defaultType" />
+		<uc-my-liberies v-model:is-open="isShowMyLiberies" :ds-mon-hoc-active="DSMonHocActive"
+			:teaching-groups="teachingGroups" v-if="isShowMyLiberies" v-model:content-library="contentLibrary"
+			@create-content="(item) => { this.OpenModalAddNoiDung(item) }" />
 		<uc-change-user v-if="isShowModalChangeUser" v-model:is-open="isShowModalChangeUser"
 			:giaovienid="vueData.GiaoVienID_Selected" />
 

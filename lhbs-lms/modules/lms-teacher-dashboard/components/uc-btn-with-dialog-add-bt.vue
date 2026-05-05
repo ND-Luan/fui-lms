@@ -13,14 +13,14 @@
 						<v-col cols="12">
 							<!-- Thông tin Khối - Môn (bên trái) -->
 							<div class="d-flex align-center">
-							<v-avatar :color="getSubjectColor(khoiItem?.MonHocName)" size="40" class="mr-4">
-								<v-icon color="white">{{ getSubjectIcon(khoiItem?.MonHocName) }}</v-icon>
-							</v-avatar>
-							<div>
-								<div class="text-overline">{{ $t('message.Grade') }} {{ khoiItem?.KhoiID
-								}}</div>
-								<div class="text-h6">{{ $i18n.locale == 'en' && khoiItem?.MonHocName == 'Ngoại ngữ'
-									? 'English' : khoiItem?.MonHocName }}</div>
+								<v-avatar :color="getSubjectColor(khoiItem?.MonHocName)" size="40" class="mr-4">
+									<v-icon color="white">{{ getSubjectIcon(khoiItem?.MonHocName) }}</v-icon>
+								</v-avatar>
+								<div>
+									<div class="text-overline">{{ $t('message.Grade') }} {{ khoiItem?.KhoiID
+										}}</div>
+									<div class="text-h6">{{ $i18n.locale == 'en' && khoiItem?.MonHocName == 'Ngoại ngữ'
+										? 'English' : khoiItem?.MonHocName }}</div>
 								</div>
 							</div>
 						</v-col>
@@ -58,8 +58,8 @@
 </template>
 
 <script>
-export default {
-	inject: ['snackbarRef', 'iframeRef', 'confirmRef'],
+	export default {
+		inject: ['snackbarRef', 'iframeRef', 'confirmRef'],
 	emits: ['update:isOpen'],
 	props: {
 		khoiItem: {
@@ -201,5 +201,5 @@ export default {
 			this.$emit('update:isOpen', false);
 		}
 	},
-}
+	}
 </script>

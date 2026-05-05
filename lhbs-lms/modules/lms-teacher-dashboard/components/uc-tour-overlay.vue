@@ -21,7 +21,8 @@
 						<v-icon start size="14">mdi-chevron-left</v-icon>{{ $t('message.back') }}
 					</v-btn>
 					<v-spacer />
-					<v-btn size="small" variant="text" color="grey" @click="$emit('close')">{{ $t('message.EndTour') }}</v-btn>
+					<v-btn size="small" variant="text" color="grey" @click="$emit('close')">{{ $t('message.EndTour') }}
+					</v-btn>
 					<v-btn v-if="step < totalSteps - 1" size="small" color="primary" @click="$emit('next')">
 						{{ $t('message.next') }}<v-icon end size="14">mdi-chevron-right</v-icon>
 					</v-btn>

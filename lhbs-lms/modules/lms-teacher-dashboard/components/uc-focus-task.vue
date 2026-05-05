@@ -4,12 +4,9 @@
 		<!-- HEADER: khoi select + filter pills -->
 		<div class="ft-hd">
 			<div class="d-flex align-center ga-2 mb-2">
-				<v-select v-model="KhoiIDSelected" :items="DSKhoi" item-title="TenKhoi" item-value="KhoiID"
-					density="compact" variant="outlined" hide-details style="flex:1" />
-				<v-btn size="x-small" variant="text"				v-show="LopNhomIDSelected"					:icon="IsShowHidedTask ? 'mdi-eye-off-outline' : 'mdi-eye-outline'"
-				v-tooltip="IsShowHidedTask ? $t('message.ShowAssignment') : $t('message.HideAssignment')"
-					@click="IsShowHidedTask = !IsShowHidedTask" />
-			</div>
+				<v-select v-model="KhoiIDSelected" :items="DSKhoi" item-title="TenKhoi" item-value="KhoiID" density="compact" variant="outlined" hide-details="" style="flex:1">
+				<v-btn size="x-small" variant="text" v-show="LopNhomIDSelected" :icon="IsShowHidedTask ? 'mdi-eye-off-outline' : 'mdi-eye-outline'" v-tooltip="IsShowHidedTask ? $t('message.ShowAssignment') : $t('message.HideAssignment')" @click="IsShowHidedTask = !IsShowHidedTask">
+			</v-btn></v-select></div>
 			<div class="ft-filter-row" v-show="LopNhomIDSelected">
 			<button class="ft-fbtn" :class="{ active: StatusSelected === -1 }" @click="StatusSelected = -1">{{ $t('message.All') }}</button>
 			<button class="ft-fbtn" :class="{ active: StatusSelected === 0 }" @click="StatusSelected = 0">{{ $t('message.NeedGrade') }}</button>
@@ -32,8 +29,7 @@
 					<v-icon size="28" class="mb-1 opacity-40">mdi-google-classroom</v-icon>
 					<span>{{ $t('message.ClassNotFound') }}</span>
 				</div>
-				<div v-for="lop in DSLop" :key="lop.LopNhomID"
-					class="ft-bt-item" @click="LopNhomIDSelected = lop.LopNhomID">
+				<div v-for="lop in DSLop" :key="lop.LopNhomID" class="ft-bt-item" @click="LopNhomIDSelected = lop.LopNhomID">
 					<div class="ft-bt-icon" style="background:#E1F5EE">
 						<v-icon size="14" color="#1D9E75">mdi-google-classroom</v-icon>
 					</div>
@@ -51,21 +47,19 @@
 			</template>
 
 			<!-- ASSIGNMENT LIST -->
-			<template v-else>
+			<template v-else="">
 				<div class="ft-back" @click="LopNhomIDSelected = null">
 					<v-icon size="14">mdi-arrow-left</v-icon>
-					<span>{{ DSLop.find(l => l.LopNhomID === LopNhomIDSelected)?.TenLop || $t('message.back') }}</span>
+					<span>{{ DSLop.find(l =&gt; l.LopNhomID === LopNhomIDSelected)?.TenLop || $t('message.back') }}</span>
 				</div>
 				<div class="ft-search">
-					<v-text-field v-model="search" density="compact" variant="outlined" hide-details
-						:placeholder="$t('message.Search')" prepend-inner-icon="mdi-magnify" />
-				</div>
+					<v-text-field v-model="search" density="compact" variant="outlined" hide-details="" :placeholder="$t('message.Search')" prepend-inner-icon="mdi-magnify">
+				</v-text-field></div>
 				<div v-if="FocusTaskListFilter.length === 0" class="ft-empty">
 					<v-icon size="28" class="mb-1 opacity-40">mdi-file-search-outline</v-icon>
 					<span>{{ $t('message.NoAssignmentToGrade') }}</span>
 				</div>
-				<div v-for="task in FocusTaskListFilter" :key="task.AssignToClassID || task.AssignToStudentID"
-					class="ft-bt-item" @click="chamBai(task)">
+				<div v-for="task in FocusTaskListFilter" :key="task.AssignToClassID || task.AssignToStudentID" class="ft-bt-item" @click="chamBai(task)">
 					<div class="ft-bt-icon" :style="{ background: getMonDot(task.MonHocName) + '22' }">
 						<v-icon size="14" :color="getMonDot(task.MonHocName)">mdi-file-document-outline</v-icon>
 					</div>
@@ -74,10 +68,7 @@
 						<div class="ft-bt-meta">{{ task.TenLopHoacNhom }} · {{ task.MonHocName }}</div>
 						<div class="ft-bt-footer">
 							<span class="ft-pill" :class="getStatusPillClass(task.Status)">{{ getStatusText(task.Status) }}</span>
-							<span v-if="task.DueDate" class="ft-due">{{ $t('message.DueDatePrefix') }}: {{ formatDate(task.DueDate) }}</span>						<v-btn icon size="x-small" variant="text" class="ml-auto"
-							:color="task.IsHided ? 'primary' : undefined"
-							v-tooltip="task.IsHided ? $t('message.ShowAssignment') : $t('message.HideAssignment')"
-							@click.stop="toggleHide(task)">
+							<span v-if="task.DueDate" class="ft-due">{{ $t('message.DueDatePrefix') }}: {{ formatDate(task.DueDate) }}</span>						<v-btn icon="" size="x-small" variant="text" class="ml-auto" :color="task.IsHided ? 'primary' : undefined" v-tooltip="task.IsHided ? $t('message.ShowAssignment') : $t('message.HideAssignment')" @click.stop="toggleHide(task)">
 							<v-icon size="12">{{ task.IsHided ? 'mdi-eye-outline' : 'mdi-eye-off-outline' }}</v-icon>
 						</v-btn>						</div>
 						<div class="ft-progress">
