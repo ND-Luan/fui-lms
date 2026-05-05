@@ -73,7 +73,7 @@
 			<div class="lib-body">
 				<!-- Skeleton loading -->
 				<template v-if="isLibraryLoading">
-					<div v-for="n in 5" :key="'skel-'+n" class="lib-bt-item" style="pointer-events:none;opacity:.7">
+					<div v-for="n in 5" :key="'skel-' + n" class="lib-bt-item" style="pointer-events:none;opacity:.7">
 						<div class="lib-bt-icon" style="background:#EAF2FC;flex-shrink:0">
 							<v-skeleton-loader type="avatar" width="15" height="15" style="margin:auto" />
 						</div>
@@ -193,9 +193,9 @@
 								: { icon: 'mdi-presentation-play', color: 'green' },
 							_status: (() => {
 								const m = {
-										1: { text: this.$t('message.Drafting'), color: 'grey' },
-										2: { text: this.$t('message.ReadyToAssign'), color: 'orange' },
-										3: { text: this.$t('message.AssignedLabel'), color: 'success' },
+									1: { text: this.$t('message.Drafting'), color: 'grey' },
+									2: { text: this.$t('message.ReadyToAssign'), color: 'orange' },
+									3: { text: this.$t('message.AssignedLabel'), color: 'success' },
 								}
 								return m[item.Status] || m[1]
 							})()

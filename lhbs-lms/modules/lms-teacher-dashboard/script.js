@@ -5,7 +5,7 @@
 function processGroupedDashboardData(response) {
     console.log("BƯỚC 1: Dữ liệu thô từ API", response);
     if (!response || !response.data || response.data.length < 5) {
-        console.error("LỖI: API GetGroupedDashboard không trả về đủ 5 bảng dữ liệu.");
+        console.error("LỖI: API GetGroupedDashboard không trả về đủ dữ liệu.");
         vueData.teachingGroups = [];
         return;
     }
@@ -200,8 +200,8 @@ function onCloseWindow(id) {
         app.config.globalProperties.v_OpenWindowList.splice(indexWindow, 1)
     }
 }
-async function Update_IsHided(AssignToClassID){
-     ajaxCALL('lms/EL_Teacher_Dashboard_Update_IsHided', {AssignToClassID}, res => {
+async function Update_IsHided(AssignToClassID, AssignToStudentID = 0){
+    ajaxCALL('lms/EL_Teacher_Dashboard_Update_IsHided', { AssignToClassID: AssignToClassID || 0, AssignToStudentID: AssignToStudentID || 0 }, res => {
     })
 }
 // Window helpers — dùng cho openWindow callback từ raw.json / child components

@@ -49,7 +49,7 @@
 							{{ group.TotalPendingGradingCount }} {{ $t('message.NeedGrade') }}
 						</v-chip>
 
-						<uc-btn-with-dialog-add-bt :khoiid="group.KhoiID" :monhocid="group.MonHocID" :group="">
+						<uc-btn-with-dialog-add-bt :khoiid="group.KhoiID" :monhocid="group.MonHocID">
 						</uc-btn-with-dialog-add-bt>
 					</div>
 				</v-col>
@@ -195,15 +195,15 @@
 			},
 			xemTinhTrang(assignment) {
 				this.$emit('view-class', this.classItem);
-			// onOpenWindow('Tình trạng nộp bài', `/lms_Assignment-Class-Detail?Flag=1` )}
-			console.log(assignment);
-			// console.log(assignmentID)
-			openWindow({
-				title: "Sổ điểm Lớp học",
-				url: `/lms-teacher-gradebook?LopID=${assignment.LopID}&MonHocID=${assignment.MonHocID}&HocKi=${vueData.HocKiItem.HocKi}`,
-				id: "WinGiaoBaiTap"
-			}) 
+				// onOpenWindow('Tình trạng nộp bài', `/lms_Assignment-Class-Detail?Flag=1` )}
+				console.log(assignment);
+				// console.log(assignmentID)
+				openWindow({
+					title: "Sổ điểm Lớp học",
+					url: `/lms-teacher-gradebook?LopID=${assignment.LopID}&MonHocID=${assignment.MonHocID}&HocKi=${vueData.HocKiItem.HocKi}`,
+					id: "WinGiaoBaiTap"
+				})
+			}
 		}
-	}
 	}
 </script>

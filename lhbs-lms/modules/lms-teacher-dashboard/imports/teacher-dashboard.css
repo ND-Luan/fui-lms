@@ -708,6 +708,51 @@
     min-height: 50px !important;
 }
 
+/* ======================================================= */
+/* == MOBILE RESPONSIVE                                 == */
+/* ======================================================= */
+
+@media (max-width: 768px) {
+    /* Main panel takes full width — cascade + sidebar hidden via v-if */
+    .lms-main {
+        padding: 6px;
+        gap: 6px;
+    }
+
+    /* Stat grid: 3 cols → 1 row, smaller padding */
+    .lms-stat-card {
+        padding: 10px 12px;
+    }
+    .lms-stat-val { font-size: 18px; }
+
+    /* Panel head: stack vertically on small screens */
+    .lms-panel-head {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+    }
+
+    /* Assignment row: stack stats below title */
+    .assignment-row {
+        grid-template-columns: 1fr;
+        gap: 8px;
+    }
+    .assignment-stats {
+        flex-direction: row !important;
+        flex-wrap: wrap;
+    }
+
+    /* Breadcrumb: allow scroll */
+    .lms-breadcrumb {
+        overflow-x: auto;
+        flex-wrap: nowrap;
+        max-width: calc(100vw - 160px);
+    }
+    .bc-chip {
+        white-space: nowrap;
+    }
+}
+
 .custom-panel-liberies>.v-expansion-panel--active>.v-expansion-panel-title:not(.v-expansion-panel-title--static) {
     min-height: 30px !important;
 }

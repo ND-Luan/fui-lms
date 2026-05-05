@@ -478,7 +478,11 @@ $('document').ready(() => {
                     TourStep5Body: "Manage and create materials and lessons by study week and subject.",
                     TourStep6Title: "Statistics & Reports",
                     TourStep6Body: "View summary statistics of student learning progress by class and subject.",
-                    DueDatePrefix: "Due"
+                    DueDatePrefix: "Due",
+                    ClassUnit: "classes",
+                    AssignByStudent: "Assign to student",
+                    AssignByClass: "By class",
+                    PersonalAssignment: "personal assignment(s)"
                 }
             },
             vi: {
@@ -839,7 +843,11 @@ $('document').ready(() => {
                     TourStep5Body: "Quản lý và tạo tài liệu, bài giảng theo tuần học và môn học.",
                     TourStep6Title: "Thống kê & báo cáo",
                     TourStep6Body: "Xem thống kê tổng hợp tiến độ học tập của học sinh theo lớp và môn học.",
-                    DueDatePrefix: "Hạn"
+                    DueDatePrefix: "Hạn",
+                    ClassUnit: "lớp",
+                    AssignByStudent: "Theo học sinh",
+                    AssignByClass: "Theo lớp",
+                    PersonalAssignment: "bài cá nhân"
                 }
             }
         }

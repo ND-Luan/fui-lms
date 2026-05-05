@@ -44,12 +44,12 @@
 
 				<v-col cols="12" sm="6" md="7" class="d-flex align-center justify-center justify-md-end">
 					<div class="d-flex flex-column flex-lg-row ga-3">
-						<v-chip v-if="!isLibraryView &amp;&amp; group.TotalPendingGradingCount > 0" color="error"
-							variant="flat" prepend-icon="mdi-alert-circle-outline">
+						<v-chip v-if="!isLibraryView &amp; amp;&amp; amp; group.TotalPendingGradingCount > 0"
+							color="error" variant="flat" prepend-icon="mdi-alert-circle-outline">
 							Có {{ group.TotalPendingGradingCount }} bài cần chấm
 						</v-chip>
 
-						<uc-btn-with-dialog-add-bt :khoiid="group.KhoiID" :monhocid="group.MonHocID" :group="">
+						<uc-btn-with-dialog-add-bt :khoiid="group.KhoiID" :monhocid="group.MonHocID">
 						</uc-btn-with-dialog-add-bt>
 					</div>
 				</v-col>
@@ -77,7 +77,7 @@
 										<div class="class-meta mt-2">
 											<span>Sĩ số: {{ classItem.StudentCount }} học sinh</span>
 											<span class="pending-tag"
-												v-if="getPendingCount(classItem) > 0 &amp;&amp; classItem.ResourceType == 'ASSIGNMENT'">
+												v-if="getPendingCount(classItem) > 0 &amp; amp;&amp; amp; classItem.ResourceType == 'ASSIGNMENT'">
 												<v-icon size="small" class="mr-1">mdi-alert-circle</v-icon>
 												{{ getPendingCount(classItem) }} bài cần chấm
 											</span>
@@ -195,9 +195,7 @@
 			},
 			xemTinhTrang(assignment) {
 				this.$emit('view-class', this.classItem);
-				// onOpenWindow('Tình trạng nộp bài', `/lms_Assignment-Class-Detail?Flag=1` )}
 				console.log(assignment);
-				// console.log(assignmentID)
 				openWindow({
 					title: "Sổ điểm Lớp học",
 					url: `/lms-teacher-gradebook?LopID=${assignment.LopID}&MonHocID=${assignment.MonHocID}&HocKi=${vueData.HocKiItem.HocKi}`,
