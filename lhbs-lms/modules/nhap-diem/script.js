@@ -259,7 +259,7 @@ const DataProcessor = {
                     const cellAddress = jspreadsheet.helpers.getCellNameFromCoords(currentJ, currentI);
                     instance[0].setStyle(cellAddress, 'background-color', 'red');
                     Vue.$toast.error(
-                        `Cột điểm chỉ cho phép nhập thang điểm từ ${cotDiem.DiemMin} đến ${cotDiem.DiemMax}!`,
+                        `Cột điểm ${cotDiem.MaCotDiem} chỉ cho phép nhập thang điểm từ ${cotDiem.DiemMin} đến ${cotDiem.DiemMax}!`,
                         { position: 'top' }
                     );
                     return undefined;

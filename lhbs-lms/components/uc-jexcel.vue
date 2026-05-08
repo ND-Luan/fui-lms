@@ -4,27 +4,6 @@
 	</div>
 </template>
 
-<style scoped>
-	/* Style cho filter cells được freeze */
-	::v-deep td.jss_column_filter.jss_freezed {
-		position: sticky !important;
-		z-index: 3 !important;
-		background-color: #fff;
-	}
-
-	/* Tính toán left position cho từng cột freeze */
-	::v-deep td.jss_column_filter.jss_freezed[data-x="0"] {
-		left: 0px !important;
-	}
-
-	::v-deep td.jss_column_filter.jss_freezed[data-x="1"] {
-		left: var(--column-0-width, 100px) !important;
-	}
-
-	::v-deep td.jss_column_filter.jss_freezed[data-x="2"] {
-		left: calc(var(--column-0-width, 100px) + var(--column-1-width, 100px)) !important;
-	}
-</style>
 <script>
 	export default {
 		emits: ['onChange', 'update:modelValue', 'update:dataSource', 'update:minDimensions', 'rowData', 'addressCell'],
@@ -122,7 +101,15 @@
 			this.$nextTick(() => {
 				this.applyFreezeToFilterCells();
 				this.calculateColumnWidths();
-	
+
+				// Áp dụng comments sau khi bảng đã render đầy đủ (tránh lỗi lazyLoading records[y] undefined)
+				if (this.comments && typeof this.comments === 'object') {
+					const ws = jExcelObj[0];
+					Object.entries(this.comments).forEach(([addr, text]) => {
+						try { ws.setComments(addr, text); } catch (e) { /* bỏ qua nếu cell chưa render */ }
+					});
+				}
+
 				const container = this.$refs.spreadsheet.querySelector('.jexcel_container');
 				if (container) {
 					container.addEventListener("scroll", this.handleScroll);
@@ -157,7 +144,6 @@
 						allowInsertRow: false, //Chặn user ko thêm dòng
 						allowManualInsertRow: false, //Chặn user ko thêm dòng
 						columnDrag: false, //Chặn ko cho kéo column
-						comments: this.comments,
 						style: this.styleSheet,
 						filters: this.filters,
 						search: this.search,

@@ -64,7 +64,7 @@
 				<template v-else="">
 					<div class="ft-back" @click="LopNhomIDSelected = null">
 						<v-icon size="14">mdi-arrow-left</v-icon>
-						<span>{{DSLop.find(l => l.LopNhomID === LopNhomIDSelected)?.TenLop || $t('message.back')
+						<span>{{DSLop.find(l =&gt; l.LopNhomID === LopNhomIDSelected)?.TenLop || $t('message.back')
 						}}</span>
 					</div>
 					<div class="ft-search">

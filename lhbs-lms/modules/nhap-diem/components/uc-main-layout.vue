@@ -14,7 +14,8 @@
 					<!-- Đã khóa hết: hiển thị gọn -->
 					<v-menu v-if="isAllColumnsLocked" v-model="action.showAllLockedColumns" offset-y>
 						<template v-slot:activator="{ props }">
-							<v-chip v-bind="props" color="primary" variant="flat" size="small" label style="cursor:pointer">
+							<v-chip v-bind="props" color="primary" variant="flat" size="small" label
+								style="cursor:pointer">
 								<v-icon start size="small" color="white">mdi-lock</v-icon>
 								{{ displayColumns.length }}/{{ displayColumns.length }} cột đã khóa
 							</v-chip>
@@ -40,8 +41,10 @@
 									:variant="cotDiem.isLocked ? 'flat' : (isColumnReadyToLock(cotDiem.value) ? 'tonal' : 'outlined')"
 									size="small" label>
 									<v-icon start v-if="cotDiem.isLocked" size="small" color="white">mdi-lock</v-icon>
-									<v-icon start v-else-if="isColumnReadyToLock(cotDiem.value)" size="small" color="warning">mdi-lock-clock</v-icon>
-									<v-icon start v-else size="small" color="grey">mdi-lock-open-variant-outline</v-icon>
+									<v-icon start v-else-if="isColumnReadyToLock(cotDiem.value)" size="small"
+										color="warning">mdi-lock-clock</v-icon>
+									<v-icon start v-else size="small" color="grey">mdi-lock-open-variant-outline
+									</v-icon>
 									{{ cotDiem.title }}
 								</v-chip>
 							</template>
@@ -54,19 +57,23 @@
 									:variant="displayColumns.slice(5).some(c => isColumnReadyToLock(c.value)) ? 'tonal' : 'outlined'"
 									size="small" label>
 									+{{ displayColumns.length - 5 }} cột khác
-									<v-icon v-if="displayColumns.slice(5).some(c => isColumnReadyToLock(c.value))" end size="x-small">mdi-lock-clock</v-icon>
+									<v-icon v-if="displayColumns.slice(5).some(c => isColumnReadyToLock(c.value))" end
+										size="x-small">mdi-lock-clock</v-icon>
 								</v-chip>
 							</template>
 							<v-list density="compact" max-height="300" class="overflow-y-auto">
 								<v-list-item v-for="cotDiem in displayColumns.slice(5)" :key="cotDiem.value">
 									<template v-slot:prepend>
 										<v-icon v-if="cotDiem.isLocked" size="small" start>mdi-lock</v-icon>
-										<v-icon v-else-if="isColumnReadyToLock(cotDiem.value)" size="small" color="warning" start>mdi-lock-clock</v-icon>
-										<v-icon v-else size="small" color="grey" start>mdi-lock-open-variant-outline</v-icon>
+										<v-icon v-else-if="isColumnReadyToLock(cotDiem.value)" size="small"
+											color="warning" start>mdi-lock-clock</v-icon>
+										<v-icon v-else size="small" color="grey" start>mdi-lock-open-variant-outline
+										</v-icon>
 									</template>
 									<v-list-item-title>
 										{{ cotDiem.title }}
-										<span v-if="isColumnReadyToLock(cotDiem.value)" class="text-caption text-warning ml-1">· sẵn sàng khóa</span>
+										<span v-if="isColumnReadyToLock(cotDiem.value)"
+											class="text-caption text-warning ml-1">· sẵn sàng khóa</span>
 									</v-list-item-title>
 								</v-list-item>
 							</v-list>
@@ -83,25 +90,37 @@
 
 			<!-- Toolbar -->
 			<v-card-text class="py-2 d-flex align-center ga-2 flex-wrap">
-				<v-btn v-if="!isAllColumnsLocked" @click="onLuuTam" color="grey" variant="outlined" :disabled="isDisabled" size="small">
+				<v-btn v-if="!isAllColumnsLocked" @click="onLuuTam" color="grey" variant="outlined"
+					:disabled="isDisabled" size="small">
 					<v-icon start>mdi-content-save</v-icon>
 					Lưu tạm
-					<v-badge v-if="changedCellCount > 0" :content="changedCellCount" color="primary" inline class="ml-1" />
+					<v-badge v-if="changedCellCount > 0" :content="changedCellCount" color="primary" inline
+						class="ml-1" />
+				</v-btn>
+
+				<v-btn v-if="!isAllColumnsLocked && vueData.user.UserID === 'NA0000022'" @click="onLuuTamTatCa"
+					color="deep-orange" variant="outlined" :disabled="isDisabled || !hasStudents" size="small">
+					<v-icon start>mdi-content-save-all</v-icon>
+					Lưu tạm tất cả
 				</v-btn>
 
 				<!-- Nút Khóa cột điểm — mở dialog chọn cột, default check hết -->
-				<v-btn v-if="hasStudents && !isAllColumnsLocked" @click="onOpenLockDialog" color="teal" variant="outlined" :disabled="isDisabled" size="small">
+				<v-btn v-if="hasStudents && !isAllColumnsLocked" @click="onOpenLockDialog" color="teal"
+					variant="outlined" :disabled="isDisabled" size="small">
 					<v-icon start>mdi-lock</v-icon>
 					Khóa cột điểm
-					<v-badge v-if="!dismissedSuggest && suggestLockColumns.length > 0" :content="suggestLockColumns.length" color="warning" inline class="ml-1" />
+					<v-badge v-if="!dismissedSuggest && suggestLockColumns.length > 0"
+						:content="suggestLockColumns.length" color="warning" inline class="ml-1" />
 				</v-btn>
 
-				<v-btn v-if="filter.MonHocItem?.MonHocID === 5" @click="onOpenMauNhanXet" color="primary" variant="outlined" size="small" :disabled="!hasStudents">
+				<v-btn v-if="filter.MonHocItem?.MonHocID === 5" @click="onOpenMauNhanXet" color="primary"
+					variant="outlined" size="small" :disabled="!hasStudents">
 					<v-icon start>mdi-comment-text-outline</v-icon>
 					Mẫu nhận xét
 				</v-btn>
 
-				<v-btn v-if="showGetThemeTestButton" @click="onGetDiemTest" color="primary" variant="outlined" size="small" :disabled="!hasStudents">
+				<v-btn v-if="showGetThemeTestButton" @click="onGetDiemTest" color="primary" variant="outlined"
+					size="small" :disabled="!hasStudents">
 					<v-icon start>mdi-download-outline</v-icon>
 					Lấy điểm Test
 				</v-btn>
@@ -117,18 +136,21 @@
 			<!-- Khu vực thông báo -->
 			<v-card-text v-if="hasStudents" class="py-2 d-flex flex-column ga-2">
 				<!-- Gợi ý khóa cột điểm khi đã nhập đủ -->
-				<v-alert v-if="showSuggestLockAlert" type="success" variant="tonal" density="compact" closable @click:close="onDismissSuggestLock">
+				<v-alert v-if="showSuggestLockAlert" type="success" variant="tonal" density="compact" closable
+					@click:close="onDismissSuggestLock">
 					<div class="d-flex align-center justify-space-between flex-wrap ga-3">
 						<div>
 							<div class="text-body-2 font-weight-bold">
 								Đã nhập đủ điểm —
-								{{ suggestLockColumns.length === 1 ? '"' + suggestLockColumns[0].title + '"' : suggestLockColumns.length + ' cột' }}
+								{{ suggestLockColumns.length === 1 ? '"' + suggestLockColumns[0].title + '"' :
+								suggestLockColumns.length + ' cột' }}
 								sẵn sàng chốt!
 							</div>
 							<div class="text-caption text-medium-emphasis mt-1">
 								Khóa cột điểm để chốt dữ liệu, giáo viên sẽ không thể chỉnh sửa thêm.
 								<template v-if="suggestLockColumns.length > 1">
-									<br />Các cột: <span class="font-weight-medium">{{ suggestLockColumns.map(c => c.title).join(' · ') }}</span>
+									<br />Các cột: <span class="font-weight-medium">{{ suggestLockColumns.map(c =>
+										c.title).join(' · ') }}</span>
 								</template>
 							</div>
 						</div>
@@ -156,7 +178,8 @@
 							Comment <b>(màu đỏ)</b> là ô điểm do <b>Giáo viên khác</b> nhập
 						</div>
 					</v-alert>
-					<v-alert v-if="showStarConversionRule" type="info" variant="tonal" density="compact" style="width: fit-content">
+					<v-alert v-if="showStarConversionRule" type="info" variant="tonal" density="compact"
+						style="width: fit-content">
 						<div class="text-caption">
 							<b>Đổi sao:</b> ≥9 = 5⭐ · ≥7 = 4⭐ · ≥5 = 3⭐ · còn lại = 2⭐
 						</div>
@@ -194,11 +217,12 @@
 						<v-checkbox
 							:model-value="action.lockDialog.selectedColumns.length === selectableColumns.length && selectableColumns.length > 0"
 							:indeterminate="action.lockDialog.selectedColumns.length > 0 && action.lockDialog.selectedColumns.length < selectableColumns.length"
-							@update:model-value="onToggleSelectAllLockColumns"
-							density="compact" hide-details color="teal">
+							@update:model-value="onToggleSelectAllLockColumns" density="compact" hide-details
+							color="teal">
 							<template v-slot:label>
 								<span class="text-body-2 font-weight-medium">Chọn tất cả</span>
-								<span class="text-caption text-medium-emphasis ml-2">({{ action.lockDialog.selectedColumns.length }}/{{ selectableColumns.length }})</span>
+								<span class="text-caption text-medium-emphasis ml-2">({{
+									action.lockDialog.selectedColumns.length }}/{{ selectableColumns.length }})</span>
 							</template>
 						</v-checkbox>
 					</div>
@@ -208,19 +232,19 @@
 					<v-list density="compact" class="rounded border pa-0" style="max-height: 260px; overflow-y: auto;">
 						<v-list-item v-for="(col, i) in lockableColumns" :key="col.value"
 							:class="i < lockableColumns.length - 1 ? 'border-b' : ''" min-height="40"
-							:disabled="col.isLocked"
-							@click="!col.isLocked && onToggleLockColumn(col.value)">
+							:disabled="col.isLocked" @click="!col.isLocked && onToggleLockColumn(col.value)">
 							<template v-slot:prepend>
 								<v-checkbox-btn
 									:model-value="col.isLocked || action.lockDialog.selectedColumns.includes(col.value)"
-									:disabled="col.isLocked"
-									@update:model-value="onToggleLockColumn(col.value)"
+									:disabled="col.isLocked" @update:model-value="onToggleLockColumn(col.value)"
 									color="teal" density="compact" />
 							</template>
 							<v-list-item-title class="text-body-2">{{ col.title }}</v-list-item-title>
 							<template v-slot:append>
-								<v-chip v-if="col.isLocked" size="x-small" color="primary" variant="flat">Đã khóa</v-chip>
-								<v-chip v-else-if="isColumnReadyToLock(col.value)" size="x-small" color="warning" variant="tonal">Đủ điểm</v-chip>
+								<v-chip v-if="col.isLocked" size="x-small" color="primary" variant="flat">Đã khóa
+								</v-chip>
+								<v-chip v-else-if="isColumnReadyToLock(col.value)" size="x-small" color="warning"
+									variant="tonal">Đủ điểm</v-chip>
 							</template>
 						</v-list-item>
 					</v-list>
@@ -229,7 +253,8 @@
 				<v-divider />
 				<v-card-actions class="justify-end ga-2 pa-3">
 					<v-btn variant="text" color="grey" @click="action.lockDialog.show = false">Hủy</v-btn>
-					<v-btn color="teal" variant="flat" :disabled="action.lockDialog.selectedColumns.length === 0" @click="onConfirmLockColumns">
+					<v-btn color="teal" variant="flat" :disabled="action.lockDialog.selectedColumns.length === 0"
+						@click="onConfirmLockColumns">
 						<v-icon start size="18">mdi-lock-check</v-icon>
 						Khóa {{ action.lockDialog.selectedColumns.length }} cột
 					</v-btn>
@@ -245,8 +270,8 @@
 </template>
 
 <script>
-export default {
-	name: 'BangDiem',
+	export default {
+		name: 'BangDiem',
 
 	props: {},
 
@@ -594,6 +619,31 @@ export default {
 			}
 		},
 
+		async onLuuTamTatCa() {
+			try {
+				const allCells = [];
+				this.DSHocSinh.forEach((student, rowIndex) => {
+					this.DSCotDiem_ByMaNhomCotDiem.forEach((cotDiem, colIndex) => {
+						if (student[cotDiem.value] != null && student[cotDiem.value] !== '') {
+							allCells.push({ x: colIndex + this.freezeColumns, y: rowIndex, value: student[cotDiem.value] });
+						}
+					});
+				});
+				const success = await BangDiemService.saveData(
+					allCells, this.DSHocSinh, this.DSHocSinh_API,
+					this.freezeColumns, { ...this.filter, NienKhoa: this.vueData.NienKhoa },
+					this.instance, this.vueData
+				);
+				if (!success) return;
+				await BangDiemService.saveDraft(this.filter, this.vueData);
+				Vue.$toast.success('Lưu tất cả thành công!', { position: 'top' });
+				await this.onRefresh();
+			} catch (error) {
+				console.error('onLuuTamTatCa error:', error);
+				Vue.$toast.error('Có lỗi xảy ra khi lưu dữ liệu!', { position: 'top' });
+			}
+		},
+
 		async onGuiBGH() {
 			try {
 				const success = await BangDiemService.saveData(
@@ -662,5 +712,5 @@ export default {
 			}
 		}
 	}
-}
+	}
 </script>

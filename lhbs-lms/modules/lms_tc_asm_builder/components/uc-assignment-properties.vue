@@ -24,7 +24,8 @@
 			<div class="d-flex">
 				<v-spacer></v-spacer>
 				<v-btn v-if="item.type === 'group'" variant="outlined" color="primary"
-					@click="onOpenModalImportFromHocLieu()"><v-icon start class="me-1">mdi-download</v-icon> Import từ kho học liệu</v-btn>
+					@click="onOpenModalImportFromHocLieu()"><v-icon start class="me-1">mdi-download</v-icon> Import từ
+					kho học liệu</v-btn>
 				<v-btn v-else icon variant="text" @click="onOpenModalKiNang()"><v-icon>mdi-cog-outline</v-icon></v-btn>
 			</div>
 		</div>
@@ -76,7 +77,7 @@
 					<v-col cols="6">
 						<v-text-field :model-value="selectedQuestionData.points" @update:model-value="onPointInput"
 							:label="$t('message.Score')" type="text" variant="outlined" density="compact"
-						:clearable="false" :disabled="isPartialScoring" />
+							:clearable="false" :disabled="isPartialScoring" />
 					</v-col>
 					<v-col cols="6">
 						<v-select :model-value="selectedQuestionData.gradingType || 'auto'"
@@ -116,9 +117,10 @@
 							</v-radio-group>
 						</v-col>
 						<v-col cols="8" class="d-flex justify-center align-center">
-							<v-text-field v-if="!selectedQuestionData.config.isAdvanced" :model-value="option.text"
+							<v-textarea v-if="!selectedQuestionData.config.isAdvanced" :model-value="option.text"
 								@update:model-value="updateOptionText(index, $event)" dense variant="outlined"
-							hide-details :clearable="false" placeholder="Nhập nội dung đáp án..." />
+								hide-details :clearable="false" placeholder="Nhập nội dung đáp án..." auto-grow
+								:rows="2" />
 							<uc-latex-edit class="w-100" v-else v-model:content="option.text" />
 						</v-col>
 						<v-col cols="2" class="d-flex justify-center align-center">
@@ -132,26 +134,24 @@
 				<!-- QUIZ_MULTIPLE_CHOICE -->
 				<div v-else-if="selectedQuestionData.type === 'QUIZ_MULTIPLE_CHOICE'">
 					<div class="mb-3">
-						<v-select
-							density="compact" variant="outlined" hide-details
+						<v-select density="compact" variant="outlined" hide-details
 							:model-value="selectedQuestionData.config.scoringMode || 'equal'"
-							@update:model-value="onScoringModeChange($event)"
-							:items="[
+							@update:model-value="onScoringModeChange($event)" :items="[
 								{ value: 'equal', title: 'Tính điểm chia đều' },
 								{ value: 'partial', title: 'Tính điểm theo từng ý' }
-							]"
-							label="Cách tính điểm"
-						/>
-						<v-alert v-if="(selectedQuestionData.config.scoringMode || 'equal') === 'partial'"
-							class="mt-2" density="compact" variant="tonal" color="info" type="info">
+							]" label="Cách tính điểm" />
+						<v-alert v-if="(selectedQuestionData.config.scoringMode || 'equal') === 'partial'" class="mt-2"
+							density="compact" variant="tonal" color="info" type="info">
 							<div class="text-caption">
 								<b>Tính điểm theo từng ý :</b><br>
-								Đúng 1 ý: 0,1đ &nbsp;·&nbsp; Đúng 2 ý: 0,25đ &nbsp;·&nbsp; Đúng 3 ý: 0,5đ &nbsp;·&nbsp; Đúng cả 4 ý: 1,0đ<br>
+								Đúng 1 ý: 0,1đ &nbsp;·&nbsp; Đúng 2 ý: 0,25đ &nbsp;·&nbsp; Đúng 3 ý: 0,5đ &nbsp;·&nbsp;
+								Đúng cả 4 ý: 1,0đ<br>
 								<span class="font-weight-medium">Bắt buộc: 4 đáp án, điểm tối đa 1,0đ.</span>
 							</div>
 						</v-alert>
 					</div>
-					<v-row dense v-for="(option, index) in selectedQuestionData.config.options" :key="option.id" align="center">
+					<v-row dense v-for="(option, index) in selectedQuestionData.config.options" :key="option.id"
+						align="center">
 						<v-col cols="2" class="d-flex justify-center">
 							<v-checkbox :model-value="selectedQuestionData.config.correctAnswers" :value="option.id"
 								@update:model-value="updateQuestionConfig('correctAnswers', $event)" hide-details
@@ -159,16 +159,19 @@
 							</v-checkbox>
 						</v-col>
 						<v-col cols="9">
-							<v-text-field v-if="!selectedQuestionData.config.isAdvanced" :model-value="option.text"
-								@update:model-value="updateOptionText(index, $event)" variant="outlined"
-							hide-details :clearable="false" density="compact" placeholder="Nhập nội dung đáp án..." />
+							<v-textarea v-if="!selectedQuestionData.config.isAdvanced" :model-value="option.text"
+								@update:model-value="updateOptionText(index, $event)" variant="outlined" hide-details
+								:clearable="false" density="compact" placeholder="Nhập nội dung đáp án..." auto-grow
+								:rows="2" />
 							<uc-latex-edit v-else v-model:content="option.text" />
 						</v-col>
 						<v-col cols="1" class="d-flex justify-center">
-						<v-icon v-if="(selectedQuestionData.config.scoringMode || 'equal') !== 'partial'" size="20" class="cursor-pointer text-red" @click="removeOption(index)">mdi-close</v-icon>
-					</v-col>
-				</v-row>
-					<v-btn v-if="(selectedQuestionData.config.scoringMode || 'equal') !== 'partial'" block size="small" @click="addOption" variant="tonal" class="mt-2">
+							<v-icon v-if="(selectedQuestionData.config.scoringMode || 'equal') !== 'partial'" size="20"
+								class="cursor-pointer text-red" @click="removeOption(index)">mdi-close</v-icon>
+						</v-col>
+					</v-row>
+					<v-btn v-if="(selectedQuestionData.config.scoringMode || 'equal') !== 'partial'" block size="small"
+						@click="addOption" variant="tonal" class="mt-2">
 						<v-icon start>mdi-plus</v-icon>{{ $t('message.MoreAnswer') }}
 					</v-btn>
 				</div>
@@ -183,42 +186,42 @@
 				<!-- QUIZ_MULTIPLE_TRUE_FALSE -->
 				<div v-else-if="selectedQuestionData.type === 'QUIZ_MULTIPLE_TRUE_FALSE'">
 					<div class="mb-3">
-						<v-select
-							density="compact" variant="outlined" hide-details
+						<v-select density="compact" variant="outlined" hide-details
 							:model-value="selectedQuestionData.config.scoringMode || 'equal'"
-							@update:model-value="onScoringModeChange($event)"
-							:items="[
+							@update:model-value="onScoringModeChange($event)" :items="[
 								{ value: 'equal', title: 'Tính điểm chia đều' },
 								{ value: 'partial', title: 'Tính điểm theo từng ý' }
-							]"
-							label="Cách tính điểm"
-						/>
-						<v-alert v-if="(selectedQuestionData.config.scoringMode || 'equal') === 'partial'"
-							class="mt-2" density="compact" variant="tonal" color="info" type="info">
+							]" label="Cách tính điểm" />
+						<v-alert v-if="(selectedQuestionData.config.scoringMode || 'equal') === 'partial'" class="mt-2"
+							density="compact" variant="tonal" color="info" type="info">
 							<div class="text-caption">
 								<b>Tính điểm theo từng ý :</b><br>
-								Đúng 1 ý: 0,1đ &nbsp;·&nbsp; Đúng 2 ý: 0,25đ &nbsp;·&nbsp; Đúng 3 ý: 0,5đ &nbsp;·&nbsp; Đúng cả 4 ý: 1,0đ<br>
+								Đúng 1 ý: 0,1đ &nbsp;·&nbsp; Đúng 2 ý: 0,25đ &nbsp;·&nbsp; Đúng 3 ý: 0,5đ &nbsp;·&nbsp;
+								Đúng cả 4 ý: 1,0đ<br>
 								<span class="font-weight-medium">Bắt buộc: 4 đáp án, điểm tối đa 1,0đ.</span>
 							</div>
 						</v-alert>
 					</div>
-					<v-row v-for="(option, index) in selectedQuestionData.config.options" :key="index" dense align="center">
+					<v-row v-for="(option, index) in selectedQuestionData.config.options" :key="index" dense
+						align="center">
 						<v-col class="d-flex justify-space-evenly" cols="3">
-						<v-checkbox v-model="option.correctAnswer" color="primary" hide-details
-							@update:modelValue="(val) => { if (val) option.inCorrectAnswer = false }" />
-						<v-checkbox v-model="option.inCorrectAnswer" color="red" hide-details
+							<v-checkbox v-model="option.correctAnswer" color="primary" hide-details
+								@update:modelValue="(val) => { if (val) option.inCorrectAnswer = false }" />
+							<v-checkbox v-model="option.inCorrectAnswer" color="red" hide-details
 								@update:modelValue="(val) => { if (val) option.correctAnswer = false }" />
 						</v-col>
 						<v-col cols="7" class="d-flex align-center ga-1">
-							<v-text-field :model-value="option.text"
-								@update:model-value="updateOptionText(index, $event)"
+							<v-textarea :model-value="option.text" @update:model-value="updateOptionText(index, $event)"
 								variant="outlined" density="compact" hide-details :clearable="false"
-								placeholder="Nhập nội dung đáp án..." />
-<v-btn v-if="selectedQuestionData.config.options.length > 2 && (selectedQuestionData.config.scoringMode || 'equal') !== 'partial'" icon="mdi-delete-outline"
-							variant="text" size="small" color="red" @click="removeOption(index)" />
-					</v-col>
-				</v-row>
-					<v-btn v-if="(selectedQuestionData.config.scoringMode || 'equal') !== 'partial'" prepend-icon="mdi-plus" variant="text" color="primary" @click="addOption('options')">
+								placeholder="Nhập nội dung đáp án..." auto-grow :rows="2" />
+							<v-btn
+								v-if="selectedQuestionData.config.options.length > 2 && (selectedQuestionData.config.scoringMode || 'equal') !== 'partial'"
+								icon="mdi-delete-outline" variant="text" size="small" color="red"
+								@click="removeOption(index)" />
+						</v-col>
+					</v-row>
+					<v-btn v-if="(selectedQuestionData.config.scoringMode || 'equal') !== 'partial'"
+						prepend-icon="mdi-plus" variant="text" color="primary" @click="addOption('options')">
 						{{ $t('message.MoreAnswer') }}
 					</v-btn>
 				</div>
@@ -231,40 +234,27 @@
 						class="d-flex align-start mb-2 ga-2">
 
 						<!-- Type badge -->
-						<v-chip
-							size="x-small" variant="tonal"
-							:color="part.type === 'blank' ? 'indigo' : 'default'"
-							class="mt-2 flex-shrink-0"
-						>{{ part.type === 'blank' ? 'Trống' : 'Văn bản' }}</v-chip>
+						<v-chip size="x-small" variant="tonal" :color="part.type === 'blank' ? 'indigo' : 'default'"
+							class="mt-2 flex-shrink-0">{{ part.type === 'blank' ? 'Trống' : 'Văn bản' }}</v-chip>
 
 						<!-- Text part -->
-						<v-text-field
-							v-if="part.type === 'text'"
-							:model-value="part.value"
+						<v-text-field v-if="part.type === 'text'" :model-value="part.value"
 							@update:model-value="updatePart(index, 'value', $event)"
-							:placeholder="$t('message.TextContent')"
-							variant="outlined" density="compact" hide-details :clearable="false" class="flex-grow-1"
-						/>
+							:placeholder="$t('message.TextContent')" variant="outlined" density="compact" hide-details
+							:clearable="false" class="flex-grow-1" />
 
 						<!-- Blank part -->
-						<div
-							v-else-if="part.type === 'blank'"
-							class="flex-grow-1 rounded pa-2"
-							style="border: 1.5px dashed #9E9E9E;"
-						>
+						<div v-else-if="part.type === 'blank'" class="flex-grow-1 rounded pa-2"
+							style="border: 1.5px dashed #9E9E9E;">
 							<!-- Danh sách đáp án đúng -->
 							<div v-if="getAnswersWithId(part.id, part).length > 0" class="d-flex flex-wrap ga-1 mb-2">
-								<v-chip
-									v-for="ans in getAnswersWithId(part.id, part)"
-									:key="ans.id"
-									size="small"
+								<v-chip v-for="ans in getAnswersWithId(part.id, part)" :key="ans.id" size="small"
 									:color="editingBlankState[part.id] && editingBlankState[part.id].editingId === ans.id ? 'primary' : 'success'"
 									variant="tonal"
 									:prepend-icon="editingBlankState[part.id] && editingBlankState[part.id].editingId === ans.id ? 'mdi-pencil' : 'mdi-check'"
-									closable
-									@click="selectAnswerForEdit(part.id, ans.id)"
-									@click:close.stop="removeAcceptedAnswer(part.id, index, ans.id)"
-								>{{ ans.value }}</v-chip>
+									closable @click="selectAnswerForEdit(part.id, ans.id)"
+									@click:close.stop="removeAcceptedAnswer(part.id, index, ans.id)">{{ ans.value
+									}}</v-chip>
 							</div>
 							<p v-else class="text-caption text-medium-emphasis mb-2">Chưa có đáp án đúng</p>
 
@@ -272,11 +262,10 @@
 							<v-text-field
 								:model-value="editingBlankState[part.id] ? editingBlankState[part.id].inputValue : ''"
 								@update:model-value="setBlankInput(part.id, $event)"
-								@keydown.enter.prevent="commitBlankAnswer(part.id, index, part)"
-								variant="outlined" density="compact" hide-details :clearable="false"
+								@keydown.enter.prevent="commitBlankAnswer(part.id, index, part)" variant="outlined"
+								density="compact" hide-details :clearable="false"
 								:placeholder="editingBlankState[part.id] && editingBlankState[part.id].editingId !== null ? 'Sửa đáp án...' : 'Thêm đáp án đúng...'"
-								append-inner-icon="mdi-keyboard-return"
-							/>
+								append-inner-icon="mdi-keyboard-return" />
 						</div>
 
 						<v-btn icon size="small" variant="text" color="default" @click="removePart(index)" class="mt-1">
@@ -285,28 +274,38 @@
 					</div>
 
 					<div class="d-flex ga-2 mt-1">
-						<v-btn size="small" @click="addPart('text')" variant="tonal" prepend-icon="mdi-format-text">{{ $t('message.AddText') }}</v-btn>
-						<v-btn size="small" @click="addPart('blank')" variant="tonal" color="indigo" prepend-icon="mdi-form-textbox">{{ $t('message.AddBlank') }}</v-btn>
+						<v-btn size="small" @click="addPart('text')" variant="tonal" prepend-icon="mdi-format-text">{{
+							$t('message.AddText') }}</v-btn>
+						<v-btn size="small" @click="addPart('blank')" variant="tonal" color="indigo"
+							prepend-icon="mdi-form-textbox">{{ $t('message.AddBlank') }}</v-btn>
 					</div>
 				</div>
 				<!-- QUIZ_MATCHING (QUIZ_MATCHING_V2 kept for backward compat with existing data) -->
 				<div v-else-if="['QUIZ_MATCHING', 'QUIZ_MATCHING_V2'].includes(selectedQuestionData.type)">
 					<v-row dense class="mb-1">
-						<v-col><p class="text-caption font-weight-medium mb-0">{{ $t('message.Column') }} A</p></v-col>
-						<v-col><p class="text-caption font-weight-medium mb-0">{{ $t('message.Column') }} B ({{ $t('message.Similar') }})</p></v-col>
+						<v-col>
+							<p class="text-caption font-weight-medium mb-0">{{ $t('message.Column') }} A</p>
+						</v-col>
+						<v-col>
+							<p class="text-caption font-weight-medium mb-0">{{ $t('message.Column') }} B ({{
+								$t('message.Similar') }})</p>
+						</v-col>
 						<v-col cols="2"></v-col>
 					</v-row>
 					<v-row v-for="(pair, index) in selectedQuestionData.config.columnA" :key="index" dense class="mb-1">
 						<v-col cols="5">
 							<v-text-field v-if="!selectedQuestionData.config.isAdvanced" v-model="pair.text"
-							density="compact" variant="outlined" hide-details :clearable="false" :placeholder="$t('message.Column') + ' A...'" />
-						<uc-latex-edit v-else v-model:content="pair.text" class="w-100" />
-					</v-col>
-					<v-col cols="5">
-						<v-text-field v-if="!selectedQuestionData.config.isAdvanced"
-							v-model="selectedQuestionData.config.columnB[index].text" density="compact"
-							variant="outlined" hide-details :clearable="false" :placeholder="$t('message.Column') + ' B...'"/>
-							<uc-latex-edit v-else v-model:content="selectedQuestionData.config.columnB[index].text" class="w-100" />
+								density="compact" variant="outlined" hide-details :clearable="false"
+								:placeholder="$t('message.Column') + ' A...'" />
+							<uc-latex-edit v-else v-model:content="pair.text" class="w-100" />
+						</v-col>
+						<v-col cols="5">
+							<v-text-field v-if="!selectedQuestionData.config.isAdvanced"
+								v-model="selectedQuestionData.config.columnB[index].text" density="compact"
+								variant="outlined" hide-details :clearable="false"
+								:placeholder="$t('message.Column') + ' B...'" />
+							<uc-latex-edit v-else v-model:content="selectedQuestionData.config.columnB[index].text"
+								class="w-100" />
 						</v-col>
 						<v-col cols="2" class="d-flex align-center">
 							<v-btn icon="mdi-delete-outline" variant="text" size="small" color="red"
@@ -437,7 +436,7 @@
 				}
 				this.updateGroups(ng);
 			},
-
+	
 			isAutoGradable(type) { return vueData.isAutoGradable(type) },
 			// Handle emit từ uc-media cho group
 			handleGroupMediaUpdate(updatedData) {

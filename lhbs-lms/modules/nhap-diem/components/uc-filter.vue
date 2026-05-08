@@ -17,7 +17,9 @@
 				item-title="TenNhomCotDiem_VI" item-value="MaNhomCotDiem" return-object :disabled="!form.MonHocItem" />
 		</v-col>
 		<v-col cols="6" sm="6" md="4" lg="2">
-			<v-btn @click="onRefreshFilter" variant="outlined" color="primary" ><v-icon start>mdi-reload</v-icon>Làm mới</v-btn>
+			<v-btn @click="onRefreshFilter" variant="outlined" color="primary">
+				<v-icon start>mdi-reload</v-icon>Làm mới
+			</v-btn>
 		</v-col>
 	</v-row>
 </template>
