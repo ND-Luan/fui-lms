@@ -1,5 +1,5 @@
 <template>
-	<div>
+	<Global>
 		<v-card>
 			<!-- Header -->
 			<v-card-title class="d-flex align-center flex-wrap ga-2">
@@ -111,6 +111,12 @@
 					Khóa cột điểm
 					<v-badge v-if="!dismissedSuggest && suggestLockColumns.length > 0"
 						:content="suggestLockColumns.length" color="warning" inline class="ml-1" />
+				</v-btn>
+
+				<v-btn v-if="canManageUnlockColumns && hasStudents && lockedColumns.length > 0" @click="onOpenUnlockDialog" color="warning"
+					variant="outlined" size="small">
+					<v-icon start>mdi-lock-open-variant</v-icon>
+					Mở khóa cột điểm
 				</v-btn>
 
 				<v-btn v-if="filter.MonHocItem?.MonHocID === 5" @click="onOpenMauNhanXet" color="primary"
@@ -262,16 +268,79 @@
 			</v-card>
 		</v-dialog>
 
+		<!-- Dialog Mở Khóa Cột Điểm -->
+		<v-dialog v-if="canManageUnlockColumns" v-model="action.unlockDialog.show" max-width="520" persistent>
+			<v-card rounded="lg">
+				<v-card-title class="d-flex align-center ga-2 pt-4 pb-2 px-4">
+					<v-icon color="warning" size="22">mdi-lock-open-variant</v-icon>
+					<span class="text-body-1 font-weight-bold">Mở khóa cột điểm</span>
+				</v-card-title>
+				<v-divider />
+
+				<v-card-text class="pt-3 px-4 pb-2">
+					<div class="text-body-2 text-medium-emphasis mb-3">
+						Chọn các cột điểm cần mở khóa và nhập lý do.
+					</div>
+
+					<div class="d-flex align-center mb-1">
+						<v-checkbox
+							:model-value="action.unlockDialog.selectedColumns.length === lockedColumns.length && lockedColumns.length > 0"
+							:indeterminate="action.unlockDialog.selectedColumns.length > 0 && action.unlockDialog.selectedColumns.length < lockedColumns.length"
+							@update:model-value="onToggleSelectAllUnlockColumns" density="compact" hide-details
+							color="warning">
+							<template v-slot:label>
+								<span class="text-body-2 font-weight-medium">Chọn tất cả cột đã khóa</span>
+								<span class="text-caption text-medium-emphasis ml-2">({{
+									action.unlockDialog.selectedColumns.length }}/{{ lockedColumns.length }})</span>
+							</template>
+						</v-checkbox>
+					</div>
+
+					<v-divider class="mb-1" />
+
+					<v-list density="compact" class="rounded border pa-0 mb-3" style="max-height: 220px; overflow-y: auto;">
+						<v-list-item v-for="(col, i) in lockedColumns" :key="col.value"
+							:class="i < lockedColumns.length - 1 ? 'border-b' : ''" min-height="40"
+							@click="onToggleUnlockColumn(col.value)">
+							<template v-slot:prepend>
+								<v-checkbox-btn :model-value="action.unlockDialog.selectedColumns.includes(col.value)"
+									@update:model-value="onToggleUnlockColumn(col.value)" color="warning" density="compact" />
+							</template>
+							<v-list-item-title class="text-body-2">{{ col.title }}</v-list-item-title>
+							<template v-slot:append>
+								<v-chip size="x-small" color="primary" variant="flat">Đang khóa</v-chip>
+							</template>
+						</v-list-item>
+					</v-list>
+
+					<v-textarea v-model="action.unlockDialog.reason" label="Lý do mở khóa" rows="3" auto-grow
+						placeholder="Nhập lý do mở khóa cột điểm..." hide-details="auto" />
+				</v-card-text>
+
+				<v-divider />
+				<v-card-actions class="justify-end ga-2 pa-3">
+					<v-btn variant="text" color="grey" @click="action.unlockDialog.show = false">Hủy</v-btn>
+					<v-btn color="warning" variant="flat"
+						:disabled="action.unlockDialog.selectedColumns.length === 0"
+						@click="onConfirmUnlockColumns">
+						<v-icon start size="18">mdi-lock-open-variant</v-icon>
+						Mở khóa {{ action.unlockDialog.selectedColumns.length }} cột
+					</v-btn>
+				</v-card-actions>
+			</v-card>
+		</v-dialog>
+
 		<!-- Dialog Mẫu Nhận Xét -->
 		<uc-dialog-mau-nhan-xet v-model="action.isShowDialogMauNhanXet" :filter="filter" :DSHocSinh="DSHocSinh"
 			@onSubmit="onXacNhanMauNhanXet" />
 
-	</div>
+	</Global>
 </template>
 
 <script>
 	export default {
 		name: 'BangDiem',
+		inject: ['snackbarRef', 'iframeRef', 'confirmRef'],
 
 	props: {},
 
@@ -285,6 +354,11 @@
 				lockDialog: {
 					show: false,
 					selectedColumns: []
+				},
+				unlockDialog: {
+					show: false,
+					selectedColumns: [],
+					reason: ''
 				}
 			},
 
@@ -355,6 +429,14 @@
 		isAllColumnsLocked() {
 			if (!this.displayColumns.length) return false;
 			return this.displayColumns.every(col => col.isLocked);
+		},
+
+		lockedColumns() {
+			return this.displayColumns.filter(col => col.isLocked);
+		},
+
+		canManageUnlockColumns() {
+			return this.vueData?.user?.UserID === 'NA0000022';
 		},
 
 		/** Tất cả cột trong dialog khóa */
@@ -432,6 +514,20 @@
 	},
 
 	methods: {
+		showSnackbar(message, color = 'info') {
+			if (this.snackbarRef?.value?.showSnackbar) {
+				this.snackbarRef.value.showSnackbar({ message, color });
+				return;
+			}
+			Vue.$toast[color]?.(message, { position: 'top' });
+		},
+
+		ensureUnlockPermission() {
+			if (this.canManageUnlockColumns) return true;
+			this.showSnackbar('Tính năng mở khóa cột điểm chỉ dành cho tài khoản NA.', 'warning');
+			return false;
+		},
+
 		isColumnReadyToLock(maCotDiem) {
 			return this.suggestLockColumnSet.has(maCotDiem);
 		},
@@ -477,7 +573,7 @@
 		onOpenLockDialog() {
 			const isSaved = this.DSHocSinh_API.some(hs => hs.KQHTID);
 			if (!isSaved) {
-				Vue.$toast.warning('Chưa có dữ liệu được lưu. Vui lòng lưu tạm trước khi khóa cột điểm!', { position: 'top' });
+				this.showSnackbar('Chưa có dữ liệu được lưu. Vui lòng lưu tạm trước khi khóa cột điểm!', 'warning');
 				return;
 			}
 			// Default check hết các cột nhập tay chưa khóa
@@ -519,16 +615,65 @@
 				if (nlpcIDList.length > 0) {
 					await BangDiemService.lock.lockNLPCColumns(this.filter, this.vueData, this.DSHocSinh_API);
 				}
-				Vue.$toast.success(
+				this.showSnackbar(
 					nlpcIDList.length > 0
 						? 'Đã khóa cột điểm và các môn Năng lực – Phẩm chất đi kèm!'
 						: `Đã khóa ${selectedCols.length} cột điểm!`,
-					{ position: 'top' }
+					'success'
 				);
 				await this.onRefresh();
 			} catch (error) {
 				console.error('onConfirmLockColumns error:', error);
-				Vue.$toast.error('Có lỗi xảy ra khi khóa cột điểm!', { position: 'top' });
+				this.showSnackbar('Có lỗi xảy ra khi khóa cột điểm!', 'error');
+			}
+		},
+
+		onOpenUnlockDialog() {
+			if (!this.ensureUnlockPermission()) return;
+			this.action.unlockDialog.selectedColumns = this.lockedColumns.map(col => col.value);
+			this.action.unlockDialog.reason = '';
+			this.action.unlockDialog.show = true;
+		},
+
+		onToggleSelectAllUnlockColumns(val) {
+			if (val) {
+				this.action.unlockDialog.selectedColumns = this.lockedColumns.map(col => col.value);
+			} else {
+				this.action.unlockDialog.selectedColumns = [];
+			}
+		},
+
+		onToggleUnlockColumn(value) {
+			const idx = this.action.unlockDialog.selectedColumns.indexOf(value);
+			if (idx === -1) {
+				this.action.unlockDialog.selectedColumns = [...this.action.unlockDialog.selectedColumns, value];
+			} else {
+				this.action.unlockDialog.selectedColumns = this.action.unlockDialog.selectedColumns.filter(v => v !== value);
+			}
+		},
+
+		async onConfirmUnlockColumns() {
+			if (!this.ensureUnlockPermission()) return;
+			const selectedCols = this.lockedColumns.filter(col =>
+				this.action.unlockDialog.selectedColumns.includes(col.value)
+			);
+			if (!selectedCols.length) return;
+
+			const reason = (this.action.unlockDialog.reason || '').trim();
+			if (!reason) {
+				this.showSnackbar('Vui lòng nhập lý do mở khóa cột điểm!', 'warning');
+				return;
+			}
+
+			this.action.unlockDialog.show = false;
+
+			try {
+				await BangDiemService.lock.unlockColumns(selectedCols, this.filter, reason);
+				this.showSnackbar(`Đã mở khóa ${selectedCols.length} cột điểm!`, 'success');
+				await this.onRefresh();
+			} catch (error) {
+				console.error('onConfirmUnlockColumns error:', error);
+				this.showSnackbar('Có lỗi xảy ra khi mở khóa cột điểm!', 'error');
 			}
 		},
 
@@ -579,7 +724,7 @@
 				this.keyComp++;
 			} catch (error) {
 				console.error('onRefresh error:', error);
-				Vue.$toast.error('Có lỗi xảy ra khi tải dữ liệu!', { position: 'top' });
+				this.showSnackbar('Có lỗi xảy ra khi tải dữ liệu!', 'error');
 			}
 		},
 
@@ -611,11 +756,11 @@
 				);
 				if (!success) return;
 				await BangDiemService.saveDraft(this.filter, this.vueData);
-				Vue.$toast.success('Lưu dữ liệu thành công!', { position: 'top' });
+				this.showSnackbar('Lưu dữ liệu thành công!', 'success');
 				await this.onRefresh();
 			} catch (error) {
 				console.error('onLuuTam error:', error);
-				Vue.$toast.error('Có lỗi xảy ra khi lưu dữ liệu!', { position: 'top' });
+				this.showSnackbar('Có lỗi xảy ra khi lưu dữ liệu!', 'error');
 			}
 		},
 
@@ -636,11 +781,11 @@
 				);
 				if (!success) return;
 				await BangDiemService.saveDraft(this.filter, this.vueData);
-				Vue.$toast.success('Lưu tất cả thành công!', { position: 'top' });
+				this.showSnackbar('Lưu tất cả thành công!', 'success');
 				await this.onRefresh();
 			} catch (error) {
 				console.error('onLuuTamTatCa error:', error);
-				Vue.$toast.error('Có lỗi xảy ra khi lưu dữ liệu!', { position: 'top' });
+				this.showSnackbar('Có lỗi xảy ra khi lưu dữ liệu!', 'error');
 			}
 		},
 
@@ -653,11 +798,11 @@
 				);
 				if (!success) return;
 				await BangDiemService.sendToBGH(this.filter, this.vueData);
-				Vue.$toast.success('Gửi BGH thành công!', { position: 'top' });
+				this.showSnackbar('Gửi BGH thành công!', 'success');
 				await this.onRefresh();
 			} catch (error) {
 				console.error('onGuiBGH error:', error);
-				Vue.$toast.error('Có lỗi xảy ra khi gửi BGH!', { position: 'top' });
+				this.showSnackbar('Có lỗi xảy ra khi gửi BGH!', 'error');
 			}
 		},
 
@@ -691,10 +836,10 @@
 
 				this.DSHocSinh = updatedStudents;
 				this.keyComp++;
-				Vue.$toast.success('Lấy điểm Test thành công!', { position: 'top' });
+				this.showSnackbar('Lấy điểm Test thành công!', 'success');
 			} catch (error) {
 				console.error('onGetDiemTest error:', error);
-				Vue.$toast.error('Có lỗi xảy ra!', { position: 'top' });
+				this.showSnackbar('Có lỗi xảy ra!', 'error');
 			}
 		},
 
@@ -705,10 +850,10 @@
 				);
 				const fileName = `Bang_Diem_Lop_${this.filter.LopItem.TenLop}_${this.filter.MonHocItem.MonHocName}.xlsx`;
 				BangDiemService.export.exportExcel(this.headers, exportData, fileName);
-				Vue.$toast.success('Xuất Excel thành công!', { position: 'top' });
+				this.showSnackbar('Xuất Excel thành công!', 'success');
 			} catch (error) {
 				console.error('onExportExcel error:', error);
-				Vue.$toast.error('Có lỗi xảy ra khi xuất Excel!', { position: 'top' });
+				this.showSnackbar('Có lỗi xảy ra khi xuất Excel!', 'error');
 			}
 		}
 	}

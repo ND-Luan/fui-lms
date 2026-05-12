@@ -87,6 +87,10 @@ const ApiService = {
     async toggleKhoaCotDiem(params) {
         return await ajaxCALLPromise("lms/KhoaCotDiem_Ins_And_Upd", params);
     },
+    /** Cập nhật tình trạng khóa cột điểm theo KhoaCotDiemID */
+    async updateKhoaCotDiemTinhTrang(params) {
+        return await ajaxCALLPromise("lms/KhoaCotDiem_TinhTrang_Upd_ByKhoaCotDiem", params);
+    },
     /** Lấy config STEM theo niên khóa từ tblConfig_STEM */
     async getSTEMConfig(params) {
         return await ajaxCALLPromise("lms/Config_STEM_Get", params);
@@ -730,6 +734,22 @@ const LockService = {
         }
     },
     /**
+     * Mở khóa một danh sách cột điểm của môn chính
+     * @param {Array} columns - [{ value: MaCotDiem, KhoaCotDiemID }]
+     * @param {object} filter
+     * @param {string} reason
+     */
+    async unlockColumns(columns, filter, reason) {
+        for (const cotDiem of columns) {
+            if (!cotDiem.KhoaCotDiemID) continue;
+            await ApiService.updateKhoaCotDiemTinhTrang({
+                KhoaCotDiemID: cotDiem.KhoaCotDiemID,
+                TinhTrang: 0,
+                LyDo: reason
+            });
+        }
+    },
+    /**
      * Khóa toàn bộ cột điểm của các môn NLPC đi kèm
      * @param {object} filter
      * @param {object} vueData
@@ -858,7 +878,12 @@ const BangDiemService = {
             const nestedHeaders = this.header.buildNestedHeaders(gradeColumns, apiData, freezeColumns, isGroup);
             const displayColumns = DSCotDiem_ByMaNhomCotDiem.map(cotDiem => {
                 const lockedCol = lockedColumns.find(x => x.MaCotDiem === cotDiem.value && x.TinhTrang === true);
-                return { title: cotDiem.title, value: cotDiem.value, isLocked: !!lockedCol };
+                return {
+                    title: cotDiem.title,
+                    value: cotDiem.value,
+                    isLocked: !!lockedCol,
+                    KhoaCotDiemID: lockedCol?.KhoaCotDiemID || null
+                };
             });
             // 8. Data rows
             const dataRows = this.buildDataRows(students, apiData, filter, headers, freezeColumns, isEnglish, vueData);
