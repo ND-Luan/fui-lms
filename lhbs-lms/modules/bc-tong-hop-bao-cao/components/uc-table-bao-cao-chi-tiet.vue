@@ -16,7 +16,9 @@
 			<v-chip size="small" class="text-primary">{{renderHocKi(item)}}</v-chip>
 		</template>
 		<template #item.JSON_BaoCao="{item}">
-			<v-chip color="blue" size="small" @click="onCopy(item)"><v-icon start>mdi-content-copy</v-icon>JSON</v-chip>
+			<v-chip color="blue" size="small" @click="onCopy(item)">
+				<v-icon start>mdi-content-copy</v-icon>JSON
+			</v-chip>
 		</template>
 		<template #item.actions="{item}">
 			<v-menu>
@@ -92,10 +94,24 @@
 		</v-card>
 	</v-dialog>
 
+	<v-dialog v-model="isShowDialogNienKhoa" max-width="420">
+		<v-card title="Chọn niên khóa">
+			<v-card-text>
+				<v-select v-model="NienKhoaSelected" label="Niên khóa" :items="DSNienKhoa" item-title="label"
+					item-value="NienKhoa" return-object />
+			</v-card-text>
+			<v-card-actions>
+				<v-spacer />
+				<v-btn text="Đóng" @click="isShowDialogNienKhoa = false" />
+				<v-btn text="Xem báo cáo" color="primary" variant="elevated" @click="onOpenReportWithNienKhoa" />
+			</v-card-actions>
+		</v-card>
+	</v-dialog>
 </template>
 
 <script>
 	export default {
+		inject: ['iframeRef'],
 		props: {
 			CapID: Number,
 			BaoCaoSelected: Object,
@@ -135,7 +151,11 @@
 						return 'Bạn chưa nhập trường dữ liệu này.'
 					}
 				],
-				DSHocKi: []
+				DSHocKi: [],
+				isShowDialogNienKhoa: false,
+				DSNienKhoa: [],
+				NienKhoaSelected: null,
+				UrlBaoCaoDangMo: ''
 			}
 		},
 		watch: {
@@ -206,10 +226,80 @@
 				Vue.$toast.success("Sao chép JSON thành công", { position: "top" })
 			},
 			onRedirectPage(bc) {
-				openWindow({
+				if (this.isThongKeChatLuongBoMonUrl(bc?.Url_BaoCao)) {
+					this.onOpenDialogNienKhoa(bc?.Url_BaoCao)
+					return
+				}
+				this.openByIframeRef(bc.Url_BaoCao)
+			},
+			isThongKeChatLuongBoMonUrl(url) {
+				return String(url || '').toLowerCase().includes('thong-ke-chat-luong-bo-mon')
+			},
+			async onOpenDialogNienKhoa(url) {
+				this.UrlBaoCaoDangMo = url || ''
+				await this.onLoadNienKhoa()
+				this.isShowDialogNienKhoa = true
+			},
+			async onLoadNienKhoa() {
+				if (this.DSNienKhoa.length) {
+					this.setDefaultNienKhoa()
+					return
+				}
+
+				const res = await fetchPromise('lms/NienKhoa_Get', {})
+				const unique = [...new Map((res ?? []).map(item => [item.NienKhoa, item])).values()]
+				this.DSNienKhoa = unique.map(item => ({
+					...item,
+					label: `${item.NienKhoa} - ${item.NienKhoa + 1}`
+				}))
+				this.setDefaultNienKhoa()
+			},
+			setDefaultNienKhoa() {
+				if (this.NienKhoaSelected) return
+
+				const nienKhoaHienTai = Number(vueData.NienKhoa)
+				this.NienKhoaSelected =
+					this.DSNienKhoa.find(item => item.NienKhoa === nienKhoaHienTai) ??
+					this.DSNienKhoa.find(item => item.IsActive) ??
+					this.DSNienKhoa[0] ??
+					null
+			},
+			onOpenReportWithNienKhoa() {
+				if (!this.NienKhoaSelected) return
+
+				const finalUrl = this.buildUrlWithNienKhoa(this.UrlBaoCaoDangMo, this.NienKhoaSelected.NienKhoa)
+				this.isShowDialogNienKhoa = false
+				this.openByIframeRef(finalUrl)
+			},
+			openByIframeRef(url) {
+				const payload = {
 					title: "Báo cáo chi tiết",
-					url: bc.Url_BaoCao
-				})
+					url
+				}
+
+				if (this.iframeRef?.value?.openWindow) {
+					this.iframeRef.value.openWindow(payload)
+					return
+				}
+
+				if (window?.parent) {
+					window.parent.postMessage({ type: 'iframeRef_openWindow', ...payload }, '*')
+					return
+				}
+
+				openWindow(payload)
+			},
+			buildUrlWithNienKhoa(url, nienKhoa) {
+				if (!url) return url
+
+				try {
+					const parsed = new URL(url, window.location.origin)
+					parsed.searchParams.set('nienkhoa', nienKhoa)
+					return parsed.pathname + parsed.search + parsed.hash
+				} catch {
+					const splitChar = url.includes('?') ? '&' : '?'
+					return `${url}${splitChar}nienkhoa=${nienKhoa}`
+				}
 			},
 			onOpenDialogUpdate(bc) {
 				this.formEdit = Object.assign({}, bc)

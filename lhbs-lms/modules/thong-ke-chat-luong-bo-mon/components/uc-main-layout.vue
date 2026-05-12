@@ -10,8 +10,10 @@
 						item-value="textValue" />
 				</v-col>
 				<v-col class="d-flex ga-2">
-					<v-btn color="primary" variant="outlined" prepend-icon="mdi-magnify" text="Tìm kiếm" @click="onLoadThongKe" />
-					<v-btn color="primary" variant="outlined" prepend-icon="mdi-file-excel" text="Xuất file Excel" @click="onExportExcel" />
+					<v-btn color="primary" variant="outlined" prepend-icon="mdi-magnify" text="Tìm kiếm"
+						@click="onLoadThongKe" />
+					<v-btn color="primary" variant="outlined" prepend-icon="mdi-file-excel" text="Xuất file Excel"
+						@click="onExportExcel" />
 				</v-col>
 			</v-row>
 		</v-card>
@@ -19,8 +21,8 @@
 		<div class="d-flex flex-row">
 			<v-tabs v-model="tab" color="primary" direction="vertical">
 				<v-divider />
-				<v-tab class="text-none text-wrap-tab" v-for="mh in DSMonHoc" :text="mh.TenMonHoc_HienThi" :value="mh.MonHocID"
-					style="max-width: 200px"></v-tab>
+				<v-tab class="text-none text-wrap-tab" v-for="mh in DSMonHoc" :text="mh.TenMonHoc_HienThi"
+					:value="mh.MonHocID" style="max-width: 200px"></v-tab>
 			</v-tabs>
 			<v-divider vertical />
 			<v-data-table class="table-bordered" :headers="HeaderThongKe" :items="DataThongKe" hide-default-footer
@@ -36,7 +38,8 @@
 			return {
 				DSHocKi: [
 					{ title: "Học kì 1", value: 1, textValue: "HK1" },
-					{ title: "Học kì 2", value: 2, textValue: "HK2" }
+					{ title: "Học kì 2", value: 2, textValue: "HK2" },
+					{ title: "Cả năm", value: 0, textValue: "CaNam" }
 				],
 				DSCap: [
 					{ title: "Cấp 1", value: 1 },
@@ -49,10 +52,14 @@
 				DSMonHoc: [],
 				HeaderThongKe: [],
 				DataThongKe: [],
+				NienKhoaParam: null,
 				vueData
 			}
 		},
-		mounted() { },
+		mounted() {
+			this.initFromUrlParams()
+			this.onLoadMonHoc()
+		},
 		computed: {},
 		watch: {
 			"vueData.NienKhoa": function (nk) {
@@ -66,13 +73,41 @@
 			}
 		},
 		methods: {
+			initFromUrlParams() {
+				const params = new URLSearchParams(window.location.search)
+				const capid = Number(params.get('capid'))
+				const hocKi = params.get('hk')
+				const nienKhoa = Number(params.get('nienkhoa'))
+	
+				if (capid) this.CapID = capid
+				if (hocKi) {
+					this.HocKi = hocKi
+	
+				}
+				if (nienKhoa) this.NienKhoaParam = nienKhoa
+			},
+			getNienKhoaSuDung() {
+				return Number(this.NienKhoaParam || vueData.NienKhoa || new Date().getFullYear())
+			},
+			getHocKiSuDung() {
+				let hk = ''
+				if (vueData?.NienKhoaItem?.HocKi) {
+					hk = vueData?.NienKhoaItem?.HocKi
+				} else {
+	
+					hk = this.DSHocKi.find(x => x.textValue === this.HocKi).value
+				}
+				return hk
+			},
 			async onLoadThongKe() {
 				const DSMonHoc_CD_D = [53, 55, 65, 71, 83, 86, 101]
 				const IsMonHoc_CD_D = DSMonHoc_CD_D.includes(this.tab)
+				const NienKhoa = this.getNienKhoaSuDung()
+				const HocKi = this.getHocKiSuDung()
 				this.DataThongKe = await ajaxCALLPromise("lms/ThongKe_ChatLuong_BoMon", {
 					MonHocID: this.tab,
-					NienKhoa: vueData.NienKhoa,
-					HocKi: vueData.NienKhoaItem.HocKi,
+					NienKhoa,
+					HocKi,
 					Semester: this.HocKi,
 					IsMonHoc_CD_D
 				})
@@ -135,9 +170,12 @@
 			},
 			async onLoadMonHoc() {
 				this.DSMonHoc = await ajaxCALLPromise("lms/MonHoc_Get_From_KQHT", {
-					NienKhoa: vueData.NienKhoa,
+					NienKhoa: this.getNienKhoaSuDung(),
 					CapID: this.CapID,
 				})
+				if (!this.tab && this.DSMonHoc.length) {
+					this.tab = this.DSMonHoc[0].MonHocID
+				}
 			},
 			getHeaderDepth(headers) {
 				if (!headers || !headers.length) return 1;

@@ -1,27 +1,33 @@
 <template>
-	<div>
-		<v-row>
-			<v-col cols="4">
-				<v-select v-model="CapID" label="Chọn cấp" :items="DSCap" item-title="title" item-value="value" />
-			</v-col>
-			<v-col cols="8">
-				<v-btn text="Tìm kiếm" color="primary" variant="elevated" @click="onLoadBaoCaoByCapID(CapID)" />
-			</v-col>
-			<v-divider />
-			<v-col cols="4" class="pa-0">
-				<uc-table-bao-cao v-model:BaoCaoSelected="BaoCaoSelected" :CapID :headerBaoCaos :itemBaoCaos
-					@onAddFinnish="onLoadBaoCaoByCapID(CapID)" @onEditFinnish="onLoadBaoCaoByCapID(CapID)"
-					@onDeleteFinnish="onLoadBaoCaoByCapID(CapID)" :IsActionPermission />
-			</v-col>
-			<v-divider vertical />
-			<v-col cols="8" class="pa-0">
-				<uc-table-bao-cao-chi-tiet :BaoCaoSelected="BaoCaoSelected" :CapID :headerBaoCaoChiTiets
-					:itemBaoCaoChiTiets @onAddFinnish="onLoadBaoCaoChiTiet(BaoCaoSelected?.BaoCaoID ?? 0)"
-					@onEditFinnish="onLoadBaoCaoChiTiet(BaoCaoSelected?.BaoCaoID ?? 0)"
-					@onDeleteFinnish="onLoadBaoCaoChiTiet(BaoCaoSelected?.BaoCaoID ?? 0)" :IsActionPermission />
-			</v-col>
-		</v-row>
-	</div>
+	<Global>
+		<v-card>
+			<v-card-title></v-card-title>
+			<v-card-text>
+				<v-row>
+					<v-col cols="4">
+						<v-select v-model="CapID" label="Chọn cấp" :items="DSCap" item-title="title"
+							item-value="value" />
+					</v-col>
+					<v-col cols="8">
+						<v-btn text="Tìm kiếm" color="primary" variant="elevated" @click="onLoadBaoCaoByCapID(CapID)" />
+					</v-col>
+					<v-divider />
+					<v-col cols="4" class="pa-0">
+						<uc-table-bao-cao v-model:BaoCaoSelected="BaoCaoSelected" :CapID :headerBaoCaos :itemBaoCaos
+							@onAddFinnish="onLoadBaoCaoByCapID(CapID)" @onEditFinnish="onLoadBaoCaoByCapID(CapID)"
+							@onDeleteFinnish="onLoadBaoCaoByCapID(CapID)" :IsActionPermission />
+					</v-col>
+					<v-divider vertical />
+					<v-col cols="8" class="pa-0">
+						<uc-table-bao-cao-chi-tiet :BaoCaoSelected="BaoCaoSelected" :CapID :headerBaoCaoChiTiets
+							:itemBaoCaoChiTiets @onAddFinnish="onLoadBaoCaoChiTiet(BaoCaoSelected?.BaoCaoID ?? 0)"
+							@onEditFinnish="onLoadBaoCaoChiTiet(BaoCaoSelected?.BaoCaoID ?? 0)"
+							@onDeleteFinnish="onLoadBaoCaoChiTiet(BaoCaoSelected?.BaoCaoID ?? 0)" :IsActionPermission />
+					</v-col>
+				</v-row>
+			</v-card-text>
+		</v-card>
+	</Global>
 </template>
 
 <script>
