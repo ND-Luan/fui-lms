@@ -1,0 +1,13 @@
+HocSinhID	int	Checked
+HocKi	int	Checked
+LopID	int	Checked
+TenLop	varchar(9)	Checked
+KQRL_Truoc	nvarchar(50)	Checked
+KQRL_Sau	nvarchar(50)	Checked
+NienKhoa	int	Checked
+IsChotDiem	bit	Checked
+CreateUser	varchar(9)	Checked
+CreateTime	datetime	Checked
+UpdateUser	varchar(9)	Checked
+UpdateTime	datetime	Checked
+		Unchecked

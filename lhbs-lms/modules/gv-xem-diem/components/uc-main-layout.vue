@@ -281,6 +281,39 @@
 	            if (value === null || value === undefined) return false
 	            return String(value).trim() !== '' && !isNaN(value)
 	        },
+
+	        isAnnualSubjectKey(key) {
+	            const normalizedKey = String(key || '').trim().toLowerCase()
+	            if (!normalizedKey) return false
+
+	            const nonSubjectKeys = new Set([
+	                'stt',
+	                'hocsinhid',
+	                'hoten',
+	                'tenlop',
+	                'ngaysinh',
+	                'dtb',
+	                'hocluc',
+	                'kqrenluyen',
+	                'danhhieu',
+	                'phep',
+	                'khongphep',
+	                'tongbuoinghi',
+	                'uudiem',
+	                'nhuocdiem',
+	                'dexuat',
+	                'hocsinhlopid',
+	                'hocki',
+	                'hocky',
+	                'nienkhoa',
+	                'lopid',
+	                'khoiid',
+	            ])
+
+	            if (nonSubjectKeys.has(normalizedKey)) return false
+	            if (normalizedKey.endsWith('id')) return false
+	            return true
+	        },
 	
 	        clearData() {
 	            this.DSHocSinh_API_QLD = []
@@ -412,26 +445,10 @@
 	            }, { cache: false })
 	
 	            const newData = this.extractList(res).map(x => ({ ...x, HocKi: this.Semester.value }))
-	            const monHocID = [
-	                'GDDP',
-	                'HDTN',
-	                'HKTN',
-	                'JA',
-	                'LS-DL',
-	                'NT',
-	                'AI',
-	                'toan',
-	                'tin',
-	                'van',
-	                'anh',
-	                'gdcd',
-	                'cn',
-	                'td',
-	            ]
 	            const data = []
 	            for (const item of newData) {
 	                for (const key in item) {
-	                    if (!monHocID.includes(key)) continue
+	                    if (!this.isAnnualSubjectKey(key)) continue
 	                    data.push({
 	                        HocSinhID: item.HocSinhID,
 	                        HoTen: item.HoTen,

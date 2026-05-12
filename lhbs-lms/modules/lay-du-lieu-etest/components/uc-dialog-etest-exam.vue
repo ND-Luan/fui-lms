@@ -217,8 +217,8 @@
 </template>
 
 <script>
-export default {
-	name: 'UcDialogEtestExam',
+	export default {
+		name: 'UcDialogEtestExam',
 
 	props: {
 		soCauDungOptions: { type: Array, default: () => [] },
@@ -242,18 +242,18 @@ export default {
 
 			examPresets: [
 				// Cấp 2
-				{ label: 'K6', code: '49CB1ADD-670F-4A10-9600-26C32EC5EBE6', hasIelts: false },
-				{ label: 'K7', code: '223901B2-3FB1-4E8E-BAA6-39DB077CD479', hasIelts: false },
-				{ label: 'K8', code: '9E280CED-A1BD-42E0-B57A-7E169398C59A', hasIelts: false },
-				{ label: 'K9', code: '2755A625-F249-44B6-8A37-0C11AFAA9587', hasIelts: false },
+				// { label: 'K6', code: '49CB1ADD-670F-4A10-9600-26C32EC5EBE6', hasIelts: false },
+				// { label: 'K7', code: '223901B2-3FB1-4E8E-BAA6-39DB077CD479', hasIelts: false },
+				// { label: 'K8', code: '9E280CED-A1BD-42E0-B57A-7E169398C59A', hasIelts: false },
+				// { label: 'K9', code: '2755A625-F249-44B6-8A37-0C11AFAA9587', hasIelts: false },
 				// Cấp 3
-				{ label: '10AV1,2', code: 'DB02F88A-C193-44E6-BADF-6A662BC019C5', hasIelts: false },
-				{ label: '10AV3,4', code: '2C9CD69F-2869-49F5-9503-CE4932E861F0', hasIelts: false },
-				{ label: '10AV5',   code: 'E9CB6CF6-C3AC-437C-B761-EEBDF40C391B', hasIelts: false },
-				{ label: '11AV1,2', code: '64DC968C-5D9F-4F4B-A1AF-58D541DB4D2E', hasIelts: true  },
-				{ label: '11AV3-5', code: '02C0916A-0D08-40F8-A003-0670B48B90CA', hasIelts: false },
-				{ label: '12AV1-4', code: 'CECB5FCD-D0BC-4F05-A420-15BAC2E66E8C', hasIelts: true  },
-				{ label: '12AV5,6', code: 'EB4DC3EB-C4B2-46EC-BFEE-C67846848CAB', hasIelts: true  },
+				{ label: '10AV1,2', code: '1CCE5EC6-719E-402D-BDB4-7FE505FA568B', hasIelts: false },
+				{ label: '10AV3,4', code: 'DB48F7B3-4FEA-44EA-B4E0-8193E0E5BAED', hasIelts: false },
+				{ label: '10AV5',   code: '2F372998-31E3-4938-863A-D96113592762', hasIelts: false },
+				{ label: '11AV1,2,3,4', code: '55A2B675-B40F-4F81-9C2B-1990F174609C', hasIelts: true  },
+				{ label: '11AV5', code: '93753DF7-5F3B-4C22-97DC-1CDF25872A07', hasIelts: false },
+				// { label: '12AV1-4', code: 'CECB5FCD-D0BC-4F05-A420-15BAC2E66E8C', hasIelts: true  },
+				// { label: '12AV5,6', code: 'EB4DC3EB-C4B2-46EC-BFEE-C67846848CAB', hasIelts: true  },
 			],
 		}
 	},
@@ -423,5 +423,5 @@ export default {
 			isActive.value = false
 		},
 	},
-}
+	}
 </script>

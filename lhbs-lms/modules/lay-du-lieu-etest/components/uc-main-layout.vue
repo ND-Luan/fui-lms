@@ -447,6 +447,8 @@
 					return {
 						wsIdx: idx, nhomID: cls.id, tenNhom: cls.name,
 						monHocLopID: cls.monHocLopID,
+						lopID: cls.id,
+						templateBangDiemID: cls.templateBangDiemID ?? null,
 						hocSinhID: student.id, hoTen: student.hoTen,
 						maCotDiem: desc.key, tenCotDiem: desc.title,
 						cotDiemID: desc.cotDiemID ?? existingGrade?.cotDiemID ?? null,
@@ -570,6 +572,7 @@
 					changedBuffer[`${targetIdx}_${rowIdx}_${ci}`] = {
 						wsIdx: targetIdx, nhomID: cls.id, tenNhom: cls.name,
 						monHocLopID,
+						lopID: cls.id, templateBangDiemID: cls.templateBangDiemID ?? null,
 						hocSinhID: student.id, hoTen: student.hoTen,
 						maCotDiem, tenCotDiem: d?.title ?? maCotDiem,
 						cotDiemID,
@@ -789,6 +792,7 @@
 						wsIdx: targetIdx,
 						nhomID: cls.id, tenNhom: cls.name,
 						monHocLopID: cls.monHocLopID,
+						lopID: cls.id, templateBangDiemID: cls.templateBangDiemID ?? null,
 						hocSinhID: student.id, hoTen: student.hoTen,
 						maCotDiem, tenCotDiem: d?.title ?? maCotDiem,
 						cotDiemID: d?.cotDiemID ?? existingGrade?.cotDiemID ?? null,
@@ -1479,13 +1483,24 @@
 						let resolvedLopID = lopID
 						let resolvedTemplateBDID = templateBangDiemID
 						let resolvedMonHocLopID = monHocLopID
-						if (!resolvedMonHocLopID) {
+						if (!resolvedMonHocLopID || !resolvedLopID || !resolvedTemplateBDID) {
 							const meta = this.wsMeta[internal.wsIdx]
 							const cls = meta?.cls
-							if (!cls) continue
-							resolvedLopID = cls.id
-							resolvedTemplateBDID = cls.templateBangDiemID
-							resolvedMonHocLopID = cls.monHocLopID
+							if (cls) {
+								resolvedLopID = resolvedLopID ?? cls.id
+								resolvedTemplateBDID = resolvedTemplateBDID ?? cls.templateBangDiemID
+								resolvedMonHocLopID = resolvedMonHocLopID ?? cls.monHocLopID
+							}
+
+							if ((!resolvedLopID || !resolvedTemplateBDID) && resolvedMonHocLopID) {
+								const clsByMonHocLop = this.loadedClasses.find(x => String(x.monHocLopID) === String(resolvedMonHocLopID))
+								if (clsByMonHocLop) {
+									resolvedLopID = resolvedLopID ?? clsByMonHocLop.id
+									resolvedTemplateBDID = resolvedTemplateBDID ?? clsByMonHocLop.templateBangDiemID
+								}
+							}
+
+							if (!resolvedMonHocLopID || !resolvedLopID || !resolvedTemplateBDID) continue
 						}
 
 						const items = rows.map(row => ({

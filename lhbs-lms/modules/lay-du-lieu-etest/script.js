@@ -497,6 +497,8 @@ function propagateSoCauDung(
         return {
             wsIdx: idx, nhomID: cls.id, tenNhom: cls.name,
             monHocLopID: cls.monHocLopID,
+            lopID: cls.id,
+            templateBangDiemID: cls.templateBangDiemID ?? null,
             hocSinhID: student.id, hoTen: student.hoTen,
             maCotDiem: desc.key, tenCotDiem: desc.title,
             cotDiemID: desc.cotDiemID ?? existingGrade?.cotDiemID ?? null,
@@ -603,6 +605,8 @@ function propagateAvgPoint_cap2(
         return {
             wsIdx: idx, nhomID: cls.id, tenNhom: cls.name,
             monHocLopID: cls.monHocLopID,
+            lopID: cls.id,
+            templateBangDiemID: cls.templateBangDiemID ?? null,
             hocSinhID: student.id, hoTen: student.hoTen,
             maCotDiem: desc.key, tenCotDiem: desc.title,
             cotDiemID: desc.cotDiemID ?? existingGrade?.cotDiemID ?? null,
@@ -730,6 +734,8 @@ function propagateAvgPoint_cap3(
         return {
             wsIdx: idx, nhomID: cls.id, tenNhom: cls.name,
             monHocLopID: cls.monHocLopID,
+            lopID: cls.id,
+            templateBangDiemID: cls.templateBangDiemID ?? null,
             hocSinhID: student.id, hoTen: student.hoTen,
             maCotDiem: desc.key, tenCotDiem: desc.title,
             cotDiemID: desc.cotDiemID ?? existingGrade?.cotDiemID ?? null,

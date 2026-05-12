@@ -5,9 +5,10 @@
 		@onChange="handleChange" @rowData="GetRowData" :styleSheet="vueData.styleSheet">
 	</uc-jexcel>
 </template>
+
 <script>
 	export default {
-	    data() {
+		data() {
 	        return {
 	            vueData
 	        }
@@ -21,7 +22,12 @@
 				console.log(`cellAdresss`, cellAdresss);
 				let styleCell = {}
 				styleCell[cellAdresss] = `background-color : yellow`
-				vueData.instance[0].setStyle(styleCell) 
+				vueData.instance[0].setStyle(styleCell)
+				// Sync giá trị thay đổi trực tiếp vào vueData.DSHocSinh
+				const columnName = vueData.columnHeader[val.x]?.name
+				if (columnName && val.y >= 0 && val.y < vueData.DSHocSinh.length) {
+					vueData.DSHocSinh[val.y][columnName] = val.value
+				}
 	        },
 			//Hứng dữ liệu từ bên trong component chung uc-jexcel để lấy row có cell thay đổi dữ liệu
 			GetRowData(val){

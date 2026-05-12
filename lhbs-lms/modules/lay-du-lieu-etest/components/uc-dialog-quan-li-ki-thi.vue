@@ -111,14 +111,14 @@
 								/ {{ previewRows.length }} học sinh
 							</span>
 							<v-spacer />
-							<v-btn size="x-small" variant="text" color="primary" @click="selectAllStudents">Chọn tất cả</v-btn>
-							<v-btn size="x-small" variant="text" color="grey" @click="selectedStudentIDs = []">Bỏ chọn</v-btn>
+							<v-btn size="x-small" variant="text" color="primary" @click="selectAllStudents">Chọn tất cả
+							</v-btn>
+							<v-btn size="x-small" variant="text" color="grey" @click="selectedStudentIDs = []">Bỏ chọn
+							</v-btn>
 						</div>
 						<v-data-table :headers="previewHeaders" :items="previewRows" density="compact"
 							hide-default-footer :items-per-page="-1" fixed-header height="270" class="border rounded-b"
-							:item-value="r => String(r.hocSinhID)"
-							v-model="selectedStudentIDs"
-							show-select />
+							:item-value="r => String(r.hocSinhID)" v-model="selectedStudentIDs" show-select />
 					</template>
 
 					<!-- Chưa chọn kì thi -->
@@ -164,7 +164,7 @@
 
 <script>
 	export default {
-	name: 'UcDialogQuanLiKiThi',
+		name: 'UcDialogQuanLiKiThi',
 
 	props: {
 		classes: { type: Array, default: () => [] },
@@ -195,7 +195,7 @@
 			// Mapping: { [TenKyNang]: maCotDiem }
 			skillMapping: {},
 			// Trường dùng để điền: 'DiemTong' | 'SoCauDung'
-			mappingField: 'DiemTong',
+			mappingField: 'SoCauDung',
 		}
 	},
 
@@ -295,7 +295,7 @@
 				this.rawScoreData = []
 				this.previewRows = []
 				this.skillMapping = {}
-				this.mappingField = 'DiemTong'
+				this.mappingField = 'SoCauDung'
 				this.fetchExams()
 			}
 		},
@@ -503,5 +503,5 @@
 			}
 		},
 	},
-}
+	}
 </script>
