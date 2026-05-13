@@ -47,6 +47,21 @@ const CONSTANTS = {
         DUYET_BGH: 8
     },
 };
+// ==================== COLUMN CODE SERVICE ====================
+const ColumnCodeService = {
+    /** Chuẩn hóa mã cột điểm: 13083_MucDoDanhGiaCK_HK2 -> MucDoDanhGiaCK_HK2 */
+    normalizeMaCotDiem(maCotDiem) {
+        if (typeof maCotDiem !== 'string') return maCotDiem;
+        const splitIndex = maCotDiem.indexOf('_');
+        if (splitIndex <= 0) return maCotDiem;
+        const prefix = maCotDiem.slice(0, splitIndex);
+        return /^\d+$/.test(prefix) ? maCotDiem.slice(splitIndex + 1) : maCotDiem;
+    },
+    /** So khớp mã cột điểm giữa API và UI, hỗ trợ cả dạng có prefix CotDiemID */
+    isSameMaCotDiem(leftCode, rightCode) {
+        return this.normalizeMaCotDiem(leftCode) === this.normalizeMaCotDiem(rightCode);
+    }
+};
 // ==================== API SERVICE ====================
 const ApiService = {
     /** Gọi API lấy dữ liệu bảng điểm */
@@ -314,7 +329,9 @@ const HeaderBuilder = {
     },
     /** Build cột điểm */
     buildGradeColumn(column, isEnglish, isDisabled, lockedColumns) {
-        const isLocked = lockedColumns.some(x => x.MaCotDiem === column.MaCotDiem && x.TinhTrang);
+        const isLocked = lockedColumns.some(x =>
+            ColumnCodeService.isSameMaCotDiem(x.MaCotDiem, column.MaCotDiem) && x.TinhTrang
+        );
         let title = isEnglish ? column.TenHienThi_EN : column.TenHienThi_VI;
         let backGroundColor = column.HexBackground;
         let width = parseInt(column?.WidthCSS ?? 80);
@@ -852,12 +869,17 @@ const BangDiemService = {
             const isGroup = this.filter.isGroupSubject(filter.MonHocItem.MonHocID);
             const freezeColumns = this.data.calculateFreezeColumns(filter.MonHocItem.MonHocID, isEnglish, isGroup);
             // 6. Locked columns
-            const lockedColumns = await this.api.getKhoaCotDiem({
+            const lockedColumnsRaw = await this.api.getKhoaCotDiem({
                 LopID: filter.LopItem.LopID,
                 MonHocLopID: filter.MonHocItem.MonHocLopID,
                 MaNhomCotDiem: filter.MaNhomCotDiemItem.MaNhomCotDiem,
                 Semester: filter.MaNhomCotDiemItem.Semester,
                 NienKhoa: vueData.NienKhoa
+            });
+            const lockedColumns = (lockedColumnsRaw ?? []).filter(x => {
+                const isSameLop = x?.LopID == null || String(x.LopID) === String(filter.LopItem.LopID);
+                const isSameMonHocLop = x?.MonHocLopID == null || Number(x.MonHocLopID) === Number(filter.MonHocItem.MonHocLopID);
+                return isSameLop && isSameMonHocLop;
             });
             // 7. Headers
             const firstStudent = fn_ProrityTinhTrang(students);
@@ -877,7 +899,9 @@ const BangDiemService = {
             ];
             const nestedHeaders = this.header.buildNestedHeaders(gradeColumns, apiData, freezeColumns, isGroup);
             const displayColumns = DSCotDiem_ByMaNhomCotDiem.map(cotDiem => {
-                const lockedCol = lockedColumns.find(x => x.MaCotDiem === cotDiem.value && x.TinhTrang === true);
+                const lockedCol = lockedColumns.find(x =>
+                    ColumnCodeService.isSameMaCotDiem(x.MaCotDiem, cotDiem.value) && x.TinhTrang === true
+                );
                 return {
                     title: cotDiem.title,
                     value: cotDiem.value,
