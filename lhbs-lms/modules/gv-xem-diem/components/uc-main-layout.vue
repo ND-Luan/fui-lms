@@ -694,7 +694,7 @@
 	            const ok = await this.confirmRef.value.show({ title: 'Xác nhận kéo điểm?' })
 	            if (!ok) return
 	
-	            const dataToPull = this.buildPayloadBySelectedColumns(this.DSHocSinh_API_QLD, selectedColumns)
+	            const dataToPull = this.buildPayloadBySelectedColumns(this.DSHocSinh_API_QLD , selectedColumns)
 	            if (!dataToPull.length) {
 	                this.snackbarRef.value.showSnackbar({ message: 'Không có dữ liệu để kéo điểm', color: 'warning' })
 	                return

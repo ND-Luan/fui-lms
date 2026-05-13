@@ -113,8 +113,8 @@
 						:content="suggestLockColumns.length" color="warning" inline class="ml-1" />
 				</v-btn>
 
-				<v-btn v-if="canManageUnlockColumns && hasStudents && lockedColumns.length > 0" @click="onOpenUnlockDialog" color="warning"
-					variant="outlined" size="small">
+				<v-btn v-if="canManageUnlockColumns && hasStudents && lockedColumns.length > 0"
+					@click="onOpenUnlockDialog" color="warning" variant="outlined" size="small">
 					<v-icon start>mdi-lock-open-variant</v-icon>
 					Mở khóa cột điểm
 				</v-btn>
@@ -298,13 +298,15 @@
 
 					<v-divider class="mb-1" />
 
-					<v-list density="compact" class="rounded border pa-0 mb-3" style="max-height: 220px; overflow-y: auto;">
+					<v-list density="compact" class="rounded border pa-0 mb-3"
+						style="max-height: 220px; overflow-y: auto;">
 						<v-list-item v-for="(col, i) in lockedColumns" :key="col.value"
 							:class="i < lockedColumns.length - 1 ? 'border-b' : ''" min-height="40"
 							@click="onToggleUnlockColumn(col.value)">
 							<template v-slot:prepend>
 								<v-checkbox-btn :model-value="action.unlockDialog.selectedColumns.includes(col.value)"
-									@update:model-value="onToggleUnlockColumn(col.value)" color="warning" density="compact" />
+									@update:model-value="onToggleUnlockColumn(col.value)" color="warning"
+									density="compact" />
 							</template>
 							<v-list-item-title class="text-body-2">{{ col.title }}</v-list-item-title>
 							<template v-slot:append>
@@ -320,8 +322,7 @@
 				<v-divider />
 				<v-card-actions class="justify-end ga-2 pa-3">
 					<v-btn variant="text" color="grey" @click="action.unlockDialog.show = false">Hủy</v-btn>
-					<v-btn color="warning" variant="flat"
-						:disabled="action.unlockDialog.selectedColumns.length === 0"
+					<v-btn color="warning" variant="flat" :disabled="action.unlockDialog.selectedColumns.length === 0"
 						@click="onConfirmUnlockColumns">
 						<v-icon start size="18">mdi-lock-open-variant</v-icon>
 						Mở khóa {{ action.unlockDialog.selectedColumns.length }} cột
