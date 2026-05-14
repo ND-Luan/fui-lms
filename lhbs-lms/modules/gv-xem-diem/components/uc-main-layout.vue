@@ -47,8 +47,12 @@
 				<div v-for="hocSinh in DSHocSinhQLD" :key="hocSinh.HocSinhID" class="mb-3 pa-3">
 					<v-lazy :min-height="100" :options="{ threshold: 0.3 }">
 						<v-card border>
-							<v-card-title class="font-weight-medium text-primary">
-								Học sinh: [{{ hocSinh.HocSinhID }}] {{ hocSinh.HoTen }}
+							<v-card-title class="font-weight-medium text-primary d-flex align-center flex-wrap ga-2">
+								<span>Học sinh: [{{ hocSinh.HocSinhID }}] {{ hocSinh.HoTen }}</span>
+								<v-chip v-if="hocSinh.TenTinhTrang" size="small"
+									:color="hocSinh.TenTinhTrang === 'Nghỉ học' ? 'error' : 'primary'" variant="tonal">
+									{{ hocSinh.TenTinhTrang }}
+								</v-chip>
 							</v-card-title>
 							<v-data-table :headers="getHeaders()" :items="getItems(hocSinh)" item-value="MonHocID"
 								items-per-page="-1" hide-default-footer density="compact">
@@ -214,6 +218,7 @@
 	            LopItem: null,
 	            DSHocSinh_API_QLD: [],
 	            DSHocSinhQLD: [],
+	            DSHocSinhTinhTrang: [],
 	            DSHocSinh_LMS: [],
 	            IsCompareLMS: false,
 	            IsShowDialogKeoDiem: false,
@@ -318,6 +323,7 @@
 	        clearData() {
 	            this.DSHocSinh_API_QLD = []
 	            this.DSHocSinhQLD = []
+	            this.DSHocSinhTinhTrang = []
 	            this.DSHocSinh_LMS = []
 	            this.IsCompareLMS = false
 	        },
@@ -425,24 +431,32 @@
 	                await this.getDiemTBLopMon()
 	                return
 	            }
-	
-	            const res = await fetchPromise(`diemc${vueData.CapID}/LMS_GetDiemTheoLop`, {
-	                LopID: this.LopItem.LopID,
-	                MonHocID: 'toan',
-	                HocKy: this.Semester.HocKi,
-	                NamHoc: vueData.NienKhoa,
-	            }, { cache: false })
+
+	            const [res, hocSinhTinhTrang] = await Promise.all([
+	                fetchPromise(`diemc${vueData.CapID}/LMS_GetDiemTheoLop`, {
+	                    LopID: this.LopItem.LopID,
+	                    MonHocID: 'toan',
+	                    HocKy: this.Semester.HocKi,
+	                    NamHoc: vueData.NienKhoa,
+	                }, { cache: false }),
+	                this.getHocSinhTinhTrangByLopID(),
+	            ])
+
 	            const list = this.extractList(res).map(x => ({ ...x, HocKi: this.Semester.value }))
-	            this.DSHocSinh_API_QLD = list
-	            this.renderDSHocSinhQLD(list)
+	            const dataWithTinhTrang = this.applyHocSinhTinhTrang(list, hocSinhTinhTrang)
+	            this.DSHocSinh_API_QLD = dataWithTinhTrang
+	            this.renderDSHocSinhQLD(dataWithTinhTrang)
 	        },
-	
+
 	        async getDiemTBLopMon() {
-	            const res = await fetchPromise(`diemc${vueData.CapID}/LMS_GetTongKetDTBMonHocByLop`, {
-	                LopID: this.LopItem.LopID,
-	                HocKy: this.Semester.HocKi,
-	                NienKhoa: vueData.NienKhoa,
-	            }, { cache: false })
+	            const [res, hocSinhTinhTrang] = await Promise.all([
+	                fetchPromise(`diemc${vueData.CapID}/LMS_GetTongKetDTBMonHocByLop`, {
+	                    LopID: this.LopItem.LopID,
+	                    HocKy: this.Semester.HocKi,
+	                    NienKhoa: vueData.NienKhoa,
+	                }, { cache: false }),
+	                this.getHocSinhTinhTrangByLopID(),
+	            ])
 	
 	            const newData = this.extractList(res).map(x => ({ ...x, HocKi: this.Semester.value }))
 	            const data = []
@@ -459,8 +473,30 @@
 	                    })
 	                }
 	            }
-	            this.DSHocSinh_API_QLD = data
-	            this.renderDSHocSinhQLD(data)
+	            const dataWithTinhTrang = this.applyHocSinhTinhTrang(data, hocSinhTinhTrang)
+	            this.DSHocSinh_API_QLD = dataWithTinhTrang
+	            this.renderDSHocSinhQLD(dataWithTinhTrang)
+	        },
+
+	        async getHocSinhTinhTrangByLopID() {
+	            if (!this.LopItem?.LopID) return []
+	            const res = await fetchPromise('lms/HocSinhLop_Get_ByLopID', {
+	                LopID: this.LopItem.LopID,
+	            }, { cache: false })
+	            this.DSHocSinhTinhTrang = this.extractList(res)
+	            return this.DSHocSinhTinhTrang
+	        },
+
+	        applyHocSinhTinhTrang(data, hocSinhTinhTrang) {
+	            if (!Array.isArray(hocSinhTinhTrang)) return data
+	            const mapTinhTrang = new Map(hocSinhTinhTrang.map(x => [x.HocSinhID, x]))
+	            return data.map(item => {
+	                const tinhTrang = mapTinhTrang.get(item.HocSinhID)
+	                return {
+	                    ...item,
+	                    TenTinhTrang: tinhTrang?.TenTinhTrang ?? item.TenTinhTrang ?? 'Nghỉ học',
+	                }
+	            })
 	        },
 	
 	        renderDSHocSinhQLD(data) {

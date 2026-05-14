@@ -6,6 +6,7 @@
 
 <script>
 	export default {
+		inject: ['snackbarRef'],
 		emits: ['onChange', 'update:modelValue', 'update:dataSource', 'update:minDimensions', 'rowData', 'addressCell'],
 		props: {
 			modelValue: {},
@@ -82,7 +83,8 @@
 		data() {
 			return {
 				jExcelObj: null,
-				isProgrammaticChange: false
+				isProgrammaticChange: false,
+				lastInvalidWarnAt: 0
 			}
 		},
 		watch: {
@@ -154,6 +156,7 @@
 				return {
 					worksheets,
 					contextMenu: function () { return false; },
+					onbeforechange: this.beforeChange,
 					onchange: this.changed,
 					onload: this.onLoad ? this.onLoad : this.onload,
 					onselection: this.onselection,
@@ -161,6 +164,27 @@
 			}
 		},
 		methods: {
+			beforeChange(instance, cell, x, y, value) {
+				const sheet = Array.isArray(instance) ? instance[0] : instance;
+				const column = sheet?.options?.columns?.[x];
+				if (!column || column.type !== 'numeric') return value;
+
+				if (value == null || value === '') return value;
+				const normalized = String(value).replace(',', '.');
+				if (Number.isNaN(Number(normalized))) {
+					const now = Date.now();
+					if (now - this.lastInvalidWarnAt > 1000) {
+						this.lastInvalidWarnAt = now;
+						const colTitle = column?.title ? `Cột ${column.title}` : `Cột ${x + 1}`;
+						this.snackbarRef?.value?.showSnackbar({
+							message: `${colTitle} chỉ cho phép nhập số.`,
+							type: 'warning'
+						});
+					}
+					return '';
+				}
+				return value;
+			},
 			// Hàm tính toán và set width cho các cột freeze
 			calculateColumnWidths() {
 				const container = this.$refs.spreadsheet;

@@ -4,9 +4,12 @@
 			<v-card>
 				<v-card-title>
 					{{ TitlePage }} • {{ TitleCap }}
-					<div v-if="ThangObj">
-						<v-chip :color="ThangObj?.MauTinhTrang">{{ ThangObj?.TenTinhTrang }}</v-chip>
-					</div>
+					<v-chip v-if="ThangObj" :color="ThangObj?.MauTinhTrang" class="ms-2" size="small">
+						{{ ThangObj?.TenTinhTrang }}
+					</v-chip>
+					<v-chip color="primary" variant="tonal" class="ms-2" size="small">
+						Tổng số học sinh: {{ items.length }}
+					</v-chip>
 				</v-card-title>
 				<v-card-text class="pb-0 px-0">
 					<v-row dense>
@@ -33,20 +36,12 @@
 						</v-col>
 						<v-col cols="12" class="pb-4">
 							<div class="d-flex justify-space-between align-center">
-								<div class="d-flex align-center justify-center">
-									<span class="text-title">
-										<span>Các học sinh đã lưu:
-											<v-chip size="small" color="primary" class="font-weight-medium">
-												({{ renderTextDSHocSinhDaLuu() }} / {{ items.length }})
-											</v-chip>
-										</span>
-									</span>
-									<div v-if="ThangObj?.ReasonReject && ThangObj.TinhTrang === 3">
-										&nbsp;Lý do từ chối: <span class="text-red">{{ ThangObj?.ReasonReject }}</span>
-									</div>
+								<div v-if="ThangObj?.ReasonReject && ThangObj.TinhTrang === 3">
+									Lý do từ chối: <span class="text-red">{{ ThangObj?.ReasonReject }}</span>
 								</div>
 								<div class="d-flex ga-2">
-									<v-btn v-if="items.length > 0" :prepend-icon="isReviewMode ? 'mdi-pencil' : 'mdi-eye'"
+									<v-btn v-if="items.length > 0"
+										:prepend-icon="isReviewMode ? 'mdi-pencil' : 'mdi-eye'"
 										:color="isReviewMode ? 'warning' : 'secondary'" variant="outlined"
 										@click="isReviewMode = !isReviewMode">
 										{{ isReviewMode ? 'Quay lại nhập liệu' : 'Xem lại' }}
@@ -58,6 +53,10 @@
 									<v-btn prepend-icon="mdi-content-save" color="info" variant="outlined"
 										:disabled="items.length === 0 || isReadOnly" @click="onSave">
 										Lưu tạm tất cả
+									</v-btn>
+									<v-btn v-if="isAdminUser && ThangObj" prepend-icon="mdi-swap-horizontal"
+										color="secondary" variant="outlined" @click="IsShowDialogTinhTrang = true">
+										Chuyển trạng thái
 									</v-btn>
 									<v-btn v-if="CapID === 1" prepend-icon="mdi-send" color="primary" variant="outlined"
 										class="me-1" :disabled="items.length === 0 || isReadOnly"
@@ -109,14 +108,16 @@
 
 			<template #item.NhanXetGVCN_VePhuHuynh_HTML="{ item }">
 				<div style="padding: 10px; max-width: 250px;">
-					<uc-quill-editor :key="'NhanXetGVCN_VePhuHuynh_HTML' + item.HocSinhID + ThangObj?.Lop_NhanXetThangID + quillKey"
+					<uc-quill-editor
+						:key="'NhanXetGVCN_VePhuHuynh_HTML' + item.HocSinhID + ThangObj?.Lop_NhanXetThangID + quillKey"
 						v-model="item.NhanXetGVCN_VePhuHuynh_HTML" :spellcheck="false" :readOnly="isReadOnly" />
 				</div>
 			</template>
 
 			<template #item.NhanXetGVCN_VeHocSinh_HTML="{ item }">
 				<div style="padding: 10px; max-width: 250px;">
-					<uc-quill-editor :key="'NhanXetGVCN_VeHocSinh_HTML' + item.HocSinhID + ThangObj?.Lop_NhanXetThangID + quillKey"
+					<uc-quill-editor
+						:key="'NhanXetGVCN_VeHocSinh_HTML' + item.HocSinhID + ThangObj?.Lop_NhanXetThangID + quillKey"
 						v-model="item.NhanXetGVCN_VeHocSinh_HTML" :spellcheck="false" :readOnly="isReadOnly" />
 				</div>
 			</template>
@@ -124,8 +125,10 @@
 			<!-- ─── Cấp 1: Các cột nhận xét môn ─── -->
 			<template #item.NhanXetToan_HTML="{ item }">
 				<div style="padding: 10px; max-width: 280px;">
-					<uc-quill-editor :key="'NhanXetToan_HTML' + item.HocSinhID + ThangObj?.Lop_NhanXetThangID + quillKey" v-model="item.NhanXetToan_HTML"
-						:spellcheck="false" style="height: 150px;" :readOnly="isReadOnly" />
+					<uc-quill-editor
+						:key="'NhanXetToan_HTML' + item.HocSinhID + ThangObj?.Lop_NhanXetThangID + quillKey"
+						v-model="item.NhanXetToan_HTML" :spellcheck="false" style="height: 150px;"
+						:readOnly="isReadOnly" />
 					<v-text-field class="mt-2" v-model="item.DiemToan" placeholder="Nhập điểm..."
 						messages="*Lưu ý: Thang điểm 10" variant="filled" :clearable="false" suffix="Điểm"
 						:readOnly="isReadOnly" solo reverse />
@@ -134,7 +137,8 @@
 
 			<template #item.NhanXetTiengViet_HTML="{ item }">
 				<div style="padding: 10px; max-width: 280px;">
-					<uc-quill-editor :key="'NhanXetTiengViet_HTML' + item.HocSinhID + ThangObj?.Lop_NhanXetThangID + quillKey"
+					<uc-quill-editor
+						:key="'NhanXetTiengViet_HTML' + item.HocSinhID + ThangObj?.Lop_NhanXetThangID + quillKey"
 						v-model="item.NhanXetTiengViet_HTML" :spellcheck="false" style="height: 150px;"
 						:readOnly="isReadOnly" />
 					<v-text-field class="mt-2" v-model="item.DiemTiengViet" placeholder="Nhập điểm..."
@@ -145,22 +149,25 @@
 
 			<template #item.NhanXetMonHocKhac_HTML="{ item }">
 				<div style="padding: 10px; max-width: 280px;">
-					<uc-quill-editor :key="'NhanXetMonHocKhac_HTML' + item.HocSinhID + ThangObj?.Lop_NhanXetThangID + quillKey"
+					<uc-quill-editor
+						:key="'NhanXetMonHocKhac_HTML' + item.HocSinhID + ThangObj?.Lop_NhanXetThangID + quillKey"
 						v-model="item.NhanXetMonHocKhac_HTML" :spellcheck="false" :readOnly="isReadOnly" />
 				</div>
 			</template>
 
 			<template #item.HoatDongGiaoDucKhac_HTML="{ item }">
 				<div style="padding: 10px; max-width: 280px;">
-					<uc-quill-editor :key="'HoatDongGiaoDucKhac_HTML' + item.HocSinhID + ThangObj?.Lop_NhanXetThangID + quillKey"
+					<uc-quill-editor
+						:key="'HoatDongGiaoDucKhac_HTML' + item.HocSinhID + ThangObj?.Lop_NhanXetThangID + quillKey"
 						v-model="item.HoatDongGiaoDucKhac_HTML" :spellcheck="false" :readOnly="isReadOnly" />
 				</div>
 			</template>
 
 			<template #item.PhamChatNangLuc_HTML="{ item }">
 				<div style="padding: 10px; max-width: 280px;">
-					<uc-quill-editor :key="'PhamChatNangLuc_HTML' + item.HocSinhID + ThangObj?.Lop_NhanXetThangID + quillKey" v-model="item.PhamChatNangLuc_HTML"
-						:spellcheck="false" :readOnly="isReadOnly" />
+					<uc-quill-editor
+						:key="'PhamChatNangLuc_HTML' + item.HocSinhID + ThangObj?.Lop_NhanXetThangID + quillKey"
+						v-model="item.PhamChatNangLuc_HTML" :spellcheck="false" :readOnly="isReadOnly" />
 				</div>
 			</template>
 
@@ -190,7 +197,7 @@
 								<v-progress-circular v-if="viPhamLoadingMap[lvp.LoaiViPham]" indeterminate size="10"
 									width="2" class="me-1" />
 								{{ tenViPhamVI(lvp.TenViPham) }} ({{ lvp.SoLuong_HS }} {{ lvp.LoaiViPham === 2 ? 'ngày'
-									: 'tiết' }})
+								: 'tiết' }})
 							</v-chip>
 							<div v-if="viPhamExpandedMap[item.HocSinhID + '_' + lvp.LoaiViPham]" class="mt-1 ms-2">
 								<!-- LoaiViPham 2: hiển thị theo ngày (unique) -->
@@ -212,11 +219,13 @@
 					</template>
 
 					<!-- ─── Nhóm học ─── -->
-					<template v-if="item.DSNhom?.some(n => n.LopHocID && getViPhamCuaHocSinhTrongNhom(item.HocSinhID, n.LopHocID).length > 0)">
+					<template
+						v-if="item.DSNhom?.some(n => n.LopHocID && getViPhamCuaHocSinhTrongNhom(item.HocSinhID, n.LopHocID).length > 0)">
 						<v-divider class="mt-2 mb-1" />
 						<!-- <div class="text-caption text-medium-emphasis mb-1">Nhóm học:</div> -->
 						<template v-for="nhom in item.DSNhom" :key="nhom.NhomID">
-							<div v-if="nhom.LopHocID && getViPhamCuaHocSinhTrongNhom(item.HocSinhID, nhom.LopHocID).length > 0" class="mb-1">
+							<div v-if="nhom.LopHocID && getViPhamCuaHocSinhTrongNhom(item.HocSinhID, nhom.LopHocID).length > 0"
+								class="mb-1">
 								<!-- <v-chip size="x-small" color="indigo" variant="tonal">{{ nhom.TenNhom }}</v-chip> -->
 								<div v-for="lvp in getViPhamCuaHocSinhTrongNhom(item.HocSinhID, nhom.LopHocID)"
 									:key="nhom.NhomID + '_' + lvp.LoaiViPham" class="ms-2 mt-1">
@@ -227,7 +236,7 @@
 											v-if="viPhamLoadingMap_Nhom[nhom.LopHocID + '_' + lvp.LoaiViPham]"
 											indeterminate size="10" width="2" class="me-1" />
 										{{ tenViPhamVI(lvp.TenViPham) }} ({{ lvp.SoLuong_HS }} {{ lvp.LoaiViPham === 2 ?
-											'ngày' : 'tiết' }})
+										'ngày' : 'tiết' }})
 									</v-chip>
 									<div v-if="viPhamExpandedMap_Nhom[item.HocSinhID + '_' + nhom.LopHocID + '_' + lvp.LoaiViPham]"
 										class="mt-1 ms-2">
@@ -241,7 +250,7 @@
 											<div v-for="(row, idx) in getViPhamChiTietNhom(item.HocSinhID, nhom.LopHocID, lvp.LoaiViPham)"
 												:key="idx" class="text-caption text-medium-emphasis">
 												{{ formatNgayViPham(row.Ngay) }} · Tiết {{ row.Tiet }} · {{
-													row.TenMonHoc }}
+												row.TenMonHoc }}
 											</div>
 										</template>
 									</div>
@@ -255,45 +264,48 @@
 			<!-- ─── Cấp 2 & 3: Cuối kỳ (T12, T5) ─── -->
 			<template #item.UuDiem="{ item }">
 				<div style="padding: 10px;">
-					<uc-quill-editor :key="'UuDiem' + item.HocSinhID + ThangObj?.Lop_NhanXetThangID + quillKey" v-model="item.UuDiem" :spellcheck="false"
-						:readOnly="isReadOnly" />
+					<uc-quill-editor :key="'UuDiem' + item.HocSinhID + ThangObj?.Lop_NhanXetThangID + quillKey"
+						v-model="item.UuDiem" :spellcheck="false" :readOnly="isReadOnly" />
 				</div>
 			</template>
 			<template #item.NhuocDiem="{ item }">
 				<div style="padding: 10px;">
-					<uc-quill-editor :key="'NhuocDiem' + item.HocSinhID + ThangObj?.Lop_NhanXetThangID + quillKey" v-model="item.NhuocDiem" :spellcheck="false"
-						:readOnly="isReadOnly" />
+					<uc-quill-editor :key="'NhuocDiem' + item.HocSinhID + ThangObj?.Lop_NhanXetThangID + quillKey"
+						v-model="item.NhuocDiem" :spellcheck="false" :readOnly="isReadOnly" />
 				</div>
 			</template>
 			<template #item.DeXuat="{ item }">
 				<div style="padding: 10px;">
-					<uc-quill-editor :key="'DeXuat' + item.HocSinhID + ThangObj?.Lop_NhanXetThangID + quillKey" v-model="item.DeXuat" :spellcheck="false"
-						:readOnly="isReadOnly" />
+					<uc-quill-editor :key="'DeXuat' + item.HocSinhID + ThangObj?.Lop_NhanXetThangID + quillKey"
+						v-model="item.DeXuat" :spellcheck="false" :readOnly="isReadOnly" />
 				</div>
 			</template>
 			<template #item.NhanXetGVCN="{ item }">
 				<div style="padding: 10px;">
-					<uc-quill-editor :key="'NhanXetGVCN' + item.HocSinhID + ThangObj?.Lop_NhanXetThangID + quillKey" v-model="item.NhanXetGVCN"
-						:spellcheck="false" :readOnly="isReadOnly" :maxLength="500" />
+					<uc-quill-editor :key="'NhanXetGVCN' + item.HocSinhID + ThangObj?.Lop_NhanXetThangID + quillKey"
+						v-model="item.NhanXetGVCN" :spellcheck="false" :readOnly="isReadOnly" :maxLength="500" />
 				</div>
 			</template>
 
 			<!-- ─── Cấp 2 & 3: Các tháng thường ─── -->
 			<template #item.NoiDungKienThuc_HTML="{ item }">
 				<div style="padding: 10px; min-width: 200px;">
-					<uc-quill-editor :key="'NoiDungKienThuc_HTML' + item.HocSinhID + ThangObj?.Lop_NhanXetThangID + quillKey" v-model="item.NoiDungKienThuc_HTML"
-						:spellcheck="false" :readOnly="isReadOnly" />
+					<uc-quill-editor
+						:key="'NoiDungKienThuc_HTML' + item.HocSinhID + ThangObj?.Lop_NhanXetThangID + quillKey"
+						v-model="item.NoiDungKienThuc_HTML" :spellcheck="false" :readOnly="isReadOnly" />
 				</div>
 			</template>
 			<template #item.NoiDungNangLuc_HTML="{ item }">
 				<div style="padding: 10px; min-width: 200px;">
-					<uc-quill-editor :key="'NoiDungNangLuc_HTML' + item.HocSinhID + ThangObj?.Lop_NhanXetThangID + quillKey" v-model="item.NoiDungNangLuc_HTML"
-						:spellcheck="false" :readOnly="isReadOnly" />
+					<uc-quill-editor
+						:key="'NoiDungNangLuc_HTML' + item.HocSinhID + ThangObj?.Lop_NhanXetThangID + quillKey"
+						v-model="item.NoiDungNangLuc_HTML" :spellcheck="false" :readOnly="isReadOnly" />
 				</div>
 			</template>
 			<template #item.NoiDungHoatDongKhac_HTML="{ item }">
 				<div style="padding: 10px; min-width: 200px;">
-					<uc-quill-editor :key="'NoiDungHoatDongKhac_HTML' + item.HocSinhID + ThangObj?.Lop_NhanXetThangID + quillKey"
+					<uc-quill-editor
+						:key="'NoiDungHoatDongKhac_HTML' + item.HocSinhID + ThangObj?.Lop_NhanXetThangID + quillKey"
 						v-model="item.NoiDungHoatDongKhac_HTML" :spellcheck="false" :readOnly="isReadOnly" />
 				</div>
 			</template>
@@ -307,10 +319,6 @@
 				</div>
 			</template>
 
-			<!-- ─── Action ─── -->
-			<template #item.actions="{ item }">
-				<v-btn @click="onSaveDraft(item)" text="Lưu tạm" color="primary" variant="outlined" />
-			</template>
 		</v-data-table>
 
 		<!-- Copy dialog -->
@@ -330,12 +338,30 @@
 				</v-card-actions>
 			</v-card>
 		</v-dialog>
+
+		<v-dialog v-model="IsShowDialogTinhTrang" width="520">
+			<v-card title="Chuyển trạng thái nhận xét tháng">
+				<v-card-text>
+					<v-select v-model="TinhTrangNew" label="Chọn trạng thái" :items="DSTinhTrang" item-title="title"
+						item-value="value" />
+					<v-textarea v-model="ReasonRejectNew" label="Lý do từ chối" placeholder="Nhập lý do (nếu có)"
+						:disabled="TinhTrangNew !== 3" />
+				</v-card-text>
+				<v-card-actions>
+					<v-spacer />
+					<v-btn @click="IsShowDialogTinhTrang = false">Đóng</v-btn>
+					<v-btn color="primary" :disabled="TinhTrangNew === null" @click="onUpdateTinhTrang">
+						Xác nhận
+					</v-btn>
+				</v-card-actions>
+			</v-card>
+		</v-dialog>
 	</Global>
 </template>
 
 <script>
-export default {
-	name: 'NhanXetThang',
+	export default {
+		name: 'NhanXetThang',
 
 	// Inject snackbarRef, iframeRef được provide từ app root (qua Global.vue)
 	inject: ['snackbarRef', 'iframeRef', 'confirmRef'],
@@ -348,6 +374,9 @@ export default {
 			ThangObj: null,
 			items: [],
 			isLowScreen: window.innerWidth < 1366,			isReviewMode: false,			IsShowDialogCopy: false,
+			IsShowDialogTinhTrang: false,
+			TinhTrangNew: null,
+			ReasonRejectNew: '',
 			ThangObj_Copy: null,
 			DSTongHop_ViPham: [],
 			viPhamDetailMap: {},
@@ -389,6 +418,18 @@ export default {
 		TitlePage() {
 			return getTitlePageByURL(window.location.pathname + window.location.search)
 		},
+		isAdminUser() {
+			return vueData.user?.UserID === 'NA0000022'
+		},
+		DSTinhTrang() {
+			return [
+				{ title: 'Chưa lưu', value: 0 },
+				{ title: 'Lưu tạm', value: 1 },
+				{ title: 'Gửi tổ trưởng', value: 2 },
+				{ title: 'Từ chối', value: 3 },
+				{ title: 'Duyệt', value: 4 },
+			]
+		},
 		/** Readonly khi tình trạng là Đã duyệt (2) hoặc Từ chối (4), hoặc đang xem lại */
 		isReadOnly() {
 			return this.isReviewMode || this.ThangObj?.TinhTrang === 2 || this.ThangObj?.TinhTrang === 4
@@ -422,6 +463,8 @@ export default {
 			if (!ThangObj) return
 			this.items = []
 			this.isReviewMode = false
+			this.TinhTrangNew = ThangObj.TinhTrang ?? null
+			this.ReasonRejectNew = ThangObj.ReasonReject ?? ''
 			this.getNhanXetThang()
 		},
 		isLowScreen() {
@@ -846,22 +889,6 @@ export default {
 			})
 		},
 
-		onSaveDraft(item) {
-			if (!this.validateNhanXetGVCN([item])) return
-			item.DKHocTiep = item.DKHocTiep ?? false
-			const promise = fetchPromise('lms/NhanXetThang_Ins_By_NhanXetThangID', {
-				...item,
-				LopID: this.LopItem.LopID,
-				Lop_NhanXetThangID: this.ThangObj.Lop_NhanXetThangID,
-			}, {forceRefresh: true})
-			this.$toastPromise(promise, {
-				loadingText: `Đang lưu ${item.HoTen}...`,
-				successText: `Lưu tạm ${item.HoTen} thành công`,
-				errorPrefix: 'Lưu thất bại',
-			})
-			promise.then(() => this.getNhanXetThang(true))
-		},
-
 		renderTextDSHocSinhDaLuu() {
 			let count = 0
 			for (const item of this.items) {
@@ -933,6 +960,8 @@ export default {
 				this.$toast('warning', 'Vui lòng lưu hết tất cả học sinh trước khi gửi')
 				return
 			}
+			this.confirmRef.value.show({ title: 'Xác nhận gửi nhận xét tháng lên BGH?' }).then(ok => {
+				if (!ok) return
 			const promise = fetchPromise('lms/NhanXetThang_Upd_TinhTrang', {
 				TinhTrang: 2,
 				Lop_NhanXetThangID: this.ThangObj.Lop_NhanXetThangID,
@@ -942,6 +971,27 @@ export default {
 				successText: 'Gửi BGH thành công',
 			})
 			promise.then(() => {
+				this.getThang(true)
+				this.getNhanXetThang(true)
+			})
+			})
+		},
+
+		onUpdateTinhTrang() {
+			if (!this.ThangObj) return
+			const reason = this.TinhTrangNew === 3 ? (this.ReasonRejectNew ?? '') : ''
+			const promise = fetchPromise('lms/NhanXetThang_Upd_TinhTrang', {
+				TinhTrang: this.TinhTrangNew,
+				Lop_NhanXetThangID: this.ThangObj.Lop_NhanXetThangID,
+				ReasonReject: reason,
+			}, { forceRefresh: true })
+			this.$toastPromise(promise, {
+				loadingText: 'Đang cập nhật trạng thái...',
+				successText: 'Cập nhật trạng thái thành công',
+				errorPrefix: 'Cập nhật thất bại',
+			})
+			promise.then(() => {
+				this.IsShowDialogTinhTrang = false
 				this.getThang(true)
 				this.getNhanXetThang(true)
 			})
@@ -972,10 +1022,6 @@ export default {
 			const H_HocSinh = {
 				title: 'Học sinh', value: 'HocSinh',
 				align: 'center', minWidth: 180, width: 180, fixed: true,
-			}
-			const H_Action = {
-				title: '', value: 'actions',
-				align: 'center', minWidth: 100, width: 100, lastFixed: true,
 			}
 
 			let headers = [H_HocSinh]
@@ -1081,13 +1127,8 @@ export default {
 				}
 			}
 
-			// Nút Lưu tạm chỉ hiện khi chưa khoá
-			if ([0, 1].includes(this.ThangObj?.TinhTrang)) {
-				headers.push(H_Action)
-			}
-
 			return headers
 		},
 	},
-}
+	}
 </script>

@@ -53,7 +53,7 @@
 <script>
 	export default {
 		inject: ['snackbarRef', 'iframeRef', 'confirmRef'],
-
+	
 		data() {
 			return {
 				vueData,
@@ -70,12 +70,12 @@
 				Semester: { title: 'Cuối kì 2', value: 2 },
 			}
 		},
-
+	
 		computed: {
 			TitleCap() { return renderText(parseInt(vueData.CapID)) },
 			TitlePage() { return getTitlePageByURL(window.location.pathname + window.location.search) },
 		},
-
+	
 		watch: {
 			'vueData.NienKhoa'() {
 				this.KhoiItem = null
@@ -94,12 +94,12 @@
 				if (v?.KhoiID) this.getTongKetByKhoi()
 			},
 		},
-
+	
 		mounted() {
 			this.ensureJExcelRuntimeState()
 			this.getKhoi()
 		},
-
+	
 		methods: {
 			ensureJExcelRuntimeState() {
 				if (!Array.isArray(vueData.DSHocSinhQLD)) vueData.DSHocSinhQLD = []
@@ -171,7 +171,7 @@
 				if (Array.isArray(res)) return res
 				return res?.data ?? []
 			},
-
+	
 			async getKhoi() {
 				const res = await fetchPromise('lms/KhoiHocByCapHoc_Get', {
 					CapID: vueData.CapID,
@@ -180,7 +180,7 @@
 				})
 				this.DSKhoi = this.extractList(res)
 			},
-
+	
 			async getKhenThuong() {
 				if (!this.KhoiItem?.KhoiID) {
 					this.DSKhenThuong = []
@@ -192,18 +192,17 @@
 				})
 				this.DSKhenThuong = this.extractList(res)
 			},
-
+	
 			async getTongKetByKhoi() {
 				if (!this.KhoiItem?.KhoiID) return
 				await this.getKhenThuong()
-				const url = `https://tapi.lhbs.vn/psmark1/LMS_GetBangTongHopKetQua_TheoKhoi?KhoiID=${this.KhoiItem.KhoiID}&=&KyDanhGia=4&NamHoc=${vueData.NienKhoa}`
-				const response = await fetch(url)
-				const data = await response.json()
-				const list = (data?.data ?? []).sort((a, b) => (a.Sort ?? 0) - (b.Sort ?? 0))
+				const url = `/psmark1/LMS_GetBangTongHopKetQua_TheoKhoi?KhoiID=${this.KhoiItem.KhoiID}&=&KyDanhGia=4&NamHoc=${vueData.NienKhoa}`
+				const res = await fetchPromise(url)
+				const list = this.extractList(res).sort((a, b) => (a.Sort ?? 0) - (b.Sort ?? 0))
 				this.DSHocSinh_API_QLD = list
 				this.renderDSHocSinhQLD()
 			},
-
+	
 			renderDSHocSinhQLD() {
 				const dsHocSinhID = [...new Set(this.DSHocSinh_API_QLD.map(x => x.HocSinhID))]
 				const data = []
@@ -239,7 +238,7 @@
 				vueData.DSHocSinhQLD = data
 				this.setJExcelHeaders()
 			},
-
+	
 			exportExcel() {
 				const headers = [
 					'TenLop',
@@ -264,7 +263,7 @@
 				XLSX.utils.book_append_sheet(workbook, worksheet, 'Sheet1')
 				XLSX.writeFile(workbook, 'DanhSachKhenThuong.xlsx')
 			},
-
+	
 			async getFontBase64(url) {
 				const res = await fetch(url)
 				const blob = await res.blob()
@@ -277,8 +276,17 @@
 					reader.readAsDataURL(blob)
 				})
 			},
-
+	
 			async exportThuKhen() {
+				const dsThuKhen = this.DSHocSinhQLD.filter(x => (x.NoiDungThuKhen || '').trim())
+				if (dsThuKhen.length === 0) {
+					this.snackbarRef.value.showSnackbar({
+						message: 'Không có nội dung thư khen để export',
+						color: 'warning',
+					})
+					return
+				}
+
 				const base64 = await this.getFontBase64('/_cdn/lhbs-lms/00085-UTM-EdwardianKT.ttf')
 				pdfMake.vfs = pdfMake.vfs || {}
 				pdfMake.vfs['UTM-EdwardianKT.ttf'] = base64
@@ -290,17 +298,18 @@
 						bolditalics: 'UTM-EdwardianKT.ttf',
 					},
 				}
-
+	
 				const content = []
-				for (const data of this.DSHocSinhQLD.filter(x => x.NoiDungThuKhen)) {
+				for (const data of dsThuKhen) {
 					let splitNoiDung = data.NoiDungThuKhen?.split('\n') ?? []
 					splitNoiDung = splitNoiDung.filter(x => x !== '')
+					if (splitNoiDung.length === 0) continue
 					let marginTop = 220
 					const soTu = splitNoiDung[0]?.split(' ').length ?? 0
 					const soDong = soTu / 11
 					if (soDong > 6) marginTop = 180
 					else if (soDong > 5) marginTop = 200
-
+	
 					const noiDungThuKhen = splitNoiDung.map(noidung => ({
 						text: `\t\t\t${noidung}`,
 						font: 'UTM_Edwardian',
@@ -309,7 +318,7 @@
 						style: 'title',
 						preserveLeadingSpaces: true,
 					}))
-
+	
 					content.push({
 						text: `Học sinh: ${data.HoTen} lớp ${String(data.TenLop || '').substring(1, 4)}`,
 						font: 'UTM_Edwardian',
@@ -319,6 +328,14 @@
 					content.push({ text: '', margin: [0, 20, 0, 0] })
 					content.push(noiDungThuKhen)
 					content.push({ text: '', fontSize: 14, bold: true, pageBreak: 'before', margin: [0, 0, 0, 8] })
+				}
+	
+				if (content.length === 0) {
+					this.snackbarRef.value.showSnackbar({
+						message: 'Không có nội dung thư khen hợp lệ để export',
+						color: 'warning',
+					})
+					return
 				}
 
 				const dd = {
@@ -336,7 +353,7 @@
 				}
 				pdfMake.createPdf(dd).open()
 			},
-
+	
 			async exportGiayKhen() {
 				this.isLoadingExportGiayKhen = true
 				const dsDanhHieu = [
@@ -353,7 +370,7 @@
 						DanhHieu_EN: 'In recognition of outstanding performance in Academic Achievements',
 					},
 				]
-
+	
 				const certs = []
 				for (const data of this.DSHocSinhQLD.filter(x => (x.DanhHieu || '').length > 0)) {
 					const objDanhHieu = dsDanhHieu.find(x => x.DanhHieu_VI === data.DanhHieu)
@@ -372,7 +389,7 @@
 						TenHieuTruong: 'Hoàng Thị Diễm Trang',
 					})
 				}
-
+	
 				try {
 					const response = await fetch('https://gencert.iotsoftvn.com/api/cert-generators/multi-pdf', {
 						method: 'POST',

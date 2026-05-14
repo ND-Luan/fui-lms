@@ -342,10 +342,15 @@ const HeaderBuilder = {
         }
         const config = {
             title, name: column.MaCotDiem, width,
-            typeValue: column.GiaTriCotDiem, backGroundColor, wrap: true,
+            // typeValue: column.GiaTriCotDiem,
+            type: this.mapValueTypeToJssType(column.GiaTriCotDiem),
+            backGroundColor, wrap: true,
             readOnly: column.LoaiCotDiem === CONSTANTS.FORMULA_COLUMN || isDisabled || isLocked
         };
         return this.buildColumnByType(column.GiaTriCotDiem, config, column);
+    },
+    mapValueTypeToJssType(valueType) {
+        return valueType === CONSTANTS.COLUMN_TYPES.NUMBER ? 'numeric' : 'text';
     },
     /** Build cấu hình cột theo type */
     buildColumnByType(valueType, baseConfig, columnData) {
