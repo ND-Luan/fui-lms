@@ -316,6 +316,22 @@
 			}
 		},
 		methods: {
+			isDeletedItemInSelectedWeek(item) {
+				const selectedWeekId = vueData.cascadeTuanID
+				if (selectedWeekId != null && item?.TuanHocID != null) {
+					return String(item.TuanHocID) === String(selectedWeekId)
+				}
+				if (vueData.cascadeTuanHienThi && item?.Tuan_HienThi) {
+					return String(item.Tuan_HienThi) === String(vueData.cascadeTuanHienThi)
+				}
+				return false
+			},
+			async refreshFocusAfterDeleteIfNeeded(item) {
+				const isAssigned = Number(item?.Status) === 3 || Number(item?.AssignedClassCount || 0) > 0
+				if (!isAssigned) return
+				if (!this.isDeletedItemInSelectedWeek(item)) return
+				await Promise.resolve(vueData.reloadFocusApis?.())
+			},
 			getNow() {
 				let date = dayjs().add(1, "minute").format("YYYY-MM-DDTHH:mm");
 				return date
@@ -388,14 +404,16 @@
 					if (this.item.ResourceType === 'ASSIGNMENT') {
 						ajaxCALL('lms/EL_Assignment_Delete', {
 							AssignmentID: this.item.ResourceID
-						}, res => {
-							vueData.apiCall3()
+						}, async res => {
+							await Promise.resolve(vueData.apiCall3?.())
+							await this.refreshFocusAfterDeleteIfNeeded(this.item)
 						})
 					} else {
 						ajaxCALL('lms/EL_Lesson_Delete', {
 							LessonID: this.item.ResourceID
-						}, res => {
-							vueData.apiCall3()
+						}, async res => {
+							await Promise.resolve(vueData.apiCall3?.())
+							await this.refreshFocusAfterDeleteIfNeeded(this.item)
 						})
 					}
 				})
@@ -577,13 +595,3 @@
 		}
 	}
 </script>
-<style>
-	.assigned-text {
-		display: block !important;
-		white-space: normal !important;
-		word-break: break-all !important;
-		/* bẻ bất kỳ chỗ nào */
-		overflow-wrap: anywhere !important;
-		min-width: 0 !important;
-	}
-</style>

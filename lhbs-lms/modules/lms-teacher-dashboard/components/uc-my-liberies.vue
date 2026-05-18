@@ -257,6 +257,22 @@
 		}
 	},
 	methods: {
+		isDeletedItemInSelectedWeek(item) {
+			const selectedWeekId = vueData.cascadeTuanID
+			if (selectedWeekId != null && item?.TuanHocID != null) {
+				return String(item.TuanHocID) === String(selectedWeekId)
+			}
+			if (vueData.cascadeTuanHienThi && item?.Tuan_HienThi) {
+				return String(item.Tuan_HienThi) === String(vueData.cascadeTuanHienThi)
+			}
+			return false
+		},
+		async refreshFocusAfterDeleteIfNeeded(item) {
+			const isAssigned = Number(item?.Status) === 3 || Number(item?.AssignedClassCount || 0) > 0
+			if (!isAssigned) return
+			if (!this.isDeletedItemInSelectedWeek(item)) return
+			await Promise.resolve(vueData.reloadFocusApis?.())
+		},
 		getStatusStyle(color) {
 			const m = { grey: { bg: '#F3F4F6', text: '#6B7280' }, orange: { bg: '#FAEEDA', text: '#BA7517' }, success: { bg: '#EAF3DE', text: '#3B6D11' } }
 			const c = m[color] || m.grey
@@ -316,15 +332,17 @@
 				if (item.ResourceType === 'ASSIGNMENT') {
 					ajaxCALL('lms/EL_Assignment_Delete', {
 						AssignmentID: item.ResourceID
-					}, res => {
-						this.refreshLibrary()
+					}, async res => {
+						await this.refreshLibrary()
+						await this.refreshFocusAfterDeleteIfNeeded(item)
 						this.snackbarRef.value.showSnackbar({ message: 'Xóa bài tập thành công!', color: 'success' })
 					})
 				} else {
 					ajaxCALL('lms/EL_Lesson_Delete', {
 						LessonID: item.ResourceID
-					}, res => {
-						this.refreshLibrary()
+					}, async res => {
+						await this.refreshLibrary()
+						await this.refreshFocusAfterDeleteIfNeeded(item)
 						this.snackbarRef.value.showSnackbar({ message: 'Xóa bài học thành công!', color: 'success' })
 					})
 				}

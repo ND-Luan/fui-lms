@@ -19,7 +19,7 @@ function getTongKetBaseKeys() {
             'GDDP', 'HDTN', 'HKTN', 'JA', 'LS-DL',
             'NT', 'AI', 'toan', 'tin', 'van', 'anh',
             'gdcd', 'cn', 'td',
-            'HocLuc', 'KQRenLuyen', 'KQRL_Source', 'DanhHieu',
+            'HocLuc', 'KQRenLuyen', 'DanhHieu',
             'Phep', 'KhongPhep', 'TongBuoiNghi',
             'UuDiem', 'NhuocDiem', 'DeXuat', 'HocSinhLopID',
             'SoQuyetDinhKT', 'VaoSoKT'
@@ -29,7 +29,7 @@ function getTongKetBaseKeys() {
         'STT', 'HocSinhID', 'HoTen', 'TenLop', 'NgaySinh',
         'GDDP', 'GDKT-PL', 'gdqp', 'HDTN', 'JA', 'toan', 'ly', 'hoa',
         'sinh', 'tin', 'van', 'su', 'dia', 'anh', 'td',
-        'HocLuc', 'KQRenLuyen', 'KQRL_Source', 'DanhHieu',
+        'HocLuc', 'KQRenLuyen', 'DanhHieu',
         'Phep', 'KhongPhep', 'TongBuoiNghi', 'UuDiem', 'NhuocDiem', 'DeXuat',
         'HocSinhLopID', 'SoQuyetDinhKT', 'VaoSoKT'
     ]
@@ -39,9 +39,18 @@ function showModuleSnackbar(message, color = 'warning') {
         vueData.snackbarRef.value.showSnackbar({ message, color })
         return
     }
+    if (color === 'success') {
+        Vue.$toast?.success?.(message, { position: 'top' })
+        return
+    }
+    if (color === 'error') {
+        Vue.$toast?.error?.(message, { position: 'top' })
+        return
+    }
+    Vue.$toast?.warning?.(message, { position: 'top' })
 }
 function isTongKetHocKiTestingUser() {
-    return vueData.user?.UserID === 'NA0000022'
+    return true
 }
 function getErrorMessage(error) {
     return error?.message ?? error?.responseJSON?.Message ?? error?.responseText ?? ''
@@ -50,41 +59,6 @@ function isTongKetChuaChotDiemError(error) {
     const message = getErrorMessage(error)
     return message.includes("Incorrect syntax near ','.")
         && message.includes("Incorrect syntax near 'pvs'.")
-}
-const KQRL_SOURCE = {
-    TONG_KET: 'TongKet',
-    LMS: 'LMS',
-    IMPORT: 'Import',
-    MANUAL: 'Manual'
-}
-const KQRL_LMS_NOTICE = 'KQRL đang lấy từ LMS, vui lòng nhấn Lưu để đẩy sang QLDiem.'
-const KQRL_MISSING_NOTICE = 'Chưa nhập KQRL, vui lòng nhập trước khi lưu.'
-function showKqrlLmsNotice() {
-    if (!vueData.hasKQRLFromLMS || vueData.isKQRLFromLMSNotified) return
-    vueData.isKQRLFromLMSNotified = true
-    showModuleSnackbar(KQRL_LMS_NOTICE, 'warning')
-}
-function showMissingKqrlNotice() {
-    if (vueData.isMissingKQRLNotified) return
-    const hasMissing = vueData.DSHocSinh.some(item => !item.KQRenLuyen)
-    if (!hasMissing) return
-    vueData.isMissingKQRLNotified = true
-    showModuleSnackbar(KQRL_MISSING_NOTICE, 'warning')
-}
-function showMissingKqrlByClassNotice() {
-    if (vueData.isMissingKQRLNotified) return
-    const missingByClass = new Map()
-    for (const item of vueData.DSHocSinh) {
-        if (item.KQRenLuyen) continue
-        const tenLop = item.TenLop ?? 'Khong ro lop'
-        missingByClass.set(tenLop, (missingByClass.get(tenLop) ?? 0) + 1)
-    }
-    if (missingByClass.size === 0) return
-    const parts = Array.from(missingByClass.entries())
-        .sort((a, b) => a[0].localeCompare(b[0]))
-        .map(([tenLop, count]) => `${tenLop} (${count})`)
-    vueData.isMissingKQRLNotified = true
-    showModuleSnackbar(`Lop thieu KQRL: ${parts.join(', ')}`, 'warning')
 }
 function createFallbackHocSinhRow(item, index, lopItem = null) {
     const row = Object.fromEntries(getTongKetBaseKeys().map(key => [key, '']))
@@ -97,7 +71,6 @@ function createFallbackHocSinhRow(item, index, lopItem = null) {
         NgaySinh: item.NgaySinh ?? '',
         HocSinhLopID: item.HocSinhLopID ?? '',
         KQRenLuyen: item.KQRenLuyen ?? item.KQRL ?? '',
-        KQRL_Source: item.KQRL_Source ?? '',
         DanhHieu: item.DanhHieu ?? '',
         Phep: item.Phep ?? '',
         KhongPhep: item.KhongPhep ?? '',
@@ -109,33 +82,36 @@ function createFallbackHocSinhRow(item, index, lopItem = null) {
         VaoSoKT: item.VaoSoKT ?? ''
     }
 }
-async function loadHocSinhFallbackForKQRL(lopItem) {
+async function loadHocSinhFallbackForKQRL(lopItem, silent = false) {
     const dsHocSinh = await fetchPromise('lms/HocSinhLop_Get_ByLopID', {
         LopID: lopItem.LopID,
         NienKhoa: vueData.NienKhoa
     }, {
         cache: false,
-        suppressError: true
+        suppressError: true,
+        silent
     })
     if (!Array.isArray(dsHocSinh)) return []
     return dsHocSinh.map((item, index) => createFallbackHocSinhRow(item, index, lopItem))
 }
-async function fetchTongKetByLop(lopItem) {
+async function fetchTongKetByLop(lopItem, khoiIDOverride = null, silent = false) {
     if (!lopItem?.LopID) {
         return {
             data: [],
             usedFallback: false
         }
     }
+    const khoiID = khoiIDOverride ?? vueData.KhoiItem?.KhoiID ?? vueData.KhoiID
     try {
         const res = await fetchPromise(`diemc${vueData.CapID}/LMS_GetTongKetDTBMonHocByLop`, {
-            KhoiID: vueData.KhoiItem?.KhoiID ?? vueData.KhoiID,
+            KhoiID: khoiID,
             LopID: lopItem.LopID,
             HocKy: vueData.Semester.value,
             NienKhoa: vueData.NienKhoa
         }, {
             cache: false,
-            suppressError: true
+            suppressError: true,
+            silent
         })
         return {
             data: Array.isArray(res) ? res : [],
@@ -146,7 +122,7 @@ async function fetchTongKetByLop(lopItem) {
             throw error
         }
         showModuleSnackbar('Chưa chốt điểm học kỳ, bạn vẫn có thể nhập KQRL trước.', 'warning')
-        const fallbackData = await loadHocSinhFallbackForKQRL(lopItem)
+        const fallbackData = await loadHocSinhFallbackForKQRL(lopItem, silent)
         return {
             data: fallbackData,
             usedFallback: true
@@ -181,17 +157,17 @@ async function exportGiayKhen() {
         {
             List_CapID: [1, 2, 3],
             DanhHieu_VI: "Học sinh Xuất sắc", //Đạt danh hiệu
-            DanhHieu_EN: "In recognition of distinguished performance in Academic Achievements"
+            DanhHieu_EN: "In recognition of outstanding academic achievement"
         },
         {
             List_CapID: [2, 3],
             DanhHieu_VI: "Học sinh Giỏi", //Đạt danh hiệu
-            DanhHieu_EN: "In recognition of outstanding performance in Academic Achievements"
+            DanhHieu_EN: "In recognition of excellent academic achievement"
         },
         {
             List_CapID: [1],
             DanhHieu_VI: "Học sinh Tiêu biểu hoàn thành tốt trong học tập và rèn luyện", //Đạt danh hiệu
-            DanhHieu_EN: "In recognition of outstanding performance in Academic Achievements"
+            DanhHieu_EN: "In recognition of excellent academic and personal achievement"
         }
     ]
     const Certs = []
@@ -263,9 +239,6 @@ function TongKet_GetDTBMonHocByKhoiLop() {
     vueData.DSHocSinh = []
     vueData.DSKhenThuong = []
     vueData.isChuaChotDiem = false
-    vueData.hasKQRLFromLMS = false
-    vueData.isKQRLFromLMSNotified = false
-    vueData.isMissingKQRLNotified = false
     if (vueData.Is_InCaKhoi) {
         getDSLop()
         return
@@ -306,32 +279,26 @@ function TongKet_GetDTBMonHocByKhoiLop() {
         const khenThuong = await fetchPromise('lms/KhenThuong_Get', { LopID: vueData.LopItem?.LopID })
         vueData.DSKhenThuong.push(khenThuong)
         initSpread()
-        const hasTongKetKqrl = vueData.dataDiem?.some(item => item?.KQRenLuyen)
-        if (!hasTongKetKqrl) {
-            await mergeKQRLFromDB(vueData.LopItem?.LopID, { overwrite: true })
-            showKqrlLmsNotice()
+        if (tongKetRes.usedFallback) {
+            await mergeKQRLFromDB(vueData.LopItem?.LopID)
         }
-        showMissingKqrlNotice()
         await mergeNhanXetThang(vueData.LopItem?.LopID)
     })().catch(error => {
         console.error('TongKet_GetDTBMonHocByKhoiLop error', error)
         showModuleSnackbar(getErrorMessage(error) || 'Tải tổng kết học kỳ thất bại', 'error')
     })
 }
-async function mergeKQRLFromDB(lopid, { overwrite = false } = {}) {
+async function mergeKQRLFromDB(lopid, silent = false) {
     try {
         const dsKQRL = await fetchPromise('lms/XetKetQuaRenLuyen_Get', {
             LopID: lopid,
             HocKi: vueData.Semester.value,
             NienKhoa: vueData.NienKhoa
-        }, { suppressError: true, cache: false })
+        }, { suppressError: true, cache: false, silent })
         if (!Array.isArray(dsKQRL) || dsKQRL.length === 0) return
-        vueData.hasKQRLFromLMS = true
         for (var item of vueData.DSHocSinh) {
             const obj = dsKQRL.find(x => x.HocSinhID == item.HocSinhID)
-            if (!obj) continue
-            item.KQRL_Source = KQRL_SOURCE.LMS
-            if (obj.KQRL_Sau && (overwrite || !item.KQRenLuyen)) {
+            if (obj && obj.KQRL_Sau) {
                 item.KQRenLuyen = obj.KQRL_Sau
             }
         }
@@ -340,13 +307,13 @@ async function mergeKQRLFromDB(lopid, { overwrite = false } = {}) {
         console.error('mergeKQRLFromDB error', e)
     }
 }
-async function mergeNhanXetThang(lopid) {
+async function mergeNhanXetThang(lopid, silent = false) {
     try {
         const dsNhanXet = await fetchPromise('lms/NhanXetThang_Thang1_Thang5_Get', {
             LopID: lopid,
             HocKi: vueData.Semester.value,
             NienKhoa: vueData.NienKhoa
-        })
+        }, { silent })
         if (!Array.isArray(dsNhanXet) || dsNhanXet.length === 0) return
         for (var item of vueData.DSHocSinh) {
             const obj = dsNhanXet.find(x => x.HocSinhID == item.HocSinhID)
@@ -361,22 +328,17 @@ async function mergeNhanXetThang(lopid) {
         console.error('mergeNhanXetThang error', e)
     }
 }
-async function TongKet_GetDTBMonHocByKhoiLopHangLoat(lopid) {
+async function TongKet_GetDTBMonHocByKhoiLopHangLoat(lopid, khoiIDOverride = null, silent = false) {
     const lopItem = vueData.DSLop.find(item => String(item.LopID) === String(lopid)) ?? { LopID: lopid }
-    const tongKetRes = await fetchTongKetByLop(lopItem)
+    const tongKetRes = await fetchTongKetByLop(lopItem, khoiIDOverride, silent)
     vueData.isChuaChotDiem = vueData.isChuaChotDiem || tongKetRes.usedFallback
     vueData.dataDiem = tongKetRes.data
     console.log('lopid', lopid)
     initSpread()
-    const hasTongKetKqrl = vueData.dataDiem?.some(item => item?.KQRenLuyen)
-    if (!hasTongKetKqrl) {
-        await mergeKQRLFromDB(lopid, { overwrite: true })
-        showKqrlLmsNotice()
+    if (tongKetRes.usedFallback) {
+        await mergeKQRLFromDB(lopid, silent)
     }
-    if (!vueData.Is_InCaKhoi) {
-        showMissingKqrlNotice()
-    }
-    await mergeNhanXetThang(lopid)
+    await mergeNhanXetThang(lopid, silent)
 }
 function renderDSHocSinh_QLD() {
     const _dsHocSinh = []
@@ -428,11 +390,10 @@ function handleHeaders() {
             width: 100,
             typeValue: 'KQRenLuyen'
         },
-        KQRL_Source: { title: 'Nguồn KQRL', width: 120 },
         VaoSoKT: { title: "Số vào sổ KT", width: 100 },
         SoQuyetDinhKT: { title: "Số quyết định KT", width: 150 },
-        NgayKhenThuong_VI: { title: "Ngày KT (VI)", width: 200 },
-        NgayKhenThuong_EN: { title: "Ngày KT (EN)", width: 200 },
+        NgayKhenThuong_VI: { title: "Ngày KT - Giấy khen (VI)", width: 200 },
+        NgayKhenThuong_EN: { title: "Ngày KT - Giấy khen (EN)", width: 200 },
         HocSinhLopID: {
             width: 60,
             type: 'hidden'
@@ -469,9 +430,6 @@ function handleHeaders() {
 }
 function handleData() {
     for (var item of vueData.dataDiem) {
-        if (item.KQRenLuyen) {
-            item.KQRL_Source = item.KQRL_Source ?? KQRL_SOURCE.TONG_KET
-        }
         vueData.DSHocSinh.push(item)
     }
     const flatArrDSKhenThuong = vueData.DSKhenThuong.flat()
@@ -485,90 +443,101 @@ function handleData() {
     vueData.DSHocSinh = vueData.DSHocSinh.sort((a, b) => a.TenLop.localeCompare(b.TenLop));
 }
 async function getDSLop() {
-    vueData.DSHocSinh = []
-    vueData.DSHocSinhChange = [] //Clear lại ds học sinh change
-    vueData.DSKhenThuong = []
-    vueData.hasKQRLFromLMS = false
-    vueData.isKQRLFromLMSNotified = false
-    vueData.isMissingKQRLNotified = false
-    ajaxCALL('lms/KhenThuong_Get_By_KhoiID', {
-        KhoiID: vueData.KhoiItem.KhoiID,
-        NienKhoa: vueData.NienKhoa
-    }, res => {
-        vueData.DSKhenThuong = res.data
-    })
-    let dslopFilter = vueData.DSLop.filter(item => !item.LopID.includes('N'))
-    const promise = () => {
-        return new Promise(async resolve => {
-            for (var item of dslopFilter) {
-                await TongKet_GetDTBMonHocByKhoiLopHangLoat(item.LopID)
-            }
-            resolve()
-        })
-    }
-    promise().then(() => {
-        showMissingKqrlByClassNotice()
-        console.log('done')
-    })
-}
-async function onSave() {
-    const confirmRef = vueData.confirmRef?.value
-    if (confirmRef?.show) {
-        const ok = await confirmRef.show({
-            title: `Xác nhận lưu ${vueData.DSHocSinh.length} học sinh?`
-        })
-        if (!ok) return
-    }
-    // vueData.DSHocSinh đã được sync realtime qua handleChange khi user edit cell
-    const latestDSHocSinh = vueData.DSHocSinh
-    try {
-        const payload = latestDSHocSinh
-            .filter(x => x.KQRenLuyen != null && x.KQRenLuyen !== '')
-            .map(x => ({
-                HocSinhID: x.HocSinhID,
-                LopID: x.LopID ?? vueData.LopItem?.LopID,
-                TenLop: x.TenLop,
-                HocKi: vueData.Semester.value,
-                KQRL_Sau: x.KQRenLuyen,
-                IsChotDiem: !vueData.isChuaChotDiem
-            }))
-        await fetchPromise('lms/XetKetQuaRenLuyen_Upsert_JSON',
-            {
-                json: payload,
-                NienKhoa: vueData.NienKhoa,
-            },
-            { silent: true, cache: false }
-        )
-        if (vueData.isChuaChotDiem) {
-            showModuleSnackbar('Lưu KQRL thành công (chưa chốt điểm)', 'success')
-            vueData.DSHocSinhChange = []
-            return
-        }
-    } catch (err) {
-        console.error('XetKetQuaRenLuyen_Upsert_JSON error', err)
-        showModuleSnackbar(getErrorMessage(err) || 'Lưu KQRL thất bại, vui lòng thử lại.', 'error')
+    if (!isTongKetHocKiTestingUser()) {
+        showModuleSnackbar('Tính năng đang được kiểm thử, hiện chưa chạy cho tài khoản này.', 'warning')
         return
     }
-    if (!vueData.isChuaChotDiem) {
-        const updateUrl = vueData.CapID === 2
-            ? '/diemc2/LMS_UpdateXetHanhKiem'
-            : vueData.CapID === 3
-                ? '/diemc3/LMS_UpdateXetHanhKiem'
-                : null
-        if (!updateUrl) return
-        try {
-            await fetchPromise(updateUrl, {
-                jsData: vueData.DSHocSinh,
-                HocKy: vueData.Semester.value
-            }, { silent: true, cache: false })
-            showModuleSnackbar('Lưu KQRL thành công', 'success')
-            vueData.DSHocSinhChange = []
-            TongKet_GetDTBMonHocByKhoiLop()
-        } catch (err) {
-            console.error('LMS_UpdateXetHanhKiem error', err)
-            showModuleSnackbar(getErrorMessage(err) || 'Lưu KQRL thất bại, vui lòng thử lại.', 'error')
-        }
+    const generation = ++vueData._loadGeneration
+    const khoiID = vueData.KhoiItem?.KhoiID
+    if (!khoiID) return
+    vueData.DSHocSinh = []
+    vueData.DSHocSinhChange = []
+    vueData.DSKhenThuong = []
+    vueData.isChuaChotDiem = false
+    const khenThuongRes = await fetchPromise('lms/KhenThuong_Get_By_KhoiID', {
+        KhoiID: khoiID,
+        NienKhoa: vueData.NienKhoa
+    }, { silent: true })
+    if (generation !== vueData._loadGeneration) return
+    vueData.DSKhenThuong = Array.isArray(khenThuongRes) ? khenThuongRes : []
+    const dslopFilter = vueData.DSLop.filter(item => !item.LopID.includes('N'))
+    vueData.loadingDialog = { show: true, title: 'Đang tải dữ liệu tất cả các lớp...', total: 0, current: 0, currentName: '', currentLopName: '', currentLop: 0, totalLop: dslopFilter.length }
+    for (const lop of dslopFilter) {
+        if (generation !== vueData._loadGeneration) { vueData.loadingDialog.show = false; return }
+        vueData.loadingDialog.currentLopName = lop.TenLop ?? lop.LopID
+        await TongKet_GetDTBMonHocByKhoiLopHangLoat(lop.LopID, null, true)
+        vueData.loadingDialog.currentLop += 1
     }
+    if (generation !== vueData._loadGeneration) { vueData.loadingDialog.show = false; return }
+    vueData.loadingDialog.show = false
+}
+function onSave() {
+    if (!isTongKetHocKiTestingUser()) {
+        showModuleSnackbar('Tính năng đang được kiểm thử, hiện chưa chạy cho tài khoản này.', 'warning')
+        return
+    }
+    confirm({
+        title: `Xác nhận lưu ${vueData.DSHocSinh.length} học sinh?`,
+        action: function () {
+            // vueData.DSHocSinh đã được sync realtime qua handleChange khi user edit cell
+            const latestDSHocSinh = vueData.DSHocSinh
+            ajaxCALL('lms/XetKetQuaRenLuyen_Upsert_JSON',
+                {
+                    json: latestDSHocSinh
+                        .filter(x => x.KQRenLuyen != null && x.KQRenLuyen !== '')
+                        .map(x => ({
+                            HocSinhID: x.HocSinhID,
+                            LopID: x.LopID ?? vueData.LopItem?.LopID,
+                            TenLop: x.TenLop,
+                            HocKi: vueData.Semester.value,
+                            KQRL_Sau: x.KQRenLuyen,
+                            IsChotDiem: !vueData.isChuaChotDiem
+                        })),
+                    NienKhoa: vueData.NienKhoa,
+                },
+                res => {
+                    console.log('res', res)
+                    if (vueData.isChuaChotDiem) {
+                        Vue.$toast.success('Lưu KQRL thành công (chưa chốt điểm)', { position: 'top' })
+                        vueData.DSHocSinhChange = []
+                        return
+                    }
+                },
+                err => {
+                    console.error('XetKetQuaRenLuyen_Upsert_JSON error', err)
+                    showModuleSnackbar(getErrorMessage(err) || 'Lưu KQRL thất bại, vui lòng thử lại.', 'error')
+                }
+            )
+            if (!vueData.isChuaChotDiem) {
+                if (vueData.CapID === 2) {
+                    ajaxCALL('/diemc2/LMS_UpdateXetHanhKiem', {
+                        jsData: vueData.DSHocSinh,
+                        HocKy: vueData.Semester.value
+                    },
+                        res => {
+                            Vue.$toast.success('Lưu KQRL thành công', { position: 'top' })
+                            vueData.DSHocSinhChange = []
+                            TongKet_GetDTBMonHocByKhoiLop()
+                            // vueData.IsShowDialogConfirm = false
+                        }
+                    )
+                }
+                if (vueData.CapID === 3) {
+                    ajaxCALL('/diemc3/LMS_UpdateXetHanhKiem', {
+                        jsData: vueData.DSHocSinh,
+                        HocKy: vueData.Semester.value
+                    },
+                        res => {
+                            Vue.$toast.success('Lưu KQRL thành công', { position: 'top' })
+                            vueData.DSHocSinhChange = []
+                            TongKet_GetDTBMonHocByKhoiLop()
+                            // vueData.IsShowDialogConfirm = false
+                        }
+                    )
+                }
+            }
+        }
+    })
 }
 function renderDSHocSinhChange() {
     const arr = []
@@ -585,8 +554,52 @@ function renderDSHocSinhChange() {
     }
     return arr
 }
+vueData._loadGeneration = 0
+vueData.loadingDialog = { show: false, title: '', total: 0, current: 0, currentName: '', currentLopName: '', currentLop: 0, totalLop: 0 }
+async function getDSTatCaKhoi() {
+    const generation = ++vueData._loadGeneration
+    const realKhoi = vueData.DSKhoi
+    if (!realKhoi || realKhoi.length === 0) {
+        showModuleSnackbar('Không có dữ liệu khối để tải.', 'warning')
+        return
+    }
+    vueData.DSHocSinh = []
+    vueData.DSHocSinhChange = []
+    vueData.DSKhenThuong = []
+    vueData.isChuaChotDiem = false
+    vueData.loadingDialog = { show: true, title: 'Đang tải dữ liệu tất cả các khối...', total: realKhoi.length, current: 0, currentName: '', currentLopName: '', currentLop: 0, totalLop: 0 }
+    for (const khoi of realKhoi) {
+        if (generation !== vueData._loadGeneration) { vueData.loadingDialog.show = false; return }
+        vueData.loadingDialog.currentName = khoi.TenKhoiHoc
+        const [dsLopRes, khenThuongRes] = await Promise.all([
+            fetchPromise('lms/Lop_Get_ByKhoiID', {
+                NienKhoa: vueData.NienKhoa,
+                KhoiID: khoi.KhoiID
+            }, { silent: true }),
+            fetchPromise('lms/KhenThuong_Get_By_KhoiID', {
+                KhoiID: khoi.KhoiID,
+                NienKhoa: vueData.NienKhoa
+            }, { silent: true })
+        ])
+        if (generation !== vueData._loadGeneration) { vueData.loadingDialog.show = false; return }
+        if (Array.isArray(khenThuongRes)) vueData.DSKhenThuong.push(khenThuongRes)
+        const filteredLops = (Array.isArray(dsLopRes) ? dsLopRes : []).filter(l => !String(l.LopID).includes('N'))
+        vueData.loadingDialog.totalLop = filteredLops.length
+        vueData.loadingDialog.currentLop = 0
+        for (const lop of filteredLops) {
+            if (generation !== vueData._loadGeneration) { vueData.loadingDialog.show = false; return }
+            vueData.loadingDialog.currentLopName = lop.TenLop ?? lop.LopID
+            await TongKet_GetDTBMonHocByKhoiLopHangLoat(lop.LopID, khoi.KhoiID, true)
+            vueData.loadingDialog.currentLop += 1
+        }
+        if (generation !== vueData._loadGeneration) { vueData.loadingDialog.show = false; return }
+        vueData.loadingDialog.current += 1
+    }
+    vueData.loadingDialog.show = false
+}
 vueData.onSave = onSave
 vueData.getDSLop = getDSLop
+vueData.getDSTatCaKhoi = getDSTatCaKhoi
 vueData.initSpread = initSpread
 vueData.TongKet_GetDTBMonHocByKhoiLop = TongKet_GetDTBMonHocByKhoiLop
 vueData.renderDSHocSinhChange = renderDSHocSinhChange
@@ -629,7 +642,6 @@ function applyImportKQRL() {
         const target = vueData.DSHocSinh.find(x => String(x.HocSinhID).trim() === id)
         if (target) {
             target.KQRenLuyen = kqrl
-            target.KQRL_Source = KQRL_SOURCE.IMPORT
             // Đánh dấu có thay đổi
             if (!vueData.DSHocSinhChange.includes(target.HocSinhID)) {
                 vueData.DSHocSinhChange.push(target.HocSinhID)

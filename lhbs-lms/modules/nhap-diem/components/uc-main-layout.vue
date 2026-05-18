@@ -599,11 +599,42 @@
 			}
 		},
 
+		async ensureSavedBeforeLock() {
+			if (!this.editedCells.length) return true;
+
+			const shouldSave = await this.confirmRef.value.show({
+				title: 'Lưu thay đổi trước khi khóa cột điểm?'
+			});
+
+			if (!shouldSave) return true;
+
+			try {
+				const success = await BangDiemService.saveData(
+					this.editedCells, this.DSHocSinh, this.DSHocSinh_API,
+					this.freezeColumns, { ...this.filter, NienKhoa: this.vueData.NienKhoa },
+					this.instance, this.vueData
+				);
+				if (!success) return false;
+
+				await BangDiemService.saveDraft(this.filter, this.vueData);
+				this.showSnackbar('Đã lưu dữ liệu trước khi khóa cột điểm!', 'success');
+				await this.onRefresh();
+				return true;
+			} catch (error) {
+				console.error('ensureSavedBeforeLock error:', error);
+				this.showSnackbar('Có lỗi xảy ra khi lưu dữ liệu trước khi khóa cột điểm!', 'error');
+				return false;
+			}
+		},
+
 		async onConfirmLockColumns() {
 			const selectedCols = this.lockableColumns.filter(col =>
 				this.action.lockDialog.selectedColumns.includes(col.value)
 			);
 			if (!selectedCols.length) return;
+
+			const canContinue = await this.ensureSavedBeforeLock();
+			if (!canContinue) return;
 
 			const nlpcIDList = this.filter.MonHocItem?.List_MonHoc_NLPC_ID
 				? this.filter.MonHocItem.List_MonHoc_NLPC_ID.split(',').map(id => id.trim()).filter(Boolean)

@@ -565,6 +565,19 @@
 				localStorage.setItem('IsLanguage', val)
 				this.$i18n.locale = val ? 'en' : 'vi'
 			},
+			cascadeKhoiID(val) {
+				vueData.cascadeKhoiID = val ?? null
+			},
+			cascadeMonHocName(val) {
+				vueData.cascadeMonHocName = val ?? null
+			},
+			cascadeTuanID(val) {
+				vueData.cascadeTuanID = val ?? null
+				vueData.cascadeTuanHienThi = this.cascadeTuanHienThi ?? null
+			},
+			cascadeTuanHienThi(val) {
+				vueData.cascadeTuanHienThi = val ?? null
+			},
 		},
 		created() {
 			this.DSMonHocActive = [...new Set(this.teachingGroups.map(item => item.MonHocName))].map(mh => {

@@ -342,7 +342,7 @@ const HeaderBuilder = {
         }
         const config = {
             title, name: column.MaCotDiem, width,
-            // typeValue: column.GiaTriCotDiem,
+            typeValue: column.GiaTriCotDiem,
             type: this.mapValueTypeToJssType(column.GiaTriCotDiem),
             backGroundColor, wrap: true,
             readOnly: column.LoaiCotDiem === CONSTANTS.FORMULA_COLUMN || isDisabled || isLocked
@@ -865,6 +865,14 @@ const BangDiemService = {
                 NienKhoa: vueData.NienKhoa,
                 KhoiID: filter.KhoiItem?.KhoiID
             });
+            if (!apiData?.length) {
+                return {
+                    students: [], headers: [], nestedHeaders: [], freezeColumns: 3,
+                    styleSheet: {}, comments: {}, apiData: [], lockedColumns: [],
+                    displayColumns: [], DSCotDiem_ByMaNhomCotDiem: [],
+                    tinhTrangStatus: { isDisabled: false, TinhTrang: null }
+                };
+            }
             // 3. Tình trạng
             const tinhTrangStatus = this.utility.getTinhTrangStatus(apiData, vueData);
             // 4. Students

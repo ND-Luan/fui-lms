@@ -1,5 +1,5 @@
 <template>
-    <div>
+	<div>
         <!-- Loading State -->
         <div v-if="!dataReady" class="page-loading">
             <div class="loader-ring">
@@ -9,21 +9,16 @@
         </div>
 
         <!-- Thông báo tính năng mới: Đánh dấu câu hỏi (hiện trong 2 ngày) -->
-        <v-alert
-            v-if="showFlagFeatureAlert"
-            type="info"
-            variant="tonal"
-            closable
-            class="ma-2"
-            @click:close="dismissFlagFeatureAlert"
-        >
+        <v-alert v-if="showFlagFeatureAlert" type="info" variant="tonal" closable class="ma-2"
+            @click:close="dismissFlagFeatureAlert">
             <template #prepend>
                 <v-icon>mdi-flag-variant</v-icon>
             </template>
             <strong>Tính năng mới:</strong> Bạn có thể <strong>đánh dấu câu hỏi</strong> bằng nút
             <v-icon size="16" color="red">mdi-flag-variant-outline</v-icon>
             để xem lại sau — kể cả sau khi đã nộp bài.
-            Tất cả câu hỏi đã đánh dấu sẽ được tổng hợp tại trang <strong>Câu hỏi đã đánh dấu</strong> trong Trang chủ học sinh.
+            Tất cả câu hỏi đã đánh dấu sẽ được tổng hợp tại trang <strong>Câu hỏi đã đánh dấu</strong> trong Trang chủ
+            học sinh.
         </v-alert>
 
         <!-- Main Content -->
@@ -34,8 +29,7 @@
                     <uc-assignment-taker-2 v-if="dataReady === true" :key="keyComp" ref="assignmentTaker" class="pa-0"
                         v-model:assignment-data="assignmentData" v-model:puseranswers="puseranswers"
                         :hocSinhDetail="HocSinhDetail" :mon-hoc-name="monHocName" :on-save-draft="saveDraft"
-                        :on-save-flags-post-submit="saveFlagsPostSubmit"
-                        :on-open-submit-dialog="openSubmitDialog" />
+                        :on-save-flags-post-submit="saveFlagsPostSubmit" :on-open-submit-dialog="openSubmitDialog" />
                     <v-dialog v-model="confirmSubmitDialog" max-width="420">
                         <v-card>
                             <v-alert type="warning" variant="tonal" rounded="0" class="mb-0"
@@ -44,9 +38,14 @@
                                 <strong>không thể chỉnh sửa</strong> bài làm của mình.
                             </v-alert>
 
-                            <v-alert v-if="renderQuestionNotSubmit().length > 0"
-                                type="error" variant="tonal" rounded="0" class="mb-0"
-                                icon="mdi-alert-circle-outline">
+                            <v-alert v-if="isFullQuizAutoGrade" type="info" variant="tonal" rounded="0" class="mb-0"
+                                icon="mdi-lightning-bolt-outline">
+                                Tất cả các câu đều là dạng trắc nghiệm nên hệ thống sẽ
+                                <strong>tự động chấm và công bố điểm ngay sau khi nộp</strong>.
+                            </v-alert>
+
+                            <v-alert v-if="renderQuestionNotSubmit().length > 0" type="error" variant="tonal"
+                                rounded="0" class="mb-0" icon="mdi-alert-circle-outline">
                                 Còn những câu
                                 <strong>{{ renderQuestionNotSubmit() }}</strong>
                                 chưa làm.
@@ -70,8 +69,8 @@
 </template>
 
 <script>
-export default {
-    name: 'AssignmentTakerPage',
+	export default {
+		name: 'AssignmentTakerPage',
 
     data() {
         const urlParams = new URLSearchParams(window.location.search);
@@ -133,6 +132,10 @@ export default {
         isActiveDirty() {
             if (!this.dataReady) return false;
             return (this.submitionInfo?.SubmissionStatus ?? 0) < 2;
+        },
+
+        isFullQuizAutoGrade() {
+            return this.toBoolean(this.assignmentData?.[0]?.[0]?.Is_Full_Quiz);
         },
     },
 
@@ -317,6 +320,51 @@ export default {
             this.monHocName = response.data[0]?.[0]?.MonHocName || '';
             this.assignmentInfo = response.data[0] ?? {};
             this.submitionInfo = response.data[1][0] ?? {};
+            this.ensureAutoGradeScoresInSubmissionContent();
+        },
+
+        ensureAutoGradeScoresInSubmissionContent() {
+            if (!this.isFullQuizAutoGrade) return;
+            if (this.submitionInfo?.SubmissionStatus !== this.SUBMISSION_STATUS.GRADED) return;
+
+            const raw = this.submitionInfo?.SubmissionContent;
+            if (!raw) return;
+
+            let parsed = null;
+            try {
+                parsed = JSON.parse(raw);
+            } catch (e) {
+                console.error('Không parse được SubmissionContent để backfill điểm tự động:', e);
+                return;
+            }
+
+            const answers = parsed?.answers || {};
+            const hasMissingScore = Object.values(answers).some(answerItem => {
+                const grading = answerItem?.grading || {};
+                const hasManual = typeof grading.manualScore === 'number';
+                const hasAuto = typeof grading.autoScore === 'number';
+                return !hasManual && !hasAuto;
+            });
+
+            if (!hasMissingScore) return;
+
+            const groups = this.getGroupsForAutoGrading();
+            if (!groups.length) return;
+
+            const graded = this.fn_AutoGradeSubmission({ answers: _.cloneDeep(answers) }, groups);
+            this.submitionInfo = {
+                ...this.submitionInfo,
+                SubmissionContent: graded.SubmissionContent,
+                Score: this.submitionInfo?.Score ?? graded.Score,
+            };
+
+            if (this.assignmentData?.[1]?.[0]) {
+                this.assignmentData[1][0] = {
+                    ...this.assignmentData[1][0],
+                    SubmissionContent: graded.SubmissionContent,
+                    Score: this.assignmentData[1][0]?.Score ?? graded.Score,
+                };
+            }
         },
 
         // ===========================
@@ -504,30 +552,33 @@ export default {
                 ? 'lms/EL_Student_SaveSubmission_AssignToStudent'
                 : 'lms/EL_Student_SaveSubmission';
 
+            const payloadForSubmit = this.isFullQuizAutoGrade
+                ? this.buildAutoGradedPayload(payload)
+                : payload;
+
             const params = isSendToStudent
                 ? {
-                    ...payload,
+                    ...payloadForSubmit,
                     Is_Resubmit: this.Is_Resubmit,
                     AssignToStudentID: parseInt(this.urlParams.get('AssignToStudentID')),
                     HocSinhID: this.HocSinhDetail.HocSinhID,
                 }
                 : {
-                    ...payload,
+                    ...payloadForSubmit,
                     Is_Resubmit: this.Is_Resubmit,
                     HocSinhID: this.HocSinhDetail.HocSinhID,
                 };
 
             try {
                 await fetchPromise(endpoint, params, { cache: false });
-                Vue.$toast.success('Nộp bài thành công!', { position: 'top' });
+                const message = this.isFullQuizAutoGrade
+                    ? 'Nộp bài thành công! Hệ thống đã tự động chấm và công bố điểm.'
+                    : 'Nộp bài thành công!';
+                Vue.$toast.success(message, { position: 'top' });
                 this.initPage();
             } catch (err) {
                 Vue.$toast.error('Có lỗi xảy ra khi nộp bài. Vui lòng thử lại.', { position: 'top' });
             }
-        },
-
-        openSubmitDialog() {
-            this.confirmSubmitDialog = true;
         },
 
         submitAssignmentFinal() {
@@ -539,6 +590,226 @@ export default {
                 HocSinhID: this.HocSinhDetail.HocSinhID,
             };
             this.submitAssignment(payload);
+        },
+
+        toBoolean(value) {
+            if (typeof value === 'boolean') return value;
+            if (typeof value === 'number') return value === 1;
+            if (typeof value === 'string') {
+                const normalized = value.trim().toLowerCase();
+                return normalized === '1' || normalized === 'true';
+            }
+            return false;
+        },
+
+        buildAutoGradedPayload(payload) {
+            const groups = this.getGroupsForAutoGrading();
+            if (!groups.length) {
+                return {
+                    ...payload,
+                    SubmissionStatus: this.SUBMISSION_STATUS.GRADED,
+                };
+            }
+
+            const hasAnyAnswerKey = this.countScorableQuizQuestions(groups) > 0;
+            if (!hasAnyAnswerKey) {
+                // Full quiz luôn gửi trạng thái GRADED để backend tự động chấm.
+                // Chỉ không đính kèm điểm/manualScore khi client chưa có answer key.
+                return {
+                    ...payload,
+                    SubmissionStatus: this.SUBMISSION_STATUS.GRADED,
+                };
+            }
+
+            const graded = this.fn_AutoGradeSubmission({ answers: _.cloneDeep(this.puseranswers || {}) }, groups);
+            return {
+                ...payload,
+                SubmissionStatus: this.SUBMISSION_STATUS.GRADED,
+                SubmissionContent: graded.SubmissionContent,
+                Score: graded.Score,
+            };
+        },
+
+        getGroupsForAutoGrading() {
+            const detail = this.assignmentData?.[0]?.[0] || {};
+            const rawConfigs = [
+                detail.AssignmentConfig_HadAnswer,
+                detail.AssignmentConfig,
+            ].filter(Boolean);
+
+            let bestGroups = [];
+            let bestScore = -1;
+
+            for (const rawConfig of rawConfigs) {
+                try {
+                    const parsed = JSON.parse(rawConfig);
+                    const groups = parsed?.groups || [];
+                    const score = this.countScorableQuizQuestions(groups);
+                    if (score > bestScore) {
+                        bestScore = score;
+                        bestGroups = groups;
+                    }
+                } catch (e) {
+                    console.error('Không parse được AssignmentConfig để tự động chấm:', e);
+                }
+            }
+
+            return bestGroups;
+        },
+
+        countScorableQuizQuestions(groups) {
+            let count = 0;
+            for (const group of (groups || [])) {
+                for (const question of (group?.questions || [])) {
+                    if (this.hasAnswerKey(question)) count += 1;
+                }
+            }
+            return count;
+        },
+
+        hasAnswerKey(question) {
+            if (!question || !question.type) return false;
+            const config = question.config || {};
+
+            if (question.type === this.QUIZ_TYPES.SINGLE_CHOICE || question.type === this.QUIZ_TYPES.TRUE_FALSE) {
+                return config.correctAnswer !== null && config.correctAnswer !== undefined && config.correctAnswer !== '';
+            }
+            if (question.type === this.QUIZ_TYPES.MULTIPLE_CHOICE) {
+                return Array.isArray(config.correctAnswers) && config.correctAnswers.length > 0;
+            }
+            if (question.type === this.QUIZ_TYPES.MULTIPLE_TRUE_FALSE) {
+                return Array.isArray(config.options) && config.options.some(opt => opt?.correctAnswer !== null && opt?.correctAnswer !== undefined);
+            }
+            if (question.type === this.QUIZ_TYPES.MATCHING) {
+                return Array.isArray(config.correctPairs) && config.correctPairs.length > 0;
+            }
+            if (question.type === this.QUIZ_TYPES.FILL_IN_BLANK) {
+                const blanks = (config.parts || []).filter(p => p.type === 'blank');
+                return blanks.some(blank => Array.isArray(blank.acceptedAnswers) && blank.acceptedAnswers.length > 0);
+            }
+
+            return false;
+        },
+
+        isSameValue(left, right) {
+            if (left === right) return true;
+            if (left == null || right == null) return false;
+            return String(left) === String(right);
+        },
+
+        fn_AutoGradeSubmission(submissionContentObj, asmGroups) {
+            let answers = submissionContentObj?.answers ?? {};
+            let score = 0;
+
+            for (const group of asmGroups) {
+                for (const question of (group?.questions || [])) {
+                    let manualScore = 0;
+                    const answerData = answers?.[question.id]?.answerData;
+                    const questionPoints = Number(question?.points ?? 0);
+
+                    if (answerData == null) continue;
+
+                    if (question.type === this.QUIZ_TYPES.SINGLE_CHOICE) {
+                        if (this.isSameValue(question?.config?.correctAnswer, answerData)) {
+                            manualScore = questionPoints;
+                        }
+                    }
+                    else if (question.type === this.QUIZ_TYPES.MULTIPLE_CHOICE) {
+                        const arr1 = question?.config?.correctAnswers || [];
+                        const mode = question?.config?.scoringMode || 'equal';
+                        let correctIndex = 0;
+
+                        arr1.forEach(opt => {
+                            if (Array.isArray(answerData) && answerData.some(item => this.isSameValue(item, opt))) correctIndex++;
+                        });
+
+                        if (mode === 'partial') {
+                            const partialMap = { 1: 0.1, 2: 0.25, 3: 0.5, 4: 1.0 };
+                            manualScore = partialMap[correctIndex] ?? 0;
+                        } else {
+                            manualScore = arr1.length
+                                ? Math.round((correctIndex / arr1.length) * questionPoints * 100) / 100
+                                : 0;
+                        }
+                    }
+                    else if (question.type === this.QUIZ_TYPES.TRUE_FALSE) {
+                        if (this.isSameValue(question?.config?.correctAnswer, answerData)) {
+                            manualScore = questionPoints;
+                        }
+                    }
+                    else if (question.type === this.QUIZ_TYPES.MULTIPLE_TRUE_FALSE) {
+                        const mode = question?.config?.scoringMode || 'equal';
+                        const options = question?.config?.options || [];
+                        let correctCount = 0;
+
+                        options.forEach(opt => {
+                            if (this.isSameValue(opt?.correctAnswer, answerData?.[opt.id])) correctCount++;
+                        });
+
+                        if (mode === 'partial') {
+                            const partialMap = { 1: 0.1, 2: 0.25, 3: 0.5, 4: 1.0 };
+                            manualScore = partialMap[correctCount] ?? 0;
+                        } else {
+                            const total = options.length;
+                            manualScore = total
+                                ? Math.round((correctCount / total) * questionPoints * 100) / 100
+                                : 0;
+                        }
+                    }
+                    else if (question.type === this.QUIZ_TYPES.MATCHING) {
+                        let numberOfCorrect = 0;
+                        const correctPairs = question?.config?.correctPairs || [];
+
+                        correctPairs.forEach(item => {
+                            const findAnswer = Array.isArray(answerData)
+                                ? answerData.find(a => this.isSameValue(a.from, item.from))
+                                : null;
+                            if (findAnswer && this.isSameValue(findAnswer.to, item.to)) numberOfCorrect += 1;
+                        });
+
+                        manualScore = correctPairs.length
+                            ? (numberOfCorrect / correctPairs.length) * questionPoints
+                            : 0;
+                    }
+                    else if (question.type === this.QUIZ_TYPES.FILL_IN_BLANK) {
+                        const parts = question?.config?.parts || [];
+                        const blanks = parts.filter(p => p.type === 'blank');
+
+                        if (blanks.length === 0) {
+                            manualScore = questionPoints;
+                        } else {
+                            let correctAnswersCount = 0;
+
+                            blanks.forEach(blank => {
+                                const studentAnswer = String(answerData?.[blank.id] ?? '').toLowerCase().replace(/\s+/g, '').trim();
+                                const acceptedAnswers = (blank.acceptedAnswers || [])
+                                    .map(item => String(item).toLowerCase().replace(/\s+/g, '').trim());
+                                if (acceptedAnswers.includes(studentAnswer)) correctAnswersCount += 1;
+                            });
+
+                            manualScore = (correctAnswersCount / blanks.length) * questionPoints;
+                        }
+                    }
+
+                    score += manualScore;
+                    answers = {
+                        ...answers,
+                        [question.id]: {
+                            ...answers[question.id],
+                            grading: {
+                                ...answers?.[question.id]?.grading,
+                                manualScore,
+                                autoScore: manualScore,
+                            },
+                        },
+                    };
+                }
+            }
+
+            return {
+                SubmissionContent: JSON.stringify({ answers }),
+                Score: Math.round(score * 100) / 100,
+            };
         },
 
         // ===========================
@@ -629,5 +900,5 @@ export default {
             return unanswered.join(', ');
         },
     },
-}
+	}
 </script>

@@ -19,6 +19,7 @@
 			vueData.apiCall2 = this.apiCall2
 			vueData.apiCall3 = this.apiCall3
 			vueData.apiCall4 = this.apiCall4
+			vueData.reloadFocusApis = this.reloadFocusApis
 			// Khởi tạo defaults để component render ngay lập tức
 			vueData.teachingGroups = vueData.teachingGroups || []
 			vueData.focusTasks = vueData.focusTasks || []
@@ -55,6 +56,13 @@
 			async getFocusTasksStudent() {
 				const res = await fetchPromise('lms/EL_Teacher_GetFocusTasks_Student', {}, { cache: false })
 				vueData.focusTasks_student = res
+			},
+			async reloadFocusApis() {
+				await Promise.all([
+					this.apiCall4(),
+					this.getFocusTasksStudent(),
+					Promise.resolve(vueData.refreshFocusTask?.()),
+				])
 			},
 			async initPage() {
 				try {

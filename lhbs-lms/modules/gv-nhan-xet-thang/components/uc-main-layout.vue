@@ -46,7 +46,8 @@
 										@click="isReviewMode = !isReviewMode">
 										{{ isReviewMode ? 'Quay lại nhập liệu' : 'Xem lại' }}
 									</v-btn>
-									<v-btn prepend-icon="mdi-file-excel" color="success" variant="outlined"
+									<v-btn v-if="!(ThangObj?.Is_HienThiPhuHuynh === false && ThangObj?.Thang === 5)"
+										prepend-icon="mdi-file-excel" color="success" variant="outlined"
 										:disabled="items.length === 0 || isReadOnly" @click="onImport">
 										Import dữ liệu từ Excel
 									</v-btn>
@@ -103,6 +104,14 @@
 						<v-textarea v-model="item.DeXuat_NDCamKet" label="Đề xuất / ND cam kết" :hide-details="false"
 							:disabled="isReadOnly" />
 					</template>
+				</div>
+			</template>
+
+			<template #item.NhanXet_ChuanBiNienKhoaSau="{ item }">
+				<div style="padding: 10px; min-width: 200px;">
+					<uc-quill-editor
+						:key="'NhanXet_ChuanBiNienKhoaSau' + item.HocSinhID + ThangObj?.Lop_NhanXetThangID + quillKey"
+						v-model="item.NhanXet_ChuanBiNienKhoaSau" :spellcheck="false" :readOnly="isReadOnly" />
 				</div>
 			</template>
 
@@ -575,31 +584,34 @@
 					}
 				})
 
+				const isGVCNThang5 = this.ThangObj?.Is_HienThiPhuHuynh === false && this.ThangObj?.Thang === 5
+
+			if (!isGVCNThang5) {
 				// Resolve LopHocID trong hệ quansinh (khác với LopItem.LopID của LMS)
 				await this.getLopHocBackground()
 				this.mainLopHocID = this.DSLopHoc.find(x => x.TenLop === this.LopItem.TenLop)?.LopHocID ?? null
-			// Capture vào local var để tránh race condition khi user đổi tháng nhanh
-			const lopHocID = this.mainLopHocID
+				// Capture vào local var để tránh race condition khi user đổi tháng nhanh
+				const lopHocID = this.mainLopHocID
 
-			// API 1: lấy tổng hợp loại vi phạm theo lớp + tháng
-			if (lopHocID) {
-				try {
-					this.DSTongHop_ViPham = await fetchPromise(
-						'quansinh/LMS_SoDauBai_TongHopTheoLoaiViPham',
-						{ TuNgay: viPhamFirstDay, DenNgay: viPhamLastDay, LopHocID: lopHocID },
-						{ cache: false }
-					) ?? []
+				// API 1: lấy tổng hợp loại vi phạm theo lớp + tháng
+				if (lopHocID) {
+					try {
+						this.DSTongHop_ViPham = await fetchPromise(
+							'quansinh/LMS_SoDauBai_TongHopTheoLoaiViPham',
+							{ TuNgay: viPhamFirstDay, DenNgay: viPhamLastDay, LopHocID: lopHocID },
+							{ cache: false }
+						) ?? []
 
-					// API 2: eager-load chi tiết song song cho các loại có vi phạm
-					const dsCoViPham = this.DSTongHop_ViPham.filter(x => x.SoLuong > 0)
-					if (dsCoViPham.length > 0) {
-						let done = 0
-						const total = dsCoViPham.length
-						this.viPhamLoadingText = `Đang tải chi tiết vi phạm (0/${total})...`
-						await Promise.all(dsCoViPham.map(async lvp => {
-							await this.loadViPhamDetail(lvp.LoaiViPham, lopHocID)
-						}))
-					}
+						// API 2: eager-load chi tiết song song cho các loại có vi phạm
+						const dsCoViPham = this.DSTongHop_ViPham.filter(x => x.SoLuong > 0)
+						if (dsCoViPham.length > 0) {
+							let done = 0
+							const total = dsCoViPham.length
+							this.viPhamLoadingText = `Đang tải chi tiết vi phạm (0/${total})...`
+							await Promise.all(dsCoViPham.map(async lvp => {
+								await this.loadViPhamDetail(lvp.LoaiViPham, lopHocID)
+							}))
+						}
 					} catch {
 						this.DSTongHop_ViPham = []
 					}
@@ -624,6 +636,7 @@
 						})
 					}
 				}
+			}
 			} finally {
 				this.isLoadingViPham = false
 				this.viPhamLoadingText = ''
@@ -880,7 +893,6 @@
 				}, {forceRefresh: true}))
 				.then(() => {
 					this.getThang(true)
-					this.getNhanXetThang(true)
 				})
 			this.$toastPromise(promise, {
 				loadingText: 'Đang lưu tạm tất cả...',
@@ -1082,6 +1094,14 @@
 					align: 'center',
 					width: 280,
 				})
+				if (this.ThangObj?.Thang === 5) {
+					headers.push({
+						title: 'Nhận xét chuẩn bị niên khóa sau',
+						value: 'NhanXet_ChuanBiNienKhoaSau',
+						align: 'center',
+						minWidth: 220,
+					})
+				}
 
 				// ── Chế độ hiển thị cho Phụ huynh ──
 			} else {

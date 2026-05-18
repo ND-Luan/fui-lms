@@ -164,14 +164,78 @@
 			}
 		},
 		methods: {
+			parseNumericInput(value) {
+				if (value == null) return { ok: true, value: '' };
+				if (typeof value === 'number') {
+					return Number.isFinite(value)
+						? { ok: true, value: String(value) }
+						: { ok: false, value: '' };
+				}
+
+				let s = String(value).trim();
+				if (!s) return { ok: true, value: '' };
+
+				if ((s.startsWith("'") && s.endsWith("'")) || (s.startsWith('"') && s.endsWith('"'))) {
+					s = s.slice(1, -1).trim();
+				}
+
+				let out = '';
+				let dotCount = 0;
+
+				for (let i = 0; i < s.length; i++) {
+					const ch = s[i];
+
+					if (ch >= '0' && ch <= '9') {
+						out += ch;
+						continue;
+					}
+
+					if (ch === ',' || ch === '.') {
+						dotCount += 1;
+						if (dotCount > 1) return { ok: false, value: '' };
+						out += '.';
+						continue;
+					}
+
+					if (ch === ' ' || ch === '\u00A0') {
+						continue;
+					}
+
+					return { ok: false, value: '' };
+				}
+
+				if (!out || out === '.') return { ok: false, value: '' };
+				const n = Number(out);
+				if (!Number.isFinite(n)) return { ok: false, value: '' };
+
+				return { ok: true, value: out };
+			},
+
 			beforeChange(instance, cell, x, y, value) {
 				const sheet = Array.isArray(instance) ? instance[0] : instance;
 				const column = sheet?.options?.columns?.[x];
 				if (!column || column.type !== 'numeric') return value;
+				if (column.readOnly) return value;
 
-				if (value == null || value === '') return value;
-				const normalized = String(value).replace(',', '.');
-				if (Number.isNaN(Number(normalized))) {
+				if (typeof value === 'string' && value.trim().startsWith('=')) {
+					return value;
+				}
+
+				const parsed = this.parseNumericInput(value);
+				if (!parsed.ok) {
+					const raw = value == null ? '' : String(value);
+					console.warn('[uc-jexcel.beforeChange] Invalid numeric input', {
+						x,
+						y,
+						columnName: column?.name,
+						columnTitle: column?.title,
+						columnReadOnly: column?.readOnly,
+						value,
+						type: typeof value,
+						raw,
+						charCodes: raw.split('').map(ch => ch.charCodeAt(0))
+					});
+
 					const now = Date.now();
 					if (now - this.lastInvalidWarnAt > 1000) {
 						this.lastInvalidWarnAt = now;
@@ -183,7 +247,7 @@
 					}
 					return '';
 				}
-				return value;
+				return parsed.value;
 			},
 			// Hàm tính toán và set width cho các cột freeze
 			calculateColumnWidths() {
@@ -267,25 +331,15 @@
 	
 			changed(instance, cell, x, y, value) {
 				if (this.isProgrammaticChange) return;
-	
-				const rawData = instance.getData();
 				const columns = this.columns.map(col => col.name);
-	
-				const dataObjects = rawData.map(row => {
-					const obj = {};
-					columns.forEach((colName, index) => {
-						obj[colName] = row[index] ?? '';
-					});
-					return obj;
-				});
-	
-				const rowObject = dataObjects[y];
 				const columnName = columns[x];
-				const cellValue = rowObject[columnName];
-				const rowData = instance.getRowData(y);
+				const hocSinhIDIndex = columns.indexOf('HocSinhID');
+				const hocSinhID = hocSinhIDIndex > -1
+					? instance.getValueFromCoords(hocSinhIDIndex, y)
+					: null;
 	
 				const CD_HocSinhExist = this.rootDataSource.filter(
-					item => item.HocSinhID === rowObject?.HocSinhID && item.MaCotDiem === columnName
+					item => item.HocSinhID === hocSinhID && item.MaCotDiem === columnName
 				);
 	
 				CD_HocSinhExist.forEach(item => {
@@ -293,21 +347,33 @@
 						const inputValue = parseFloat(value);
 						if (!isNaN(inputValue)) {
 							const newValue = item.HeSo * inputValue;
-							if (String(newValue) !== String(cellValue)) {
-								instance.options.data[y][x] = newValue;
-								instance.records[y][x].innerHTML = newValue;
-	
-								dataObjects[y][columnName] = newValue;
+							const currentValue = instance.getValueFromCoords(x, y);
+							if (String(newValue) !== String(currentValue)) {
 								this.isProgrammaticChange = true;
-								instance.setValueFromCoords(x, y, newValue)
-								this.isProgrammaticChange = false
+								try {
+									instance.setValueFromCoords(x, y, newValue);
+								} finally {
+									this.isProgrammaticChange = false;
+								}
 							}
 						}
 					}
 				});
+
+				const rawData = instance.getData();
+				const dataObjects = rawData.map(row => {
+					const obj = {};
+					columns.forEach((colName, index) => {
+						obj[colName] = row[index] ?? '';
+					});
+					return obj;
+				});
+
+				const rowData = instance.getRowData(y);
+				const finalValue = instance.getValueFromCoords(x, y);
 	
 				this.$emit('update:dataSource', dataObjects);
-				this.$emit('onChange', { instance, cell, x, y, value, dataObjects });
+				this.$emit('onChange', { instance, cell, x, y, value: finalValue, dataObjects });
 				this.$emit('rowData', rowData);
 				this.$emit('addressCell', [x, y]);
 			},

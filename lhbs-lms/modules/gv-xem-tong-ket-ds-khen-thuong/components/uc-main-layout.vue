@@ -19,7 +19,8 @@
 								item-value="KhoiID" return-object />
 						</v-col>
 						<v-col class="d-flex align-center ga-2 flex-wrap">
-							<v-btn variant="outlined" color="primary" :disabled="!KhoiItem" @click="getTongKetByKhoi">
+							<v-btn variant="outlined" color="primary" :disabled="!KhoiItem"
+								@click="KhoiItem?.isAll ? getTongKetAllKhoi() : getTongKetByKhoi()">
 								<v-icon start>mdi-refresh</v-icon>Làm mới
 							</v-btn>
 							<v-btn icon variant="outlined" color="primary">
@@ -47,6 +48,21 @@
 
 		<uc-xem-tong-ket-dskt />
 		<uc-empty v-if="DSHocSinhQLD.length === 0" />
+
+		<v-dialog v-model="loadingDialog.show" persistent width="400">
+			<v-card>
+				<v-card-title class="text-subtitle-1">Đang tải dữ liệu tất cả các khối...</v-card-title>
+				<v-card-text>
+					<div class="mb-3 text-body-2">
+						Khối: <strong>{{ loadingDialog.currentName }}</strong>
+						<!-- ({{ loadingDialog.current }}/{{ loadingDialog.total }}) -->
+					</div>
+					<v-progress-linear
+						:model-value="loadingDialog.total ? (loadingDialog.current / loadingDialog.total) * 100 : 0"
+						color="primary" rounded height="10" />
+				</v-card-text>
+			</v-card>
+		</v-dialog>
 	</Global>
 </template>
 
@@ -63,6 +79,8 @@
 				DSHocSinh_API_QLD: [],
 				DSHocSinhQLD: [],
 				isLoadingExportGiayKhen: false,
+				loadingDialog: { show: false, total: 0, current: 0, currentName: '' },
+				_loadGeneration: 0,
 				DSSemester: [
 					{ title: 'Cuối kì 2', value: 2 },
 					{ title: 'Cả năm', value: 0 },
@@ -86,12 +104,14 @@
 			Semester() {
 				this.DSHocSinhQLD = []
 				vueData.DSHocSinhQLD = []
-				if (this.KhoiItem?.KhoiID) this.getTongKetByKhoi()
+				if (this.KhoiItem?.isAll) this.getTongKetAllKhoi()
+				else if (this.KhoiItem?.KhoiID) this.getTongKetByKhoi()
 			},
 			KhoiItem(v) {
 				this.DSHocSinhQLD = []
 				vueData.DSHocSinhQLD = []
-				if (v?.KhoiID) this.getTongKetByKhoi()
+				if (v?.isAll) this.getTongKetAllKhoi()
+				else if (v?.KhoiID) this.getTongKetByKhoi()
 			},
 		},
 	
@@ -109,7 +129,7 @@
 				if (typeof vueData.keyComp !== 'number') vueData.keyComp = 0
 				if (typeof vueData.freezeColumns !== 'number') vueData.freezeColumns = 4
 			},
-
+	
 			setJExcelHeaders() {
 				const headerDefault = [
 					'STT',
@@ -128,9 +148,11 @@
 					'SoQuyetDinhKT',
 					'NgayKhenThuong_VI',
 					'NgayKhenThuong_EN',
+					'NgayKhenThuong_ThuKhen_VI',
+					'NgayKhenThuong_ThuKhen_EN',
 					'Is_DaIn',
 				]
-
+	
 				const columnMapping = {
 					STT: { width: 1, type: 'hidden' },
 					TenLop: { width: 60, title: 'Tên lớp' },
@@ -146,11 +168,13 @@
 					DanhHieu: { width: 150, title: 'Danh hiệu' },
 					VaoSoKT: { width: 100, title: 'Số vào sổ KT' },
 					SoQuyetDinhKT: { width: 100, title: 'Số QĐ KT' },
-					NgayKhenThuong_VI: { width: 150, title: 'Ngày KT (VI)' },
-					NgayKhenThuong_EN: { width: 150, title: 'Ngày KT (EN)' },
+					NgayKhenThuong_VI: { width: 150, title: 'Ngày KT - Giấy khen (VI)' },
+					NgayKhenThuong_EN: { width: 150, title: 'Ngày KT - Giấy khen (EN)' },
+					NgayKhenThuong_ThuKhen_VI: { width: 150, title: 'Ngày KT - Thư khen (VI)' },
+					NgayKhenThuong_ThuKhen_EN: { width: 150, title: 'Ngày KT - Thư khen (EN)' },
 					Is_DaIn: { width: 1, type: 'hidden' },
 				}
-
+	
 				vueData.columnHeader = headerDefault.map(key => ({
 					type: 'text',
 					title: key,
@@ -163,10 +187,10 @@
 					style: 'font-size:8px',
 					...columnMapping[key],
 				}))
-
+	
 				vueData.keyComp += 1
 			},
-
+	
 			extractList(res) {
 				if (Array.isArray(res)) return res
 				return res?.data ?? []
@@ -178,26 +202,63 @@
 					NienKhoa: vueData.NienKhoa,
 					HocKi: this.Semester.value,
 				})
-				this.DSKhoi = this.extractList(res)
+				this.DSKhoi = [
+					{ TenKhoiHoc: 'Tất cả các khối', KhoiID: '__all__', isAll: true },
+					...this.extractList(res),
+				]
 			},
 	
-			async getKhenThuong() {
-				if (!this.KhoiItem?.KhoiID) {
+			async getKhenThuong(khoiID) {
+				if (!khoiID) {
 					this.DSKhenThuong = []
 					return
 				}
 				const res = await fetchPromise('lms/KhenThuong_Get_By_KhoiID', {
-					KhoiID: this.KhoiItem.KhoiID,
+					KhoiID: khoiID,
 					NienKhoa: vueData.NienKhoa,
 				})
 				this.DSKhenThuong = this.extractList(res)
 			},
 	
+			async getTongKetAllKhoi() {
+				const generation = ++this._loadGeneration
+				const realKhoi = this.DSKhoi.filter(k => !k.isAll && k.KhoiID)
+				if (realKhoi.length === 0) return
+				this.loadingDialog = { show: true, total: realKhoi.length, current: 0, currentName: '' }
+				const results = []
+				for (const khoi of realKhoi) {
+					if (generation !== this._loadGeneration) { this.loadingDialog.show = false; return }
+					this.loadingDialog.currentName = khoi.TenKhoiHoc
+					const [khenThuongRes, tongKetRes] = await Promise.all([
+						fetchPromise('lms/KhenThuong_Get_By_KhoiID', {
+							KhoiID: khoi.KhoiID,
+							NienKhoa: vueData.NienKhoa,
+						}, { silent: true }),
+						fetchPromise(`/psmark1/LMS_GetBangTongHopKetQua_TheoKhoi?KhoiID=${khoi.KhoiID}&=&KyDanhGia=4&NamHoc=${vueData.NienKhoa}`, {}, { silent: true }),
+					])
+					if (generation !== this._loadGeneration) { this.loadingDialog.show = false; return }
+					results.push({
+						dsKhenThuong: this.extractList(khenThuongRes),
+						dsTongKet: this.extractList(tongKetRes).sort((a, b) => (a.Sort ?? 0) - (b.Sort ?? 0)),
+					})
+					this.loadingDialog.current += 1
+				}
+				if (generation !== this._loadGeneration) { this.loadingDialog.show = false; return }
+				this.loadingDialog.show = false
+				this.DSKhenThuong = results.flatMap(r => r.dsKhenThuong)
+				this.DSHocSinh_API_QLD = results.flatMap(r => r.dsTongKet)
+				this.renderDSHocSinhQLD()
+			},
+
 			async getTongKetByKhoi() {
-				if (!this.KhoiItem?.KhoiID) return
-				await this.getKhenThuong()
-				const url = `/psmark1/LMS_GetBangTongHopKetQua_TheoKhoi?KhoiID=${this.KhoiItem.KhoiID}&=&KyDanhGia=4&NamHoc=${vueData.NienKhoa}`
+				const generation = ++this._loadGeneration
+				const khoiID = this.KhoiItem?.KhoiID
+				if (!khoiID || khoiID === '__all__') return
+				await this.getKhenThuong(khoiID)
+				if (generation !== this._loadGeneration) return
+				const url = `/psmark1/LMS_GetBangTongHopKetQua_TheoKhoi?KhoiID=${khoiID}&=&KyDanhGia=4&NamHoc=${vueData.NienKhoa}`
 				const res = await fetchPromise(url)
+				if (generation !== this._loadGeneration) return
 				const list = this.extractList(res).sort((a, b) => (a.Sort ?? 0) - (b.Sort ?? 0))
 				this.DSHocSinh_API_QLD = list
 				this.renderDSHocSinhQLD()
@@ -231,6 +292,8 @@
 						SoQuyetDinhKT: hocSinhKhenThuong?.SoQuyetDinhKT,
 						NgayKhenThuong_VI: hocSinhKhenThuong?.NgayKhenThuong_VI,
 						NgayKhenThuong_EN: hocSinhKhenThuong?.NgayKhenThuong_EN,
+						NgayKhenThuong_ThuKhen_VI: hocSinhKhenThuong?.NgayKhenThuong_ThuKhen_VI,
+						NgayKhenThuong_ThuKhen_EN: hocSinhKhenThuong?.NgayKhenThuong_ThuKhen_EN,
 						Is_DaIn: hocSinhKhenThuong?.Is_DaIn,
 					})
 				}
@@ -256,6 +319,8 @@
 					'SoQuyetDinhKT',
 					'NgayKhenThuong_VI',
 					'NgayKhenThuong_EN',
+					'NgayKhenThuong_ThuKhen_VI',
+					'NgayKhenThuong_ThuKhen_EN',
 				]
 				const sheetData = this.DSHocSinhQLD.map(item => headers.map(h => item[h] ?? ''))
 				const worksheet = XLSX.utils.aoa_to_sheet([headers, ...sheetData])
@@ -286,18 +351,45 @@
 					})
 					return
 				}
-
+	
+				// const base64 = await this.getFontBase64('/_cdn/lhbs-lms/00085-UTM-EdwardianKT.ttf')
+				// pdfMake.vfs = pdfMake.vfs || {}
+				// pdfMake.vfs['UTM-EdwardianKT.ttf'] = base64
+				// pdfMake.fonts = {
+				// 	UTM_Edwardian: {
+				// 		normal: 'UTM-EdwardianKT.ttf',
+				// 		bold: 'UTM-EdwardianKT.ttf',
+				// 		italics: 'UTM-EdwardianKT.ttf',
+				// 		bolditalics: 'UTM-EdwardianKT.ttf',
+				// 	},
+				// }
+	
 				const base64 = await this.getFontBase64('/_cdn/lhbs-lms/00085-UTM-EdwardianKT.ttf')
+				const base64Times = await this.getFontBase64('/_cdn/lhbs-lms/times.ttf')
+	
 				pdfMake.vfs = pdfMake.vfs || {}
+	
 				pdfMake.vfs['UTM-EdwardianKT.ttf'] = base64
+				pdfMake.vfs['times.ttf'] = base64Times
+	
 				pdfMake.fonts = {
+					...pdfMake.fonts,
+	
 					UTM_Edwardian: {
 						normal: 'UTM-EdwardianKT.ttf',
 						bold: 'UTM-EdwardianKT.ttf',
 						italics: 'UTM-EdwardianKT.ttf',
 						bolditalics: 'UTM-EdwardianKT.ttf',
 					},
+	
+					TimesNewRoman: {
+						normal: 'times.ttf',
+						bold: 'times.ttf',
+						italics: 'times.ttf',
+						bolditalics: 'times.ttf',
+					},
 				}
+	
 	
 				const content = []
 				for (const data of dsThuKhen) {
@@ -311,7 +403,9 @@
 					else if (soDong > 5) marginTop = 200
 	
 					const noiDungThuKhen = splitNoiDung.map(noidung => ({
-						text: `\t\t\t${noidung}`,
+						text: `\t\t\t${String(noidung || '')
+							.replace(/–/g, '-')
+							.replace(/—/g, '-')}`,
 						font: 'UTM_Edwardian',
 						alignment: 'justify',
 						margin: [55, 0, 55, 0],
@@ -325,8 +419,21 @@
 						style: 'title',
 						margin: [0, marginTop, 0, 0],
 					})
-					content.push({ text: '', margin: [0, 20, 0, 0] })
+					content.push({ text: '', margin: [0, 10, 0, 0] })
 					content.push(noiDungThuKhen)
+					const ngayKT = data.NgayKhenThuong_ThuKhen_VI ? data.NgayKhenThuong_ThuKhen_VI.charAt(0).toLowerCase() + data.NgayKhenThuong_ThuKhen_VI.slice(1) : ''
+					if (data.NgayKhenThuong_ThuKhen_VI) {
+						content.push({
+							text: `Trấn Biên, ${ngayKT}`,
+							font: 'TimesNewRoman',
+							style: 'title',
+							absolutePosition: {
+								x: 280,
+								y: 640
+							},
+							fontSize: 15
+						})
+					}
 					content.push({ text: '', fontSize: 14, bold: true, pageBreak: 'before', margin: [0, 0, 0, 8] })
 				}
 	
@@ -337,7 +444,7 @@
 					})
 					return
 				}
-
+	
 				const dd = {
 					pageSize: 'A4',
 					content: content.slice(0, -1),
@@ -359,15 +466,15 @@
 				const dsDanhHieu = [
 					{
 						DanhHieu_VI: 'Học sinh Xuất sắc',
-						DanhHieu_EN: 'In recognition of distinguished performance in Academic Achievements',
+						DanhHieu_EN: 'In recognition of outstanding academic achievement',
 					},
 					{
 						DanhHieu_VI: 'Học sinh Tiêu biểu hoàn thành tốt trong học tập và rèn luyện',
-						DanhHieu_EN: 'In recognition of outstanding performance in Academic Achievements',
+						DanhHieu_EN: 'In recognition of excellent academic and personal achievement',
 					},
 					{
 						DanhHieu_VI: 'Học sinh Giỏi',
-						DanhHieu_EN: 'In recognition of outstanding performance in Academic Achievements',
+						DanhHieu_EN: 'In recognition of excellent academic achievement',
 					},
 				]
 	
@@ -376,13 +483,13 @@
 					const objDanhHieu = dsDanhHieu.find(x => x.DanhHieu_VI === data.DanhHieu)
 					certs.push({
 						KhenTang_Vi: 'Khen tặng học sinh',
-						KhenTang_En: 'We gladly present',
+						KhenTang_En: 'This certificate is proudly presented to',
 						HoTen: String(data.HoTen || '').toUpperCase(),
-						Lop: `CLASS ${data.TenLop || ''}`,
+						Lop: `Lớp/ Class ${(data.TenLop || '').replace(/^0+/, '')}`,
 						DanhHieu_Vi: `Đạt danh hiệu ${data.DanhHieu || ''}`,
 						DanhHieu_En: objDanhHieu?.DanhHieu_EN ?? '',
-						NamHoc_Vi: `Năm học ${vueData.NienKhoa}-${vueData.NienKhoa + 1}`,
-						NamHoc_En: `In the school year ${vueData.NienKhoa}-${vueData.NienKhoa + 1}`,
+						NamHoc_Vi: `Năm học/ School Year ${vueData.NienKhoa} - ${vueData.NienKhoa + 1}`,
+						NamHoc_En: ``,
 						NgayThangNam_Vi: data.NgayKhenThuong_VI ?? '',
 						NgayThangNam_En: data.NgayKhenThuong_EN ?? '',
 						SoQuyetDinh: `${data.SoQuyetDinhKT ?? ''}/QĐ-SNLH. NO: ${String(data.VaoSoKT ?? '').padStart(2, '0')}`,

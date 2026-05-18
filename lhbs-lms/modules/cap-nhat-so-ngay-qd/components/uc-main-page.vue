@@ -40,17 +40,37 @@
 										prepend-inner-icon="mdi-file-document-outline" placeholder="VD: 123/QĐ-BGD"
 										hide-details />
 								</v-col>
-								<v-col cols="12" md="4">
+							</v-row>
+
+							<div class="text-caption text-medium-emphasis mt-3 mb-1">Giấy khen</div>
+							<v-row dense>
+								<v-col cols="12" md="6">
 									<v-text-field v-model="element.NgayKhenThuong_VI" label="Ngày KT (Tiếng Việt)"
 										variant="outlined" color="primary" density="compact"
 										prepend-inner-icon="mdi-calendar-outline"
 										placeholder="VD: ngày 15 tháng 5 năm 2025" hide-details :clearable="false" />
 								</v-col>
-								<v-col cols="12" md="4">
+								<v-col cols="12" md="6">
 									<v-text-field v-model="element.NgayKhenThuong_EN" label="Ngày KT (English)"
 										variant="outlined" color="primary" density="compact"
 										prepend-inner-icon="mdi-calendar-month-outline" placeholder="VD: May 15, 2025"
 										hide-details :clearable="false" />
+								</v-col>
+							</v-row>
+
+							<div class="text-caption text-medium-emphasis mt-3 mb-1">Thư khen</div>
+							<v-row dense>
+								<v-col cols="12" md="6">
+									<v-text-field v-model="element.NgayKhenThuong_ThuKhen_VI"
+										label="Ngày KT - Thư khen (Tiếng Việt)" variant="outlined" color="primary"
+										density="compact" prepend-inner-icon="mdi-calendar-outline"
+										placeholder="VD: ngày 15 tháng 5 năm 2025" hide-details :clearable="false" />
+								</v-col>
+								<v-col cols="12" md="6">
+									<v-text-field v-model="element.NgayKhenThuong_ThuKhen_EN"
+										label="Ngày KT - Thư khen (English)" variant="outlined" color="primary"
+										density="compact" prepend-inner-icon="mdi-calendar-month-outline"
+										placeholder="VD: May 15, 2025" hide-details :clearable="false" />
 								</v-col>
 							</v-row>
 						</v-card-text>
@@ -100,9 +120,9 @@
 				],
 				List_CapID: [],
 				DSCap: [
-					{ title: "Tiểu học", value: 1, SoQuyetDinhKT: "", NgayKhenThuong_VI: "", NgayKhenThuong_EN: "" },
-					{ title: "Trung học cơ sở", value: 2, SoQuyetDinhKT: "", NgayKhenThuong_VI: "", NgayKhenThuong_EN: "" },
-					{ title: "Trung học phổ thông", value: 3, SoQuyetDinhKT: "", NgayKhenThuong_VI: "", NgayKhenThuong_EN: "" },
+					{ title: "Tiểu học", value: 1, SoQuyetDinhKT: "", NgayKhenThuong_VI: "", NgayKhenThuong_EN: "", NgayKhenThuong_ThuKhen_VI: "", NgayKhenThuong_ThuKhen_EN: "" },
+					{ title: "Trung học cơ sở", value: 2, SoQuyetDinhKT: "", NgayKhenThuong_VI: "", NgayKhenThuong_EN: "", NgayKhenThuong_ThuKhen_VI: "", NgayKhenThuong_ThuKhen_EN: "" },
+					{ title: "Trung học phổ thông", value: 3, SoQuyetDinhKT: "", NgayKhenThuong_VI: "", NgayKhenThuong_EN: "", NgayKhenThuong_ThuKhen_VI: "", NgayKhenThuong_ThuKhen_EN: "" },
 				],
 				DSKhoi_Sort: [],
 				formModel: {
@@ -139,6 +159,8 @@
 						item.SoQuyetDinhKT = objCap?.SoQuyetDinhKT ?? ""
 						item.NgayKhenThuong_VI = objCap?.NgayKhenThuong_VI ?? ""
 						item.NgayKhenThuong_EN = objCap?.NgayKhenThuong_EN ?? ""
+						item.NgayKhenThuong_ThuKhen_VI = objCap?.NgayKhenThuong_ThuKhen_VI ?? ""
+						item.NgayKhenThuong_ThuKhen_EN = objCap?.NgayKhenThuong_ThuKhen_EN ?? ""
 					}
 				})
 			},
@@ -153,6 +175,8 @@
 							SoQuyetDinhKT: objKhoi.SoQuyetDinhKT || null,
 							NgayKhenThuong_VI: objKhoi.NgayKhenThuong_VI || null,
 							NgayKhenThuong_EN: objKhoi.NgayKhenThuong_EN || null,
+							NgayKhenThuong_ThuKhen_VI: objKhoi.NgayKhenThuong_ThuKhen_VI || null,
+							NgayKhenThuong_ThuKhen_EN: objKhoi.NgayKhenThuong_ThuKhen_EN || null,
 						}
 					})
 	

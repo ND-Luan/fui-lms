@@ -149,6 +149,41 @@ function renderDSHocSinh_QLD() {
         obj.TiLe_KT_ThuKhen = parseFloat((KT_ThuKhen / sumKT_Truong) * 100).toFixed(2)
         groupHocSinh.push(obj)
     }
+    const tongCong = groupHocSinh.reduce((acc, item) => {
+        acc.TongSo += item.TongSo || 0
+        acc.TongSoNu += item.TongSoNu || 0
+        acc.DG_HoanThanhXuatSac += item.DG_HoanThanhXuatSac || 0
+        acc.DG_HoanThanhTot += item.DG_HoanThanhTot || 0
+        acc.DG_HoanThanh += item.DG_HoanThanh || 0
+        acc.DG_ChuaHoanThanh += item.DG_ChuaHoanThanh || 0
+        acc.KT_Truong_XuatSac += item.KT_Truong_XuatSac || 0
+        acc.KT_Truong_TieuBieu += item.KT_Truong_TieuBieu || 0
+        acc.ThanhTichKhac += item.ThanhTichKhac || 0
+        acc.KT_ThuKhen += item.KT_ThuKhen || 0
+        return acc
+    }, {
+        TenLop: 'Tổng cộng',
+        TongSo: 0,
+        TongSoNu: 0,
+        DG_HoanThanhXuatSac: 0,
+        DG_HoanThanhTot: 0,
+        DG_HoanThanh: 0,
+        DG_ChuaHoanThanh: 0,
+        KT_Truong_XuatSac: 0,
+        KT_Truong_TieuBieu: 0,
+        ThanhTichKhac: 0,
+        KT_ThuKhen: 0,
+        TiLe_KT_Truong_XuatSac: '0.00',
+        TiLe_KT_Truong_TieuBieu: '0.00',
+        TiLe_KT_ThuKhen: '0.00',
+    })
+    const tongSumKT_Truong = tongCong.KT_Truong_XuatSac + tongCong.KT_Truong_TieuBieu + tongCong.KT_ThuKhen
+    if (tongSumKT_Truong > 0) {
+        tongCong.TiLe_KT_Truong_XuatSac = parseFloat((tongCong.KT_Truong_XuatSac / tongSumKT_Truong) * 100).toFixed(2)
+        tongCong.TiLe_KT_Truong_TieuBieu = parseFloat((tongCong.KT_Truong_TieuBieu / tongSumKT_Truong) * 100).toFixed(2)
+        tongCong.TiLe_KT_ThuKhen = parseFloat((tongCong.KT_ThuKhen / tongSumKT_Truong) * 100).toFixed(2)
+    }
+    groupHocSinh.push(tongCong)
     handleHeaders()
     vueData.DSHocSinhQLD = groupHocSinh
 }

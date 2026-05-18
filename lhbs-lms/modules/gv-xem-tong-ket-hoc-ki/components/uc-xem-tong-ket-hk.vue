@@ -1,6 +1,6 @@
 <template>
 	<uc-jexcel class="height-excel-tong-ket-hoc-ki" v-if="vueData.DSHocSinh?.length > 0" v-model="vueData.instance"
-		:freeze-columns="vueData.freezeColumns" :freeze-rows="2" v-model:dataSource="vueData.DSHocSinh"
+		:freeze-columns="vueData.freezeColumns" :freeze-rows="2" :dataSource="tableData"
 		:columns="vueData.columnHeader" :key="vueData.keyComp" :filters="true" :exportExcel="true"
 		@onChange="handleChange" @rowData="GetRowData" :styleSheet="vueData.styleSheet">
 	</uc-jexcel>
@@ -13,6 +13,19 @@
 	            vueData
 	        }
 	    },
+		computed: {
+			tableData() {
+				const columns = (vueData.columnHeader || []).map(col => col?.name).filter(Boolean)
+				if (!columns.length) return []
+				return (vueData.DSHocSinh || []).map(item => {
+					const row = {}
+					columns.forEach(col => {
+						row[col] = item?.[col] ?? ''
+					})
+					return row
+				})
+			}
+		},
 	    mounted() {
 	    },
 	    methods: {

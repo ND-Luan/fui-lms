@@ -1,8 +1,8 @@
 <template>
 	<Global>
 		<template #header>
-			<v-card>
-				<v-card-title>{{ TitlePage }} • {{ TitleCap }}
+			<v-card> 
+				<v-card-title>{{ TitlePage }} • {{ TitleCap }} 
 					<v-chip variant="text" color="primary" class="font-weight-medium">
 						Tổng số học sinh: {{ DSHocSinhQLD.length }}
 					</v-chip>
@@ -37,7 +37,7 @@
 						</v-col>
 					</v-row>
 				</v-card-text>
-			</v-card>
+			</v-card> 
 		</template>
 
 		<v-divider />
@@ -49,10 +49,10 @@
 						<v-card border>
 							<v-card-title class="font-weight-medium text-primary d-flex align-center flex-wrap ga-2">
 								<span>Học sinh: [{{ hocSinh.HocSinhID }}] {{ hocSinh.HoTen }}</span>
-								<v-chip v-if="hocSinh.TenTinhTrang" size="small"
+								<!-- <v-chip v-if="hocSinh.TenTinhTrang" size="small"
 									:color="hocSinh.TenTinhTrang === 'Nghỉ học' ? 'error' : 'primary'" variant="tonal">
 									{{ hocSinh.TenTinhTrang }}
-								</v-chip>
+								</v-chip> -->
 							</v-card-title>
 							<v-data-table :headers="getHeaders()" :items="getItems(hocSinh)" item-value="MonHocID"
 								items-per-page="-1" hide-default-footer density="compact">
