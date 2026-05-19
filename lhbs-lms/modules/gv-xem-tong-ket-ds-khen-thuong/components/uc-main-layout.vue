@@ -29,10 +29,10 @@
 									<v-list>
 										<v-list-item title="Export excel" :disabled="DSHocSinhQLD.length === 0"
 											@click="exportExcel" />
-										<v-divider />
+										<!-- <v-divider /> -->
 										<v-list-item title="Export Thư khen" :disabled="DSHocSinhQLD.length === 0"
 											@click="exportThuKhen" />
-										<v-divider />
+										<!-- <v-divider /> -->
 										<v-list-item title="Export Giấy khen" :disabled="DSHocSinhQLD.length === 0"
 											:loading="isLoadingExportGiayKhen" @click="exportGiayKhen" />
 									</v-list>
@@ -44,7 +44,7 @@
 			</v-card>
 		</template>
 
-		<v-divider />
+		<!-- <v-divider /> -->
 
 		<uc-xem-tong-ket-dskt />
 		<uc-empty v-if="DSHocSinhQLD.length === 0" />
@@ -200,6 +200,12 @@
 				return value !== null && value !== undefined && String(value).trim() !== ''
 			},
 
+			isZeroValue(value) {
+				if (!this.hasValue(value)) return false
+				const parsed = Number(String(value).trim())
+				return Number.isFinite(parsed) && parsed === 0
+			},
+
 			sortByVaoSoKTIfNeeded(list) {
 				if (!Array.isArray(list) || list.length === 0) return list
 				const hasVaoSoKT = list.some(item => this.hasValue(item?.VaoSoKT))
@@ -212,10 +218,21 @@
 						const bRaw = b.item?.VaoSoKT
 						const aHas = this.hasValue(aRaw)
 						const bHas = this.hasValue(bRaw)
+						const aIsZero = this.isZeroValue(aRaw)
+						const bIsZero = this.isZeroValue(bRaw)
+
+						const getRank = (hasValue, isZero) => {
+							if (isZero) return 2
+							if (!hasValue) return 1
+							return 0
+						}
+
+						const aRank = getRank(aHas, aIsZero)
+						const bRank = getRank(bHas, bIsZero)
+						if (aRank !== bRank) return aRank - bRank
 
 						if (!aHas && !bHas) return a.index - b.index
-						if (!aHas) return 1
-						if (!bHas) return -1
+						if (aIsZero && bIsZero) return a.index - b.index
 
 						const aValue = String(aRaw).trim()
 						const bValue = String(bRaw).trim()
@@ -257,7 +274,7 @@
 				this.loadingDialog = { show: true, total: realKhoi.length, current: 0, currentName: '' }
 				const results = []
 				for (const khoi of realKhoi) {
-					if (generation !== this._loadGeneration) { this.loadingDialog.show = false; return }
+					if (generation !== this._loadGeneration) return
 					this.loadingDialog.currentName = khoi.TenKhoiHoc
 					const [khenThuongRes, tongKetRes] = await Promise.all([
 						fetchPromise('lms/KhenThuong_Get_By_KhoiID', {
@@ -266,14 +283,14 @@
 						}, { silent: true }),
 						fetchPromise(`/psmark1/LMS_GetBangTongHopKetQua_TheoKhoi?KhoiID=${khoi.KhoiID}&=&KyDanhGia=4&NamHoc=${vueData.NienKhoa}`, {}, { silent: true }),
 					])
-					if (generation !== this._loadGeneration) { this.loadingDialog.show = false; return }
+					if (generation !== this._loadGeneration) return
 					results.push({
 						dsKhenThuong: this.extractList(khenThuongRes),
 						dsTongKet: this.extractList(tongKetRes).sort((a, b) => (a.Sort ?? 0) - (b.Sort ?? 0)),
 					})
 					this.loadingDialog.current += 1
 				}
-				if (generation !== this._loadGeneration) { this.loadingDialog.show = false; return }
+				if (generation !== this._loadGeneration) return
 				this.loadingDialog.show = false
 				this.DSKhenThuong = results.flatMap(r => r.dsKhenThuong)
 				this.DSHocSinh_API_QLD = results.flatMap(r => r.dsTongKet)

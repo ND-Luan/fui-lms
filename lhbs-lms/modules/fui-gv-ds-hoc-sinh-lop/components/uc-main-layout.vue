@@ -1,6 +1,6 @@
 <template>
-	<Global>
-		<template #header>
+	<global>
+		<template #header="">
 			<v-card>
 				<v-card-title>
 					{{ TitlePage }} • {{ TitleCap }}
@@ -8,53 +8,48 @@
 				<v-card-text>
 					<v-row align="center">
 						<v-col cols="12" sm="3">
-							<v-select v-model="KhoiItem" label="Chọn khối" :items="DSKhoi" item-title="TenKhoiHoc"
-								item-value="KhoiID" return-object />
-						</v-col>
+							<v-select v-model="KhoiItem" label="Chọn khối" :items="DSKhoi" item-title="TenKhoiHoc" item-value="KhoiID" return-object="">
+						</v-select></v-col>
 						<v-col cols="12" sm="3">
-							<v-select v-model="LopItem" label="Chọn lớp" :items="DSLop" item-title="TenLop"
-								item-value="LopID" :disabled="!KhoiItem" return-object />
-						</v-col>
+							<v-select v-model="LopItem" label="Chọn lớp" :items="DSLop" item-title="TenLop" item-value="LopID" :disabled="!KhoiItem" return-object="">
+						</v-select></v-col>
 						<v-col class="d-flex align-center ga-2 flex-wrap">
 							<v-btn @click="getHocSinh()" variant="outlined" color="primary" :disabled="!LopItem">
-								<v-icon start>mdi-reload</v-icon>Làm mới
+								<v-icon start="">mdi-reload</v-icon>Làm mới
 							</v-btn>
 							<v-btn @click="insHocSinh()" color="teal" :disabled="DSHocSinhSelected.length === 0">
-								<v-icon start>mdi-sync</v-icon>
+								<v-icon start="">mdi-sync</v-icon>
 								Cập nhật DS học sinh
-								<v-badge v-if="DSHocSinhSelected.length > 0" :content="DSHocSinhSelected.length"
-									color="white" text-color="teal" inline />
-							</v-btn>
+								<v-badge v-if="DSHocSinhSelected.length > 0" :content="DSHocSinhSelected.length" color="white" text-color="teal" inline="">
+							</v-badge></v-btn>
 						</v-col>
 					</v-row>
 				</v-card-text>
 			</v-card>
 		</template>
 
-		<v-divider />
+		<!-- <v-divider /> -->
 
 		<!-- Thay toàn bộ phần template v-data-table -->
-		<v-data-table v-model="DSHocSinhSelected" :headers :items :show-select="true" items-per-page="-1"
-			:item-value="(item) => item" hide-default-footer hover
-			style="max-height: calc(100dvh - 77px); overflow-y: auto;">
+		<v-data-table v-model="DSHocSinhSelected" :headers="" :items="" :show-select="true" items-per-page="-1" :item-value="(item) => item" hide-default-footer="" hover="" style="max-height: calc(100dvh - 77px); overflow-y: auto;">
 			<!-- STT -->
-			<template #item.STT="{ item }">
+			<template #item.stt="{ item }">
 				<span class="text-caption text-medium-emphasis font-weight-medium">{{ item.STT }}</span>
 			</template>
 
 			<!-- Thông tin học sinh — gộp avatar + tên + ID + tên tiếng Anh vào 1 hàng ngang -->
-			<template #item.ThongTinHocSinh="{ item }">
+			<template #item.thongtinhocsinh="{ item }">
 				<div class="d-flex align-center ga-3 py-2">
 					<v-avatar :size="52" class="elevation-2 flex-shrink-0">
-						<v-img :src="vueData.v_Set.urlAvatarHocSinh + item.HocSinhID" />
-					</v-avatar>
+						<v-img :src="vueData.v_Set.urlAvatarHocSinh + item.HocSinhID">
+					</v-img></v-avatar>
 					<div class="d-flex flex-column ga-1">
 						<span class="font-weight-bold text-body-2">{{ item.HoTen }}</span>
 						<div class="d-flex align-center ga-2 flex-wrap">
-							<v-chip size="x-small" variant="tonal" color="primary" label>
+							<v-chip size="x-small" variant="tonal" color="primary" label="">
 								{{ item.HocSinhID }}
 							</v-chip>
-							<v-chip size="x-small" variant="tonal" color="secondary" label>
+							<v-chip size="x-small" variant="tonal" color="secondary" label="">
 								SDB: {{ item.SoDanhBo ?? '—' }}
 							</v-chip>
 						</div>
@@ -62,55 +57,52 @@
 							<span class="text-caption text-success font-weight-medium">
 								{{ item.EnglishName ?? '—' }}
 							</span>
-							<v-btn icon="mdi-square-edit-outline" color="success" variant="text" size="x-small"
-								v-tooltip="'Cập nhật tên tiếng Anh'" @click="onOpenModalEditProfile(item)" />
-						</div>
+							<v-btn icon="mdi-square-edit-outline" color="success" variant="text" size="x-small" v-tooltip="'Cập nhật tên tiếng Anh'" @click="onOpenModalEditProfile(item)">
+						</v-btn></div>
 					</div>
 				</div>
 			</template>
 
 			<!-- Tình trạng KQHT -->
-			<template #item.TinhTrangKQHT="{ item }">
-				<v-chip v-if="item.isExistInKQHT" :color="renderColorTinhTrang(item.TinhTrangKQHT)" size="small" label>
-					<v-icon start size="13">mdi-school</v-icon>
+			<template #item.tinhtrangkqht="{ item }">
+				<v-chip v-if="item.isExistInKQHT" :color="renderColorTinhTrang(item.TinhTrangKQHT)" size="small" label="">
+					<v-icon start="" size="13">mdi-school</v-icon>
 					{{ item.TenTinhTrangKQHT ?? 'Không có' }}
 				</v-chip>
-				<v-chip v-else color="warning" variant="tonal" size="small" label>
-					<v-icon start size="13">mdi-alert-outline</v-icon>
+				<v-chip v-else="" color="warning" variant="tonal" size="small" label="">
+					<v-icon start="" size="13">mdi-alert-outline</v-icon>
 					Chưa có trong KQHT
 				</v-chip>
 			</template>
 
 			<!-- Tình trạng QLHS -->
-			<template #item.TinhTrangQLHS="{ item }">
-				<v-chip :color="renderColorTinhTrang(item.TinhTrangQLHS)" size="small" label>
-					<v-icon start size="13">mdi-account-check</v-icon>
+			<template #item.tinhtrangqlhs="{ item }">
+				<v-chip :color="renderColorTinhTrang(item.TinhTrangQLHS)" size="small" label="">
+					<v-icon start="" size="13">mdi-account-check</v-icon>
 					{{ item.TenTinhTrangQLHS ?? 'Không có' }}
 				</v-chip>
 			</template>
 
 			<!-- Nhận xét chuẩn bị niên khóa sau -->
-			<template #item.NhanXet_ChuanBiNienKhoaSau="{ item }">
+			<template #item.nhanxet_chuanbinienkhoasau="{ item }">
 				<div v-if="item.NhanXet_ChuanBiNienKhoaSau" class="py-2 px-1" style="max-width: 360px;">
-					<div class="text-body-2"
-						style="display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; line-height: 1.4;">
+					<div class="text-body-2" style="display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; line-height: 1.4;">
 						{{ item.NhanXet_ChuanBiNienKhoaSau }}
 					</div>
 				</div>
-				<v-chip v-else size="x-small" variant="tonal" color="grey">
+				<v-chip v-else="" size="x-small" variant="tonal" color="grey">
 					Chưa có nhận xét
 				</v-chip>
 			</template>
 
 			<!-- Xem chi tiết -->
-			<template #item.XemChiTiet="{ item }">
-				<v-btn @click="localStorageSetItem(item)" icon="mdi-eye-outline" variant="text" color="primary"
-					size="small" v-tooltip="'Xem chi tiết ' + item.HoTen" />
-			</template>
+			<template #item.xemchitiet="{ item }">
+				<v-btn @click="localStorageSetItem(item)" icon="mdi-eye-outline" variant="text" color="primary" size="small" v-tooltip="'Xem chi tiết ' + item.HoTen">
+			</v-btn></template>
 		</v-data-table>
 
-		<uc-modal-edit-profile v-model="isOpenModalEditProfile" :StudentProfile @onSubmitFinish="getHocSinh(false)" />
-	</Global>
+		<uc-modal-edit-profile v-model="isOpenModalEditProfile" :student-profile="StudentProfile" @onsubmitfinish="getHocSinh(false)">
+	</uc-modal-edit-profile></global>
 </template>
 
 <script>
