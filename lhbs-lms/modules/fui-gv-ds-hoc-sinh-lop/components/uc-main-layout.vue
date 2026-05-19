@@ -92,7 +92,8 @@
 			<!-- Nhận xét chuẩn bị niên khóa sau -->
 			<template #item.NhanXet_ChuanBiNienKhoaSau="{ item }">
 				<div v-if="item.NhanXet_ChuanBiNienKhoaSau" class="py-2 px-1" style="max-width: 360px;">
-					<div class="text-body-2" style="display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; line-height: 1.4;">
+					<div class="text-body-2"
+						style="display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; line-height: 1.4;">
 						{{ item.NhanXet_ChuanBiNienKhoaSau }}
 					</div>
 				</div>
@@ -113,8 +114,8 @@
 </template>
 
 <script>
-export default {
-	inject: ['snackbarRef', 'iframeRef'],
+	export default {
+		inject: ['snackbarRef', 'iframeRef'],
 
 	data() {
 		return {
@@ -323,5 +324,5 @@ export default {
 				.map((x, i) => ({ ...x, STT: i + 1, HoTen: x.Ho + ' ' + x.Ten }))
 		},
 	},
-}
+	}
 </script>

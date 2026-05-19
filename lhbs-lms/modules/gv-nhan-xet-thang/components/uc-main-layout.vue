@@ -61,16 +61,14 @@
 									</v-btn>
 									<v-btn
 										v-if="CapID === 1 && !(ThangObj?.Is_HienThiPhuHuynh === false && ThangObj?.Thang === 5)"
-										prepend-icon="mdi-send" color="primary" variant="outlined"
-										class="me-1" :disabled="items.length === 0 || isReadOnly"
-										@click="onSendToTruong">
+										prepend-icon="mdi-send" color="primary" variant="outlined" class="me-1"
+										:disabled="items.length === 0 || isReadOnly" @click="onSendToTruong">
 										Gửi tổ trưởng
 									</v-btn>
 									<v-btn
 										v-if="(CapID === 2 || CapID === 3) && !(ThangObj?.Is_HienThiPhuHuynh === false && ThangObj?.Thang === 5)"
-										prepend-icon="mdi-send" color="primary"
-										variant="outlined" class="me-1" :disabled="items.length === 0 || isReadOnly"
-										@click="onSendToBGH">
+										prepend-icon="mdi-send" color="primary" variant="outlined" class="me-1"
+										:disabled="items.length === 0 || isReadOnly" @click="onSendToBGH">
 										Gửi BGH
 									</v-btn>
 								</div>
