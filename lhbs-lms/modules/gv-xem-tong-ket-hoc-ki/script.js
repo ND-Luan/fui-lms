@@ -453,7 +453,48 @@ function handleData() {
         item.SoQuyetDinhKT = objHS?.SoQuyetDinhKT ?? ''
         item.VaoSoKT = objHS?.VaoSoKT ?? ''
     }
-    vueData.DSHocSinh = vueData.DSHocSinh.sort((a, b) => a.TenLop.localeCompare(b.TenLop));
+    vueData.DSHocSinh = sortHocSinhByVaoSoKTIfNeeded(vueData.DSHocSinh)
+}
+
+function hasValue(value) {
+    return value !== null && value !== undefined && String(value).trim() !== ''
+}
+
+function sortHocSinhByVaoSoKTIfNeeded(list) {
+    if (!Array.isArray(list) || list.length === 0) return list
+
+    const hasVaoSoKT = list.some(item => hasValue(item?.VaoSoKT))
+    if (!hasVaoSoKT) {
+        return list.sort((a, b) => (a?.TenLop ?? '').localeCompare(b?.TenLop ?? ''))
+    }
+
+    return list
+        .map((item, index) => ({ item, index }))
+        .sort((a, b) => {
+            const aRaw = a.item?.VaoSoKT
+            const bRaw = b.item?.VaoSoKT
+            const aHas = hasValue(aRaw)
+            const bHas = hasValue(bRaw)
+
+            if (!aHas && !bHas) {
+                const classCompare = (a.item?.TenLop ?? '').localeCompare(b.item?.TenLop ?? '')
+                if (classCompare !== 0) return classCompare
+                return a.index - b.index
+            }
+            if (!aHas) return 1
+            if (!bHas) return -1
+
+            const compare = String(aRaw).trim().localeCompare(String(bRaw).trim(), 'vi', {
+                numeric: true,
+                sensitivity: 'base',
+            })
+            if (compare !== 0) return compare
+
+            const classCompare = (a.item?.TenLop ?? '').localeCompare(b.item?.TenLop ?? '')
+            if (classCompare !== 0) return classCompare
+            return a.index - b.index
+        })
+        .map(x => x.item)
 }
 async function getDSLop() {
     if (!isTongKetHocKiTestingUser()) {

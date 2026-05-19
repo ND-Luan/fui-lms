@@ -195,6 +195,36 @@
 				if (Array.isArray(res)) return res
 				return res?.data ?? []
 			},
+
+			hasValue(value) {
+				return value !== null && value !== undefined && String(value).trim() !== ''
+			},
+
+			sortByVaoSoKTIfNeeded(list) {
+				if (!Array.isArray(list) || list.length === 0) return list
+				const hasVaoSoKT = list.some(item => this.hasValue(item?.VaoSoKT))
+				if (!hasVaoSoKT) return list
+
+				return list
+					.map((item, index) => ({ item, index }))
+					.sort((a, b) => {
+						const aRaw = a.item?.VaoSoKT
+						const bRaw = b.item?.VaoSoKT
+						const aHas = this.hasValue(aRaw)
+						const bHas = this.hasValue(bRaw)
+
+						if (!aHas && !bHas) return a.index - b.index
+						if (!aHas) return 1
+						if (!bHas) return -1
+
+						const aValue = String(aRaw).trim()
+						const bValue = String(bRaw).trim()
+						const compare = aValue.localeCompare(bValue, 'vi', { numeric: true, sensitivity: 'base' })
+						if (compare !== 0) return compare
+						return a.index - b.index
+					})
+					.map(x => x.item)
+			},
 	
 			async getKhoi() {
 				const res = await fetchPromise('lms/KhoiHocByCapHoc_Get', {
@@ -297,8 +327,9 @@
 						Is_DaIn: hocSinhKhenThuong?.Is_DaIn,
 					})
 				}
-				this.DSHocSinhQLD = data
-				vueData.DSHocSinhQLD = data
+				const sortedData = this.sortByVaoSoKTIfNeeded(data)
+				this.DSHocSinhQLD = sortedData
+				vueData.DSHocSinhQLD = sortedData
 				this.setJExcelHeaders()
 			},
 	
