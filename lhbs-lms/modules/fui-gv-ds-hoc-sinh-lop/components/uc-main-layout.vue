@@ -89,6 +89,18 @@
 				</v-chip>
 			</template>
 
+			<!-- Nhận xét chuẩn bị niên khóa sau -->
+			<template #item.NhanXet_ChuanBiNienKhoaSau="{ item }">
+				<div v-if="item.NhanXet_ChuanBiNienKhoaSau" class="py-2 px-1" style="max-width: 360px;">
+					<div class="text-body-2" style="display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; line-height: 1.4;">
+						{{ item.NhanXet_ChuanBiNienKhoaSau }}
+					</div>
+				</div>
+				<v-chip v-else size="x-small" variant="tonal" color="grey">
+					Chưa có nhận xét
+				</v-chip>
+			</template>
+
 			<!-- Xem chi tiết -->
 			<template #item.XemChiTiet="{ item }">
 				<v-btn @click="localStorageSetItem(item)" icon="mdi-eye-outline" variant="text" color="primary"
@@ -113,6 +125,7 @@ export default {
 				{ title: "Học sinh", value: "ThongTinHocSinh", align: "start", minWidth: 280 },
 				{ title: "Trạng thái LMS", value: "TinhTrangKQHT", align: "center", width: 180 },
 				{ title: "Trạng thái QLHS", value: "TinhTrangQLHS", align: "center", width: 180 },
+				{ title: "Nhận xét chuẩn bị niên khóa sau", value: "NhanXet_ChuanBiNienKhoaSau", align: "start", minWidth: 280 },
 				{ title: "", value: "XemChiTiet", align: "center", width: 120, sortable: false },
 			],
 			DSKhoi: [],
@@ -169,13 +182,18 @@ export default {
 
 		async getHocSinh(forceRefresh = false) {
 			this.DSHocSinhSelected = []
-			const [DSHocSinhLop, DSHocSinh_LMS, DSHocSinhLop_LMS] = await fetchBatchPromise([
+			const [DSHocSinhLop, DSHocSinh_LMS, DSHocSinhLop_LMS, DSNhanXetChuanBiNienKhoaSau] = await fetchBatchPromise([
 				{ url: 'lms/HocSinhLop_Get', params: { LopID: this.LopItem?.LopID, NienKhoa: vueData.NienKhoa } },
 				{ url: 'student/LMS_GetHocSinh', params: { LopID: this.LopItem?.LopID, NienKhoa: vueData.NienKhoa } },
 				{ url: 'student/LMS_GetHocSinhLop', params: { LopID: this.LopItem?.LopID, NienKhoa: vueData.NienKhoa } },
+				{
+					url: 'lms/NhanXet_HocSinh_NienKhoaSau_Get_ByLopID',
+					params: { LopID: this.LopItem?.LopID, NienKhoa: vueData.NienKhoa },
+					opts: { suppressError: true },
+				},
 			], { forceRefresh })
 
-			this.items = this.renderDSHocSinh(DSHocSinhLop, DSHocSinh_LMS, DSHocSinhLop_LMS)
+			this.items = this.renderDSHocSinh(DSHocSinhLop, DSHocSinh_LMS, DSHocSinhLop_LMS, DSNhanXetChuanBiNienKhoaSau)
 		},
 
 		async insHocSinh() {
@@ -236,9 +254,10 @@ export default {
 			return ''
 		},
 
-		renderDSHocSinh(DSHocSinhLop, DSHocSinh_LMS, DSHocSinhLop_LMS) {
+		renderDSHocSinh(DSHocSinhLop, DSHocSinh_LMS, DSHocSinhLop_LMS, DSNhanXetChuanBiNienKhoaSau = []) {
 			const eduBotHocSinhLop = []
 			const currentDSHocSinhLop_LMS = DSHocSinhLop_LMS.filter(x => x.LopID == this.LopItem.LopID)
+			const mapNhanXetChuanBi = new Map((DSNhanXetChuanBiNienKhoaSau ?? []).map(x => [x.HocSinhID, x]))
 
 			for (const hsl of currentDSHocSinhLop_LMS) {
 				const hs = DSHocSinh_LMS.find(x => x.HocSinhID === hsl.HocSinhID)
@@ -250,6 +269,7 @@ export default {
 			const items = uniqueHocSinhID.map(id => {
 				const hocSinh = DSHocSinhLop.find(x => x.HocSinhID === id)
 				const hocSinhLMS = eduBotHocSinhLop.find(x => x.HocSinhID === id)
+				const nhanXetChuanBi = mapNhanXetChuanBi.get(id)
 				let obj = { isExistInKQHT: !!hocSinh }
 
 				if (hocSinh) {
@@ -287,6 +307,8 @@ export default {
 						UpdateTime: hocSinhLMS.UpdateTime,
 					})
 				}
+
+				obj.NhanXet_ChuanBiNienKhoaSau = nhanXetChuanBi?.NhanXet_ChuanBiNienKhoaSau ?? ''
 
 				return obj
 			})

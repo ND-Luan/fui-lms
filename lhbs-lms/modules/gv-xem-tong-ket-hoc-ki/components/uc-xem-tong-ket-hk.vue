@@ -1,8 +1,8 @@
 <template>
 	<uc-jexcel class="height-excel-tong-ket-hoc-ki" v-if="vueData.DSHocSinh?.length > 0" v-model="vueData.instance"
-		:freeze-columns="vueData.freezeColumns" :freeze-rows="2" :dataSource="tableData"
-		:columns="vueData.columnHeader" :key="vueData.keyComp" :filters="true" :exportExcel="true"
-		@onChange="handleChange" @rowData="GetRowData" :styleSheet="vueData.styleSheet">
+		:freeze-columns="vueData.freezeColumns" :freeze-rows="2" :dataSource="tableData" :columns="vueData.columnHeader"
+		:key="vueData.keyComp" :filters="true" :exportExcel="true" @onChange="handleChange" @rowData="GetRowData"
+		:styleSheet="vueData.styleSheet">
 	</uc-jexcel>
 </template>
 

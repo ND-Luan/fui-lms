@@ -82,6 +82,13 @@ function createFallbackHocSinhRow(item, index, lopItem = null) {
         VaoSoKT: item.VaoSoKT ?? ''
     }
 }
+function normalizeDanhHieu(value) {
+    if (typeof value !== 'string') return value
+    const text = value.trim()
+    if (!text) return text
+    // Chuẩn hóa viết tắt HS thành Học sinh để đồng nhất hiển thị/xử lý.
+    return text.replace(/^HS\b/i, 'Học sinh')
+}
 async function loadHocSinhFallbackForKQRL(lopItem, silent = false) {
     const dsHocSinh = await fetchPromise('lms/HocSinhLop_Get_ByLopID', {
         LopID: lopItem.LopID,
@@ -113,8 +120,11 @@ async function fetchTongKetByLop(lopItem, khoiIDOverride = null, silent = false)
             suppressError: true,
             silent
         })
+        const normalizedRes = Array.isArray(res)
+            ? res.map(item => ({ ...item, DanhHieu: normalizeDanhHieu(item.DanhHieu) }))
+            : []
         return {
-            data: Array.isArray(res) ? res : [],
+            data: normalizedRes,
             usedFallback: false
         }
     } catch (error) {
@@ -175,7 +185,7 @@ async function exportGiayKhen() {
     console.log('priority', priority)
     const sortDSHocSinh_By_DanhHieu = vueData.DSHocSinh
         .map(x => {
-            if (x.TenLop === '10B1' || x.TenLop === '10B2') x.TenLop = '10C'
+            if (x.TenLop === '10B1' || x.TenLop === '10B2') x.TenLop = '10B'
             if (x.TenLop === '11C1' || x.TenLop === '11C2') x.TenLop = '11C'
             if (x.TenLop === '12C1' || x.TenLop === '12C2') x.TenLop = '12C'
             return {
@@ -190,16 +200,18 @@ async function exportGiayKhen() {
             // Nếu TenLop giống nhau, so sánh theo thứ tự DanhHieu trong priority
             return priority.indexOf(a.DanhHieu?.trim()) - priority.indexOf(b.DanhHieu?.trim());
         });
-    console.log('sortDSHocSinh_By_DanhHieu', sortDSHocSinh_By_DanhHieu.map(x => x.DanhHieu))
+    function normalize(code) {
+        return code.replace(/^0/, '');
+    }
     for (var data of sortDSHocSinh_By_DanhHieu) {
         const objEN_DanhHieu = DSDanhHieu.find(x => x.DanhHieu_VI === data.DanhHieu)
         // const tenLop = data.TenLop
         // if (data.TenLop.startWidth)
         Certs.push({
             KhenTang_Vi: "Khen tặng học sinh",
-            KhenTang_En: "We gladly present",
+            KhenTang_En: "This certificate is proudly presented to",
             HoTen: data.HoTen.toUpperCase(),
-            Lop: `CLASS ${data.TenLop}`,
+            Lop: `CLASS ${normalize(data.TenLop)}`,
             DanhHieu_Vi: "Đạt danh hiệu " + data.DanhHieu ?? "",
             DanhHieu_En: objEN_DanhHieu?.DanhHieu_EN ?? "",
             NamHoc_Vi: `Năm học ${vueData.NienKhoa}-${vueData.NienKhoa + 1}`,
@@ -430,6 +442,7 @@ function handleHeaders() {
 }
 function handleData() {
     for (var item of vueData.dataDiem) {
+        item.DanhHieu = normalizeDanhHieu(item.DanhHieu)
         vueData.DSHocSinh.push(item)
     }
     const flatArrDSKhenThuong = vueData.DSKhenThuong.flat()
