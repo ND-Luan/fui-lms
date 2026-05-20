@@ -49,6 +49,13 @@ const CONSTANTS = {
 };
 // ==================== COLUMN CODE SERVICE ====================
 const ColumnCodeService = {
+    hasNumericPrefix(maCotDiem) {
+        if (typeof maCotDiem !== 'string') return false;
+        const splitIndex = maCotDiem.indexOf('_');
+        if (splitIndex <= 0) return false;
+        const prefix = maCotDiem.slice(0, splitIndex);
+        return /^\d+$/.test(prefix);
+    },
     /** Chuẩn hóa mã cột điểm: 13083_MucDoDanhGiaCK_HK2 -> MucDoDanhGiaCK_HK2 */
     normalizeMaCotDiem(maCotDiem) {
         if (typeof maCotDiem !== 'string') return maCotDiem;
@@ -59,6 +66,13 @@ const ColumnCodeService = {
     },
     /** So khớp mã cột điểm giữa API và UI, hỗ trợ cả dạng có prefix CotDiemID */
     isSameMaCotDiem(leftCode, rightCode) {
+        const leftHasPrefix = this.hasNumericPrefix(leftCode);
+        const rightHasPrefix = this.hasNumericPrefix(rightCode);
+        // NLPC columns (prefixed) must match by exact code, not normalized main-subject code.
+        if (leftHasPrefix || rightHasPrefix) {
+            if (leftHasPrefix !== rightHasPrefix) return false;
+            return leftCode === rightCode;
+        }
         return this.normalizeMaCotDiem(leftCode) === this.normalizeMaCotDiem(rightCode);
     }
 };
@@ -749,8 +763,8 @@ const LockService = {
         for (const cotDiem of columns) {
             await ApiService.toggleKhoaCotDiem({
                 LopID: filter.LopItem.LopID,
-                MonHocLopID: filter.MonHocItem.MonHocLopID,
-                MaCotDiem: cotDiem.value,
+                MonHocLopID: cotDiem.MonHocLopID || filter.MonHocItem.MonHocLopID,
+                MaCotDiem: cotDiem.MaCotDiemSave || ColumnCodeService.normalizeMaCotDiem(cotDiem.value),
                 IsKhoaCotDiem: true
             });
         }
@@ -891,8 +905,7 @@ const BangDiemService = {
             });
             const lockedColumns = (lockedColumnsRaw ?? []).filter(x => {
                 const isSameLop = x?.LopID == null || String(x.LopID) === String(filter.LopItem.LopID);
-                const isSameMonHocLop = x?.MonHocLopID == null || Number(x.MonHocLopID) === Number(filter.MonHocItem.MonHocLopID);
-                return isSameLop && isSameMonHocLop;
+                return isSameLop;
             });
             // 7. Headers
             const firstStudent = fn_ProrityTinhTrang(students);
@@ -912,14 +925,18 @@ const BangDiemService = {
             ];
             const nestedHeaders = this.header.buildNestedHeaders(gradeColumns, apiData, freezeColumns, isGroup);
             const displayColumns = DSCotDiem_ByMaNhomCotDiem.map(cotDiem => {
-                const lockedCol = lockedColumns.find(x =>
-                    ColumnCodeService.isSameMaCotDiem(x.MaCotDiem, cotDiem.value) && x.TinhTrang === true
+                const matchedCols = lockedColumns.filter(x =>
+                    ColumnCodeService.isSameMaCotDiem(x.MaCotDiem, cotDiem.value)
                 );
+                const lockedCol = matchedCols.find(x => x.TinhTrang === true)
+                    || matchedCols.sort((a, b) => Number(b.KhoaCotDiemID || 0) - Number(a.KhoaCotDiemID || 0))[0];
                 return {
                     title: cotDiem.title,
                     value: cotDiem.value,
-                    isLocked: !!lockedCol,
-                    KhoaCotDiemID: lockedCol?.KhoaCotDiemID || null
+                    isLocked: !!lockedCol?.TinhTrang,
+                    KhoaCotDiemID: lockedCol?.KhoaCotDiemID || null,
+                    MonHocLopID: lockedCol?.MonHocLopID || filter.MonHocItem.MonHocLopID,
+                    MaCotDiemSave: ColumnCodeService.normalizeMaCotDiem(cotDiem.value)
                 };
             });
             // 8. Data rows

@@ -437,7 +437,7 @@
 		},
 
 		canManageUnlockColumns() {
-			return this.vueData?.user?.UserID === 'NA0000022';
+			return this.vueData?.user?.UserID === 'NA0000022' || this.vueData?.user?.UserID === 'NV0000134';
 		},
 
 		/** Tất cả cột trong dialog khóa */

@@ -86,8 +86,10 @@
 					{ title: "Cấp 2", value: 2 },
 					{ title: "Cấp 3", value: 3 },
 				],
-				HocKi: null,
-				CapID: null,
+				HocKi: ['HK1', 'HK2'].includes(String(vueData.HocKi || '').toUpperCase())
+					? String(vueData.HocKi).toUpperCase()
+					: "HK1",
+				CapID: [1, 2, 3].includes(parseInt(vueData.CapID)) ? parseInt(vueData.CapID) : 1,
 				headers_JA: [{
 					title: "JA",
 					align: "center",
@@ -96,9 +98,15 @@
 						{ title: "Lớp", value: "TenLop" },
 						{ title: "TSHS", value: "TongSoHocSinh", align: "end" },
 						{ title: "Tốt", value: "XepLoaiTot", align: "end" },
+						{ title: "TL Tốt (%)", value: "TiLeTot", align: "end" },
 						{ title: "Khá", value: "XepLoaiKha", align: "end" },
+						{ title: "TL Khá (%)", value: "TiLeKha", align: "end" },
 						{ title: "Đạt", value: "XepLoaiDat", align: "end" },
+						{ title: "TL Đạt (%)", value: "TiLeDat", align: "end" },
 						{ title: "Chưa đạt", value: "XepLoaiChuaDat", align: "end" },
+						{ title: "TL Chưa đạt (%)", value: "TiLeChuaDat", align: "end" },
+						{ title: "Chưa xác định", value: "ChuaXacDinh", align: "end" },
+						{ title: "TL Chưa xác định (%)", value: "TiLeChuaXacDinh", align: "end" },
 					]
 				}],
 				items_JA: [],
@@ -110,9 +118,15 @@
 						{ title: "Lớp", value: "TenLop" },
 						{ title: "TSHS", value: "TongSoHocSinh", align: "end" },
 						{ title: "Tốt", value: "XepLoaiTot", align: "end" },
+						{ title: "TL Tốt (%)", value: "TiLeTot", align: "end" },
 						{ title: "Khá", value: "XepLoaiKha", align: "end" },
+						{ title: "TL Khá (%)", value: "TiLeKha", align: "end" },
 						{ title: "Đạt", value: "XepLoaiDat", align: "end" },
+						{ title: "TL Đạt (%)", value: "TiLeDat", align: "end" },
 						{ title: "Chưa đạt", value: "XepLoaiChuaDat", align: "end" },
+						{ title: "TL Chưa đạt (%)", value: "TiLeChuaDat", align: "end" },
+						{ title: "Chưa xác định", value: "ChuaXacDinh", align: "end" },
+						{ title: "TL Chưa xác định (%)", value: "TiLeChuaXacDinh", align: "end" },
 					]
 				}],
 				items_AI: [],
@@ -124,9 +138,15 @@
 						{ title: "Lớp", value: "TenLop" },
 						{ title: "TSHS", value: "TongSoHocSinh", align: "end" },
 						{ title: "Tốt", value: "XepLoaiTot", align: "end" },
+						{ title: "TL Tốt (%)", value: "TiLeTot", align: "end" },
 						{ title: "Khá", value: "XepLoaiKha", align: "end" },
+						{ title: "TL Khá (%)", value: "TiLeKha", align: "end" },
 						{ title: "Đạt", value: "XepLoaiDat", align: "end" },
+						{ title: "TL Đạt (%)", value: "TiLeDat", align: "end" },
 						{ title: "Chưa đạt", value: "XepLoaiChuaDat", align: "end" },
+						{ title: "TL Chưa đạt (%)", value: "TiLeChuaDat", align: "end" },
+						{ title: "Chưa xác định", value: "ChuaXacDinh", align: "end" },
+						{ title: "TL Chưa xác định (%)", value: "TiLeChuaXacDinh", align: "end" },
 					]
 				}],
 				items_STEM: [],
@@ -137,9 +157,15 @@
 						{ title: "Khối", value: "KhoiID" },
 						{ title: "TSHS", value: "TongSoHocSinh", align: "end" },
 						{ title: "Tốt", value: "XepLoaiTot", align: "end" },
+						{ title: "TL Tốt (%)", value: "TiLeTot", align: "end" },
 						{ title: "Khá", value: "XepLoaiKha", align: "end" },
+						{ title: "TL Khá (%)", value: "TiLeKha", align: "end" },
 						{ title: "Đạt", value: "XepLoaiDat", align: "end" },
+						{ title: "TL Đạt (%)", value: "TiLeDat", align: "end" },
 						{ title: "Chưa đạt", value: "XepLoaiChuaDat", align: "end" },
+						{ title: "TL Chưa đạt (%)", value: "TiLeChuaDat", align: "end" },
+						{ title: "Chưa xác định", value: "ChuaXacDinh", align: "end" },
+						{ title: "TL Chưa xác định (%)", value: "TiLeChuaXacDinh", align: "end" },
 					]
 				}],
 				items_JA_Khoi: [],
@@ -150,9 +176,15 @@
 						{ title: "Khối", value: "KhoiID" },
 						{ title: "TSHS", value: "TongSoHocSinh", align: "end" },
 						{ title: "Tốt", value: "XepLoaiTot", align: "end" },
+						{ title: "TL Tốt (%)", value: "TiLeTot", align: "end" },
 						{ title: "Khá", value: "XepLoaiKha", align: "end" },
+						{ title: "TL Khá (%)", value: "TiLeKha", align: "end" },
 						{ title: "Đạt", value: "XepLoaiDat", align: "end" },
+						{ title: "TL Đạt (%)", value: "TiLeDat", align: "end" },
 						{ title: "Chưa đạt", value: "XepLoaiChuaDat", align: "end" },
+						{ title: "TL Chưa đạt (%)", value: "TiLeChuaDat", align: "end" },
+						{ title: "Chưa xác định", value: "ChuaXacDinh", align: "end" },
+						{ title: "TL Chưa xác định (%)", value: "TiLeChuaXacDinh", align: "end" },
 					]
 				}],
 				items_AI_Khoi: [],
@@ -163,9 +195,15 @@
 						{ title: "Khối", value: "KhoiID" },
 						{ title: "TSHS", value: "TongSoHocSinh", align: "end" },
 						{ title: "Tốt", value: "XepLoaiTot", align: "end" },
+						{ title: "TL Tốt (%)", value: "TiLeTot", align: "end" },
 						{ title: "Khá", value: "XepLoaiKha", align: "end" },
+						{ title: "TL Khá (%)", value: "TiLeKha", align: "end" },
 						{ title: "Đạt", value: "XepLoaiDat", align: "end" },
+						{ title: "TL Đạt (%)", value: "TiLeDat", align: "end" },
 						{ title: "Chưa đạt", value: "XepLoaiChuaDat", align: "end" },
+						{ title: "TL Chưa đạt (%)", value: "TiLeChuaDat", align: "end" },
+						{ title: "Chưa xác định", value: "ChuaXacDinh", align: "end" },
+						{ title: "TL Chưa xác định (%)", value: "TiLeChuaXacDinh", align: "end" },
 					]
 				}],
 				items_STEM_Khoi: [],
@@ -194,12 +232,12 @@
 						CapID: this.CapID,
 						NienKhoa: vueData.NienKhoa,
 					})
-					this.DataBaoCao = data
 				}
+				this.DataBaoCao = data
 	
-				this.items_JA = data[0]
-				this.items_AI = data[1]
-				this.items_STEM = data[2]
+				this.items_JA = this.boSungTiLe(data[0] || [])
+				this.items_AI = this.boSungTiLe(data[1] || [])
+				this.items_STEM = this.boSungTiLe(data[2] || [])
 	
 				// Tính toán dữ liệu theo khối
 				this.items_JA_Khoi = this.tinhTheoKhoi(this.items_JA)
@@ -240,7 +278,41 @@
 				})
 	
 				// Chuyển object thành array và sắp xếp theo KhoiID
-				return Object.values(grouped).sort((a, b) => a.KhoiID - b.KhoiID)
+				return this.boSungTiLe(Object.values(grouped)).sort((a, b) => a.KhoiID - b.KhoiID)
+			},
+			boSungTiLe(items) {
+				return (items || []).map(item => {
+					const tong = this.toNumber(item.TongSoHocSinh);
+					const xepLoaiTot = this.toNumber(item.XepLoaiTot);
+					const xepLoaiKha = this.toNumber(item.XepLoaiKha);
+					const xepLoaiDat = this.toNumber(item.XepLoaiDat);
+					const xepLoaiChuaDat = this.toNumber(item.XepLoaiChuaDat);
+					const chuaXacDinh = this.toNumber(item.ChuaXacDinh);
+
+					return {
+						...item,
+						XepLoaiTot: xepLoaiTot,
+						XepLoaiKha: xepLoaiKha,
+						XepLoaiDat: xepLoaiDat,
+						XepLoaiChuaDat: xepLoaiChuaDat,
+						ChuaXacDinh: chuaXacDinh,
+						TiLeTot: this.chuanHoaTiLe(item.TiLeTot, xepLoaiTot, tong),
+						TiLeKha: this.chuanHoaTiLe(item.TiLeKha, xepLoaiKha, tong),
+						TiLeDat: this.chuanHoaTiLe(item.TiLeDat, xepLoaiDat, tong),
+						TiLeChuaDat: this.chuanHoaTiLe(item.TiLeChuaDat, xepLoaiChuaDat, tong),
+						TiLeChuaXacDinh: this.chuanHoaTiLe(item.TiLeChuaXacDinh, chuaXacDinh, tong)
+					};
+				});
+			},
+			toNumber(value) {
+				const n = Number(value);
+				return Number.isFinite(n) ? n : 0;
+			},
+			chuanHoaTiLe(apiValue, soLuong, tong) {
+				const apiRate = Number(apiValue);
+				if (Number.isFinite(apiRate)) return Number(apiRate.toFixed(2));
+				if (!tong) return 0;
+				return Number(((this.toNumber(soLuong) * 100) / tong).toFixed(2));
 			},
 			onExportExcel() {
 				// Import XLSX từ CDN nếu chưa có

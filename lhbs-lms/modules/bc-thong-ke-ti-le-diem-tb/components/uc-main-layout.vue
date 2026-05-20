@@ -27,7 +27,8 @@
 						<v-icon left>mdi-microsoft-excel</v-icon>
 						Xuất Excel
 					</v-btn>
-					<v-btn color="warning" variant="tonal" @click="onChotBaoCao" :disabled="BaoCaoItem && BaoCaoItem?.IsChotBaoCao">
+					<v-btn color="warning" variant="tonal" @click="onChotBaoCao"
+						:disabled="BaoCaoItem && BaoCaoItem?.IsChotBaoCao">
 						<v-icon left>mdi-lock</v-icon>
 						Chốt báo cáo
 					</v-btn>
@@ -72,6 +73,13 @@
 <script>
 	export default {
 		data() {
+			const hocKiInput = String(vueData.HocKi || '').toUpperCase();
+			const hocKiMap = {
+				HK1: "HK1",
+				HK2: "HK2",
+				CANAM: "CaNam",
+			};
+
 			return {
 				BaoCaoItem: null,
 				DataBaoCao: [],
@@ -80,12 +88,13 @@
 					{ title: "Trung học cơ sở", value: 2 },
 					{ title: "Trung học phổ thông", value: 3 },
 				],
-				CapID: 2,
+				CapID: [2, 3].includes(parseInt(vueData.CapID)) ? parseInt(vueData.CapID) : 2,
 				DSHocKi: [
 					{ title: "Học kì 1", value: "HK1" },
 					{ title: "Học kì 2", value: "HK2" },
+					{ title: "CaNam", value: "CaNam" },
 				],
-				HocKi: "HK1",
+				HocKi: hocKiMap[hocKiInput] || "HK1",
 				DSMonHoc: [],
 				DSChiTieu: [],
 				currentTab: null

@@ -1,49 +1,25 @@
 <template>
-  <Global>
-    <template #header>
+	<global>
+    <template #header="">
       <v-card>
         <v-card-title>{{ TitlePage }} • {{ TitleCap }}</v-card-title>
         <v-card-text>
           <v-row align="center">
             <v-col cols="12" sm="3">
-              <v-select
-                v-model="Semester"
-                label="Chọn học kì"
-                :items="DSSemester"
-                item-title="title"
-                item-value="value"
-              />
-            </v-col>
+              <v-select v-model="Semester" label="Chọn học kì" :items="DSSemester" item-title="title" item-value="value">
+            </v-select></v-col>
             <v-col cols="12" sm="3">
-              <v-select
-                v-model="KhoiID"
-                label="Chọn khối"
-                :items="DSKhoi"
-                item-title="TenKhoiHoc"
-                item-value="KhoiID"
-              />
-            </v-col>
+              <v-select v-model="KhoiID" label="Chọn khối" :items="DSKhoi" item-title="TenKhoiHoc" item-value="KhoiID">
+            </v-select></v-col>
             <v-col cols="12" sm="3">
-              <v-select
-                v-model="MonHocItem"
-                label="Chọn môn học"
-                :items="DSMonHoc"
-                item-title="MonHocName"
-                item-value="MonHocID"
-                return-object
-              />
-            </v-col>
+              <v-select v-model="MonHocItem" label="Chọn môn học" :items="DSMonHoc" item-title="MonHocName" item-value="MonHocID" return-object="">
+            </v-select></v-col>
             <v-col cols="12" sm="3" class="d-flex align-center ga-2 flex-wrap">
               <v-btn variant="outlined" color="primary" @click="onRefresh">
-                <v-icon start>mdi-refresh</v-icon>Làm mới
+                <v-icon start="">mdi-refresh</v-icon>Làm mới
               </v-btn>
-              <v-btn
-                variant="outlined"
-                color="primary"
-                :disabled="DSHocSinh.length === 0 && DataThongKe.length === 0"
-                @click="exportExcel"
-              >
-                <v-icon start>mdi-file-excel</v-icon>Xuất Excel (2 bảng)
+              <v-btn variant="outlined" color="primary" :disabled="DSHocSinh.length === 0 &amp;&amp; DataThongKe.length === 0" @click="exportExcel">
+                <v-icon start="">mdi-file-excel</v-icon>Xuất Excel (2 bảng)
               </v-btn>
             </v-col>
           </v-row>
@@ -56,14 +32,8 @@
         <span>Thống kê kết quả các khối</span>
       </v-card-title>
       <v-card-text>
-        <v-data-table
-          :items="DataThongKe"
-          :headers="headers"
-          items-per-page="-1"
-          hide-default-footer
-          style="max-height: calc(100dvh - 77px); overflow-y: auto;"
-        />
-      </v-card-text>
+        <v-data-table :items="DataThongKe" :headers="headers" items-per-page="-1" hide-default-footer="" style="max-height: calc(100dvh - 77px); overflow-y: auto;">
+      </v-data-table></v-card-text>
     </v-card>
 
     <v-card class="pt-0">
@@ -74,22 +44,15 @@
         <v-chip v-if="DSHocSinh.length > 0" class="ml-2" color="primary">Tổng số học sinh: {{ DSHocSinh.length }}</v-chip>
       </v-card-title>
 
-      <uc-jexcel
-        v-if="DSHocSinh.length > 0"
-        class="height-excel"
-        :key="keyComp"
-        :columns="columns"
-        :data-source="DSHocSinh"
-        :freeze-columns="freezeColumns"
-      />
-      <uc-empty v-else />
-    </v-card>
-  </Global>
+      <uc-jexcel v-if="DSHocSinh.length > 0" class="height-excel" :key="keyComp" :columns="columns" :data-source="DSHocSinh" :freeze-columns="freezeColumns">
+      <uc-empty v-else="">
+    </uc-empty></uc-jexcel></v-card>
+  </global>
 </template>
 
 <script>
-export default {
-  inject: ['snackbarRef', 'iframeRef', 'confirmRef'],
+	export default {
+		inject: ['snackbarRef', 'iframeRef', 'confirmRef'],
   data() {
     return {
       vueData,
@@ -410,5 +373,5 @@ export default {
       ]
     },
   },
-}
+	}
 </script>
