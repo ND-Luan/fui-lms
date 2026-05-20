@@ -92,7 +92,7 @@
 				DSHocKi: [
 					{ title: "Học kì 1", value: "HK1" },
 					{ title: "Học kì 2", value: "HK2" },
-					{ title: "CaNam", value: "CaNam" },
+					{ title: "Cả năm", value: "CaNam" },
 				],
 				HocKi: hocKiMap[hocKiInput] || "HK1",
 				DSMonHoc: [],
