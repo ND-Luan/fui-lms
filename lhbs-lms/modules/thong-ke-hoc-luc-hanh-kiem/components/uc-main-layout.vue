@@ -18,17 +18,21 @@
 						<v-select v-model="HocKi" label="Chọn học kì" :items="DSHocKi" item-title="title"
 							item-value="value" />
 					</v-col>
+					<v-col cols="3">
+						<v-select v-model="CapSelection" label="Chọn cấp" :items="DSCap" item-title="title"
+							item-value="value" />
+					</v-col>
 					<v-col class="d-flex ga-2">
 						<v-btn @click="onSearch" color="primary" variant="outlined" prepend-icon="mdi-magnify"
-							:disabled="HocKi === null">
+							:disabled="HocKi === null || CapSelection === null">
 							Tìm kiếm
 						</v-btn>
 						<v-btn @click="onExportExcel" color="green" variant="outlined" prepend-icon="mdi-file-excel"
-							:disabled="HocKi === null || vueData.DSHocSinh.length === 0">
+							:disabled="HocKi === null || CapSelection === null || vueData.DSHocSinh.length === 0">
 							Xuất Excel
 						</v-btn>
 						<v-btn @click="onChotBaoCao" color="amber" variant="outlined" prepend-icon="mdi-check-circle"
-							:disabled="HocKi === null || !BaoCaoItem || BaoCaoItem?.IsChotBaoCao">
+							:disabled="HocKi === null || CapSelection === null || !BaoCaoItem || BaoCaoItem?.IsChotBaoCao || isCapTongHop">
 							Chốt báo cáo
 						</v-btn>
 					</v-col>
@@ -71,6 +75,12 @@
 				}
 			]
 			const HocKi = DSHocKi.find(x => x.textValue === vueData.hk)?.value || null
+			const DSCap = [
+				{ title: "Cấp 2", value: 2, capIds: [2] },
+				{ title: "Cấp 3", value: 3, capIds: [3] },
+				{ title: "Cả 2 cấp", value: 23, capIds: [2, 3] },
+			]
+			const CapSelection = this.getInitialCapSelection(DSCap)
 	
 			return {
 				vueData,
@@ -80,11 +90,19 @@
 				ChiTieuMap: {},
 				ChiTieuNienKhoa: null,
 				DSHocKi,
-				HocKi
+				HocKi,
+				DSCap,
+				CapSelection,
 			}
 		},
-		mounted() {
-			if (!this.HocKi) return
+		computed: {
+			isCapTongHop() {
+				return this.CapSelection === 23
+			},
+		},
+		async mounted() {
+			await this.ensureNienKhoaContext()
+			if (this.HocKi === null || this.CapSelection === null) return
 			this.onSearch()
 		},
 		watch: {
@@ -93,12 +111,175 @@
 	
 				this.onSearch()
 			},
+			CapSelection: function (CapSelection) {
+				if (CapSelection === null) return
+
+				this.onSearch()
+			},
 			tab: function (tab) {
 				if (tab === null) return
 				this.onSearch()
 			}
 		},
 		methods: {
+			isTongKetCapLabel(label) {
+				const normalized = String(label ?? '').trim().toUpperCase()
+				return normalized === 'THCS' || normalized === 'THPT' || normalized === 'THCS & THPT'
+			},
+			buildTongKetHaiCapRow(data = []) {
+				if (!this.isCapTongHop || !Array.isArray(data) || data.length === 0) return null
+
+				const thcsRow = data.find(x => String(x?.['Lớp'] ?? '').trim().toUpperCase() === 'THCS')
+				const thptRow = data.find(x => String(x?.['Lớp'] ?? '').trim().toUpperCase() === 'THPT')
+				if (!thcsRow || !thptRow) return null
+
+				const denominatorKey = 'Sỉ số' in thcsRow || 'Sỉ số' in thptRow ? 'Sỉ số' : 'Tổng số'
+				const weightTHCS = this.toNumber(thcsRow?.[denominatorKey]) ?? 0
+				const weightTHPT = this.toNumber(thptRow?.[denominatorKey]) ?? 0
+				const totalWeight = weightTHCS + weightTHPT
+
+				const result = {}
+				const keys = new Set([...Object.keys(thcsRow), ...Object.keys(thptRow)])
+				for (const key of keys) {
+					if (key === 'Lớp') {
+						result[key] = 'THCS & THPT'
+						continue
+					}
+					if (key === 'STT') {
+						result[key] = ''
+						continue
+					}
+
+					const valueTHCS = this.toNumber(thcsRow?.[key])
+					const valueTHPT = this.toNumber(thptRow?.[key])
+					const isNumeric = valueTHCS !== null || valueTHPT !== null
+					if (!isNumeric) {
+						result[key] = ''
+						continue
+					}
+
+					const isPercentLike = key.includes('%') || key.includes('Tăng/Giảm')
+					if (isPercentLike) {
+						if (totalWeight > 0 && valueTHCS !== null && valueTHPT !== null) {
+							result[key] = this.formatPercent(((valueTHCS * weightTHCS) + (valueTHPT * weightTHPT)) / totalWeight)
+						} else if (valueTHCS !== null && valueTHPT !== null) {
+							result[key] = this.formatPercent((valueTHCS + valueTHPT) / 2)
+						} else {
+							result[key] = this.formatPercent(valueTHCS ?? valueTHPT)
+						}
+						continue
+					}
+
+					const sumValue = (valueTHCS ?? 0) + (valueTHPT ?? 0)
+					result[key] = Number.isInteger(sumValue) ? sumValue : Math.round(sumValue * 100) / 100
+				}
+
+				return result
+			},
+			appendTongKetHaiCapRow(data = []) {
+				if (!Array.isArray(data) || data.length === 0) return data
+				if (!this.isCapTongHop) return data
+
+				const filteredData = data.filter(x => String(x?.['Lớp'] ?? '').trim().toUpperCase() !== 'THCS & THPT')
+				const tongKetHaiCap = this.buildTongKetHaiCapRow(filteredData)
+				if (!tongKetHaiCap) return filteredData
+
+				return [...filteredData, tongKetHaiCap]
+			},
+			buildTongKetStyleSheet(data = [], headerDefault = []) {
+				const styleSheet = {}
+				for (let y = 0; y < data.length; y++) {
+					const isSummaryRow = this.isTongKetCapLabel(data[y]?.['Lớp'])
+					if (!isSummaryRow) continue
+
+					for (let x = 0; x < headerDefault.length; x++) {
+						const cellAddress = jspreadsheet.helpers.getCellNameFromCoords(x, y)
+						styleSheet[cellAddress] = 'background-color: #E3F2FD; color: #0D47A1; font-weight: 700;'
+					}
+				}
+				return styleSheet
+			},
+			async ensureNienKhoaContext() {
+				if (Number(vueData.NienKhoa)) return
+
+				const dsNienKhoa = await fetchPromise('lms/NienKhoa_Get', {})
+				const nienKhoaItem = (dsNienKhoa ?? []).find(x => x.IsActive) ?? (dsNienKhoa ?? [])[0] ?? null
+				if (!nienKhoaItem?.NienKhoa) return
+
+				vueData.NienKhoa = Number(nienKhoaItem.NienKhoa)
+				if (!vueData.NienKhoaItem) {
+					vueData.NienKhoaItem = nienKhoaItem
+				}
+			},
+			getInitialCapSelection(DSCap) {
+				const searchParams = new URLSearchParams(window.location.search)
+				const capIDFromUrl = parseInt(searchParams.get('capid') ?? searchParams.get('CapID'))
+
+				if (capIDFromUrl === 2 || capIDFromUrl === 3) {
+					return capIDFromUrl
+				}
+
+				const capIDFromVueData = parseInt(vueData.CapID)
+				if (capIDFromVueData === 2 || capIDFromVueData === 3) {
+					return capIDFromVueData
+				}
+
+				return DSCap.find(x => x.value === 23)?.value ?? 23
+			},
+			getSelectedCapIds() {
+				const option = this.DSCap.find(x => x.value === this.CapSelection)
+				return option?.capIds ?? []
+			},
+			getBaoCaoIdByTabAndCap(capID) {
+				if (this.tab === 0) return capID === 2 ? 20 : 23
+				if (this.tab === 1) return capID === 2 ? 21 : 24
+				if (this.tab === 2) return capID === 2 ? 22 : 25
+				return null
+			},
+			async loadBaoCaoByCap({ capID, endpoint, typeBaoCao }) {
+				const BaoCaoID = this.getBaoCaoIdByTabAndCap(capID)
+				if (!BaoCaoID) return { data: [], baoCaoItem: null }
+
+				const valueHK = this.DSHocKi.find(x => x.value === this.HocKi)
+				const dataLMS = await ajaxCALLPromise("lms/BaoCao_TongHop_Get_BaoCaoID_HocKi_CapID", {
+					BaoCaoID,
+					HocKi: valueHK.textValue,
+					CapID: capID,
+					NienKhoa: vueData.NienKhoa
+				})
+
+				const baoCaoItem = dataLMS?.[1]?.[0] ?? null
+				if (baoCaoItem?.IsChotBaoCao) {
+					return {
+						data: JSON.parse(baoCaoItem.JSON_BaoCao ?? '[]'),
+						baoCaoItem,
+					}
+				}
+
+				const data = await ajaxCALLPromise(endpoint.replace('{capID}', capID), {
+					HocKy: this.HocKi,
+					NamHoc: vueData.NienKhoa,
+					TypeBaoCao: typeBaoCao
+				})
+
+				return {
+					data: data ?? [],
+					baoCaoItem,
+				}
+			},
+			async loadBySelectedCaps({ endpoint, typeBaoCao }) {
+				const capIds = this.getSelectedCapIds()
+				if (!capIds.length) return []
+
+				const results = await Promise.all(
+					capIds.map(capID => this.loadBaoCaoByCap({ capID, endpoint, typeBaoCao }))
+				)
+
+				this.BaoCaoItem = results.length === 1 ? (results[0].baoCaoItem ?? null) : null
+				const data = results.flatMap(x => x.data ?? [])
+				this.DataChotBaoCao = data
+				return data
+			},
 			getTextLength(value) {
 				if (value === null || value === undefined) return 0
 				return String(value).trim().length
@@ -125,18 +306,31 @@
 			},
 			async onSearch() {
 				vueData.DSHocSinh = []
-				if (this.HocKi === null) return
+				vueData.styleSheet = {}
+				this.BaoCaoItem = null
+				this.DataChotBaoCao = []
+				await this.ensureNienKhoaContext()
+				if (!Number(vueData.NienKhoa)) return
+				if (this.HocKi === null || this.CapSelection === null) return
 				let data
 	
 				if (this.tab === 0) data = await this.onLoadTatCaKhoi()
 				else if (this.tab === 1) data = await this.onLoad_2_Mat_GD()
 				else if (this.tab === 2) data = await this.onLoadDanToc()
+				data = this.appendTongKetHaiCapRow(data)
+
+				if (!Array.isArray(data) || data.length === 0) {
+					vueData.columnHeader = []
+					vueData.keyComp++
+					return
+				}
 
 				data = await this.enrichDataWithChiTieu(data)
 				this.DataChotBaoCao = data
 	
 				let headerDefault = Object.keys(data[0])
 				const { uiWidthByHeader } = this.buildColumnWidths(data, headerDefault)
+				vueData.styleSheet = this.buildTongKetStyleSheet(data, headerDefault)
 				let columnThongTinHocSinh = []
 				for (var key of headerDefault) {
 					let column = {
@@ -261,7 +455,7 @@
 					const lop = item['Lớp']
 					const khoiID = this.getKhoiIDFromLabel(lop)
 					const targetByKhoi = khoiID ? (this.ChiTieuMap[khoiID] ?? {}) : null
-					const isTongHopCap = !khoiID && ['THCS', 'THPT'].includes(String(lop ?? '').trim().toUpperCase())
+					const isTongHopCap = !khoiID && this.isTongKetCapLabel(lop)
 
 					const targetKQHTTot = targetByKhoi?.['Chỉ tiêu % KQHT Tốt'] ?? (isTongHopCap ? weightedKQHTTot : null)
 					const targetKQHTKha = targetByKhoi?.['Chỉ tiêu % KQHT Khá'] ?? (isTongHopCap ? weightedKQHTKha : null)
@@ -302,79 +496,22 @@
 				})
 			},
 			async onLoadTatCaKhoi() {
-				let data
-				let BaoCaoID
-				if (vueData.CapID === 2) BaoCaoID = 20
-				else if (vueData.CapID === 3) BaoCaoID = 23
-				const valueHK = this.DSHocKi.find(x => x.value === this.HocKi)
-				const dataLMS = await ajaxCALLPromise("lms/BaoCao_TongHop_Get_BaoCaoID_HocKi_CapID", {
-					BaoCaoID,
-					HocKi: valueHK.textValue,
-					CapID: vueData.CapID,
-					NienKhoa: vueData.NienKhoa
+				return this.loadBySelectedCaps({
+					endpoint: 'diemc{capID}/LMS_ThongKeChung',
+					typeBaoCao: 2,
 				})
-				this.BaoCaoItem = dataLMS[1][0]
-				if (this.BaoCaoItem.IsChotBaoCao) {
-					data = JSON.parse(this.BaoCaoItem.JSON_BaoCao)
-				} else {
-					data = await ajaxCALLPromise(`diemc${vueData.CapID}/LMS_ThongKeChung`, {
-						HocKy: this.HocKi,
-						NamHoc: vueData.NienKhoa,
-						TypeBaoCao: 2
-					})
-					this.DataChotBaoCao = data
-				}
-				return data
 			},
 			async onLoad_2_Mat_GD() {
-				let data
-				let BaoCaoID
-				if (vueData.CapID === 2) BaoCaoID = 21
-				else if (vueData.CapID === 3) BaoCaoID = 24
-				const valueHK = this.DSHocKi.find(x => x.value === this.HocKi)
-				const dataLMS = await ajaxCALLPromise("lms/BaoCao_TongHop_Get_BaoCaoID_HocKi_CapID", {
-					BaoCaoID,
-					HocKi: valueHK.textValue,
-					CapID: vueData.CapID,
-					NienKhoa: vueData.NienKhoa
+				return this.loadBySelectedCaps({
+					endpoint: 'diemc{capID}/LMS_ThongKeChung_TheoKhoi',
+					typeBaoCao: 1,
 				})
-				this.BaoCaoItem = dataLMS[1][0]
-				if (this.BaoCaoItem.IsChotBaoCao) {
-					data = JSON.parse(this.BaoCaoItem.JSON_BaoCao)
-				} else {
-					data = await ajaxCALLPromise(`diemc${vueData.CapID}/LMS_ThongKeChung_TheoKhoi`, {
-						HocKy: this.HocKi,
-						NamHoc: vueData.NienKhoa,
-						TypeBaoCao: 1
-					})
-					this.DataChotBaoCao = data
-				}
-				return data
 			},
 			async onLoadDanToc() {
-				let data
-				let BaoCaoID
-				if (vueData.CapID === 2) BaoCaoID = 22
-				else if (vueData.CapID === 3) BaoCaoID = 25
-				const valueHK = this.DSHocKi.find(x => x.value === this.HocKi)
-				const dataLMS = await ajaxCALLPromise("lms/BaoCao_TongHop_Get_BaoCaoID_HocKi_CapID", {
-					BaoCaoID,
-					HocKi: valueHK.textValue,
-					CapID: vueData.CapID,
-					NienKhoa: vueData.NienKhoa
+				return this.loadBySelectedCaps({
+					endpoint: 'diemc{capID}/LMS_ThongKeChung_TheoKhoi',
+					typeBaoCao: 2,
 				})
-				this.BaoCaoItem = dataLMS[1][0]
-				if (this.BaoCaoItem.IsChotBaoCao) {
-					data = JSON.parse(this.BaoCaoItem.JSON_BaoCao)
-				} else {
-					data = await ajaxCALLPromise(`diemc${vueData.CapID}/LMS_ThongKeChung_TheoKhoi`, {
-						HocKy: this.HocKi,
-						NamHoc: vueData.NienKhoa,
-						TypeBaoCao: 2
-					})
-					this.DataChotBaoCao = data
-				}
-				return data
 			},
 			async onExportExcel() {
 				if (vueData.DSHocSinh.length === 0) {
@@ -386,6 +523,7 @@
 					// Lấy tên học kỳ
 					const hocKyInfo = this.DSHocKi.find(x => x.value === this.HocKi);
 					const tenHocKy = hocKyInfo ? hocKyInfo.title : "";
+					const capInfo = this.DSCap.find(x => x.value === this.CapSelection);
 	
 					// Lấy tên tab
 					let tenTab = "";
@@ -394,7 +532,7 @@
 					else if (this.tab === 2) tenTab = "Dan_Toc";
 	
 					// Tạo tên file
-					const fileName = `Thong_Ke_Hoc_Tap_${tenTab}_${hocKyInfo.textValue}_${vueData.NienKhoa}.xlsx`;
+					const fileName = `Thong_Ke_Hoc_Tap_${tenTab}_${hocKyInfo.textValue}_${capInfo?.value ?? 'all'}_${vueData.NienKhoa}.xlsx`;
 	
 					// Chuẩn bị dữ liệu
 					const dataExport = vueData.DSHocSinh.map(item => {

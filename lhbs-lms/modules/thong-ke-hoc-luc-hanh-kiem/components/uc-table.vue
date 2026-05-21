@@ -1,12 +1,13 @@
 <template>
-    <uc-jexcel class="height-excel" v-if="vueData.DSHocSinh?.length > 0" v-model="vueData.instance"
+	<uc-jexcel   v-if="vueData.DSHocSinh?.length > 0" v-model="vueData.instance"
 		:freeze-columns="vueData.freezeColumns" v-model:dataSource="vueData.DSHocSinh" :columns="vueData.columnHeader"
-		 :key="vueData.keyComp" :filters="true" :exportExcel="true">
+		:key="vueData.keyComp" :filters="true" :exportExcel="true" :styleSheet="vueData.styleSheet">
 	</uc-jexcel>
 </template>
+
 <script>
-    export default{
-        data(){
+	export default {
+		data(){
             return{
                 vueData
             }
@@ -18,5 +19,5 @@
                 vueData.instance.helpers.download()
             }
         }
-    }
+	}
 </script>

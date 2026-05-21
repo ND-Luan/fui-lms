@@ -1,5 +1,5 @@
 <template>
-  <Global>
+	<Global>
     <template #header>
       <v-card>
         <v-card-title>{{ TitlePage }} • {{ TitleCap }}</v-card-title>
@@ -199,6 +199,9 @@
                     @click="toggleDraftColumn(subject.subjectId, group.groupKey, column.key)"
                   >
                     {{ column.title }}
+                    <v-tooltip v-if="!isColumnHasScore(column.key)" activator="parent" location="top">
+                      Không có điểm
+                    </v-tooltip>
                   </v-chip>
                 </div>
               </div>
@@ -211,8 +214,8 @@
 </template>
 
 <script>
-export default {
-  inject: ['snackbarRef', 'iframeRef', 'confirmRef'],
+	export default {
+		inject: ['snackbarRef', 'iframeRef', 'confirmRef'],
   data() {
     return {
       vueData,
@@ -251,6 +254,7 @@ export default {
       FilterPreset: 'all',
       columnHeader: [],
       nestedHeaders: [[{ title: '', colspan: 3 }]],
+      ColumnHasScoreMap: {},
     }
   },
   computed: {
@@ -404,6 +408,7 @@ export default {
       this.DraftColumnOptions = []
       this.columnHeader = []
       this.nestedHeaders = [[{ title: '', colspan: 3 }]]
+      this.ColumnHasScoreMap = {}
       this.keyComp += 1
     },
     async getKhoi() {
@@ -556,7 +561,33 @@ export default {
 
       this.ScoreColumnMeta = scoreColumns
       this.RawRows = Array.from(studentMap.values())
+      this.ColumnHasScoreMap = this.buildColumnHasScoreMap(scoreColumns, this.RawRows)
       this.initColumnFilters()
+    },
+    buildColumnHasScoreMap(scoreColumns, rows) {
+      const result = {}
+      scoreColumns.forEach((item) => {
+        result[item.key] = false
+      })
+
+      for (const row of rows) {
+        for (const item of scoreColumns) {
+          if (result[item.key]) continue
+          if (this.hasScoreValue(row[item.key])) {
+            result[item.key] = true
+          }
+        }
+      }
+
+      return result
+    },
+    hasScoreValue(value) {
+      if (value === null || value === undefined) return false
+      if (typeof value === 'string' && value.trim() === '') return false
+      return true
+    },
+    isColumnHasScore(columnKey) {
+      return !!this.ColumnHasScoreMap[columnKey]
     },
     normalizeScoreValue(item) {
       if (item.GiaTriCotDiem === 'number') {
@@ -583,7 +614,9 @@ export default {
       this.SelectedGroupKeys = this.GroupOptions.map((item) => item.value)
       this.SelectedSemesterKeys = this.SemesterOptions.map((item) => item.value)
       this.syncColumnOptions()
-      this.SelectedColumnKeys = this.ColumnOptions.map((item) => item.value)
+      this.SelectedColumnKeys = this.ColumnOptions
+        .map((item) => item.value)
+        .filter((key) => this.isColumnHasScore(key))
       this.FilterPreset = 'all'
       this.applyColumnFilter()
     },
@@ -689,9 +722,9 @@ export default {
       this.DraftSelectedSubjectFilterIDs = [...this.SelectedSubjectFilterIDs]
       this.DraftSelectedSemesterKeys = [...this.SelectedSemesterKeys]
       this.syncDraftColumnOptions()
-      this.DraftSelectedColumnKeys = this.SelectedColumnKeys.filter((key) =>
-        this.DraftColumnOptions.some((item) => item.value === key)
-      )
+      this.DraftSelectedColumnKeys = this.DraftColumnOptions
+        .map((item) => item.value)
+        .filter((key) => this.isColumnHasScore(key))
       this.isShowFilterDialog = true
     },
     onApplyAdvancedFilter() {
@@ -731,7 +764,9 @@ export default {
         this.DraftSelectedSubjectFilterIDs = [...this.DraftSelectedSubjectFilterIDs, subjectId]
         const groupToAdd = subject.groups.map((group) => group.groupKey)
         this.DraftSelectedGroupKeys = [...new Set([...this.DraftSelectedGroupKeys, ...groupToAdd])]
-        const columnToAdd = subject.groups.flatMap((group) => group.columns.map((column) => column.key))
+        const columnToAdd = subject.groups
+          .flatMap((group) => group.columns.map((column) => column.key))
+          .filter((key) => this.isColumnHasScore(key))
         this.DraftSelectedColumnKeys = [...new Set([...this.DraftSelectedColumnKeys, ...columnToAdd])]
       }
 
@@ -753,7 +788,7 @@ export default {
           this.DraftSelectedSubjectFilterIDs = [...this.DraftSelectedSubjectFilterIDs, subjectId]
         }
         this.DraftSelectedGroupKeys = [...new Set([...this.DraftSelectedGroupKeys, groupKey])]
-        const columnToAdd = group.columns.map((column) => column.key)
+        const columnToAdd = group.columns.map((column) => column.key).filter((key) => this.isColumnHasScore(key))
         this.DraftSelectedColumnKeys = [...new Set([...this.DraftSelectedColumnKeys, ...columnToAdd])]
       }
 
@@ -1054,5 +1089,5 @@ export default {
       XLSX.writeFile(workbook, `TongBangDiemQuaTrinh_${lopName}_${monName}.xlsx`)
     },
   },
-}
+	}
 </script>

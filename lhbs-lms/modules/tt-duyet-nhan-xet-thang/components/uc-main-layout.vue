@@ -1,319 +1,329 @@
 <template>
-  <Global>
-    <template #header>
-      <v-card>
-        <v-card-title>
-          {{ TitlePage }} • {{ TitleCap }}
-          <v-chip color="primary" variant="text" class="font-weight-medium ml-2">
-            Tổng số học sinh: {{ items.length }}
-          </v-chip>
-          <v-chip v-if="ThangObj" size="small" :color="ThangObj.MauTinhTrang || 'default'" variant="tonal" class="mt-1">
-            {{ ThangObj.TenTinhTrang }}
-          </v-chip>
-          <v-spacer />
-          <v-btn v-if="vueData.user?.UserID === 'NA0000022' && ThangObj" color="primary" variant="outlined"
-            @click="isOpenReport = true">
-            Xem báo cáo nhận xét tháng {{ ThangObj.Thang }}
-          </v-btn>
-        </v-card-title>
-
-        <v-card-text>
-          <v-row align="center">
-            <v-col cols="12" sm="4" md="3">
-              <v-select v-model="LopID" label="Chọn lớp" :items="DSLop" item-title="TenLop" item-value="LopID" />
-            </v-col>
-
-            <v-col cols="12" sm="4" md="3">
-              <v-select v-model="ThangObj" label="Chọn tháng" :items="DSThang" item-title="Thang_HienThi"
-                item-value="Lop_NhanXetThangID" return-object>
-                <template #item="{ props, item }">
-                  <uc-item-thang v-bind="props" :item="item" />
-                </template>
-              </v-select>
-            </v-col>
-
-            <v-col cols="12" sm="4" md="3" class="d-flex align-center ga-2 flex-wrap">
-              <v-btn color="primary" variant="outlined" prepend-icon="mdi-refresh" @click="onRefresh">
-                Làm mới
-              </v-btn>
-            </v-col>
-
-            <v-col cols="12" class="d-flex justify-space-between align-center flex-wrap ga-2">
-              <div class="d-flex flex-column ga-1">
-                <div v-if="ThangObj?.ReasonReject && ThangObj?.TinhTrang === 3">
-                  Lý do từ chối: <span class="text-red">{{ ThangObj?.ReasonReject }}</span>
-                </div>
-              </div>
-
-              <div class="d-flex ga-2 flex-wrap">
-                <v-btn v-if="ThangObj?.TinhTrang === 2" :disabled="items.length === 0" color="error" variant="outlined"
-                  @click="IsShowDialogReject = true">
-                  Từ chối
-                </v-btn>
-
-                <v-btn v-if="ThangObj?.TinhTrang === 2" :disabled="items.length === 0" color="primary"
-                  variant="outlined" @click="onApprove">
-                  Duyệt
-                </v-btn>
-
-                <v-btn v-if="ThangObj?.TinhTrang === 2" :disabled="items.length === 0" color="primary"
-                  variant="outlined" @click="onOpenApproveAll">
-                  Duyệt tất cả lớp
-                </v-btn>
-              </div>
-            </v-col>
-          </v-row>
-        </v-card-text>
-      </v-card>
-    </template>
-
-    <v-divider />
-
-    <div style="overflow-x: auto;">
-      <GlobalDataTable :headers="headers" :items="items" items-per-page="-1" hide-default-footer hover
-        :auto-table-height="{ offset: 8 }" style="min-width: 1200px;">
-        <template #item.hocSinh="{ item }">
-          <uc-info-student :item="item" />
-        </template>
-
-        <template #item.gvcn_extra="{ item }">
-          <div class="d-flex ga-2 flex-column pa-2">
-            <v-select v-model="item.PhoiHopCMHS" label="Phối hợp CMHS" :items="['Tốt', 'Đạt', 'Không đạt']"
-              placeholder="Chọn" />
-
-            <template v-if="!isKhoiCanLoai">
-              <v-select v-model="item.PhanLoai_TuyenThang" :items="['Tuyển thẳng', 'Tuyển thẳng có cam kết']"
-                label="Phân loại tuyển thẳng" />
-              <v-text-field v-model="item.Flyers" label="Flyers" />
-              <v-text-field v-model="item.DiemTA" label="Điểm Tiếng Anh" />
-              <v-checkbox v-model="item.DKHocTiep" label="Đăng ký học tiếp" />
-              <v-textarea v-model="item.DeXuat_NDCamKet" label="Đề xuất / ND cam kết" :hide-details="false" />
-            </template>
-          </div>
-        </template>
-
-        <template #item.NhanXetGVCN_VePhuHuynh_HTML="{ item }">
-          <div style="padding: 10px; max-width: 340px;">
-            <uc-quill-editor :key="'NhanXetGVCN_VePhuHuynh_HTML' + item.HocSinhID"
-              v-model="item.NhanXetGVCN_VePhuHuynh_HTML" :spellcheck="false" style="height: 110px;" />
-          </div>
-        </template>
-
-        <template #item.NhanXetGVCN_VeHocSinh_HTML="{ item }">
-          <div style="padding: 10px; max-width: 340px;">
-            <uc-quill-editor :key="'NhanXetGVCN_VeHocSinh_HTML' + item.HocSinhID"
-              v-model="item.NhanXetGVCN_VeHocSinh_HTML" :spellcheck="false" style="height: 110px;" />
-          </div>
-        </template>
-
-        <template #item.NhanXetToan_HTML="{ item }">
-          <div style="padding: 10px; max-width: 340px;">
-            <uc-quill-editor :key="'NhanXetToan_HTML' + item.HocSinhID" v-model="item.NhanXetToan_HTML"
-              :spellcheck="false" :readOnly="true" style="height: 110px;" />
-            <v-text-field class="mt-2" v-model="item.DiemToan" placeholder="Nhập điểm..."
-              messages="*Lưu ý: Thang điểm 10" variant="filled" :clearable="false" suffix="Điểm" reverse solo />
-          </div>
-        </template>
-
-        <template #item.NhanXetTiengViet_HTML="{ item }">
-          <div style="padding: 10px; max-width: 340px;">
-            <uc-quill-editor :key="'NhanXetTiengViet_HTML' + item.HocSinhID" v-model="item.NhanXetTiengViet_HTML"
-              :spellcheck="false" :readOnly="true" style="height: 110px;" />
-            <v-text-field class="mt-2" v-model="item.DiemTiengViet" placeholder="Nhập điểm..."
-              messages="*Lưu ý: Thang điểm 10" variant="filled" :clearable="false" suffix="Điểm" reverse solo />
-          </div>
-        </template>
-
-        <template #item.NhanXetMonHocKhac_HTML="{ item }">
-          <div style="padding: 10px; max-width: 340px;">
-            <uc-quill-editor :key="'NhanXetMonHocKhac_HTML' + item.HocSinhID" v-model="item.NhanXetMonHocKhac_HTML"
-              :spellcheck="false" :readOnly="true" style="height: 110px;" />
-          </div>
-        </template>
-
-        <template #item.HoatDongGiaoDucKhac_HTML="{ item }">
-          <div style="padding: 10px; max-width: 340px;">
-            <uc-quill-editor :key="'HoatDongGiaoDucKhac_HTML' + item.HocSinhID" v-model="item.HoatDongGiaoDucKhac_HTML"
-              :spellcheck="false" :readOnly="true" style="height: 110px;" />
-          </div>
-        </template>
-
-        <template #item.PhamChatNangLuc_HTML="{ item }">
-          <div style="padding: 10px; max-width: 340px;">
-            <uc-quill-editor :key="'PhamChatNangLuc_HTML' + item.HocSinhID" v-model="item.PhamChatNangLuc_HTML"
-              :spellcheck="false" :readOnly="true" style="height: 110px;" />
-          </div>
-        </template>
-
-        <template #item.NhanXetCap1Mobile="{ item }">
-          <div style="padding: 10px; max-width: 100%;" class="d-flex flex-column ga-2">
-            <div>
-              <b class="text-left">Nhận xét môn Toán</b>
-              <div class="compact-comment" v-html="formatComment(item.NhanXetToan_HTML)"></div>
-              <div class="mt-1 text-body-2">Điểm Toán: {{ item.DiemToan ?? '-' }}</div>
-            </div>
-
-            <div>
-              <b class="text-left">Nhận xét môn Tiếng Việt</b>
-              <div class="compact-comment" v-html="formatComment(item.NhanXetTiengViet_HTML)"></div>
-              <div class="mt-1 text-body-2">Điểm Tiếng Việt: {{ item.DiemTiengViet ?? '-' }}</div>
-            </div>
-
-            <div>
-              <b class="text-left">Nhận xét môn học khác</b>
-              <div class="compact-comment" v-html="formatComment(item.NhanXetMonHocKhac_HTML)"></div>
-            </div>
-
-            <div>
-              <b class="text-left">Hoạt động giáo dục khác</b>
-              <div class="compact-comment" v-html="formatComment(item.HoatDongGiaoDucKhac_HTML)"></div>
-            </div>
-
-            <div>
-              <b class="text-left">Phẩm chất - Năng lực</b>
-              <div class="compact-comment" v-html="formatComment(item.PhamChatNangLuc_HTML)"></div>
-            </div>
-          </div>
-        </template>
-
-        <template #item.NgayNghi="{ item }">
-          <div class="d-flex ga-2 flex-column" style="padding: 8px; min-width: 220px;">
-            <div class="d-flex justify-space-between">
-              <p v-if="item.NgayNghi?.TongSoTiet > 0" class="text-left font-weight-medium">
-                Tổng số tiết: {{ item.NgayNghi?.TongSoTiet }}
-              </p>
-              <v-btn v-if="item.NgayNghi?.TongSoTiet > 0" icon="mdi-eye" size="small" variant="text" color="primary"
-                :title="'Xem báo nghỉ chi tiết học sinh - ' + item.HoTen"
-                :href="'/gv-xem-vang-tre-nghi-phep?hocsinhid=' + item.HocSinhID + '&lopid=' + item.LopID + '&ngaybatdau=' + item.firstDay + '&ngayketthuc=' + item.lastDay"
-                target="_blank" />
-            </div>
-
-            <v-chip v-for="mon in item.NgayNghi?.MonVang" :key="mon.TenMonHoc" color="orange" size="small"
-              style="width: fit-content;">
-              {{ mon.TenMonHoc }}
-            </v-chip>
-
-            <div v-if="item.LoaiViPham_Group?.length > 0">
-              <v-divider class="mt-2" />
-              <p class="text-left font-weight-medium">Loại vi phạm</p>
-              <div v-for="lvp in item.LoaiViPham_Group" :key="lvp.LoaiViPham">
-                <div class="text-left text-body-2">• {{ lvp.TenViPham }}</div>
-                <div v-for="ngayVP in lvp.Ngay" :key="ngayVP.Ngay" class="text-body-2 text-left">
-                  <p>Ngày: {{ ngayVP.Ngay }}</p>
-                  <div v-for="ngay in ngayVP.DSNgay" :key="ngay.Buoi" class="ml-2">
-                    <p>{{ ngay.Buoi }}</p>
-                    <v-chip v-for="buoi in ngay.DS" :key="buoi.Tiet + '_' + buoi.TenMonHoc" class="mt-1" size="small"
-                      color="orange">
-                      Tiết: {{ buoi.Tiet }} - {{ buoi.TenMonHoc }}
+	<Global>
+        <template #header>
+            <v-card>
+                <v-card-title>
+                    {{ TitlePage }} • {{ TitleCap }}
+                    <v-chip color="primary" variant="text" class="font-weight-medium ml-2">
+                        Tổng số học sinh: {{ items.length }}
                     </v-chip>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
+                    <v-chip v-if="ThangObj" size="small" :color="ThangObj.MauTinhTrang || 'default'" variant="tonal"
+                        class="mt-1">
+                        {{ ThangObj.TenTinhTrang }}
+                    </v-chip>
+                    <v-spacer />
+                    <v-btn v-if="vueData.user?.UserID === 'NA0000022' && ThangObj" color="primary" variant="outlined"
+                        @click="isOpenReport = true">
+                        Xem báo cáo nhận xét tháng {{ ThangObj.Thang }}
+                    </v-btn>
+                </v-card-title>
+
+                <v-card-text>
+                    <v-row align="center">
+                        <v-col cols="12" sm="4" md="3">
+                            <v-select v-model="LopID" label="Chọn lớp" :items="DSLop" item-title="TenLop"
+                                item-value="LopID" />
+                        </v-col>
+
+                        <v-col cols="12" sm="4" md="3">
+                            <v-select v-model="ThangObj" label="Chọn tháng" :items="DSThang" item-title="Thang_HienThi"
+                                item-value="Lop_NhanXetThangID" return-object>
+                                <template #item="{ props, item }">
+                                    <uc-item-thang v-bind="props" :item="item" />
+                                </template>
+                            </v-select>
+                        </v-col>
+
+                        <v-col cols="12" sm="4" md="3" class="d-flex align-center ga-2 flex-wrap">
+                            <v-btn color="primary" variant="outlined" prepend-icon="mdi-refresh" @click="onRefresh">
+                                Làm mới
+                            </v-btn>
+                        </v-col>
+
+                        <v-col cols="12" class="d-flex justify-space-between align-center flex-wrap ga-2">
+                            <div class="d-flex flex-column ga-1">
+                                <div v-if="ThangObj?.ReasonReject && ThangObj?.TinhTrang === 3">
+                                    Lý do từ chối: <span class="text-red">{{ ThangObj?.ReasonReject }}</span>
+                                </div>
+                            </div>
+
+                            <div class="d-flex ga-2 flex-wrap">
+                                <v-btn v-if="ThangObj?.TinhTrang === 2" :disabled="items.length === 0" color="error"
+                                    variant="outlined" @click="IsShowDialogReject = true">
+                                    Từ chối
+                                </v-btn>
+
+                                <v-btn v-if="ThangObj?.TinhTrang === 2" :disabled="items.length === 0" color="primary"
+                                    variant="outlined" @click="onApprove">
+                                    Duyệt
+                                </v-btn>
+
+                                <v-btn v-if="ThangObj?.TinhTrang === 2" :disabled="items.length === 0" color="primary"
+                                    variant="outlined" @click="onOpenApproveAll">
+                                    Duyệt tất cả lớp
+                                </v-btn>
+                            </div>
+                        </v-col>
+                    </v-row>
+                </v-card-text>
+            </v-card>
         </template>
 
-        <template #item.UuDiem="{ item }">
-          <div style="padding: 10px; max-width: 360px;">
-            <div class="compact-comment" v-html="formatComment(item.UuDiem)"></div>
-          </div>
-        </template>
+        <v-divider />
 
-        <template #item.NhuocDiem="{ item }">
-          <div style="padding: 10px; max-width: 360px;">
-            <div class="compact-comment" v-html="formatComment(item.NhuocDiem)"></div>
-          </div>
-        </template>
+        <div style="overflow-x: auto;">
+            <v-data-table :key="keyTable" :headers="headers" :items="items" items-per-page="-1" hide-default-footer
+                hover style="height: calc(100dvh - 119px); overflow-y: auto; min-width: 1200px;">
+                <template #item.hocSinh="{ item }">
+                    <uc-info-student :item="item" />
+                </template>
 
-        <template #item.DeXuat="{ item }">
-          <div style="padding: 10px; max-width: 360px;">
-            <div class="compact-comment" v-html="formatComment(item.DeXuat)"></div>
-          </div>
-        </template>
+                <template #item.gvcn_extra="{ item }">
+                    <div class="d-flex ga-2 flex-column pa-2">
+                        <v-select v-model="item.PhoiHopCMHS" label="Phối hợp CMHS" :items="['Tốt', 'Đạt', 'Không đạt']"
+                            placeholder="Chọn" />
 
-        <template #item.NhanXetGVCN="{ item }">
-          <div style="padding: 10px; max-width: 360px;">
-            <div class="compact-comment" v-html="formatComment(item.NhanXetGVCN)"></div>
-          </div>
-        </template>
+                        <template v-if="!isKhoiCanLoai">
+                            <v-select v-model="item.PhanLoai_TuyenThang"
+                                :items="['Tuyển thẳng', 'Tuyển thẳng có cam kết']" label="Phân loại tuyển thẳng" />
+                            <v-text-field v-model="item.Flyers" label="Flyers" />
+                            <v-text-field v-model="item.DiemTA" label="Điểm Tiếng Anh" />
+                            <v-checkbox v-model="item.DKHocTiep" label="Đăng ký học tiếp" />
+                            <v-textarea v-model="item.DeXuat_NDCamKet" label="Đề xuất / ND cam kết"
+                                :hide-details="false" />
+                        </template>
+                    </div>
+                </template>
 
-        <template #item.NoiDungKienThuc_HTML="{ item }">
-          <div style="padding: 10px; max-width: 360px;">
-            <div class="compact-comment" v-html="formatComment(item.NoiDungKienThuc_HTML)"></div>
-          </div>
-        </template>
+                <template #item.NhanXetGVCN_VePhuHuynh_HTML="{ item }">
+                    <div style="padding: 10px; max-width: 340px;">
+                        <uc-quill-editor :key="'NhanXetGVCN_VePhuHuynh_HTML' + item.HocSinhID"
+                            v-model="item.NhanXetGVCN_VePhuHuynh_HTML" :spellcheck="false" style="height: 110px;" />
+                    </div>
+                </template>
 
-        <template #item.NoiDungNangLuc_HTML="{ item }">
-          <div style="padding: 10px; max-width: 360px;">
-            <div class="compact-comment" v-html="formatComment(item.NoiDungNangLuc_HTML)"></div>
-          </div>
-        </template>
+                <template #item.NhanXetGVCN_VeHocSinh_HTML="{ item }">
+                    <div style="padding: 10px; max-width: 340px;">
+                        <uc-quill-editor :key="'NhanXetGVCN_VeHocSinh_HTML' + item.HocSinhID"
+                            v-model="item.NhanXetGVCN_VeHocSinh_HTML" :spellcheck="false" style="height: 110px;" />
+                    </div>
+                </template>
 
-        <template #item.NoiDungHoatDongKhac_HTML="{ item }">
-          <div style="padding: 10px; max-width: 360px;">
-            <div class="compact-comment" v-html="formatComment(item.NoiDungHoatDongKhac_HTML)"></div>
-          </div>
-        </template>
+                <template #item.NhanXetToan_HTML="{ item }">
+                    <div style="padding: 10px; max-width: 340px;">
+                        <uc-quill-editor :key="'NhanXetToan_HTML' + item.HocSinhID" v-model="item.NhanXetToan_HTML"
+                            :spellcheck="false" :readOnly="true" style="height: 110px;" />
+                        <v-text-field class="mt-2" v-model="item.DiemToan" placeholder="Nhập điểm..."
+                            messages="*Lưu ý: Thang điểm 10" variant="filled" :clearable="false" suffix="Điểm" reverse
+                            solo />
+                    </div>
+                </template>
 
-        <template #item.NhanXetCap23Mobile="{ item }">
-          <div style="padding: 10px; max-width: 100%;" class="d-flex flex-column ga-2">
-            <template v-if="isCuoiKi">
-              <div>
-                <b class="text-left">Ưu điểm</b>
-                <div class="compact-comment" v-html="formatComment(item.UuDiem)"></div>
-              </div>
-              <div>
-                <b class="text-left">Nhược điểm</b>
-                <div class="compact-comment" v-html="formatComment(item.NhuocDiem)"></div>
-              </div>
-              <div>
-                <b class="text-left">Đề xuất</b>
-                <div class="compact-comment" v-html="formatComment(item.DeXuat)"></div>
-              </div>
-            </template>
+                <template #item.NhanXetTiengViet_HTML="{ item }">
+                    <div style="padding: 10px; max-width: 340px;">
+                        <uc-quill-editor :key="'NhanXetTiengViet_HTML' + item.HocSinhID"
+                            v-model="item.NhanXetTiengViet_HTML" :spellcheck="false" :readOnly="true"
+                            style="height: 110px;" />
+                        <v-text-field class="mt-2" v-model="item.DiemTiengViet" placeholder="Nhập điểm..."
+                            messages="*Lưu ý: Thang điểm 10" variant="filled" :clearable="false" suffix="Điểm" reverse
+                            solo />
+                    </div>
+                </template>
 
-            <template v-else>
-              <div>
-                <b class="text-left">Về học tập</b>
-                <div class="compact-comment" v-html="formatComment(item.NoiDungKienThuc_HTML)"></div>
-              </div>
-              <div>
-                <b class="text-left">Về nền nếp</b>
-                <div class="compact-comment" v-html="formatComment(item.NoiDungNangLuc_HTML)"></div>
-              </div>
-              <div>
-                <b class="text-left">Mong muốn phối hợp</b>
-                <div class="compact-comment" v-html="formatComment(item.NoiDungHoatDongKhac_HTML)"></div>
-              </div>
-            </template>
-          </div>
-        </template>
+                <template #item.NhanXetMonHocKhac_HTML="{ item }">
+                    <div style="padding: 10px; max-width: 340px;">
+                        <uc-quill-editor :key="'NhanXetMonHocKhac_HTML' + item.HocSinhID"
+                            v-model="item.NhanXetMonHocKhac_HTML" :spellcheck="false" :readOnly="true"
+                            style="height: 110px;" />
+                    </div>
+                </template>
 
-        <template #no-data>
-          <div class="d-flex flex-column align-center justify-center py-12 text-medium-emphasis">
-            <v-icon size="48" class="mb-3 opacity-40">mdi-table-search</v-icon>
-            <p class="text-body-2">Chọn lớp để xem dữ liệu</p>
-          </div>
-        </template>
-      </GlobalDataTable>
-    </div>
+                <template #item.HoatDongGiaoDucKhac_HTML="{ item }">
+                    <div style="padding: 10px; max-width: 340px;">
+                        <uc-quill-editor :key="'HoatDongGiaoDucKhac_HTML' + item.HocSinhID"
+                            v-model="item.HoatDongGiaoDucKhac_HTML" :spellcheck="false" :readOnly="true"
+                            style="height: 110px;" />
+                    </div>
+                </template>
 
-    <uc-dialog v-model="IsShowDialogReject" title="Lý do từ chối" doneText="Xác nhận" @onSubmit="onReject">
-      <v-textarea v-model="ReasonReject" placeholder="Nhập lý do từ chối..." />
-    </uc-dialog>
+                <template #item.PhamChatNangLuc_HTML="{ item }">
+                    <div style="padding: 10px; max-width: 340px;">
+                        <uc-quill-editor :key="'PhamChatNangLuc_HTML' + item.HocSinhID"
+                            v-model="item.PhamChatNangLuc_HTML" :spellcheck="false" :readOnly="true"
+                            style="height: 110px;" />
+                    </div>
+                </template>
 
-    <v-dialog v-model="isOpenReport" max-width="800">
-      <uc-bc-tinh-trang-nxt-lop v-if="isOpenReport" :ThangObj="ThangObj" :CapID="CapID" @close="isOpenReport = false"
-        @select-lop="onSelectLop" />
-    </v-dialog>
+                <template #item.NhanXetCap1Mobile="{ item }">
+                    <div style="padding: 10px; max-width: 100%;" class="d-flex flex-column ga-2">
+                        <div>
+                            <b class="text-left">Nhận xét môn Toán</b>
+                            <div class="compact-comment" v-html="formatComment(item.NhanXetToan_HTML)"></div>
+                            <div class="mt-1 text-body-2">Điểm Toán: {{ item.DiemToan ?? '-' }}</div>
+                        </div>
 
-    <uc-dialog-duyet-all :DSLop="DSLop" :ThangObj="ThangObj" @done="onDuyetAllDone" />
-  </Global>
+                        <div>
+                            <b class="text-left">Nhận xét môn Tiếng Việt</b>
+                            <div class="compact-comment" v-html="formatComment(item.NhanXetTiengViet_HTML)"></div>
+                            <div class="mt-1 text-body-2">Điểm Tiếng Việt: {{ item.DiemTiengViet ?? '-' }}</div>
+                        </div>
+
+                        <div>
+                            <b class="text-left">Nhận xét môn học khác</b>
+                            <div class="compact-comment" v-html="formatComment(item.NhanXetMonHocKhac_HTML)"></div>
+                        </div>
+
+                        <div>
+                            <b class="text-left">Hoạt động giáo dục khác</b>
+                            <div class="compact-comment" v-html="formatComment(item.HoatDongGiaoDucKhac_HTML)"></div>
+                        </div>
+
+                        <div>
+                            <b class="text-left">Phẩm chất - Năng lực</b>
+                            <div class="compact-comment" v-html="formatComment(item.PhamChatNangLuc_HTML)"></div>
+                        </div>
+                    </div>
+                </template>
+
+                <template #item.NgayNghi="{ item }">
+                    <div class="d-flex ga-2 flex-column" style="padding: 8px; min-width: 220px;">
+                        <div class="d-flex justify-space-between">
+                            <p v-if="item.NgayNghi?.TongSoTiet > 0" class="text-left font-weight-medium">
+                                Tổng số tiết: {{ item.NgayNghi?.TongSoTiet }}
+                            </p>
+                            <v-btn v-if="item.NgayNghi?.TongSoTiet > 0" icon="mdi-eye" size="small" variant="text"
+                                color="primary" :title="'Xem báo nghỉ chi tiết học sinh - ' + item.HoTen"
+                                :href="'/gv-xem-vang-tre-nghi-phep?hocsinhid=' + item.HocSinhID + '&lopid=' + item.LopID + '&ngaybatdau=' + item.firstDay + '&ngayketthuc=' + item.lastDay"
+                                target="_blank" />
+                        </div>
+
+                        <v-chip v-for="mon in item.NgayNghi?.MonVang" :key="mon.TenMonHoc" color="orange" size="small"
+                            style="width: fit-content;">
+                            {{ mon.TenMonHoc }}
+                        </v-chip>
+
+                        <div v-if="item.LoaiViPham_Group?.length > 0">
+                            <v-divider class="mt-2" />
+                            <p class="text-left font-weight-medium">Loại vi phạm</p>
+                            <div v-for="lvp in item.LoaiViPham_Group" :key="lvp.LoaiViPham">
+                                <div class="text-left text-body-2">• {{ lvp.TenViPham }}</div>
+                                <div v-for="ngayVP in lvp.Ngay" :key="ngayVP.Ngay" class="text-body-2 text-left">
+                                    <p>Ngày: {{ ngayVP.Ngay }}</p>
+                                    <div v-for="ngay in ngayVP.DSNgay" :key="ngay.Buoi" class="ml-2">
+                                        <p>{{ ngay.Buoi }}</p>
+                                        <v-chip v-for="buoi in ngay.DS" :key="buoi.Tiet + '_' + buoi.TenMonHoc"
+                                            class="mt-1" size="small" color="orange">
+                                            Tiết: {{ buoi.Tiet }} - {{ buoi.TenMonHoc }}
+                                        </v-chip>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </template>
+
+                <template #item.UuDiem="{ item }">
+                    <div style="padding: 10px; max-width: 360px;">
+                        <div class="compact-comment" v-html="formatComment(item.UuDiem)"></div>
+                    </div>
+                </template>
+
+                <template #item.NhuocDiem="{ item }">
+                    <div style="padding: 10px; max-width: 360px;">
+                        <div class="compact-comment" v-html="formatComment(item.NhuocDiem)"></div>
+                    </div>
+                </template>
+
+                <template #item.DeXuat="{ item }">
+                    <div style="padding: 10px; max-width: 360px;">
+                        <div class="compact-comment" v-html="formatComment(item.DeXuat)"></div>
+                    </div>
+                </template>
+
+                <template #item.NhanXetGVCN="{ item }">
+                    <div style="padding: 10px; max-width: 360px;">
+                        <div class="compact-comment" v-html="formatComment(item.NhanXetGVCN)"></div>
+                    </div>
+                </template>
+
+                <template #item.NoiDungKienThuc_HTML="{ item }">
+                    <div style="padding: 10px; max-width: 360px;">
+                        <div class="compact-comment" v-html="formatComment(item.NoiDungKienThuc_HTML)"></div>
+                    </div>
+                </template>
+
+                <template #item.NoiDungNangLuc_HTML="{ item }">
+                    <div style="padding: 10px; max-width: 360px;">
+                        <div class="compact-comment" v-html="formatComment(item.NoiDungNangLuc_HTML)"></div>
+                    </div>
+                </template>
+
+                <template #item.NoiDungHoatDongKhac_HTML="{ item }">
+                    <div style="padding: 10px; max-width: 360px;">
+                        <div class="compact-comment" v-html="formatComment(item.NoiDungHoatDongKhac_HTML)"></div>
+                    </div>
+                </template>
+
+                <template #item.NhanXetCap23Mobile="{ item }">
+                    <div style="padding: 10px; max-width: 100%;" class="d-flex flex-column ga-2">
+                        <template v-if="isCuoiKi">
+                            <div>
+                                <b class="text-left">Ưu điểm</b>
+                                <div class="compact-comment" v-html="formatComment(item.UuDiem)"></div>
+                            </div>
+                            <div>
+                                <b class="text-left">Nhược điểm</b>
+                                <div class="compact-comment" v-html="formatComment(item.NhuocDiem)"></div>
+                            </div>
+                            <div>
+                                <b class="text-left">Đề xuất</b>
+                                <div class="compact-comment" v-html="formatComment(item.DeXuat)"></div>
+                            </div>
+                        </template>
+
+                        <template v-else>
+                            <div>
+                                <b class="text-left">Về học tập</b>
+                                <div class="compact-comment" v-html="formatComment(item.NoiDungKienThuc_HTML)"></div>
+                            </div>
+                            <div>
+                                <b class="text-left">Về nền nếp</b>
+                                <div class="compact-comment" v-html="formatComment(item.NoiDungNangLuc_HTML)"></div>
+                            </div>
+                            <div>
+                                <b class="text-left">Mong muốn phối hợp</b>
+                                <div class="compact-comment" v-html="formatComment(item.NoiDungHoatDongKhac_HTML)">
+                                </div>
+                            </div>
+                        </template>
+                    </div>
+                </template>
+
+                <template #no-data>
+                    <div class="d-flex flex-column align-center justify-center py-12 text-medium-emphasis">
+                        <v-icon size="48" class="mb-3 opacity-40">mdi-table-search</v-icon>
+                        <p class="text-body-2">Chọn lớp để xem dữ liệu</p>
+                    </div>
+                </template>
+            </v-data-table>
+        </div>
+
+        <uc-dialog v-model="IsShowDialogReject" title="Lý do từ chối" doneText="Xác nhận" @onSubmit="onReject">
+            <v-textarea v-model="ReasonReject" placeholder="Nhập lý do từ chối..." />
+        </uc-dialog>
+
+        <v-dialog v-model="isOpenReport" max-width="800">
+            <uc-bc-tinh-trang-nxt-lop v-if="isOpenReport" :ThangObj="ThangObj" :CapID="CapID"
+                @close="isOpenReport = false" @select-lop="onSelectLop" />
+        </v-dialog>
+
+        <uc-dialog-duyet-all :DSLop="DSLop" :ThangObj="ThangObj" @done="onDuyetAllDone" />
+    </Global>
 </template>
 
 <script>
-export default {
-  inject: ['snackbarRef', 'iframeRef', 'confirmRef'],
+	export default {
+		inject: ['snackbarRef', 'iframeRef', 'confirmRef'],
   data() {
     return {
       vueData,
@@ -330,6 +340,7 @@ export default {
       isOpenReport: false,
       firstDay: null,
       lastDay: null,
+      keyTable: 0,
     }
   },
   computed: {
@@ -418,6 +429,7 @@ export default {
       })
       await this.convertItems()
       this.headers = this.renderHeader()
+      this.keyTable++
     },
     onRefresh() {
       if (!this.ThangObj || !this.LopID) return
@@ -464,27 +476,33 @@ export default {
       this.IsShowDialogReject = false
     },
     escapeHtml(value) {
-      return String(value)
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/\"/g, '&quot;')
-        .replace(/'/g, '&#39;')
+      let text = String(value)
+      text = text.split('&').join('&amp;')
+      text = text.split('<').join('&lt;')
+      text = text.split('>').join('&gt;')
+      text = text.split('"').join('&quot;')
+      text = text.split("'").join('&#39;')
+      return text
     },
     formatComment(value) {
       if (value === null || value === undefined) return '<span class="text-medium-emphasis">-</span>'
       const raw = String(value).trim()
       if (!raw) return '<span class="text-medium-emphasis">-</span>'
 
-      if (/<[a-z][\s\S]*>/i.test(raw)) {
+      const hasHtmlLike = raw.includes('<') && raw.includes('>')
+      if (hasHtmlLike) {
         const div = document.createElement('div')
         div.innerHTML = raw
         const text = (div.innerText || div.textContent || '').trim()
         if (!text) return '<span class="text-medium-emphasis">-</span>'
-        return this.escapeHtml(text).replace(/\n/g, '<br/>')
+        let normalizedText = text.split('\r\n').join('\n')
+        normalizedText = normalizedText.split('\r').join('\n')
+        return this.escapeHtml(normalizedText).split('\n').join('<br/>')
       }
 
-      return this.escapeHtml(raw).replace(/\n/g, '<br/>')
+      let normalizedRaw = raw.split('\r\n').join('\n')
+      normalizedRaw = normalizedRaw.split('\r').join('\n')
+      return this.escapeHtml(normalizedRaw).split('\n').join('<br/>')
     },
     renderHeader() {
       const columns = [
@@ -547,7 +565,12 @@ export default {
     async convertItems() {
       function convertNewLineToP(text) {
         if (!text) return ''
-        return text.split(/\n+/).map(line => `<p>${line}</p>`).join('')
+        const normalizedText = String(text).split('\r\n').join('\n').split('\r').join('\n')
+        return normalizedText
+          .split('\n')
+          .filter(line => line !== '')
+          .map(line => `<p>${line}</p>`)
+          .join('')
       }
       this.items = this.items.map(x => {
         const existDSTreVang = vueData.DSChuyenCan_TreVang?.find(n => n.HocSinhID === x.HocSinhID)
@@ -590,12 +613,12 @@ export default {
           'student/LMS_SendMessageToME'
           // 'lms/NienKhoa_Get'
           , {
-          HocSinhID: item.HocSinhID,
-          NoiDung: plainText,
-        })
+            HocSinhID: item.HocSinhID,
+            NoiDung: plainText,
+          })
         if (isSend) Vue.$toast.success(`Đẩy ${item.HocSinhID} - ${item.HoTen} dữ liệu tháng sang ME`, { position: 'top' })
       }
     },
   },
-}
+	}
 </script>

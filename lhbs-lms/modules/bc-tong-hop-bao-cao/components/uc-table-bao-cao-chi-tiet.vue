@@ -230,7 +230,8 @@
 					this.onOpenDialogNienKhoa(bc?.Url_BaoCao)
 					return
 				}
-				this.openByIframeRef(bc.Url_BaoCao)
+				const finalUrl = this.buildUrlWithNienKhoa(bc?.Url_BaoCao, vueData.NienKhoa)
+				this.openByIframeRef(finalUrl)
 			},
 			isThongKeChatLuongBoMonUrl(url) {
 				return String(url || '').toLowerCase().includes('thong-ke-chat-luong-bo-mon')
