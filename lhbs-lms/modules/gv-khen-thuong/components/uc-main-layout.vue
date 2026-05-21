@@ -21,7 +21,7 @@
                                 Làm mới
                             </v-btn>
 
-                            <v-btn variant="outlined" color="primary" prepend-icon="mdi-content-save"
+                            <v-btn v-if="!isAfterDeadline" variant="outlined" color="primary" prepend-icon="mdi-content-save"
                                 :disabled="!LopItem || DSKhenThuong.length === 0" @click="onSave">
                                 Lưu khen thưởng
                             </v-btn>
@@ -112,6 +112,12 @@
         },
         TitlePage() {
             return getTitlePageByURL(window.location.pathname + window.location.search)
+        },
+        isAfterDeadline() {
+            const now = new Date()
+            const month = now.getMonth() + 1
+            const day = now.getDate()
+            return month > 5 || (month === 5 && day >= 21)
         },
     },
 

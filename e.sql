@@ -1,5 +1,10 @@
 USE [LMS-LHBS]
 GO
+/****** Object:  StoredProcedure [dbo].[spAPI_BaoCao_ThongKe_NhanXet_Cap1]    Script Date: 2026-05-21 4:14:49 PM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
 
 ALTER PROCEDURE [dbo].[spAPI_BaoCao_ThongKe_NhanXet_Cap1]
     @LopID      NVARCHAR(100),
@@ -62,10 +67,11 @@ BEGIN
     ON #KetQua (HocSinhID, LopID, MonHocID);
 
     -- ===================== Bước 4: Gom nhóm từng loại =====================
+      -- ===================== Bước 4: Gom nhóm từng loại =====================
     DROP TABLE IF EXISTS #NangLucChung;
     SELECT 
         HocSinhID, LopID,
-        STRING_AGG(CAST(KetQuaDanhGia_VI AS NVARCHAR(MAX)), ' ') AS NhanXet_NangLucChung
+        STRING_AGG(CAST(KetQuaDanhGia_VI AS NVARCHAR(MAX)), '') AS NhanXet_NangLucChung
     INTO #NangLucChung
     FROM #KetQua
     WHERE MonHocID IN (20, 21, 22)
@@ -74,7 +80,7 @@ BEGIN
     DROP TABLE IF EXISTS #NangLucDacThu;
     SELECT 
         HocSinhID, LopID,
-        STRING_AGG(CAST(KetQuaDanhGia_VI AS NVARCHAR(MAX)), ' ') AS NhanXet_NangLucDacThu
+        STRING_AGG(CAST(KetQuaDanhGia_VI AS NVARCHAR(MAX)), '') AS NhanXet_NangLucDacThu
     INTO #NangLucDacThu
     FROM #KetQua
     WHERE MonHocID IN (28, 29, 30, 31, 32, 33, 34)
@@ -83,7 +89,7 @@ BEGIN
     DROP TABLE IF EXISTS #PhamChat;
     SELECT 
         HocSinhID, LopID,
-        STRING_AGG(CAST(KetQuaDanhGia_VI AS NVARCHAR(MAX)), ' ') AS NhanXet_PhamChat
+        STRING_AGG(CAST(KetQuaDanhGia_VI AS NVARCHAR(MAX)), '') AS NhanXet_PhamChat
     INTO #PhamChat
     FROM #KetQua
     WHERE MonHocID IN (23, 24, 25, 26, 27)
@@ -92,6 +98,8 @@ BEGIN
     -- ===================== Bước 5: OUTPUT =====================
     SELECT 
         kq.HocSinhID,
+		hs.NgaySinh,
+		hsl.SoDanhBo,
         hs.Ho + ' ' + hs.Ten                                     AS HoTen,
         kq.LopID,
         l.TenLop,
@@ -137,6 +145,7 @@ BEGIN
     FROM #KetQua kq
     INNER JOIN dbo.tblHocSinh hs 
         ON hs.HocSinhID = kq.HocSinhID
+	INNER JOIN dbo.tblHocSinhLop hsl ON hsl.HocSinhID = hs.HocSinhID AND hsl.HocSinhID = kq.HocSinhID AND hsl.LopID = kq.LopID
     INNER JOIN dbo.tblLop l      
         ON l.LopID = kq.LopID AND l.NienKhoa = kq.NienKhoa
     LEFT JOIN #NangLucChung  nlc  
@@ -145,10 +154,10 @@ BEGIN
         ON nldt.HocSinhID = kq.HocSinhID AND nldt.LopID = kq.LopID
     LEFT JOIN #PhamChat       pc  
         ON pc.HocSinhID  = kq.HocSinhID AND pc.LopID  = kq.LopID
-    WHERE LEN(nlc.NhanXet_NangLucChung)   >= 400
-       OR LEN(nldt.NhanXet_NangLucDacThu) >= 400
-       OR LEN(pc.NhanXet_PhamChat)        >= 400
-    ORDER BY l.TenLop, hs.Ho, hs.Ten, kq.MonHocID;
+   -- WHERE LEN(nlc.NhanXet_NangLucChung)   >= 400
+   --    OR LEN(nldt.NhanXet_NangLucDacThu) >= 400
+   --    OR LEN(pc.NhanXet_PhamChat)        >= 400
+    ORDER BY l.TenLop,  hsl.SoDanhBo, kq.MonHocID;
 
     -- ===================== Dọn dẹp =====================
     DROP TABLE IF EXISTS #CotDiem;

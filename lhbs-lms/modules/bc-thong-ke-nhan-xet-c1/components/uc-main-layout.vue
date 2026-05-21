@@ -233,19 +233,26 @@ export default {
     },
     mounted() {
         this.ensureCapIDDefault()
-        this.getLop()
+        const params = new URLSearchParams(window.location.search)
+        const hk = params.get('hk')
+        if (hk && this.DSHocKi.some((x) => x.value === hk)) this.HocKiItem = hk
+        this.getLop(params.get('lopid'))
     },
     methods: {
         ensureCapIDDefault() {
             vueData.CapID = parseInt(vueData.CapID) || 1
         },
-        async getLop() {
+        async getLop(initLopID = null) {
             this.ensureCapIDDefault()
             const res = await fetchPromise('lms/Lop_Get_By_CapID', {
                 NienKhoa: vueData.NienKhoa,
                 CapID: vueData.CapID,
             })
             this.DSLop = res ?? []
+            if (initLopID) {
+                const found = this.DSLop.find((x) => String(x.LopID) === String(initLopID))
+                if (found) this.LopItem = found
+            }
         },
         async getDS() {
             if (!this.LopItem?.LopID || !this.HocKiItem) return
@@ -264,6 +271,8 @@ export default {
                     studentMap.set(row.HocSinhID, {
                         HocSinhID: row.HocSinhID,
                         HoTen: row.HoTen,
+                        NgaySinh: row.NgaySinh,
+                        SoDanhBo: row.SoDanhBo,
                         LopID: row.LopID,
                         TenLop: row.TenLop,
                         KiTu_NangLucChung: row.KiTu_NangLucChung,
