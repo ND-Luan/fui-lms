@@ -448,6 +448,9 @@ function handleData() {
     const flatArrDSKhenThuong = vueData.DSKhenThuong.flat()
     for (var item of vueData.DSHocSinh) {
         const objHS = flatArrDSKhenThuong.find(x => x.HocSinhID == item.HocSinhID)
+        if (!item.DanhHieu && objHS?.DanhHieu) {
+            item.DanhHieu = normalizeDanhHieu(objHS.DanhHieu)
+        }
         item.NgayKhenThuong_EN = objHS?.NgayKhenThuong_EN ?? ''
         item.NgayKhenThuong_VI = objHS?.NgayKhenThuong_VI ?? ''
         item.SoQuyetDinhKT = objHS?.SoQuyetDinhKT ?? ''

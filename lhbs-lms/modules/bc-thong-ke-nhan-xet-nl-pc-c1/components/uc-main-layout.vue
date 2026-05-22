@@ -1,5 +1,5 @@
 <template>
-    <Global>
+	<Global>
         <template #header>
             <v-card>
                 <v-card-title>{{ TitlePage }} • {{ TitleCap }}</v-card-title>
@@ -10,23 +10,14 @@
                                 item-value="LopID" return-object />
                         </v-col>
                         <v-col cols="12" sm="4" md="3">
-                            <v-select
-                                v-model="HocKiItem"
-                                label="Chọn học kì"
-                                :items="DSHocKi"
-                                item-title="text"
-                                item-value="value"
-                            />
+                            <v-select v-model="HocKiItem" label="Chọn học kì" :items="DSHocKi" item-title="text"
+                                item-value="value" />
                         </v-col>
                         <v-col class="d-flex align-center ga-2 flex-wrap">
-                            <v-switch
-                                v-model="OnlyVuot"
-                                color="error"
-                                hide-details
-                                inset
-                                label="Chỉ hiển thị nhận xét vượt ký tự"
-                            />
-                            <v-btn variant="outlined" color="primary" :disabled="!LopItem || !HocKiItem" @click="getDS()">
+                            <v-switch v-model="OnlyVuot" color="error" hide-details inset
+                                label="Chỉ hiển thị nhận xét vượt ký tự" />
+                            <v-btn variant="outlined" color="primary" :disabled="!LopItem || !HocKiItem"
+                                @click="getDS()">
                                 <v-icon start>mdi-reload</v-icon>
                                 Làm mới
                             </v-btn>
@@ -38,7 +29,8 @@
                                 Học sinh vượt: {{ SoDongVuot }}
                             </v-chip>
                             <v-chip color="primary" variant="tonal">Tổng học sinh: {{ DS.length }}</v-chip>
-                            <span class="text-caption text-medium-emphasis">· Giới hạn mỗi nhóm: 400 kí tự &nbsp;·&nbsp; Click hàng để xem chi tiết từng môn</span>
+                            <span class="text-caption text-medium-emphasis">· Giới hạn mỗi nhóm: 400 kí tự &nbsp;·&nbsp;
+                                Click hàng để xem chi tiết từng môn</span>
                         </v-col>
                         <v-col cols="auto" class="text-right">
                             <span class="text-medium-emphasis">Học kì: <strong>{{ HocKiItem }}</strong></span>
@@ -50,17 +42,8 @@
 
         <v-divider />
 
-        <GlobalDataTable
-            :headers="headers"
-            :items="DSHienThi"
-            item-value="rowKey"
-            items-per-page="-1"
-            hide-default-footer
-            hover
-            show-expand
-            expand-on-click
-            v-data-table-height="calc(100dvh - 77px)"
-        >
+        <GlobalDataTable :headers="headers" :items="DSHienThi" item-value="rowKey" items-per-page="-1"
+            hide-default-footer hover show-expand expand-on-click >
             <template #item.hocSinh="{ item }">
                 <uc-info-student :item="item" />
             </template>
@@ -68,7 +51,8 @@
             <!-- Năng lực chung: số kí tự tổng + trạng thái -->
             <template #item.NangLucChung="{ item }">
                 <div class="d-flex align-center ga-2">
-                    <span :class="item.VuotNhanXet_NangLucChung ? 'text-error font-weight-bold' : 'text-medium-emphasis'">
+                    <span
+                        :class="item.VuotNhanXet_NangLucChung ? 'text-error font-weight-bold' : 'text-medium-emphasis'">
                         {{ item.KiTu_NangLucChung ?? '—' }}
                     </span>
                     <v-chip size="x-small" :color="item.VuotNhanXet_NangLucChung ? 'error' : 'success'" variant="tonal">
@@ -80,10 +64,12 @@
             <!-- Năng lực đặc thù -->
             <template #item.NangLucDacThu="{ item }">
                 <div class="d-flex align-center ga-2">
-                    <span :class="item.VuotNhanXet_NangLucDacThu ? 'text-error font-weight-bold' : 'text-medium-emphasis'">
+                    <span
+                        :class="item.VuotNhanXet_NangLucDacThu ? 'text-error font-weight-bold' : 'text-medium-emphasis'">
                         {{ item.KiTu_NangLucDacThu ?? '—' }}
                     </span>
-                    <v-chip size="x-small" :color="item.VuotNhanXet_NangLucDacThu ? 'error' : 'success'" variant="tonal">
+                    <v-chip size="x-small" :color="item.VuotNhanXet_NangLucDacThu ? 'error' : 'success'"
+                        variant="tonal">
                         {{ item.VuotNhanXet_NangLucDacThu ? 'Vượt' : 'Đạt' }}
                     </v-chip>
                 </div>
@@ -122,18 +108,18 @@
                             <tbody>
                                 <tr v-for="(ct, idx) in buildChiTietRows(item)" :key="ct.TenMon + idx">
                                     <!-- Ô nhóm merge nhiều dòng, hiển thị tổng + chip trạng thái nhóm -->
-                                    <td v-if="ct.isFirstInGroup"
-                                        :rowspan="ct.groupRowspan"
-                                        class="align-top pt-2"
+                                    <td v-if="ct.isFirstInGroup" :rowspan="ct.groupRowspan" class="align-top pt-2"
                                         style="border-right: 1px solid rgba(0,0,0,0.08); vertical-align: top">
                                         <div class="d-flex flex-column ga-1">
-                                            <v-chip size="x-small" color="info" variant="tonal">{{ ct.NhomNhanXet }}</v-chip>
+                                            <v-chip size="x-small" color="info" variant="tonal">{{ ct.NhomNhanXet }}
+                                            </v-chip>
                                             <div class="d-flex align-center ga-1 mt-1">
                                                 <span class="text-caption"
                                                     :class="ct.nhomVuot ? 'text-error font-weight-bold' : 'text-medium-emphasis'">
                                                     Tổng: {{ ct.nhomKiTu ?? '—' }} kí tự
                                                 </span>
-                                                <v-chip size="x-small" :color="ct.nhomVuot ? 'error' : 'success'" variant="tonal">
+                                                <v-chip size="x-small" :color="ct.nhomVuot ? 'error' : 'success'"
+                                                    variant="tonal">
                                                     {{ ct.nhomVuot ? 'Vượt' : 'Đạt' }}
                                                 </v-chip>
                                             </div>
@@ -142,7 +128,8 @@
                                     <td>{{ ct.TenMon }}</td>
                                     <td style="max-width:480px">
                                         <span class="text-body-2">
-                                            {{ expandedNhanXet[item.rowKey + ct.TenMon] ? ct.NhanXet : truncate(ct.NhanXet, 120) }}
+                                            {{ expandedNhanXet[item.rowKey + ct.TenMon] ? ct.NhanXet :
+                                            truncate(ct.NhanXet, 120) }}
                                         </span>
                                         <a v-if="ct.NhanXet && ct.NhanXet.length > 120"
                                             class="text-primary text-caption ms-1"
@@ -170,8 +157,8 @@
 </template>
 
 <script>
-export default {
-    inject: ['snackbarRef', 'iframeRef', 'confirmRef'],
+	export default {
+		inject: ['snackbarRef', 'iframeRef', 'confirmRef'],
     data() {
         return {
             vueData,
@@ -334,5 +321,5 @@ export default {
             return rows
         },
     },
-}
+	}
 </script>

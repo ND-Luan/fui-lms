@@ -34,7 +34,7 @@
 		<!-- <v-divider /> -->
 
 		<!-- Thay toàn bộ phần template v-data-table -->
-		<v-data-table v-model="DSHocSinhSelected" :headers="" :items="" :show-select="true" :items-per-page="-1"
+		<v-data-table v-model="DSHocSinhSelected" :headers :items :show-select="true" :items-per-page="-1"
 			:item-value="(item) => item" hide-default-footer style="max-height: calc(100dvh - 77px); overflow-y: auto;">
 			<!-- STT -->
 			<template #item.STT="{ item }">
@@ -98,7 +98,7 @@
 						{{ item.NhanXet_ChuanBiNienKhoaSau }}
 					</div>
 				</div>
-				<v-chip v-else="" size="x-small" variant="tonal" color="grey">
+				<v-chip v-else size="x-small" variant="tonal" color="grey">
 					Chưa có nhận xét
 				</v-chip>
 			</template>

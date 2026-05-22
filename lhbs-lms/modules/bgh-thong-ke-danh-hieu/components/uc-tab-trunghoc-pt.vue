@@ -1,4 +1,4 @@
-<template>
+﻿<template>
 	<v-card class="px-4 pt-0 pb-4 ">
 		<v-card-title class=" my-3 ga-2 card-border rounded-sm  d-flex">
 			<div>
@@ -15,12 +15,12 @@
 			<v-spacer></v-spacer>
 			<div class="d-flex ga-2 align-center">
 				<v-select v-model="HocKi" label="Chọn học kì" :items="DSHocKi" style="min-width: 200px;" />
-				<v-btn color="primary" variant="outlined" prepend-icon="mdi-refresh" :disabled="!HocKi"
+				<v-btn color="primary" variant="outlined" prepend-icon="mdi-refresh" :disabled="HocKi == null"
 					@click="getHocLucHangKiem(3)">
 					Làm mới
 				</v-btn>
 				<v-btn color="success" variant="outlined" prepend-icon="mdi-lock-check"
-					:disabled="!HocKi || !BaoCaoItem || BaoCaoItem?.IsChotBaoCao" @click="onChotBaoCao">
+					:disabled="HocKi == null || !BaoCaoItem || BaoCaoItem?.IsChotBaoCao" @click="onChotBaoCao">
 					Chốt báo cáo
 				</v-btn>
 			</div>
@@ -79,6 +79,7 @@
 <script>
 	export default {
 		props: [],
+		inject: ['snackbarRef', 'iframeRef', 'confirmRef'],
 		data() {
 			var options = {
 				chart: {
@@ -317,7 +318,7 @@
 				if (!vueData.NienKhoa) return
 				let data
 				const valueHK = this.DSHocKi.find(x => x.value === this.HocKi)
-				const dataLMS = await ajaxCALLPromise("lms/BaoCao_TongHop_Get_BaoCaoID_HocKi_CapID", {
+				const dataLMS = await fetchPromise("lms/BaoCao_TongHop_Get_BaoCaoID_HocKi_CapID", {
 					BaoCaoID: 10,
 					HocKi: valueHK.textValue,
 					CapID: 3,
@@ -328,7 +329,7 @@
 					data = JSON.parse(this.BaoCaoItem.JSON_BaoCao)
 				}
 				else {
-					data = await ajaxCALLPromise(`diemc${capid}/LMS_ThongKeChung`, {
+					data = await fetchPromise(`diemc${capid}/LMS_ThongKeChung`, {
 						HocKy: this.HocKi, //Cả năm
 						NamHoc: vueData.NienKhoa,
 						TypeBaoCao: 2
@@ -480,20 +481,15 @@
 					]
 				}
 			},
-			onChotBaoCao() { 
-				const $this = this
-				confirm({
-					title: "Xác nhận chốt báo cáo",
-					action: function () {
-						ajaxCALLPromise("lms/BaoCao_TongHop_Upd_Chot_BaoCao", {
-							BaoCao_ChiTietID: $this.BaoCaoItem.BaoCao_ChiTietID,
-							JSON_BaoCao: $this.DataChotBaoCao
-						}).then(() => {
-							$this.getHocLucHangKiem(3)
-							Vue.$toast.success("Chốt báo cáo thành công", { position: "top" })
-						})
-					}
-				})
+			async onChotBaoCao() {
+				const ok = await this.confirmRef.value.show({ title: 'Xác nhận chốt báo cáo' })
+				if (!ok) return
+				await fetchPromise("lms/BaoCao_TongHop_Upd_Chot_BaoCao", {
+					BaoCao_ChiTietID: this.BaoCaoItem.BaoCao_ChiTietID,
+					JSON_BaoCao: this.DataChotBaoCao
+				}, { cache: false })
+				this.snackbarRef.value.showSnackbar({ message: 'Chốt báo cáo thành công', color: 'success' })
+				this.getHocLucHangKiem(3)
 			}
 		},
 	}

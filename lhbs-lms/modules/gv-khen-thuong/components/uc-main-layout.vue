@@ -21,8 +21,9 @@
                                 Làm mới
                             </v-btn>
 
-                            <v-btn v-if="!isAfterDeadline" variant="outlined" color="primary" prepend-icon="mdi-content-save"
-                                :disabled="!LopItem || DSKhenThuong.length === 0" @click="onSave">
+                            <v-btn v-if="!isAfterDeadline" variant="outlined" color="primary"
+                                prepend-icon="mdi-content-save" :disabled="!LopItem || DSKhenThuong.length === 0"
+                                @click="onSave">
                                 Lưu khen thưởng
                             </v-btn>
                         </v-col>
@@ -117,7 +118,7 @@
             const now = new Date()
             const month = now.getMonth() + 1
             const day = now.getDate()
-            return month > 5 || (month === 5 && day >= 21)
+            return month > 5 || (month === 5 && day >= 22)
         },
     },
 

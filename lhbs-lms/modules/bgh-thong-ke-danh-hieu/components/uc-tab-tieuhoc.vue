@@ -1,4 +1,4 @@
-<template>
+﻿<template>
 	<v-card class="px-4 pt-0 pb-4 card-border">
 		<v-card-title class="my-3 ga-2 card-border rounded-sm ">
 			<div>
@@ -152,6 +152,7 @@
 <script>
 	export default {
 		props: [],
+		inject: ['snackbarRef', 'iframeRef', 'confirmRef'],
 		data() {
 			var options = {
 	
@@ -467,7 +468,7 @@
 				let data
 				const valueHK = this.DSHocKi.find(x => x.value === this.HocKi)
 				console.log("valueHK", valueHK)
-				const dataLMS = await ajaxCALLPromise("lms/BaoCao_TongHop_Get_BaoCaoID_HocKi_CapID", {
+				const dataLMS = await fetchPromise("lms/BaoCao_TongHop_Get_BaoCaoID_HocKi_CapID", {
 					BaoCaoID: 8,
 					HocKi: valueHK.textValue,
 					CapID: 1,
@@ -478,7 +479,7 @@
 					data = JSON.parse(this.BaoCaoItem.JSON_BaoCao)
 				}
 				else {
-					data = await ajaxCALLPromise('lms/ThongKe_KQRL_Get_All_Khoi_C1', {
+					data = await fetchPromise('lms/ThongKe_KQRL_Get_All_Khoi_C1', {
 						HocKi: valueHK.textValue,
 						NienKhoa: vueData.NienKhoa
 					})
@@ -860,20 +861,15 @@
 				}
 				return '';
 			},
-			onChotBaoCao() {
-				const $this = this
-				confirm({
-					title: "Xác nhận chốt báo cáo",
-					action: function () {
-						ajaxCALLPromise("lms/BaoCao_TongHop_Upd_Chot_BaoCao", {
-							BaoCao_ChiTietID: $this.BaoCaoItem.BaoCao_ChiTietID,
-							JSON_BaoCao: $this.DataChotBaoCao
-						}).then(() => {
-							$this.ThongKe_KQRL_Get_All_Khoi_C1()
-							Vue.$toast.success("Chốt báo cáo thành công", { position: "top" })
-						})
-					}
-				})
+			async onChotBaoCao() {
+				const ok = await this.confirmRef.value.show({ title: 'Xác nhận chốt báo cáo' })
+				if (!ok) return
+				await fetchPromise("lms/BaoCao_TongHop_Upd_Chot_BaoCao", {
+					BaoCao_ChiTietID: this.BaoCaoItem.BaoCao_ChiTietID,
+					JSON_BaoCao: this.DataChotBaoCao
+				}, { cache: false })
+				this.snackbarRef.value.showSnackbar({ message: 'Chốt báo cáo thành công', color: 'success' })
+				this.ThongKe_KQRL_Get_All_Khoi_C1()
 			}
 		},
 	}
