@@ -1106,8 +1106,10 @@ export default {
 							}]
 						}
 
-						console.log("data.length", data.length)
-						this.tab = 2//data.length
+						const lastPublicItem = [...data].reverse().find(x => x.Is_Public)
+						this.tab = lastPublicItem
+							? lastPublicItem.KyDanhGia
+							: (data.length > 0 ? data[data.length - 1].KyDanhGia : 1)
 						resolve()
 					})
 			})
