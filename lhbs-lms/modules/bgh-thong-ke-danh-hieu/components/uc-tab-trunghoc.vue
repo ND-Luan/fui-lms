@@ -1,14 +1,14 @@
-﻿<template>
+<template>
 	<v-card class="px-4 pt-0 pb-4 ">
 		<v-card-title class="d-flex my-3 ga-2 card-border rounded-sm ">
 			<div>
 				<span class="text-primary">TRUNG HỌC</span>
 				<div v-if="BaoCaoItem?.IsChotBaoCao" class="text-caption">
-					<span class="text-red">Thời điểm chốt:</span> 
+					<span class="text-red">Thời điểm chốt:</span>
 					<span class="text-black">
-					[{{BaoCaoItem.NguoiChot}}]
-					{{BaoCaoItem.HoTenNguoiChot}} -
-					{{BaoCaoItem.NgayChot}}
+						[{{BaoCaoItem.NguoiChot}}]
+						{{BaoCaoItem.HoTenNguoiChot}} -
+						{{BaoCaoItem.NgayChot}}
 					</span>
 				</div>
 			</div>
@@ -73,7 +73,6 @@
 			</v-card>
 		</div>
 	</v-card>
-
 </template>
 
 <script>

@@ -1,21 +1,21 @@
-﻿<template>
+<template>
 	<v-card class="px-4 pt-0 pb-4 card-border">
 		<v-card-title class="my-3 ga-2 card-border rounded-sm ">
 			<div>
 				<span class="text-primary">TIỂU HỌC</span>
 				<div v-if="BaoCaoItem?.IsChotBaoCao" class="text-caption">
-					<span class="text-red">Thời điểm chốt:</span> 
+					<span class="text-red">Thời điểm chốt:</span>
 					<span class="text-black">
-					[{{BaoCaoItem.NguoiChot}}]
-					{{BaoCaoItem.HoTenNguoiChot}} - {{BaoCaoItem.NgayChot}}
+						[{{BaoCaoItem.NguoiChot}}]
+						{{BaoCaoItem.HoTenNguoiChot}} - {{BaoCaoItem.NgayChot}}
 					</span>
 				</div>
 			</div>
 			<v-spacer></v-spacer>
 			<div class="d-flex ga-2 align-center">
 				<v-select v-model="HocKi" label="Chọn học kì" :items="DSHocKi" style="min-width: 200px;" />
-				<v-btn color="primary" variant="outlined" prepend-icon="mdi-refresh" :loading="isBusy" :disabled="!HocKi"
-					@click="ThongKe_KQRL_Get_All_Khoi_C1">
+				<v-btn color="primary" variant="outlined" prepend-icon="mdi-refresh" :loading="isBusy"
+					:disabled="!HocKi" @click="ThongKe_KQRL_Get_All_Khoi_C1">
 					Làm mới
 				</v-btn>
 				<v-btn color="success" variant="outlined" prepend-icon="mdi-lock-check" :loading="isBusy"
@@ -48,7 +48,8 @@
 							KẾT QUẢ RÈN LUYỆN KHỐI 1, 2, 3, 4, 5 – NĂNG LỰC
 						</v-card-title>
 						<v-card-text class="pa-0">
-							<v-data-table :items="DataChart2" :headers="headersChart2" :items-per-page="-1" :hide-default-footer="true">
+							<v-data-table :items="DataChart2" :headers="headersChart2" :items-per-page="-1"
+								:hide-default-footer="true">
 								<template #item="{ item, index }">
 									<tr :style="getRowStyle(item)" :class="getRowClass(item)">
 										<td v-for="obj of headersChart2"
@@ -100,7 +101,8 @@
 							KẾT QUẢ HỌC TẬP – CẤP TIỂU HỌC
 						</v-card-title>
 						<v-card-text class="pa-0">
-							<v-data-table :items="DataChart4" :headers="headersChart4" :items-per-page="-1" :hide-default-footer="true" />
+							<v-data-table :items="DataChart4" :headers="headersChart4" :items-per-page="-1"
+								:hide-default-footer="true" />
 						</v-card-text>
 					</v-card>
 

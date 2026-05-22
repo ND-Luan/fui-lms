@@ -321,8 +321,21 @@ async function onUpdateKyGuiDiem() {
     }
     return await ajaxCALLPromise("psmark1/LMS_UpdateKyGuiDiemPhuHuynh", params)
 }
+async function onUpdateKiDanhGia_LMS() {
+    let KyDanhGia = null
+    if (vueData.Semester.value === 'GK_HK1') KyDanhGia = 1
+    if (vueData.Semester.value === 'CK_HK1') KyDanhGia = 2
+    if (vueData.Semester.value === 'GK_HK2') KyDanhGia = 3
+    if (vueData.Semester.value === 'CK_HK2') KyDanhGia = 4
+    const params = {
+        NienKhoa: vueData.NienKhoa,
+        CapID: 1,
+        KyDanhGia
+    }
+    return await ajaxCALLPromise("lms/CongBoBangDiem_Update_Mo_KyDanhGia", params)
+}
 async function onPushMessageToME() {
-    for (var hocSinh of vueData.DSHocSinh.filter(x => x.HocSinhID !== 25100126)) {
+    for (var hocSinh of vueData.DSHocSinh) {
         await onPushMessageToME_ByHocSinh(hocSinh)
     }
 }
