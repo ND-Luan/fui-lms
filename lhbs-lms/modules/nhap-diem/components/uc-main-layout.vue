@@ -603,10 +603,10 @@
 			if (!this.editedCells.length) return true;
 
 			const shouldSave = await this.confirmRef.value.show({
-				title: 'Lưu thay đổi trước khi khóa cột điểm?'
+				title: 'Bạn có muốn lưu dữ liệu trước khi khóa cột điểm không?'
 			});
 
-			if (!shouldSave) return true;
+			if (!shouldSave) return false;
 
 			try {
 				const success = await BangDiemService.saveData(

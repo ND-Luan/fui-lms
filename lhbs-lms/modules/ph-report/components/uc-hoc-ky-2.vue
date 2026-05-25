@@ -54,9 +54,9 @@
 																	<v-icon small class="mr-1"
 																		:style="{ color: DSMonHoc.find(x => x.MonHocName === key || (key == 'Giáo dục thể chất' && x.MonHocName == 'Thể dục'))?.Color ?? '#000000' }">
 																		{{DSMonHoc.find(x => x.MonHocName === key ||
-																			(key == 'Giáo dục thể chất' &&
-																				x.MonHocName == 'Thể dục'))?.Icon ||
-																			'mdi-book-open'}}
+																		(key == 'Giáo dục thể chất' &&
+																		x.MonHocName == 'Thể dục'))?.Icon ||
+																		'mdi-book-open'}}
 																	</v-icon>
 																	{{ key }}
 																</v-chip>
@@ -68,7 +68,7 @@
 																	:class="'bg-' + getBgColorMucDoDanhGia(value[Object.keys(value).find(it => it.endsWith('M'))])"
 																	v-if="value[Object.keys(value).find(it => it.endsWith('M'))]">
 																	{{value[Object.keys(value).find(it =>
-																		it.endsWith('M'))] ?? '-'}}
+																	it.endsWith('M'))] ?? '-'}}
 																</v-chip>
 																<v-chip color="green" size="small" variant="outlined"
 																	v-if="value[Object.keys(value).find(it => it.endsWith('S'))] && List_MonHoc_Change.includes(key)">
@@ -84,7 +84,7 @@
 																	style="background-color: #E8F5E9"
 																	v-if="value[Object.keys(value).find(it => it.endsWith('D'))] && !List_MonHoc_Change.includes(key)">
 																	{{value[Object.keys(value).find(it =>
-																		it.endsWith('D'))] ?? '-'}}
+																	it.endsWith('D'))] ?? '-'}}
 																</v-chip>
 															</v-col>
 														</v-row>
@@ -119,7 +119,7 @@
 																	<v-card class="note-paper" flat>
 																		<v-card-text>
 																			{{value[Object.keys(value).find(it =>
-																				it.endsWith('NX'))] ?? '-'}}
+																			it.endsWith('NX'))] ?? '-'}}
 																		</v-card-text>
 																	</v-card>
 																</div>
@@ -164,7 +164,7 @@
 																	<v-icon small class="mr-1"
 																		:style="{ color: DSMonHoc.find(x => x.MonHocName === key)?.Color ?? '#000000' }">
 																		{{DSMonHoc.find(x => x.MonHocName ===
-																			key)?.Icon || 'mdi-book-open'}}
+																		key)?.Icon || 'mdi-book-open'}}
 																	</v-icon>
 																	{{ key }}
 																</v-chip>
@@ -176,7 +176,7 @@
 																	size="small" variant="outlined"
 																	v-if="value[Object.keys(value).find(it => !it.endsWith('NX'))]">
 																	{{value[Object.keys(value).find(it =>
-																		!it.endsWith('NX'))] ?? '-'}}
+																	!it.endsWith('NX'))] ?? '-'}}
 																</v-chip>
 															</v-col>
 														</v-row>
@@ -201,7 +201,7 @@
 																	<v-card class="note-paper" flat>
 																		<v-card-text>
 																			{{value[Object.keys(value).find(it =>
-																				it.endsWith('NX'))] ?? '-'}}
+																			it.endsWith('NX'))] ?? '-'}}
 																		</v-card-text>
 																	</v-card>
 																</div>
@@ -220,8 +220,8 @@
 										<v-expansion-panel-title class="bg-yellow-lighten-5 group-panel"
 											expand-icon="mdi-menu-down">
 											<div class="d-flex align-center ga-4">
-												<v-img src="/_cdn/lhbs-lms/pham_chat_icon.png" height="30"
-													width="30"></v-img>
+												<v-img src="/_cdn/lhbs-lms/pham_chat_icon.png" height="30" width="30">
+												</v-img>
 												<p>{{ $t('message.Quality') }}</p>
 											</div>
 										</v-expansion-panel-title>
@@ -248,7 +248,7 @@
 																	<v-icon small class="mr-1"
 																		:style="{ color: DSMonHoc.find(x => x.MonHocName === key)?.Color ?? '#000000' }">
 																		{{DSMonHoc.find(x => x.MonHocName ===
-																			key)?.Icon || 'mdi-book-open'}}
+																		key)?.Icon || 'mdi-book-open'}}
 																	</v-icon>
 																	{{ key }}
 																</v-chip>
@@ -260,7 +260,7 @@
 																	size="small" variant="outlined"
 																	v-if="value[Object.keys(value).find(it => !it.endsWith('NX'))]">
 																	{{value[Object.keys(value).find(it =>
-																		!it.endsWith('NX'))] ?? '-'}}
+																	!it.endsWith('NX'))] ?? '-'}}
 																</v-chip>
 															</v-col>
 														</v-row>
@@ -285,7 +285,7 @@
 																	<v-card class="note-paper" flat>
 																		<v-card-text>
 																			{{value[Object.keys(value).find(it =>
-																				it.endsWith('NX'))] ?? '-'}}
+																			it.endsWith('NX'))] ?? '-'}}
 																		</v-card-text>
 																	</v-card>
 																</div>
@@ -304,8 +304,8 @@
 										<v-expansion-panel-title class="bg-brown-lighten-5 group-panel"
 											expand-icon="mdi-menu-down">
 											<div class="d-flex align-center ga-4">
-												<v-img src="/_cdn/lhbs-lms/nang_luc_rieng.png" height="30"
-													width="30"></v-img>
+												<v-img src="/_cdn/lhbs-lms/nang_luc_rieng.png" height="30" width="30">
+												</v-img>
 												<p>{{ $t('message.Personal_Ability') }}</p>
 											</div>
 										</v-expansion-panel-title>
@@ -332,7 +332,7 @@
 																	<v-icon small class="mr-1"
 																		:style="{ color: DSMonHoc.find(x => x.MonHocName === key)?.Color ?? '#000000' }">
 																		{{DSMonHoc.find(x => x.MonHocName ===
-																			key)?.Icon || 'mdi-book-open'}}
+																		key)?.Icon || 'mdi-book-open'}}
 																	</v-icon>
 																	{{ key }}
 																</v-chip>
@@ -344,7 +344,7 @@
 																	size="small" variant="outlined"
 																	v-if="value[Object.keys(value).find(it => !it.endsWith('NX'))]">
 																	{{value[Object.keys(value).find(it =>
-																		!it.endsWith('NX'))] ?? '-'}}
+																	!it.endsWith('NX'))] ?? '-'}}
 																</v-chip>
 															</v-col>
 															<v-col class="d-flex justify-center" cols="2"> </v-col>
@@ -370,7 +370,7 @@
 																	<v-card class="note-paper" flat>
 																		<v-card-text>
 																			{{value[Object.keys(value).find(it =>
-																				it.endsWith('NX'))] ?? '-'}}
+																			it.endsWith('NX'))] ?? '-'}}
 																		</v-card-text>
 																	</v-card>
 																</div>
@@ -480,7 +480,7 @@
 											<v-icon class="mr-2"
 												:color="DSMonHoc.find(x => x.MonHocName === item.TenMon)?.Color">
 												{{DSMonHoc.find(x => x.MonHocName === item.TenMon)?.Icon ||
-													'mdi-book-open'}}
+												'mdi-book-open'}}
 											</v-icon>
 											{{ item.TenMon }}
 										</template>
@@ -526,7 +526,7 @@
 											<v-icon class="mr-2"
 												:color="DSMonHoc.find(x => x.MonHocName === item.TenMon)?.Color">
 												{{DSMonHoc.find(x => x.MonHocName === item.TenMon)?.Icon ||
-													'mdi-book-open'}}
+												'mdi-book-open'}}
 											</v-icon>
 											{{ item.TenMon }}
 										</template>
@@ -570,7 +570,7 @@
 											<v-icon class="mr-2"
 												:color="DSMonHoc.find(x => x.MonHocName === item.TenMon)?.Color">
 												{{DSMonHoc.find(x => x.MonHocName === item.TenMon)?.Icon ||
-													'mdi-book-open'}}
+												'mdi-book-open'}}
 											</v-icon>
 											{{ item.TenMon }}
 										</template>
@@ -634,7 +634,7 @@
 												<v-icon small class="mr-1"
 													:style="{ color: DSMonHoc.find(x => x.MonHocName === item.TenMon)?.Color ?? '#000000' }">
 													{{DSMonHoc.find(x => x.MonHocName === item.TenMon)?.Icon ||
-														'mdi-book-open'}}
+													'mdi-book-open'}}
 												</v-icon>
 												<p class="font-weight-medium">{{ item.TenMon }}</p>
 											</div>
@@ -654,8 +654,8 @@
 													<v-chip color="primary">{{ item.ktthuongxuyen ?? '-' }}</v-chip>
 												</template>
 												<template #prepend>
-													<v-icon size="small" class="mb-1 me-1"
-														color="primary">mdi-calendar-check</v-icon>
+													<v-icon size="small" class="mb-1 me-1" color="primary">
+														mdi-calendar-check</v-icon>
 												</template>
 											</v-list-item>
 											<v-list-item title="Điểm KT giữa kì" v-if="item.ktgiuaki">
@@ -663,8 +663,8 @@
 													<v-chip color="primary">{{ item.ktgiuaki ?? '-' }}</v-chip>
 												</template>
 												<template #prepend>
-													<v-icon size="small" class="mb-1 me-1"
-														color="primary">mdi-file-document-edit</v-icon>
+													<v-icon size="small" class="mb-1 me-1" color="primary">
+														mdi-file-document-edit</v-icon>
 												</template>
 											</v-list-item>
 											<v-list-item title="Điểm KT cuối kì" v-if="item.ktcuoiki">
@@ -672,8 +672,8 @@
 													<v-chip color="primary">{{ item.ktcuoiki ?? '-' }}</v-chip>
 												</template>
 												<template #prepend>
-													<v-icon size="small" class="mb-1 me-1"
-														color="primary">mdi-school</v-icon>
+													<v-icon size="small" class="mb-1 me-1" color="primary">mdi-school
+													</v-icon>
 												</template>
 											</v-list-item>
 										</v-list>
@@ -688,7 +688,7 @@
 												<v-icon small class="mr-1"
 													:style="{ color: DSMonHoc.find(x => x.MonHocName === item.TenMon)?.Color ?? '#000000' }">
 													{{DSMonHoc.find(x => x.MonHocName === item.TenMon)?.Icon ||
-														'mdi-book-open'}}
+													'mdi-book-open'}}
 												</v-icon>
 												<p class="font-weight-medium">{{ item.TenMon }}</p>
 											</div>
@@ -708,8 +708,8 @@
 													<v-chip color="primary">{{ item.ktthuongxuyen ?? '-' }}</v-chip>
 												</template>
 												<template #prepend>
-													<v-icon size="small" class="mb-1 me-1"
-														color="primary">mdi-calendar-check</v-icon>
+													<v-icon size="small" class="mb-1 me-1" color="primary">
+														mdi-calendar-check</v-icon>
 												</template>
 											</v-list-item>
 											<v-list-item title="Điểm KT giữa kì" v-if="item.ktgiuaki">
@@ -717,8 +717,8 @@
 													<v-chip color="primary">{{ item.ktgiuaki ?? '-' }}</v-chip>
 												</template>
 												<template #prepend>
-													<v-icon size="small" class="mb-1 me-1"
-														color="primary">mdi-file-document-edit</v-icon>
+													<v-icon size="small" class="mb-1 me-1" color="primary">
+														mdi-file-document-edit</v-icon>
 												</template>
 											</v-list-item>
 											<v-list-item title="Điểm KT cuối kì" v-if="item.ktcuoiki">
@@ -726,8 +726,8 @@
 													<v-chip color="primary">{{ item.ktcuoiki ?? '-' }}</v-chip>
 												</template>
 												<template #prepend>
-													<v-icon size="small" class="mb-1 me-1"
-														color="primary">mdi-school</v-icon>
+													<v-icon size="small" class="mb-1 me-1" color="primary">mdi-school
+													</v-icon>
 												</template>
 											</v-list-item>
 										</v-list>
@@ -743,7 +743,7 @@
 												<v-icon small class="mr-1"
 													:style="{ color: DSMonHoc.find(x => x.MonHocName === item.TenMon)?.Color ?? '#000000' }">
 													{{DSMonHoc.find(x => x.MonHocName === item.TenMon)?.Icon ||
-														'mdi-book-open'}}
+													'mdi-book-open'}}
 												</v-icon>
 												<p class="font-weight-medium">{{ item.TenMon }}</p>
 											</div>
@@ -765,8 +765,8 @@
 													<v-chip color="primary">{{ item.ktthuongxuyen ?? '-' }}</v-chip>
 												</template>
 												<template #prepend>
-													<v-icon size="small" class="mb-1 me-1"
-														color="primary">mdi-calendar-check</v-icon>
+													<v-icon size="small" class="mb-1 me-1" color="primary">
+														mdi-calendar-check</v-icon>
 												</template>
 											</v-list-item>
 											<v-list-item title="Điểm KT giữa kì" v-if="item.ktgiuaki">
@@ -774,8 +774,8 @@
 													<v-chip color="primary">{{ item.ktgiuaki ?? '-' }}</v-chip>
 												</template>
 												<template #prepend>
-													<v-icon size="small" class="mb-1 me-1"
-														color="primary">mdi-file-document-edit</v-icon>
+													<v-icon size="small" class="mb-1 me-1" color="primary">
+														mdi-file-document-edit</v-icon>
 												</template>
 											</v-list-item>
 											<v-list-item title="Điểm KT cuối kì" v-if="item.ktcuoiki">
@@ -783,8 +783,8 @@
 													<v-chip color="primary">{{ item.ktcuoiki ?? '-' }}</v-chip>
 												</template>
 												<template #prepend>
-													<v-icon size="small" class="mb-1 me-1"
-														color="primary">mdi-school</v-icon>
+													<v-icon size="small" class="mb-1 me-1" color="primary">mdi-school
+													</v-icon>
 												</template>
 											</v-list-item>
 										</v-list>
@@ -908,8 +908,8 @@
 </template>
 
 <script>
-export default {
-	props: [],
+	export default {
+		props: [],
 	data() {
 		const { useI18n } = VueI18n
 		const { t } = useI18n()
@@ -1616,5 +1616,5 @@ export default {
 			return flag
 		}
 	},
-}
+	}
 </script>

@@ -517,8 +517,12 @@ export default {
 						return
 					}
 
-					//Lấy học sinh đã nộp hoặc giáo viên đã chấm nháp
-					const DSHocSinhSubmited = $this.studentSubmissionsOriginal.filter(x => x.SubmissionStatus === 2 || x.SubmissionStatus === 3)
+					// Lấy học sinh đã nộp/chấm nháp; đồng thời gồm cả các bản ghi đã lên trạng thái 4 nhưng chưa có điểm.
+					const DSHocSinhSubmited = $this.studentSubmissionsOriginal.filter(x =>
+						x.SubmissionStatus === 2
+						|| x.SubmissionStatus === 3
+						|| (x.SubmissionStatus === 4 && (x.Score === null || x.Score === undefined))
+					)
 					const DSHocSinhGraded = []
 					for (var hocSinh of DSHocSinhSubmited) {
 						const { SubmissionContent, Score } = $this.fn_ChamBaiStudent(hocSinh, AsmConfig)

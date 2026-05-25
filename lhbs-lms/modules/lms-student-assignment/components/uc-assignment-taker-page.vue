@@ -556,28 +556,63 @@
                 ? this.buildAutoGradedPayload(payload)
                 : payload;
 
+            const isAutoGradedSubmit =
+                payloadForSubmit?.SubmissionStatus === this.SUBMISSION_STATUS.GRADED
+                && typeof payloadForSubmit?.Score === 'number';
+
+            let submitToken = null;
+            if ((payloadForSubmit?.SubmissionStatus ?? 0) >= this.SUBMISSION_STATUS.SUBMITTED) {
+                submitToken = await this.requestSubmitToken(isSendToStudent);
+                if (!submitToken) {
+                    Vue.$toast.error('Không lấy được one-time token nộp bài. Vui lòng thử lại.', { position: 'top' });
+                    return;
+                }
+            }
+
             const params = isSendToStudent
                 ? {
                     ...payloadForSubmit,
+                    SubmitToken: submitToken,
                     Is_Resubmit: this.Is_Resubmit,
                     AssignToStudentID: parseInt(this.urlParams.get('AssignToStudentID')),
                     HocSinhID: this.HocSinhDetail.HocSinhID,
                 }
                 : {
                     ...payloadForSubmit,
+                    SubmitToken: submitToken,
                     Is_Resubmit: this.Is_Resubmit,
                     HocSinhID: this.HocSinhDetail.HocSinhID,
                 };
 
             try {
                 await fetchPromise(endpoint, params, { cache: false });
-                const message = this.isFullQuizAutoGrade
+                const message = isAutoGradedSubmit
                     ? 'Nộp bài thành công! Hệ thống đã tự động chấm và công bố điểm.'
                     : 'Nộp bài thành công!';
                 Vue.$toast.success(message, { position: 'top' });
                 this.initPage();
             } catch (err) {
                 Vue.$toast.error('Có lỗi xảy ra khi nộp bài. Vui lòng thử lại.', { position: 'top' });
+            }
+        },
+
+        async requestSubmitToken(isSendToStudent) {
+            try {
+                const params = {
+                    HocSinhID: this.HocSinhDetail.HocSinhID,
+                };
+
+                if (isSendToStudent) {
+                    params.AssignToStudentID = parseInt(this.urlParams.get('AssignToStudentID'));
+                } else {
+                    params.AssignToClassID = this.assignmentData?.[0]?.[0]?.AssignToClassID;
+                }
+
+                const res = await fetchPromise('lms/EL_Student_SubmitToken_Begin', params, { cache: false });
+                return res?.SubmitToken || res?.[0]?.SubmitToken || null;
+            } catch (error) {
+                console.error('Lỗi requestSubmitToken:', error);
+                return null;
             }
         },
 
@@ -605,23 +640,31 @@
         buildAutoGradedPayload(payload) {
             const groups = this.getGroupsForAutoGrading();
             if (!groups.length) {
+                console.warn('Auto-grade fallback: thiếu cấu hình câu hỏi có đáp án, chuyển về trạng thái đã nộp.');
                 return {
                     ...payload,
-                    SubmissionStatus: this.SUBMISSION_STATUS.GRADED,
+                    SubmissionStatus: this.SUBMISSION_STATUS.SUBMITTED,
                 };
             }
 
             const hasAnyAnswerKey = this.countScorableQuizQuestions(groups) > 0;
             if (!hasAnyAnswerKey) {
-                // Full quiz luôn gửi trạng thái GRADED để backend tự động chấm.
-                // Chỉ không đính kèm điểm/manualScore khi client chưa có answer key.
+                console.warn('Auto-grade fallback: không tìm thấy answer key để chấm tự động, chuyển về trạng thái đã nộp.');
                 return {
                     ...payload,
-                    SubmissionStatus: this.SUBMISSION_STATUS.GRADED,
+                    SubmissionStatus: this.SUBMISSION_STATUS.SUBMITTED,
                 };
             }
 
             const graded = this.fn_AutoGradeSubmission({ answers: _.cloneDeep(this.puseranswers || {}) }, groups);
+            if (typeof graded?.Score !== 'number' || Number.isNaN(graded.Score)) {
+                console.warn('Auto-grade fallback: tính điểm thất bại, chuyển về trạng thái đã nộp.');
+                return {
+                    ...payload,
+                    SubmissionStatus: this.SUBMISSION_STATUS.SUBMITTED,
+                };
+            }
+
             return {
                 ...payload,
                 SubmissionStatus: this.SUBMISSION_STATUS.GRADED,

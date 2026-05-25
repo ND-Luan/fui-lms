@@ -1,186 +1,216 @@
 USE [LMS-LHBS]
 GO
-/****** Object:  StoredProcedure [dbo].[spAPI_KhoaCotDiem_Get]    Script Date: 2026-05-20 10:10:19 AM ******/
+/****** Object:  StoredProcedure [dbo].[spAPI_EL_Student_SaveSubmission_AssignToStudent]    Script Date: 2026-05-25 11:18:16 AM ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
-
-ALTER PROC [dbo].[spAPI_KhoaCotDiem_Get]
-    @LopID         VARCHAR(50),
-    @MonHocLopID   INT,
-    @MaNhomCotDiem VARCHAR(100),
-    @NienKhoa      INT,
-    @Semester      VARCHAR(50),
-    @SYS_USERID    VARCHAR(9)
+ALTER PROCEDURE [dbo].[spAPI_EL_Student_SaveSubmission_AssignToStudent]
+    @AssignToStudentID INT
+  , @HocSinhID         INT
+  , @SubmissionContent NVARCHAR(MAX)
+       , @SubmissionStatus  TINYINT -- 1: Draft, 2: Submitted, 4: Graded (full-quiz auto grade)
+       , @Score             DECIMAL(10, 2) = NULL
+       , @SubmitToken       VARCHAR(128) = NULL
+  , @sys_UserID        VARCHAR(9)
 AS
 BEGIN
-    SET NOCOUNT ON;
+              SET NOCOUNT ON;
 
-    -- =========================================================================
-    -- BƯỚC 1: Lấy thông tin môn học và danh sách môn học năng lực phẩm chất
-    -- =========================================================================
-    DECLARE @MonHocID            INT          = 0;
-    DECLARE @List_MonHoc_NLPC_ID NVARCHAR(50) = N'';
+              IF @SubmissionStatus >= 2
+              BEGIN
+                            IF NULLIF(LTRIM(RTRIM(@SubmitToken)), '') IS NULL
+                            BEGIN
+                                          RAISERROR(N'Thieu one-time token nop bai.', 16, 1);
+                                          RETURN;
+                            END;
 
-    SELECT
-        @MonHocID            = mhl.MonHocID,
-        @List_MonHoc_NLPC_ID = ISNULL(mh.List_MonHoc_NLPC_ID, N'')
-    FROM dbo.tblMonHocLop mhl
-    INNER JOIN dbo.tblMonHoc mh ON mh.MonHocID = mhl.MonHocID
-    WHERE mhl.MonHocLopID = @MonHocLopID;
+                            DECLARE @TokenHash VARBINARY(32) = HASHBYTES('SHA2_256', @SubmitToken);
+                            DECLARE @ConsumedRows INT = 0;
 
-    -- =========================================================================
-    -- BƯỚC 2: Xác định TemplateBangDiemID của môn học chính
-    -- =========================================================================
-    DECLARE @TemplateBangDiemID_Main INT = 0;
+                            ;WITH TokenPick AS
+                            (
+                                          SELECT TOP 1 SubmitTokenID
+                                          FROM dbo.tblEL_Student_SubmitTokens WITH (UPDLOCK, ROWLOCK, READPAST)
+                                          WHERE HocSinhID = @HocSinhID
+                                                 AND AssignToStudentID = @AssignToStudentID
+                                                 AND AssignToClassID IS NULL
+                                                 AND TokenHash = @TokenHash
+                                                 AND IsUsed = 0
+                                                 AND ExpireTime >= SYSDATETIME()
+                                          ORDER BY SubmitTokenID DESC
+                            )
+                            UPDATE tok
+                                    SET IsUsed = 1,
+                                                  UsedTime = SYSDATETIME()
+                            FROM dbo.tblEL_Student_SubmitTokens tok
+                            JOIN TokenPick pick ON tok.SubmitTokenID = pick.SubmitTokenID;
 
-    SELECT @TemplateBangDiemID_Main = TemplateBangDiemID
-    FROM dbo.tblMonHocLop
-    WHERE MonHocLopID = @MonHocLopID;
+                            SET @ConsumedRows = @@ROWCOUNT;
 
-    -- =========================================================================
-    -- BƯỚC 3: Xác định danh sách môn học NLPC (Năng Lực Phẩm Chất)
-    -- =========================================================================
-    DECLARE @TemplateBangDiemID_NLPCs TABLE
+                            IF @ConsumedRows = 0
+                            BEGIN
+                                          RAISERROR(N'One-time token khong hop le hoac da het han.', 16, 1);
+                                          RETURN;
+                            END;
+              END;
+
+    DECLARE @SubmissionID_Out BIGINT;
+    -- Lần nộp
+    DECLARE @LanNop INT = 1;
+    DECLARE @CheckLanNop INT;
+    SET @CheckLanNop = ISNULL((
+                                  SELECT TOP 1
+                                         LanNop
+                                  FROM
+                                         tblEL_Submissions
+                                  WHERE
+                                         HocSinhID        = @HocSinhID
+                                    AND  AssignToStudentID = @AssignToStudentID
+                                    AND  IsDeleted         = 0
+                                    AND  SubmissionStatus  >= 2
+                                  ORDER BY
+                                         1 DESC
+                              ), 0
+                             );
+    SET @LanNop = @CheckLanNop + 1;
+    DECLARE @Is_OverDue BIT = 0;
+    DECLARE @Duedate DATETIME;
+    SET @Duedate =
     (
-        TemplateBangDiemID INT NOT NULL,
-        MonHocLopID        INT NOT NULL
+        SELECT [DueDate]
+        FROM
+               tblEL_AssignToStudent
+        WHERE
+               AssignToStudentID = @AssignToStudentID
+          AND  IsDeleted          = 0
     );
+    IF GETDATE() > @Duedate
+        SET @Is_OverDue = 1;
+    -- Lấy AssignmentID
+    DECLARE @AssignmentID INT;
 
-    IF @List_MonHoc_NLPC_ID <> N''
-    BEGIN
-        INSERT INTO @TemplateBangDiemID_NLPCs (TemplateBangDiemID, MonHocLopID)
-        SELECT DISTINCT
-            mhl.TemplateBangDiemID,
-            mhl.MonHocLopID
-        FROM dbo.tblMonHocLop mhl
-        WHERE mhl.MonHocID IN (
-                SELECT CAST(value AS INT)
-                FROM STRING_SPLIT(@List_MonHoc_NLPC_ID, ',')
-                WHERE RTRIM(value) <> ''
-            )
-          AND mhl.NienKhoa    = @NienKhoa
-          AND mhl.LopNhomID   = @LopID
-          AND mhl.Enable      = 1
-          AND mhl.MonHocLopID <> @MonHocLopID;
-    END
-
-    -- =========================================================================
-    -- BƯỚC 4: Xây dựng danh sách MaCotDiem đặc biệt cho MonHocID = 36
-    -- =========================================================================
-    DECLARE @ListMaCotDiem36 TABLE (MaCotDiem VARCHAR(100));
-
-    IF @MonHocID = 36
-    BEGIN
-        INSERT INTO @ListMaCotDiem36 VALUES
-            ('TongDiem_CD1_' + @Semester),
-            ('TongDiem_CD2_' + @Semester),
-            ('TongDiem_CD3_' + @Semester);
-    END
-
-    -- =========================================================================
-    -- BƯỚC 5: Xây dựng danh sách MaCotDiem đặc biệt cho MonHocID = 5
-    -- =========================================================================
-    DECLARE @ListMaCotDiem5 TABLE (MaCotDiem VARCHAR(100));
-
-    IF @MonHocID = 5
-    BEGIN
-        IF @Semester = 'HK1'
-        BEGIN
-            IF @MaNhomCotDiem = 'DiemGK_HK1'
-                INSERT INTO @ListMaCotDiem5 VALUES
-                    ('Topic1_Result'), ('Topic2_Result'), ('DiemGK_HK1');
-            ELSE IF @MaNhomCotDiem = 'DiemCK_HK1'
-                INSERT INTO @ListMaCotDiem5 VALUES
-                    ('Topic1_Result'), ('Topic2_Result'),
-                    ('Topic3_Result'), ('Topic4_Result');
-        END
-        ELSE IF @Semester = 'HK2'
-        BEGIN
-            IF @MaNhomCotDiem = 'DiemGK_HK2'
-                INSERT INTO @ListMaCotDiem5 VALUES
-                    ('Topic5_Result'), ('Topic6_Result'), ('DiemGK_HK2');
-            ELSE IF @MaNhomCotDiem = 'DiemCK_HK2'
-                INSERT INTO @ListMaCotDiem5 VALUES
-                    ('Topic5_Result'), ('Topic6_Result'),
-                    ('Topic7_Result'), ('Topic8_Result');
-        END
-    END
-
-    -- =========================================================================
-    -- BƯỚC 6: Lấy danh sách cột điểm và trạng thái khóa
-    -- =========================================================================
-
-    -- -------------------------------------------------------------------------
-    -- PHẦN A: Cột điểm của môn học CHÍNH
-    -- -------------------------------------------------------------------------
-    SELECT
-        ISNULL(kcd.KhoaCotDiemID, 0)          AS KhoaCotDiemID,
-        @LopID                                AS LopID,
-        @MonHocLopID                          AS MonHocLopID,
-        ct.MaCotDiem                          AS MaCotDiem,
-        CAST(ISNULL(kcd.TinhTrang, 0) AS BIT) AS TinhTrang
-    FROM dbo.TemplateBangDiemChiTiet ct
-    INNER JOIN dbo.tblMonHocLop mhl
-        ON  mhl.MonHocLopID        = @MonHocLopID
-        AND mhl.TemplateBangDiemID = @TemplateBangDiemID_Main
-        AND mhl.Enable             = 1
-        AND mhl.NienKhoa           = @NienKhoa
-    OUTER APPLY (
-        SELECT TOP 1
-            k.KhoaCotDiemID,
-            k.TinhTrang
-        FROM dbo.tblKhoaCotDiem k
-        WHERE k.MaCotDiem = ct.MaCotDiem
-          AND k.MonHocLopID = @MonHocLopID
-          AND k.LopID = @LopID
-          AND k.Enable = 1
-        ORDER BY ISNULL(k.UpdateTime, k.CreateTime) DESC, k.KhoaCotDiemID DESC
-    ) kcd
+    SELECT TOP 1
+           @AssignmentID = ats.AssignmentID
+    FROM
+           dbo.tblEL_AssignToStudent ats
     WHERE
-        ct.TemplateBangDiemID = @TemplateBangDiemID_Main
-        AND ct.Enable         = 1
-        AND (
-            ct.MaNhomCotDiem = @MaNhomCotDiem
-            OR (@MonHocID = 36 AND ct.MaCotDiem IN (SELECT MaCotDiem FROM @ListMaCotDiem36))
-            OR (@MonHocID = 5  AND ct.MaCotDiem IN (SELECT MaCotDiem FROM @ListMaCotDiem5))
+           ats.AssignToStudentID = @AssignToStudentID
+      AND  ats.HocSinhID          = @HocSinhID
+      AND  ats.IsDeleted          = 0;
+    -- Sử dụng MERGE để chèn hoặc cập nhật
+    MERGE dbo.tblEL_Submissions AS target
+    USING
+    (
+        SELECT @AssignToStudentID AS AssignToStudentID
+             , @HocSinhID         AS HocSinhID
+    ) AS source
+    ON (
+           target.AssignToStudentID = source.AssignToStudentID
+     AND   target.HocSinhID = source.HocSinhID
+     AND   target.IsDeleted = 0
+       )
+
+    -- Khi đã có bản nháp từ trước và chưa nộp
+    WHEN MATCHED AND target.SubmissionStatus < 2 THEN UPDATE SET SubmissionContent = @SubmissionContent
+                                                               , SubmissionStatus = @SubmissionStatus
+                                                               , SubmissionTime = CASE
+                                                                                                                                                      WHEN @SubmissionStatus >= 2 THEN GETDATE()
+                                                                                       ELSE target.SubmissionTime
+                                                                                  END
+                                                                                                            , Score = CASE
+                                                                                                                                      WHEN @SubmissionStatus >= 2 THEN @Score
+                                                                                                                                      ELSE target.Score
+                                                                                                                               END
+                                                               , IsOverDue = @Is_OverDue
+                                                               , UpdateTime = GETDATE()
+                                                               , UpdateUser = @HocSinhID
+
+    -- Khi chưa có bản ghi nào
+    WHEN NOT MATCHED THEN INSERT
+                          (
+                              AssignToStudentID
+                            , AssignToClassID
+                            , HocSinhID
+                            , SubmissionContent
+                            , SubmissionStatus
+                            , SubmissionTime
+                            , Score
+                            , CreateUser
+                            , CreateTime
+                            , IsOverDue
+                            , LanNop
+                          )
+                          VALUES
+                          (
+                              @AssignToStudentID
+                            , -1
+                            , @HocSinhID
+                            , @SubmissionContent
+                            , @SubmissionStatus
+                                                                                                  , CASE WHEN @SubmissionStatus >= 2 THEN GETDATE() ELSE NULL END
+                                                                                                  , @Score
+                            , @HocSinhID
+                            , GETDATE()
+                            , @Is_OverDue
+                            , @LanNop
+                          );
+
+    -- Lấy ID của bản ghi vừa được tác động để ghi log
+    -- SCOPE_IDENTITY() chỉ hoạt động cho INSERT, nên cần SELECT lại để chắc chắn
+    SELECT TOP 1
+           @SubmissionID_Out = SubmissionID
+    FROM
+           dbo.tblEL_Submissions
+    WHERE
+           AssignToStudentID = @AssignToStudentID
+      AND  HocSinhID          = @HocSinhID
+      AND  IsDeleted          = 0;
+
+    -- Chỉ ghi log khi nộp bài thành công (Status=2), không ghi khi lưu nháp (Status=1)
+       IF @SubmissionStatus >= 2
+   AND @SubmissionID_Out IS NOT NULL
+    BEGIN
+        -- Ghi log, sử dụng SubmissionID vừa lấy được
+        INSERT INTO dbo.tblEL_Activity_Logs
+        (
+            HocSinhID
+          , ActivityType
+          , ResourceID
+          , ResourceType
+          , CreateUser
+          , CreateTime
         )
+        VALUES
+        (
+            @HocSinhID
+          , 'SUBMISSION_NEW'
+          , @SubmissionID_Out
+          , 'SUBMISSION'
+          , @HocSinhID
+          , GETDATE()
+        );
 
-    UNION
+        DECLARE @CurrentTime DATETIME = GETDATE();
+        --insert log nộp bài
+        EXEC spAPI_EL_Log_NopBai_Ins @SubmissionID = @SubmissionID_Out
+                                   , @SubmissionContent = @SubmissionContent
+                                   , @SubmissionTime = @CurrentTime
+                                   , @SYS_USERID = @HocSinhID;
+    END;
+    -- Lấy lại dữ liệu để load lại UI 
+    EXEC spAPI_EL_Student_GetAssignmentDetail_AssignToStudent @AssignToStudentID = @AssignToStudentID
+                                                            , @LanNop = @LanNop
+															, @HocSinhID = @HocSinhID
+                                                            , @sys_UserID = @HocSinhID;
 
-    -- -------------------------------------------------------------------------
-    -- PHẦN B: Cột điểm của các môn học NLPC
-    -- -------------------------------------------------------------------------
-    SELECT
-        ISNULL(kcd.KhoaCotDiemID, 0)                    AS KhoaCotDiemID,
-        @LopID                                          AS LopID,
-        nlpc.MonHocLopID                                AS MonHocLopID,
-        CONCAT(ct.CotDiemID, '_', ct.MaCotDiem)         AS MaCotDiem,
-        CAST(ISNULL(kcd.TinhTrang, 0) AS BIT)           AS TinhTrang
-    FROM dbo.TemplateBangDiemChiTiet ct
-    INNER JOIN @TemplateBangDiemID_NLPCs nlpc
-        ON  nlpc.TemplateBangDiemID = ct.TemplateBangDiemID
-    INNER JOIN dbo.tblMonHocLop mhl
-        ON  mhl.MonHocLopID        = nlpc.MonHocLopID
-        AND mhl.TemplateBangDiemID = nlpc.TemplateBangDiemID
-        AND mhl.Enable             = 1
-        AND mhl.NienKhoa           = @NienKhoa
-    OUTER APPLY (
-        SELECT TOP 1
-            k.KhoaCotDiemID,
-            k.TinhTrang
-        FROM dbo.tblKhoaCotDiem k
-        WHERE k.MaCotDiem = ct.MaCotDiem
-          AND k.MonHocLopID = nlpc.MonHocLopID
-          AND k.LopID = @LopID
-          AND k.Enable = 1
-        ORDER BY ISNULL(k.UpdateTime, k.CreateTime) DESC, k.KhoaCotDiemID DESC
-    ) kcd
-    WHERE
-        ct.MaNhomCotDiem = @MaNhomCotDiem
-        AND ct.Enable    = 1
-
-    ORDER BY MaCotDiem;
-
+    --Gắn thêm thông báo
+       IF (@SubmissionStatus >= 2)
+    BEGIN
+        EXEC [dbo].[spAPI_ThongBao_Ins] @ResourceID = @SubmissionID_Out
+                                      , @ResourceType = 'SUBMISSION'
+                                      , @ThongBao_TemplateID = 7
+                                      , @NguoiNhan = @HocSinhID
+                                      , @SYS_USERID = @HocSinhID;
+    END;
 END;
