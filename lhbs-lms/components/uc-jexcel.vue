@@ -79,6 +79,10 @@
 				type: Boolean,
 				default: false,
 			},
+			disableLazyLoading: {
+				type: Boolean,
+				default: false,
+			},
 		},
 		data() {
 			return {
@@ -122,6 +126,7 @@
 			jExcelOptions() {
 				let isLazyLoading = true
 				if (this.pagination) isLazyLoading = false
+				if (this.disableLazyLoading) isLazyLoading = false
 	
 				const worksheets = [
 					{

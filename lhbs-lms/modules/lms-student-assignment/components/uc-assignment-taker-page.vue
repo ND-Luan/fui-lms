@@ -507,12 +507,14 @@
             const params = isSendToStudent
                 ? {
                     ...payload,
+                    Is_Full_Quiz: this.isFullQuizAutoGrade,
                     Is_Resubmit: this.Is_Resubmit ?? 0,
                     AssignToStudentID: parseInt(this.urlParams.get('AssignToStudentID')),
                     HocSinhID: this.HocSinhDetail.HocSinhID,
                 }
                 : {
                     ...payload,
+                    Is_Full_Quiz: this.isFullQuizAutoGrade,
                     Is_Resubmit: this.Is_Resubmit ?? 0,
                     HocSinhID: this.HocSinhDetail.HocSinhID,
                 };
@@ -552,44 +554,77 @@
                 ? 'lms/EL_Student_SaveSubmission_AssignToStudent'
                 : 'lms/EL_Student_SaveSubmission';
 
-            const payloadForSubmit = this.isFullQuizAutoGrade
-                ? this.buildAutoGradedPayload(payload)
-                : payload;
-
-            const isAutoGradedSubmit =
-                payloadForSubmit?.SubmissionStatus === this.SUBMISSION_STATUS.GRADED
-                && typeof payloadForSubmit?.Score === 'number';
-
-            let submitToken = null;
-            if ((payloadForSubmit?.SubmissionStatus ?? 0) >= this.SUBMISSION_STATUS.SUBMITTED) {
-                submitToken = await this.requestSubmitToken(isSendToStudent);
-                if (!submitToken) {
-                    Vue.$toast.error('Không lấy được one-time token nộp bài. Vui lòng thử lại.', { position: 'top' });
-                    return;
-                }
-            }
-
-            const params = isSendToStudent
+            const buildParams = (payloadInput, submitToken) => (isSendToStudent
                 ? {
-                    ...payloadForSubmit,
+                    ...payloadInput,
+                    Is_Full_Quiz: this.isFullQuizAutoGrade,
                     SubmitToken: submitToken,
                     Is_Resubmit: this.Is_Resubmit,
                     AssignToStudentID: parseInt(this.urlParams.get('AssignToStudentID')),
                     HocSinhID: this.HocSinhDetail.HocSinhID,
                 }
                 : {
-                    ...payloadForSubmit,
+                    ...payloadInput,
+                    Is_Full_Quiz: this.isFullQuizAutoGrade,
                     SubmitToken: submitToken,
                     Is_Resubmit: this.Is_Resubmit,
                     HocSinhID: this.HocSinhDetail.HocSinhID,
-                };
+                });
 
             try {
-                await fetchPromise(endpoint, params, { cache: false });
-                const message = isAutoGradedSubmit
-                    ? 'Nộp bài thành công! Hệ thống đã tự động chấm và công bố điểm.'
-                    : 'Nộp bài thành công!';
-                Vue.$toast.success(message, { position: 'top' });
+                if (this.isFullQuizAutoGrade) {
+                    // Phase 1: chốt trạng thái 4 để API detail cho phép trả config có đáp án.
+                    const phase1Payload = {
+                        ...payload,
+                        SubmissionStatus: this.SUBMISSION_STATUS.GRADED,
+                    };
+
+                    let tokenPhase1 = await this.requestSubmitToken(isSendToStudent);
+                    if (!tokenPhase1) {
+                        Vue.$toast.error('Không lấy được one-time token nộp bài. Vui lòng thử lại.', { position: 'top' });
+                        return;
+                    }
+
+                    await fetchPromise(endpoint, buildParams(phase1Payload, tokenPhase1), { cache: false });
+
+                    const { AssignToClassID, AssignToStudentID } = this.getAssignmentIDs();
+                    await this.loadAssignmentData(AssignToClassID, AssignToStudentID);
+
+                    const phase2Payload = this.buildAutoGradedPayload({
+                        ...payload,
+                        SubmissionStatus: this.SUBMISSION_STATUS.GRADED,
+                    });
+
+                    const canPublishScore =
+                        phase2Payload?.SubmissionStatus === this.SUBMISSION_STATUS.GRADED
+                        && typeof phase2Payload?.Score === 'number';
+
+                    if (canPublishScore) {
+                        const tokenPhase2 = await this.requestSubmitToken(isSendToStudent);
+                        if (!tokenPhase2) {
+                            Vue.$toast.error('Đã nộp bài nhưng chưa lấy được token để cập nhật điểm. Vui lòng thử lại.', { position: 'top' });
+                            this.initPage();
+                            return;
+                        }
+                        await fetchPromise(endpoint, buildParams(phase2Payload, tokenPhase2), { cache: false });
+                        Vue.$toast.success('Nộp bài thành công! Hệ thống đã tự động chấm và công bố điểm.', { position: 'top' });
+                    } else {
+                        Vue.$toast.success('Nộp bài thành công!', { position: 'top' });
+                    }
+                } else {
+                    const payloadForSubmit = payload;
+                    let submitToken = null;
+                    if ((payloadForSubmit?.SubmissionStatus ?? 0) >= this.SUBMISSION_STATUS.SUBMITTED) {
+                        submitToken = await this.requestSubmitToken(isSendToStudent);
+                        if (!submitToken) {
+                            Vue.$toast.error('Không lấy được one-time token nộp bài. Vui lòng thử lại.', { position: 'top' });
+                            return;
+                        }
+                    }
+                    await fetchPromise(endpoint, buildParams(payloadForSubmit, submitToken), { cache: false });
+                    Vue.$toast.success('Nộp bài thành công!', { position: 'top' });
+                }
+
                 this.initPage();
             } catch (err) {
                 Vue.$toast.error('Có lỗi xảy ra khi nộp bài. Vui lòng thử lại.', { position: 'top' });

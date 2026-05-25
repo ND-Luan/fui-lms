@@ -11,21 +11,33 @@ ALTER PROCEDURE [dbo].[spAPI_EL_Student_SaveSubmission]
   , @SubmissionContent NVARCHAR(MAX)
        , @SubmissionStatus  TINYINT -- 1: Draft, 2: Submitted, 4: Graded (full-quiz auto grade)
        , @Score             DECIMAL(10, 2) = NULL
+         , @Is_Full_Quiz      BIT = 0
        , @SubmitToken       VARCHAR(128) = NULL
   , @sys_UserID        VARCHAR(9)
 AS
 BEGIN
     SET NOCOUNT ON;
 
+              IF @SubmissionStatus = 4 AND @Score IS NULL AND ISJSON(@SubmissionContent) = 1
+              BEGIN
+                            SELECT @Score = ROUND(SUM(ISNULL(
+                                   COALESCE(
+                                          TRY_CAST(JSON_VALUE(ans.[value], '$.grading.manualScore') AS DECIMAL(10, 2)),
+                                          TRY_CAST(JSON_VALUE(ans.[value], '$.grading.autoScore') AS DECIMAL(10, 2)),
+                                          0
+                                   ),
+                                   0
+                            )), 2)
+                            FROM OPENJSON(JSON_QUERY(@SubmissionContent, '$.answers')) ans;
+              END;
+
               IF @SubmissionStatus >= 2
               BEGIN
-                            IF NULLIF(LTRIM(RTRIM(@SubmitToken)), '') IS NULL
-                            BEGIN
-                                          RAISERROR(N'Thieu one-time token nop bai.', 16, 1);
-                                          RETURN;
-                            END;
+                            DECLARE @SubmitTokenNorm VARCHAR(128) = NULLIF(LTRIM(RTRIM(@SubmitToken)), '');
+                            DECLARE @TokenHash VARBINARY(32) = NULL;
+                            IF @SubmitTokenNorm IS NOT NULL
+                                   SET @TokenHash = HASHBYTES('SHA2_256', @SubmitTokenNorm);
 
-                            DECLARE @TokenHash VARBINARY(32) = HASHBYTES('SHA2_256', @SubmitToken);
                             DECLARE @ConsumedRows INT = 0;
 
                             ;WITH TokenPick AS
@@ -35,7 +47,7 @@ BEGIN
                                           WHERE HocSinhID = @HocSinhID
                                                  AND AssignToClassID = @AssignToClassID
                                                  AND AssignToStudentID IS NULL
-                                                 AND TokenHash = @TokenHash
+                                                 AND (@TokenHash IS NULL OR TokenHash = @TokenHash)
                                                  AND IsUsed = 0
                                                  AND ExpireTime >= SYSDATETIME()
                                           ORDER BY SubmitTokenID DESC
@@ -50,7 +62,7 @@ BEGIN
 
                             IF @ConsumedRows = 0
                             BEGIN
-                                          RAISERROR(N'One-time token khong hop le hoac da het han.', 16, 1);
+                                          RAISERROR(N'Khong tim thay one-time token hop le. Vui long yeu cau token moi va nop lai.', 16, 1);
                                           RETURN;
                             END;
               END;
@@ -102,22 +114,31 @@ BEGIN
      AND   target.IsDeleted = 0
        )
 
-    -- Khi đã có bản nháp từ trước và chưa nộp
-       WHEN MATCHED AND target.SubmissionStatus < 2 THEN UPDATE SET SubmissionContent = @SubmissionContent
-                                                               , SubmissionStatus = @SubmissionStatus
-                                                               , SubmissionTime = CASE
-                                                                                                                                                      WHEN @SubmissionStatus >= 2 THEN GETDATE()
-                                                                                       ELSE target.SubmissionTime
-                                                                                  END
-                                                                                                            , Score = CASE
-                                                                                                                                      WHEN @SubmissionStatus >= 2 THEN @Score
-                                                                                                                                      ELSE target.Score
-                                                                                                                               END
-                                                               , IsOverDue = @Is_OverDue
-                                                               , UpdateTime = GETDATE()
-                                                               , UpdateUser = @HocSinhID
+        -- Khi đã có bản ghi: luôn cho cập nhật nháp; cho cập nhật bài đã nộp nếu là full-quiz hoặc status=4
+               WHEN MATCHED AND (
+                              target.SubmissionStatus < 2
+                              OR (@Is_Full_Quiz = 1 AND @SubmissionStatus >= 2)
+                              OR (@SubmissionStatus = 4)
+               ) THEN UPDATE SET SubmissionContent = @SubmissionContent
+                                                                                                             , SubmissionStatus = @SubmissionStatus
+                                                                                                             , SubmissionTime = CASE
+                                                                                                                                                WHEN @SubmissionStatus >= 2 THEN GETDATE()
+                                                                                                                                                ELSE target.SubmissionTime
+                                                                                                                                         END
+                                                                                                             , Score = CASE
+                                                                                                                                WHEN @SubmissionStatus >= 2 AND @Score IS NOT NULL THEN @Score
+                                                                                                                                WHEN @SubmissionStatus >= 2 THEN target.Score
+                                                                                                                                ELSE target.Score
+                                                                                                                         END
+                                                                                                             , GradedDate = CASE
+                                                                                                                                WHEN @SubmissionStatus = 4 THEN GETDATE()
+                                                                                                                                ELSE target.GradedDate
+                                                                                                                           END
+                                                                                                             , IsOverDue = @Is_OverDue
+                                                                                                             , UpdateTime = GETDATE()
+                                                                                                             , UpdateUser = @HocSinhID
 
-    -- Khi chưa có bản ghi nào
+       -- Khi chưa có bản ghi nào
     WHEN NOT MATCHED THEN INSERT
                           (
                               AssignToClassID
@@ -126,6 +147,8 @@ BEGIN
                             , SubmissionStatus
                             , SubmissionTime
                             , Score
+                            , GradedDate
+                            , Log_ChamBaiID
                             , CreateUser
                             , CreateTime
                             , IsOverDue
@@ -139,6 +162,8 @@ BEGIN
                             , @SubmissionStatus
                                                                                                   , CASE WHEN @SubmissionStatus >= 2 THEN GETDATE() ELSE NULL END
                                                                                                   , @Score
+                                                                                                  , CASE WHEN @SubmissionStatus = 4 THEN GETDATE() ELSE NULL END
+                                                                                                  , NULL
                             , @HocSinhID
                             , GETDATE()
                             , @Is_OverDue
@@ -186,6 +211,56 @@ BEGIN
                                    , @SubmissionContent = @SubmissionContent
                                    , @SubmissionTime = @CurrentTime
                                    , @SYS_USERID = @HocSinhID;
+
+              IF @SubmissionStatus = 4
+              BEGIN
+                     DECLARE @Log_ChamBaiID_New INT = NULL;
+                     DECLARE @AssignmentConfig_Log NVARCHAR(MAX) = NULL;
+
+                     SELECT TOP 1 @AssignmentConfig_Log = AssignmentConfig
+                     FROM dbo.tblEL_Submissions
+                     WHERE SubmissionID = @SubmissionID_Out
+                       AND IsDeleted = 0;
+
+                     INSERT INTO dbo.tblEL_Log_ChamBai
+                     (
+                            SubmissionID,
+                            AssignToClassID,
+                            AssignToStudentID,
+                            AssignmentConfig,
+                            SubmissionStatus,
+                            SubmissionContent,
+                            Reason,
+                            CreateUser,
+                            CreateTime,
+                            UpdateUser,
+                            UpdateTime
+                     )
+                     VALUES
+                     (
+                            @SubmissionID_Out,
+                            @AssignToClassID,
+                            NULL,
+                            @AssignmentConfig_Log,
+                            @SubmissionStatus,
+                            @SubmissionContent,
+                            NULL,
+                            @HocSinhID,
+                            GETDATE(),
+                            @HocSinhID,
+                            GETDATE()
+                     );
+
+                     SET @Log_ChamBaiID_New = SCOPE_IDENTITY();
+
+                     UPDATE dbo.tblEL_Submissions
+                     SET GradedDate = GETDATE(),
+                            Log_ChamBaiID = @Log_ChamBaiID_New,
+                            UpdateTime = GETDATE(),
+                            UpdateUser = @HocSinhID
+                     WHERE SubmissionID = @SubmissionID_Out
+                       AND IsDeleted = 0;
+              END;
     END;
     -- Lấy lại dữ liệu để load lại UI 
     EXEC spAPI_EL_Student_GetAssignmentDetail @AssignToClassID = @AssignToClassID

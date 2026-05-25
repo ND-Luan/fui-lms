@@ -49,7 +49,7 @@
         <v-divider />
 
         <v-data-table-virtual :headers :items="DSKhenThuong" item-value="HocSinhID" :items-per-page="-1"
-            hide-default-footer  style="max-height: calc(100dvh - 77px); overflow-y: auto;">
+            hide-default-footer style="max-height: calc(100dvh - 77px); overflow-y: auto;">
             <template #item.HocSinh="{ item }">
                 <uc-info-student :item="item" />
             </template>
@@ -144,7 +144,7 @@
                         </v-col>
                     </v-row>
                     <uc-jexcel v-model="importInstance" v-model:dataSource="importData" :columns="importColumns"
-                        :key="importKey" style="max-height: calc(100vh - 280px); overflow: auto;" />
+                        :key="importKey" :disable-lazy-loading="true" style="max-height: calc(100vh - 280px); overflow: auto;" />
                 </v-card-text>
                 <v-divider />
                 <v-card-actions class="pa-4">
@@ -306,12 +306,17 @@
             return [idColumn, ...selected]
         },
 
-        resetImportData(rowCount = 40) {
+        getImportRowCount() {
+            return Math.max(this.DSKhenThuong.length + 20, 200)
+        },
+
+        resetImportData(rowCount = null) {
+            const safeRowCount = Math.max(Number(rowCount ?? this.getImportRowCount()) || 0, 1)
             const template = {}
             for (const col of this.importColumns) {
                 template[col.name] = ''
             }
-            this.importData = Array.from({ length: rowCount }, () => ({ ...template }))
+            this.importData = Array.from({ length: safeRowCount }, () => ({ ...template }))
         },
 
         normalizeImportRows(writableFields) {

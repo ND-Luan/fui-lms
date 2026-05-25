@@ -210,7 +210,15 @@
 					<div>
 						<span>{{ formatDate(item.SubmissionTime) }}</span>
 					</div>
+					<div v-if="isFullQuizCurrentAssignment && item.GradedDate" class="text-medium-emphasis" style="font-size: 13px;">
+						<span>Chấm: {{ formatDate(item.GradedDate) }}</span>
+					</div>
 
+				</div>
+				<div v-else-if="isFullQuizCurrentAssignment && item.GradedDate" class="d-flex flex-column">
+					<div>
+						<span>Chấm: {{ formatDate(item.GradedDate) }}</span>
+					</div>
 				</div>
 				<div class="d-flex ga-2">
 					<span style="font-size: 12px;" size="small" variant="text">Số lần truy cập: <span
@@ -319,8 +327,8 @@
 </template>
 
 <script>
-export default {
-	name: 'uc-baocaobaitapdanop',
+	export default {
+		name: 'uc-baocaobaitapdanop',
 	inject: ['snackbarRef', 'iframeRef', 'confirmRef'],
 	props: {
 		assigntoclassid: Number,
@@ -382,6 +390,16 @@ export default {
 		assignmentInfo() {
 			return this.assignmentList.find(a => a.AssignToClassID === this.selectedAssignToClassID) || {};
 		},
+		isFullQuizCurrentAssignment() {
+			const value = this.assignmentInfo?.Is_Full_Quiz
+			if (typeof value === 'boolean') return value
+			if (typeof value === 'number') return value === 1
+			if (typeof value === 'string') {
+				const normalized = value.trim().toLowerCase()
+				return normalized === '1' || normalized === 'true'
+			}
+			return false
+		},
 		completionRate() {
 			if (!this.stats.TotalStudents || this.stats.TotalStudents === 0) return 0;
 			return ((this.stats.SubmittedCount || 0) / this.stats.TotalStudents) * 100;
@@ -426,6 +444,7 @@ export default {
 			// console.log('newId', newId)
 			if (newId && newId !== oldId) {
 				this.studentSelected = []
+				this.buildHeaders()
 				if (newId == -1) {
 					this.loadAllDataForAssignment(null);
 					vueData.AssignType = 'STUDENT'
@@ -448,6 +467,40 @@ export default {
 		}
 	},
 	methods: {
+		buildHeaders() {
+			if (this.assignmentInfo && (this.assignmentInfo.LimitAssigned == 1 || this.assignmentInfo.LimitAssigned == null)) {
+				const submissionTimeTitle = this.isFullQuizCurrentAssignment
+					? 'Thời gian nộp & chấm'
+					: this.$t('message.SubmissionTime')
+
+				const headers = [
+					{ title: this.$t('message.StudentID'), key: 'HocSinhID', sortable: false, width: 100, align: 'center' },
+					{ title: this.$t('message.RegistrationNumber'), key: 'SoDanhBo', sortable: false, width: 130, align: 'center' },
+					{ title: this.$t('message.StudentName'), key: 'HoTen', sortable: false, width: 300 },
+					{ title: this.$t('message.Status'), key: 'Status', sortable: true },
+					{ title: submissionTimeTitle, key: 'SubmissionTime', sortable: true },
+				]
+
+				if (!this.isFullQuizCurrentAssignment) {
+					headers.push({ title: 'Giáo viên chấm', key: 'TeacherGraded', sortable: true })
+				}
+
+				headers.push(
+					{ title: this.$t('message.Score'), key: 'Score', sortable: true },
+					{ title: this.$t('message.Actions'), key: 'actions', sortable: false, align: 'end' }
+				)
+
+				this.headers = headers
+				return
+			}
+
+			this.headers = [
+				{ title: this.$t('message.StudentID'), key: 'HocSinhID', sortable: false, width: 100, align: 'center' },
+				{ title: this.$t('message.RegistrationNumber'), key: 'SoDanhBo', sortable: false, width: 130, align: 'center' },
+				{ title: this.$t('message.StudentName'), key: 'HoTen', sortable: false, width: 300 },
+				{ title: this.$t('message.SubmissionInfo'), key: 'thongtinnopbai', }
+			]
+		},
 		isDisabled(obj) {
 			return !obj.SubmissionID
 				|| obj.SubmissionStatus == 1
@@ -717,20 +770,7 @@ export default {
 						// vueData.AssignToStudentID_FromURL = this.assignmentList[0].AssignToStudentID;
 					}
 				}
-				if (this.assignmentInfo && (this.assignmentInfo.LimitAssigned == 1 || this.assignmentInfo.LimitAssigned == null)) {
-					this.headers = [{ title: this.$t('message.StudentID'), key: 'HocSinhID', sortable: false, width: 100, align: 'center' },
-					{ title: this.$t('message.RegistrationNumber'), key: 'SoDanhBo', sortable: false, width: 130, align: 'center' },
-					{ title: this.$t('message.StudentName'), key: 'HoTen', sortable: false, width: 300 }, { title: this.$t('message.Status'), key: 'Status', sortable: true },
-					{ title: this.$t('message.SubmissionTime'), key: 'SubmissionTime', sortable: true },
-					{ title: 'Giáo viên chấm', key: 'TeacherGraded', sortable: true },
-					{ title: this.$t('message.Score'), key: 'Score', sortable: true },
-					{ title: this.$t('message.Actions'), key: 'actions', sortable: false, align: 'end' }]
-				} else {
-					this.headers = [{ title: this.$t('message.StudentID'), key: 'HocSinhID', sortable: false, width: 100, align: 'center' },
-					{ title: this.$t('message.RegistrationNumber'), key: 'SoDanhBo', sortable: false, width: 130, align: 'center' },
-					{ title: this.$t('message.StudentName'), key: 'HoTen', sortable: false, width: 300 },
-					{ title: this.$t('message.SubmissionInfo'), key: 'thongtinnopbai', }]
-				}
+				this.buildHeaders()
 
 			});
 		},
@@ -914,13 +954,5 @@ export default {
 		}
 		await this.initialize();
 	},
-
-}
+	}
 </script>
-<style scoped>
-.text-truncate {
-	white-space: nowrap;
-	overflow: hidden;
-	text-overflow: ellipsis;
-}
-</style>
