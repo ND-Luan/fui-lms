@@ -144,7 +144,8 @@
                         </v-col>
                     </v-row>
                     <uc-jexcel v-model="importInstance" v-model:dataSource="importData" :columns="importColumns"
-                        :key="importKey" :disable-lazy-loading="true" style="max-height: calc(100vh - 280px); overflow: auto;" />
+                        :key="importKey" :disable-lazy-loading="true"
+                        style="max-height: calc(100vh - 280px); overflow: auto;" />
                 </v-card-text>
                 <v-divider />
                 <v-card-actions class="pa-4">
