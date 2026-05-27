@@ -1,5 +1,6 @@
 <template>
-	<v-dialog :model-value="visible" @update:model-value="$emit('update:visible', false)" max-width="720px" scrollable>
+	<v-dialog :model-value="visible" @update:model-value="$emit('update:visible', false)"
+		:max-width="isMobile ? undefined : '720px'" :fullscreen="isMobile" scrollable>
 		<v-card class="gb-card">
 
 			<!-- Header -->
@@ -28,11 +29,6 @@
 				<div class="gb-stat">
 					<div class="gb-stat-val">{{ gradedCount }}</div>
 					<div class="gb-stat-lbl">Đã chấm</div>
-				</div>
-				<div class="gb-stat-div"></div>
-				<div class="gb-stat">
-					<div class="gb-stat-val" :class="avgColor">{{ avgScore }}</div>
-					<div class="gb-stat-lbl">Điểm TB</div>
 				</div>
 			</div>
 
@@ -67,8 +63,7 @@
 								<div class="gb-row-name">{{ item.AssignmentTitle }}</div>
 							</td>
 							<td class="text-center">
-								<span v-if="item.Score != null" class="gb-score-chip"
-									:class="getScoreClass(item.Score, item.MaxScore)">
+								<span v-if="item.Score != null" class="gb-score-chip">
 									{{ item.Score }}
 								</span>
 								<span v-else class="gb-score-empty">—</span>
@@ -76,7 +71,7 @@
 							<td class="text-center gb-max-cell">{{ item.MaxScore }}</td>
 							<td class="text-center">
 								<div v-if="item.Score != null" class="gb-pct-bar-wrap">
-									<div class="gb-pct-bar" :class="getScoreClass(item.Score, item.MaxScore)"
+									<div class="gb-pct-bar"
 										:style="{ width: Math.round((item.Score / item.MaxScore) * 100) + '%' }"></div>
 									<span class="gb-pct-label">{{ Math.round((item.Score / item.MaxScore) * 100)
 										}}%</span>
@@ -123,19 +118,6 @@
 		computed: {
 			gradedCount() {
 				return this.gradeData.filter(r => r.Score != null).length
-			},
-			avgScore() {
-				const graded = this.gradeData.filter(r => r.Score != null && r.MaxScore)
-				if (!graded.length) return '—'
-				const sum = graded.reduce((s, r) => s + (r.Score / r.MaxScore) * 10, 0)
-				return (sum / graded.length).toFixed(1)
-			},
-			avgColor() {
-				const v = parseFloat(this.avgScore)
-				if (isNaN(v)) return ''
-				if (v < 5) return 'text-error'
-				if (v < 7) return 'text-warning'
-				return 'text-success'
 			}
 		},
 	
@@ -184,14 +166,6 @@
 				} finally {
 					this.loading = false
 				}
-			},
-	
-			getScoreClass(score, maxScore) {
-				if (score == null || !maxScore) return ''
-				const ratio = score / maxScore
-				if (ratio < 0.5) return 'score--fail'
-				if (ratio < 0.7) return 'score--mid'
-				return 'score--pass'
 			}
 		}
 	}

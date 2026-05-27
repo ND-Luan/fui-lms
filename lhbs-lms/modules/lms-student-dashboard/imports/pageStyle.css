@@ -193,6 +193,8 @@
     width: 36px;
     height: 24px;
     border-radius: 6px;
+    background: rgba(var(--v-theme-on-surface), .06);
+    color: rgba(var(--v-theme-on-surface), .82);
     font-size: 12px;
     font-weight: 700;
 }
@@ -200,22 +202,6 @@
 .gb-score-empty {
     color: rgba(var(--v-theme-on-surface), .3);
     font-size: 14px;
-}
-
-/* Score states */
-.score--fail {
-    background: rgba(var(--v-theme-error), .12);
-    color: rgb(var(--v-theme-error));
-}
-
-.score--mid {
-    background: rgba(var(--v-theme-warning), .12);
-    color: rgb(var(--v-theme-warning));
-}
-
-.score--pass {
-    background: rgba(var(--v-theme-success), .12);
-    color: rgb(var(--v-theme-success));
 }
 
 /* ── Percent bar ── */
@@ -235,19 +221,8 @@
     top: 0;
     bottom: 0;
     border-radius: 4px;
+    background: rgba(var(--v-theme-on-surface), .24);
     transition: width .4s ease;
-}
-
-.gb-pct-bar.score--fail {
-    background: rgba(var(--v-theme-error), .4);
-}
-
-.gb-pct-bar.score--mid {
-    background: rgba(var(--v-theme-warning), .4);
-}
-
-.gb-pct-bar.score--pass {
-    background: rgba(var(--v-theme-success), .4);
 }
 
 .gb-pct-label {
@@ -264,6 +239,43 @@
 /* ── Actions ── */
 .gb-actions {
     padding: 10px 16px;
+}
+
+@media (max-width: 600px) {
+    .gb-card {
+        height: 100%;
+        border-radius: 0 !important;
+    }
+
+    .gb-title {
+        padding: 12px;
+    }
+
+    .gb-stats-bar {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 0;
+        padding: 10px 12px;
+    }
+
+    .gb-body {
+        overflow-x: auto;
+    }
+
+    .gb-table {
+        min-width: 560px;
+    }
+
+    .gb-table .v-table__wrapper {
+        max-height: calc(100vh - 190px);
+    }
+
+    .gb-row-name {
+        max-width: 220px;
+    }
+
+    .gb-actions {
+        padding: 8px 12px;
+    }
 }
 
 
