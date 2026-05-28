@@ -1,36 +1,33 @@
 {
-    "data": [
-        {
-            "KhoiID": "parseInt(KhoiID)",
-            "MonHocID": "parseInt(MonHocID)",
-            "NienKhoa": "parseInt(NienKhoa)",
-            "NienKhoaItem": null
-        },
-        {
-            "EXE":"initPage()"
-        }
-    ],
-    "watch": {},
-    "controls": [
-        {
-            "prop": "fluid grid-list-md",
-            "rows": [
-                {
-                    "prop": "",
-                    "cols": [
-                        {
-                            "el": "uc-main-page",
-                            "attr": {
-                                "v-if": "NienKhoaItem"
-                            }
-                        }
-                    ]
-                }
-            ]
-        }
-    ],
-    "set": {
-        "menu": false,
-        "menuLeft": false
+  "data": [
+    {
+      "EXE": "IsCheck_NotRoleParent(vueData.user)"
+    },
+    {
+      "CapID": "parseInt(capid)"
+    },
+    {
+      "KhoiID": "parseInt(KhoiID)"
+    },
+    {
+      "MonHocID": "parseInt(MonHocID)"
     }
+  ],
+  "watch": {},
+  "controls": [
+    {
+      "prop": "fluid pa-0",
+      "rows": [
+        {
+          "prop": ":no-gutters='true'",
+          "cols": [
+            {
+              "el": "uc-main-layout"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "set": {}
 }

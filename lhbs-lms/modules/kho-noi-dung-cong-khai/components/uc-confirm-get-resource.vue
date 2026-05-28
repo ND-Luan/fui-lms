@@ -1,69 +1,87 @@
 <template>
-    <v-dialog v-model="isOpen" max-width="500px" transition="dialog-transition">
-        <v-card>
-            <v-card-title class="d-flex py-0">
-                <span>Chọn tuần học lưu trữ nội dung</span>
-                <v-spacer></v-spacer>
-                <v-btn variant="text" icon="mdi-close" @click="$emit('update:isOpen', false)"></v-btn>
-            </v-card-title>
-            <v-card-text class="pa-2">
-                <v-form ref="formRef">
-                    <v-select label="Tuần học" v-model="TuanHocID_Selected" return-object :items="this.TuanHocList" item-title="Tuan_HienThi" item-value="TuanHocID" density="compact" hide-details></v-select>
-                </v-form>
-            </v-card-text>
-            <v-card-actions>
-                <v-spacer></v-spacer>
-                    <v-btn variant="text">Hủy</v-btn>
-                     <v-btn variant="text" @click="SaveResource">Xác nhận</v-btn>
-            </v-card-actions>
-        </v-card>
-    </v-dialog>
+    <uc-dialog v-model="isShow" title="Chọn tuần học lưu trữ nội dung" done-text="Xác nhận" @onSubmit="saveResource">
+        <v-form ref="formRef">
+            <v-select
+                v-model="TuanHocItem"
+                label="Tuần học"
+                :items="TuanHocList"
+                item-title="Tuan_HienThi"
+                item-value="TuanHocID"
+                return-object
+                hide-details="auto"
+            />
+        </v-form>
+    </uc-dialog>
 </template>
+
 <script>
 export default {
-    props: ['isOpen', 'resource'],
-    emits: ['update:isOpen','finish-save'],
+    inject: ['snackbarRef', 'confirmRef'],
+    props: {
+        modelValue: Boolean,
+        resource: Object,
+    },
+    emits: ['update:modelValue', 'finish-save'],
     data() {
         return {
             TuanHocList: [],
-            TuanHocID_Selected:null
+            TuanHocItem: null,
         }
     },
-    async mounted() {
-        this.TuanHocList = await GET_TuanHoc()
-        this.TuanHocID_Selected = this.TuanHocList.find(th => th.Is_Active)
-        console.log(' this.TuanHocList', this.TuanHocList)
+    computed: {
+        isShow: {
+            get() { return this.modelValue },
+            set(value) { this.$emit('update:modelValue', value) },
+        },
+    },
+    watch: {
+        modelValue(v) {
+            if (v && !this.TuanHocList.length) this.getTuanHoc()
+        },
+    },
+    mounted() {
+        this.getTuanHoc()
     },
     methods: {
-        SaveResource(){
-            if(!this.TuanHocID_Selected && !this.TuanHocID_Selected.TuanHocID){
-                Vue.$toast.warning('Không tìm thấy tuần học', { position: 'top' })
-                return 
-            }
-            if (this.resource.ResourceType == 'ASSIGNMENT') {
-				let payload = {
-					AssignmentID: this.resource.ResourceID,
-                    TuanHocID: this.TuanHocID_Selected.TuanHocID
-				}
-				ajaxCALL('/lms/EL_Teacher_Copy_ContentByAssignmentID', payload, res => {
-					this.$emit('finish-save')
-					Vue.$toast.success(this.$t('message.RetrievedSuccess'), { position: 'top' })
-                    this.$emit('update:isOpen', false)
-				})
-			} else {
-				let payload = {
-					LessonID: this.resource.ResourceID,
-                    TuanHocID: this.TuanHocID_Selected.TuanHocID
-				}
-				ajaxCALL('/lms/EL_Teacher_Copy_ContentByLessonID', payload, res => {
-					this.$emit('finish-save')
-					Vue.$toast.success(this.$t('message.RetrievedSuccess'), { position: 'top' })
-                      this.$emit('update:isOpen', false)
-				})
-			}
+        async getTuanHoc() {
+            const res = await fetchPromise('lms/TuanHocTap_Get', { NienKhoa: vueData.NienKhoa })
+            this.TuanHocList = res ?? []
+            this.TuanHocItem = this.TuanHocList.find(tuanHoc => tuanHoc.Is_Active) || this.TuanHocList[0] || null
         },
+        getCopyEndpoint() {
+            return this.resource?.ResourceType === 'ASSIGNMENT'
+                ? 'lms/EL_Teacher_Copy_ContentByAssignmentID'
+                : 'lms/EL_Teacher_Copy_ContentByLessonID'
+        },
+        getCopyPayload() {
+            const resourceID = this.resource?.ResourceID
+            const tuanHocID = this.TuanHocItem?.TuanHocID
+            if (this.resource?.ResourceType === 'ASSIGNMENT') {
+                return { AssignmentID: resourceID, TuanHocID: tuanHocID }
+            }
+            return { LessonID: resourceID, TuanHocID: tuanHocID }
+        },
+        async saveResource() {
+            if (!this.TuanHocItem?.TuanHocID) {
+                this.snackbarRef.value.showSnackbar({ message: 'Không tìm thấy tuần học', color: 'warning' })
+                return
+            }
+            if (!this.resource?.ResourceID) {
+                this.snackbarRef.value.showSnackbar({ message: 'Không tìm thấy nội dung cần lấy', color: 'warning' })
+                return
+            }
 
-        GET_TuanHoc
-    }
+            const ok = await this.confirmRef.value.show({
+                title: `Xác nhận lấy nội dung "${this.resource.Title || 'đã chọn'}" về ${this.TuanHocItem.Tuan_HienThi}?`,
+                type: 'confirm',
+            })
+            if (!ok) return
+
+            await fetchPromise(this.getCopyEndpoint(), this.getCopyPayload(), { cache: false })
+            this.$emit('finish-save')
+            this.snackbarRef.value.showSnackbar({ message: 'Lấy nội dung thành công', color: 'success' })
+            this.isShow = false
+        },
+    },
 }
 </script>
