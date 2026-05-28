@@ -32,11 +32,7 @@
 		<div v-if="HocSinh?.DSNhomDangHoc?.length" class="sp-groups">
 			<div class="sp-section-label">Nhóm đang học</div>
 			<div class="sp-groups-chips">
-				<div
-					v-for="nhom in HocSinh.DSNhomDangHoc"
-					:key="nhom.TenNhom"
-					class="sp-nhom-item"
-				>
+				<div v-for="nhom in HocSinh.DSNhomDangHoc" :key="nhom.TenNhom" class="sp-nhom-item">
 					<div class="sp-nhom-mon">{{ nhom.TenMonHoc_HienThi }}</div>
 					<div class="sp-nhom-code">{{ nhom.TenNhom }}</div>
 				</div>
@@ -48,8 +44,7 @@
 			<div class="sp-section-label">Tính năng</div>
 
 			<!-- Kết quả học tập -->
-			<div v-if="isMobile && isHocSinhTrungHoc" ref="kqhtFeatureItem" data-tour="student-kqht"
-				class="sp-item" @click="openKqhtDialog">
+			<div v-if="isMobile && isHocSinhTrungHoc" class="sp-item" @click="kqhtDialog = true">
 				<div class="sp-item-icon sp-item-icon--primary">
 					<v-icon size="18" color="white">mdi-file-chart-outline</v-icon>
 				</div>
@@ -140,28 +135,6 @@
 			</v-card>
 		</v-dialog>
 
-		<!-- Dialog: Thông báo tính năng mới -->
-		<v-dialog v-model="newKqhtFeatureDialog" :fullscreen="isMobile" max-width="420"
-			@update:model-value="onNewKqhtFeatureDialogChange">
-			<v-card>
-				<v-card-title class="d-flex align-center ga-2">
-					<v-icon color="primary">mdi-file-chart-outline</v-icon>
-					<span>Tính năng mới</span>
-				</v-card-title>
-				<v-card-text>
-					<div class="text-body-2">
-						Bạn có thể xem kết quả học tập ngay trong tab Cá nhân bằng ô
-						<strong>Kết quả học tập</strong>.
-					</div>
-				</v-card-text>
-				<v-card-actions>
-					<v-spacer />
-					<v-btn variant="text" @click="dismissNewKqhtFeature">Đã hiểu</v-btn>
-					<v-btn color="primary" variant="flat" @click="openKqhtFromFeatureNotice">Xem ngay</v-btn>
-				</v-card-actions>
-			</v-card>
-		</v-dialog>
-
 		<!-- Dialog: Kết quả học tập -->
 		<v-dialog v-model="kqhtDialog" :fullscreen="isMobile" max-width="900" scrollable>
 			<v-card>
@@ -192,27 +165,12 @@
 				vueData,
 				storeQuestionDialog: false,
 				kqhtDialog: false,
-				newKqhtFeatureDialog: false,
 			}
 		},
 		computed: {
 			isHocSinhTrungHoc() {
 				return this.HocSinh?.CapID == 2 || this.HocSinh?.CapID == 3
 			}
-		},
-		mounted() {
-			this.showNewKqhtFeatureNotice()
-		},
-		watch: {
-			isMobile() {
-				this.showNewKqhtFeatureNotice()
-			},
-			isHocSinhTrungHoc() {
-				this.showNewKqhtFeatureNotice()
-			},
-			'HocSinh.HocSinhID'() {
-				this.showNewKqhtFeatureNotice()
-			},
 		},
 		methods: {
 			onLogout() {
@@ -223,47 +181,6 @@
 					title: "Học liệu số",
 					url: `/kham-pha?capid=${this.HocSinh?.CapID}&khoiid=${this.HocSinh?.KhoiID}`
 				})
-			},
-			openKqhtDialog() {
-				this.markNewKqhtFeatureSeen()
-				this.kqhtDialog = true
-			},
-			openKqhtFromFeatureNotice() {
-				this.newKqhtFeatureDialog = false
-				this.openKqhtDialog()
-			},
-			dismissNewKqhtFeature() {
-				this.markNewKqhtFeatureSeen()
-				this.newKqhtFeatureDialog = false
-			},
-			onNewKqhtFeatureDialogChange(value) {
-				if (!value) this.markNewKqhtFeatureSeen()
-			},
-			showNewKqhtFeatureNotice() {
-				if (!this.isMobile || !this.isHocSinhTrungHoc || !this.HocSinh?.HocSinhID) return
-				if (!this.hasCompletedStudentTour()) return
-				if (localStorage.getItem(this.newKqhtFeatureSeenKey())) return
-
-				this.$nextTick(() => {
-					if (!localStorage.getItem(this.newKqhtFeatureSeenKey())) {
-						this.newKqhtFeatureDialog = true
-					}
-				})
-			},
-			hasCompletedStudentTour() {
-				return [
-					'lms-student-dashboard-tour-done',
-					'lms-student-tour-done',
-					'lms-student-dashboard-tour-v1-done',
-					'lms-student-onboarding-done',
-				].some(key => localStorage.getItem(key))
-			},
-			newKqhtFeatureSeenKey() {
-				const hocSinhID = this.HocSinh?.HocSinhID || 'unknown'
-				return `lms-student-dashboard-kqht-feature-seen-${hocSinhID}`
-			},
-			markNewKqhtFeatureSeen() {
-				localStorage.setItem(this.newKqhtFeatureSeenKey(), '1')
 			},
 		}
 	}

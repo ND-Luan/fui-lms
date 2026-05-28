@@ -59,13 +59,19 @@
 								<template #item.ktcuoiki="{ item }">
 									<span>{{ fmtScore(item.ktcuoiki) }}</span>
 								</template>
+								<template #item.dtb="{ item }">
+									<span class="font-weight-bold text-primary">{{ fmtScore(item.dtb) }}</span>
+								</template>
 							</v-data-table>
 						</v-card>
 						<div v-else class="kqht-mobile-list">
-							<div v-if="!dataHK1.Diem.length" class="kqht-mobile-empty">Chưa có dữ liệu điểm học kỳ 1</div>
-							<div v-for="item in dataHK1.Diem" :key="item.LopmonID || item.TenMon" class="kqht-mobile-card">
+							<div v-if="!dataHK1.Diem.length" class="kqht-mobile-empty">Chưa có dữ liệu điểm học kỳ 1
+							</div>
+							<div v-for="item in dataHK1.Diem" :key="item.LopmonID || item.TenMon"
+								class="kqht-mobile-card">
 								<div class="kqht-mobile-subject">
-									<v-icon size="16" :color="getMonHocColor(item.TenMon)">{{ getMonHocIcon(item.TenMon) }}</v-icon>
+									<v-icon size="16" :color="getMonHocColor(item.TenMon)">{{ getMonHocIcon(item.TenMon)
+										}}</v-icon>
 									<span>{{ item.TenMon }}</span>
 								</div>
 								<div class="kqht-mobile-score-row">
@@ -79,6 +85,10 @@
 								<div class="kqht-mobile-score-row">
 									<div class="kqht-mobile-score-label">KT cuối kì</div>
 									<div class="kqht-mobile-score-value">{{ fmtScore(item.ktcuoiki) }}</div>
+								</div>
+								<div class="kqht-mobile-score-row">
+									<div class="kqht-mobile-score-label font-weight-bold text-primary">ĐTB môn</div>
+									<div class="kqht-mobile-score-value font-weight-bold text-primary">{{ fmtScore(item.dtb) }}</div>
 								</div>
 							</div>
 						</div>
@@ -125,13 +135,19 @@
 								<template #item.ktcuoiki="{ item }">
 									<span>{{ fmtScore(item.ktcuoiki) }}</span>
 								</template>
+								<template #item.dtb="{ item }">
+									<span class="font-weight-bold text-primary">{{ fmtScore(item.dtb) }}</span>
+								</template>
 							</v-data-table>
 						</v-card>
 						<div v-else class="kqht-mobile-list">
-							<div v-if="!dataHK2.Diem.length" class="kqht-mobile-empty">Chưa có dữ liệu điểm học kỳ 2</div>
-							<div v-for="item in dataHK2.Diem" :key="item.LopmonID || item.TenMon" class="kqht-mobile-card">
+							<div v-if="!dataHK2.Diem.length" class="kqht-mobile-empty">Chưa có dữ liệu điểm học kỳ 2
+							</div>
+							<div v-for="item in dataHK2.Diem" :key="item.LopmonID || item.TenMon"
+								class="kqht-mobile-card">
 								<div class="kqht-mobile-subject">
-									<v-icon size="16" :color="getMonHocColor(item.TenMon)">{{ getMonHocIcon(item.TenMon) }}</v-icon>
+									<v-icon size="16" :color="getMonHocColor(item.TenMon)">{{ getMonHocIcon(item.TenMon)
+										}}</v-icon>
 									<span>{{ item.TenMon }}</span>
 								</div>
 								<div class="kqht-mobile-score-row">
@@ -145,6 +161,10 @@
 								<div class="kqht-mobile-score-row">
 									<div class="kqht-mobile-score-label">KT cuối kì</div>
 									<div class="kqht-mobile-score-value">{{ fmtScore(item.ktcuoiki) }}</div>
+								</div>
+								<div class="kqht-mobile-score-row">
+									<div class="kqht-mobile-score-label font-weight-bold text-primary">ĐTB môn</div>
+									<div class="kqht-mobile-score-value font-weight-bold text-primary">{{ fmtScore(item.dtb) }}</div>
 								</div>
 							</div>
 						</div>
@@ -183,14 +203,25 @@
 										<span class="mon-ten">{{ item.TenMon }}</span>
 									</div>
 								</template>
+								<template #item.dtb="{ item }">
+									<span class="font-weight-medium">{{ fmtScore(item.dtb) }}</span>
+								</template>
 							</v-data-table>
 						</v-card>
 						<div v-else class="kqht-mobile-list">
-							<div v-if="!dataCN.Diem.length" class="kqht-mobile-empty">Chưa có dữ liệu kết quả cả năm</div>
-							<div v-for="item in dataCN.Diem" :key="item.LopmonID || item.TenMon" class="kqht-mobile-card kqht-mobile-card--compact">
-								<div class="kqht-mobile-subject">
-									<v-icon size="16" :color="getMonHocColor(item.TenMon)">{{ getMonHocIcon(item.TenMon) }}</v-icon>
-									<span>{{ item.TenMon }}</span>
+							<div v-if="!dataCN.Diem.length" class="kqht-mobile-empty">Chưa có dữ liệu kết quả cả năm
+							</div>
+							<div v-for="item in dataCN.Diem" :key="item.LopmonID || item.TenMon"
+								class="kqht-mobile-card kqht-mobile-card--compact">
+								<div class="d-flex justify-space-between align-center w-100">
+									<div class="kqht-mobile-subject">
+										<v-icon size="16" :color="getMonHocColor(item.TenMon)">{{ getMonHocIcon(item.TenMon)
+											}}</v-icon>
+										<span>{{ item.TenMon }}</span>
+									</div>
+									<v-chip size="x-small" color="primary" variant="tonal" class="font-weight-bold flex-shrink-0">
+										ĐTB: {{ fmtScore(item.dtb) }}
+									</v-chip>
 								</div>
 							</div>
 						</div>
@@ -459,13 +490,15 @@
 			],
 
 			headersHK: [
-				{ title: 'Môn học', value: 'TenMon', width: '32%' },
+				{ title: 'Môn học', value: 'TenMon', width: '30%' },
 				{ title: 'KT thường xuyên', value: 'ktthuongxuyen', align: 'center' },
 				{ title: 'KT giữa kì', value: 'ktgiuaki', align: 'center' },
 				{ title: 'KT cuối kì', value: 'ktcuoiki', align: 'center' },
+				{ title: 'ĐTB môn', value: 'dtb', align: 'center' },
 			],
 			headersCN: [
-				{ title: 'Môn học', value: 'TenMon' },
+				{ title: 'Môn học', value: 'TenMon', width: '60%' },
+				{ title: 'Điểm trung bình', value: 'dtb', align: 'center' },
 			],
 		}
 	},
