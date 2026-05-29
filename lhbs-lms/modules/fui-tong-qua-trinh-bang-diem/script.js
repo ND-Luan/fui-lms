@@ -1,0 +1,1 @@
+// Logic moved to components/uc-main-layout.vue

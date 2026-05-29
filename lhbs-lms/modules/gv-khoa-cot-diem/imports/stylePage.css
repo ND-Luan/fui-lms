@@ -1,0 +1,4 @@
+:deep(.row-dimmed) {
+    opacity: 0.45;
+    transition: opacity 0.15s ease;
+}
