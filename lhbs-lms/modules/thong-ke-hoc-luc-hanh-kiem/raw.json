@@ -1,0 +1,1 @@
+{"data":[{"EXE":"IsCheck_NotRoleParent(vueData.user)"},{"CapID":"parseInt(capid)","instance":null,"keyComp":0,"columnHeader":[],"DSHocSinh":[],"styleSheet":null,"freezeColumns":1}],"watch":{},"controls":[{"prop":"fluid pa-0","rows":[{"prop":":no-gutters='true'","cols":[{"el":"uc-main-layout"}]}]}],"set":{"menu":false,"menuLeft":false}}

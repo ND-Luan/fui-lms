@@ -1,0 +1,23 @@
+{
+    "data": [],
+    "watch": {},
+    "controls": [
+        {
+            "prop": "fluid pa-0",
+            "rows": [
+                {
+                    "prop": ":no-gutters='true'",
+                    "cols": [
+                        {
+                            "el": "uc-assignment-taker-page"
+                        }
+                    ]
+                }
+            ]
+        }
+    ],
+    "set": {
+        "menu": false,
+        "menuLeft": false
+    }
+}

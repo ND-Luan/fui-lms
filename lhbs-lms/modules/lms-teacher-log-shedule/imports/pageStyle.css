@@ -1,0 +1,19 @@
+.lms-log-table :deep(.v-data-table__tr:hover) {
+    background-color: rgba(63, 81, 181, 0.04) !important;
+}
+
+.lms-log-table :deep(.v-data-table-header__content) {
+    font-weight: 600;
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: rgba(0, 0, 0, 0.6);
+}
+
+.gap-2 {
+    gap: 8px;
+}
+
+.gap-3 {
+    gap: 12px;
+}

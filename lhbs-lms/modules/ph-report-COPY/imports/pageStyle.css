@@ -1,0 +1,50 @@
+.vChip-full-width-content .v-chip__content {
+    width: 100%;
+}
+.note-wrapper {
+  position: relative;
+  display: inline-block;
+}
+
+/* Tờ giấy ghi chú */
+.note-paper {
+  background-color: #FFF9C4;
+  border-radius: 8px;
+  box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.15);
+  padding: 12px;
+ font-size: 18px !important;
+  line-height: 1.6; 
+  position: relative;
+}
+
+/* Cây ghim 📌 */
+.pin-icon {
+  position: absolute;
+  left: 12px;
+  font-size: 24px;
+  transform: rotate(-20deg);
+  z-index: 2;
+}
+
+/* (Tùy chọn) hiệu ứng gấp giấy */
+.note-paper::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 0;
+  height: 0;
+  border-top: 20px solid #f5f5a5;
+  border-left: 20px solid transparent;
+}
+
+table th+th {
+  border-left: thin solid rgb(224, 224, 224)
+}
+table td+td {
+  border-left: thin solid rgb(224, 224, 224)
+}
+
+.fpScrollbar, .v-navigation-drawer__content {
+   overflow-y: hidden;
+}

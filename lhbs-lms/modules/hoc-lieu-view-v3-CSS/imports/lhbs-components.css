@@ -1,0 +1,777 @@
+/* === LHBS UNIFIED SIMPLE CSS === */
+/* Tất cả components đã được đơn giản hóa */
+
+/* Import Vietnamese fonts */
+@import url('https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@300;400;500;600;700;800;900&family=Be+Vietnam+Pro:wght@300;400;500;600;700;800;900&display=swap');
+
+/* CSS Variables */
+:root {
+    /* LHBS Color System */
+    --lhbs-emerald: #10B981;
+    --lhbs-emerald-light: #34D399;
+    --lhbs-emerald-dark: #047857;
+    --lhbs-emerald-bg: #ECFDF5;
+
+    --lhbs-sapphire: #0EA5E9;
+    --lhbs-sapphire-light: #38BDF8;
+    --lhbs-sapphire-dark: #0369A1;
+    --lhbs-sapphire-bg: #F0F9FF;
+
+    --lhbs-gold: #F59E0B;
+    --lhbs-gold-light: #FBBF24;
+    --lhbs-gold-dark: #D97706;
+    --lhbs-gold-bg: #FFFBEB;
+
+    /* Status Colors */
+    --lhbs-success: #10B981;
+    --lhbs-error: #EF4444;
+    --lhbs-warning: #F59E0B;
+    --lhbs-info: #0EA5E9;
+
+    /* Neutral Colors */
+    --lhbs-white: #FFFFFF;
+    --lhbs-gray-50: #F9FAFB;
+    --lhbs-gray-100: #F3F4F6;
+    --lhbs-gray-200: #E5E7EB;
+    --lhbs-gray-300: #D1D5DB;
+    --lhbs-gray-400: #9CA3AF;
+    --lhbs-gray-500: #6B7280;
+    --lhbs-gray-600: #4B5563;
+    --lhbs-gray-700: #374151;
+    --lhbs-gray-800: #1F2937;
+    --lhbs-gray-900: #111827;
+
+    /* Simple Shadows */
+    --lhbs-shadow-xs: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    --lhbs-shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    --lhbs-shadow-base: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+    --lhbs-shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    --lhbs-shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+
+    /* Border Radius */
+    --lhbs-radius-sm: 0.375rem;
+    --lhbs-radius-md: 0.5rem;
+    --lhbs-radius-lg: 0.75rem;
+    --lhbs-radius-xl: 1rem;
+    --lhbs-radius-2xl: 1.25rem;
+    --lhbs-radius-full: 9999px;
+
+    /* Spacing */
+    --lhbs-space-1: 0.25rem;
+    --lhbs-space-2: 0.5rem;
+    --lhbs-space-3: 0.75rem;
+    --lhbs-space-4: 1rem;
+    --lhbs-space-5: 1.25rem;
+    --lhbs-space-6: 1.5rem;
+    --lhbs-space-8: 2rem;
+    --lhbs-space-12: 3rem;
+
+    /* Typography */
+    --lhbs-font-display: 'Be Vietnam Pro', 'Nunito Sans', 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
+    --lhbs-font-body: 'Nunito Sans', 'Be Vietnam Pro', 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
+
+    --lhbs-text-xs: 0.75rem;
+    --lhbs-text-sm: 0.875rem;
+    --lhbs-text-base: 1rem;
+    --lhbs-text-lg: 1.125rem;
+    --lhbs-text-xl: 1.25rem;
+    --lhbs-text-2xl: 1.5rem;
+    --lhbs-text-3xl: 1.875rem;
+
+    /* Simple Transitions */
+    --lhbs-transition: all 0.2s ease-in-out;
+}
+
+/* === BODY BACKGROUND === */
+body,
+.v-application,
+.v-main,
+.lh-app-container {
+    background: linear-gradient(135deg, #F0F9FF 0%, #ECFDF5 100%) !important;
+    min-height: 100vh;
+    font-family: var(--lhbs-font-body) !important;
+}
+
+/* === HEADER COMPONENTS === */
+.lh-header-premium {
+    background: var(--lhbs-white) !important;
+    border: 1px solid var(--lhbs-gray-200) !important;
+    border-radius: var(--lhbs-radius-lg) !important;
+    padding: var(--lhbs-space-2) var(--lhbs-space-4) !important;
+    box-shadow: var(--lhbs-shadow-sm) !important;
+    margin-bottom: var(--lhbs-space-4) !important;
+}
+
+.lh-header-content {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    align-items: center;
+    gap: var(--lhbs-space-3);
+}
+
+/* === LOGO COMPONENTS === */
+.lh-brand-section {
+    display: flex;
+    align-items: center;
+    gap: var(--lhbs-space-4);
+}
+
+.lh-logo-container {
+    display: flex;
+    align-items: center;
+    gap: var(--lhbs-space-2);
+    padding: var(--lhbs-space-2) var(--lhbs-space-3);
+    background: var(--lhbs-gray-50);
+    border: 1px solid var(--lhbs-gray-200);
+    border-radius: var(--lhbs-radius-md);
+    box-shadow: var(--lhbs-shadow-xs);
+}
+
+.lh-logo-icon {
+    font-size: var(--lhbs-text-2xl);
+    color: var(--lhbs-emerald);
+}
+
+.lh-logo-image {
+    width: 32px;
+    height: 32px;
+    object-fit: contain;
+    border-radius: var(--lhbs-radius-sm);
+    border: 1px solid var(--lhbs-gray-200);
+    background: var(--lhbs-white);
+    padding: 2px;
+}
+
+.lh-logo-text {
+    display: flex;
+    flex-direction: column;
+    line-height: 1.1;
+}
+
+.lh-logo-main {
+    font-family: var(--lhbs-font-display);
+    font-weight: 700;
+    font-size: var(--lhbs-text-base);
+    color: var(--lhbs-gray-800);
+}
+
+.lh-logo-sub {
+    font-family: var(--lhbs-font-body);
+    font-weight: 500;
+    font-size: var(--lhbs-text-xs);
+    color: var(--lhbs-gray-600);
+}
+
+.lh-back-btn {
+    background: var(--lhbs-gray-50);
+    border: 1px solid var(--lhbs-gray-200);
+    border-radius: var(--lhbs-radius-lg);
+    padding: var(--lhbs-space-2);
+    color: var(--lhbs-gray-700);
+    transition: var(--lhbs-transition);
+    cursor: pointer;
+}
+
+.lh-back-btn:hover {
+    background: var(--lhbs-emerald-bg);
+    border-color: var(--lhbs-emerald-light);
+    color: var(--lhbs-emerald-dark);
+}
+
+/* === BREADCRUMB COMPONENTS === */
+.lh-breadcrumb-section {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.lh-breadcrumb-container {
+    display: flex;
+    align-items: center;
+    gap: var(--lhbs-space-2);
+    padding: var(--lhbs-space-2) var(--lhbs-space-4);
+    background: var(--lhbs-gray-50);
+    border: 1px solid var(--lhbs-gray-200);
+    border-radius: var(--lhbs-radius-md);
+    box-shadow: var(--lhbs-shadow-xs);
+    max-width: 100%;
+    overflow-x: auto;
+}
+
+.lh-breadcrumb-item {
+    display: flex;
+    align-items: center;
+    gap: var(--lhbs-space-2);
+    padding: var(--lhbs-space-1) var(--lhbs-space-2);
+    border-radius: var(--lhbs-radius-md);
+    transition: var(--lhbs-transition);
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+.lh-breadcrumb-item:hover {
+    background: rgba(16, 185, 129, 0.1);
+}
+
+.lh-breadcrumb-icon {
+    font-size: var(--lhbs-text-sm);
+    color: var(--lhbs-emerald);
+}
+
+.lh-breadcrumb-text {
+    font-size: var(--lhbs-text-sm);
+    font-weight: 600;
+    color: var(--lhbs-gray-800);
+    max-width: 120px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.lh-breadcrumb-separator {
+    color: var(--lhbs-gray-500);
+    font-size: var(--lhbs-text-base);
+    margin: 0 var(--lhbs-space-1);
+    flex-shrink: 0;
+    font-weight: 600;
+}
+
+/* === PROGRESS COMPONENTS === */
+.lh-progress-section {
+    display: flex;
+    align-items: center;
+}
+
+.lh-progress-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--lhbs-space-2);
+    padding: var(--lhbs-space-2) var(--lhbs-space-3);
+    background: var(--lhbs-gold-bg);
+    border: 1px solid rgba(245, 158, 11, 0.3);
+    border-radius: var(--lhbs-radius-md);
+    box-shadow: var(--lhbs-shadow-xs);
+}
+
+.lh-progress-stars {
+    display: flex;
+    gap: var(--lhbs-space-1);
+}
+
+.lh-star {
+    font-size: var(--lhbs-text-sm);
+    color: var(--lhbs-gray-300);
+}
+
+.lh-star-filled {
+    color: var(--lhbs-gold);
+}
+
+.lh-progress-text {
+    font-size: var(--lhbs-text-xs);
+    font-weight: 600;
+    color: var(--lhbs-gray-700);
+}
+
+/* === CONTENT COMPONENTS === */
+.lh-content-main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+}
+
+.lh-content-container {
+    flex: 1;
+    background: var(--lhbs-white);
+    border: 1px solid var(--lhbs-gray-200);
+    border-radius: var(--lhbs-radius-lg);
+    padding: var(--lhbs-space-4);
+    box-shadow: var(--lhbs-shadow-sm);
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+}
+
+.lh-slide-container {
+    flex: 1;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+    min-height: 0;
+}
+
+/* === QUIZ START SCREEN === */
+.lh-quiz-start {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 60vh;
+    padding: var(--lhbs-space-8);
+    background: linear-gradient(135deg, #10B981 0%, #0EA5E9 100%);
+    border-radius: var(--lhbs-radius-xl);
+    color: var(--lhbs-white);
+    text-align: center;
+}
+
+.lh-start-icon {
+    font-size: 4rem;
+    margin-bottom: var(--lhbs-space-6);
+}
+
+.lh-start-title {
+    font-size: var(--lhbs-text-3xl);
+    font-weight: 700;
+    margin-bottom: var(--lhbs-space-4);
+}
+
+.lh-start-subtitle {
+    font-size: var(--lhbs-text-lg);
+    opacity: 0.9;
+    margin-bottom: var(--lhbs-space-6);
+}
+
+.lh-start-info {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: var(--lhbs-space-4);
+    margin-bottom: var(--lhbs-space-8);
+    width: 100%;
+    max-width: 600px;
+}
+
+.lh-info-card {
+    background: rgba(255, 255, 255, 0.15);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: var(--lhbs-radius-lg);
+    padding: var(--lhbs-space-4);
+    display: flex;
+    align-items: center;
+    gap: var(--lhbs-space-3);
+}
+
+.lh-info-icon {
+    font-size: var(--lhbs-text-2xl);
+}
+
+.lh-info-label {
+    font-size: var(--lhbs-text-sm);
+    opacity: 0.8;
+    margin-bottom: var(--lhbs-space-1);
+}
+
+.lh-info-value {
+    font-size: var(--lhbs-text-xl);
+    font-weight: 700;
+}
+
+/* === QUIZ LAYOUT === */
+.lh-quiz-layout {
+    display: grid;
+    grid-template-columns: 1fr 280px;
+    gap: var(--lhbs-space-3);
+    height: 80vh;
+    max-height: 800px;
+}
+
+.lh-quiz-content {
+    background: var(--lhbs-white);
+    border-radius: var(--lhbs-radius-lg);
+    padding: var(--lhbs-space-4);
+    overflow-y: auto;
+    box-shadow: var(--lhbs-shadow-sm);
+}
+
+.lh-quiz-sidebar {
+    background: linear-gradient(135deg, #6B7280 0%, #4B5563 100%);
+    border-radius: var(--lhbs-radius-lg);
+    padding: var(--lhbs-space-2);
+    color: var(--lhbs-white);
+    overflow-y: auto;
+    box-shadow: var(--lhbs-shadow-md);
+}
+
+.lh-sidebar-content {
+    display: flex;
+    flex-direction: column;
+    gap: var(--lhbs-space-2);
+    height: 100%;
+}
+
+/* === QUESTION COMPONENTS === */
+.lh-question-container {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.lh-question-badge {
+    background: linear-gradient(135deg, #10B981 0%, #0EA5E9 100%);
+    color: var(--lhbs-white);
+    padding: var(--lhbs-space-2) var(--lhbs-space-3);
+    border-radius: var(--lhbs-radius-full);
+    font-weight: 600;
+    font-size: var(--lhbs-text-sm);
+    display: inline-block;
+    margin-bottom: var(--lhbs-space-4);
+}
+
+.lh-question-prompt {
+    font-size: var(--lhbs-text-lg);
+    font-weight: 600;
+    color: var(--lhbs-gray-800);
+    margin-bottom: var(--lhbs-space-6);
+    line-height: 1.5;
+    background: var(--lhbs-gray-50);
+    padding: var(--lhbs-space-4);
+    border-radius: var(--lhbs-radius-lg);
+    border: 1px solid var(--lhbs-gray-200);
+}
+
+/* === TIMER COMPONENTS === */
+.lh-timer-card {
+    background: rgba(255, 255, 255, 0.15);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: var(--lhbs-radius-md);
+    padding: var(--lhbs-space-2);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--lhbs-space-2);
+}
+
+.lh-timer-icon {
+    font-size: 1.2rem;
+    flex-shrink: 0;
+}
+
+.lh-timer-content {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    flex: 1;
+    text-align: right;
+}
+
+.lh-timer-time {
+    font-size: var(--lhbs-text-lg);
+    font-weight: 700;
+    font-family: 'Courier New', monospace;
+    margin-bottom: var(--lhbs-space-1);
+    color: var(--lhbs-white);
+}
+
+.lh-timer-label {
+    font-size: var(--lhbs-text-xs);
+    opacity: 0.8;
+}
+
+/* === PROGRESS CARDS === */
+.lh-progress-card {
+    background: rgba(255, 255, 255, 0.15);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: var(--lhbs-radius-md);
+    padding: var(--lhbs-space-2);
+}
+
+.lh-progress-header {
+    display: flex;
+    align-items: center;
+    gap: var(--lhbs-space-1);
+    margin-bottom: var(--lhbs-space-1);
+}
+
+.lh-progress-icon {
+    font-size: 1rem;
+}
+
+.lh-progress-title {
+    font-weight: 600;
+    font-size: var(--lhbs-text-sm);
+}
+
+.lh-progress-number {
+    font-size: var(--lhbs-text-lg);
+    font-weight: 800;
+}
+
+.lh-progress-bar {
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: var(--lhbs-radius-full);
+    height: 6px;
+    overflow: hidden;
+    margin-bottom: var(--lhbs-space-1);
+}
+
+.lh-progress-fill {
+    height: 100%;
+    background: var(--lhbs-gold);
+    border-radius: var(--lhbs-radius-full);
+    transition: width 0.3s ease;
+}
+
+/* === QUESTIONS GRID === */
+.lh-questions-grid {
+    background: rgba(255, 255, 255, 0.15);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: var(--lhbs-radius-md);
+    padding: var(--lhbs-space-2);
+}
+
+.lh-grid-title {
+    display: flex;
+    align-items: center;
+    gap: var(--lhbs-space-1);
+    margin-bottom: var(--lhbs-space-1);
+    font-weight: 600;
+    font-size: var(--lhbs-text-sm);
+}
+
+.lh-grid-container {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: var(--lhbs-space-1);
+}
+
+.lh-question-btn {
+    background: rgba(255, 255, 255, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: var(--lhbs-radius-sm);
+    padding: var(--lhbs-space-1);
+    color: var(--lhbs-white);
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--lhbs-transition);
+    min-height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: var(--lhbs-text-xs);
+}
+
+.lh-question-btn:hover {
+    background: rgba(255, 255, 255, 0.3);
+}
+
+.lh-question-btn.lh-current {
+    background: var(--lhbs-gold);
+    color: var(--lhbs-gray-800);
+    border-color: var(--lhbs-gold-dark);
+    font-weight: 700;
+}
+
+.lh-question-btn.lh-completed {
+    background: var(--lhbs-success);
+    color: var(--lhbs-white);
+    border-color: var(--lhbs-emerald-dark);
+}
+
+/* === NAVIGATION CONTROLS === */
+.lh-nav-controls {
+    display: flex;
+    gap: var(--lhbs-space-1);
+}
+
+.lh-nav-controls .lh-btn {
+    flex: 1;
+    background: rgba(255, 255, 255, 0.2);
+    color: var(--lhbs-white);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    font-size: var(--lhbs-text-lg);
+    min-width: 40px;
+    height: 40px;
+    padding: var(--lhbs-space-1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--lhbs-radius-md);
+    cursor: pointer;
+    transition: var(--lhbs-transition);
+}
+
+.lh-nav-controls .lh-btn:hover {
+    background: rgba(255, 255, 255, 0.3);
+}
+
+.lh-nav-controls .lh-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* === QUIZ OPTIONS === */
+.lh-options-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    gap: var(--lhbs-space-4);
+    margin-bottom: var(--lhbs-space-6);
+}
+
+.lh-option-card {
+    background: var(--lhbs-white);
+    border: 2px solid var(--lhbs-gray-300);
+    border-radius: var(--lhbs-radius-md);
+    padding: var(--lhbs-space-4);
+    cursor: pointer;
+    transition: var(--lhbs-transition);
+    display: flex;
+    align-items: center;
+    gap: var(--lhbs-space-3);
+    box-shadow: var(--lhbs-shadow-sm);
+}
+
+.lh-option-card:hover {
+    border-color: var(--lhbs-emerald);
+    background: var(--lhbs-emerald-bg);
+    box-shadow: var(--lhbs-shadow-md);
+}
+
+.lh-option-card.lh-selected {
+    border-color: var(--lhbs-emerald);
+    background: var(--lhbs-emerald-bg);
+    box-shadow: var(--lhbs-shadow-md);
+}
+
+.lh-option-card.lh-correct-answer {
+    border-color: var(--lhbs-success);
+    background: rgba(16, 185, 129, 0.1);
+}
+
+.lh-option-card.lh-correct-answer::after {
+    content: '✓';
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    color: var(--lhbs-success);
+    font-weight: bold;
+    font-size: 1.2rem;
+}
+
+.lh-option-card.lh-wrong-answer {
+    border-color: var(--lhbs-error);
+    background: rgba(239, 68, 68, 0.1);
+}
+
+.lh-option-card.lh-wrong-answer::after {
+    content: '✗';
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    color: var(--lhbs-error);
+    font-weight: bold;
+    font-size: 1.2rem;
+}
+
+.lh-option-indicator {
+    width: 20px;
+    height: 20px;
+    border: 2px solid var(--lhbs-gray-400);
+    border-radius: 50%;
+    position: relative;
+    flex-shrink: 0;
+    transition: var(--lhbs-transition);
+}
+
+.lh-selected .lh-option-indicator {
+    border-color: var(--lhbs-emerald);
+    background: var(--lhbs-emerald);
+}
+
+.lh-selected .lh-option-indicator::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 8px;
+    height: 8px;
+    background: var(--lhbs-white);
+    border-radius: 50%;
+}
+
+.lh-option-text {
+    font-size: var(--lhbs-text-base);
+    line-height: 1.5;
+    color: var(--lhbs-gray-800);
+    font-weight: 500;
+}
+
+/* === NAVIGATION FOOTER === */
+.lh-navigation-footer {
+    background: var(--lhbs-white);
+    border: 1px solid var(--lhbs-gray-200);
+    border-radius: var(--lhbs-radius-lg);
+    padding: var(--lhbs-space-2);
+    box-shadow: var(--lhbs-shadow-sm);
+    margin-top: var(--lhbs-space-4);
+}
+
+.lh-nav-container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    max-width: 500px;
+    margin: 0 auto;
+    gap: var(--lhbs-space-4);
+}
+
+.lh-nav-btn {
+    background: linear-gradient(135deg, #10B981 0%, #0EA5E9 100%);
+    color: var(--lhbs-white);
+    border-radius: var(--lhbs-radius-md);
+    padding: var(--lhbs-space-2) var(--lhbs-space-4);
+    font-weight: 600;
+    font-size: var(--lhbs-text-sm);
+    box-shadow: var(--lhbs-shadow-sm);
+    transition: var(--lhbs-transition);
+    border: none;
+    min-width: 80px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--lhbs-space-2);
+    cursor: pointer;
+}
+
+.lh-nav-btn:hover {
+    box-shadow: var(--lhbs-shadow-md);
+}
+
+.lh-nav-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.lh-nav-prev {
+    background: linear-gradient(135deg, #6B7280 0%, #4B5563 100%);
+}
+
+.lh-progress-circle {
+    width: 50px;
+    height: 50px;
+    background: linear-gradient(135deg, #F59E0B 0%, #D97706 100%);
+    border-radius: var(--lhbs-radius-full);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    box-shadow: var(--lhbs-shadow-sm);
+    border: 1px solid rgba(245, 158, 11, 0.3);
+}
+
+.lh-progress-number {
+    font-family: var(--lhbs-font-display);
+    font-weight: 700;
+    font-size: var(--lhbs-text-sm);
+    color: var(--lhbs-white);
+    line-height: 1;
+}
+
+.lh-progress-total {
+    font-size: var(--lhbs-text-xs

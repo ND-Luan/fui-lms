@@ -1,0 +1,5 @@
+.bc-table :deep(th) {
+    font-size: 10px !important;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}

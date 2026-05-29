@@ -1,0 +1,153 @@
+/* ======================================================= */
+/* == 1. CẤU TRÚC LAYOUT CHÍNH (Mobile First)           == */
+/* ======================================================= */
+
+.lesson-viewer-container {
+    display: flex;
+    flex-direction: column;
+    background-color: #f4f5f7;
+    width: 100%;
+}
+
+.lesson-sidebar {
+    display: none;
+    /* Mặc định ẩn trên mobile */
+}
+
+.lesson-main-content {
+    width: 100%;
+    /* max-width: 900px; */
+    margin: 0 auto;
+    padding: 16px;
+}
+
+/* ======================================================= */
+/* == 2. MEDIA QUERY CHO MÀN HÌNH LỚN (Desktop)         == */
+/* ======================================================= */
+
+@media (min-width: 1024px) {
+    .lesson-viewer-container {
+        flex-direction: row;
+        /* justify-content: center; */
+        gap: 16px;
+        padding: 16px;
+        align-items: flex-start;
+        /* Dóng các cột lên trên cùng */
+    }
+
+    .lesson-sidebar {
+        display: block;
+        flex: 0 0 280px;
+        order: -1;
+    }
+
+    .sidebar-sticky-content {
+        position: sticky;
+        top: 80px;
+        background-color: #ffffff;
+        border-radius: 12px;
+        padding: 20px;
+        border: 1px solid #e5e7eb;
+    }
+
+    .lesson-main-content {
+        padding: 0;
+        margin: 0;
+    }
+}
+
+/* ======================================================= */
+/* == 3. STYLING CÁC THÀNH PHẦN CỦA VIEWER              == */
+/* ======================================================= */
+
+.lesson-header {
+    background-color: white;
+    border-radius: 12px;
+    padding: 12px 16px;
+    margin-bottom: 24px;
+    border: 1px solid #e5e7eb;
+}
+
+.lesson-toc {
+    list-style-type: none;
+    padding-left: 0;
+    margin-top: 0;
+    max-height: 65vh;
+    overflow-y: auto;
+}
+
+.lesson-toc li a {
+    display: flex;
+    align-items: center;
+    padding: 10px 12px;
+    border-radius: 8px;
+    color: #4b5563;
+    text-decoration: none;
+    font-size: 0.9rem;
+    transition: all 0.2s ease;
+    cursor: pointer;
+    border-left: 3px solid transparent;
+}
+
+.lesson-toc li a:hover {
+    background-color: #f3f4f6;
+    color: #111827;
+}
+
+.lesson-toc li a.is-active {
+    background-color: #eef2ff;
+    color: #3730a3;
+    font-weight: 600;
+    border-left: 3px solid #4f46e5;
+}
+
+/* ======================================================= */
+/* == 4. STYLING CHO CANVAS VÀ CÁC KHỐI NỘI DUNG        == */
+/* ======================================================= */
+
+.empty-canvas {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    min-height: 300px;
+    border: 2px dashed #d1d5db;
+    border-radius: 12px;
+    color: #9ca3af;
+    background-color: #fafafa;
+}
+
+.element-preview {
+    border: 1px solid #e0e0e0;
+    margin-bottom: 20px;
+    border-radius: 12px;
+    background-color: white;
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05);
+    overflow: hidden;
+}
+
+.element-title {
+    display: flex;
+    align-items: center;
+    font-weight: 600;
+    font-size: 0.9rem;
+    padding: 16px 20px;
+    border-bottom: 1px solid #f3f4f6;
+    background-color: #fafafa;
+    color: #1f2937;
+}
+
+.element-content {
+    padding: 20px;
+}
+
+.text-content {
+    line-height: 1.7;
+    color: #374151;
+}
+
+.chip-style{
+        white-space: normal;
+    height: fit-content !important;
+    padding: 4px 12px !important;
+}

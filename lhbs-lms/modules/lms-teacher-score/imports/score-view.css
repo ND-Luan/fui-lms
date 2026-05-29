@@ -1,0 +1,165 @@
+
+.page-container {
+    background-color: #f8f9fa;
+}
+
+.page-header {
+    margin-bottom: 24px;
+}
+.header-title-group .text-h5 { color: #111827; }
+.header-title-group .text-body-2 { color: #6b7280; }
+
+.table-card {
+    border-radius: 12px;
+    border: 1px solid #e5e7eb;
+    overflow: hidden;
+}
+:deep(thead tr) {
+    background-color: #f9fafb;
+}
+:deep(th) {
+    font-weight: 600 !important;
+    color: #4b5563 !important;
+    border-left: 1px solid #e5e7eb;
+}
+:deep(td) {
+    border-left: 1px solid #e5e7eb;
+}
+:deep(tbody tr:hover) {
+    background-color: #eff6ff !important;
+}
+
+.fixed-col,
+.fixed-col-right {
+    position: sticky;
+    background-color: #ffffff;
+    z-index: 1;
+}
+th.fixed-col,
+th.fixed-col-right,
+tfoot th {
+    z-index: 2; /* Header và Footer phải đè lên Body */
+}
+
+/* Kích thước các cột dính */
+.student-name-col { width: 250px; min-width: 250px; }
+.score-col { width: 120px; min-width: 120px; }
+
+/* Vị trí các cột dính */
+.fixed-col { left: 0; }
+.fixed-col-right {
+    right: 0;
+    box-shadow: -2px 0 5px -2px rgba(0, 0, 0, 0.1);
+}
+
+
+.student-name-link {
+    cursor: pointer;
+    color: #1d4ed8;
+}
+.student-name-link:hover {
+    text-decoration: underline;
+    background-color: #eff6ff; /* Cùng màu với hover của cả dòng */
+}
+
+.low-score-row {
+    background-color: #fee2e2 !important; /* Màu hồng nhạt */
+}
+.low-score-row:hover {
+    background-color: #fecaca !important; /* Đậm hơn khi hover */
+}
+
+tfoot th {
+    background-color: #f1f5f9 !important;
+    font-weight: 600 !important;
+    color: #334155 !important;
+    position: sticky;
+    bottom: 0;
+    border-top: 2px solid #e5e7eb !important;
+}
+
+.question-col {
+    min-width: 20px; 
+    padding: 0 4px !important; 
+}
+
+/* Kích thước các cột dính */
+.student-id-col {
+    width: 120px;
+    min-width: 120px;
+}
+
+.student-name-col {
+    width: 180px;
+    min-width: 180px;
+}
+
+.score-col {
+    width: 50px;
+    min-width: 50px;
+}
+
+/* Vị trí các cột dính (quan trọng) */
+.fixed-col {
+    position: sticky;
+    background-color: #ffffff;
+    z-index: 1;
+}
+
+/* Cột 1 (Mã HS) dính ở cạnh tráiสุด */
+th.fixed-col:nth-child(1),
+td.fixed-col:nth-child(1) {
+    left: 0;
+}
+
+/* Cột 2 (Họ tên) dính bên cạnh cột 1 */
+th.fixed-col:nth-child(2),
+td.fixed-col:nth-child(2) {
+    left: 120px;
+    /* Bằng chiều rộng của cột 1 */
+    border-right: 1px solid #e5e7eb;
+    /* Thêm đường kẻ phân tách */
+}
+
+/* Cột cuối cùng (Tổng điểm) */
+.fixed-col-right {
+    position: sticky;
+    right: 0;
+    background-color: #ffffff;
+    z-index: 1;
+    box-shadow: -2px 0 5px -2px rgba(0, 0, 0, 0.1);
+}
+
+th.fixed-col,
+th.fixed-col-right,
+tfoot th {
+    z-index: 2;
+}
+
+
+.student-name-link {
+    cursor: pointer;
+    color: #1d4ed8;
+}
+
+.student-name-link:hover {
+    text-decoration: underline;
+    background-color: #eff6ff;
+}
+
+.low-score-row {
+    background-color: #fee2e2 !important;
+}
+
+.low-score-row:hover {
+    background-color: #fecaca !important;
+}
+
+tfoot th {
+    background-color: #f1f5f9 !important;
+    font-weight: 600 !important;
+    color: #334155 !important;
+    position: sticky;
+    bottom: 0;
+    border-top: 2px solid #e5e7eb !important;
+}

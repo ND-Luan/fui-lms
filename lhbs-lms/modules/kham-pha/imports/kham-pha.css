@@ -1,0 +1,621 @@
+/* === LHBS SIMPLE CSS - CLEAN & MINIMAL === */
+
+/* Import Vietnamese fonts */
+@import url('https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@300;400;500;600;700;800;900&family=Be+Vietnam+Pro:wght@300;400;500;600;700;800;900&display=swap');
+
+/* CSS Variables */
+:root {
+  /* LHBS Color System - Simplified */
+  --lhbs-emerald: #10B981;
+  --lhbs-emerald-light: #34D399;
+  --lhbs-emerald-dark: #047857;
+  --lhbs-emerald-bg: #ECFDF5;
+
+  --lhbs-sapphire: #0EA5E9;
+  --lhbs-sapphire-light: #38BDF8;
+  --lhbs-sapphire-dark: #0369A1;
+  --lhbs-sapphire-bg: #F0F9FF;
+
+  --lhbs-gold: #F59E0B;
+  --lhbs-gold-light: #FBBF24;
+  --lhbs-gold-dark: #D97706;
+  --lhbs-gold-bg: #FFFBEB;
+
+  /* Neutral Colors */
+  --lhbs-white: #FFFFFF;
+  --lhbs-gray-50: #F9FAFB;
+  --lhbs-gray-100: #F3F4F6;
+  --lhbs-gray-200: #E5E7EB;
+  --lhbs-gray-300: #D1D5DB;
+  --lhbs-gray-400: #9CA3AF;
+  --lhbs-gray-500: #6B7280;
+  --lhbs-gray-600: #4B5563;
+  --lhbs-gray-700: #374151;
+  --lhbs-gray-800: #1F2937;
+  --lhbs-gray-900: #111827;
+
+  /* Simple Shadows */
+  --lhbs-shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --lhbs-shadow-base: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+  --lhbs-shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  --lhbs-shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+
+  /* Border Radius */
+  --lhbs-radius-sm: 0.375rem;
+  --lhbs-radius-md: 0.5rem;
+  --lhbs-radius-lg: 0.75rem;
+  --lhbs-radius-xl: 1rem;
+  --lhbs-radius-2xl: 1.25rem;
+
+  /* Spacing */
+  --lhbs-space-1: 0.25rem;
+  --lhbs-space-2: 0.5rem;
+  --lhbs-space-3: 0.75rem;
+  --lhbs-space-4: 1rem;
+  --lhbs-space-5: 1.25rem;
+  --lhbs-space-6: 1.5rem;
+  --lhbs-space-8: 2rem;
+
+  /* Typography */
+  --lhbs-font-display: 'Be Vietnam Pro', 'Nunito Sans', 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
+  --lhbs-font-body: 'Nunito Sans', 'Be Vietnam Pro', 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
+
+  --lhbs-text-xs: 0.75rem;
+  --lhbs-text-sm: 0.875rem;
+  --lhbs-text-base: 1rem;
+  --lhbs-text-lg: 1.125rem;
+  --lhbs-text-xl: 1.25rem;
+  --lhbs-text-2xl: 1.5rem;
+
+  /* Simple Transitions */
+  --lhbs-transition: all 0.2s ease-in-out;
+}
+
+/* === BODY BACKGROUND === */
+body,
+.v-application,
+.v-main {
+  background: linear-gradient(135deg, #F0F9FF 0%, #ECFDF5 50%, #FFFBEB 100%) !important;
+  min-height: 100vh;
+  font-family: var(--lhbs-font-body) !important;
+}
+
+/* === PAGE TITLE === */
+.text-h6.text-primary {
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.08) 0%, rgba(14, 165, 233, 0.08) 50%, rgba(245, 158, 11, 0.08) 100%) !important;
+  border: 1px solid rgba(16, 185, 129, 0.2) !important;
+  border-radius: var(--lhbs-radius-xl) !important;
+  box-shadow: var(--lhbs-shadow-md) !important;
+  padding: var(--lhbs-space-4) var(--lhbs-space-5) !important;
+  margin-bottom: var(--lhbs-space-4) !important;
+  font-family: var(--lhbs-font-display) !important;
+  font-weight: 600 !important;
+  font-size: var(--lhbs-text-lg) !important;
+  color: var(--lhbs-gray-800) !important;
+  position: relative;
+}
+
+/* === V-EXPANSION-PANELS === */
+.v-expansion-panels {
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.v-expansion-panel {
+  background: var(--lhbs-white) !important;
+  border: 1px solid var(--lhbs-gray-200) !important;
+  border-radius: var(--lhbs-radius-lg) !important;
+  box-shadow: var(--lhbs-shadow-sm) !important;
+  margin-bottom: var(--lhbs-space-3) !important;
+  overflow: hidden !important;
+  transition: var(--lhbs-transition) !important;
+}
+
+/* === COLORED PANEL VARIANTS (Simplified) === */
+.v-expansion-panel:nth-child(1) {
+  border-left: 4px solid var(--lhbs-emerald) !important;
+}
+
+.v-expansion-panel:nth-child(2) {
+  border-left: 4px solid var(--lhbs-sapphire) !important;
+}
+
+.v-expansion-panel:nth-child(3) {
+  border-left: 4px solid var(--lhbs-gold) !important;
+}
+
+.v-expansion-panel:nth-child(4) {
+  border-left: 4px solid #8B4513 !important;
+}
+
+.v-expansion-panel:nth-child(5) {
+  border-left: 4px solid #A855F7 !important;
+}
+
+.v-expansion-panel:nth-child(6) {
+  border-left: 4px solid #EC4899 !important;
+}
+
+.v-expansion-panel:nth-child(7) {
+  border-left: 4px solid #6366F1 !important;
+}
+
+.v-expansion-panel:nth-child(8) {
+  border-left: 4px solid #14B8A6 !important;
+}
+
+.v-expansion-panel:nth-child(9) {
+  border-left: 4px solid #EF4444 !important;
+}
+
+.v-expansion-panel:nth-child(10) {
+  border-left: 4px solid #22C55E !important;
+}
+
+.v-expansion-panel:nth-child(n+11) {
+  border-left: 4px solid var(--lhbs-gray-400) !important;
+}
+
+.v-expansion-panel:hover {
+  box-shadow: var(--lhbs-shadow-md) !important;
+  border-color: var(--lhbs-gray-300) !important;
+}
+
+.v-expansion-panel--active {
+  box-shadow: var(--lhbs-shadow-lg) !important;
+}
+
+/* === V-EXPANSION-PANEL-TITLE === */
+.v-expansion-panel-title {
+  background: transparent !important;
+  color: var(--lhbs-gray-700) !important;
+  font-family: var(--lhbs-font-display) !important;
+  font-size: var(--lhbs-text-base) !important;
+  font-weight: 600 !important;
+  padding: var(--lhbs-space-4) var(--lhbs-space-5) !important;
+  transition: var(--lhbs-transition) !important;
+  min-height: 48px !important;
+}
+
+.v-expansion-panel:hover .v-expansion-panel-title {
+  color: var(--lhbs-gray-800) !important;
+}
+
+.v-expansion-panel--active .v-expansion-panel-title {
+  color: var(--lhbs-gray-900) !important;
+  font-weight: 700 !important;
+}
+
+/* === V-EXPANSION-PANEL-TITLE ICON === */
+.v-expansion-panel-title .v-expansion-panel-title__icon {
+  color: var(--lhbs-gray-500) !important;
+  transition: var(--lhbs-transition) !important;
+}
+
+.v-expansion-panel:hover .v-expansion-panel-title__icon {
+  color: var(--lhbs-gray-600) !important;
+}
+
+.v-expansion-panel--active .v-expansion-panel-title__icon {
+  color: var(--lhbs-emerald) !important;
+  transform: rotate(180deg) !important;
+}
+
+/* === V-EXPANSION-PANEL-TEXT === */
+.v-expansion-panel-text {
+  background: var(--lhbs-gray-50) !important;
+  border-top: 1px solid var(--lhbs-gray-200) !important;
+  padding: var(--lhbs-space-4) var(--lhbs-space-5) !important;
+  max-height: 500px !important;
+  overflow: auto !important;
+}
+
+.v-expansion-panel-text::-webkit-scrollbar {
+  width: 6px;
+}
+
+.v-expansion-panel-text::-webkit-scrollbar-track {
+  background: var(--lhbs-gray-100);
+  border-radius: var(--lhbs-radius-sm);
+}
+
+.v-expansion-panel-text::-webkit-scrollbar-thumb {
+  background: var(--lhbs-emerald);
+  border-radius: var(--lhbs-radius-sm);
+}
+
+/* === SACH-CARD === */
+.sach-card.v-card {
+  background: var(--lhbs-white) !important;
+  border: 1px solid var(--lhbs-gray-200) !important;
+  border-radius: var(--lhbs-radius-lg) !important;
+  box-shadow: var(--lhbs-shadow-sm) !important;
+  transition: var(--lhbs-transition) !important;
+  overflow: hidden !important;
+  cursor: pointer !important;
+  height: 100% !important;
+  display: flex !important;
+  flex-direction: column !important;
+}
+
+.sach-card.v-card:hover {
+  box-shadow: var(--lhbs-shadow-md) !important;
+  border-color: var(--lhbs-gray-300) !important;
+}
+
+/* === SACH-CARD IMAGE === */
+.sach-card .v-img {
+  border-radius: var(--lhbs-radius-lg) var(--lhbs-radius-lg) 0 0 !important;
+  transition: var(--lhbs-transition) !important;
+}
+
+/* === SACH-INFO === */
+.sach-info {
+  flex-grow: 1 !important;
+  padding: var(--lhbs-space-4) !important;
+  background: transparent !important;
+}
+
+.sach-title {
+  font-family: var(--lhbs-font-display) !important;
+  font-size: var(--lhbs-text-sm) !important;
+  font-weight: 600 !important;
+  color: var(--lhbs-gray-800) !important;
+  line-height: 1.4 !important;
+  margin-bottom: var(--lhbs-space-2) !important;
+  transition: var(--lhbs-transition) !important;
+}
+
+.sach-card:hover .sach-title {
+  color: var(--lhbs-emerald-dark) !important;
+}
+
+.sach-description {
+  font-family: var(--lhbs-font-body) !important;
+  font-size: var(--lhbs-text-xs) !important;
+  font-weight: 400 !important;
+  color: var(--lhbs-gray-600) !important;
+  line-height: 1.5 !important;
+  transition: var(--lhbs-transition) !important;
+}
+
+.sach-card:hover .sach-description {
+  color: var(--lhbs-gray-700) !important;
+}
+
+/* === SACH-META === */
+.sach-meta {
+  padding: var(--lhbs-space-3) var(--lhbs-space-4) !important;
+  background: transparent !important;
+  border-top: 1px solid var(--lhbs-gray-200) !important;
+}
+
+/* === V-CHIP === */
+.sach-meta .v-chip {
+  background: var(--lhbs-emerald) !important;
+  border: none !important;
+  border-radius: var(--lhbs-radius-sm) !important;
+  color: var(--lhbs-white) !important;
+  font-family: var(--lhbs-font-body) !important;
+  font-weight: 500 !important;
+  font-size: var(--lhbs-text-xs) !important;
+  transition: var(--lhbs-transition) !important;
+  height: 24px !important;
+  padding: 0 var(--lhbs-space-2) !important;
+}
+
+.sach-meta .v-chip:hover {
+  background: var(--lhbs-emerald-dark) !important;
+}
+
+.sach-meta .v-chip .v-icon {
+  color: var(--lhbs-white) !important;
+}
+
+/* === V-DIVIDER === */
+.sach-card .v-divider {
+  border-color: var(--lhbs-gray-200) !important;
+  opacity: 1 !important;
+}
+
+/* === NHOM-SACH-SECTION === */
+.nhom-sach-section {
+  margin-bottom: var(--lhbs-space-8) !important;
+}
+
+.nhom-sach-title {
+  background: var(--lhbs-white) !important;
+  border: 1px solid var(--lhbs-gray-200) !important;
+  border-radius: var(--lhbs-radius-xl) !important;
+  box-shadow: var(--lhbs-shadow-base) !important;
+  padding: var(--lhbs-space-4) var(--lhbs-space-6) !important;
+  margin-bottom: var(--lhbs-space-6) !important;
+  display: flex !important;
+  align-items: center !important;
+  font-family: var(--lhbs-font-display) !important;
+  font-size: var(--lhbs-text-xl) !important;
+  font-weight: 700 !important;
+  color: var(--lhbs-gray-800) !important;
+}
+
+.nhom-sach-title .v-icon {
+  color: var(--lhbs-emerald) !important;
+  margin-right: var(--lhbs-space-3) !important;
+}
+
+/* === V-SKELETON-LOADER === */
+.v-skeleton-loader {
+  background: var(--lhbs-white) !important;
+  border: 1px solid var(--lhbs-gray-200) !important;
+  border-radius: var(--lhbs-radius-lg) !important;
+  box-shadow: var(--lhbs-shadow-sm) !important;
+}
+
+.v-skeleton-loader__bone {
+  background: var(--lhbs-gray-200) !important;
+  border-radius: var(--lhbs-radius-sm) !important;
+}
+
+/* === EMPTY STATE === */
+.text-center.text-grey {
+  background: var(--lhbs-white) !important;
+  border: 1px solid var(--lhbs-gray-200) !important;
+  border-radius: var(--lhbs-radius-2xl) !important;
+  box-shadow: var(--lhbs-shadow-base) !important;
+  color: var(--lhbs-gray-600) !important;
+  font-family: var(--lhbs-font-body) !important;
+  font-size: var(--lhbs-text-lg) !important;
+  font-weight: 500 !important;
+  padding: var(--lhbs-space-8) !important;
+  margin: var(--lhbs-space-6) 0 !important;
+}
+
+/* === RESPONSIVE DESIGN === */
+
+/* === TABLET (768px - 1023px) === */
+@media (min-width: 768px) and (max-width: 1023px) {
+  .text-h6.text-primary {
+    padding: var(--lhbs-space-3) var(--lhbs-space-4) !important;
+    font-size: var(--lhbs-text-base) !important;
+  }
+
+  .v-expansion-panel-title {
+    padding: var(--lhbs-space-3) var(--lhbs-space-4) !important;
+    font-size: var(--lhbs-text-sm) !important;
+  }
+
+  .v-expansion-panel-text {
+    padding: var(--lhbs-space-3) var(--lhbs-space-4) !important;
+  }
+
+  .sach-info {
+    padding: var(--lhbs-space-3) !important;
+  }
+
+  .sach-title {
+    font-size: var(--lhbs-text-xs) !important;
+  }
+}
+
+/* === MOBILE (480px - 767px) === */
+@media (min-width: 480px) and (max-width: 767px) {
+  .text-h6.text-primary {
+    padding: var(--lhbs-space-2) var(--lhbs-space-3) !important;
+    font-size: var(--lhbs-text-base) !important;
+    margin-bottom: var(--lhbs-space-3) !important;
+  }
+
+  .v-expansion-panel {
+    margin-bottom: var(--lhbs-space-2) !important;
+  }
+
+  .v-expansion-panel-title {
+    padding: var(--lhbs-space-3) !important;
+    font-size: var(--lhbs-text-sm) !important;
+    min-height: 40px !important;
+  }
+
+  .v-expansion-panel-text {
+    padding: var(--lhbs-space-3) !important;
+    max-height: 350px !important;
+  }
+
+  .sach-card.v-card {
+    border-radius: var(--lhbs-radius-md) !important;
+  }
+
+  .sach-info {
+    padding: var(--lhbs-space-2) !important;
+  }
+
+  .sach-title {
+    font-size: var(--lhbs-text-xs) !important;
+  }
+
+  .sach-description {
+    font-size: 11px !important;
+  }
+
+  .sach-meta {
+    padding: var(--lhbs-space-2) !important;
+  }
+
+  .nhom-sach-title {
+    padding: var(--lhbs-space-3) var(--lhbs-space-4) !important;
+    font-size: var(--lhbs-text-lg) !important;
+  }
+}
+
+/* === MOBILE SMALL (320px - 479px) === */
+@media (max-width: 479px) {
+  .text-h6.text-primary {
+    padding: var(--lhbs-space-2) !important;
+    font-size: var(--lhbs-text-sm) !important;
+    margin-bottom: var(--lhbs-space-2) !important;
+  }
+
+  .v-expansion-panel {
+    margin-bottom: var(--lhbs-space-1) !important;
+    border-radius: var(--lhbs-radius-md) !important;
+  }
+
+  .v-expansion-panel-title {
+    padding: var(--lhbs-space-2) !important;
+    font-size: var(--lhbs-text-xs) !important;
+    min-height: 36px !important;
+  }
+
+  .v-expansion-panel-text {
+    padding: var(--lhbs-space-2) !important;
+    max-height: 300px !important;
+  }
+
+  .sach-card.v-card {
+    border-radius: var(--lhbs-radius-sm) !important;
+  }
+
+  .sach-info {
+    padding: var(--lhbs-space-2) !important;
+  }
+
+  .sach-title {
+    font-size: 11px !important;
+  }
+
+  .sach-description {
+    font-size: 10px !important;
+  }
+
+  .sach-meta {
+    padding: var(--lhbs-space-1) var(--lhbs-space-2) !important;
+  }
+
+  .sach-meta .v-chip {
+    font-size: 10px !important;
+    height: 20px !important;
+    padding: 0 var(--lhbs-space-1) !important;
+  }
+
+  .nhom-sach-title {
+    padding: var(--lhbs-space-2) var(--lhbs-space-3) !important;
+    font-size: var(--lhbs-text-base) !important;
+  }
+
+  .v-img {
+    height: 120px !important;
+  }
+}
+
+/* === ACCESSIBILITY === */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    transition: none !important;
+  }
+}
+
+/* === HIGH CONTRAST MODE === */
+@media (prefers-contrast: high) {
+  .v-expansion-panel,
+  .sach-card.v-card,
+  .text-h6.text-primary {
+    border: 2px solid currentColor !important;
+  }
+
+  .sach-title,
+  .v-expansion-panel-title,
+  .text-h6.text-primary {
+    font-weight: 800 !important;
+  }
+}
+
+/* === PRINT STYLES === */
+@media print {
+  body,
+  .v-application {
+    background: white !important;
+  }
+
+  .v-expansion-panel,
+  .sach-card.v-card,
+  .text-h6.text-primary {
+    background: white !important;
+    box-shadow: none !important;
+    border: 1px solid #000 !important;
+  }
+
+  .v-expansion-panel-text {
+    max-height: none !important;
+    overflow: visible !important;
+  }
+
+  .sach-card.v-card {
+    break-inside: avoid !important;
+    height: auto !important;
+  }
+}
+
+/* === UTILITY CLASSES === */
+.simple-card {
+  background: var(--lhbs-white) !important;
+  border: 1px solid var(--lhbs-gray-200) !important;
+  border-radius: var(--lhbs-radius-lg) !important;
+  box-shadow: var(--lhbs-shadow-sm) !important;
+}
+
+.simple-text {
+  color: var(--lhbs-gray-700) !important;
+  font-family: var(--lhbs-font-body) !important;
+}
+
+.simple-title {
+  color: var(--lhbs-gray-800) !important;
+  font-family: var(--lhbs-font-display) !important;
+  font-weight: 600 !important;
+}
+
+/* === VUETIFY OVERRIDES === */
+.v-application .v-expansion-panel {
+  color: inherit !important;
+}
+
+.v-application .v-expansion-panel-title {
+  color: inherit !important;
+}
+
+.v-application .v-card {
+  color: inherit !important;
+}
+
+.v-application .v-chip {
+  color: inherit !important;
+}
+
+/* === PERFORMANCE OPTIMIZATIONS === */
+.v-expansion-panel,
+.sach-card.v-card {
+  transform: translateZ(0);
+  backface-visibility: hidden;
+}
+
+/* === LOADING STATES === */
+.v-skeleton-loader.loading-simple {
+  opacity: 0.7;
+  pointer-events: none;
+}
+
+/* === SPECIAL STATES === */
+.sach-card.featured {
+  border: 2px solid var(--lhbs-emerald) !important;
+  box-shadow: var(--lhbs-shadow-md) !important;
+}
+
+.sach-card.premium {
+  border: 2px solid var(--lhbs-gold) !important;
+  box-shadow: var(--lhbs-shadow-md) !important;
+}
+
+.sach-card.disabled {
+  opacity: 0.5 !important;
+  pointer-events: none !important;
+  filter: grayscale(100%) !important;
+}

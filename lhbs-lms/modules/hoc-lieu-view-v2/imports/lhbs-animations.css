@@ -1,0 +1,1136 @@
+/**********************************************
+ * ✨ LHBS ANIMATIONS CSS - UNIFIED ANIMATIONS
+ * Tất cả animations, effects và achievements
+ * Version: 2.0 - Refactored & Optimized
+ **********************************************/
+
+/* === ACHIEVEMENT POPUP SYSTEM === */
+
+.lh-achievement-popup {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: var(--lh-z-tooltip);
+  opacity: 0;
+  transform: translateX(100%);
+  transition: all var(--lh-transition-bounce);
+  pointer-events: none;
+}
+
+.lh-achievement-show {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.lh-achievement-content {
+  background: var(--lh-glass-white);
+  backdrop-filter: var(--lh-backdrop-blur);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-left: 4px solid var(--lh-primary);
+  border-radius: var(--lh-radius-xl);
+  padding: var(--lh-space-4);
+  box-shadow: var(--lh-shadow-2xl);
+  display: flex;
+  align-items: center;
+  gap: var(--lh-space-3);
+  min-width: 280px;
+  max-width: 400px;
+  position: relative;
+  overflow: hidden;
+}
+
+.lh-achievement-content::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+  animation: achievement-shimmer 2s ease-out;
+}
+
+.lh-achievement-icon {
+  font-size: var(--lh-text-3xl);
+  line-height: 1;
+  animation: achievement-bounce 0.6s ease-out;
+}
+
+.lh-achievement-text {
+  flex: 1;
+}
+
+.lh-achievement-title {
+  font-weight: 700;
+  font-size: var(--lh-text-base);
+  color: var(--lh-gray-800);
+  margin-bottom: var(--lh-space-1);
+}
+
+.lh-achievement-desc {
+  font-size: var(--lh-text-sm);
+  color: var(--lh-gray-600);
+  line-height: 1.4;
+}
+
+/* === PAGE TRANSITION EFFECTS === */
+
+.lh-page-transition-next {
+  animation: slide-out-left 0.5s ease-out;
+}
+
+.lh-page-transition-prev {
+  animation: slide-out-right 0.5s ease-out;
+}
+
+.lh-exit-animation {
+  animation: fade-scale-out 0.3s ease-in forwards;
+}
+
+/* Content reveal animations */
+.lh-scroll-reveal {
+  opacity: 0;
+  transform: translateY(30px);
+  transition: all var(--lh-transition-slow);
+}
+
+.lh-scroll-reveal.lh-revealed {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* === CELEBRATION EFFECTS === */
+
+.lh-celebration {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: var(--lh-z-modal);
+}
+
+.lh-confetti {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  background: var(--lh-primary);
+  animation: confetti-fall 3s linear infinite;
+}
+
+.lh-confetti:nth-child(2n) { 
+  background: var(--lh-secondary); 
+  animation-delay: 0.5s; 
+}
+
+.lh-confetti:nth-child(3n) { 
+  background: var(--lh-accent); 
+  animation-delay: 1s; 
+}
+
+.lh-confetti:nth-child(4n) { 
+  background: var(--lh-success); 
+  animation-delay: 1.5s; 
+}
+
+.lh-confetti:nth-child(5n) { 
+  background: var(--lh-info); 
+  animation-delay: 2s; 
+}
+
+/* === INTERACTIVE BUTTON EFFECTS === */
+
+.lh-interactive-btn {
+  position: relative;
+  overflow: hidden;
+  transform-style: preserve-3d;
+}
+
+.lh-interactive-btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+  transform: skewX(-25deg);
+  transition: left var(--lh-transition-slow);
+}
+
+.lh-interactive-btn:hover::before {
+  left: 100%;
+}
+
+/* === MICRO ANIMATIONS === */
+
+/* Floating elements */
+.lh-float-slow {
+  animation: float-slow 8s ease-in-out infinite;
+}
+
+.lh-float-medium {
+  animation: float-medium 6s ease-in-out infinite;
+}
+
+.lh-float-fast {
+  animation: float-fast 4s ease-in-out infinite;
+}
+
+/* Pulse variations */
+.lh-pulse-slow {
+  animation: pulse-slow 4s ease-in-out infinite;
+}
+
+.lh-pulse-medium {
+  animation: pulse-medium 2s ease-in-out infinite;
+}
+
+.lh-pulse-fast {
+  animation: pulse-fast 1s ease-in-out infinite;
+}
+
+/* Glow effects */
+.lh-glow-primary {
+  animation: glow-primary 2s ease-in-out infinite alternate;
+}
+
+.lh-glow-secondary {
+  animation: glow-secondary 2s ease-in-out infinite alternate;
+}
+
+.lh-glow-accent {
+  animation: glow-accent 2s ease-in-out infinite alternate;
+}
+
+/* Bounce variations */
+.lh-bounce-soft {
+  animation: bounce-soft 2s ease-in-out infinite;
+}
+
+.lh-bounce-medium {
+  animation: bounce-medium 1.5s ease-in-out infinite;
+}
+
+.lh-bounce-hard {
+  animation: bounce-hard 1s ease-in-out infinite;
+}
+
+/* Shake effects */
+.lh-shake-soft {
+  animation: shake-soft 0.5s ease-in-out;
+}
+
+.lh-shake-medium {
+  animation: shake-medium 0.5s ease-in-out;
+}
+
+.lh-shake-hard {
+  animation: shake-hard 0.5s ease-in-out;
+}
+
+/* Wiggle effects */
+.lh-wiggle {
+  animation: wiggle 1s ease-in-out infinite;
+}
+
+.lh-wiggle-fast {
+  animation: wiggle 0.5s ease-in-out infinite;
+}
+
+/* Tada effect */
+.lh-tada {
+  animation: tada 1s ease-in-out;
+}
+
+/* Heartbeat effect */
+.lh-heartbeat {
+  animation: heartbeat 1.5s ease-in-out infinite;
+}
+
+/* Rotate effects */
+.lh-rotate-slow {
+  animation: rotate-slow 10s linear infinite;
+}
+
+.lh-rotate-medium {
+  animation: rotate-medium 5s linear infinite;
+}
+
+.lh-rotate-fast {
+  animation: rotate-fast 2s linear infinite;
+}
+
+/* === ENTRANCE ANIMATIONS === */
+
+.lh-fade-in {
+  animation: fade-in 0.5s ease-out;
+}
+
+.lh-fade-in-up {
+  animation: fade-in-up 0.5s ease-out;
+}
+
+.lh-fade-in-down {
+  animation: fade-in-down 0.5s ease-out;
+}
+
+.lh-fade-in-left {
+  animation: fade-in-left 0.5s ease-out;
+}
+
+.lh-fade-in-right {
+  animation: fade-in-right 0.5s ease-out;
+}
+
+.lh-slide-in-up {
+  animation: slide-in-up 0.5s ease-out;
+}
+
+.lh-slide-in-down {
+  animation: slide-in-down 0.5s ease-out;
+}
+
+.lh-slide-in-left {
+  animation: slide-in-left 0.5s ease-out;
+}
+
+.lh-slide-in-right {
+  animation: slide-in-right 0.5s ease-out;
+}
+
+.lh-zoom-in {
+  animation: zoom-in 0.5s ease-out;
+}
+
+.lh-zoom-in-up {
+  animation: zoom-in-up 0.5s ease-out;
+}
+
+.lh-zoom-in-down {
+  animation: zoom-in-down 0.5s ease-out;
+}
+
+.lh-flip-in-x {
+  animation: flip-in-x 0.6s ease-out;
+}
+
+.lh-flip-in-y {
+  animation: flip-in-y 0.6s ease-out;
+}
+
+.lh-rotate-in {
+  animation: rotate-in 0.6s ease-out;
+}
+
+.lh-roll-in {
+  animation: roll-in 0.6s ease-out;
+}
+
+/* === EXIT ANIMATIONS === */
+
+.lh-fade-out {
+  animation: fade-out 0.5s ease-in forwards;
+}
+
+.lh-fade-out-up {
+  animation: fade-out-up 0.5s ease-in forwards;
+}
+
+.lh-fade-out-down {
+  animation: fade-out-down 0.5s ease-in forwards;
+}
+
+.lh-fade-out-left {
+  animation: fade-out-left 0.5s ease-in forwards;
+}
+
+.lh-fade-out-right {
+  animation: fade-out-right 0.5s ease-in forwards;
+}
+
+.lh-slide-out-up {
+  animation: slide-out-up 0.5s ease-in forwards;
+}
+
+.lh-slide-out-down {
+  animation: slide-out-down 0.5s ease-in forwards;
+}
+
+.lh-slide-out-left {
+  animation: slide-out-left 0.5s ease-in forwards;
+}
+
+.lh-slide-out-right {
+  animation: slide-out-right 0.5s ease-in forwards;
+}
+
+.lh-zoom-out {
+  animation: zoom-out 0.5s ease-in forwards;
+}
+
+.lh-zoom-out-up {
+  animation: zoom-out-up 0.5s ease-in forwards;
+}
+
+.lh-zoom-out-down {
+  animation: zoom-out-down 0.5s ease-in forwards;
+}
+
+.lh-flip-out-x {
+  animation: flip-out-x 0.6s ease-in forwards;
+}
+
+.lh-flip-out-y {
+  animation: flip-out-y 0.6s ease-in forwards;
+}
+
+.lh-rotate-out {
+  animation: rotate-out 0.6s ease-in forwards;
+}
+
+.lh-roll-out {
+  animation: roll-out 0.6s ease-in forwards;
+}
+
+/* === ATTENTION SEEKERS === */
+
+.lh-jello {
+  animation: jello 1s ease-in-out;
+}
+
+.lh-rubber-band {
+  animation: rubber-band 1s ease-in-out;
+}
+
+.lh-swing {
+  animation: swing 1s ease-in-out;
+}
+
+.lh-wobble {
+  animation: wobble 1s ease-in-out;
+}
+
+.lh-flash {
+  animation: flash 1s ease-in-out;
+}
+
+.lh-head-shake {
+  animation: head-shake 1s ease-in-out;
+}
+
+/* === SPECIAL EFFECTS === */
+
+.lh-hinge {
+  animation: hinge 2s ease-in-out;
+}
+
+.lh-jack-in-the-box {
+  animation: jack-in-the-box 1s ease-in-out;
+}
+
+.lh-light-speed-in-right {
+  animation: light-speed-in-right 1s ease-out;
+}
+
+.lh-light-speed-out-right {
+  animation: light-speed-out-right 1s ease-in forwards;
+}
+
+/* === STAGGER ANIMATIONS === */
+
+.lh-stagger-1 { animation-delay: 0.1s; }
+.lh-stagger-2 { animation-delay: 0.2s; }
+.lh-stagger-3 { animation-delay: 0.3s; }
+.lh-stagger-4 { animation-delay: 0.4s; }
+.lh-stagger-5 { animation-delay: 0.5s; }
+.lh-stagger-6 { animation-delay: 0.6s; }
+.lh-stagger-7 { animation-delay: 0.7s; }
+.lh-stagger-8 { animation-delay: 0.8s; }
+.lh-stagger-9 { animation-delay: 0.9s; }
+.lh-stagger-10 { animation-delay: 1s; }
+
+/* === KEYFRAME DEFINITIONS === */
+
+/* === Basic Animations === */
+
+@keyframes achievement-shimmer {
+  0% { left: -100%; }
+  100% { left: 100%; }
+}
+
+@keyframes achievement-bounce {
+  0% { transform: scale(0); }
+  50% { transform: scale(1.3); }
+  100% { transform: scale(1); }
+}
+
+@keyframes slide-out-left {
+  0% { transform: translateX(0); opacity: 1; }
+  50% { transform: translateX(-50px); opacity: 0.5; }
+  100% { transform: translateX(0); opacity: 1; }
+}
+
+@keyframes slide-out-right {
+  0% { transform: translateX(0); opacity: 1; }
+  50% { transform: translateX(50px); opacity: 0.5; }
+  100% { transform: translateX(0); opacity: 1; }
+}
+
+@keyframes fade-scale-out {
+  0% { 
+    opacity: 1; 
+    transform: scale(1); 
+  }
+  100% { 
+    opacity: 0; 
+    transform: scale(0.95); 
+  }
+}
+
+@keyframes confetti-fall {
+  0% {
+    transform: translateY(-100vh) rotate(0deg);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(100vh) rotate(720deg);
+    opacity: 0;
+  }
+}
+
+/* === Float Animations === */
+
+@keyframes float-slow {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-15px); }
+}
+
+@keyframes float-medium {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-10px); }
+}
+
+@keyframes float-fast {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-5px); }
+}
+
+/* === Pulse Animations === */
+
+@keyframes pulse-slow {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+}
+
+@keyframes pulse-medium {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+}
+
+@keyframes pulse-fast {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.15); }
+}
+
+/* === Glow Animations === */
+
+@keyframes glow-primary {
+  from { box-shadow: 0 0 5px var(--lh-primary); }
+  to { box-shadow: 0 0 20px var(--lh-primary), 0 0 30px var(--lh-primary); }
+}
+
+@keyframes glow-secondary {
+  from { box-shadow: 0 0 5px var(--lh-secondary); }
+  to { box-shadow: 0 0 20px var(--lh-secondary), 0 0 30px var(--lh-secondary); }
+}
+
+@keyframes glow-accent {
+  from { box-shadow: 0 0 5px var(--lh-accent); }
+  to { box-shadow: 0 0 20px var(--lh-accent), 0 0 30px var(--lh-accent); }
+}
+
+/* === Bounce Animations === */
+
+@keyframes bounce-soft {
+  0%, 20%, 53%, 80%, 100% {
+    animation-timing-function: cubic-bezier(0.215, 0.610, 0.355, 1.000);
+    transform: translate3d(0,0,0);
+  }
+  40%, 43% {
+    animation-timing-function: cubic-bezier(0.755, 0.050, 0.855, 0.060);
+    transform: translate3d(0, -10px, 0);
+  }
+  70% {
+    animation-timing-function: cubic-bezier(0.755, 0.050, 0.855, 0.060);
+    transform: translate3d(0, -5px, 0);
+  }
+  90% {
+    transform: translate3d(0,-2px,0);
+  }
+}
+
+@keyframes bounce-medium {
+  0%, 20%, 53%, 80%, 100% {
+    animation-timing-function: cubic-bezier(0.215, 0.610, 0.355, 1.000);
+    transform: translate3d(0,0,0);
+  }
+  40%, 43% {
+    animation-timing-function: cubic-bezier(0.755, 0.050, 0.855, 0.060);
+    transform: translate3d(0, -15px, 0);
+  }
+  70% {
+    animation-timing-function: cubic-bezier(0.755, 0.050, 0.855, 0.060);
+    transform: translate3d(0, -7px, 0);
+  }
+  90% {
+    transform: translate3d(0,-3px,0);
+  }
+}
+
+@keyframes bounce-hard {
+  0%, 20%, 53%, 80%, 100% {
+    animation-timing-function: cubic-bezier(0.215, 0.610, 0.355, 1.000);
+    transform: translate3d(0,0,0);
+  }
+  40%, 43% {
+    animation-timing-function: cubic-bezier(0.755, 0.050, 0.855, 0.060);
+    transform: translate3d(0, -20px, 0);
+  }
+  70% {
+    animation-timing-function: cubic-bezier(0.755, 0.050, 0.855, 0.060);
+    transform: translate3d(0, -10px, 0);
+  }
+  90% {
+    transform: translate3d(0,-5px,0);
+  }
+}
+
+/* === Shake Animations === */
+
+@keyframes shake-soft {
+  0%, 100% { transform: translateX(0); }
+  10%, 30%, 50%, 70%, 90% { transform: translateX(-2px); }
+  20%, 40%, 60%, 80% { transform: translateX(2px); }
+}
+
+@keyframes shake-medium {
+  0%, 100% { transform: translateX(0); }
+  10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+  20%, 40%, 60%, 80% { transform: translateX(5px); }
+}
+
+@keyframes shake-hard {
+  0%, 100% { transform: translateX(0); }
+  10%, 30%, 50%, 70%, 90% { transform: translateX(-10px); }
+  20%, 40%, 60%, 80% { transform: translateX(10px); }
+}
+
+/* === Wiggle Animation === */
+
+@keyframes wiggle {
+  0%, 7% { transform: rotateZ(0); }
+  15% { transform: rotateZ(-15deg); }
+  20% { transform: rotateZ(10deg); }
+  25% { transform: rotateZ(-10deg); }
+  30% { transform: rotateZ(6deg); }
+  35% { transform: rotateZ(-4deg); }
+  40%, 100% { transform: rotateZ(0); }
+}
+
+/* === Tada Animation === */
+
+@keyframes tada {
+  0% { transform: scale3d(1, 1, 1); }
+  10%, 20% { transform: scale3d(0.9, 0.9, 0.9) rotate3d(0, 0, 1, -3deg); }
+  30%, 50%, 70%, 90% { transform: scale3d(1.1, 1.1, 1.1) rotate3d(0, 0, 1, 3deg); }
+  40%, 60%, 80% { transform: scale3d(1.1, 1.1, 1.1) rotate3d(0, 0, 1, -3deg); }
+  100% { transform: scale3d(1, 1, 1); }
+}
+
+/* === Heartbeat Animation === */
+
+@keyframes heartbeat {
+  0% { transform: scale(1); }
+  14% { transform: scale(1.3); }
+  28% { transform: scale(1); }
+  42% { transform: scale(1.3); }
+  70% { transform: scale(1); }
+}
+
+/* === Rotate Animations === */
+
+@keyframes rotate-slow {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+@keyframes rotate-medium {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+@keyframes rotate-fast {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* === Entrance Animations === */
+
+@keyframes fade-in {
+  0% { opacity: 0; }
+  100% { opacity: 1; }
+}
+
+@keyframes fade-in-up {
+  0% { opacity: 0; transform: translate3d(0, 100%, 0); }
+  100% { opacity: 1; transform: translate3d(0, 0, 0); }
+}
+
+@keyframes fade-in-down {
+  0% { opacity: 0; transform: translate3d(0, -100%, 0); }
+  100% { opacity: 1; transform: translate3d(0, 0, 0); }
+}
+
+@keyframes fade-in-left {
+  0% { opacity: 0; transform: translate3d(-100%, 0, 0); }
+  100% { opacity: 1; transform: translate3d(0, 0, 0); }
+}
+
+@keyframes fade-in-right {
+  0% { opacity: 0; transform: translate3d(100%, 0, 0); }
+  100% { opacity: 1; transform: translate3d(0, 0, 0); }
+}
+
+@keyframes slide-in-up {
+  0% { transform: translate3d(0, 100%, 0); visibility: visible; }
+  100% { transform: translate3d(0, 0, 0); }
+}
+
+@keyframes slide-in-down {
+  0% { transform: translate3d(0, -100%, 0); visibility: visible; }
+  100% { transform: translate3d(0, 0, 0); }
+}
+
+@keyframes slide-in-left {
+  0% { transform: translate3d(-100%, 0, 0); visibility: visible; }
+  100% { transform: translate3d(0, 0, 0); }
+}
+
+@keyframes slide-in-right {
+  0% { transform: translate3d(100%, 0, 0); visibility: visible; }
+  100% { transform: translate3d(0, 0, 0); }
+}
+
+@keyframes zoom-in {
+  0% { opacity: 0; transform: scale3d(0.3, 0.3, 0.3); }
+  50% { opacity: 1; }
+  100% { transform: scale3d(1, 1, 1); }
+}
+
+@keyframes zoom-in-up {
+  0% { opacity: 0; transform: scale3d(0.1, 0.1, 0.1) translate3d(0, 1000px, 0); }
+  60% { opacity: 1; transform: scale3d(0.475, 0.475, 0.475) translate3d(0, -60px, 0); }
+  100% { transform: scale3d(1, 1, 1) translate3d(0, 0, 0); }
+}
+
+@keyframes zoom-in-down {
+  0% { opacity: 0; transform: scale3d(0.1, 0.1, 0.1) translate3d(0, -1000px, 0); }
+  60% { opacity: 1; transform: scale3d(0.475, 0.475, 0.475) translate3d(0, 60px, 0); }
+  100% { transform: scale3d(1, 1, 1) translate3d(0, 0, 0); }
+}
+
+@keyframes flip-in-x {
+  0% { transform: perspective(400px) rotateX(90deg); opacity: 0; }
+  40% { transform: perspective(400px) rotateX(-20deg); }
+  60% { transform: perspective(400px) rotateX(10deg); opacity: 1; }
+  80% { transform: perspective(400px) rotateX(-5deg); }
+  100% { transform: perspective(400px); }
+}
+
+@keyframes flip-in-y {
+  0% { transform: perspective(400px) rotateY(90deg); opacity: 0; }
+  40% { transform: perspective(400px) rotateY(-20deg); }
+  60% { transform: perspective(400px) rotateY(10deg); opacity: 1; }
+  80% { transform: perspective(400px) rotateY(-5deg); }
+  100% { transform: perspective(400px); }
+}
+
+@keyframes rotate-in {
+  0% { transform: rotate(-200deg); opacity: 0; }
+  100% { transform: rotate(0); opacity: 1; }
+}
+
+@keyframes roll-in {
+  0% { opacity: 0; transform: translate3d(-100%, 0, 0) rotate3d(0, 0, 1, -120deg); }
+  100% { opacity: 1; transform: translate3d(0, 0, 0); }
+}
+
+/* === Exit Animations === */
+
+@keyframes fade-out {
+  0% { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+@keyframes fade-out-up {
+  0% { opacity: 1; }
+  100% { opacity: 0; transform: translate3d(0, -100%, 0); }
+}
+
+@keyframes fade-out-down {
+  0% { opacity: 1; }
+  100% { opacity: 0; transform: translate3d(0, 100%, 0); }
+}
+
+@keyframes fade-out-left {
+  0% { opacity: 1; }
+  100% { opacity: 0; transform: translate3d(-100%, 0, 0); }
+}
+
+@keyframes fade-out-right {
+  0% { opacity: 1; }
+  100% { opacity: 0; transform: translate3d(100%, 0, 0); }
+}
+
+@keyframes slide-out-up {
+  0% { transform: translate3d(0, 0, 0); }
+  100% { visibility: hidden; transform: translate3d(0, -100%, 0); }
+}
+
+@keyframes slide-out-down {
+  0% { transform: translate3d(0, 0, 0); }
+  100% { visibility: hidden; transform: translate3d(0, 100%, 0); }
+}
+
+@keyframes slide-out-left {
+  0% { transform: translate3d(0, 0, 0); }
+  100% { visibility: hidden; transform: translate3d(-100%, 0, 0); }
+}
+
+@keyframes slide-out-right {
+  0% { transform: translate3d(0, 0, 0); }
+  100% { visibility: hidden; transform: translate3d(100%, 0, 0); }
+}
+
+@keyframes zoom-out {
+  0% { opacity: 1; }
+  50% { opacity: 0; transform: scale3d(0.3, 0.3, 0.3); }
+  100% { opacity: 0; }
+}
+
+@keyframes zoom-out-up {
+  40% { opacity: 1; transform: scale3d(0.475, 0.475, 0.475) translate3d(0, 60px, 0); }
+  100% { opacity: 0; transform: scale3d(0.1, 0.1, 0.1) translate3d(0, -2000px, 0); }
+}
+
+@keyframes zoom-out-down {
+  40% { opacity: 1; transform: scale3d(0.475, 0.475, 0.475) translate3d(0, -60px, 0); }
+  100% { opacity: 0; transform: scale3d(0.1, 0.1, 0.1) translate3d(0, 2000px, 0); }
+}
+
+@keyframes flip-out-x {
+  0% { transform: perspective(400px); }
+  30% { transform: perspective(400px) rotateX(-20deg); opacity: 1; }
+  100% { transform: perspective(400px) rotateX(90deg); opacity: 0; }
+}
+
+@keyframes flip-out-y {
+  0% { transform: perspective(400px); }
+  30% { transform: perspective(400px) rotateY(-15deg); opacity: 1; }
+  100% { transform: perspective(400px) rotateY(90deg); opacity: 0; }
+}
+
+@keyframes rotate-out {
+  0% { transform: rotate(0); opacity: 1; }
+  100% { transform: rotate(200deg); opacity: 0; }
+}
+
+@keyframes roll-out {
+  0% { opacity: 1; }
+  100% { opacity: 0; transform: translate3d(100%, 0, 0) rotate3d(0, 0, 1, 120deg); }
+}
+
+/* === Attention Seekers === */
+
+@keyframes jello {
+  0%, 11.1%, 100% { transform: translate3d(0, 0, 0); }
+  22.2% { transform: skewX(-12.5deg) skewY(-12.5deg); }
+  33.3% { transform: skewX(6.25deg) skewY(6.25deg); }
+  44.4% { transform: skewX(-3.125deg) skewY(-3.125deg); }
+  55.5% { transform: skewX(1.5625deg) skewY(1.5625deg); }
+  66.6% { transform: skewX(-0.78125deg) skewY(-0.78125deg); }
+  77.7% { transform: skewX(0.390625deg) skewY(0.390625deg); }
+  88.8% { transform: skewX(-0.1953125deg) skewY(-0.1953125deg); }
+}
+
+@keyframes rubber-band {
+  0% { transform: scale3d(1, 1, 1); }
+  30% { transform: scale3d(1.25, 0.75, 1); }
+  40% { transform: scale3d(0.75, 1.25, 1); }
+  50% { transform: scale3d(1.15, 0.85, 1); }
+  65% { transform: scale3d(0.95, 1.05, 1); }
+  75% { transform: scale3d(1.05, 0.95, 1); }
+  100% { transform: scale3d(1, 1, 1); }
+}
+
+@keyframes swing {
+  20% { transform: rotate3d(0, 0, 1, 15deg); }
+  40% { transform: rotate3d(0, 0, 1, -10deg); }
+  60% { transform: rotate3d(0, 0, 1, 5deg); }
+  80% { transform: rotate3d(0, 0, 1, -5deg); }
+  100% { transform: rotate3d(0, 0, 1, 0deg); }
+}
+
+@keyframes wobble {
+  0% { transform: translate3d(0, 0, 0); }
+  15% { transform: translate3d(-25%, 0, 0) rotate3d(0, 0, 1, -5deg); }
+  30% { transform: translate3d(20%, 0, 0) rotate3d(0, 0, 1, 3deg); }
+  45% { transform: translate3d(-15%, 0, 0) rotate3d(0, 0, 1, -3deg); }
+  60% { transform: translate3d(10%, 0, 0) rotate3d(0, 0, 1, 2deg); }
+  75% { transform: translate3d(-5%, 0, 0) rotate3d(0, 0, 1, -1deg); }
+  100% { transform: translate3d(0, 0, 0); }
+}
+
+@keyframes flash {
+  0%, 50%, 100% { opacity: 1; }
+  25%, 75% { opacity: 0; }
+}
+
+@keyframes head-shake {
+  0% { transform: translateX(0); }
+  6.5% { transform: translateX(-6px) rotateY(-9deg); }
+  18.5% { transform: translateX(5px) rotateY(7deg); }
+  31.5% { transform: translateX(-3px) rotateY(-5deg); }
+  43.5% { transform: translateX(2px) rotateY(3deg); }
+  50% { transform: translateX(0); }
+}
+
+/* === Special Effects === */
+
+@keyframes hinge {
+  0% { transform-origin: top left; }
+  20%, 60% { transform: rotate3d(0, 0, 1, 80deg); transform-origin: top left; }
+  40%, 80% { transform: rotate3d(0, 0, 1, 60deg); transform-origin: top left; opacity: 1; }
+  100% { transform: translate3d(0, 700px, 0); opacity: 0; }
+}
+
+@keyframes jack-in-the-box {
+  0% { opacity: 0; transform: scale(0.1) rotate(30deg); transform-origin: center bottom; }
+  50% { transform: rotate(-10deg); }
+  70% { transform: rotate(3deg); }
+  100% { opacity: 1; transform: scale(1); }
+}
+
+@keyframes light-speed-in-right {
+  0% { transform: translate3d(100%, 0, 0) skewX(-30deg); opacity: 0; }
+  60% { transform: skewX(20deg); opacity: 1; }
+  80% { transform: skewX(-5deg); }
+  100% { transform: translate3d(0, 0, 0); opacity: 1; }
+}
+
+@keyframes light-speed-out-right {
+  0% { opacity: 1; }
+  100% { transform: translate3d(100%, 0, 0) skewX(30deg); opacity: 0; }
+}
+
+/* === UTILITY CLASSES === */
+
+.lh-infinite {
+  animation-iteration-count: infinite;
+}
+
+.lh-delay-1s { animation-delay: 1s; }
+.lh-delay-2s { animation-delay: 2s; }
+.lh-delay-3s { animation-delay: 3s; }
+.lh-delay-4s { animation-delay: 4s; }
+.lh-delay-5s { animation-delay: 5s; }
+
+.lh-faster { animation-duration: 0.5s; }
+.lh-fast { animation-duration: 0.8s; }
+.lh-slow { animation-duration: 2s; }
+.lh-slower { animation-duration: 3s; }
+
+.lh-ease-in { animation-timing-function: ease-in; }
+.lh-ease-out { animation-timing-function: ease-out; }
+.lh-ease-in-out { animation-timing-function: ease-in-out; }
+.lh-linear { animation-timing-function: linear; }
+
+.lh-backwards { animation-fill-mode: backwards; }
+.lh-forwards { animation-fill-mode: forwards; }
+.lh-both { animation-fill-mode: both; }
+
+.lh-paused { animation-play-state: paused; }
+.lh-running { animation-play-state: running; }
+
+/* === RESPONSIVE ANIMATIONS === */
+
+@media (max-width: 768px) {
+  .lh-achievement-popup {
+    right: 10px;
+    top: 10px;
+  }
+  
+  .lh-achievement-content {
+    min-width: 260px;
+    padding: var(--lh-space-3);
+  }
+  
+  .lh-achievement-icon {
+    font-size: var(--lh-text-2xl);
+  }
+  
+  /* Reduce animation intensity on mobile */
+  .lh-page-transition-next,
+  .lh-page-transition-prev {
+    animation-duration: 0.3s;
+  }
+  
+  .lh-confetti {
+    width: 8px;
+    height: 8px;
+  }
+  
+  /* Simpler animations for mobile performance */
+  .lh-bounce-hard,
+  .lh-bounce-medium {
+    animation-name: bounce-soft;
+  }
+  
+  .lh-shake-hard,
+  .lh-shake-medium {
+    animation-name: shake-soft;
+  }
+}
+
+@media (max-width: 480px) {
+  .lh-achievement-popup {
+    right: 5px;
+    top: 5px;
+  }
+  
+  .lh-achievement-content {
+    min-width: 240px;
+    padding: var(--lh-space-2);
+  }
+  
+  .lh-achievement-icon {
+    font-size: var(--lh-text-xl);
+  }
+  
+  /* Very simple animations for small screens */
+  .lh-confetti {
+    width: 6px;
+    height: 6px;
+  }
+}
+
+/* === ACCESSIBILITY === */
+
+@media (prefers-reduced-motion: reduce) {
+  /* Disable all animations for users who prefer reduced motion */
+  .lh-achievement-popup,
+  .lh-page-transition-next,
+  .lh-page-transition-prev,
+  .lh-confetti,
+  [class*="lh-float"],
+  [class*="lh-pulse"],
+  [class*="lh-glow"],
+  [class*="lh-bounce"],
+  [class*="lh-shake"],
+  [class*="lh-wiggle"],
+  .lh-tada,
+  .lh-heartbeat,
+  [class*="lh-rotate"],
+  [class*="lh-fade"],
+  [class*="lh-slide"],
+  [class*="lh-zoom"],
+  [class*="lh-flip"],
+  .lh-jello,
+  .lh-rubber-band,
+  .lh-swing,
+  .lh-wobble,
+  .lh-flash,
+  .lh-head-shake,
+  .lh-hinge,
+  .lh-jack-in-the-box,
+  [class*="lh-light-speed"] {
+    animation: none !important;
+    transition: none !important;
+  }
+  
+  .lh-achievement-content::before {
+    display: none !important;
+  }
+  
+  /* Allow only essential transitions */
+  * {
+    transition-duration: 0.1s !important;
+  }
+}
+
+/* === DARK MODE SUPPORT === */
+
+@media (prefers-color-scheme: dark) {
+  .lh-achievement-content {
+    background: rgba(0, 0, 0, 0.8);
+    border-color: rgba(255, 255, 255, 0.2);
+  }
+  
+  .lh-achievement-title {
+    color: var(--lh-white);
+  }
+  
+  .lh-achievement-desc {
+    color: var(--lh-gray-300);
+  }
+  
+  /* Adjust glow effects for dark mode */
+  @keyframes glow-primary {
+    from { box-shadow: 0 0 5px var(--lh-primary); }
+    to { box-shadow: 0 0 15px var(--lh-primary), 0 0 25px var(--lh-primary); }
+  }
+  
+  @keyframes glow-secondary {
+    from { box-shadow: 0 0 5px var(--lh-secondary); }
+    to { box-shadow: 0 0 15px var(--lh-secondary), 0 0 25px var(--lh-secondary); }
+  }
+  
+  @keyframes glow-accent {
+    from { box-shadow: 0 0 5px var(--lh-accent); }
+    to { box-shadow: 0 0 15px var(--lh-accent), 0 0 25px var(--lh-accent); }
+  }
+}
+
+/* === HIGH PERFORMANCE MODE === */
+
+@media (max-width: 480px) and (max-height: 600px) {
+  /* Minimal animations for low-end devices */
+  * {
+    animation-duration: 0.2s !important;
+    transition-duration: 0.2s !important;
+  }
+  
+  .lh-confetti,
+  [class*="lh-glow"],
+  [class*="lh-rotate"],
+  .lh-heartbeat {
+    animation: none !important;
+  }
+}
+
+/* === PRINT MODE === */
+
+@media print {
+  /* Disable all animations in print mode */
+  * {
+    animation: none !important;
+    transition: none !important;
+  }
+  
+  .lh-achievement-popup,
+  .lh-confetti {
+    display: none !important;
+  }
+}

@@ -1,0 +1,4 @@
+.custom-legend-style .apexcharts-legend-group-vertical{
+    flex-direction: row !important;
+}
+

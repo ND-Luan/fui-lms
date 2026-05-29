@@ -1,0 +1,215 @@
+{
+    "data": [
+        {
+            "CapID": "3",
+            "LopItem": null,
+            "KhoiItem": null,
+            "DSLopAV2": [],
+            "DSSemester": [
+                {
+                    "title": "Giữa kì 1",
+                    "value": "Giữa HK1"
+                },
+                {
+                    "title": "Cuối kì 1",
+                    "value": "Cuối HK1"
+                },
+                {
+                    "title": "Giữa kì 2",
+                    "value": "Giữa HK2"
+                },
+                {
+                    "title": "Cuối kì 2",
+                    "value": "Cuối HK2"
+                }
+            ],
+            "Semester": null,
+            "DSLopAV2Group": [],
+            "JsonLop": null,
+            "compIndex": 1
+        },
+        {
+            "getLop": {
+                "API": "lms/Lop_Get_ByKhoiID",
+                "IN": {
+                    "NienKhoa": "vueData.NienKhoa",
+                    "KhoiID": "vueData.KhoiItem.value"
+                },
+                "OUT": "DSLop",
+                "CALLBACK": [
+                    {
+                        "DSLopAV2": "DSLop.filter(item => item.TenLop.includes('AV'))"
+                    },
+                    {
+                        "IF": "DSLopAV2.length > 0 && DSLopAV2.length == 5",
+                        "THEN": [
+                            {
+                                "DSLopAV2Group": "[[DSLopAV2[0].LopID,DSLopAV2[1].LopID],[DSLopAV2[2].LopID,DSLopAV2[3].LopID], [DSLopAV2[4].LopID]]"
+                            }
+                        ]
+                    },
+                    {
+                        "IF": "DSLopAV2.length > 0 && DSLopAV2.length == 6",
+                        "THEN": [
+                            {
+                                "DSLopAV2Group": "[[DSLopAV2[0].LopID,DSLopAV2[1].LopID],[DSLopAV2[2].LopID,DSLopAV2[3].LopID], [DSLopAV2[4].LopID,DSLopAV2[5].LopID]]"
+                            }
+                        ]
+                    }
+                ]
+            }
+        },
+        {
+            "ThongKeXepLoaiKyNangAV_Group": [
+                {
+                    "API": "lms/ThongKeXepLoaiKyNangAV_TheoLop_HK1",
+                    "IN": {
+                        "JsonLop": "JSON.stringify(DSLopAV2Group[0])",
+                        "HocKy": "Semester.value"
+                    },
+                    "OUT": "DataChart1"
+                },
+                {
+                    "API": "lms/ThongKeXepLoaiKyNangAV_TheoLop_HK1",
+                    "IN": {
+                        "JsonLop": "JSON.stringify(DSLopAV2Group[1])",
+                        "HocKy": "Semester.value"
+                    },
+                    "OUT": "DataChart2"
+                },
+                {
+                    "API": "lms/ThongKeXepLoaiKyNangAV_TheoLop_HK1",
+                    "IN": {
+                        "JsonLop": "JSON.stringify(DSLopAV2Group[2])",
+                        "HocKy": "Semester.value"
+                    },
+                    "OUT": "DataChart3"
+                }
+            ]
+        },
+        {
+            "EXE": "renderDSKhoi()"
+        }
+    ],
+    "watch": {
+        "KhoiItem": {
+            "IF": "vueData.KhoiItem.value > 0",
+            "THEN": [
+                {
+                    "Semester": null
+                },
+                {
+                    "CALL": "getLop"
+                }
+            ]
+        },
+        "Semester": {
+            "IF": "Semester && Semester.value.length>0",
+            "THEN": [
+                {
+                    "compIndex": "vueData.compIndex += 1"
+                },
+                {
+                    "CALL": "ThongKeXepLoaiKyNangAV_Group"
+                }
+            ]
+        }
+    },
+    "controls": [
+        {
+            "prop": "fluid grid-list-md",
+            "rows": [
+                {
+                    "prop": "",
+                    "cols": [
+                        {
+                            "el": "v-card",
+                            "attr": {},
+                            "innerHTML": [
+                                {
+                                    "el": "v-card-title",
+                                    "attr": {
+                                        "class": "text-primary"
+                                    },
+                                    "innerHTML": "Chọn"
+                                },
+                                {
+                                    "el": "v-card-text",
+                                    "innerHTML": [
+                                        {
+                                            "el": "v-row",
+                                            "innerHTML": [
+                                                {
+                                                    "el": "v-col",
+                                                    "innerHTML": [
+                                                        {
+                                                            "el": "v-select",
+                                                            "attr": {
+                                                                "v-model": "KhoiItem",
+                                                                "label": "Chọn khối",
+                                                                ":items": "DSKhoi",
+                                                                "item-title": "title",
+                                                                "item-value": "value",
+                                                                ":return-object": true,
+                                                                "hide-details": "auto"
+                                                            }
+                                                        }
+                                                    ],
+                                                    "w": 2
+                                                },
+                                                {
+                                                    "el": "v-col",
+                                                    "innerHTML": [
+                                                        {
+                                                            "el": "v-select",
+                                                            "attr": {
+                                                                "v-model": "Semester",
+                                                                "label": "Chọn học kì",
+                                                                ":items": "DSSemester",
+                                                                "hide-details": "auto",
+                                                                "item-title": "title",
+                                                                "item-value": "value",
+                                                                ":return-object": true,
+                                                                ":disabled": "!(KhoiItem && KhoiItem.value>0)"
+                                                            }
+                                                        }
+                                                    ],
+                                                    "w": 2
+                                                },
+                                                {
+                                                    "el": "v-col",
+                                                    "innerHTML": "<f-button label='Làm mới' :disabled='!(Semester && Semester.value.length>0)' variant='outlined' :action='ThongKeXepLoaiKyNangAV_Group'  color='primary' />"
+                                                }
+                                            ]
+                                        }
+                                    ],
+                                    "attr": {}
+                                }
+                            ],
+                            "w": 12
+                        },
+                        {
+                            "el": "uc-main-page",
+                            "attr": {
+                                ":compIndex": "compIndex",
+                                ":data-Chart1": "DataChart1",
+                                ":data-Chart2": "DataChart2",
+                                ":data-Chart3": "DataChart3",
+                                "v-if": "Semester && Semester.value.length>0"
+                            },
+                            "w": 12
+                        },
+                        {
+                            "el": "uc-empty",
+                            "attr": {
+                                "v-if": "!Semester || DSLopAV2Group.length==0"
+                            },
+                            "w": 12
+                        }
+                    ]
+                }
+            ]
+        }
+    ],
+    "set": {}
+}

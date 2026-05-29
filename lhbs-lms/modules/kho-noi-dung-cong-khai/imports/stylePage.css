@@ -1,0 +1,21 @@
+.custom-table {
+    border: 0.2px solid #ccc;
+    /* viền ngoài */
+    /* bo góc nếu muốn */
+}
+
+.custom-table th,
+.custom-table td {
+    border: 0.2px solid #ddd;
+    /* viền trong */
+}
+
+.custom-table th {
+    background: #f5f5f5;
+    /* màu nền header */
+}
+
+.custom-table td{
+    padding-top: 8px !important;
+     padding-bottom: 8px  !important;
+}

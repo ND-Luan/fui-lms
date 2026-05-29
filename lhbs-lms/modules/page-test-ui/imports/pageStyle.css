@@ -1,0 +1,262 @@
+/* ======================================================================
+   CSS CUSTOM PROPERTIES
+   Chỉnh sửa các biến dưới đây để thay đổi giao diện toàn bộ hệ thống
+   ====================================================================== */
+:root {
+    /* ---------- Màu sắc ---------- */
+    --primary: #2563EB;
+    /* Màu thương hiệu chính */
+    --secondary: #7C3AED;
+    /* Màu phụ / accent */
+    --success: #16A34A;
+    /* Thành công */
+    --warning: #D97706;
+    /* Cảnh báo */
+    --error: #DC2626;
+    /* Lỗi */
+    --info: #0891B2;
+    /* Thông tin */
+
+    /* ---------- Typography ---------- */
+    --font-family: 'Be Vietnam Pro', 'Inter', 'Segoe UI', sans-serif;
+    --font-size-base: 14px;
+    /* Cỡ chữ gốc — thử 13px / 15px / 16px */
+    --line-height: 1.6;
+
+    /* ---------- Border radius ---------- */
+    --radius-btn: 8px;
+    /* Bo góc button */
+    --radius-card: 12px;
+    /* Bo góc card */
+    --radius-chip: 20px;
+    /* Bo góc chip */
+    --radius-input: 8px;
+    /* Bo góc input / field */
+    --radius-dialog: 16px;
+    /* Bo góc dialog */
+
+    /* ---------- Shadow ---------- */
+    --shadow-card: 0 1px 4px rgba(0, 0, 0, .08), 0 4px 16px rgba(0, 0, 0, .06);
+
+    /* ---------- Spacing ---------- */
+    --spacing-xs: 4px;
+    --spacing-sm: 8px;
+    --spacing-md: 16px;
+    --spacing-lg: 24px;
+
+    /* ---------- Table ---------- */
+    --table-row-height: 36px;
+    --table-header-font-size: 0.78rem;
+    --table-cell-font-size: 0.85rem;
+}
+
+/* ======================================================================
+   GLOBAL
+   ====================================================================== */
+:deep(*) {
+    font-family: var(--font-family) !important;
+}
+
+:deep(.v-application) {
+    font-size: var(--font-size-base);
+    line-height: var(--line-height);
+}
+
+/* ======================================================================
+   APP BAR
+   ====================================================================== */
+.showcase-title {
+    font-size: 1rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+}
+
+/* ======================================================================
+   SECTION HEADER
+   ====================================================================== */
+.section-header {
+    display: flex;
+    align-items: center;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    color: #6b7280;
+    padding-bottom: 8px;
+    border-bottom: 1px solid rgba(0, 0, 0, .07);
+}
+
+/* ======================================================================
+   SHOWCASE LABEL (sub-section divider)
+   ====================================================================== */
+.showcase-label {
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    color: #9ca3af;
+    margin-bottom: 10px;
+}
+
+/* ======================================================================
+   CARD
+   ====================================================================== */
+.showcase-card {
+    border-radius: var(--radius-card) !important;
+    box-shadow: var(--shadow-card) !important;
+    border: 1px solid rgba(0, 0, 0, .06) !important;
+    overflow: hidden;
+}
+
+.stat-card {
+    transition: transform 0.18s ease, box-shadow 0.18s ease;
+}
+
+.stat-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 28px rgba(0, 0, 0, .13) !important;
+}
+
+.stat-label {
+    font-size: 0.78rem;
+    color: #6b7280;
+    font-weight: 500;
+    margin-bottom: 4px;
+}
+
+.stat-value {
+    font-size: 1.45rem;
+    font-weight: 800;
+    line-height: 1.15;
+    margin-bottom: 8px;
+    color: #111827;
+}
+
+:deep(.v-theme--dark) .stat-value {
+    color: #f9fafb;
+}
+
+/* ======================================================================
+   BUTTONS
+   ====================================================================== */
+:deep(.v-btn) {
+    border-radius: var(--radius-btn) !important;
+    font-weight: 600 !important;
+    letter-spacing: 0.01em !important;
+    text-transform: none !important;
+    font-size: 0.85rem !important;
+}
+
+/* ======================================================================
+   CHIPS
+   ====================================================================== */
+:deep(.v-chip) {
+    border-radius: var(--radius-chip) !important;
+    font-weight: 600 !important;
+    font-size: 0.78rem !important;
+}
+
+/* Dot status */
+.status-dot {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    margin-right: 6px;
+    flex-shrink: 0;
+}
+
+.dot-online {
+    background-color: #16a34a;
+}
+
+.dot-busy {
+    background-color: #d97706;
+}
+
+.dot-offline {
+    background-color: #9ca3af;
+}
+
+/* ======================================================================
+   INPUTS
+   ====================================================================== */
+:deep(.v-field) {
+    border-radius: var(--radius-input) !important;
+    font-size: var(--font-size-base) !important;
+}
+
+:deep(.v-label) {
+    font-size: 0.85rem !important;
+}
+
+/* ======================================================================
+   DATA TABLE
+   ====================================================================== */
+.showcase-table :deep(.v-data-table__th) {
+    font-size: var(--table-header-font-size) !important;
+    font-weight: 700 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.05em !important;
+    color: #6b7280 !important;
+    background-color: #f9fafb !important;
+    white-space: nowrap;
+}
+
+.showcase-table :deep(td) {
+    font-size: var(--table-cell-font-size) !important;
+    height: var(--table-row-height) !important;
+}
+
+:deep(.v-theme--dark) .showcase-table :deep(.v-data-table__th) {
+    background-color: #1f2937 !important;
+    color: #9ca3af !important;
+}
+
+/* ======================================================================
+   TABS
+   ====================================================================== */
+:deep(.v-tab) {
+    font-size: 0.85rem !important;
+    font-weight: 600 !important;
+    text-transform: none !important;
+    letter-spacing: 0 !important;
+}
+
+/* ======================================================================
+   EXPANSION PANELS
+   ====================================================================== */
+.showcase-panels {
+    border-radius: var(--radius-card) !important;
+    overflow: hidden;
+    box-shadow: var(--shadow-card) !important;
+    border: 1px solid rgba(0, 0, 0, .06) !important;
+}
+
+:deep(.v-expansion-panel-title) {
+    font-size: 0.9rem !important;
+    font-weight: 600 !important;
+}
+
+:deep(.v-expansion-panel-text__wrapper) {
+    font-size: 0.87rem !important;
+    color: #4b5563;
+    line-height: 1.75;
+}
+
+/* ======================================================================
+   DIALOG
+   ====================================================================== */
+:deep(.v-overlay__content > .v-card) {
+    border-radius: var(--radius-dialog) !important;
+}
+
+/* ======================================================================
+   SNACKBAR
+   ====================================================================== */
+:deep(.v-snackbar__wrapper) {
+    border-radius: 10px !important;
+    font-size: 0.87rem !important;
+    font-weight: 600 !important;
+}
