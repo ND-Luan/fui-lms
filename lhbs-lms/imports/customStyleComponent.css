@@ -38,3 +38,140 @@
     align-items: center;
     justify-content: center;
 }
+
+/* GlobalNavigationDrawer: layout navigation chung cho khối nhà trường */
+.global-nav-layout {
+    min-height: 100vh;
+    background: #f7f9fc;
+}
+
+.global-nav-drawer {
+    border-right: 1px solid #edf0f7;
+}
+
+.global-nav-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-height: 66px;
+    min-width: 0;
+    padding: 12px 14px;
+}
+
+.global-nav-avatar {
+    border: 2px solid rgba(var(--v-theme-primary), .16);
+    flex: 0 0 auto;
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.global-nav-user {
+    flex: 1;
+    min-width: 0;
+}
+
+.global-nav-name {
+    color: rgba(var(--v-theme-on-surface), .9);
+    font-size: 14px;
+    font-weight: 700;
+    line-height: 1.35;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.global-nav-meta {
+    color: rgba(var(--v-theme-on-surface), .52);
+    font-size: 12px;
+    line-height: 1.35;
+    margin-top: 2px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.global-nav-rail-btn {
+    flex: 0 0 auto;
+}
+
+.global-nav-list {
+    padding: 12px;
+}
+
+.global-nav-section {
+    padding: 0 16px 12px;
+}
+
+.global-nav-section-label {
+    color: rgba(var(--v-theme-on-surface), .42);
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: .5px;
+    margin-bottom: 8px;
+    text-transform: uppercase;
+}
+
+.global-nav-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.global-nav-footer {
+    align-items: center;
+    border-top: 1px solid #edf0f7;
+    color: rgba(var(--v-theme-on-surface), .55);
+    display: flex;
+    font-size: 12px;
+    gap: 8px;
+    height: 44px;
+    padding: 0 16px;
+}
+
+.global-nav-main {
+    min-width: 0;
+}
+
+.global-nav-topbar {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+}
+
+.global-nav-content {
+    min-width: 0;
+    padding: 16px;
+}
+
+.global-nav-mobile {
+    background: #ffffff;
+    border-bottom: 1px solid #edf0f7;
+    position: sticky;
+    top: 0;
+    z-index: 3;
+}
+
+.global-nav-mobile-head {
+    align-items: center;
+    display: flex;
+    gap: 8px;
+    min-height: 52px;
+    padding: 0 10px;
+}
+
+.global-nav-mobile-title {
+    color: rgba(var(--v-theme-on-surface), .86);
+    flex: 1;
+    font-size: 15px;
+    font-weight: 700;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+@media (max-width: 600px) {
+    .global-nav-content {
+        padding: 10px;
+    }
+}

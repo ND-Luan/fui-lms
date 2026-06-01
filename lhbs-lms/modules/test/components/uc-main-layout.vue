@@ -1,20 +1,7 @@
 <template>
-	<!-- <Global>
-		<div class="d-flex flex-wrap ga-2 pa-4">
-			<v-btn @click="openPage">Mở trang</v-btn>
-			<v-btn color="primary" @click="testConfirm">confirm (Promise)</v-btn>
-			<v-btn color="warning" @click="testWarning">warning (callback)</v-btn>
-			<v-btn color="info" @click="testAlert">alert (chỉ OK)</v-btn>
-			<v-btn color="secondary" @click="testInfo">info</v-btn>
-		</div>
-		<div v-if="lastResult !== null" class="pa-4">
-			Kết quả: <strong>{{ lastResult }}</strong>
-		</div>
-		<GlobalDataTable :headers :items />
-	</Global> -->
+	<Global :isTest="true">
 
-	<v-btn @click="isOpen=true" />
-	<uc-dialog-1 v-model="isOpen" />
+	</Global>
 </template>
 
 <script>
