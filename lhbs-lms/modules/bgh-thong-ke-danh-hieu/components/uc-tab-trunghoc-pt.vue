@@ -194,6 +194,28 @@ methods: {
 onRefresh() {
 this.getHocLucHangKiem(3)
 },
+onExportExcel() {
+	const XLSX = window.XLSX
+	if (!XLSX) { alert('Thư viện xuất Excel chưa sẵn sàng, vui lòng thử lại.'); return }
+	if (!this.Data_THPT.length) { alert('Không có dữ liệu để xuất.'); return }
+	const buildSheet = (headers, items) => {
+		const flat = []
+		for (const h of headers) {
+			if (h.children) flat.push(...h.children.map(c => ({ title: h.title + ' - ' + c.title, value: c.value })))
+			else flat.push({ title: h.title, value: h.value })
+		}
+		const headerRow = flat.map(h => h.title)
+		const dataRows = items.map(item => flat.map(h => item[h.value] ?? ''))
+		const ws = XLSX.utils.aoa_to_sheet([headerRow, ...dataRows])
+		ws['!cols'] = headerRow.map((h, i) => ({ wch: Math.min(Math.max(String(h).length, ...dataRows.map(r => String(r[i] ?? '').length)) + 4, 50) }))
+		return ws
+	}
+	const wb = XLSX.utils.book_new()
+	XLSX.utils.book_append_sheet(wb, buildSheet(this.headersHocTap, this.Data_THPT), 'Học tập')
+	XLSX.utils.book_append_sheet(wb, buildSheet(this.headersKQRL, this.Data_THPT), 'KQRL')
+	XLSX.utils.book_append_sheet(wb, buildSheet(this.headersDanhHieu, this.Data_THPT), 'Danh hiệu')
+	XLSX.writeFile(wb, `ThongKeDanhHieu_THPT_${this.HocKi || 'BaoCao'}.xlsx`)
+},
 async getHocLucHangKiem(capid) {
 if (!vueData.NienKhoa || !this.HocKi) return
 let data

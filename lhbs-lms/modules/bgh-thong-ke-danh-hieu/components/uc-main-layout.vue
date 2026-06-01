@@ -16,8 +16,9 @@
 						<v-col class="d-flex align-center ga-2 flex-wrap text-no-wrap">
 							<v-btn variant="outlined" color="primary" :disabled="!HocKi" @click="onRefresh">
 								<v-icon start>mdi-reload</v-icon>Làm mới
-							</v-btn>
-							<v-btn variant="elevated" color="success" :disabled="!HocKi || isLocked"
+							</v-btn>						<v-btn variant="outlined" color="teal" :disabled="!HocKi" @click="onExportExcel">
+							<v-icon start>mdi-file-excel</v-icon>Xuất Excel
+						</v-btn>							<v-btn variant="elevated" color="success" :disabled="!HocKi || isLocked"
 								@click="onConfirmChot">
 								<v-icon start>mdi-lock-check</v-icon>Chốt báo cáo
 							</v-btn>
@@ -41,7 +42,17 @@
 	export default {
 		inject: ['snackbarRef', 'iframeRef', 'confirmRef'],
 		data() {
-			const hkUrl = vueData.HK || vueData.hk || null
+			const hkUrl = vueData.hk
+			let DSHocKi = []
+			if (vueData.CapID === 1)
+				DSHocKi = [{ title: "Giữa HK1", textValue: "GK_HK1" },
+				{ title: "Cuối HK1", textValue: "CK_HK1" },
+				{ title: "Giữa HK2", textValue: "GK_HK2" },
+				{ title: "Cuối HK2", textValue: "CK_HK2" },]
+			else
+				DSHocKi = [{ title: "Học kì 1", textValue: "HK1" },
+				{ title: "Học kì 2", textValue: "HK2" },
+				{ title: "Cả năm", textValue: "CaNam" }]
 			return {
 				vueData,
 				CapID: parseInt(vueData.CapID || vueData.capid) || 1,
@@ -52,15 +63,7 @@
 					{ title: "Trung học cơ sở", value: 2 },
 					{ title: "Trung học phổ thông", value: 3 },
 				],
-				DSHocKi: [
-					{ title: "Giữa HK1", textValue: "GK_HK1" },
-					{ title: "Cuối HK1", textValue: "CK_HK1" },
-					{ title: "Giữa HK2", textValue: "GK_HK2" },
-					{ title: "Cuối HK2", textValue: "CK_HK2" },
-					{ title: "Học kì 1", textValue: "HK1" },
-					{ title: "Học kì 2", textValue: "HK2" },
-					{ title: "Cả năm", textValue: "CaNam" }
-				]
+				DSHocKi
 			}
 		},
 		computed: {
@@ -75,9 +78,21 @@
 				this.isLocked = false
 			}
 		},
+		mounted() {
+			if (!window.XLSX) {
+				const s = document.createElement('script')
+				s.src = 'https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js'
+				document.head.appendChild(s)
+			}
+		},
 		methods: {
 			updateActionState(state) {
 				this.isLocked = state.isLocked
+			},
+			onExportExcel() {
+				if (this.$refs.tabRef?.onExportExcel) {
+					this.$refs.tabRef.onExportExcel()
+				}
 			},
 			onRefresh() {
 				if (this.$refs.tabRef?.onRefresh) {

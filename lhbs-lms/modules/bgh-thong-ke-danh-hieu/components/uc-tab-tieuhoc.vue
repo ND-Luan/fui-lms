@@ -225,6 +225,26 @@
 			onRefresh() {
 				this.ThongKe_KQRL_Get_All_Khoi_C1()
 			},
+			onExportExcel() {
+				const XLSX = window.XLSX
+				if (!XLSX) { alert('Thư viện xuất Excel chưa sẵn sàng, vui lòng thử lại.'); return }
+				const hasData = this.DataChart1.length || this.DataChart2.length || this.DataChart4.length || this.DataChart5.length || this.DataChart6.length
+				if (!hasData) { alert('Không có dữ liệu để xuất.'); return }
+				const buildSheet = (headers, items) => {
+					const headerRow = headers.map(h => h.title)
+					const dataRows = items.map(item => headers.map(h => item[h.value] ?? ''))
+					const ws = XLSX.utils.aoa_to_sheet([headerRow, ...dataRows])
+					ws['!cols'] = headerRow.map((h, i) => ({ wch: Math.min(Math.max(String(h).length, ...dataRows.map(r => String(r[i] ?? '').length)) + 4, 50) }))
+					return ws
+				}
+				const wb = XLSX.utils.book_new()
+				if (this.DataChart1.length) XLSX.utils.book_append_sheet(wb, buildSheet(this.headersChart1, this.DataChart1), 'Phẩm chất')
+				if (this.DataChart2.length) XLSX.utils.book_append_sheet(wb, buildSheet(this.headersChart2, this.DataChart2), 'Năng lực')
+				if (this.DataChart4.length) XLSX.utils.book_append_sheet(wb, buildSheet(this.headersChart4, this.DataChart4), 'Môn học')
+				if (this.DataChart5.length) XLSX.utils.book_append_sheet(wb, buildSheet(this.headersChart5, this.DataChart5), 'Khen thưởng')
+				if (this.DataChart6.length) XLSX.utils.book_append_sheet(wb, buildSheet(this.headersChart6, this.DataChart6), 'KT theo khối')
+				XLSX.writeFile(wb, `ThongKeDanhHieu_TieuHoc_${this.HocKi || 'BaoCao'}.xlsx`)
+			},
 			async ThongKe_KQRL_Get_All_Khoi_C1() {
 				if (!this.HocKi) return
 				let data
