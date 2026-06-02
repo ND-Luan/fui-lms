@@ -13,8 +13,8 @@ window.addEventListener('message', (event) => {
 
         // Update global vueData for legacy code
         if (window.vueData) {
-            window.vueData.NienKhoa = payload.schoolYear;
-            window.vueData.NienKhoaItem = payload.schoolYearItem;
+            window.vueData.NienKhoa = payload.NienKhoa;
+            window.vueData.NienKhoaItem = payload.NienKhoaItem;
         }
 
         // Dispatch a custom event for Vue components to reactively update
@@ -24,15 +24,15 @@ window.addEventListener('message', (event) => {
 
 /**
  * Composition API version for modern components
- * Usage: const { schoolYear, schoolYearItem } = useSchoolYearMessage();
+ * Usage: const { NienKhoa, NienKhoaItem } = useSchoolYearMessage();
  */
 function useSchoolYearMessage() {
     const schoolYear = Vue.ref(window.vueData?.NienKhoa);
     const schoolYearItem = Vue.ref(window.vueData?.NienKhoaItem);
 
     const handleSyncEvent = (e) => {
-        schoolYear.value = e.detail.schoolYear;
-        schoolYearItem.value = e.detail.schoolYearItem;
+        schoolYear.value = e.detail.NienKhoa;
+        schoolYearItem.value = e.detail.NienKhoaItem;
     };
 
     Vue.onMounted(() => {

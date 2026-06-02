@@ -1,6 +1,6 @@
 <template>
-	<global>
-		<template #header="">
+	<Global>
+		<template #header>
 			<v-card>
 				<v-card-title>
 					{{ TitlePage }} • {{ TitleCap }}
@@ -10,11 +10,13 @@
 						<v-col cols="12" sm="3">
 							<v-select v-model="KhoiItem" label="Chọn khối" :items="DSKhoi" item-title="TenKhoiHoc"
 								item-value="KhoiID" return-object="">
-							</v-select></v-col>
+							</v-select>
+						</v-col>
 						<v-col cols="12" sm="3">
 							<v-select v-model="LopItem" label="Chọn lớp" :items="DSLop" item-title="TenLop"
 								item-value="LopID" :disabled="!KhoiItem" return-object="">
-							</v-select></v-col>
+							</v-select>
+						</v-col>
 						<v-col class="d-flex align-center ga-2 flex-wrap">
 							<v-btn @click="getHocSinh()" variant="outlined" color="primary" :disabled="!LopItem">
 								<v-icon start="">mdi-reload</v-icon>Làm mới
@@ -24,7 +26,8 @@
 								Cập nhật DS học sinh
 								<v-badge v-if="DSHocSinhSelected.length > 0" :content="DSHocSinhSelected.length"
 									color="white" text-color="teal" inline="">
-								</v-badge></v-btn>
+								</v-badge>
+							</v-btn>
 						</v-col>
 					</v-row>
 				</v-card-text>
@@ -46,7 +49,8 @@
 				<div class="d-flex align-center ga-3 py-2">
 					<v-avatar :size="52" class="elevation-2 flex-shrink-0">
 						<v-img :src="vueData.v_Set.urlAvatarHocSinh + item.HocSinhID">
-						</v-img></v-avatar>
+						</v-img>
+					</v-avatar>
 					<div class="d-flex flex-column ga-1">
 						<span class="font-weight-bold text-body-2">{{ item.HoTen }}</span>
 						<div class="d-flex align-center ga-2 flex-wrap">
@@ -107,13 +111,14 @@
 			<template #item.XemChiTiet="{ item }">
 				<v-btn @click="localStorageSetItem(item)" icon="mdi-eye-outline" variant="text" color="primary"
 					size="small" v-tooltip="'Xem chi tiết ' + item.HoTen">
-				</v-btn></template>
+				</v-btn>
+			</template>
 		</v-data-table>
 
 		<uc-modal-edit-profile v-model="isOpenModalEditProfile" :student-profile="StudentProfile"
 			@onsubmitfinish="getHocSinh(false)">
 		</uc-modal-edit-profile>
-	</global>
+	</Global>
 </template>
 
 <script>
@@ -148,11 +153,16 @@
 		},
 	
 		watch: {
-			"vueData.NienKhoa"() {
-				this.getKhoi()
-				this.KhoiItem = null
-				this.LopItem = null
-				this.items = []
+			"vueData.NienKhoa": {
+				immediate: true,
+				handler(newVal) {
+					if (!newVal) return
+					this.DSKhoi = []
+					this.KhoiItem = null
+					this.LopItem = null
+					this.items = []
+					this.getKhoi()
+				}
 			},
 			KhoiItem(val) {
 				if (!val) return
@@ -168,8 +178,8 @@
 		},
 	
 		mounted() {
-			this.getKhoi()
 		},
+
 	
 		methods: {
 			async getKhoi() {

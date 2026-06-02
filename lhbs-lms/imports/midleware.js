@@ -106,6 +106,25 @@ suppressError           | boolean | false           | Ẩn error dialog
 */
 
 /*****************************************
+* GLOBAL WAIT LOCK (Dành cho App Shell / Global)
+*****************************************/
+let _globalWaitResolve = null;
+window._globalWaitPromise = Promise.resolve(); 
+
+window.startGlobalWait = function() {
+    window._globalWaitPromise = new Promise(resolve => {
+        _globalWaitResolve = resolve;
+    });
+};
+
+window.endGlobalWait = function() {
+    if (_globalWaitResolve) {
+        _globalWaitResolve();
+        _globalWaitResolve = null;
+    }
+};
+
+/*****************************************
 * STATE MANAGEMENT
 *****************************************/
 let loadingState = {
@@ -548,11 +567,22 @@ const runMiddlewares = compose([
 /*****************************************
  * FETCH PROMISE (API UTIL)
  *****************************************/
-function fetchPromise(url, params = {}, options = {}) {
+async function fetchPromise(url, params = {}, options = {}) {
+    // Đợi Global sẵn sàng, ngoại trừ chính các câu lệnh lấy niên khóa
+    if (!url.includes('NienKhoa_Get')) {
+        await window._globalWaitPromise;
+    }
+
     const ctx = { url, params, options };
     return runMiddlewares(ctx).then(() => ctx.response);
 }
 async function fetchBatchPromise(apiCalls, options = {}) {
+    // Đợi Global sẵn sàng cho toàn bộ batch
+    const hasNKApi = apiCalls.some(c => c.url.includes('NienKhoa_Get'));
+    if (!hasNKApi) {
+        await window._globalWaitPromise;
+    }
+
     const enableBatchCache = options.batchCache !== false;
     const batchCacheTTL = options.batchCacheTTL || 5 * 60 * 1000;
     const forceRefresh = options.forceRefresh === true; // ← THÊM

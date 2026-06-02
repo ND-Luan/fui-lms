@@ -245,7 +245,7 @@
 			mobileDrawer: { type: Boolean, default: false }
 		},
 	
-		emits: ['navigate', 'update:mobileDrawer'],
+		emits: ['navigate', 'update:mobileDrawer', 'nienkhoa-loaded'],
 	
 		data() {
 			return {
@@ -321,19 +321,27 @@
 	
 		methods: {
 			async getNK() {
-				const res = await fetchPromise('lms/NienKhoa_Get')
-				this.DSNK = res || []
-				// Set mặc định từ vueData nếu có, ưu tiên theo NienKhoaID
-				if (vueData?.NienKhoaItem?.NienKhoaID) {
-					this.NKItem = this.DSNK.find(x => x.NienKhoaID === vueData.NienKhoaItem.NienKhoaID)
-				} else if (vueData?.NienKhoa) {
-					// Fallback nếu chỉ có NienKhoa năm
-					this.NKItem = this.DSNK.find(x => x.NienKhoa === vueData.NienKhoa && x.HocKi === vueData.NienKhoaItem?.HocKi)
-				}
+				try {
+					const res = await fetchPromise('lms/NienKhoa_Get')
+					this.DSNK = res || []
+					// Set mặc định từ vueData nếu có, ưu tiên theo NienKhoaID
+					if (vueData?.NienKhoaItem?.NienKhoaID) {
+						this.NKItem = this.DSNK.find(x => x.NienKhoaID === vueData.NienKhoaItem.NienKhoaID)
+					} else if (vueData?.NienKhoa) {
+						// Fallback nếu chỉ có NienKhoa năm
+						this.NKItem = this.DSNK.find(x => x.NienKhoa === vueData.NienKhoa && x.HocKi === vueData.NienKhoaItem?.HocKi)
+					}
 
-				// Nếu vẫn chưa có NKItem (lần đầu vào hoặc vueData trống), tự động lấy cái IsActive
-				if (!this.NKItem) {
-					this.NKItem = this.DSNK.find(x => x.IsActive)
+					// Nếu vẫn chưa có NKItem (lần đầu vào hoặc vueData trống), tự động lấy cái IsActive
+					if (!this.NKItem) {
+						this.NKItem = this.DSNK.find(x => x.IsActive)
+					}
+
+					// Chờ NKItem watcher chạy xong (set vueData) trước khi báo shell sẵn sàng
+					await this.$nextTick()
+				} finally {
+					// Luôn emit dù thành công hay lỗi — shell sẽ mở iframe sau đây
+					this.$emit('nienkhoa-loaded')
 				}
 			},
 			loadFavorites(key) {
