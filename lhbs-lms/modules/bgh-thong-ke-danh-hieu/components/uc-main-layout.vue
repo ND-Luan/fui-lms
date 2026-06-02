@@ -16,9 +16,11 @@
 						<v-col class="d-flex align-center ga-2 flex-wrap text-no-wrap">
 							<v-btn variant="outlined" color="primary" :disabled="!HocKi" @click="onRefresh">
 								<v-icon start>mdi-reload</v-icon>Làm mới
-							</v-btn>						<v-btn variant="outlined" color="teal" :disabled="!HocKi" @click="onExportExcel">
-							<v-icon start>mdi-file-excel</v-icon>Xuất Excel
-						</v-btn>							<v-btn variant="elevated" color="success" :disabled="!HocKi || isLocked"
+							</v-btn>
+							<v-btn variant="outlined" color="teal" :disabled="!HocKi" @click="onExportExcel">
+								<v-icon start>mdi-file-excel</v-icon>Xuất Excel
+							</v-btn>
+							<v-btn variant="elevated" color="success" :disabled="!HocKi || isLocked"
 								@click="onConfirmChot">
 								<v-icon start>mdi-lock-check</v-icon>Chốt báo cáo
 							</v-btn>
