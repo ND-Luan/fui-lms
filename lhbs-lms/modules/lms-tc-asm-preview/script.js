@@ -56,19 +56,30 @@ function submitAssignmentFinal() {
     submitAssignment(payload);
 }
 function renderQuestionNotSubmit() {
-    const asmConfigString = vueData.assignmentData[0][0]?.AssignmentConfig
-    const asmConfig = JSON.parse(asmConfigString)
-    const questions = []
-    for (var group of asmConfig.groups) {
-        questions.push(group.questions)
+    let assignment = vueData.assignmentData;
+    if (Array.isArray(assignment)) assignment = assignment[0];
+    if (Array.isArray(assignment)) assignment = assignment[0];
+    const asmConfigString = assignment?.AssignmentConfig;
+    if (!asmConfigString) return "";
+    try {
+        const asmConfig = JSON.parse(asmConfigString);
+        if (asmConfig.type === 'INTEGRATED') return "";
+        const questions = []
+        if (asmConfig.groups) {
+            for (var group of asmConfig.groups) {
+                if (group.questions) questions.push(group.questions)
+            }
+        }
+        const flatQuestions = questions.flat()
+        const questionNotDone = []
+        flatQuestions.forEach((question, index) => {
+            if (!vueData.puseranswers[question.id] || vueData.puseranswers[question.id].answerData === null)
+                questionNotDone.push('Câu ' + (index + 1))
+        })
+        return questionNotDone.join(', ')
+    } catch (e) {
+        return "";
     }
-    const flatQuestions = questions.flat()
-    const questionNotDone = []
-    flatQuestions.forEach((question, index) => {
-        if (vueData.puseranswers[question.id].answerData === null)
-            questionNotDone.push('Câu ' + (index + 1))
-    })
-    return questionNotDone.join(', ')
 }
 vueData.initPage = initPage;
 vueData.saveDraft = saveDraft;

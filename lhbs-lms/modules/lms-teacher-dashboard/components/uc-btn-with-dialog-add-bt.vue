@@ -133,13 +133,14 @@
 						NienKhoa: vueData.NienKhoa,
 					HocKi: vueData.NienKhoaItem?.HocKi ?? 1
 					}, res => {
-					this.snackbarRef.value.showSnackbar({ message: 'Tạo bài tập thành công', color: 'success' })
-					this.clearData();
-					this.CloseModal();
+						this.snackbarRef.value.showSnackbar({ message: 'Tạo bài tập thành công', color: 'success' })
+						this.clearData();
+						this.CloseModal();
+						vueData.apiCall3();
 
-					this.iframeRef.value.openWindow({
-						title: "Soạn bài tập",
-						url: `/lms_tc_asm_builder?AssignmentID=${res?.data[0].AssignmentID}`,
+						this.iframeRef.value.openWindow({
+							title: "Soạn bài tập",
+							url: `/lms_tc_asm_builder?AssignmentID=${res?.data[0].AssignmentID}`,
 							onclose: () => vueData.initPage()
 						});
 					},
@@ -161,13 +162,12 @@
 						Vue.$toast.success('Tạo bài học thành công', { position: "top" })
 						this.clearData();
 						this.CloseModal();
-						openWindow({
+						vueData.apiCall3();
+						this.iframeRef.value.openWindow({
 							title: "Soạn bài học",
 							url: `lms_tc_lesson_builder?LessonID=${res?.data[0].LessonID}`,
 							id: "WinSoanBaiGiang",
-							onclose: {
-								"EXE": "apiCall3()"
-							}
+							onclose: () => vueData.initPage()
 						});
 					},
 						err => {

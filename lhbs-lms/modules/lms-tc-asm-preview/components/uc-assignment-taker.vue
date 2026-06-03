@@ -42,7 +42,7 @@
 				</div>
 
 				<v-expand-transition>
-					<v-alert v-if="showInstructions && assignment.Instructions" class="mt-2" density="comfortable"
+					<v-alert v-if="showInstructions && assignment.Instructions && assignment.Instructions !== assignment.ExternalLink" class="mt-2" density="comfortable"
 						variant="tonal" type="info">
 						{{ assignment.Instructions }}
 					</v-alert>
@@ -51,8 +51,15 @@
 		</v-card>
 
 		<v-row dense>
+			<v-col cols="12" v-if="isIntegrated">
+				<v-card flat border height="calc(100vh - 120px)">
+					<iframe :src="assignment.ExternalLink || assignment.Instructions" width="100%" height="100%"
+						frameborder="0"></iframe>
+				</v-card>
+			</v-col>
 			<!-- NAV -->
-			<v-col cols="12" sm="12" md="4" v-if="!isMobile" style="border-inline-end: 0.5px dashed #a7a2a2;">
+			<v-col cols="12" sm="12" md="4" v-if="!isMobile && !isIntegrated"
+				style="border-inline-end: 0.5px dashed #a7a2a2;">
 				<v-card class="question-nav" sticky top="80px" flat>
 					<div class="d-flex justify-end mb-2 " v-if="isTablet">
 						<v-btn-toggle v-model="viewMode" color="primary" variant="outlined" density="compact" divided
@@ -133,7 +140,7 @@
 			</v-col>
 
 			<!-- CONTENT -->
-			<v-col cols="12" md="8" class="pe-0">
+			<v-col cols="12" md="8" class="pe-0" v-if="!isIntegrated">
 				<div v-if="viewMode === 'single'">
 					<!-- COMPACT PROGRESS (sticky nhỏ gọn cho chế độ single cũng được, nhưng giữ nguyên logic lưu) -->
 					<v-card v-if="currentQuestion?.config" class="question-content-card ">
@@ -584,8 +591,8 @@
 </template>
 
 <script>
-export default {
-	name: 'uc-assignment-taker',
+	export default {
+		name: 'uc-assignment-taker',
 	props: {
 		puseranswers: Object,
 		assignmentData: Object,
@@ -622,11 +629,33 @@ export default {
 		userAnswers() {
 			return this.puseranswers || {};
 		},
+		isIntegrated() {
+			return this.assignment?.Type === 'INTEGRATED' || (!!this.assignment?.IntegrationSource && this.assignment?.IntegrationSource !== 'LMS');
+		},
 		assignment() {
 			if (!this.assignmentData) return null
-			const config = this.assignmentData;
-			if (config && typeof config.AssignmentConfig === 'string' && !config.groups) {
-				try { config.groups = JSON.parse(config.AssignmentConfig).groups || []; } catch (e) { config.groups = []; }
+			let rawData = this.assignmentData;
+			if (Array.isArray(rawData)) {
+				rawData = rawData[0];
+				if (Array.isArray(rawData)) {
+					rawData = rawData[0];
+				}
+			}
+			if (!rawData) return null;
+
+			const config = { ...rawData };
+			if (config && typeof config.AssignmentConfig === 'string') {
+				try {
+					const parsed = JSON.parse(config.AssignmentConfig);
+					config.groups = parsed.groups || [];
+					// Hỗ trợ bài tập tích hợp (Integration) - Chỉ xử lý khi source không phải là 'LMS'
+					if (parsed.type === 'INTEGRATED' || (config.IntegrationSource && config.IntegrationSource !== 'LMS')) {
+						config.Type = 'INTEGRATED';
+						config.ExternalLink = parsed.link || config.Instructions || '';
+					}
+				} catch (e) {
+					config.groups = [];
+				}
 			}
 			return config;
 		},
@@ -746,23 +775,27 @@ export default {
 		initializeAnswers() {
 			if (this.draft) {
 				try {
-					const asmConfigString = this.assignmentData?.AssignmentConfig
+					const asmConfigString = this.assignment?.AssignmentConfig
+					if (!asmConfigString) return;
 					const asmData = JSON.parse(asmConfigString)
-					const submissionContent = JSON.parse(this.draft.SubmissionContent) || { answers: {} }
-					const answers = submissionContent.answers
+					if (asmData.type === 'INTEGRATED') return;
+					const submissionContent = JSON.parse(this.draft.SubmissionContent || '{}') || { answers: {} }
+					const answers = submissionContent.answers || {}
 
-					asmData.groups.forEach(group => {
-						for (var question of group.questions) {
-							answers[question.id] = {
-								answerData: answers[question.id]?.answerData ?? null,
-								grading: {
-									comment: answers[question.id]?.grading?.comment || null,
-									teacherComment: answers[question.id]?.grading?.teacherComment || null,
-									manualScore: answers[question.id]?.grading?.manualScore || null,
+					if (asmData.groups) {
+						asmData.groups.forEach(group => {
+							for (var question of group.questions) {
+								answers[question.id] = {
+									answerData: answers[question.id]?.answerData ?? null,
+									grading: {
+										comment: answers[question.id]?.grading?.comment || null,
+										teacherComment: answers[question.id]?.grading?.teacherComment || null,
+										manualScore: answers[question.id]?.grading?.manualScore || null,
+									}
 								}
 							}
-						}
-					})
+						})
+					}
 					console.log('answers', answers)
 					this.$emit('update:puseranswers', answers || {});
 				} catch (e) {
@@ -969,5 +1002,5 @@ export default {
 	beforeUnmount() {
 		if (this.autoSaveTimer) clearTimeout(this.autoSaveTimer);
 	}
-}
+	}
 </script>

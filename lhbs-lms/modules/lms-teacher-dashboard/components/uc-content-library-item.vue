@@ -544,12 +544,10 @@
 						const assignmentID = dataItem.AssignmentID ?? null;
 						const assignToClassID = dataItem.AssignToClassID ?? null;
 						if (assignmentID !== null && assignToClassID !== null) {
-							openWindow({
+							this.iframeRef.value.openWindow({
 								title: "Sửa bài tập",
 								url: `/lms_tc_asm_builder?AssignmentID=${assignmentID}&AssignToClassID=${assignToClassID}`,
-								onclose: {
-									EXE: "apiCall3()"
-								}
+								onclose: () => vueData.initPage()
 							});
 						}
 					}

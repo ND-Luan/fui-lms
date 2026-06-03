@@ -6,8 +6,9 @@
 				<v-icon>mdi-close</v-icon>
 			</v-btn>
 		</div>
-		<p v-else class="ma-2 text-subtitle-1 font-weight-medium">{{ $t('message.QuestionLibrary') }}</p>
-		<v-divider></v-divider>
+		<p v-else-if="!hideTitle" class="ma-2 text-subtitle-1 font-weight-medium">{{ $t('message.QuestionLibrary') }}
+		</p>
+		<v-divider v-if="inDrawer || !hideTitle"></v-divider>
 		<v-list density="compact" nav class="pa-0">
 			<v-list-subheader>{{ $t('message.InteractiveQuiz') }}</v-list-subheader>
 			<v-list-item v-for="item in quizComponents" :key="item.type" @click="selectComponent(item)" link>
@@ -35,7 +36,8 @@
 		name: 'uc-assignment-component-library',
 		emits: ['add-component', 'close'],
 		props: {
-			inDrawer: { type: Boolean, default: false }
+			inDrawer: { type: Boolean, default: false },
+			hideTitle: { type: Boolean, default: false }
 		},
 		data() {
 			const toggle = JSON.parse(localStorage.getItem('IsLanguage')) ?? false

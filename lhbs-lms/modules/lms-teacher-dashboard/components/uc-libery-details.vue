@@ -10,7 +10,7 @@
 
 				<div class="d-flex mb-4 ga-2">
 					<v-chip class="pe-0" variant="text" color="#7C3AED">{{ $t('message.Grade') }} {{ formData.KhoiID
-					}}</v-chip>
+						}}</v-chip>
 					<v-chip class="pa-0" variant="text" color="#7C3AED">{{ formData.Tuan_HienThi }}</v-chip>
 				</div>
 
@@ -37,16 +37,17 @@
 					</v-row>
 				</v-form>
 				<v-btn @click="onRedirectToASM(selectedLibery)" color="success" variant="outlined" size="small"
-					class="mt-2"><v-icon class="me-1">mdi-file-document-outline</v-icon>{{ $t('message.ViewDetail') }}
+					class="mt-2">
+					<v-icon class="me-1">mdi-file-document-outline</v-icon>{{ $t('message.ViewDetail') }}
 					{{ formData.ResourceType == 'LESSON' ? ($i18n.locale ==
-						'en' ? 'lesson' : 'bài học') : ($i18n.locale == 'en' ? 'assignment' : 'bài tập') }}
+					'en' ? 'lesson' : 'bài học') : ($i18n.locale == 'en' ? 'assignment' : 'bài tập') }}
 				</v-btn>
 			</v-card-text>
 			<div class="d-flex border-t px-2 pt-3 ga-2" style="flex-wrap: wrap;"
 				v-if="formData?.AssignedClassNames?.split(',').length > 0 && selectedLibery?.Is_AssignedToClass == 1">
 				<b>{{ $t('message.ListClassAssigned') }} {{ formData.ResourceType == 'LESSON' ? ($i18n.locale ==
 					'en' ? 'lesson' : 'bài học') : ($i18n.locale == 'en' ? 'assignment' : 'bài tập')
-				}} </b>
+					}} </b>
 				<!-- <v-chip v-for="lop in formData?.AssignedClassNames?.split(',')" color="primary" size="small">
 					{{ lop }}
 				</v-chip> -->
@@ -80,18 +81,10 @@
 					<template v-slot:item.LimitAssigned="{ item }">
 						<div class="text-center d-flex align-center justify-center w-100">
 							<!-- :disabled="!item.Is_Full_Quiz" -->
-							<v-text-field
-								v-if="editDataLimitAssigned[getIndexToEdit(item)]"
-								:clearable="false"
-								density="compact"
-								class="my-2"
-								type="number"
-								min="1"
-								hide-details
-								v-model="editDataLimitAssigned[getIndexToEdit(item)].LimitAssigned"
-								variant="outlined"
-								style="min-width: 80px; max-width: 110px;"
-							/>
+							<v-text-field v-if="editDataLimitAssigned[getIndexToEdit(item)]" :clearable="false"
+								density="compact" class="my-2" type="number" min="1" hide-details
+								v-model="editDataLimitAssigned[getIndexToEdit(item)].LimitAssigned" variant="outlined"
+								style="min-width: 80px; max-width: 110px;" />
 							<!-- <v-tooltip v-if="editDataLimitAssigned[getIndexToEdit(item)] && !item.Is_Full_Quiz" location="top">
 								<template #activator="{ props }">
 									<v-icon v-bind="props" size="small" color="warning" class="ms-1">mdi-help-circle-outline</v-icon>
@@ -134,9 +127,10 @@
 			</div>
 			<v-card-actions class="border-t">
 				<v-spacer></v-spacer>
-				<v-btn @click="onSave()" variant="outlined" color="primary"><v-icon
-						class="me-1">mdi-content-save-outline</v-icon>{{
-							$t('message.Update') }}</v-btn>
+				<v-btn @click="onSave()" variant="outlined" color="primary">
+					<v-icon class="me-1">mdi-content-save-outline</v-icon>{{
+					$t('message.Update') }}
+				</v-btn>
 			</v-card-actions>
 		</v-card>
 	</v-dialog>
@@ -407,6 +401,7 @@
 			this.iframeRef.value.openWindow({
 				title: item.Title,
 				url,
+				onclose: () => vueData.initPage()
 			});
 		},
 		async saveAllLimitAssigned() {

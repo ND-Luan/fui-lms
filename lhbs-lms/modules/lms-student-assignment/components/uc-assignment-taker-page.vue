@@ -1,71 +1,77 @@
 <template>
 	<div>
-        <!-- Loading State -->
-        <div v-if="!dataReady" class="page-loading">
-            <div class="loader-ring">
-                <v-progress-circular indeterminate size="52" width="3" color="primary" />
-            </div>
-            <p class="loading-label">Đang tải dữ liệu học sinh...</p>
-        </div>
+		<!-- Loading State -->
+		<div v-if="!dataReady" class="page-loading">
+			<div class="loader-ring">
+				<v-progress-circular indeterminate size="52" width="3" color="primary" />
+			</div>
+			<p class="loading-label">Đang tải dữ liệu học sinh...</p>
+		</div>
 
-        <!-- Thông báo tính năng mới: Đánh dấu câu hỏi (hiện trong 2 ngày) -->
-        <v-alert v-if="showFlagFeatureAlert" type="info" variant="tonal" closable class="ma-2"
-            @click:close="dismissFlagFeatureAlert">
-            <template #prepend>
-                <v-icon>mdi-flag-variant</v-icon>
-            </template>
-            <strong>Tính năng mới:</strong> Bạn có thể <strong>đánh dấu câu hỏi</strong> bằng nút
-            <v-icon size="16" color="red">mdi-flag-variant-outline</v-icon>
-            để xem lại sau — kể cả sau khi đã nộp bài.
-            Tất cả câu hỏi đã đánh dấu sẽ được tổng hợp tại trang <strong>Câu hỏi đã đánh dấu</strong> trong Trang chủ
-            học sinh.
-        </v-alert>
+		<!-- Thông báo tính năng mới: Đánh dấu câu hỏi (hiện trong 2 ngày) -->
+		<v-alert v-if="showFlagFeatureAlert && !isIntegrated" type="info" variant="tonal" closable class="ma-2"
+			@click:close="dismissFlagFeatureAlert">
+			<template #prepend>
+				<v-icon>mdi-flag-variant</v-icon>
+			</template>
+			<strong>Tính năng mới:</strong> Bạn có thể <strong>đánh dấu câu hỏi</strong> bằng nút
+			<v-icon size="16" color="red">mdi-flag-variant-outline</v-icon>
+			để xem lại sau — kể cả sau khi đã nộp bài.
+			Tất cả câu hỏi đã đánh dấu sẽ được tổng hợp tại trang <strong>Câu hỏi đã đánh dấu</strong> trong Trang chủ
+			học sinh.
+		</v-alert>
 
-        <!-- Main Content -->
-        <v-container v-if="dataReady" fluid class="pa-0">
-            <v-row :no-gutters="true">
-                <v-col cols="12">
-                    <!-- Assignment Taker Component -->
-                    <uc-assignment-taker-2 v-if="dataReady === true" :key="keyComp" ref="assignmentTaker" class="pa-0"
-                        v-model:assignment-data="assignmentData" v-model:puseranswers="puseranswers"
-                        :hocSinhDetail="HocSinhDetail" :mon-hoc-name="monHocName" :on-save-draft="saveDraft"
-                        :on-save-flags-post-submit="saveFlagsPostSubmit" :on-open-submit-dialog="openSubmitDialog" />
-                    <v-dialog v-model="confirmSubmitDialog" max-width="420">
-                        <v-card>
-                            <v-alert type="warning" variant="tonal" rounded="0" class="mb-0"
-                                icon="mdi-send-check-outline" title="Xác nhận nộp bài">
-                                Bạn có chắc chắn muốn nộp bài không? Sau khi nộp, bạn sẽ
-                                <strong>không thể chỉnh sửa</strong> bài làm của mình.
-                            </v-alert>
+		<!-- Main Content -->
+		<v-container v-if="dataReady" fluid class="pa-0">
+			<v-row :no-gutters="true">
+				<v-col cols="12">
+					<!-- Assignment Taker Component -->
+					<uc-assignment-taker-2 v-if="dataReady === true" :key="keyComp" ref="assignmentTaker" class="pa-0"
+						v-model:assignment-data="assignmentData" v-model:puseranswers="puseranswers"
+						:hocSinhDetail="HocSinhDetail" :mon-hoc-name="monHocName" :on-save-draft="saveDraft"
+						:on-save-flags-post-submit="saveFlagsPostSubmit" :on-open-submit-dialog="openSubmitDialog" />
+					<v-dialog v-model="confirmSubmitDialog" max-width="420">
+						<v-card>
+							<v-alert type="warning" variant="tonal" rounded="0" class="mb-0"
+								icon="mdi-send-check-outline" title="Xác nhận nộp bài">
+								Bạn có chắc chắn muốn nộp bài không? Sau khi nộp, bạn sẽ
+								<strong>không thể chỉnh sửa</strong> bài làm của mình.
+							</v-alert>
 
-                            <v-alert v-if="isFullQuizAutoGrade" type="info" variant="tonal" rounded="0" class="mb-0"
-                                icon="mdi-lightning-bolt-outline">
-                                Tất cả các câu đều là dạng trắc nghiệm nên hệ thống sẽ
-                                <strong>tự động chấm và công bố điểm ngay sau khi nộp</strong>.
-                            </v-alert>
+							<v-alert v-if="isFullQuizAutoGrade && !isIntegrated" type="info" variant="tonal" rounded="0"
+								class="mb-0" icon="mdi-lightning-bolt-outline">
+								Tất cả các câu đều là dạng trắc nghiệm nên hệ thống sẽ
+								<strong>tự động chấm và công bố điểm ngay sau khi nộp</strong>.
+							</v-alert>
 
-                            <v-alert v-if="renderQuestionNotSubmit().length > 0" type="error" variant="tonal"
-                                rounded="0" class="mb-0" icon="mdi-alert-circle-outline">
-                                Còn những câu
-                                <strong>{{ renderQuestionNotSubmit() }}</strong>
-                                chưa làm.
-                            </v-alert>
+							<v-alert v-if="isIntegrated" type="info" variant="tonal" rounded="0" class="mb-0"
+								icon="mdi-information-outline">
+								Bạn đang nộp bài làm được hoàn thành từ trang liên kết. Vui lòng đảm bảo bạn đã lưu/nộp
+								bài bên trang nguồn trước khi nhấn xác nhận.
+							</v-alert>
 
-                            <v-card-actions class="pa-3">
-                                <v-spacer />
-                                <v-btn variant="text" color="grey" @click="confirmSubmitDialog = false">
-                                    <v-icon start>mdi-close</v-icon>Hủy
-                                </v-btn>
-                                <v-btn color="success" variant="flat" @click="submitAssignmentFinal()">
-                                    <v-icon start>mdi-check-all</v-icon>Xác nhận Nộp
-                                </v-btn>
-                            </v-card-actions>
-                        </v-card>
-                    </v-dialog>
-                </v-col>
-            </v-row>
-        </v-container>
-    </div>
+							<v-alert v-if="renderQuestionNotSubmit().length > 0" type="error" variant="tonal"
+								rounded="0" class="mb-0" icon="mdi-alert-circle-outline">
+								Còn những câu
+								<strong>{{ renderQuestionNotSubmit() }}</strong>
+								chưa làm.
+							</v-alert>
+
+							<v-card-actions class="pa-3">
+								<v-spacer />
+								<v-btn variant="text" color="grey" @click="confirmSubmitDialog = false">
+									<v-icon start>mdi-close</v-icon>Hủy
+								</v-btn>
+								<v-btn color="success" variant="flat" @click="submitAssignmentFinal()">
+									<v-icon start>mdi-check-all</v-icon>Xác nhận Nộp
+								</v-btn>
+							</v-card-actions>
+						</v-card>
+					</v-dialog>
+				</v-col>
+			</v-row>
+		</v-container>
+	</div>
 </template>
 
 <script>
@@ -136,6 +142,21 @@
 
         isFullQuizAutoGrade() {
             return this.toBoolean(this.assignmentData?.[0]?.[0]?.Is_Full_Quiz);
+        },
+
+        isIntegrated() {
+            const config = this.assignmentData?.[0]?.[0];
+            if (!config) return false;
+            // Nếu nguồn là LMS thì không phải là Integrated External
+            if (config.IntegrationSource === 'LMS') return false;
+
+            if (config.IntegrationSource) return true;
+            try {
+                const parsed = JSON.parse(config.AssignmentConfig);
+                return parsed.type === 'INTEGRATED';
+            } catch (e) {
+                return false;
+            }
         },
     },
 

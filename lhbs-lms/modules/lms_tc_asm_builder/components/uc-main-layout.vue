@@ -1,18 +1,13 @@
 <template>
-  <Global>
-    <uc-assignment-builder
-      v-if="dataReady"
-      :initial-assignment="assignment"
-      :is-edit-mode="isEditMode"
-      :on-save="saveAssignment"
-      :on-auto-save="autoSaveAssignment"
-    />
-  </Global>
+	<Global>
+		<uc-assignment-builder v-if="dataReady" :initial-assignment="assignment" :is-edit-mode="isEditMode"
+			:on-save="saveAssignment" :on-auto-save="autoSaveAssignment" />
+	</Global>
 </template>
 
 <script>
-export default {
-  inject: ['snackbarRef', 'iframeRef'],
+	export default {
+		inject: ['snackbarRef', 'iframeRef'],
   data() {
     return {
       dataReady: false,
@@ -70,6 +65,20 @@ export default {
             if (typeof assignmentData.AssignmentConfig === 'string') {
               assignmentData.AssignmentConfig = JSON.parse(assignmentData.AssignmentConfig) || asmDefault
             }
+            // Xác định loại bài tập dựa trên config đã lưu
+            if (assignmentData.AssignmentConfig?.type === 'INTEGRATED') {
+              assignmentData.AssignmentType = 'INTEGRATED'
+              assignmentData.IntegrationSource = assignmentData.IntegrationSource || assignmentData.AssignmentConfig.source || ''
+              assignmentData.ExternalLink = assignmentData.AssignmentConfig.link || assignmentData.Instructions || ''
+              // Đảm bảo có groups dự phòng nếu user chuyển sang LMS
+              if (!assignmentData.AssignmentConfig.groups) {
+                assignmentData.AssignmentConfig.groups = []
+              }
+            } else {
+              assignmentData.AssignmentType = 'LMS'
+              assignmentData.IntegrationSource = ''
+              assignmentData.ExternalLink = ''
+            }
           } catch (e) {
             assignmentData.AssignmentConfig = asmDefault
           }
@@ -82,6 +91,8 @@ export default {
           Title: '',
           Instructions: '',
           MonHocLopID: null,
+          AssignmentType: 'LMS',
+          IntegrationSource: '',
           AssignmentConfig: {
             version: '1.2',
             type: 'GROUPED_MIXED',
@@ -111,6 +122,7 @@ export default {
     _buildPayload(payload) {
       const dataToSend = {
         ...payload.assignment,
+        Type: payload.assignment.AssignmentType,
         AssignmentID: vueData.AssignmentID || 0,
         AssignToClassID: vueData.AssignToClassID || 0,
         Is_Full_Quiz: payload.Is_Full_Quiz ? 1 : 0,
@@ -120,28 +132,43 @@ export default {
 
       const groups = payload.assignment.AssignmentConfig?.groups || []
       let MaxScore = 0
-      for (const group of groups) {
-        for (const question of group.questions) {
-          const pts = Number(question.points)
-          MaxScore += (isNaN(pts) || pts < 0) ? 0 : pts
+      if (payload.assignment.ExternalLink) {
+        MaxScore = Number(payload.assignment.MaxScore) || 10
+      } else {
+        dataToSend.IntegrationSource = 'LMS'
+        for (const group of groups) {
+          for (const question of group.questions) {
+            const pts = Number(question.points)
+            MaxScore += (isNaN(pts) || pts < 0) ? 0 : pts
+          }
         }
       }
       dataToSend.MaxScore = MaxScore
 
-      const cloneGroup = _.cloneDeep(dataToSend.AssignmentConfig)
-      for (const group of cloneGroup.groups) {
-        group.questions = group.questions.map(x => {
-          if (x.type === 'QUIZ_SINGLE_CHOICE') x.config.correctAnswer = null
-          if (x.type === 'QUIZ_MULTIPLE_CHOICE') x.config.correctAnswers = []
-          if (x.type === 'QUIZ_TRUE_FALSE') x.config.correctAnswer = null
-          if (x.type === 'QUIZ_MULTIPLE_TRUE_FALSE') x.config.options = x.config.options.map(n => ({ ...n, inCorrectAnswer: null, correctAnswer: null }))
-          if (x.type === 'QUIZ_FILL_IN_BLANK') x.config.parts = x.config.parts.map(n => { if (n.type === 'blank') n.acceptedAnswers = []; return n })
-          if (x.type === 'QUIZ_MATCHING') x.config.correctPairs = []
-          return x
-        })
+      if (payload.assignment.ExternalLink) {
+        dataToSend.AssignmentConfig = JSON.stringify({ version: '1.2', type: 'INTEGRATED', source: payload.assignment.IntegrationSource, link: payload.assignment.ExternalLink })
+        dataToSend.AssignmentConfig_NoAnswer = dataToSend.AssignmentConfig
+      } else {
+        const fullConfig = payload.assignment.AssignmentConfig || { groups: [] }
+        fullConfig.type = 'GROUPED_MIXED' // Đảm bảo type là LMS
+        if (!fullConfig.groups) fullConfig.groups = []
+
+        const cloneGroup = _.cloneDeep(fullConfig)
+
+        for (const group of cloneGroup.groups) {
+          group.questions = group.questions.map(x => {
+            if (x.type === 'QUIZ_SINGLE_CHOICE') x.config.correctAnswer = null
+            if (x.type === 'QUIZ_MULTIPLE_CHOICE') x.config.correctAnswers = []
+            if (x.type === 'QUIZ_TRUE_FALSE') x.config.correctAnswer = null
+            if (x.type === 'QUIZ_MULTIPLE_TRUE_FALSE') x.config.options = x.config.options.map(n => ({ ...n, inCorrectAnswer: null, correctAnswer: null }))
+            if (x.type === 'QUIZ_FILL_IN_BLANK') x.config.parts = x.config.parts.map(n => { if (n.type === 'blank') n.acceptedAnswers = []; return n })
+            if (x.type === 'QUIZ_MATCHING') x.config.correctPairs = []
+            return x
+          })
+        }
+        dataToSend.AssignmentConfig_NoAnswer = JSON.stringify(cloneGroup)
+        dataToSend.AssignmentConfig = JSON.stringify(fullConfig)
       }
-      dataToSend.AssignmentConfig_NoAnswer = JSON.stringify(cloneGroup)
-      dataToSend.AssignmentConfig = JSON.stringify(dataToSend.AssignmentConfig)
       return dataToSend
     },
 
@@ -175,5 +202,5 @@ export default {
       await fetchPromise('lms/EL_Teacher_SaveAssignment', dataToSend, { cache: false, silent: true })
     },
   },
-}
+	}
 </script>
