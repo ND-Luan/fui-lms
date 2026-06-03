@@ -1,5 +1,5 @@
 <template>
-    <div>
+	<div>
         <GlobalLoading />
         <GlobalApiErrorDialog />
         <GlobalStaleDataBanner />
@@ -10,16 +10,17 @@
         <uc-ticket-status v-if="!isInIframe" />
         <v-responsive>
             <v-app theme="light">
+                <!-- Navigation Drawer & Toolbar (Commented out)
                 <v-layout v-if="hasNavigation">
                     <GlobalNavigationDrawer
-                        :menuLeft="resolvedMenuLeft"
-                        :userInfo="resolvedUserInfo"
-                        :avatarUrl="resolvedAvatarUrl"
-                        :roleLabel="resolvedRoleLabel"
-                        :schoolName="schoolName"
+                        :menu-left="resolvedMenuLeft"
+                        :user-info="resolvedUserInfo"
+                        :avatar-url="resolvedAvatarUrl"
+                        :role-label="resolvedRoleLabel"
+                        :school-name="schoolName"
                         :version="version"
-                        :isMobile="isMobile"
-                        :currentUrl="activeModuleUrl"
+                        :is-mobile="isMobile"
+                        :current-url="activeModuleUrl"
                         :rail="rail"
                         :mobile-drawer="mobileDrawer"
                         @update:mobile-drawer="mobileDrawer = $event"
@@ -28,7 +29,6 @@
                     />
 
                     <v-main>
-                        <!-- Top Bar (Toolbar version) -->
                         <v-toolbar v-if="hasNavigation" density="compact" color="white" style="position: sticky; top: 0; z-index: 1000">
                             <v-btn icon="mdi-menu" v-if="!isMobile" @click="rail = !rail" variant="text" />
                             <v-btn icon="mdi-menu" v-if="isMobile" @click="mobileDrawer = !mobileDrawer" variant="text" />
@@ -39,7 +39,6 @@
 
                             <v-spacer />
 
-                            <!-- Language Switcher -->
                             <div class="d-flex align-center ga-1 px-2">
                                 <v-btn icon size="small" variant="text" @click="changeLang('VI')">
                                     <v-img src="https://flagcdn.com/w40/vn.png" width="24" />
@@ -52,13 +51,11 @@
                             </div>
                         </v-toolbar>
 
-                        <!-- Loading overlay — chờ niên khóa từ API trước khi load iframe -->
                         <div v-if="!isNienKhoaReady" class="d-flex flex-column align-center justify-center" style="height: calc(100dvh - 48px)">
                             <v-progress-circular indeterminate color="primary" size="48" />
                             <p class="mt-4 text-body-2 text-medium-emphasis">Đang tải dữ liệu...</p>
                         </div>
 
-                        <!-- Content Area: Iframe for App Shell mode, Slot for direct mode -->
                         <div v-else class="global-content-wrapper" style="height: calc(100dvh - 48px); width: 100%">
                             <iframe v-show="resolvedModuleSrc" ref="moduleIframe" :src="resolvedModuleSrc" style="width: 100%; height: 100%; border: none; display: block" @load="onIframeLoad"></iframe>
                             <div v-if="!resolvedModuleSrc" class="h-100">
@@ -66,37 +63,26 @@
                             </div>
                         </div>
                     </v-main>
-                </v-layout>
+                </v-layout> 
+                -->
 
-                <template v-else>
-                    <template v-if="isNienKhoaReady">
+                <v-main>
+                    <v-container fluid class="pa-0">
                         <div ref="headerRef">
                             <slot name="header" />
                         </div>
-                        <v-main>
-                            <v-container fluid class="pa-0">
-                                <slot />
-                            </v-container>
-                        </v-main>
-                    </template>
-                    <div v-else class="d-flex flex-column align-center justify-center" style="height: 100dvh">
-                        <v-progress-circular indeterminate color="primary" size="48" />
-                        <p class="mt-4 text-body-2 text-medium-emphasis">Đang chuẩn bị dữ liệu...</p>
-                    </div>
-                </template>
+                        <slot />
+                    </v-container>
+                </v-main>
             </v-app>
         </v-responsive>
     </div>
 </template>
 
 <script>
-export default {
-    name: 'Global',
+	export default {
+		name: 'Global',
     inject: ['iframeRef', 'snackbarRef', 'confirmRef'],
-
-    beforeCreate() {
-        if (window.startGlobalWait) window.startGlobalWait()
-    },
 
     props: {
         navigation: { type: Boolean, default: null },
@@ -474,7 +460,7 @@ export default {
         hasNavigation() {
             if (this.isInIframe) return false // Không hiện Drawer nếu đang ở trong Iframe
             if (this.navigation !== null) return this.navigation // tường minh nhất
-            // if (this.isTest) return true // test mode
+            if (this.isTest) return true // test mode
             return true // mặc định (trong App Shell mới là true)
         },
 
@@ -493,23 +479,12 @@ export default {
 
         resolvedModuleSrc() {
             if (this.isNienKhoaReady && this.activeModuleUrl) {
-                // Return activeModuleUrl trực tiếp. 
+                // Return activeModuleUrl trực tiếp.
                 // Nó đã được buildUrlWithYear xử lý trong handleDrawerNavigate và onNienKhoaLoaded.
                 // Việc tách biệt này giúp khi đổi niên khóa (chỉ đổi URL top-level), iframe không bị reload.
                 return this.activeModuleUrl
             }
             return null
-        },
-    },
-
-    watch: {
-        isNienKhoaReady: {
-            handler(v) {
-                if (v && window.endGlobalWait) {
-                    window.endGlobalWait()
-                }
-            },
-            immediate: true,
         },
     },
 
@@ -692,5 +667,5 @@ export default {
     beforeUnmount() {
         this.observer?.disconnect()
     },
-}
+	}
 </script>
