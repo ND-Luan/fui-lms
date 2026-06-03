@@ -1,8 +1,8 @@
 <template>
 	<Global>
-		<uc-assignment-builder v-if="dataReady" :initial-assignment="assignment" :is-edit-mode="isEditMode"
-			:on-save="saveAssignment" :on-auto-save="autoSaveAssignment" />
-	</Global>
+        <uc-assignment-builder v-if="dataReady" :initial-assignment="assignment" :is-edit-mode="isEditMode"
+            :on-save="saveAssignment" :on-auto-save="autoSaveAssignment" />
+    </Global>
 </template>
 
 <script>
@@ -58,6 +58,12 @@
         }
         const res = await fetchPromise(apiUrl, apiParams, { cache: false })
         let assignmentData = { ...(res?.[0] ?? {}) }
+
+        // Đảm bảo Is_Full_Quiz luôn là boolean khi nhận từ API
+        if (assignmentData.hasOwnProperty('Is_Full_Quiz')) {
+          assignmentData.Is_Full_Quiz = !!assignmentData.Is_Full_Quiz
+        }
+
         if (!assignmentData.AssignmentConfig) {
           assignmentData.AssignmentConfig = asmDefault
         } else {
@@ -132,7 +138,10 @@
 
       const groups = payload.assignment.AssignmentConfig?.groups || []
       let MaxScore = 0
-      if (payload.assignment.ExternalLink) {
+      
+      const isIntegration = payload.assignment.AssignmentType === 'INTEGRATED' || (payload.assignment.IntegrationSource && payload.assignment.IntegrationSource !== 'LMS')
+
+      if (isIntegration || payload.assignment.ExternalLink) {
         MaxScore = Number(payload.assignment.MaxScore) || 10
       } else {
         dataToSend.IntegrationSource = 'LMS'
@@ -175,16 +184,11 @@
     async saveAssignment(payload) {
       const dataToSend = this._buildPayload(payload)
       const res = await fetchPromise('lms/EL_Teacher_SaveAssignment', dataToSend, { cache: false })
+      if (!res) return null
+
       this.snackbarRef.value.showSnackbar({ message: 'Lưu bài tập thành công', color: 'success' })
       const urlParams = new URLSearchParams(window.location.search)
-      if (urlParams.get('AssignToClassID') && !this.isEditMode) {
-        if (window !== window.top) {
-          window.parent.postMessage({ type: 'iframeRef_closeWindow' }, '*')
-        } else {
-          window.open('/lms-teacher-dashboard', '_parent')
-        }
-        return
-      }
+      
       if (!this.isEditMode && res?.[0]?.AssignmentID) {
         const newId = res[0].AssignmentID
         window.history.pushState({}, '', `?AssignmentID=${newId}`)
@@ -195,6 +199,7 @@
         this.assignment = savedAssignment
         vueData.assignment = savedAssignment
       }
+      return res
     },
 
     async autoSaveAssignment(payload) {

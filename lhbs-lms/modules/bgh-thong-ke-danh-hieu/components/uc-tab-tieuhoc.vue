@@ -110,6 +110,23 @@
 			</v-row>
 		</v-card>
 
+		<v-card class="mt-2" border flat>
+			<v-row>
+				<v-col cols="12">
+					<v-card-title class="text-primary" style="text-wrap:auto">
+						KẾT QUẢ ĐÁNH GIÁ GIÁO DỤC (THEO KHỐI)
+					</v-card-title>
+					<v-card-text class="pa-0">
+						<v-data-table :items="DataChart7" :headers="headersChart7" :items-per-page="-1"
+							:hide-default-footer="true" />
+					</v-card-text>
+				</v-col>
+				<v-col cols="12" class="mt-5 elevation-2" v-if="DataChart7.length > 0">
+					<uc-chart-apex :options="OptionsChart7" />
+				</v-col>
+			</v-row>
+		</v-card>
+
 	</Global>
 </template>
 
@@ -157,11 +174,13 @@
 				OptionsChart4: options,
 				OptionsChart5: optionsPie,
 				OptionsChart6: options,
+				OptionsChart7: options,
 				DataChart1: [],
 				DataChart2: [],
 				DataChart4: [],
 				DataChart5: [],
 				DataChart6: [],
+				DataChart7: [],
 				headersChart1: [
 					{ title: "Phẩm chất", value: "TenMonHoc_HienThi" },
 					{ title: "Tổng số HS", value: "TongSoHS", align: "end" },
@@ -204,15 +223,33 @@
 					{ title: "Tỉ lệ (%)", value: "TiLe_XuatSac", align: "end" },
 					{ title: "HS Tiêu biểu", value: "HocSinhTieuBieu", align: "end" },
 					{ title: "Tỉ lệ (%)", value: "TiLe_TieuBieu", align: "end" }
+				],
+				headersChart7: [
+					{ title: "Khối", value: "TenKhoi" },
+					{ title: "Sĩ số", value: "SoHocSinh", align: "end" },
+					{ title: "HT Xuất sắc", value: "HoanThanhXS", align: "end" },
+					{ title: "Tỉ lệ (%)", value: "TileHTXS", align: "end" },
+					{ title: "HT Tốt", value: "HoanThanhTot", align: "end" },
+					{ title: "Tỉ lệ (%)", value: "TileHTTot", align: "end" },
+					{ title: "Hoàn thành", value: "HoanThanh", align: "end" },
+					{ title: "Tỉ lệ (%)", value: "TileHT", align: "end" },
+					{ title: "Chưa HT", value: "ChuaHT", align: "end" },
+					{ title: "Tỉ lệ (%)", value: "TileChuaHT", align: "end" }
 				]
 			}
 		},
 		mounted() {
-			if (this.HocKi) this.ThongKe_KQRL_Get_All_Khoi_C1()
+			if (this.HocKi) {
+				this.ThongKe_KQRL_Get_All_Khoi_C1()
+				this.getThongKeDanhGiaGiaoDuc()
+			}
 		},
 		watch: {
 			HocKi(v) {
-				if (v) this.ThongKe_KQRL_Get_All_Khoi_C1()
+				if (v) {
+					this.ThongKe_KQRL_Get_All_Khoi_C1()
+					this.getThongKeDanhGiaGiaoDuc()
+				}
 			},
 			BaoCaoItem: {
 				handler(v) {
@@ -224,11 +261,12 @@
 		methods: {
 			onRefresh() {
 				this.ThongKe_KQRL_Get_All_Khoi_C1()
+				this.getThongKeDanhGiaGiaoDuc()
 			},
 			onExportExcel() {
 				const XLSX = window.XLSX
 				if (!XLSX) { alert('Thư viện xuất Excel chưa sẵn sàng, vui lòng thử lại.'); return }
-				const hasData = this.DataChart1.length || this.DataChart2.length || this.DataChart4.length || this.DataChart5.length || this.DataChart6.length
+				const hasData = this.DataChart1.length || this.DataChart2.length || this.DataChart4.length || this.DataChart5.length || this.DataChart6.length || this.DataChart7.length
 				if (!hasData) { alert('Không có dữ liệu để xuất.'); return }
 				const buildSheet = (headers, items) => {
 					const headerRow = headers.map(h => h.title)
@@ -243,7 +281,34 @@
 				if (this.DataChart4.length) XLSX.utils.book_append_sheet(wb, buildSheet(this.headersChart4, this.DataChart4), 'Môn học')
 				if (this.DataChart5.length) XLSX.utils.book_append_sheet(wb, buildSheet(this.headersChart5, this.DataChart5), 'Khen thưởng')
 				if (this.DataChart6.length) XLSX.utils.book_append_sheet(wb, buildSheet(this.headersChart6, this.DataChart6), 'KT theo khối')
+				if (this.DataChart7.length) XLSX.utils.book_append_sheet(wb, buildSheet(this.headersChart7, this.DataChart7), 'KQDGGD theo khối')
 				XLSX.writeFile(wb, `ThongKeDanhHieu_TieuHoc_${this.HocKi || 'BaoCao'}.xlsx`)
+			},
+			async getThongKeDanhGiaGiaoDuc() {
+				const res = await fetchPromise('psmark1/LMS_GetThongKeDanhGiaGiaoDuc', {
+					NienKhoa: vueData.NienKhoa
+				})
+				this.DataChart7 = (res || []).map(item => ({
+					...item,
+					TenKhoi: 'Khối ' + item.KhoiID,
+					TileHTXS: Number(item.TileHTXS || 0).toFixed(2),
+					TileHTTot: Number(item.TileHTTot || 0).toFixed(2),
+					TileHT: Number(item.TileHT || 0).toFixed(2),
+					TileChuaHT: Number(item.TileChuaHT || 0).toFixed(2)
+				}))
+
+				let arrKhoi = this.DataChart7.map(item => item.TenKhoi)
+				this.OptionsChart7 = {
+					...this.OptionsChart7,
+					xaxis: { categories: arrKhoi },
+					series: [
+						{ name: 'HT Xuất sắc', data: this.DataChart7.map(item => Number(item.TileHTXS)) },
+						{ name: 'HT Tốt', data: this.DataChart7.map(item => Number(item.TileHTTot)) },
+						{ name: 'Hoàn thành', data: this.DataChart7.map(item => Number(item.TileHT)) },
+						{ name: 'Chưa hoàn thành', data: this.DataChart7.map(item => Number(item.TileChuaHT)) }
+					],
+					title: { text: 'Biểu đồ kết quả đánh giá giáo dục theo khối' }
+				}
 			},
 			async ThongKe_KQRL_Get_All_Khoi_C1() {
 				if (!this.HocKi) return

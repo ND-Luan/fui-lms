@@ -450,7 +450,8 @@
             return this.selectedClass.length != 0 && this.selectedClass.length == this.classOptions.length
         },
         totalScoreAsm() {
-            if (this.assignment.ExternalLink) {
+            const isIntegration = this.assignment.AssignmentType === 'INTEGRATED' || (this.assignment.IntegrationSource && this.assignment.IntegrationSource !== 'LMS')
+            if (isIntegration || this.assignment.ExternalLink) {
                 return this.formatNumber(this.assignment.MaxScore || 0, 2)
             }
             if (!this.assignment?.AssignmentConfig?.groups) return this.formatNumber(0)
@@ -530,7 +531,8 @@
                         if (this.assignment.IntegrationSource === 'ETEST' && !link.includes('etest.lhbs.vn')) return
                     }
 
-                    const isNotFullQuiz = this.assignment.ExternalLink ? false : vueData.isCheckAllGroupFullQuiz(groups)
+                    const isIntegration = this.assignment.IntegrationSource && this.assignment.IntegrationSource !== 'LMS'
+                    const isNotFullQuiz = (isIntegration || this.assignment.ExternalLink) ? true : vueData.isCheckAllGroupFullQuiz(groups)
                     const payload = {
                         assignment: this.assignment,
                         isPublishing: false,
@@ -627,8 +629,12 @@
             const due = this.getDue(d)
             // truyền true => isPushlish = true
             const groups = this.assignment.AssignmentConfig.groups
-            const isNotFullQuiz = vueData.isCheckAllGroupFullQuiz(groups)
-            await this.handleSave(true)
+            const isIntegration = this.assignment.IntegrationSource && this.assignment.IntegrationSource !== 'LMS'
+            const isNotFullQuiz = (isIntegration || this.assignment.ExternalLink) ? true : vueData.isCheckAllGroupFullQuiz(groups)
+            
+            const success = await this.handleSave(true)
+            if (!success) return
+
             await new Promise((resolve) => setTimeout(resolve, 1000)) // thực sự delay 2s
 
             Vue.$toast.success('Lưu bài và giao bài thành công!', { position: 'top' })
@@ -658,7 +664,9 @@
                 text: this._buildAssignSummary(),
             })
             if (!ok) return
-            await this._doAssign()
+            const success = await this._doAssign()
+            if (!success) return
+            
             this.isOpenDialogForAssignToStudent = false
             if (window !== window.top) {
                 window.parent.postMessage({ type: 'iframeRef_closeWindow' }, '*')
@@ -780,7 +788,8 @@
                     return
                 }
             }
-            const isNotFullQuiz = this.assignment.ExternalLink ? false : vueData.isCheckAllGroupFullQuiz(groups)
+            const isIntegration = this.assignment.IntegrationSource && this.assignment.IntegrationSource !== 'LMS'
+            const isNotFullQuiz = (isIntegration || this.assignment.ExternalLink) ? true : vueData.isCheckAllGroupFullQuiz(groups)
             const payload = {
                 assignment: this.assignment,
                 isPublishing: isPublishing,
@@ -790,11 +799,15 @@
             console.log('payload', payload)
             // Cancel any pending auto-save and guard against concurrent saves
             clearTimeout(this.autoSaveTimer)
-            if (this.isSaving) return
+            if (this.isSaving) return false
             this.isSaving = true
             try {
                 this.autoSaveStatus = 'saving'
-                await this.onSave(payload)
+                const res = await this.onSave(payload)
+                if (!res) {
+                    this.autoSaveStatus = null
+                    return false
+                }
                 this.lastSavedAt = Date.now()
                 this.relativeTimeNow = Date.now()
                 this.autoSaveStatus = 'saved'
@@ -802,6 +815,7 @@
                 this.relativeTimeTimer = setInterval(() => {
                     this.relativeTimeNow = Date.now()
                 }, 10000)
+                return true
             } finally {
                 this.isSaving = false
             }
@@ -860,9 +874,18 @@
             const d = { date: this.deadlines?.date, time: this.deadlines?.time }
             const due = this.getDue(d)
             const groups = this.assignment.AssignmentConfig.groups
-            const isNotFullQuiz = vueData.isCheckAllGroupFullQuiz(groups)
-            await this.handleSave(true)
+            const isIntegration = this.assignment.IntegrationSource && this.assignment.IntegrationSource !== 'LMS'
+            const isNotFullQuiz = (isIntegration || this.assignment.ExternalLink) ? true : vueData.isCheckAllGroupFullQuiz(groups)
+            
+            const success = await this.handleSave(true)
+            if (!success) {
+                this.isLoadDSHocSinh = false
+                return false
+            }
+
             await new Promise((resolve) => setTimeout(resolve, 500))
+            const assignPromises = []
+
             if (this.DSHocSinhSelected.length > 0) {
                 for (const item of this.DSHocSinhSelected) {
                     const payload = [
@@ -878,7 +901,7 @@
                             Is_Full_Quiz: !isNotFullQuiz ? 1 : 0,
                         },
                     ]
-                    ajaxCALL('/lms/EL_Teacher_AssignToStudent', { AssignmentID: vueData.AssignmentID, JsonStudentItems: payload })
+                    assignPromises.push(fetchPromise('/lms/EL_Teacher_AssignToStudent', { AssignmentID: vueData.AssignmentID, JsonStudentItems: payload }, { cache: false }))
                 }
             }
             if (this.selectedClass.length > 0) {
@@ -895,15 +918,18 @@
                             Is_Full_Quiz: !isNotFullQuiz ? 1 : 0,
                         },
                     ]
-                    ajaxCALL('/lms/EL_Teacher_AssignToClasses_CLASS', {
+                    assignPromises.push(fetchPromise('/lms/EL_Teacher_AssignToClasses_CLASS', {
                         AssignmentID: vueData.AssignmentID,
                         JsonClassItems: payload,
                         ListTeacherPermission: this.GiaoVienPermissionSelected.length > 0 ? this.GiaoVienPermissionSelected.join(',') : '',
-                    })
+                    }, { cache: false }))
                 }
             }
+            
+            await Promise.all(assignPromises)
             Vue.$toast.success('Lưu bài và giao bài thành công!', { position: 'top' })
             this.isLoadDSHocSinh = false
+            return true
         },
         _buildAssignSummary() {
             const lines = []

@@ -35,7 +35,109 @@
 			</v-alert>
 		</v-card>
 		<v-row class="ma-0">
-			<v-col cols="3" v-if="!mobile">
+			<!-- INTEGRATED MODE -->
+			<template v-if="assignment.AssignmentType === 'INTEGRATED'">
+				<v-col cols="3" v-if="!mobile">
+					<div class="TongKet border-t pt-2">
+						<div class="text-subtitle-1 font-weight-medium py-1">
+							<v-icon left color="primary">mdi-clipboard-check-outline</v-icon>
+							{{ $t('message.SummaryAndGeneralComments') }}
+						</div>
+						<v-card class="mb-2">
+							<v-card-text class="pa-0">
+								<v-row dense>
+									<v-col cols="12">
+										<label class="font-weight-medium mb-2 d-block">{{ $t('message.FinalScore') }}</label>
+										<div class="d-flex align-center">
+											<v-number-input v-model="gradingSummary.totalScore" label="Điểm"
+												:max="assignment.MaxScore" :min="0" variant="outlined" density="compact"
+												hide-details style="max-width: 100px;" control-variant="stacked" inset>
+											</v-number-input>
+											<span class="text-h6 ml-2 text-primary"> / {{ assignment.MaxScore }}</span>
+											<span class="ml-1 text-caption">{{ $t('message.points') }}</span>
+										</div>
+									</v-col>
+									<v-col cols="12">
+										<label class="font-weight-medium mb-2 d-block">{{ $t('message.OverallComment') }}</label>
+										<v-textarea v-model="gradingSummary.teacherComment" hide-details
+											:placeholder="$t('message.EnterGeneralFeedback')" auto-grow :rows="2" />
+									</v-col>
+								</v-row>
+							</v-card-text>
+						</v-card>
+					</div>
+				</v-col>
+				<v-divider vertical />
+				<v-col :cols="mobile ? 12 : 9" style="height: calc(100dvh - 64px); overflow: auto" class="pa-2">
+					<v-card flat border class="mb-2">
+						<v-card-text>
+							<div class="text-h6 mb-2">{{ assignment.Title }}</div>
+							<div v-if="assignment.Instructions" class="text-body-1 mb-3" v-html="assignment.Instructions"></div>
+							<v-alert density="compact" type="info" variant="tonal" class="text-caption">
+								{{ IsEngLish ? 'This is an integrated assignment. Student work is handled on an external platform.' : 'Đây là bài tập tích hợp. Học sinh thực hiện bài làm trên nền tảng bên ngoài.' }}
+							</v-alert>
+						</v-card-text>
+					</v-card>
+
+					<!-- Mobile grading panel -->
+					<v-card v-if="mobile" flat border class="mb-2">
+						<v-card-text>
+							<div class="mb-3">
+								<label class="font-weight-medium mb-2 d-block">{{ $t('message.FinalScore') }}</label>
+								<div class="d-flex align-center">
+									<v-number-input v-model="gradingSummary.totalScore" label="Điểm"
+										:max="assignment.MaxScore" :min="0" variant="outlined" density="compact"
+										hide-details style="max-width: 100px;" control-variant="stacked" inset>
+									</v-number-input>
+									<span class="text-h6 ml-2 text-primary"> / {{ assignment.MaxScore }}</span>
+								</div>
+							</div>
+							<label class="font-weight-medium mb-2 d-block">{{ $t('message.OverallComment') }}</label>
+							<v-textarea v-model="gradingSummary.teacherComment" hide-details variant="outlined"
+								:placeholder="$t('message.EnterGeneralFeedback')" auto-grow :rows="2" />
+						</v-card-text>
+					</v-card>
+
+					<!-- Action bar -->
+					<v-card class="mb-2 progress-summary border" flat border>
+						<v-card-text class="py-2">
+							<div class="d-flex justify-space-between align-center flex-wrap ga-2">
+								<v-chip :color="getSubmissionStatusColor()" variant="tonal" size="small">
+									{{ getSubmissionStatusText() }}
+								</v-chip>
+								<div class="d-flex flex-wrap align-center ga-2"
+									v-if="![0, 1, 4].includes(submission?.SubmissionStatus)">
+									<v-chip v-if="autoSaveStatus" size="x-small" :color="autoSaveStatus === 'saving' ? 'grey' : 'success'" variant="tonal">
+										<v-icon v-if="autoSaveStatus === 'saving'" start size="12" class="mdi-spin">mdi-loading</v-icon>
+										<v-icon v-else start size="12">mdi-check-circle-outline</v-icon>
+										<span v-if="autoSaveStatus === 'saving'">{{ IsEngLish ? 'Saving...' : 'Đang lưu...' }}</span>
+										<span v-else>{{ IsEngLish ? 'Auto-saved' : 'Đã lưu tự động' }}<span v-if="lastSavedRelative"> — {{ lastSavedRelative }}</span></span>
+									</v-chip>
+									<v-btn @click="saveGrading(false)" color="grey-darken-1" variant="outlined"
+										size="small" :loading="isSaving">
+										<v-icon start size="16">mdi-content-save-outline</v-icon>
+										{{ IsEngLish ? "Draft Grading" : "Chấm nháp" }}
+									</v-btn>
+									<v-btn @click="handleOpenModalRequireResend" color="warning" size="small"
+										variant="elevated" :loading="isSaving">
+										<v-icon start>mdi-reload-alert</v-icon>
+										{{ IsEngLish ? "Request Resubmission" : "Yêu cầu nộp lại bài" }}
+									</v-btn>
+									<v-btn @click="saveGrading(true)" color="success" size="small" variant="elevated"
+										:loading="isSaving">
+										<v-icon start size="16">mdi-send-check</v-icon>
+										{{ IsEngLish ? "Complete grade and public" : "Hoàn tất & Trả bài" }}
+									</v-btn>
+								</div>
+							</div>
+						</v-card-text>
+					</v-card>
+				</v-col>
+			</template>
+
+			<!-- DEFAULT LMS MODE -->
+			<template v-else>
+				<v-col cols="3" v-if="!mobile">
 				<v-card class="question-nav" sticky top="80px">
 					<div class="d-flex justify-space-between align-center text-subtitle-1 font-weight-medium cursor-pointer"
 						@click="navCollapsed = !navCollapsed">
@@ -644,6 +746,7 @@
 				</v-card> -->
 
 			<!-- </v-col> -->
+			</template>
 		</v-row>
 		<v-dialog v-model="IsOpenModal_Require_Resend" max-width="600px">
 			<v-card>
@@ -743,9 +846,13 @@
 				let promise = await new Promise((resolve, reject) => {
 					if (!data || !data[0] || !data[1]) return;
 					const assignmentConfig = data[0][0];
+					let parsedConfig = {};
 					if (assignmentConfig && (typeof assignmentConfig.AssignmentConfig === 'string' || typeof
 						assignmentConfig.AssignmentConfig === 'object')) {
-						assignmentConfig.groups = JSON.parse(assignmentConfig.AssignmentConfig)?.groups || [];
+						parsedConfig = typeof assignmentConfig.AssignmentConfig === 'string' ? JSON.parse(assignmentConfig.AssignmentConfig) : assignmentConfig.AssignmentConfig;
+						assignmentConfig.groups = parsedConfig?.groups || [];
+						assignmentConfig.AssignmentType = parsedConfig?.type || 'LMS';
+						assignmentConfig.ExternalLink = parsedConfig?.link || '';
 					}
 					this.assignment = assignmentConfig;
 					const submissionData = data[1][0];
@@ -837,11 +944,9 @@
 			},
 			async saveGrading(isPublishing) {
 				const $this = this
-				let listQuestions = _.flatten(this.assignment.groups.map(q => { return [...q.questions] }))
+				const isIntegrated = this.assignment?.AssignmentType === 'INTEGRATED'
+				let listQuestions = isIntegrated ? [] : _.flatten(this.assignment.groups.map(q => { return [...q.questions] }))
 				this.isSaving = true;
-				// if(!this.gradingSummary.totalScore){
-				// }
-				// await this.calculateTotalScore();
 				const payload = {
 					SubmissionID: this.submission.SubmissionID,
 					Score: this.gradingSummary.totalScore,
@@ -849,8 +954,7 @@
 					SubmissionContent: JSON.stringify({ answers: this.gradingData })
 				};
 				if (isPublishing) {
-					//Hàm warning những câu chưa chấm
-					let messageQuestionsNotGrade = this.onHandleQuestionNotGrade(listQuestions)
+					let messageQuestionsNotGrade = isIntegrated ? '' : this.onHandleQuestionNotGrade(listQuestions)
 					confirm({
 						title: messageQuestionsNotGrade.length > 0 ? (`${this.IsEngLish ? 'There are still ungraded questions. Do you want to confirm and return the assignment?' : "Còn các câu hỏi chưa được chấm. Thầy/Cô xác nhận hoàn tất và trả bài?"}`) : (`${this.IsEngLish ? 'Confirm grading completion and return the assignment to the student?' : "Xác nhận hoàn tất chấm bài và trả bài cho học sinh?"}`),
 						message: messageQuestionsNotGrade.length > 0 ? (`${this.IsEngLish ? "List of Ungraded Questions" : "Danh sách câu chưa chấm"}: ` + messageQuestionsNotGrade) : "",
@@ -889,6 +993,7 @@
 				}
 			},
 			async calculateTotalScore() {
+				if (this.assignment?.AssignmentType === 'INTEGRATED') return;
 				let total = 0;
 				await this.allQuestions.forEach(q => {
 					const grade = this.gradingData[q.id]?.grading;
@@ -1035,6 +1140,14 @@
 			mobile: function (val) {
 				if (val) this.viewMode = 'all'
 				else this.viewMode = 'single'
+			},
+			gradingSummary: {
+				handler() {
+					if (this.assignment?.AssignmentType === 'INTEGRATED') {
+						this.triggerAutoSave()
+					}
+				},
+				deep: true
 			}
 		}
 	}
