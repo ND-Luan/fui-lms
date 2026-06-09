@@ -474,7 +474,14 @@
 							</v-expansion-panel-title>
 							<v-expansion-panel-text>
 								<div v-if="item.id == 1">
-									<v-data-table class="table-bordered" :items="dataHK_1_C2_C3.Diem" :headers="headers"
+									<!-- Section 1: Chương trình của Bộ GD&ĐT HK1 desktop -->
+									<div class="d-flex align-center px-2 py-2 bg-blue-lighten-5 mb-2"
+										style="border-left: 4px solid #1976D2;">
+										<v-icon color="primary" class="mr-2">mdi-book-open-page-variant</v-icon>
+										<span class="font-weight-bold text-primary-darken-2 text-subtitle-2">CHƯƠNG
+											TRÌNH CỦA BỘ GD&ĐT</span>
+									</div>
+									<v-data-table class="table-bordered mb-4" :items="diemHK1_Main" :headers="headers"
 										:hide-default-footer="-1" :items-per-page="-1">
 										<template v-slot:item.TenMon="{ item }">
 											<v-icon class="mr-2"
@@ -485,6 +492,28 @@
 											{{ item.TenMon }}
 										</template>
 									</v-data-table>
+									<!-- Section môn ngoài xếp loại HK1 desktop -->
+									<div v-if="diemHK1_NgoaiXL.length > 0" class="mt-2 mb-2">
+										<div class="d-flex align-center px-2 py-2 bg-teal-lighten-5 mb-2"
+											style="border-left: 4px solid #009688;">
+											<v-icon color="teal" class="mr-2">mdi-school</v-icon>
+											<span class="font-weight-bold text-teal-darken-2 text-subtitle-2">CHƯƠNG
+												TRÌNH RIÊNG CỦA NHÀ TRƯỜNG</span>
+											<v-chip size="x-small" color="teal" variant="outlined" class="ml-2">Không
+												tính vào kết quả xếp loại</v-chip>
+										</div>
+										<v-data-table :items="diemHK1_NgoaiXL" :headers="headers"
+											:hide-default-footer="-1" :items-per-page="-1">
+											<template v-slot:item.TenMon="{ item }">
+												<v-icon class="mr-2"
+													:color="DSMonHoc.find(x => x.MonHocName === item.TenMon)?.Color">
+													{{DSMonHoc.find(x => x.MonHocName === item.TenMon)?.Icon ||
+													'mdi-book-open'}}
+												</v-icon>
+												{{ item.TenMon }}
+											</template>
+										</v-data-table>
+									</div>
 									<div class="d-flex flex-column px-2">
 										<v-row style="border: thin solid #e0e0e0; border-radius: 5px;" class="ma-0">
 											<!-- <v-col cols="12">
@@ -520,7 +549,14 @@
 									</div>
 								</div>
 								<div v-if="item.id == 2">
-									<v-data-table :items="dataHK_2_C2_C3.Diem" :headers="headers"
+									<!-- Section 1: Chương trình của Bộ GD&ĐT HK2 desktop -->
+									<div class="d-flex align-center px-2 py-2 bg-blue-lighten-5 mb-2"
+										style="border-left: 4px solid #1976D2;">
+										<v-icon color="primary" class="mr-2">mdi-book-open-page-variant</v-icon>
+										<span class="font-weight-bold text-primary-darken-2 text-subtitle-2">CHƯƠNG
+											TRÌNH CỦA BỘ GD&ĐT</span>
+									</div>
+									<v-data-table class="table-bordered mb-4" :items="diemHK2_Main" :headers="headers"
 										:hide-default-footer="-1" :items-per-page="-1">
 										<template v-slot:item.TenMon="{ item }">
 											<v-icon class="mr-2"
@@ -531,6 +567,28 @@
 											{{ item.TenMon }}
 										</template>
 									</v-data-table>
+									<!-- Section môn ngoài xếp loại HK2 desktop -->
+									<div v-if="diemHK2_NgoaiXL.length > 0" class="mt-2 mb-2">
+										<div class="d-flex align-center px-2 py-2 bg-teal-lighten-5 mb-2"
+											style="border-left: 4px solid #009688;">
+											<v-icon color="teal" class="mr-2">mdi-school</v-icon>
+											<span class="font-weight-bold text-teal-darken-2 text-subtitle-2">CHƯƠNG
+												TRÌNH RIÊNG CỦA NHÀ TRƯỜNG</span>
+											<v-chip size="x-small" color="teal" variant="outlined" class="ml-2">Không
+												tính vào kết quả xếp loại</v-chip>
+										</div>
+										<v-data-table :items="diemHK2_NgoaiXL" :headers="headers"
+											:hide-default-footer="-1" :items-per-page="-1">
+											<template v-slot:item.TenMon="{ item }">
+												<v-icon class="mr-2"
+													:color="DSMonHoc.find(x => x.MonHocName === item.TenMon)?.Color">
+													{{DSMonHoc.find(x => x.MonHocName === item.TenMon)?.Icon ||
+													'mdi-book-open'}}
+												</v-icon>
+												{{ item.TenMon }}
+											</template>
+										</v-data-table>
+									</div>
 									<v-row style="border: thin solid #e0e0e0; border-radius: 5px;" class="ma-0">
 										<!-- <v-col cols="12">
 											<v-icon color="blue" class="mr-1">mdi-chart-bar</v-icon>
@@ -564,8 +622,15 @@
 									</v-row>
 								</div>
 								<div v-if="item.id == 3">
-									<v-data-table :items="dataCN_C2_C3.Diem" :headers="headersCaNam"
-										:hide-default-footer="-1" :items-per-page="-1">
+									<!-- Section 1: Chương trình của Bộ GD&ĐT CN desktop -->
+									<div class="d-flex align-center px-2 py-2 bg-blue-lighten-5 mb-2"
+										style="border-left: 4px solid #1976D2;">
+										<v-icon color="primary" class="mr-2">mdi-book-open-page-variant</v-icon>
+										<span class="font-weight-bold text-primary-darken-2 text-subtitle-2">CHƯƠNG
+											TRÌNH CỦA BỘ GD&ĐT</span>
+									</div>
+									<v-data-table class="table-bordered mb-4" :items="diemCN_Main"
+										:headers="headersCaNam" :hide-default-footer="-1" :items-per-page="-1">
 										<template v-slot:item.TenMon="{ item }">
 											<v-icon class="mr-2"
 												:color="DSMonHoc.find(x => x.MonHocName === item.TenMon)?.Color">
@@ -575,6 +640,28 @@
 											{{ item.TenMon }}
 										</template>
 									</v-data-table>
+									<!-- Section môn ngoài xếp loại Cả năm desktop -->
+									<div v-if="diemCN_NgoaiXL.length > 0" class="mt-2 mb-2">
+										<div class="d-flex align-center px-2 py-2 bg-teal-lighten-5 mb-2"
+											style="border-left: 4px solid #009688;">
+											<v-icon color="teal" class="mr-2">mdi-school</v-icon>
+											<span class="font-weight-bold text-teal-darken-2 text-subtitle-2">CHƯƠNG
+												TRÌNH RIÊNG CỦA NHÀ TRƯỜNG</span>
+											<v-chip size="x-small" color="teal" variant="outlined" class="ml-2">Không
+												tính vào kết quả xếp loại</v-chip>
+										</div>
+										<v-data-table :items="diemCN_NgoaiXL" :headers="headersCaNam"
+											:hide-default-footer="-1" :items-per-page="-1">
+											<template v-slot:item.TenMon="{ item }">
+												<v-icon class="mr-2"
+													:color="DSMonHoc.find(x => x.MonHocName === item.TenMon)?.Color">
+													{{DSMonHoc.find(x => x.MonHocName === item.TenMon)?.Icon ||
+													'mdi-book-open'}}
+												</v-icon>
+												{{ item.TenMon }}
+											</template>
+										</v-data-table>
+									</div>
 									<v-row style="border: thin solid #e0e0e0; border-radius: 5px;" class="ma-0">
 										<!-- <v-col cols="12">
 											<v-icon color="blue" class="mr-1">mdi-chart-bar</v-icon>
@@ -623,174 +710,362 @@
 					</v-tabs>
 					<v-tabs-window v-model="tab">
 						<v-tabs-window-item v-for="hocKy in DSHocKy" :key="hocKy.id" :value="hocKy.id">
+							<!-- Section 1: Chương trình của Bộ GD&ĐT mobile -->
+							<div class="d-flex align-center px-3 py-2 bg-blue-lighten-5 mt-2 mb-1"
+								style="border-left: 4px solid #1976D2;">
+								<v-icon color="primary" class="mr-2" size="small">mdi-book-open-page-variant</v-icon>
+								<div class="font-weight-bold text-primary-darken-2 text-caption">CHƯƠNG TRÌNH CỦA BỘ
+									GD&ĐT</div>
+							</div>
 							<v-expansion-panels v-model="panelC2_C3" flat selected-class='bg-primary'
 								variant="accordion" multiple>
-								<v-expansion-panel v-for="item in dataHK_1_C2_C3.Diem" v-if="hocKy.id === 1">
-									<v-expansion-panel-title expand-icon="mdi-menu-down"
-										style="background-color: #e7f1ff8c; padding: 12px; border-radius: 0;">
-										<!-- <img src="/_cdn/lhbs-lms/icon_hk.png" height="25" class="mr-2" /> -->
-										<div class="d-flex justify-space-between align-center w-100">
-											<div class="d-flex ga-2 align-center">
-												<v-icon small class="mr-1"
-													:style="{ color: DSMonHoc.find(x => x.MonHocName === item.TenMon)?.Color ?? '#000000' }">
-													{{DSMonHoc.find(x => x.MonHocName === item.TenMon)?.Icon ||
-													'mdi-book-open'}}
-												</v-icon>
-												<p class="font-weight-medium">{{ item.TenMon }}</p>
-											</div>
-											<v-chip class="vChip-full-width-content" color="#1d581e" size="small"
-												variant="flat" style="min-width: 90px">
-												<div class="d-flex justify-space-between w-100">
-													<span>ĐTB: </span>
-													<span>{{ item.dtb }}</span>
-												</div>
-											</v-chip>
-										</div>
-									</v-expansion-panel-title>
-									<v-expansion-panel-text>
-										<v-list style="padding: 0">
-											<v-list-item title="Điểm KT thường xuyên" v-if="item.ktthuongxuyen">
-												<template #append>
-													<v-chip color="primary">{{ item.ktthuongxuyen ?? '-' }}</v-chip>
-												</template>
-												<template #prepend>
-													<v-icon size="small" class="mb-1 me-1" color="primary">
-														mdi-calendar-check</v-icon>
-												</template>
-											</v-list-item>
-											<v-list-item title="Điểm KT giữa kì" v-if="item.ktgiuaki">
-												<template #append>
-													<v-chip color="primary">{{ item.ktgiuaki ?? '-' }}</v-chip>
-												</template>
-												<template #prepend>
-													<v-icon size="small" class="mb-1 me-1" color="primary">
-														mdi-file-document-edit</v-icon>
-												</template>
-											</v-list-item>
-											<v-list-item title="Điểm KT cuối kì" v-if="item.ktcuoiki">
-												<template #append>
-													<v-chip color="primary">{{ item.ktcuoiki ?? '-' }}</v-chip>
-												</template>
-												<template #prepend>
-													<v-icon size="small" class="mb-1 me-1" color="primary">mdi-school
+								<!-- HK1 -->
+								<template v-if="hocKy.id === 1">
+									<v-expansion-panel v-for="item in diemHK1_Main" :key="'hk1-'+item.LopmonID">
+										<v-expansion-panel-title expand-icon="mdi-menu-down"
+											style="background-color: #e7f1ff8c; padding: 12px; border-radius: 0;">
+											<div class="d-flex justify-space-between align-center w-100">
+												<div class="d-flex ga-2 align-center">
+													<v-icon small class="mr-1"
+														:style="{ color: DSMonHoc.find(x => x.MonHocName === item.TenMon)?.Color ?? '#000000' }">
+														{{DSMonHoc.find(x => x.MonHocName === item.TenMon)?.Icon ||
+														'mdi-book-open'}}
 													</v-icon>
-												</template>
-											</v-list-item>
-										</v-list>
-									</v-expansion-panel-text>
-								</v-expansion-panel>
-								<v-expansion-panel v-for="item in dataHK_2_C2_C3.Diem" v-if="hocKy.id === 2">
-									<v-expansion-panel-title expand-icon="mdi-menu-down"
-										style="background-color: #e7f1ff; padding: 12px; border-radius: 0;">
-										<!-- <img src="/_cdn/lhbs-lms/icon_hk.png" height="25" class="mr-2" /> -->
-										<div class="d-flex justify-space-between align-center w-100">
-											<div class="d-flex ga-2 align-center">
-												<v-icon small class="mr-1"
-													:style="{ color: DSMonHoc.find(x => x.MonHocName === item.TenMon)?.Color ?? '#000000' }">
-													{{DSMonHoc.find(x => x.MonHocName === item.TenMon)?.Icon ||
-													'mdi-book-open'}}
-												</v-icon>
-												<p class="font-weight-medium">{{ item.TenMon }}</p>
-											</div>
-											<v-chip class="vChip-full-width-content" color="#1d581e" variant="flat"
-												style="min-width: 90px">
-												<div class="d-flex justify-space-between w-100">
-													<span>ĐTB: </span>
-													<span>{{ item.dtb }}</span>
+													<p class="font-weight-medium">{{ item.TenMon }}</p>
 												</div>
-											</v-chip>
-										</div>
-									</v-expansion-panel-title>
-									<v-expansion-panel-text>
-										<v-list style="padding: 0">
-											<v-list-item title="Điểm KT thường xuyên" v-if="item.ktthuongxuyen">
-												<template #append>
-													<v-chip color="primary">{{ item.ktthuongxuyen ?? '-' }}</v-chip>
-												</template>
-												<template #prepend>
-													<v-icon size="small" class="mb-1 me-1" color="primary">
-														mdi-calendar-check</v-icon>
-												</template>
-											</v-list-item>
-											<v-list-item title="Điểm KT giữa kì" v-if="item.ktgiuaki">
-												<template #append>
-													<v-chip color="primary">{{ item.ktgiuaki ?? '-' }}</v-chip>
-												</template>
-												<template #prepend>
-													<v-icon size="small" class="mb-1 me-1" color="primary">
-														mdi-file-document-edit</v-icon>
-												</template>
-											</v-list-item>
-											<v-list-item title="Điểm KT cuối kì" v-if="item.ktcuoiki">
-												<template #append>
-													<v-chip color="primary">{{ item.ktcuoiki ?? '-' }}</v-chip>
-												</template>
-												<template #prepend>
-													<v-icon size="small" class="mb-1 me-1" color="primary">mdi-school
-													</v-icon>
-												</template>
-											</v-list-item>
-										</v-list>
-									</v-expansion-panel-text>
-								</v-expansion-panel>
-								<v-expansion-panel readonly :expandIcon="null" :expanded="false"
-									v-for="item in dataCN_C2_C3.Diem" v-if="hocKy.id === 3" variant="accordion">
-									<v-expansion-panel-title
-										style="background-color: #e7f1ff; padding: 12px; border-radius: 0;">
-										<!-- <img src="/_cdn/lhbs-lms/icon_hk.png" height="25" class="mr-2" /> -->
-										<div class="d-flex justify-space-between align-center w-100">
-											<div class="d-flex ga-2 align-center">
-												<v-icon small class="mr-1"
-													:style="{ color: DSMonHoc.find(x => x.MonHocName === item.TenMon)?.Color ?? '#000000' }">
-													{{DSMonHoc.find(x => x.MonHocName === item.TenMon)?.Icon ||
-													'mdi-book-open'}}
-												</v-icon>
-												<p class="font-weight-medium">{{ item.TenMon }}</p>
+												<v-chip class="vChip-full-width-content" color="#1d581e" size="small"
+													variant="flat" style="min-width: 90px">
+													<div class="d-flex justify-space-between w-100">
+														<span>ĐTB: </span>
+														<span>{{ item.dtb }}</span>
+													</div>
+												</v-chip>
 											</div>
+										</v-expansion-panel-title>
+										<v-expansion-panel-text>
+											<v-list style="padding: 0">
+												<v-list-item title="Điểm KT thường xuyên" v-if="item.ktthuongxuyen">
+													<template #append>
+														<v-chip color="primary">{{ item.ktthuongxuyen ?? '-' }}</v-chip>
+													</template>
+													<template #prepend>
+														<v-icon size="small" class="mb-1 me-1" color="primary">
+															mdi-calendar-check</v-icon>
+													</template>
+												</v-list-item>
+												<v-list-item title="Điểm KT giữa kì" v-if="item.ktgiuaki">
+													<template #append>
+														<v-chip color="primary">{{ item.ktgiuaki ?? '-' }}</v-chip>
+													</template>
+													<template #prepend>
+														<v-icon size="small" class="mb-1 me-1" color="primary">
+															mdi-file-document-edit</v-icon>
+													</template>
+												</v-list-item>
+												<v-list-item title="Điểm KT cuối kì" v-if="item.ktcuoiki">
+													<template #append>
+														<v-chip color="primary">{{ item.ktcuoiki ?? '-' }}</v-chip>
+													</template>
+													<template #prepend>
+														<v-icon size="small" class="mb-1 me-1" color="primary">
+															mdi-school</v-icon>
+													</template>
+												</v-list-item>
+											</v-list>
+										</v-expansion-panel-text>
+									</v-expansion-panel>
+								</template>
+								<!-- HK2 -->
+								<template v-if="hocKy.id === 2">
+									<v-expansion-panel v-for="item in diemHK2_Main" :key="'hk2-'+item.LopmonID">
+										<v-expansion-panel-title expand-icon="mdi-menu-down"
+											style="background-color: #e7f1ff; padding: 12px; border-radius: 0;">
+											<div class="d-flex justify-space-between align-center w-100">
+												<div class="d-flex ga-2 align-center">
+													<v-icon small class="mr-1"
+														:style="{ color: DSMonHoc.find(x => x.MonHocName === item.TenMon)?.Color ?? '#000000' }">
+														{{DSMonHoc.find(x => x.MonHocName === item.TenMon)?.Icon ||
+														'mdi-book-open'}}
+													</v-icon>
+													<p class="font-weight-medium">{{ item.TenMon }}</p>
+												</div>
+												<v-chip class="vChip-full-width-content" color="#1d581e" variant="flat"
+													style="min-width: 90px">
+													<div class="d-flex justify-space-between w-100">
+														<span>ĐTB: </span>
+														<span>{{ item.dtb }}</span>
+													</div>
+												</v-chip>
+											</div>
+										</v-expansion-panel-title>
+										<v-expansion-panel-text>
+											<v-list style="padding: 0">
+												<v-list-item title="Điểm KT thường xuyên" v-if="item.ktthuongxuyen">
+													<template #append>
+														<v-chip color="primary">{{ item.ktthuongxuyen ?? '-' }}</v-chip>
+													</template>
+													<template #prepend>
+														<v-icon size="small" class="mb-1 me-1" color="primary">
+															mdi-calendar-check</v-icon>
+													</template>
+												</v-list-item>
+												<v-list-item title="Điểm KT giữa kì" v-if="item.ktgiuaki">
+													<template #append>
+														<v-chip color="primary">{{ item.ktgiuaki ?? '-' }}</v-chip>
+													</template>
+													<template #prepend>
+														<v-icon size="small" class="mb-1 me-1" color="primary">
+															mdi-file-document-edit</v-icon>
+													</template>
+												</v-list-item>
+												<v-list-item title="Điểm KT cuối kì" v-if="item.ktcuoiki">
+													<template #append>
+														<v-chip color="primary">{{ item.ktcuoiki ?? '-' }}</v-chip>
+													</template>
+													<template #prepend>
+														<v-icon size="small" class="mb-1 me-1" color="primary">
+															mdi-school</v-icon>
+													</template>
+												</v-list-item>
+											</v-list>
+										</v-expansion-panel-text>
+									</v-expansion-panel>
+								</template>
+								<!-- Cả năm -->
+								<template v-if="hocKy.id === 3">
+									<v-expansion-panel readonly :expandIcon="null" :expanded="false"
+										v-for="item in diemCN_Main" :key="'cn-'+item.MonHocID" variant="accordion">
+										<v-expansion-panel-title
+											style="background-color: #e7f1ff; padding: 12px; border-radius: 0;">
+											<!-- <img src="/_cdn/lhbs-lms/icon_hk.png" height="25" class="mr-2" /> -->
+											<div class="d-flex justify-space-between align-center w-100">
+												<div class="d-flex ga-2 align-center">
+													<v-icon small class="mr-1"
+														:style="{ color: DSMonHoc.find(x => x.MonHocName === item.TenMon)?.Color ?? '#000000' }">
+														{{DSMonHoc.find(x => x.MonHocName === item.TenMon)?.Icon ||
+														'mdi-book-open'}}
+													</v-icon>
+													<p class="font-weight-medium">{{ item.TenMon }}</p>
+												</div>
 
-											<v-chip class="vChip-full-width-content" color="#1d581e" variant="flat"
-												style="min-width: 90px">
-												<div class="d-flex justify-space-between w-100">
-													<span>ĐTB: </span>
-													<span>{{ item.dtb }}</span>
-												</div>
-											</v-chip>
-										</div>
-										<template #actions></template>
-									</v-expansion-panel-title>
-									<v-expansion-panel-text>
-										<v-list style="padding: 0">
-											<v-list-item title="Điểm KT thường xuyên" v-if="item.ktthuongxuyen">
-												<template #append>
-													<v-chip color="primary">{{ item.ktthuongxuyen ?? '-' }}</v-chip>
-												</template>
-												<template #prepend>
-													<v-icon size="small" class="mb-1 me-1" color="primary">
-														mdi-calendar-check</v-icon>
-												</template>
-											</v-list-item>
-											<v-list-item title="Điểm KT giữa kì" v-if="item.ktgiuaki">
-												<template #append>
-													<v-chip color="primary">{{ item.ktgiuaki ?? '-' }}</v-chip>
-												</template>
-												<template #prepend>
-													<v-icon size="small" class="mb-1 me-1" color="primary">
-														mdi-file-document-edit</v-icon>
-												</template>
-											</v-list-item>
-											<v-list-item title="Điểm KT cuối kì" v-if="item.ktcuoiki">
-												<template #append>
-													<v-chip color="primary">{{ item.ktcuoiki ?? '-' }}</v-chip>
-												</template>
-												<template #prepend>
-													<v-icon size="small" class="mb-1 me-1" color="primary">mdi-school
-													</v-icon>
-												</template>
-											</v-list-item>
-										</v-list>
-									</v-expansion-panel-text>
-								</v-expansion-panel>
+												<v-chip class="vChip-full-width-content" color="#1d581e" variant="flat"
+													style="min-width: 90px">
+													<div class="d-flex justify-space-between w-100">
+														<span>ĐTB: </span>
+														<span>{{ item.dtb }}</span>
+													</div>
+												</v-chip>
+											</div>
+											<template #actions></template>
+										</v-expansion-panel-title>
+										<v-expansion-panel-text>
+											<v-list style="padding: 0">
+												<v-list-item title="Điểm KT thường xuyên" v-if="item.ktthuongxuyen">
+													<template #append>
+														<v-chip color="primary">{{ item.ktthuongxuyen ?? '-' }}</v-chip>
+													</template>
+													<template #prepend>
+														<v-icon size="small" class="mb-1 me-1" color="primary">
+															mdi-calendar-check</v-icon>
+													</template>
+												</v-list-item>
+												<v-list-item title="Điểm KT giữa kì" v-if="item.ktgiuaki">
+													<template #append>
+														<v-chip color="primary">{{ item.ktgiuaki ?? '-' }}</v-chip>
+													</template>
+													<template #prepend>
+														<v-icon size="small" class="mb-1 me-1" color="primary">
+															mdi-file-document-edit</v-icon>
+													</template>
+												</v-list-item>
+												<v-list-item title="Điểm KT cuối kì" v-if="item.ktcuoiki">
+													<template #append>
+														<v-chip color="primary">{{ item.ktcuoiki ?? '-' }}</v-chip>
+													</template>
+													<template #prepend>
+														<v-icon size="small" class="mb-1 me-1" color="primary">
+															mdi-school
+														</v-icon>
+													</template>
+												</v-list-item>
+											</v-list>
+										</v-expansion-panel-text>
+									</v-expansion-panel>
+								</template>
 							</v-expansion-panels>
+							<!-- Section môn ngoài xếp loại mobile -->
+							<template v-if="diemHK1_NgoaiXL.length > 0 && hocKy.id === 1">
+								<div class="d-flex align-center px-3 py-2 bg-teal-lighten-5 mt-2 mb-1"
+									style="border-left: 4px solid #009688;">
+									<v-icon color="teal" class="mr-2" size="small">mdi-school</v-icon>
+									<div>
+										<div class="font-weight-bold text-teal-darken-2 text-caption">CHƯƠNG TRÌNH RIÊNG
+											CỦA NHÀ TRƯỜNG</div>
+										<div class="text-caption text-teal-darken-1">Không tính vào kết quả xếp loại
+										</div>
+									</div>
+								</div>
+								<v-expansion-panels flat variant="accordion" multiple>
+									<v-expansion-panel v-for="item in diemHK1_NgoaiXL" :key="'nxl-hk1-'+item.TenMon">
+										<v-expansion-panel-title expand-icon="mdi-menu-down"
+											style="background-color: #e0f2f18c; padding: 12px; border-radius: 0;">
+											<div class="d-flex justify-space-between align-center w-100">
+												<div class="d-flex ga-2 align-center">
+													<v-icon small class="mr-1"
+														:style="{ color: DSMonHoc.find(x => x.MonHocName === item.TenMon)?.Color ?? '#009688' }">
+														{{DSMonHoc.find(x => x.MonHocName === item.TenMon)?.Icon ||
+														'mdi-book-open'}}
+													</v-icon>
+													<p class="font-weight-medium">{{ item.TenMon }}</p>
+												</div>
+												<v-chip class="vChip-full-width-content" color="#1d581e" size="small"
+													variant="flat" style="min-width: 90px">
+													<div class="d-flex justify-space-between w-100">
+														<span>ĐTB: </span>
+														<span>{{ item.dtb }}</span>
+													</div>
+												</v-chip>
+											</div>
+										</v-expansion-panel-title>
+										<v-expansion-panel-text>
+											<v-list style="padding: 0">
+												<v-list-item title="Điểm KT thường xuyên" v-if="item.ktthuongxuyen">
+													<template #append>
+														<v-chip color="teal">{{ item.ktthuongxuyen ?? '-' }}</v-chip>
+													</template>
+													<template #prepend>
+														<v-icon size="small" class="mb-1 me-1" color="teal">
+															mdi-calendar-check</v-icon>
+													</template>
+												</v-list-item>
+												<v-list-item title="Điểm KT giữa kì" v-if="item.ktgiuaki">
+													<template #append>
+														<v-chip color="teal">{{ item.ktgiuaki ?? '-' }}</v-chip>
+													</template>
+													<template #prepend>
+														<v-icon size="small" class="mb-1 me-1" color="teal">
+															mdi-file-document-edit</v-icon>
+													</template>
+												</v-list-item>
+												<v-list-item title="Điểm KT cuối kì" v-if="item.ktcuoiki">
+													<template #append>
+														<v-chip color="teal">{{ item.ktcuoiki ?? '-' }}</v-chip>
+													</template>
+													<template #prepend>
+														<v-icon size="small" class="mb-1 me-1" color="teal">mdi-school
+														</v-icon>
+													</template>
+												</v-list-item>
+											</v-list>
+										</v-expansion-panel-text>
+									</v-expansion-panel>
+								</v-expansion-panels>
+							</template>
+							<template v-if="diemHK2_NgoaiXL.length > 0 && hocKy.id === 2">
+								<div class="d-flex align-center px-3 py-2 bg-teal-lighten-5 mt-2 mb-1"
+									style="border-left: 4px solid #009688;">
+									<v-icon color="teal" class="mr-2" size="small">mdi-school</v-icon>
+									<div>
+										<div class="font-weight-bold text-teal-darken-2 text-caption">CHƯƠNG TRÌNH RIÊNG
+											CỦA NHÀ TRƯỜNG</div>
+										<div class="text-caption text-teal-darken-1">Không tính vào kết quả xếp loại
+										</div>
+									</div>
+								</div>
+								<v-expansion-panels flat variant="accordion" multiple>
+									<v-expansion-panel v-for="item in diemHK2_NgoaiXL" :key="'nxl-hk2-'+item.TenMon">
+										<v-expansion-panel-title expand-icon="mdi-menu-down"
+											style="background-color: #e0f2f18c; padding: 12px; border-radius: 0;">
+											<div class="d-flex justify-space-between align-center w-100">
+												<div class="d-flex ga-2 align-center">
+													<v-icon small class="mr-1"
+														:style="{ color: DSMonHoc.find(x => x.MonHocName === item.TenMon)?.Color ?? '#009688' }">
+														{{DSMonHoc.find(x => x.MonHocName === item.TenMon)?.Icon ||
+														'mdi-book-open'}}
+													</v-icon>
+													<p class="font-weight-medium">{{ item.TenMon }}</p>
+												</div>
+												<v-chip class="vChip-full-width-content" color="#1d581e" size="small"
+													variant="flat" style="min-width: 90px">
+													<div class="d-flex justify-space-between w-100">
+														<span>ĐTB: </span>
+														<span>{{ item.dtb }}</span>
+													</div>
+												</v-chip>
+											</div>
+										</v-expansion-panel-title>
+										<v-expansion-panel-text>
+											<v-list style="padding: 0">
+												<v-list-item title="Điểm KT thường xuyên" v-if="item.ktthuongxuyen">
+													<template #append>
+														<v-chip color="teal">{{ item.ktthuongxuyen ?? '-' }}</v-chip>
+													</template>
+													<template #prepend>
+														<v-icon size="small" class="mb-1 me-1" color="teal">
+															mdi-calendar-check</v-icon>
+													</template>
+												</v-list-item>
+												<v-list-item title="Điểm KT giữa kì" v-if="item.ktgiuaki">
+													<template #append>
+														<v-chip color="teal">{{ item.ktgiuaki ?? '-' }}</v-chip>
+													</template>
+													<template #prepend>
+														<v-icon size="small" class="mb-1 me-1" color="teal">
+															mdi-file-document-edit</v-icon>
+													</template>
+												</v-list-item>
+												<v-list-item title="Điểm KT cuối kì" v-if="item.ktcuoiki">
+													<template #append>
+														<v-chip color="teal">{{ item.ktcuoiki ?? '-' }}</v-chip>
+													</template>
+													<template #prepend>
+														<v-icon size="small" class="mb-1 me-1" color="teal">mdi-school
+														</v-icon>
+													</template>
+												</v-list-item>
+											</v-list>
+										</v-expansion-panel-text>
+									</v-expansion-panel>
+								</v-expansion-panels>
+							</template>
+							<template v-if="diemCN_NgoaiXL.length > 0 && hocKy.id === 3">
+								<div class="d-flex align-center px-3 py-2 bg-teal-lighten-5 mt-2 mb-1"
+									style="border-left: 4px solid #009688;">
+									<v-icon color="teal" class="mr-2" size="small">mdi-school</v-icon>
+									<div>
+										<div class="font-weight-bold text-teal-darken-2 text-caption">CHƯƠNG TRÌNH RIÊNG
+											CỦA NHÀ TRƯỜNG</div>
+										<div class="text-caption text-teal-darken-1">Không tính vào kết quả xếp loại
+										</div>
+									</div>
+								</div>
+								<v-expansion-panels flat variant="accordion" multiple>
+									<v-expansion-panel v-for="item in diemCN_NgoaiXL" :key="'nxl-cn-'+item.TenMon"
+										readonly>
+										<v-expansion-panel-title
+											style="background-color: #e0f2f18c; padding: 12px; border-radius: 0;">
+											<div class="d-flex justify-space-between align-center w-100">
+												<div class="d-flex ga-2 align-center">
+													<v-icon small class="mr-1"
+														:style="{ color: DSMonHoc.find(x => x.MonHocName === item.TenMon)?.Color ?? '#009688' }">
+														{{DSMonHoc.find(x => x.MonHocName === item.TenMon)?.Icon ||
+														'mdi-book-open'}}
+													</v-icon>
+													<p class="font-weight-medium">{{ item.TenMon }}</p>
+												</div>
+												<v-chip class="vChip-full-width-content" color="#1d581e" size="small"
+													variant="flat" style="min-width: 90px">
+													<div class="d-flex justify-space-between w-100">
+														<span>ĐTB: </span>
+														<span>{{ item.dtb }}</span>
+													</div>
+												</v-chip>
+											</div>
+											<template #actions></template>
+										</v-expansion-panel-title>
+									</v-expansion-panel>
+								</v-expansion-panels>
+							</template>
 							<div v-if="hocKy.id === 1">
 								<v-divider></v-divider>
 								<v-card>
@@ -1067,6 +1342,39 @@
 				this.loadHocSinhKQHT(tab)
 			}
 		}
+	},
+	computed: {
+		// Danh sách MonHocID ngoài xếp loại theo CapID
+		// Cấp 2: STEM (69), JA (58), AI (38) | Cấp 3: STEM (99), JA (105)
+		MonHocNgoaiXepLoai_IDs() {
+			const capID = vueData.HocSinhSelected?.CapID
+			if (capID === 2 || capID === 3) return ['STEM', 'JA', 'AI']
+			return []
+		},
+		// HK1 - chỉ môn chính
+		diemHK1_Main() {
+			return (this.dataHK_1_C2_C3.Diem || []).filter(x => !this.MonHocNgoaiXepLoai_IDs.includes(x.MonHocID))
+		},
+		// HK1 - môn ngoài xếp loại
+		diemHK1_NgoaiXL() {
+			return (this.dataHK_1_C2_C3.Diem || []).filter(x => this.MonHocNgoaiXepLoai_IDs.includes(x.MonHocID))
+		},
+		// HK2 - chỉ môn chính
+		diemHK2_Main() {
+			return (this.dataHK_2_C2_C3.Diem || []).filter(x => !this.MonHocNgoaiXepLoai_IDs.includes(x.MonHocID))
+		},
+		// HK2 - môn ngoài xếp loại
+		diemHK2_NgoaiXL() {
+			return (this.dataHK_2_C2_C3.Diem || []).filter(x => this.MonHocNgoaiXepLoai_IDs.includes(x.MonHocID))
+		},
+		// Cả năm - chỉ môn chính
+		diemCN_Main() {
+			return (this.dataCN_C2_C3.Diem || []).filter(x => !this.MonHocNgoaiXepLoai_IDs.includes(x.MonHocID))
+		},
+		// Cả năm - môn ngoài xếp loại
+		diemCN_NgoaiXL() {
+			return (this.dataCN_C2_C3.Diem || []).filter(x => this.MonHocNgoaiXepLoai_IDs.includes(x.MonHocID))
+		},
 	},
 	methods: {
 		loadCongBoBangDiem() {
