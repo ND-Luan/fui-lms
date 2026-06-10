@@ -558,6 +558,12 @@ class tblAlert {
    varchar(9) UpdateUser
    datetime UpdateTime
 }
+class tblAlertRead {
+   int AlertReadID
+   int AlertID
+   varchar(20) UserID
+   datetime ReadTime
+}
 class tblBangDiemChiTiet_CK1_C1 {
    int LopID
    nvarchar(100) TenLop

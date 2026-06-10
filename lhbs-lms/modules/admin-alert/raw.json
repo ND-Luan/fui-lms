@@ -1,1 +1,24 @@
-{"data":[],"watch":{},"controls":[{"prop":"fluid pa-0","rows":[{"prop":":no-gutters='true'","cols":[{"el":"uc-main-layout"}]}]}],"set":{}}
+{
+    "data": [
+        {
+            "CapID": "parseInt(capid || 0)"
+        }
+    ],
+    "watch": {},
+    "controls": [
+        {
+            "prop": "fluid pa-0",
+            "rows": [
+                {
+                    "prop": ":no-gutters='true'",
+                    "cols": [
+                        {
+                            "el": "uc-main-layout"
+                        }
+                    ]
+                }
+            ]
+        }
+    ],
+    "set": {}
+}

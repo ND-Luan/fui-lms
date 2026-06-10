@@ -355,6 +355,13 @@ export default {
 				}
 			}
 		} catch { }
+		window.openTicketDialog = (tab = 'create') => {
+			this.activeTab = tab
+			if (tab === 'history') {
+				this.loadHistory()
+			}
+			this.openDialog()
+		}
 		if (!window.htmlToImage) {
 			const s = document.createElement('script')
 			s.src = 'https://cdn.jsdelivr.net/npm/html-to-image@1.11.11/dist/html-to-image.js'
