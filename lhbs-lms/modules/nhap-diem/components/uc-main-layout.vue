@@ -125,6 +125,19 @@
 					Mẫu nhận xét
 				</v-btn>
 
+				<v-btn v-if="hasTextColumn" @click="onCheckCommentAI" color="purple" variant="outlined" size="small"
+					:disabled="isDisabled || !hasStudents || isCheckingLength" :loading="isCheckingAI">
+					<v-icon start>mdi-robot-outline</v-icon>
+					Kiểm tra nhận xét bằng AI
+				</v-btn>
+
+				<v-btn v-if="isCap1NangLucPhamChat && hasTextColumn" @click="onCheckCommentLength" color="info"
+					variant="outlined" size="small" :disabled="isDisabled || !hasStudents || isCheckingAI"
+					:loading="isCheckingLength">
+					<v-icon start>mdi-text-box-search-outline</v-icon>
+					Kiểm tra độ dài nhận xét
+				</v-btn>
+
 				<v-btn v-if="showGetThemeTestButton" @click="onGetDiemTest" color="primary" variant="outlined"
 					size="small" :disabled="!hasStudents">
 					<v-icon start>mdi-download-outline</v-icon>
@@ -335,6 +348,85 @@
 		<uc-dialog-mau-nhan-xet v-model="action.isShowDialogMauNhanXet" :filter="filter" :DSHocSinh="DSHocSinh"
 			@onSubmit="onXacNhanMauNhanXet" />
 
+		<!-- Dialog Kết quả Kiểm tra AI / Độ dài -->
+		<v-dialog v-model="action.aiResultDialog.show" max-width="600" scrollable>
+			<v-card rounded="lg">
+				<v-card-title class="d-flex align-center ga-2 pt-4 pb-2 px-4">
+					<v-icon :color="action.aiResultDialog.title?.includes('AI') ? 'purple' : 'info'" size="22">
+						{{ action.aiResultDialog.title?.includes('AI') ? 'mdi-robot-outline' :
+						'mdi-text-box-search-outline' }}
+					</v-icon>
+					<span class="text-body-1 font-weight-bold">{{ action.aiResultDialog.title || 'Kết quả kiểm tra'
+						}}</span>
+				</v-card-title>
+				<v-divider />
+
+				<v-card-text class="pa-4" style="max-height: 450px;">
+					<div v-if="aiWarnings.length === 0"
+						class="d-flex flex-column align-center justify-center py-6 text-medium-emphasis">
+						<v-icon size="48" color="success" class="mb-2">mdi-check-decagram</v-icon>
+						<p class="text-body-2 font-weight-bold text-success">Không phát hiện lỗi nào!</p>
+						<p class="text-caption">
+							{{ action.aiResultDialog.title?.includes('AI')
+							? 'Tất cả nhận xét đều đúng chính tả và nằm trong giới hạn ký tự.'
+							: 'Tất cả nhận xét đều hợp lệ và nằm trong giới hạn ký tự.' }}
+						</p>
+					</div>
+
+					<v-list v-else density="compact" class="pa-0">
+						<div v-for="(warning, index) in aiWarnings" :key="index" class="mb-3 pb-3"
+							:class="index < aiWarnings.length - 1 ? 'border-b' : ''">
+							<div class="d-flex align-center justify-space-between mb-1">
+								<span class="text-body-2 font-weight-bold text-primary">
+									Dòng {{ warning.rowNum }} — {{ warning.studentName }}
+								</span>
+								<v-chip size="x-small" :color="warning.type === 'limit' ? 'error' : 'warning'"
+									variant="tonal">
+									{{ warning.type === 'limit' ? 'Vượt ký tự' : 'Lỗi chính tả/cú pháp' }}
+								</v-chip>
+							</div>
+
+							<div class="text-caption text-medium-emphasis mb-1">
+								<strong>Môn:</strong> {{ warning.subjectName }}
+							</div>
+
+							<!-- Nội dung nhận xét hiện tại -->
+							<div class="text-caption bg-grey-lighten-4 pa-2 rounded mb-2 text-italic">
+								"{{ warning.currentText }}"
+							</div>
+
+							<!-- Chi tiết lỗi / Gợi ý -->
+							<div v-if="warning.type === 'limit'" class="text-caption text-error font-weight-medium">
+								<v-icon size="14" class="mr-1" color="error">mdi-alert-circle-outline</v-icon>
+								{{ warning.message }}
+							</div>
+							<div v-else class="text-caption">
+								<div class="font-weight-medium text-warning mb-1">
+									<v-icon size="14" class="mr-1" color="warning">mdi-alert-outline</v-icon>
+									Phát hiện lỗi chính tả hoặc khoảng trắng:
+								</div>
+								<ul class="pl-4">
+									<li v-for="(sug, sIdx) in warning.suggestions" :key="sIdx"
+										class="text-caption text-medium-emphasis">
+										{{ sug }}
+									</li>
+								</ul>
+								<div class="mt-2 text-success font-weight-medium">
+									Gợi ý sửa đổi: "{{ warning.correctedText }}"
+								</div>
+							</div>
+						</div>
+					</v-list>
+				</v-card-text>
+
+				<v-divider />
+				<v-card-actions class="justify-end pa-3">
+					<v-btn :color="action.aiResultDialog.title?.includes('AI') ? 'purple' : 'info'" variant="flat"
+						@click="action.aiResultDialog.show = false">Đóng</v-btn>
+				</v-card-actions>
+			</v-card>
+		</v-dialog>
+
 	</Global>
 </template>
 
@@ -348,10 +440,16 @@
 	data() {
 		return {
 			vueData,
+			isCheckingAI: false,
+			isCheckingLength: false,
 
 			action: {
 				isShowDialogMauNhanXet: false,
 				showAllLockedColumns: false,
+				aiResultDialog: {
+					show: false,
+					title: 'Kết quả kiểm tra nhận xét bằng AI'
+				},
 				lockDialog: {
 					show: false,
 					selectedColumns: []
@@ -362,6 +460,8 @@
 					reason: ''
 				}
 			},
+
+			aiWarnings: [],
 
 			filter: {
 				KhoiItem: null,
@@ -403,6 +503,23 @@
 	computed: {
 		pageTitle() {
 			return this.vueData.TitlePage || 'Nhập điểm';
+		},
+
+		hasTextColumn() {
+			return this.DSCotDiem_ByMaNhomCotDiem?.some(col => col.GiaTriCotDiem === 'text');
+		},
+
+		isCap1NangLucPhamChat() {
+			const isCap1 = parseInt(this.vueData.CapID) === 1;
+			const monHocID = this.filter.MonHocItem?.MonHocID;
+			const mapMonHocToNhom = {
+				20: 'Năng lực chung', 21: 'Năng lực chung', 22: 'Năng lực chung',
+				28: 'Năng lực đặc thù', 29: 'Năng lực đặc thù', 30: 'Năng lực đặc thù',
+				31: 'Năng lực đặc thù', 32: 'Năng lực đặc thù', 33: 'Năng lực đặc thù',
+				34: 'Năng lực đặc thù',
+				23: 'Phẩm chất', 24: 'Phẩm chất', 25: 'Phẩm chất', 26: 'Phẩm chất', 27: 'Phẩm chất'
+			};
+			return isCap1 && !!mapMonHocToNhom[monHocID];
 		},
 
 		hasStudents() {
@@ -886,6 +1003,278 @@
 			} catch (error) {
 				console.error('onExportExcel error:', error);
 				this.showSnackbar('Có lỗi xảy ra khi xuất Excel!', 'error');
+			}
+		},
+
+		async onCheckCommentAI() {
+			if (this.isDisabled || !this.hasStudents) return;
+
+			this.aiWarnings = [];
+
+			// 1. Tải nhận xét cấp 1 liên quan nếu cần
+			let allComments = [];
+			const isCap1 = parseInt(this.vueData.CapID) === 1;
+			const lopID = this.filter.LopItem?.LopID;
+			const nienKhoa = this.vueData.NienKhoa;
+			const maNhom = this.filter.MaNhomCotDiemItem?.MaNhomCotDiem || '';
+
+			let hocKi = '';
+			if (maNhom.includes('GK_HK1')) hocKi = 'GK_HK1';
+			else if (maNhom.includes('CK_HK1')) hocKi = 'CK_HK1';
+			else if (maNhom.includes('GK_HK2')) hocKi = 'GK_HK2';
+			else if (maNhom.includes('CK_HK2')) hocKi = 'CK_HK2';
+
+			const mapMonHocToNhom = {
+				20: 'Năng lực chung', 21: 'Năng lực chung', 22: 'Năng lực chung',
+				28: 'Năng lực đặc thù', 29: 'Năng lực đặc thù', 30: 'Năng lực đặc thù',
+				31: 'Năng lực đặc thù', 32: 'Năng lực đặc thù', 33: 'Năng lực đặc thù',
+				34: 'Năng lực đặc thù',
+				23: 'Phẩm chất', 24: 'Phẩm chất', 25: 'Phẩm chất', 26: 'Phẩm chất', 27: 'Phẩm chất'
+			};
+			const mapMonHocToTenMon = {
+				20: 'Tự chủ và tự học', 21: 'Giao tiếp và hợp tác', 22: 'Giải quyết vấn đề và sáng tạo',
+				28: 'Ngôn ngữ', 29: 'Tính toán', 30: 'Khoa học', 31: 'Công nghệ', 32: 'Tin học',
+				33: 'Thẩm mĩ', 34: 'Thể chất',
+				23: 'Yêu nước', 24: 'Nhân ái', 25: 'Chăm chỉ', 26: 'Trung thực', 27: 'Trách nhiệm'
+			};
+
+			const monHocID = this.filter.MonHocItem?.MonHocID;
+			const nhomNhanXet = mapMonHocToNhom[monHocID];
+			const currentTenMon = mapMonHocToTenMon[monHocID];
+
+			this.isCheckingAI = true;
+			try {
+				if (isCap1 && lopID && nienKhoa && hocKi && nhomNhanXet) {
+					try {
+						const resComments = await ajaxCALLPromise('lms/BaoCao_ThongKe_NhanXet_Cap1', {
+							LopID: String(lopID),
+							NienKhoa: nienKhoa,
+							HocKi: hocKi
+						});
+						allComments = Array.isArray(resComments) ? resComments : [];
+					} catch (err) {
+						console.error('Lỗi khi tải nhận xét cấp 1 liên quan:', err);
+					}
+				}
+
+				// 2. Thu thập và kiểm tra độ dài cục bộ / tổng nhóm
+				const commentsToCheck = [];
+				const localWarnings = [];
+
+				this.DSHocSinh.forEach((student, rowIndex) => {
+					this.DSCotDiem_ByMaNhomCotDiem.forEach((col) => {
+						if (col.GiaTriCotDiem === 'text') {
+							const textValue = student[col.value] || '';
+							const trimmedValue = textValue.trim();
+
+							if (isCap1 && nhomNhanXet) {
+								const otherComments = allComments
+									.filter(x => x.HocSinhID === student.HocSinhID && x.NhomNhanXet === nhomNhanXet && x.TenMon !== currentTenMon)
+									.map(x => x.NhanXet || '')
+									.filter(Boolean);
+								
+								const otherLength = otherComments.reduce((sum, c) => sum + c.trim().length, 0);
+								const totalLength = trimmedValue.length + otherLength;
+
+								if (totalLength > 400) {
+									localWarnings.push({
+										rowNum: rowIndex + 1,
+										studentName: student.HoVaTenHocSinh,
+										subjectName: col.title,
+										type: 'limit',
+										currentText: trimmedValue || '(Trống)',
+										message: `Tổng nhận xét nhóm [${nhomNhanXet}] là ${totalLength} ký tự, vượt quá giới hạn 400 ký tự (Độ dài các môn khác cùng nhóm là ${otherLength} ký tự).`
+									});
+								}
+							}
+
+							if (trimmedValue) {
+								commentsToCheck.push({
+									id: `${rowIndex}_${col.value}`,
+									text: trimmedValue,
+									studentName: student.HoVaTenHocSinh,
+									subjectTitle: col.title
+								});
+							}
+						}
+					});
+				});
+
+				this.aiWarnings = [...localWarnings];
+
+				// 3. Gửi AI kiểm tra chính tả/khoảng trắng
+				if (commentsToCheck.length > 0) {
+					const response = await ajaxCALLPromise('lms/CallGeminiAPI', {
+						Prompt: 'Bạn là một trợ lý AI chuyên phát hiện lỗi chính tả, khoảng trắng thừa, dấu câu và lỗi cú pháp tiếng Việt trong nhận xét của học sinh. Bạn sẽ nhận được đầu vào là một mảng JSON gồm các đối tượng có dạng { "id": "tọa độ", "text": "nhận xét" }.\nNhiệm vụ của bạn:\n1. Phân tích chuỗi nhận xét trong trường "text" để phát hiện các lỗi chính tả, khoảng trắng không đều, thiếu dấu câu hoặc viết hoa tùy tiện.\n2. Trả về kết quả dưới dạng một mảng JSON chứa các đối tượng có cấu trúc chính xác như sau:\n  - "id": giữ nguyên id nhận vào.\n  - "hasError": true nếu phát hiện lỗi, false nếu nhận xét hoàn toàn chính xác.\n  - "suggestions": danh sách các chuỗi mô tả lỗi phát hiện được (ví dụ: ["Sai chính tả: cham ngoan -> chăm ngoan", "Khoảng trắng thừa: học  tốt -> học tốt"]). Nếu không có lỗi, đặt là mảng rỗng.\n  - "correctedText": chuỗi nhận xét đầy đủ sau khi đã sửa toàn bộ các lỗi trên. Nếu không có lỗi, giữ nguyên như nhận xét ban đầu.\nTuyệt đối không thêm bớt trường, không giải thích hay trả về bất kỳ văn bản nào khác ngoài mảng JSON đó. Không viết hoa/xuống dòng dư thừa làm hỏng định dạng JSON.',
+						Content: JSON.stringify(commentsToCheck.map(c => ({ id: c.id, text: c.text })))
+					});
+
+					const resultData = Array.isArray(response) ? response[0] : response;
+					if (resultData && resultData.Status === 'OK') {
+						let cleanText = resultData.CleanResponse;
+						if (!cleanText && resultData.RawResponse) {
+							try {
+								const rawObj = JSON.parse(resultData.RawResponse);
+								const parts = rawObj.candidates?.[0]?.content?.parts;
+								if (Array.isArray(parts)) {
+									for (let i = parts.length - 1; i >= 0; i--) {
+										const txt = parts[i]?.text;
+										if (txt && txt.trim()) {
+											cleanText = txt;
+											break;
+										}
+									}
+								}
+							} catch (e) {
+								console.error('Lỗi khi phân tách RawResponse:', e);
+							}
+						}
+
+						if (cleanText) {
+							cleanText = cleanText.replace(/```json/g, '').replace(/```/g, '').trim();
+							const correctedComments = JSON.parse(cleanText);
+
+							if (Array.isArray(correctedComments)) {
+								correctedComments.forEach(item => {
+									if (item.hasError) {
+										const parts = item.id.split('_');
+										const rowIndex = parseInt(parts[0]);
+										const colName = parts[1];
+										const student = this.DSHocSinh[rowIndex];
+										const colInfo = commentsToCheck.find(c => c.id === item.id);
+
+										this.aiWarnings.push({
+											rowNum: rowIndex + 1,
+											studentName: student ? student.HoVaTenHocSinh : 'Học sinh',
+											subjectName: colInfo ? colInfo.subjectTitle : 'Môn',
+											type: 'spelling',
+											currentText: colInfo ? colInfo.text : '',
+											suggestions: item.suggestions || [],
+											correctedText: item.correctedText || ''
+										});
+									}
+								});
+							}
+						}
+					} else {
+						const errMsg = resultData?.ErrorMessage || 'Lỗi gọi hệ thống AI';
+						this.showSnackbar(errMsg, 'error');
+						return;
+					}
+				}
+
+				// Sắp xếp cảnh báo theo số dòng tăng dần
+				this.aiWarnings.sort((a, b) => a.rowNum - b.rowNum);
+				
+				// Hiển thị dialog kết quả
+				this.action.aiResultDialog.title = 'Kết quả kiểm tra nhận xét bằng AI';
+				this.action.aiResultDialog.show = true;
+			} catch (error) {
+				console.error('onCheckCommentAI error:', error);
+				this.showSnackbar('Có lỗi xảy ra khi gọi AI kiểm tra nhận xét.', 'error');
+			} finally {
+				this.isCheckingAI = false;
+			}
+		},
+
+		async onCheckCommentLength() {
+			if (this.isDisabled || !this.hasStudents) return;
+
+			this.aiWarnings = [];
+
+			const isCap1 = parseInt(this.vueData.CapID) === 1;
+			const lopID = this.filter.LopItem?.LopID;
+			const nienKhoa = this.vueData.NienKhoa;
+			const maNhom = this.filter.MaNhomCotDiemItem?.MaNhomCotDiem || '';
+
+			if (!isCap1 || !lopID) {
+				this.showSnackbar('Tính năng này chỉ hỗ trợ kiểm tra nhận xét cho học sinh Tiểu học (Cấp 1).', 'warning');
+				return;
+			}
+
+			let hocKi = '';
+			if (maNhom.includes('GK_HK1')) hocKi = 'GK_HK1';
+			else if (maNhom.includes('CK_HK1')) hocKi = 'CK_HK1';
+			else if (maNhom.includes('GK_HK2')) hocKi = 'GK_HK2';
+			else if (maNhom.includes('CK_HK2')) hocKi = 'CK_HK2';
+
+			const mapMonHocToNhom = {
+				20: 'Năng lực chung', 21: 'Năng lực chung', 22: 'Năng lực chung',
+				28: 'Năng lực đặc thù', 29: 'Năng lực đặc thù', 30: 'Năng lực đặc thù',
+				31: 'Năng lực đặc thù', 32: 'Năng lực đặc thù', 33: 'Năng lực đặc thù',
+				34: 'Năng lực đặc thù',
+				23: 'Phẩm chất', 24: 'Phẩm chất', 25: 'Phẩm chất', 26: 'Phẩm chất', 27: 'Phẩm chất'
+			};
+			const mapMonHocToTenMon = {
+				20: 'Tự chủ và tự học', 21: 'Giao tiếp và hợp tác', 22: 'Giải quyết vấn đề và sáng tạo',
+				28: 'Ngôn ngữ', 29: 'Tính toán', 30: 'Khoa học', 31: 'Công nghệ', 32: 'Tin học',
+				33: 'Thẩm mĩ', 34: 'Thể chất',
+				23: 'Yêu nước', 24: 'Nhân ái', 25: 'Chăm chỉ', 26: 'Trung thực', 27: 'Trách nhiệm'
+			};
+
+			const monHocID = this.filter.MonHocItem?.MonHocID;
+			const nhomNhanXet = mapMonHocToNhom[monHocID];
+			const currentTenMon = mapMonHocToTenMon[monHocID];
+
+			if (!nhomNhanXet) {
+				this.showSnackbar('Tính năng này chỉ áp dụng cho các môn Năng lực hoặc Phẩm chất.', 'warning');
+				return;
+			}
+
+			this.isCheckingLength = true;
+			try {
+				let allComments = [];
+				if (lopID && nienKhoa && hocKi) {
+					try {
+						const resComments = await ajaxCALLPromise('lms/BaoCao_ThongKe_NhanXet_Cap1', {
+							LopID: String(lopID),
+							NienKhoa: nienKhoa,
+							HocKi: hocKi
+						});
+						allComments = Array.isArray(resComments) ? resComments : [];
+					} catch (err) {
+						console.error('Lỗi khi tải nhận xét cấp 1 liên quan:', err);
+					}
+				}
+
+				const localWarnings = [];
+
+				this.DSHocSinh.forEach((student, rowIndex) => {
+					this.DSCotDiem_ByMaNhomCotDiem.forEach((col) => {
+						if (col.GiaTriCotDiem === 'text') {
+							const textValue = student[col.value] || '';
+							const trimmedValue = textValue.trim();
+
+							const otherComments = allComments
+								.filter(x => x.HocSinhID === student.HocSinhID && x.NhomNhanXet === nhomNhanXet && x.TenMon !== currentTenMon)
+								.map(x => x.NhanXet || '')
+								.filter(Boolean);
+							
+							const otherLength = otherComments.reduce((sum, c) => sum + c.trim().length, 0);
+							const totalLength = trimmedValue.length + otherLength;
+
+							if (totalLength > 400) {
+								localWarnings.push({
+									rowNum: rowIndex + 1,
+									studentName: student.HoVaTenHocSinh,
+									subjectName: col.title,
+									type: 'limit',
+									currentText: trimmedValue || '(Trống)',
+									message: `Tổng nhận xét nhóm [${nhomNhanXet}] là ${totalLength} ký tự, vượt quá giới hạn 400 ký tự (Độ dài các môn khác cùng nhóm là ${otherLength} ký tự).`
+								});
+							}
+						}
+					});
+				});
+
+				this.aiWarnings = localWarnings;
+				this.action.aiResultDialog.title = 'Kết quả kiểm tra giới hạn ký tự';
+				this.action.aiResultDialog.show = true;
+			} catch (error) {
+				console.error('onCheckCommentLength error:', error);
+				this.showSnackbar('Có lỗi xảy ra khi kiểm tra độ dài nhận xét.', 'error');
+			} finally {
+				this.isCheckingLength = false;
 			}
 		}
 	}

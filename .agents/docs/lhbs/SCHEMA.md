@@ -191,7 +191,44 @@ class tbl_LOG_HocSinhNhom {
    varchar(20) UpdateUser
    datetime UpdateTime
 }
+class tbl_LOG_HocSinhNhom_2025 {
+   int Log_HocSinhNhomID
+   int HSNhomID
+   int HocSinhID
+   int LopID
+   varchar(50) NhomID
+   varchar(10) NhomID_HK1
+   varchar(10) SoDanhBo
+   int SoTT
+   bit Enable
+   varchar(20) CreateUser
+   datetime CreateTime
+   varchar(20) UpdateUser
+   datetime UpdateTime
+}
 class tbl_LOG_KetQuaHocTap {
+   int BackupID
+   int KQHTID
+   int MonHocLopID
+   int HocSinhID
+   varchar(10) LopID
+   int NienKhoa
+   int CotDiemID
+   nvarchar(1000) KetQuaDanhGia_VI
+   nvarchar(1000) KetQuaDanhGia_EN
+   int Lop_TinhTrangID
+   tinyint TinhTrang
+   bit Is_Edit
+   bit Enable
+   varchar(20) CreateUser
+   datetime CreateTime
+   varchar(20) UpdateUser
+   datetime UpdateTime
+   varchar(9) NhapDiemUser
+   datetime NhapDiemTime
+   int KhoaCotDiemID
+}
+class tbl_LOG_KetQuaHocTap_2024_2025 {
    int BackupID
    int KQHTID
    int MonHocLopID
@@ -224,6 +261,17 @@ class tbl_LOG_KhoaCotDiem {
    varchar(9) UpdateUser
    datetime UpdateTime
 }
+class tbl_LOG_KhoaCotDiem_2025 {
+   int Log_KhoaCotDiemID
+   int KhoaCotDiemID
+   bit TinhTrang
+   nvarchar(1000) LyDo
+   bit Enable
+   varchar(9) CreateUser
+   datetime CreateTime
+   varchar(9) UpdateUser
+   datetime UpdateTime
+}
 class tbl_LOG_NhanXetThang {
    int BackupID
    int NhanXetThangID
@@ -237,10 +285,10 @@ class tbl_LOG_NhanXetThang {
    nvarchar(max) NoiDungTiengViet_HTML
    nvarchar(max) NoiDungMonHocKhac_HTML
    nvarchar(max) NhanXetCuoiNam_HTML
-   int DiemToan
+   float DiemToan
    int SoSao_Toan
    nvarchar(max) NhanXetToan_HTML
-   int DiemTiengViet
+   float DiemTiengViet
    int SoSao_TiengViet
    nvarchar(max) NhanXetTiengViet_HTML
    nvarchar(max) NhanXetMonHocKhac_HTML
@@ -256,6 +304,113 @@ class tbl_LOG_NhanXetThang {
    datetime UpdateTime
    varchar(9) ParentConfirmUser
    datetime ParentConfirmTime
+   nvarchar(max) UuDiem
+   nvarchar(max) NhuocDiem
+   nvarchar(max) DeXuat
+   nvarchar(500) NhanXetGVCN
+   bit Is_Viewed
+   nvarchar(50) PhoiHopCMHS
+   nvarchar(4000) NhanXetGVCN_VePhuHuynh_HTML
+   nvarchar(4000) NhanXetGVCN_VeHocSinh_HTML
+   nvarchar(50) PhanLoai_TuyenThang
+   nvarchar(50) Flyers
+   float DiemTA
+   bit DKHocTiep
+   nvarchar(500) DeXuat_NDCamKet
+   nvarchar(1000) NhanXet_ChuanBiNienKhoaSau
+}
+class tbl_LOG_NhanXetThang_2025 {
+   int BackupID
+   int NhanXetThangID
+   int Lop_NhanXetThangID
+   int HSLopID
+   int HocSinhID
+   nvarchar(max) NoiDungKienThuc_HTML
+   nvarchar(max) NoiDungNangLuc_HTML
+   nvarchar(max) NoiDungHoatDongKhac_HTML
+   nvarchar(max) NoiDungToan_HTML
+   nvarchar(max) NoiDungTiengViet_HTML
+   nvarchar(max) NoiDungMonHocKhac_HTML
+   nvarchar(max) NhanXetCuoiNam_HTML
+   float DiemToan
+   int SoSao_Toan
+   nvarchar(max) NhanXetToan_HTML
+   float DiemTiengViet
+   int SoSao_TiengViet
+   nvarchar(max) NhanXetTiengViet_HTML
+   nvarchar(max) NhanXetMonHocKhac_HTML
+   nvarchar(max) HoatDongGiaoDucKhac_HTML
+   nvarchar(max) PhamChatNangLuc_HTML
+   bit Is_Reject
+   nvarchar(max) ReasonReject
+   nvarchar(max) Parent_Comment
+   bit Enable
+   varchar(9) CreateUser
+   datetime CreateTime
+   varchar(9) UpdateUser
+   datetime UpdateTime
+   varchar(9) ParentConfirmUser
+   datetime ParentConfirmTime
+   nvarchar(max) UuDiem
+   nvarchar(max) NhuocDiem
+   nvarchar(max) DeXuat
+   nvarchar(500) NhanXetGVCN
+   bit Is_Viewed
+   nvarchar(50) PhoiHopCMHS
+   nvarchar(4000) NhanXetGVCN_VePhuHuynh_HTML
+   nvarchar(4000) NhanXetGVCN_VeHocSinh_HTML
+   nvarchar(50) PhanLoai_TuyenThang
+   nvarchar(50) Flyers
+   float DiemTA
+   bit DKHocTiep
+   nvarchar(500) DeXuat_NDCamKet
+   nvarchar(1000) NhanXet_ChuanBiNienKhoaSau
+}
+class tbl_LOG_NhanXetThang_Lop {
+   int BackupID
+   int Lop_NhanXetThangID
+   int LopID
+   nvarchar(50) HocKy
+   int Thang
+   int Nam
+   nvarchar(20) Text_Thang_VI
+   nvarchar(20) Text_Thang_EN
+   int NienKhoa
+   varchar(100) IconUrl
+   tinyint TinhTrang
+   bit Is_HienThiPhuHuynh
+   nvarchar(400) ReasonReject
+   bit Enable
+   varchar(9) CreateUser
+   datetime CreateTime
+   varchar(9) UpdateUser
+   datetime UpdateTime
+   bit Is_Showing
+   datetime LogTime
+   varchar(9) LogUser
+}
+class tbl_LOG_NhanXetThang_Lop_2025 {
+   int BackupID
+   int Lop_NhanXetThangID
+   int LopID
+   nvarchar(50) HocKy
+   int Thang
+   int Nam
+   nvarchar(20) Text_Thang_VI
+   nvarchar(20) Text_Thang_EN
+   int NienKhoa
+   varchar(100) IconUrl
+   tinyint TinhTrang
+   bit Is_HienThiPhuHuynh
+   nvarchar(400) ReasonReject
+   bit Enable
+   varchar(9) CreateUser
+   datetime CreateTime
+   varchar(9) UpdateUser
+   datetime UpdateTime
+   bit Is_Showing
+   datetime LogTime
+   varchar(9) LogUser
 }
 class tbl_MucDo {
    int MucDo_ID
@@ -384,6 +539,24 @@ class tbl_XepNhomTiengAnh {
    nvarchar(255) GhiChu
    nvarchar(50) XepNhomTiengAnh
    nvarchar(20) LoaiHocSinh
+}
+class tblAI {
+   int ID
+   nvarchar(50) Code
+   varchar(1000) API_KEY
+}
+class tblAlert {
+   int AlertID
+   varchar(100) TypeAlert
+   nvarchar(100) ContentAlert
+   datetime DateAlert
+   int CapID
+   int NienKhoa
+   bit Enable
+   varchar(9) CreateUser
+   datetime CreateTime
+   varchar(9) UpdateUser
+   datetime UpdateTime
 }
 class tblBangDiemChiTiet_CK1_C1 {
    int LopID
@@ -532,6 +705,36 @@ class tblChiTieu_KQHT_CuoiNam {
    float Kha
    float Dat
    float ChuaDat
+   bit Enable
+   varchar(9) CreateUser
+   datetime CreateTime
+   varchar(9) UpdateUser
+   datetime UpdateTime
+}
+class tblChiTieu_TA1 {
+   int ChiTieuID
+   int CapID
+   nvarchar(50) LopID
+   nvarchar(100) HocKi
+   float ChuaDat
+   float Dat
+   float Kha
+   float Tot
+   float C1_HoanThanh
+   float C1_ChuaHoanThanh
+   float C1_Tot
+   bit Enable
+   varchar(9) CreateUser
+   datetime CreateTime
+   varchar(9) UpdateUser
+   datetime UpdateTime
+}
+class tblChiTieu_TA2 {
+   int ChiTieuID
+   int CapID
+   nvarchar(200) LopID
+   float ChiTieu
+   int HocKi
    bit Enable
    varchar(9) CreateUser
    datetime CreateTime
@@ -709,6 +912,7 @@ class tblEL_Assignments {
    decimal MaxScore
    int NienKhoa
    tinyint HocKi
+   nvarchar(200) IntegrationSource
    bit IsDev
    bit IsDeleted
    bit IsBlockCopy_Paste
@@ -871,7 +1075,31 @@ class tblEL_Log_ChamBai {
    datetime UpdateTime
    int AssignToStudentID
 }
+class tblEL_Log_ChamBai_2025 {
+   int Log_ChamBaiID
+   int SubmissionID
+   int AssignToClassID
+   nvarchar(max) AssignmentConfig
+   int SubmissionStatus
+   nvarchar(max) SubmissionContent
+   nvarchar(2000) Reason
+   varchar(9) CreateUser
+   datetime CreateTime
+   varbinary(50) UpdateUser
+   datetime UpdateTime
+   int AssignToStudentID
+}
 class tblEL_Log_NopBai {
+   int Log_SubmissionID
+   int SubmissionID
+   nvarchar(max) SubmissionContent
+   datetime SubmissionTime
+   varchar(9) CreateUser
+   datetime CreateTime
+   varbinary(50) UpdateUser
+   datetime UpdateTime
+}
+class tblEL_Log_NopBai_2025 {
    int Log_SubmissionID
    int SubmissionID
    nvarchar(max) SubmissionContent
@@ -929,6 +1157,18 @@ class tblEL_Resoucre_TeacherPermissions {
    int MonHocID
    bit Enable
    int NienKhoa
+}
+class tblEL_Student_SubmitTokens {
+   bigint SubmitTokenID
+   int AssignToClassID
+   int AssignToStudentID
+   int HocSinhID
+   varbinary(32) TokenHash
+   datetime2 ExpireTime
+   bit IsUsed
+   datetime2 UsedTime
+   datetime2 CreateTime
+   varchar(9) CreateUser
 }
 class tblEL_Submissions {
    bigint SubmissionID
@@ -1351,6 +1591,27 @@ class tblKetQuaHocTap2025_10_22_17_32_25 {
    datetime GVBM_GuiDiem_Time
    varchar(9) GVCN_TuChoiGuiDiem_User
    datetime GVCN_TuChoiGuiDiem_Time
+}
+class tblKetQuaHocTap2026_05_23_12_15_37 {
+   int KQHTID
+   int MonHocLopID
+   int HocSinhID
+   varchar(10) LopID
+   int NienKhoa
+   int CotDiemID
+   nvarchar(1000) KetQuaDanhGia_VI
+   nvarchar(1000) KetQuaDanhGia_EN
+   int Lop_TinhTrangID
+   tinyint TinhTrang
+   bit Is_Edit
+   bit Enable
+   varchar(20) CreateUser
+   datetime CreateTime
+   varchar(20) UpdateUser
+   datetime UpdateTime
+   varchar(9) NhapDiemUser
+   datetime NhapDiemTime
+   int KhoaCotDiemID
 }
 class tblKhenThuong {
    int KhenThuongID

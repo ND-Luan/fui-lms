@@ -5,5 +5,5 @@ notilms-e405e-*.json
 # Functions dependencies
 functions/node_modules/
 
-.agents/docs/lhbs/sql_export
+.agents/docs/lhbs/*
 .agents/scripts/*
