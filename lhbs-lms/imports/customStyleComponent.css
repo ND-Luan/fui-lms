@@ -284,6 +284,15 @@
     background-color: #000000 !important;
 }
 
+.vercel-fab-btn.fab-today-alert {
+    background-color: #d32f2f !important;
+    border-color: rgba(255, 255, 255, 0.2) !important;
+}
+
+.vercel-fab-btn.fab-today-alert:hover {
+    background-color: #b71c1c !important;
+}
+
 .vercel-card {
     background: rgba(255, 255, 255, 0.95) !important;
     backdrop-filter: blur(12px);

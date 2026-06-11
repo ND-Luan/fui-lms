@@ -17,14 +17,16 @@
 				<v-btn
 					icon
 					class="vercel-fab-btn"
-					:class="{ 'pulse-animation': unreadAlertsCount > 0 }"
+					:class="{ 'pulse-animation': unreadAlertsCount > 0, 'fab-today-alert': hasTodayAlert }"
 					@click="fabClick"
 					elevation="4"
 				>
 					<v-icon color="white">
 						{{ unreadAlertsCount > 0 ? 'mdi-bell-ring-outline' : 'mdi-cube-outline' }}
 					</v-icon>
-					<v-tooltip activator="parent" location="left">LHBS Hub</v-tooltip>
+					<v-tooltip activator="parent" location="left">
+						<div style="white-space: pre-line; max-width: 300px; line-height: 1.4;">{{ alertsTooltipText }}</div>
+					</v-tooltip>
 				</v-btn>
 			</v-badge>
 		</div>
@@ -564,6 +566,19 @@
 		},
 		unreadAlertsCount() {
 			return this.activeAlerts.filter(a => !a.isRead).length
+		},
+		hasTodayAlert() {
+			const todayStr = new Date().toDateString()
+			return this.activeAlerts.some(alert => {
+				if (alert.isRead) return false
+				const alertDate = new Date(alert.DateAlert)
+				return !isNaN(alertDate.getTime()) && alertDate.toDateString() === todayStr
+			})
+		},
+		alertsTooltipText() {
+			const unread = this.activeAlerts.filter(a => !a.isRead)
+			if (unread.length === 0) return 'LHBS Hub'
+			return unread.map(a => a.ContentAlert).join('\n')
 		}
 	},
 	watch: {
