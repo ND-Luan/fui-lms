@@ -287,10 +287,25 @@
 .vercel-fab-btn.fab-today-alert {
     background-color: #d32f2f !important;
     border-color: rgba(255, 255, 255, 0.2) !important;
+    animation: pulse-toolbar 2s infinite, fab-ring 1.5s ease-in-out infinite;
 }
 
 .vercel-fab-btn.fab-today-alert:hover {
     background-color: #b71c1c !important;
+    animation-play-state: paused;
+    transform: scale(1.05) !important;
+}
+
+@keyframes fab-ring {
+    0% { transform: rotate(0); }
+    5% { transform: rotate(15deg); }
+    10% { transform: rotate(-15deg); }
+    15% { transform: rotate(12deg); }
+    20% { transform: rotate(-12deg); }
+    25% { transform: rotate(9deg); }
+    30% { transform: rotate(-9deg); }
+    35% { transform: rotate(0); }
+    100% { transform: rotate(0); }
 }
 
 .vercel-card {

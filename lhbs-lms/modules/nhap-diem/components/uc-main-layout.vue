@@ -281,6 +281,73 @@
 			</v-card>
 		</v-dialog>
 
+		<!-- Dialog Chọn Cột Kiểm Tra Bằng AI -->
+		<v-dialog v-model="action.aiColumnDialog.show" max-width="400" persistent>
+			<v-card rounded="lg">
+				<v-card-title class="d-flex align-center ga-2 pt-4 pb-2 px-4">
+					<v-icon color="purple" size="22">mdi-robot-outline</v-icon>
+					<span class="text-body-1 font-weight-bold">Chọn cột kiểm tra bằng AI</span>
+				</v-card-title>
+				<v-divider />
+
+				<v-card-text class="pt-3 px-4 pb-2">
+					<div class="text-body-2 text-medium-emphasis mb-3">
+						Chọn các cột nhận xét bạn muốn AI kiểm tra lỗi chính tả và cú pháp.
+					</div>
+
+					<v-list density="compact" class="rounded border pa-0" style="max-height: 200px; overflow-y: auto;">
+						<v-list-item v-for="(col, i) in textColumns" :key="col.value"
+							:class="i < textColumns.length - 1 ? 'border-b' : ''" min-height="40"
+							:disabled="col.isLocked" @click="!col.isLocked && onToggleAiColumn(col.value)">
+							<template v-slot:prepend>
+								<v-checkbox-btn
+									:model-value="action.aiColumnDialog.selectedColumns.includes(col.value)"
+									:disabled="col.isLocked"
+									@update:model-value="onToggleAiColumn(col.value)"
+									color="purple" density="compact" />
+							</template>
+							<v-list-item-title class="text-body-2">
+								{{ col.title }}
+								<span v-if="aiRunCounts[col.value]" class="text-caption text-purple ml-2 font-weight-medium">
+									(Đã chạy {{ aiRunCounts[col.value] }} lần)
+								</span>
+							</v-list-item-title>
+							<template v-slot:append>
+								<v-chip v-if="col.isLocked" size="x-small" color="primary" variant="flat">Đã khóa</v-chip>
+							</template>
+						</v-list-item>
+					</v-list>
+				</v-card-text>
+
+				<v-divider />
+				<v-card-actions class="justify-end ga-2 pa-3 flex-wrap">
+					<v-btn variant="text" color="grey" @click="action.aiColumnDialog.show = false" size="small">Hủy</v-btn>
+					
+					<template v-if="hasSelectedRunBefore">
+						<v-btn color="purple" variant="outlined" size="small"
+							:disabled="action.aiColumnDialog.selectedColumns.length === 0"
+							@click="onShowPreviousAiResult()">
+							<v-icon start size="16">mdi-eye-outline</v-icon>
+							Xem kết quả trước
+						</v-btn>
+						<v-btn color="purple" variant="flat" size="small"
+							:disabled="action.aiColumnDialog.selectedColumns.length === 0"
+							@click="onConfirmCheckCommentAI(true)">
+							<v-icon start size="16">mdi-refresh</v-icon>
+							Chạy lại AI
+						</v-btn>
+					</template>
+					<template v-else>
+						<v-btn color="purple" variant="flat" size="small"
+							:disabled="action.aiColumnDialog.selectedColumns.length === 0"
+							@click="onConfirmCheckCommentAI(false)">
+							Xác nhận
+						</v-btn>
+					</template>
+				</v-card-actions>
+			</v-card>
+		</v-dialog>
+
 		<!-- Dialog Mở Khóa Cột Điểm -->
 		<v-dialog v-if="canManageUnlockColumns" v-model="action.unlockDialog.show" max-width="520" persistent>
 			<v-card rounded="lg">
@@ -391,8 +458,8 @@
 							</div>
 
 							<!-- Nội dung nhận xét hiện tại -->
-							<div class="text-caption bg-grey-lighten-4 pa-2 rounded mb-2 text-italic">
-								"{{ warning.currentText }}"
+							<div class="text-caption bg-grey-lighten-4 pa-2 rounded mb-2 text-italic" style="white-space: pre-wrap;">
+								"<span v-html="warning.currentHtml || warning.currentText"></span>"
 							</div>
 
 							<!-- Chi tiết lỗi / Gợi ý -->
@@ -407,12 +474,23 @@
 								</div>
 								<ul class="pl-4">
 									<li v-for="(sug, sIdx) in warning.suggestions" :key="sIdx"
-										class="text-caption text-medium-emphasis">
+										class="text-caption text-medium-emphasis" style="white-space: pre-wrap;">
 										{{ sug }}
 									</li>
 								</ul>
-								<div class="mt-2 text-success font-weight-medium">
-									Gợi ý sửa đổi: "{{ warning.correctedText }}"
+								<div class="mt-2 d-flex align-center justify-space-between flex-wrap ga-2 border-t pt-2">
+									<div class="text-success font-weight-medium" style="white-space: pre-wrap;">
+										Gợi ý sửa đổi: "<span v-html="warning.correctedHtml || warning.correctedText"></span>"
+									</div>
+									<v-btn v-if="!warning.applied" size="x-small" color="success" variant="tonal"
+										@click="onApplyAiSuggestion(warning)">
+										<v-icon start size="14">mdi-check-bold</v-icon>
+										Áp dụng
+									</v-btn>
+									<span v-else class="text-caption text-success font-weight-bold d-flex align-center ga-1">
+										<v-icon size="16">mdi-check-decagram</v-icon>
+										Đã áp dụng
+									</span>
 								</div>
 							</div>
 						</div>
@@ -420,9 +498,20 @@
 				</v-card-text>
 
 				<v-divider />
-				<v-card-actions class="justify-end pa-3">
-					<v-btn :color="action.aiResultDialog.title?.includes('AI') ? 'purple' : 'info'" variant="flat"
+				<v-card-actions class="justify-end pa-3 ga-2">
+					
+					<v-btn :color="action.aiResultDialog.title?.includes('AI') ? 'purple' : 'info'" variant="flat" size="small"
 						@click="action.aiResultDialog.show = false">Đóng</v-btn>
+					<v-btn v-if="hasSpellingWarningsToApply" color="success" variant="flat" size="small"
+						@click="onApplyAllAiSuggestions">
+						<v-icon start>mdi-check-all</v-icon>
+						Áp dụng tất cả
+					</v-btn>
+					<v-btn v-if="aiWarnings.length > 0" color="success" variant="outlined" size="small"
+						@click="onExportAiWarnings">
+						<v-icon start>mdi-microsoft-excel</v-icon>
+						Xuất Excel lỗi
+					</v-btn>
 				</v-card-actions>
 			</v-card>
 		</v-dialog>
@@ -450,6 +539,10 @@
 					show: false,
 					title: 'Kết quả kiểm tra nhận xét bằng AI'
 				},
+				aiColumnDialog: {
+					show: false,
+					selectedColumns: []
+				},
 				lockDialog: {
 					show: false,
 					selectedColumns: []
@@ -462,6 +555,8 @@
 			},
 
 			aiWarnings: [],
+			aiCache: {},
+			aiRunCounts: {},
 
 			filter: {
 				KhoiItem: null,
@@ -597,6 +692,17 @@
 			return this.editedCells.length;
 		},
 
+		textColumns() {
+			return this.DSCotDiem_ByMaNhomCotDiem?.filter(col => col.GiaTriCotDiem === 'text').map(col => {
+				const matchedCol = this.displayColumns.find(d => d.value === col.value);
+				return {
+					title: matchedCol?.title || col.title,
+					value: col.value,
+					isLocked: matchedCol?.isLocked ?? false
+				};
+			}) || [];
+		},
+
 		suggestLockColumnSet() {
 			return new Set(this.suggestLockColumns.map(c => c.value));
 		},
@@ -604,6 +710,17 @@
 		/** Danh sách cột chưa khóa (không phải công thức) — dùng cho onLockAllColumns */
 		unlockedColumns() {
 			return this.lockableColumns.filter(col => !col.isLocked);
+		},
+
+		hasSelectedRunBefore() {
+			return this.action.aiColumnDialog.selectedColumns.some(colVal => 
+				this.aiRunCounts && this.aiRunCounts[colVal] > 0
+			);
+		},
+
+		hasSpellingWarningsToApply() {
+			return this.action.aiResultDialog.title?.includes('AI') && 
+				this.aiWarnings?.some(w => w.type === 'spelling' && !w.applied);
 		}
 	},
 
@@ -639,6 +756,7 @@
 			}
 			Vue.$toast[color]?.(message, { position: 'top' });
 		},
+
 
 		ensureUnlockPermission() {
 			if (this.canManageUnlockColumns) return true;
@@ -837,6 +955,8 @@
 			this.nestedHeaders = [];
 			this.displayColumns = [];
 			this.keyComp++;
+			this.aiWarnings = [];
+			this.aiRunCounts = {};
 		},
 
 		async onRefresh() {
@@ -853,6 +973,10 @@
 				this.DSKhoaCotDiem_API = result.lockedColumns;
 				this.DSCotDiem_ByMaNhomCotDiem = result.DSCotDiem_ByMaNhomCotDiem;
 				this.displayColumns = result.displayColumns;
+
+				// Reset kết quả kiểm tra AI khi làm mới bảng điểm
+				this.aiWarnings = [];
+				this.aiRunCounts = {};
 
 				// Auto-mark các ô có default value vào editedCells
 				const defaultCells = [];
@@ -1006,10 +1130,326 @@
 			}
 		},
 
-		async onCheckCommentAI() {
-			if (this.isDisabled || !this.hasStudents) return;
+		onExportAiWarnings() {
+			try {
+				if (!this.aiWarnings?.length) return;
+				
+				const headers = [
+					'Dòng',
+					'Mã học sinh',
+					'Học sinh',
+					'Môn/Cột điểm',
+					'Loại lỗi',
+					'Nhận xét hiện tại',
+					'Chi tiết lỗi / Cảnh báo',
+					'Nhận xét đề xuất sửa'
+				];
+				
+				const dataRows = this.aiWarnings.map(w => {
+					const errorType = w.type === 'limit' ? 'Vượt ký tự' : 'Lỗi chính tả/cú pháp';
+					const details = w.type === 'limit' 
+						? w.message 
+						: (w.suggestions || []).join('; ');
+					
+					return [
+						w.rowNum,
+						w.studentId || '',
+						w.studentName,
+						w.subjectName,
+						errorType,
+						w.currentText,
+						details,
+						w.correctedText || ''
+					];
+				});
+				
+				const worksheet = XLSX.utils.aoa_to_sheet([headers, ...dataRows]);
+				
+				worksheet['!cols'] = [
+					{ wch: 8 },   // Dòng
+					{ wch: 15 },  // Mã học sinh
+					{ wch: 25 },  // Học sinh
+					{ wch: 20 },  // Môn
+					{ wch: 15 },  // Loại lỗi
+					{ wch: 45 },  // Nhận xét hiện tại
+					{ wch: 50 },  // Chi tiết lỗi
+					{ wch: 45 }   // Nhận xét đề xuất
+				];
+				
+				const workbook = XLSX.utils.book_new();
+				XLSX.utils.book_append_sheet(workbook, worksheet, 'Báo cáo lỗi nhận xét');
+				
+				const lopName = this.filter.LopItem?.TenLop || 'Lop';
+				const monName = this.filter.MonHocItem?.MonHocName || 'MonHoc';
+				const checkType = this.action.aiResultDialog.title?.includes('AI') ? 'AI' : 'DoDai';
+				const fileName = `Bao_Cao_Loi_Nhan_Xet_${checkType}_${lopName}_${monName}.xlsx`;
+				
+				XLSX.writeFile(workbook, fileName);
+				this.showSnackbar('Xuất file Excel báo cáo lỗi thành công!', 'success');
+			} catch (error) {
+				console.error('onExportAiWarnings error:', error);
+				this.showSnackbar('Có lỗi xảy ra khi xuất file Excel!', 'error');
+			}
+		},
 
+		parseHtmlTags(htmlString) {
+			if (!htmlString) return '';
+			try {
+				const parser = new DOMParser();
+				const doc = parser.parseFromString(`<body>${htmlString}</body>`, 'text/html');
+				const root = doc.body;
+
+				const transform = (node) => {
+					if (node.nodeType === 3) { // TEXT_NODE
+						const span = document.createElement('span');
+						span.textContent = node.textContent;
+						return span;
+					}
+
+					if (node.nodeType === 1) { // ELEMENT_NODE
+						const tagName = node.tagName.toLowerCase();
+						const wrapper = document.createElement('span');
+						const text = node.textContent || '';
+						const isSpaceOnly = text.trim() === '' && text.length > 0;
+
+						if (tagName === 'del') {
+							if (isSpaceOnly) {
+								wrapper.className = 'bg-red-lighten-3 text-red-darken-4 font-weight-bold';
+								wrapper.style.backgroundColor = '#ff8a80';
+								wrapper.style.color = '#b71c1c';
+								wrapper.style.textDecoration = 'underline';
+								wrapper.style.textUnderlineOffset = '4px';
+								wrapper.style.padding = '0 4px';
+								wrapper.style.borderRadius = '2px';
+								wrapper.innerHTML = '&nbsp;'.repeat(text.length);
+							} else {
+								wrapper.className = 'bg-red-lighten-4 text-red-darken-4 font-weight-bold';
+								wrapper.style.backgroundColor = '#ffcdd2';
+								wrapper.style.color = '#b71c1c';
+								wrapper.style.textDecoration = 'line-through';
+								wrapper.style.padding = '0 2px';
+								wrapper.style.borderRadius = '2px';
+								Array.from(node.childNodes).forEach(child => {
+									wrapper.appendChild(transform(child));
+								});
+							}
+						} else if (tagName === 'ins') {
+							if (isSpaceOnly) {
+								wrapper.className = 'bg-green-lighten-3 text-green-darken-4 font-weight-bold';
+								wrapper.style.backgroundColor = '#b9f6ca';
+								wrapper.style.color = '#1b5e20';
+								wrapper.style.padding = '0 4px';
+								wrapper.style.borderRadius = '2px';
+								wrapper.innerHTML = '&nbsp;'.repeat(text.length);
+							} else {
+								wrapper.className = 'bg-green-lighten-4 text-green-darken-4 font-weight-bold';
+								wrapper.style.backgroundColor = '#c8e6c9';
+								wrapper.style.color = '#1b5e20';
+								wrapper.style.padding = '0 2px';
+								wrapper.style.borderRadius = '2px';
+								Array.from(node.childNodes).forEach(child => {
+									wrapper.appendChild(transform(child));
+								});
+							}
+						} else {
+							Array.from(node.childNodes).forEach(child => {
+								wrapper.appendChild(transform(child));
+							});
+						}
+						return wrapper;
+					}
+
+					return document.createTextNode('');
+				};
+
+				const container = document.createElement('div');
+				Array.from(root.childNodes).forEach(child => {
+					container.appendChild(transform(child));
+				});
+				return container.innerHTML;
+			} catch (e) {
+				console.error('Lỗi khi phân tích HTML bằng DOMParser:', e);
+				return htmlString;
+			}
+		},
+
+		getDiffMarkup(oldStr, newStr) {
+			if (!oldStr) return { oldHtml: '', newHtml: '' };
+			if (!newStr) return { oldHtml: oldStr, newHtml: '' };
+
+			const dp = Array(oldStr.length + 1).fill(null).map(() => Array(newStr.length + 1).fill(0));
+			for (let i = 1; i <= oldStr.length; i++) {
+				for (let j = 1; j <= newStr.length; j++) {
+					if (oldStr[i - 1] === newStr[j - 1]) {
+						dp[i][j] = dp[i - 1][j - 1] + 1;
+					} else {
+						dp[i][j] = Math.max(dp[i - 1][j], dp[i][j - 1]);
+					}
+				}
+			}
+
+			let i = oldStr.length;
+			let j = newStr.length;
+			const diff = [];
+
+			while (i > 0 || j > 0) {
+				if (i > 0 && j > 0 && oldStr[i - 1] === newStr[j - 1]) {
+					diff.push({ type: 'common', value: oldStr[i - 1] });
+					i--;
+					j--;
+				} else if (j > 0 && (i === 0 || dp[i][j - 1] >= dp[i - 1][j])) {
+					diff.push({ type: 'added', value: newStr[j - 1] });
+					j--;
+				} else {
+					diff.push({ type: 'removed', value: oldStr[i - 1] });
+					i--;
+				}
+			}
+			diff.reverse();
+
+			const escapeHtml = (str) => {
+				return str
+					.split('&').join('&amp;')
+					.split('<').join('&lt;')
+					.split('>').join('&gt;')
+					.split('"').join('&quot;')
+					.split("'").join('&#039;');
+			};
+
+			let oldHtml = '';
+			let newHtml = '';
+
+			diff.forEach(part => {
+				const escapedValue = escapeHtml(part.value);
+				if (part.type === 'common') {
+					oldHtml += escapedValue;
+					newHtml += escapedValue;
+				} else if (part.type === 'removed') {
+					if (part.value === ' ') {
+						oldHtml += `<span class="bg-red-lighten-3 text-red-darken-4 font-weight-bold" style="background-color: #ff8a80; color: #b71c1c; text-decoration: underline; text-underline-offset: 4px; padding: 0 4px; border-radius: 2px;">&nbsp;</span>`;
+					} else {
+						oldHtml += `<span class="bg-red-lighten-4 text-red-darken-4 font-weight-bold" style="background-color: #ffcdd2; color: #b71c1c; text-decoration: line-through; padding: 0 2px; border-radius: 2px;">${escapedValue}</span>`;
+					}
+				} else if (part.type === 'added') {
+					if (part.value === ' ') {
+						newHtml += `<span class="bg-green-lighten-3 text-green-darken-4 font-weight-bold" style="background-color: #b9f6ca; color: #1b5e20; padding: 0 4px; border-radius: 2px;">&nbsp;</span>`;
+					} else {
+						newHtml += `<span class="bg-green-lighten-4 text-green-darken-4 font-weight-bold" style="background-color: #c8e6c9; color: #1b5e20; padding: 0 2px; border-radius: 2px;">${escapedValue}</span>`;
+					}
+				}
+			});
+
+			return { oldHtml, newHtml };
+		},
+
+		onCheckCommentAI() {
+			if (this.isDisabled || !this.hasStudents) return;
+			this.action.aiColumnDialog.selectedColumns = this.textColumns
+				.filter(col => !col.isLocked)
+				.map(col => col.value);
+			this.action.aiColumnDialog.show = true;
+		},
+
+		onToggleAiColumn(value) {
+			const col = this.textColumns.find(c => c.value === value);
+			if (col?.isLocked) return;
+			const idx = this.action.aiColumnDialog.selectedColumns.indexOf(value);
+			if (idx === -1) {
+				this.action.aiColumnDialog.selectedColumns = [...this.action.aiColumnDialog.selectedColumns, value];
+			} else {
+				this.action.aiColumnDialog.selectedColumns = this.action.aiColumnDialog.selectedColumns.filter(v => v !== value);
+			}
+		},
+
+		onApplyAiSuggestion(warning) {
+			try {
+				const rowIndex = warning.rowNum - 1;
+				const colIndex = this.headers.findIndex(h => h.name === warning.colValue);
+				if (colIndex !== -1 && this.instance) {
+					const sheet = Array.isArray(this.instance) ? this.instance[0] : this.instance;
+					if (sheet && typeof sheet.setValueFromCoords === 'function') {
+						sheet.setValueFromCoords(colIndex, rowIndex, warning.correctedText);
+						warning.applied = true;
+						this.showSnackbar('Đã áp dụng nhận xét sửa đổi!', 'success');
+					} else {
+						this.showSnackbar('Không thể áp dụng nhận xét (bảng điểm chưa sẵn sàng)!', 'warning');
+					}
+				} else {
+					this.showSnackbar('Không tìm thấy ô điểm tương ứng trên bảng!', 'warning');
+				}
+			} catch (err) {
+				console.error('onApplyAiSuggestion error:', err);
+				this.showSnackbar('Có lỗi xảy ra khi áp dụng nhận xét.', 'error');
+			}
+		},
+
+		onApplyAllAiSuggestions() {
+			try {
+				if (!this.aiWarnings || this.aiWarnings.length === 0) {
+					this.showSnackbar('Không có gợi ý nào để áp dụng!', 'warning');
+					return;
+				}
+				if (!this.instance) {
+					this.showSnackbar('Bảng điểm chưa sẵn sàng!', 'warning');
+					return;
+				}
+				const sheet = Array.isArray(this.instance) ? this.instance[0] : this.instance;
+				if (!sheet || typeof sheet.setValueFromCoords !== 'function') {
+					this.showSnackbar('Không thể áp dụng nhận xét (bảng điểm chưa sẵn sàng)!', 'warning');
+					return;
+				}
+				let count = 0;
+				this.aiWarnings.forEach(warning => {
+					if (warning.type === 'spelling' && !warning.applied) {
+						const rowIndex = warning.rowNum - 1;
+						const colIndex = this.headers.findIndex(h => h.name === warning.colValue);
+						if (colIndex !== -1) {
+							sheet.setValueFromCoords(colIndex, rowIndex, warning.correctedText);
+							warning.applied = true;
+							count++;
+						}
+					}
+				});
+				if (count > 0) {
+					this.showSnackbar(`Đã áp dụng thành công ${count} nhận xét sửa đổi!`, 'success');
+				} else {
+					this.showSnackbar('Không có nhận xét mới nào cần áp dụng!', 'info');
+				}
+			} catch (err) {
+				console.error('onApplyAllAiSuggestions error:', err);
+				this.showSnackbar('Có lỗi xảy ra khi áp dụng tất cả nhận xét.', 'error');
+			}
+		},
+
+		onShowPreviousAiResult() {
+			this.action.aiColumnDialog.show = false;
+			if (this.aiWarnings && this.aiWarnings.length > 0 && this.instance) {
+				const sheet = Array.isArray(this.instance) ? this.instance[0] : this.instance;
+				if (sheet) {
+					this.aiWarnings.forEach(warning => {
+						if (warning.type === 'spelling') {
+							const rowIndex = warning.rowNum - 1;
+							const colIndex = this.headers.findIndex(h => h.name === warning.colValue);
+							if (colIndex !== -1) {
+								const currentValue = sheet.getValueFromCoords(colIndex, rowIndex) || '';
+								const trimmedCurrent = currentValue.trim();
+								if (trimmedCurrent === warning.correctedText.trim()) {
+									warning.applied = true;
+								}
+							}
+						}
+					});
+				}
+			}
+			this.action.aiResultDialog.title = 'Kết quả kiểm tra nhận xét bằng AI';
+			this.action.aiResultDialog.show = true;
+		},
+
+
+		async onConfirmCheckCommentAI(forceRefresh = false) {
+			this.action.aiColumnDialog.show = false;
 			this.aiWarnings = [];
+			this.isCheckingAI = true;
 
 			// 1. Tải nhận xét cấp 1 liên quan nếu cần
 			let allComments = [];
@@ -1042,7 +1482,6 @@
 			const nhomNhanXet = mapMonHocToNhom[monHocID];
 			const currentTenMon = mapMonHocToTenMon[monHocID];
 
-			this.isCheckingAI = true;
 			try {
 				if (isCap1 && lopID && nienKhoa && hocKi && nhomNhanXet) {
 					try {
@@ -1063,7 +1502,7 @@
 
 				this.DSHocSinh.forEach((student, rowIndex) => {
 					this.DSCotDiem_ByMaNhomCotDiem.forEach((col) => {
-						if (col.GiaTriCotDiem === 'text') {
+						if (col.GiaTriCotDiem === 'text' && this.action.aiColumnDialog.selectedColumns.includes(col.value)) {
 							const textValue = student[col.value] || '';
 							const trimmedValue = textValue.trim();
 
@@ -1079,6 +1518,7 @@
 								if (totalLength > 400) {
 									localWarnings.push({
 										rowNum: rowIndex + 1,
+										studentId: student.HocSinhID,
 										studentName: student.HoVaTenHocSinh,
 										subjectName: col.title,
 										type: 'limit',
@@ -1089,12 +1529,38 @@
 							}
 
 							if (trimmedValue) {
-								commentsToCheck.push({
-									id: `${rowIndex}_${col.value}`,
-									text: trimmedValue,
-									studentName: student.HoVaTenHocSinh,
-									subjectTitle: col.title
-								});
+								const normKey = trimmedValue.normalize('NFC');
+								if (!forceRefresh && this.aiCache && this.aiCache[normKey] !== undefined) {
+									const cachedResult = this.aiCache[normKey];
+									if (cachedResult.hasError) {
+										if (!cachedResult.currentHtml || !cachedResult.correctedHtml) {
+											const diff = this.getDiffMarkup(trimmedValue, cachedResult.correctedText || '');
+											cachedResult.currentHtml = diff.oldHtml;
+											cachedResult.correctedHtml = diff.newHtml;
+										}
+										localWarnings.push({
+											rowNum: rowIndex + 1,
+											colValue: col.value,
+											studentId: student.HocSinhID,
+											studentName: student.HoVaTenHocSinh,
+											subjectName: col.title,
+											type: 'spelling',
+											currentText: trimmedValue,
+											currentHtml: cachedResult.currentHtml,
+											correctedHtml: cachedResult.correctedHtml,
+											suggestions: cachedResult.suggestions || [],
+											correctedText: cachedResult.correctedText || ''
+										});
+									}
+								} else {
+									commentsToCheck.push({
+										id: `${rowIndex}_${col.value}`,
+										text: trimmedValue,
+										studentName: student.HoVaTenHocSinh,
+										subjectTitle: col.title,
+										colValue: col.value
+									});
+								}
 							}
 						}
 					});
@@ -1105,7 +1571,33 @@
 				// 3. Gửi AI kiểm tra chính tả/khoảng trắng
 				if (commentsToCheck.length > 0) {
 					const response = await ajaxCALLPromise('lms/CallGeminiAPI', {
-						Prompt: 'Bạn là một trợ lý AI chuyên phát hiện lỗi chính tả, khoảng trắng thừa, dấu câu và lỗi cú pháp tiếng Việt trong nhận xét của học sinh. Bạn sẽ nhận được đầu vào là một mảng JSON gồm các đối tượng có dạng { "id": "tọa độ", "text": "nhận xét" }.\nNhiệm vụ của bạn:\n1. Phân tích chuỗi nhận xét trong trường "text" để phát hiện các lỗi chính tả, khoảng trắng không đều, thiếu dấu câu hoặc viết hoa tùy tiện.\n2. Trả về kết quả dưới dạng một mảng JSON chứa các đối tượng có cấu trúc chính xác như sau:\n  - "id": giữ nguyên id nhận vào.\n  - "hasError": true nếu phát hiện lỗi, false nếu nhận xét hoàn toàn chính xác.\n  - "suggestions": danh sách các chuỗi mô tả lỗi phát hiện được (ví dụ: ["Sai chính tả: cham ngoan -> chăm ngoan", "Khoảng trắng thừa: học  tốt -> học tốt"]). Nếu không có lỗi, đặt là mảng rỗng.\n  - "correctedText": chuỗi nhận xét đầy đủ sau khi đã sửa toàn bộ các lỗi trên. Nếu không có lỗi, giữ nguyên như nhận xét ban đầu.\nTuyệt đối không thêm bớt trường, không giải thích hay trả về bất kỳ văn bản nào khác ngoài mảng JSON đó. Không viết hoa/xuống dòng dư thừa làm hỏng định dạng JSON.',
+						Prompt: `
+						Bạn là một trợ lý AI chuyên phát hiện lỗi chính tả, khoảng trắng thừa, dấu câu và lỗi cú pháp tiếng Việt trong nhận xét của học sinh. Bạn sẽ nhận được đầu vào là một mảng JSON gồm các đối tượng có dạng { "id": "tọa độ", "text": "nhận xét" }.
+
+Nhiệm vụ của bạn:
+1. Phân tích chuỗi nhận xét trong trường "text" để phát hiện các lỗi chính tả, khoảng trắng không đều, thiếu dấu câu hoặc viết hoa tùy tiện.
+
+2. Quy tắc bắt buộc về Tổ hợp Vần (Chuẩn đặt dấu thanh cũ - Hoà / Quý):
+  - Hệ thống quy định bắt buộc dùng kiểu đặt dấu cũ (dấu trên 'o' và 'u'). Gặp kiểu dấu mới (dấu trên 'a' và 'y') phải coi là LỖI CHÍNH TẢ và bắt buộc phải sửa đổi.
+  - Danh sách sửa đổi bắt buộc cho nhóm vần OA/UY/OE/UÊ/UYA:
+    + "òa, óa, ỏa, õa, họa" phải sửa thành "oà, oá, oả, oã, hoạ" (dấu đặt trên o).
+    + "uỳ, uý, uỷ, uỹ, uỵ" phải sửa thành "ùy, úy, ủy, ũy, ụy" (dấu đặt trên u).
+    + "òe, óe, ỏe, õe, ọe" phải sửa thành "oè, oé, oẻ, oẽ, oẹ" (dấu đặt trên o).
+    + "uề, uế, uể, uễ, uệ" phải sửa thành "ùe, úe, ủe, ũe, ụe" (dấu đặt trên u).
+  - Đồng thời, phát hiện các lỗi đặt dấu sai cấu trúc vần nghiêm trọng khác như: "hoạitử" -> "hoại tử", "húong" -> "hướng", "tìen" -> "tiền".
+  - Không báo lỗi nếu sự khác biệt chỉ ở mức encoding Unicode nội bộ (NFD/NFC) mà không ảnh hưởng đến hiển thị hay nghĩa của văn bản. Chỉ báo lỗi khi sự sai khác có thể nhìn thấy bằng mắt thường.
+
+3. Trả về kết quả dưới dạng một mảng JSON chứa các đối tượng có cấu trúc chính xác như sau:
+  - "id": giữ nguyên id nhận vào.
+  - "hasError": true nếu phát hiện lỗi (bao gồm lỗi đặt dấu kiểu mới như òa, úy), false nếu nhận xét hoàn toàn chính xác.
+  - "suggestions": danh sách các chuỗi mô tả lỗi phát hiện được (ví dụ: ["Sai chính tả: hòa -> hoà", "Sai chính tả: quý -> qúy", "Khoảng trắng thừa: học  tốt -> học tốt"]). Nếu không có lỗi, đặt là mảng rỗng.
+  - "correctedText": chuỗi nhận xét đầy đủ sau khi đã sửa toàn bộ các lỗi trên theo đúng chuẩn bắt buộc (hoà, qúy). Nếu không có lỗi, giữ nguyên nguyên văn chuỗi "text" đầu vào.
+  - "currentHtml": chuỗi nhận xét gốc "text" ban đầu nhưng những ký tự/khoảng trắng bị sai hoặc thừa được bọc trong cặp thẻ <del>...</del> (ví dụ: nếu sai chữ "hòa" thì bọc <del>hòa</del>). Nếu không có lỗi, giữ nguyên nguyên văn chuỗi "text" đầu vào.
+  - "correctedHtml": chuỗi nhận xét đã sửa "correctedText" nhưng những ký tự/khoảng trắng được thêm mới hoặc sửa đổi được bọc trong cặp thẻ <ins>...</ins> (ví dụ: sửa thành "hoà" thì bọc <ins>hoà</ins>). Nếu không có lỗi, giữ nguyên nguyên văn chuỗi "text" đầu vào.
+
+Tuyệt đối không thêm bớt trường, không giải thích hay trả về bất kỳ văn bản nào khác ngoài mảng JSON đó. Không viết hoa/xuống dòng dư thừa làm hỏng định dạng JSON.
+
+						`,
 						Content: JSON.stringify(commentsToCheck.map(c => ({ id: c.id, text: c.text })))
 					});
 
@@ -1131,24 +1623,63 @@
 						}
 
 						if (cleanText) {
-							cleanText = cleanText.replace(/```json/g, '').replace(/```/g, '').trim();
+							cleanText = cleanText.split('```json').join('').split('```').join('').trim();
 							const correctedComments = JSON.parse(cleanText);
 
 							if (Array.isArray(correctedComments)) {
 								correctedComments.forEach(item => {
+									const colInfo = commentsToCheck.find(c => c.id === item.id);
+									
+									// Chuẩn hóa Unicode NFC để bỏ qua các sai khác vô hình về mặt mã hóa (ví dụ: cần vs cần)
+									const rawText = colInfo ? colInfo.text : '';
+									const corrText = item.correctedText || '';
+									if (rawText.normalize('NFC') === corrText.normalize('NFC')) {
+										item.hasError = false;
+									}
+
+									let currentHtmlParsed = '';
+									let correctedHtmlParsed = '';
+
+									if (item.currentHtml && item.correctedHtml) {
+										currentHtmlParsed = this.parseHtmlTags(item.currentHtml);
+										correctedHtmlParsed = this.parseHtmlTags(item.correctedHtml);
+									} else {
+										// Fallback: nếu AI không trả về tag (hoặc do cache server cũ), client tự chạy thuật toán so sánh làm nổi bật
+										const diff = this.getDiffMarkup(colInfo ? colInfo.text : '', item.correctedText || '');
+										currentHtmlParsed = diff.oldHtml;
+										correctedHtmlParsed = diff.newHtml;
+									}
+
+									if (colInfo) {
+										if (!this.aiCache) {
+											this.aiCache = {};
+										}
+										const normKey = colInfo.text.normalize('NFC');
+										this.aiCache[normKey] = {
+											hasError: !!item.hasError,
+											suggestions: item.suggestions || [],
+											correctedText: item.correctedText || '',
+											currentHtml: currentHtmlParsed,
+											correctedHtml: correctedHtmlParsed
+										};
+									}
+
 									if (item.hasError) {
 										const parts = item.id.split('_');
 										const rowIndex = parseInt(parts[0]);
 										const colName = parts[1];
 										const student = this.DSHocSinh[rowIndex];
-										const colInfo = commentsToCheck.find(c => c.id === item.id);
 
 										this.aiWarnings.push({
 											rowNum: rowIndex + 1,
+											colValue: colInfo ? colInfo.colValue : '',
+											studentId: student ? student.HocSinhID : '',
 											studentName: student ? student.HoVaTenHocSinh : 'Học sinh',
 											subjectName: colInfo ? colInfo.subjectTitle : 'Môn',
 											type: 'spelling',
 											currentText: colInfo ? colInfo.text : '',
+											currentHtml: currentHtmlParsed,
+											correctedHtml: correctedHtmlParsed,
 											suggestions: item.suggestions || [],
 											correctedText: item.correctedText || ''
 										});
@@ -1161,6 +1692,13 @@
 						this.showSnackbar(errMsg, 'error');
 						return;
 					}
+
+					// Tăng số lần chạy cho các cột được chọn có gọi API
+					const newCounts = { ...this.aiRunCounts };
+					this.action.aiColumnDialog.selectedColumns.forEach(colVal => {
+						newCounts[colVal] = (newCounts[colVal] || 0) + 1;
+					});
+					this.aiRunCounts = newCounts;
 				}
 
 				// Sắp xếp cảnh báo theo số dòng tăng dần
@@ -1256,6 +1794,7 @@
 							if (totalLength > 400) {
 								localWarnings.push({
 									rowNum: rowIndex + 1,
+									studentId: student.HocSinhID,
 									studentName: student.HoVaTenHocSinh,
 									subjectName: col.title,
 									type: 'limit',

@@ -18,6 +18,7 @@
 					icon
 					class="vercel-fab-btn"
 					:class="{ 'pulse-animation': unreadAlertsCount > 0, 'fab-today-alert': hasTodayAlert }"
+					:loading="isLoadingAlerts"
 					@click="fabClick"
 					elevation="4"
 				>
@@ -486,6 +487,7 @@
 			// State Cảnh báo (Alerts)
 			alerts: [],
 			dismissedAlertIDs: [],
+			isLoadingAlerts: false,
 
 			// State Báo lỗi (Feedback)
 			feedbackForm: {
@@ -671,6 +673,7 @@
 			this.dismissedAlertIDs = []
 		},
 		async loadAlerts() {
+			this.isLoadingAlerts = true
 			try {
 				const res = await fetchPromise("lms/Alert_Get", {
 					NienKhoa: vueData.NienKhoa || 0,
@@ -686,6 +689,8 @@
 				this.alerts = res ?? []
 			} catch (error) {
 				console.error("Lỗi khi tải thông báo hệ thống:", error)
+			} finally {
+				this.isLoadingAlerts = false
 			}
 		},
 		async dismissAlert(id) {
