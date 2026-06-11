@@ -52,6 +52,19 @@
 			modelValue: function (v) {
 				this.form = v
 			},
+			'vueData.NienKhoa': function () {
+				// Khi niên khoá thay đổi, reset toàn bộ filter và load lại khối
+				this.form.KhoiItem = null
+				this.form.LopItem = null
+				this.form.MonHocItem = null
+				this.form.MaNhomCotDiemItem = null
+				this.DSKhoi = []
+				this.DSLop = []
+				this.DSMonHoc = []
+				this.DSMaNhom = []
+				this.$emit("update:modelValue", this.form)
+				this.getKhoi()
+			},
 			'form.KhoiItem': function (newVal, oldVal) {
 				// Khi chọn lại Khối, clear tất cả các cấp dưới
 				if (newVal?.KhoiID !== oldVal?.KhoiID) {

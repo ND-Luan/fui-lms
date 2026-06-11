@@ -429,27 +429,32 @@
 				<v-divider />
 
 				<v-card-text class="pa-4" style="max-height: 450px;">
-					<div v-if="aiWarnings.length === 0"
+					<!-- Bộ lọc chỉ hiển thị vượt ký tự nếu là dialog độ dài -->
+					<div v-if="action.aiResultDialog.title?.includes('giới hạn ký tự') && aiWarnings.some(w => w.type === 'limit' || w.type === 'limit_ok')" class="mb-2">
+						<v-switch v-model="showOnlyLimitExceeded" label="Chỉ hiển thị học sinh vượt quá 400 ký tự" color="error" density="compact" hide-details />
+					</div>
+
+					<div v-if="filteredAiWarnings.length === 0"
 						class="d-flex flex-column align-center justify-center py-6 text-medium-emphasis">
 						<v-icon size="48" color="success" class="mb-2">mdi-check-decagram</v-icon>
 						<p class="text-body-2 font-weight-bold text-success">Không phát hiện lỗi nào!</p>
 						<p class="text-caption">
 							{{ action.aiResultDialog.title?.includes('AI')
 							? 'Tất cả nhận xét đều đúng chính tả và nằm trong giới hạn ký tự.'
-							: 'Tất cả nhận xét đều hợp lệ và nằm trong giới hạn ký tự.' }}
+							: (showOnlyLimitExceeded ? 'Không có học sinh nào vượt quá giới hạn 400 ký tự.' : 'Tất cả nhận xét đều hợp lệ và nằm trong giới hạn ký tự.') }}
 						</p>
 					</div>
 
 					<v-list v-else density="compact" class="pa-0">
-						<div v-for="(warning, index) in aiWarnings" :key="index" class="mb-3 pb-3"
-							:class="index < aiWarnings.length - 1 ? 'border-b' : ''">
+						<div v-for="(warning, index) in filteredAiWarnings" :key="index" class="mb-3 pb-3"
+							:class="index < filteredAiWarnings.length - 1 ? 'border-b' : ''">
 							<div class="d-flex align-center justify-space-between mb-1">
 								<span class="text-body-2 font-weight-bold text-primary">
 									Dòng {{ warning.rowNum }} — {{ warning.studentName }}
 								</span>
-								<v-chip size="x-small" :color="warning.type === 'limit' ? 'error' : 'warning'"
+								<v-chip size="x-small" :color="warning.type === 'limit' ? 'error' : (warning.type === 'limit_ok' ? 'success' : 'warning')"
 									variant="tonal">
-									{{ warning.type === 'limit' ? 'Vượt ký tự' : 'Lỗi chính tả/cú pháp' }}
+									{{ warning.type === 'limit' ? 'Vượt ký tự' : (warning.type === 'limit_ok' ? 'Còn lại: ' + warning.remainingCount + ' ký tự' : 'Lỗi chính tả/cú pháp') }}
 								</v-chip>
 							</div>
 
@@ -465,6 +470,10 @@
 							<!-- Chi tiết lỗi / Gợi ý -->
 							<div v-if="warning.type === 'limit'" class="text-caption text-error font-weight-medium">
 								<v-icon size="14" class="mr-1" color="error">mdi-alert-circle-outline</v-icon>
+								{{ warning.message }}
+							</div>
+							<div v-else-if="warning.type === 'limit_ok'" class="text-caption text-success font-weight-medium">
+								<v-icon size="14" class="mr-1" color="success">mdi-check-circle-outline</v-icon>
 								{{ warning.message }}
 							</div>
 							<div v-else class="text-caption">
@@ -531,6 +540,7 @@
 			vueData,
 			isCheckingAI: false,
 			isCheckingLength: false,
+			showOnlyLimitExceeded: false,
 
 			action: {
 				isShowDialogMauNhanXet: false,
@@ -721,6 +731,13 @@
 		hasSpellingWarningsToApply() {
 			return this.action.aiResultDialog.title?.includes('AI') && 
 				this.aiWarnings?.some(w => w.type === 'spelling' && !w.applied);
+		},
+		filteredAiWarnings() {
+			if (!this.aiWarnings) return [];
+			if (this.action.aiResultDialog.title?.includes('giới hạn ký tự') && this.showOnlyLimitExceeded) {
+				return this.aiWarnings.filter(w => w.type === 'limit');
+			}
+			return this.aiWarnings;
 		}
 	},
 
@@ -1719,6 +1736,7 @@ Tuyệt đối không thêm bớt trường, không giải thích hay trả về
 			if (this.isDisabled || !this.hasStudents) return;
 
 			this.aiWarnings = [];
+			this.showOnlyLimitExceeded = false;
 
 			const isCap1 = parseInt(this.vueData.CapID) === 1;
 			const lopID = this.filter.LopItem?.LopID;
@@ -1800,6 +1818,17 @@ Tuyệt đối không thêm bớt trường, không giải thích hay trả về
 									type: 'limit',
 									currentText: trimmedValue || '(Trống)',
 									message: `Tổng nhận xét nhóm [${nhomNhanXet}] là ${totalLength} ký tự, vượt quá giới hạn 400 ký tự (Độ dài các môn khác cùng nhóm là ${otherLength} ký tự).`
+								});
+							} else if (totalLength > 0) {
+								localWarnings.push({
+									rowNum: rowIndex + 1,
+									studentId: student.HocSinhID,
+									studentName: student.HoVaTenHocSinh,
+									subjectName: col.title,
+									type: 'limit_ok',
+									remainingCount: 400 - totalLength,
+									currentText: trimmedValue || '(Trống)',
+									message: `Tổng nhận xét nhóm [${nhomNhanXet}] hiện tại là ${totalLength}/400 ký tự. Còn lại ${400 - totalLength} ký tự (Các môn khác cùng nhóm đã chiếm ${otherLength} ký tự).`
 								});
 							}
 						}
