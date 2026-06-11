@@ -466,8 +466,8 @@
 </template>
 
 <script>
-export default {
-	name: 'uc-system-toolbar',
+	export default {
+		name: 'uc-system-toolbar',
 	inject: ['snackbarRef'],
 	data() {
 		return {
@@ -1330,7 +1330,5 @@ export default {
 			this.annotateDialog.show = false
 		}
 	}
-}
+	}
 </script>
-
-

@@ -262,308 +262,310 @@
 
 /* ── Vercel-style System Toolbar ── */
 .vercel-fab-container {
-	position: fixed;
-	z-index: 9999;
-	touch-action: none;
-	user-select: none;
+    position: fixed;
+    z-index: 9999;
+    touch-action: none;
+    user-select: none;
 }
 
 .vercel-fab-btn {
-	background-color: #1a1a1a !important;
-	color: white !important;
-	border: 1px solid rgba(255, 255, 255, 0.1) !important;
-	box-shadow: 0 4px 14px rgba(0, 0, 0, 0.3) !important;
-	width: 48px !important;
-	height: 48px !important;
-	transition: transform 0.2s ease, box-shadow 0.2s ease !important;
+    background-color: #1a1a1a !important;
+    color: white !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.3) !important;
+    width: 48px !important;
+    height: 48px !important;
+    transition: transform 0.2s ease, box-shadow 0.2s ease !important;
 }
 
 .vercel-fab-btn:hover {
-	transform: scale(1.05);
-	box-shadow: 0 6px 18px rgba(0, 0, 0, 0.4) !important;
-	background-color: #000000 !important;
+    transform: scale(1.05);
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.4) !important;
+    background-color: #000000 !important;
 }
 
 .vercel-card {
-	background: rgba(255, 255, 255, 0.95) !important;
-	backdrop-filter: blur(12px);
-	border: 1px solid rgba(0, 0, 0, 0.08) !important;
-	border-radius: 16px !important;
-	box-shadow: 0 20px 40px rgba(0, 0, 0, 0.12) !important;
-	overflow: hidden;
+    background: rgba(255, 255, 255, 0.95) !important;
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(0, 0, 0, 0.08) !important;
+    border-radius: 16px !important;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.12) !important;
+    overflow: hidden;
 }
 
 .vercel-header {
-	padding: 16px 20px 12px;
+    padding: 16px 20px 12px;
 }
 
 .vercel-badge {
-	font-size: 10px;
-	text-transform: uppercase;
-	font-weight: 700;
-	color: #666;
-	background: #eaeaea;
-	padding: 2px 6px;
-	border-radius: 4px;
-	letter-spacing: 0.5px;
+    font-size: 10px;
+    text-transform: uppercase;
+    font-weight: 700;
+    color: #666;
+    background: #eaeaea;
+    padding: 2px 6px;
+    border-radius: 4px;
+    letter-spacing: 0.5px;
 }
 
 .vercel-esc-hint {
-	font-size: 11px;
-	color: #999;
-	border: 1px solid #e2e2e2;
-	background: #fbfbfb;
-	padding: 1px 4px;
-	border-radius: 4px;
-	box-shadow: 0 1px 0 rgba(0,0,0,0.05);
+    font-size: 11px;
+    color: #999;
+    border: 1px solid #e2e2e2;
+    background: #fbfbfb;
+    padding: 1px 4px;
+    border-radius: 4px;
+    box-shadow: 0 1px 0 rgba(0, 0, 0, 0.05);
 }
 
 .vercel-title {
-	font-size: 20px;
-	font-weight: 700;
-	color: #171717;
-	margin: 0;
+    font-size: 20px;
+    font-weight: 700;
+    color: #171717;
+    margin: 0;
 }
 
 .vercel-shortcuts-row {
-	display: flex;
-	justify-content: space-around;
-	padding: 12px 16px;
-	background: rgba(250, 250, 250, 0.7);
+    display: flex;
+    justify-content: space-around;
+    padding: 12px 16px;
+    background: rgba(250, 250, 250, 0.7);
 }
 
 .shortcut-item {
-	display: flex;
-	flex-direction: column;
-	align-items: center;
-	cursor: pointer;
-	width: 80px;
-	transition: all 0.2s ease;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    cursor: pointer;
+    width: 80px;
+    transition: all 0.2s ease;
 }
 
 .shortcut-icon-circle {
-	width: 40px;
-	height: 40px;
-	border-radius: 50%;
-	background: #ffffff;
-	border: 1px solid #e2e2e2;
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	margin-bottom: 6px;
-	color: #444;
-	box-shadow: 0 2px 4px rgba(0,0,0,0.02);
-	transition: all 0.2s ease;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: #ffffff;
+    border: 1px solid #e2e2e2;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 6px;
+    color: #444;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
+    transition: all 0.2s ease;
 }
 
 .shortcut-item:hover .shortcut-icon-circle {
-	background: #000000;
-	color: #ffffff;
-	border-color: #000000;
-	transform: translateY(-2px);
+    background: #000000;
+    color: #ffffff;
+    border-color: #000000;
+    transform: translateY(-2px);
 }
 
 .shortcut-item.active .shortcut-icon-circle {
-	background: #1976D2;
-	color: #ffffff;
-	border-color: #1976D2;
+    background: #1976D2;
+    color: #ffffff;
+    border-color: #1976D2;
 }
 
 .shortcut-label {
-	font-size: 11px;
-	font-weight: 500;
-	color: #666;
-	text-align: center;
+    font-size: 11px;
+    font-weight: 500;
+    color: #666;
+    text-align: center;
 }
 
 .shortcut-item:hover .shortcut-label {
-	color: #111;
+    color: #111;
 }
 
 .shortcut-item.active .shortcut-label {
-	color: #1976D2;
-	font-weight: 600;
+    color: #1976D2;
+    font-weight: 600;
 }
 
 .vercel-card-body {
-	max-height: 420px;
-	overflow-y: auto;
-	background: #ffffff;
+    max-height: 420px;
+    overflow-y: auto;
+    background: #ffffff;
 }
 
 .empty-state {
-	display: flex;
-	flex-direction: column;
-	align-items: center;
-	justify-content: center;
-	padding: 40px 20px;
-	text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 20px;
+    text-align: center;
 }
 
 .alert-item-card {
-	border-width: 1px;
-	background-color: rgba(245, 245, 245, 0.05);
-	border-radius: 8px;
-	transition: transform 0.2s, box-shadow 0.2s;
+    border-width: 1px;
+    background-color: rgba(245, 245, 245, 0.05);
+    border-radius: 8px;
+    transition: transform 0.2s, box-shadow 0.2s;
 }
 
 .alert-item-card:hover {
-	transform: translateY(-1px);
-	box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
 }
 
 .dismiss-btn {
-	position: absolute;
-	top: -2px;
-	right: -8px;
-	opacity: 0.6;
-	transition: opacity 0.2s;
+    position: absolute;
+    top: -2px;
+    right: -8px;
+    opacity: 0.6;
+    transition: opacity 0.2s;
 }
 
 .dismiss-btn:hover {
-	opacity: 1;
+    opacity: 1;
 }
 
 .attachment-preview-box {
-	position: relative;
-	width: 72px;
-	height: 72px;
-	border: 1px solid #e2e2e2;
-	border-radius: 6px;
-	overflow: visible;
+    position: relative;
+    width: 72px;
+    height: 72px;
+    border: 1px solid #e2e2e2;
+    border-radius: 6px;
+    overflow: visible;
 }
 
 .attachment-img {
-	border-radius: 6px;
-	cursor: pointer;
+    border-radius: 6px;
+    cursor: pointer;
 }
 
 .edit-att-btn {
-	position: absolute !important;
-	bottom: -6px !important;
-	left: -6px !important;
-	box-shadow: 0 2px 4px rgba(0,0,0,0.1) !important;
-	width: 24px !important;
-	height: 24px !important;
-	min-width: 0 !important;
-	padding: 0 !important;
+    position: absolute !important;
+    bottom: -6px !important;
+    left: -6px !important;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1) !important;
+    width: 24px !important;
+    height: 24px !important;
+    min-width: 0 !important;
+    padding: 0 !important;
 }
 
 .remove-att-btn {
-	position: absolute !important;
-	top: -6px !important;
-	right: -6px !important;
-	box-shadow: 0 2px 4px rgba(0,0,0,0.1) !important;
-	width: 24px !important;
-	height: 24px !important;
-	min-width: 0 !important;
-	padding: 0 !important;
+    position: absolute !important;
+    top: -6px !important;
+    right: -6px !important;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1) !important;
+    width: 24px !important;
+    height: 24px !important;
+    min-width: 0 !important;
+    padding: 0 !important;
 }
 
 .inbox-item-card {
-	cursor: pointer;
-	border-radius: 8px;
-	transition: all 0.2s ease;
-	border: 1px solid #e2e2e2;
+    cursor: pointer;
+    border-radius: 8px;
+    transition: all 0.2s ease;
+    border: 1px solid #e2e2e2;
 }
 
 .inbox-item-card:hover {
-	background: #f9f9f9;
-	border-color: #1976D2;
+    background: #f9f9f9;
+    border-color: #1976D2;
 }
 
 .system-info-list {
-	background: #f9f9f9;
-	border-radius: 8px;
-	border: 1px solid #eaeaea;
-	padding: 12px;
+    background: #f9f9f9;
+    border-radius: 8px;
+    border: 1px solid #eaeaea;
+    padding: 12px;
 }
 
 .sys-info-row {
-	display: flex;
-	justify-content: space-between;
-	padding: 8px 0;
-	border-bottom: 1px solid #f1f1f1;
-	font-size: 13px;
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 0;
+    border-bottom: 1px solid #f1f1f1;
+    font-size: 13px;
 }
 
 .sys-info-row:last-child {
-	border-bottom: none;
+    border-bottom: none;
 }
 
 .sys-info-row .lbl {
-	color: #666;
-	font-weight: 500;
+    color: #666;
+    font-weight: 500;
 }
 
 .sys-info-row .val {
-	color: #171717;
-	font-weight: 600;
-	text-align: right;
+    color: #171717;
+    font-weight: 600;
+    text-align: right;
 }
 
 .comment-bubble {
-	max-width: 90%;
-	word-wrap: break-word;
+    max-width: 90%;
+    word-wrap: break-word;
 }
 
 .comment-it {
-	background: #f1f1f1;
-	margin-right: auto;
+    background: #f1f1f1;
+    margin-right: auto;
 }
 
 .comment-user {
-	background: #e3f2fd;
-	margin-left: auto;
+    background: #e3f2fd;
+    margin-left: auto;
 }
 
 .white-space-pre {
-	white-space: pre-wrap;
+    white-space: pre-wrap;
 }
 
 .canvas-container {
-	background: #e0e0e0;
-	overflow: auto;
+    background: #e0e0e0;
+    overflow: auto;
 }
 
 .annotate-canvas {
-	display: block;
-	max-width: 100%;
-	margin: auto;
+    display: block;
+    max-width: 100%;
+    margin: auto;
 }
 
 .color-picker-input {
-	width: 30px;
-	height: 30px;
-	border: none;
-	border-radius: 4px;
-	cursor: pointer;
-	padding: 2px;
+    width: 30px;
+    height: 30px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    padding: 2px;
 }
 
 .cursor-pointer {
-	cursor: pointer;
+    cursor: pointer;
 }
 
 .pulse-animation {
-	animation: pulse-toolbar 2s infinite;
+    animation: pulse-toolbar 2s infinite;
 }
 
 @keyframes pulse-toolbar {
-	0% {
-		box-shadow: 0 0 0 0 rgba(220, 50, 50, 0.4);
-	}
-	70% {
-		box-shadow: 0 0 0 10px rgba(220, 50, 50, 0);
-	}
-	100% {
-		box-shadow: 0 0 0 0 rgba(220, 50, 50, 0);
-	}
+    0% {
+        box-shadow: 0 0 0 0 rgba(220, 50, 50, 0.4);
+    }
+
+    70% {
+        box-shadow: 0 0 0 10px rgba(220, 50, 50, 0);
+    }
+
+    100% {
+        box-shadow: 0 0 0 0 rgba(220, 50, 50, 0);
+    }
 }
 
 .alert-read {
-	opacity: 0.6 !important;
-	background-color: #fafafa !important;
-	border-color: #e2e2e2 !important;
-	filter: grayscale(0.5);
-}
+    opacity: 0.6 !important;
+    background-color: #fafafa !important;
+    border-color: #e2e2e2 !important;
+    filter: grayscale(0.5);
+}

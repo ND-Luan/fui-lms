@@ -86,8 +86,8 @@
 </template>
 
 <script>
-export default {
-	name: 'GlobalAlertNotification',
+	export default {
+		name: 'GlobalAlertNotification',
 	data() {
 		return {
 			Alerts: [],
@@ -195,52 +195,5 @@ export default {
 			}
 		}
 	}
-}
+	}
 </script>
-
-<style scoped>
-.global-alerts-fab {
-	position: fixed;
-	bottom: 144px;
-	right: 24px;
-	z-index: 9999;
-}
-.alert-dialog-card {
-	box-shadow: 0 10px 30px rgba(0,0,0,0.1) !important;
-	border: 1px solid rgba(0,0,0,0.05);
-}
-.alert-item-card {
-	border-width: 1px;
-	background-color: rgba(245, 245, 245, 0.1);
-	border-radius: 8px;
-}
-.alert-content-text {
-	line-height: 1.4;
-}
-.dismiss-btn-inline {
-	position: absolute;
-	top: -2px;
-	right: -8px;
-	opacity: 0.6;
-}
-.dismiss-btn-inline:hover {
-	opacity: 1;
-}
-.border-bottom {
-	border-bottom: 1px solid rgba(0,0,0,0.08);
-}
-.pulse-animation {
-	animation: pulse 2s infinite;
-}
-@keyframes pulse {
-	0% {
-		box-shadow: 0 0 0 0 rgba(30, 30, 30, 0.4);
-	}
-	70% {
-		box-shadow: 0 0 0 10px rgba(30, 30, 30, 0);
-	}
-	100% {
-		box-shadow: 0 0 0 0 rgba(30, 30, 30, 0);
-	}
-}
-</style>

@@ -8,24 +8,12 @@
 				<v-card-text>
 					<v-row align="center">
 						<v-col cols="12" sm="4">
-							<v-select
-								v-model="filterCapID"
-								label="Cấp học"
-								:items="DSCap"
-								item-title="title"
-								item-value="value"
-								hide-details
-							/>
+							<v-select v-model="filterCapID" label="Cấp học" :items="DSCap" item-title="title"
+								item-value="value" hide-details />
 						</v-col>
 						<v-col cols="12" sm="4">
-							<v-select
-								v-model="filterTypeAlert"
-								label="Loại thông báo"
-								:items="DSTypeOptions"
-								item-title="title"
-								item-value="value"
-								hide-details
-							/>
+							<v-select v-model="filterTypeAlert" label="Loại thông báo" :items="DSTypeOptions"
+								item-title="title" item-value="value" hide-details />
 						</v-col>
 						<v-col cols="12" sm="4" class="d-flex align-center justify-end ga-2">
 							<v-btn color="primary" variant="outlined" prepend-icon="mdi-plus" @click="openNew">
@@ -42,15 +30,8 @@
 
 		<v-divider />
 
-		<GlobalDataTable
-			:headers="headers"
-			:items="DS"
-			item-value="AlertID"
-			items-per-page="-1"
-			hide-default-footer
-			hover
-			v-data-table-height="calc(100dvh - 210px)"
-		>
+		<GlobalDataTable :headers="headers" :items="DS" item-value="AlertID" items-per-page="-1" hide-default-footer
+			hover >
 			<!-- custom column slots -->
 			<template #item.CapID="{ item }">
 				<v-chip size="small" :color="getCapColor(item.CapID)" variant="tonal">
@@ -103,34 +84,19 @@
 		</GlobalDataTable>
 
 		<!-- Dialog thêm / sửa -->
-		<uc-dialog
-			v-model="dialog"
-			:title="isEditMode ? 'Cập nhật thông báo' : 'Thêm thông báo mới'"
-			doneText="Lưu"
-			:width="560"
-			@onSubmit="onSave"
-		>
+		<uc-dialog v-model="dialog" :title="isEditMode ? 'Cập nhật thông báo' : 'Thêm thông báo mới'" doneText="Lưu"
+			:width="560" @onSubmit="onSave">
 			<v-row dense class="mt-1">
 				<v-col cols="12">
-					<v-select
-						v-model="editedItem.TypeAlert"
-						label="Loại thông báo"
-						:items="[
+					<v-select v-model="editedItem.TypeAlert" label="Loại thông báo" :items="[
 							{ title: 'Thông báo', value: 'ALERT' },
 							{ title: 'Cảnh báo', value: 'WARNING' },
 							{ title: 'Nhắc nhở', value: 'REMIND' },
 							{ title: 'Hệ thống', value: 'SYSTEM' }
-						]"
-						item-title="title"
-						item-value="value"
-						:rules="[v => !!v || 'Bắt buộc']"
-					/>
+						]" item-title="title" item-value="value" :rules="[v => !!v || 'Bắt buộc']" />
 				</v-col>
 				<v-col cols="12">
-					<v-select
-						v-model="editedItem.UserRight"
-						label="Đối tượng hiển thị"
-						:items="[
+					<v-select v-model="editedItem.UserRight" label="Đối tượng hiển thị" :items="[
 							{ title: 'Tất cả mọi người', value: 'ALL' },
 							{ title: 'Học sinh', value: 'STUDENT' },
 							{ title: 'Tất cả giáo viên', value: 'TEACHER' },
@@ -139,38 +105,20 @@
 							{ title: 'Ban Giám Hiệu (SR 3)', value: '3' },
 							{ title: 'Tổ trưởng (SR 5)', value: '5' },
 							{ title: 'System Admin (SR 9)', value: '9' }
-						]"
-						item-title="title"
-						item-value="value"
-						:rules="[v => !!v || 'Bắt buộc']"
-					/>
+						]" item-title="title" item-value="value" :rules="[v => !!v || 'Bắt buộc']" />
 				</v-col>
 				<v-col cols="12">
-					<v-textarea
-						v-model="editedItem.ContentAlert"
-						label="Nội dung thông báo"
-						rows="3"
-						counter="100"
+					<v-textarea v-model="editedItem.ContentAlert" label="Nội dung thông báo" rows="3" counter="100"
 						maxlength="100"
-						:rules="[v => !!v || 'Bắt buộc', v => (v && v.length <= 100) || 'Tối đa 100 ký tự']"
-					/>
+						:rules="[v => !!v || 'Bắt buộc', v => (v && v.length <= 100) || 'Tối đa 100 ký tự']" />
 				</v-col>
 				<v-col cols="12" sm="6">
-					<v-select
-						v-model="editedItem.CapID"
-						label="Cấp học áp dụng"
-						:items="DSCap"
-						item-title="title"
-						item-value="value"
-					/>
+					<v-select v-model="editedItem.CapID" label="Cấp học áp dụng" :items="DSCap" item-title="title"
+						item-value="value" />
 				</v-col>
 				<v-col cols="12" sm="6">
-					<v-text-field
-						v-model="editedItem.DateAlert"
-						label="Ngày hiển thị"
-						type="datetime-local"
-						:rules="[v => !!v || 'Bắt buộc']"
-					/>
+					<v-text-field v-model="editedItem.DateAlert" label="Ngày hiển thị" type="datetime-local"
+						:rules="[v => !!v || 'Bắt buộc']" />
 				</v-col>
 			</v-row>
 		</uc-dialog>
@@ -178,8 +126,8 @@
 </template>
 
 <script>
-export default {
-	inject: ['snackbarRef', 'iframeRef', 'confirmRef'],
+	export default {
+		inject: ['snackbarRef', 'iframeRef', 'confirmRef'],
 	data() {
 		return {
 			vueData,
@@ -453,5 +401,5 @@ export default {
 			}
 		}
 	}
-}
+	}
 </script>

@@ -1,0 +1,3 @@
+
+- Thêm cảnh báo nếu mà trùng ngày DateAlert thì uc-system-toolbar sẽ hiển thị màu đỏ để cho user nhận biết
+- Nếu có thông báo thì có thể để thêm tooltip nữa khi user hover vào hiển thị nội dung thông báo lên 
