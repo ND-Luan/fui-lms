@@ -1,32 +1,18 @@
 <template>
 	<div v-if="vueData.user && vueData.user.UserID">
 		<!-- Floating Action Button (FAB) kiểu Vercel -->
-		<div
-			class="vercel-fab-container"
-			:style="fabStyle"
-			@mousedown="fabDragStart"
-			@touchstart.prevent="fabDragStart"
-		>
-			<v-badge
-				:content="unreadAlertsCount"
-				:model-value="unreadAlertsCount > 0"
-				color="error"
-				overlap
-				bordered
-			>
-				<v-btn
-					icon
-					class="vercel-fab-btn"
+		<div class="vercel-fab-container" :style="fabStyle" @mousedown="fabDragStart"
+			@touchstart.prevent="fabDragStart">
+			<v-badge :content="unreadAlertsCount" :model-value="unreadAlertsCount > 0" color="error" overlap bordered>
+				<v-btn icon class="vercel-fab-btn"
 					:class="{ 'pulse-animation': unreadAlertsCount > 0, 'fab-today-alert': hasTodayAlert }"
-					:loading="isLoadingAlerts"
-					@click="fabClick"
-					elevation="4"
-				>
+					:loading="isLoadingAlerts" @click="fabClick" elevation="4">
 					<v-icon color="white">
 						{{ unreadAlertsCount > 0 ? 'mdi-bell-ring-outline' : 'mdi-cube-outline' }}
 					</v-icon>
 					<v-tooltip activator="parent" location="left">
-						<div style="white-space: pre-line; max-width: 300px; line-height: 1.4;">{{ alertsTooltipText }}</div>
+						<div style="white-space: pre-line; max-width: 300px; line-height: 1.4;">{{ alertsTooltipText }}
+						</div>
 					</v-tooltip>
 				</v-btn>
 			</v-badge>
@@ -48,19 +34,11 @@
 
 				<!-- Hàng Shortcuts Navigation -->
 				<div class="vercel-shortcuts-row">
-					<div
-						v-for="tab in tabs"
-						:key="tab.value"
-						:class="['shortcut-item', { active: activeTab === tab.value }]"
-						@click="switchTab(tab.value)"
-					>
+					<div v-for="tab in tabs" :key="tab.value"
+						:class="['shortcut-item', { active: activeTab === tab.value }]" @click="switchTab(tab.value)">
 						<div class="shortcut-icon-circle">
-							<v-badge
-								v-if="tab.value === 'alerts' && unreadAlertsCount > 0"
-								:content="unreadAlertsCount"
-								color="error"
-								dot
-							>
+							<v-badge v-if="tab.value === 'alerts' && unreadAlertsCount > 0" :content="unreadAlertsCount"
+								color="error" dot>
 								<v-icon size="20">{{ tab.icon }}</v-icon>
 							</v-badge>
 							<v-icon v-else size="20">{{ tab.icon }}</v-icon>
@@ -80,32 +58,24 @@
 							<p class="text-body-2 font-weight-medium">Không có thông báo mới nào</p>
 						</div>
 						<div v-else class="alerts-list">
-							<v-card
-								v-for="alert in activeAlerts"
-								:key="alert.AlertID"
-								variant="outlined"
+							<v-card v-for="alert in activeAlerts" :key="alert.AlertID" variant="outlined"
 								:color="alert.isRead ? 'grey-lighten-2' : getBorderColor(alert.TypeAlert)"
-								class="mb-3 alert-item-card"
-								:class="{ 'alert-read': alert.isRead }"
-							>
+								class="mb-3 alert-item-card" :class="{ 'alert-read': alert.isRead }">
 								<v-card-text class="pa-3">
 									<div class="d-flex align-center justify-space-between mb-2">
-										<v-chip size="x-small" :color="alert.isRead ? 'grey' : getAlertColor(alert.TypeAlert)" variant="tonal" class="font-weight-medium">
+										<v-chip size="x-small"
+											:color="alert.isRead ? 'grey' : getAlertColor(alert.TypeAlert)"
+											variant="tonal" class="font-weight-medium">
 											{{ getAlertTitle(alert.TypeAlert) }}
 										</v-chip>
-										<span class="text-caption text-medium-emphasis">{{ formatTimeAgo(alert.DateAlert) }}</span>
+										<span class="text-caption text-medium-emphasis">{{
+											formatTimeAgo(alert.DateAlert) }}</span>
 									</div>
-									<div class="text-body-2 font-weight-medium text-high-emphasis pr-8 position-relative">
+									<div
+										class="text-body-2 font-weight-medium text-high-emphasis pr-8 position-relative">
 										{{ alert.ContentAlert }}
-										<v-btn
-											v-if="!alert.isRead"
-											icon="mdi-check"
-											variant="text"
-											size="x-small"
-											color="success"
-											class="dismiss-btn"
-											@click="dismissAlert(alert.AlertID)"
-										>
+										<v-btn v-if="!alert.isRead" icon="mdi-check" variant="text" size="x-small"
+											color="success" class="dismiss-btn" @click="dismissAlert(alert.AlertID)">
 											<v-icon size="16">mdi-check</v-icon>
 											<v-tooltip activator="parent" location="top">Đã xem</v-tooltip>
 										</v-btn>
@@ -113,7 +83,8 @@
 								</v-card-text>
 							</v-card>
 							<div class="d-flex justify-end mt-2" v-if="unreadAlertsCount > 0">
-								<v-btn variant="text" size="small" color="primary" class="text-none" @click="dismissAllAlerts">
+								<v-btn variant="text" size="small" color="primary" class="text-none"
+									@click="dismissAllAlerts">
 									Đã xem tất cả
 								</v-btn>
 							</div>
@@ -122,62 +93,49 @@
 
 					<!-- Tab 2: BÁO LỖI (FEEDBACK) -->
 					<div v-if="activeTab === 'feedback'">
-						<v-text-field
-							v-model="feedbackForm.Title"
-							label="Tiêu đề lỗi *"
-							:rules="[v => !!v || 'Bắt buộc']"
-							density="comfortable"
-							variant="outlined"
-							class="mb-3"
-							hide-details="auto"
-						/>
-						<v-textarea
-							v-model="feedbackForm.Description"
-							label="Mô tả chi tiết *"
-							:rules="[v => !!v || 'Bắt buộc']"
-							density="comfortable"
-							variant="outlined"
-							rows="3"
-							class="mb-3"
-							hide-details="auto"
-						/>
+						<v-text-field v-model="feedbackForm.Title" label="Tiêu đề lỗi *"
+							:rules="[v => !!v || 'Bắt buộc']" density="comfortable" variant="outlined" class="mb-3"
+							hide-details="auto" />
+						<v-textarea v-model="feedbackForm.Description" label="Mô tả chi tiết *"
+							:rules="[v => !!v || 'Bắt buộc']" density="comfortable" variant="outlined" rows="3"
+							class="mb-3" hide-details="auto" />
 
 						<!-- Ảnh đính kèm -->
 						<div class="mb-4">
 							<p class="text-caption font-weight-bold mb-1">Ảnh đính kèm *</p>
 							<div class="d-flex align-center ga-2 flex-wrap">
-								<v-btn variant="outlined" size="small" class="text-none" @click="$refs.fileInput.click()">
+								<v-btn variant="outlined" size="small" class="text-none"
+									@click="$refs.fileInput.click()">
 									<v-icon start size="16">mdi-image-plus</v-icon>
 									Chọn ảnh
 								</v-btn>
-								<v-btn variant="outlined" size="small" class="text-none" :loading="isCapturing" @click="captureScreenshot">
+								<v-btn variant="outlined" size="small" class="text-none" :loading="isCapturing"
+									@click="captureScreenshot">
 									<v-icon start size="16">mdi-camera</v-icon>
 									Chụp màn hình
 								</v-btn>
 							</div>
-							<input ref="fileInput" type="file" accept="image/*" multiple style="display:none;" @change="handleFileChange" />
+							<input ref="fileInput" type="file" accept="image/*" multiple style="display:none;"
+								@change="handleFileChange" />
 
 							<div v-if="attachments.length" class="d-flex flex-wrap ga-2 mt-3">
 								<div v-for="(att, i) in attachments" :key="i" class="attachment-preview-box">
-									<v-img :src="att.previewUrl" width="72" height="72" cover class="attachment-img" @click="previewImage(att.previewUrl)" />
-									<v-btn icon size="x-small" variant="elevated" color="info" class="edit-att-btn" @click.stop="openAnnotate(i)">
+									<v-img :src="att.previewUrl" width="72" height="72" cover class="attachment-img"
+										@click="previewImage(att.previewUrl)" />
+									<v-btn icon size="x-small" variant="elevated" color="info" class="edit-att-btn"
+										@click.stop="openAnnotate(i)">
 										<v-icon size="12">mdi-pencil</v-icon>
 									</v-btn>
-									<v-btn icon size="x-small" variant="elevated" color="error" class="remove-att-btn" @click.stop="removeAttachment(i)">
+									<v-btn icon size="x-small" variant="elevated" color="error" class="remove-att-btn"
+										@click.stop="removeAttachment(i)">
 										<v-icon size="12">mdi-close</v-icon>
 									</v-btn>
 								</div>
 							</div>
 						</div>
 
-						<v-btn
-							color="primary"
-							variant="elevated"
-							block
-							class="text-none"
-							:loading="isSubmitting"
-							@click="submitTicket"
-						>
+						<v-btn color="primary" variant="elevated" block class="text-none" :loading="isSubmitting"
+							@click="submitTicket">
 							<v-icon start>mdi-send</v-icon>Gửi báo lỗi
 						</v-btn>
 					</div>
@@ -192,17 +150,13 @@
 							<p class="text-body-2 font-weight-medium">Chưa có lỗi nào được báo</p>
 						</div>
 						<div v-else class="inbox-list">
-							<v-card
-								v-for="item in history"
-								:key="item.TicketID"
-								variant="outlined"
-								class="mb-3 inbox-item-card"
-								@click="openTicketDetail(item)"
-							>
+							<v-card v-for="item in history" :key="item.TicketID" variant="outlined"
+								class="mb-3 inbox-item-card" @click="openTicketDetail(item)">
 								<v-card-text class="pa-3 d-flex align-center justify-space-between">
 									<div class="pr-2 flex-grow-1" style="min-width: 0;">
 										<div class="text-body-2 font-weight-bold text-truncate">{{ item.Title }}</div>
-										<span class="text-caption text-medium-emphasis">{{ formatDate(item.CreateTime) }}</span>
+										<span class="text-caption text-medium-emphasis">{{ formatDate(item.CreateTime)
+											}}</span>
 									</div>
 									<v-chip size="x-small" :color="statusColor(item.Status)" variant="tonal">
 										{{ statusLabel(item.Status) }}
@@ -225,11 +179,13 @@
 							</div>
 							<div class="sys-info-row">
 								<span class="lbl">Niên khóa</span>
-								<span class="val">{{ vueData.NienKhoa }} (Học kì {{ vueData.NienKhoaItem?.HocKi || '?' }})</span>
+								<span class="val">{{ vueData.NienKhoa }} (Học kì {{ vueData.NienKhoaItem?.HocKi || '?'
+									}})</span>
 							</div>
 							<div class="sys-info-row">
 								<span class="lbl">Cấp học</span>
-								<span class="val">{{ vueData.CapID === 1 ? 'Tiểu học (Cấp 1)' : vueData.CapID === 2 ? 'THCS (Cấp 2)' : vueData.CapID === 3 ? 'THPT (Cấp 3)' : 'Hệ thống' }}</span>
+								<span class="val">{{ vueData.CapID === 1 ? 'Tiểu học (Cấp 1)' : vueData.CapID === 2 ?
+									'THCS (Cấp 2)' : vueData.CapID === 3 ? 'THPT (Cấp 3)' : 'Hệ thống' }}</span>
 							</div>
 							<div class="sys-info-row">
 								<span class="lbl">Hệ điều hành</span>
@@ -241,7 +197,8 @@
 							</div>
 							<div class="sys-info-row">
 								<span class="lbl">Địa chỉ URL</span>
-								<span class="val text-truncate" style="max-width: 220px;" :title="sysEnv.url">{{ sysEnv.url }}</span>
+								<span class="val text-truncate" style="max-width: 220px;" :title="sysEnv.url">{{
+									sysEnv.url }}</span>
 							</div>
 						</div>
 					</div>
@@ -260,7 +217,8 @@
 				<v-card-title class="d-flex align-center justify-space-between pa-4">
 					<div class="d-flex align-center ga-2" style="min-width: 0;">
 						<v-icon color="error">mdi-bug-outline</v-icon>
-						<span class="text-body-1 font-weight-bold text-truncate" :title="detailDialog.ticket.Title">{{ detailDialog.ticket.Title }}</span>
+						<span class="text-body-1 font-weight-bold text-truncate" :title="detailDialog.ticket.Title">{{
+							detailDialog.ticket.Title }}</span>
 					</div>
 					<div class="d-flex align-center ga-1">
 						<v-chip size="x-small" :color="statusColor(detailDialog.ticket.Status)" variant="tonal">
@@ -269,18 +227,21 @@
 						<v-btn icon="mdi-close" variant="text" size="small" @click="detailDialog.show = false" />
 					</div>
 				</v-card-title>
-				
+
 				<v-divider />
 
 				<v-card-text class="pa-4" style="max-height: 400px; overflow-y: auto;">
-					<p class="text-body-2 mb-2 font-weight-medium white-space-pre">{{ detailDialog.ticket.Description }}</p>
-					<span class="text-caption text-medium-emphasis d-block mb-3">{{ formatDate(detailDialog.ticket.CreateTime) }}</span>
+					<p class="text-body-2 mb-2 font-weight-medium white-space-pre">{{ detailDialog.ticket.Description }}
+					</p>
+					<span class="text-caption text-medium-emphasis d-block mb-3">{{
+						formatDate(detailDialog.ticket.CreateTime) }}</span>
 
 					<!-- Ảnh đính kèm của ticket -->
 					<div v-if="detailDialog.attachments.length" class="mb-4">
 						<p class="text-caption font-weight-bold mb-1">Ảnh đính kèm:</p>
 						<div class="d-flex flex-wrap ga-2">
-							<v-chip v-for="(att, i) in detailDialog.attachments" :key="i" size="small" color="primary" variant="tonal" class="cursor-pointer" @click="previewImage(att.FileID)">
+							<v-chip v-for="(att, i) in detailDialog.attachments" :key="i" size="small" color="primary"
+								variant="tonal" class="cursor-pointer" @click="previewImage(att.FileID)">
 								<v-icon start size="14">mdi-image-outline</v-icon>
 								{{ att.FileName || ('Ảnh ' + (i + 1)) }}
 							</v-chip>
@@ -288,23 +249,28 @@
 					</div>
 
 					<v-divider class="mb-3" />
-					
+
 					<!-- Danh sách bình luận -->
 					<p class="text-caption font-weight-bold text-medium-emphasis mb-2">Trao đổi phản hồi</p>
-					<div v-if="detailDialog.comments.length === 0" class="text-caption text-medium-emphasis mb-3 text-center py-4">
+					<div v-if="detailDialog.comments.length === 0"
+						class="text-caption text-medium-emphasis mb-3 text-center py-4">
 						Chưa có phản hồi nào
 					</div>
 					<div v-else class="comments-list">
-						<div v-for="(c, i) in detailDialog.comments" :key="i" :class="['comment-bubble mb-3 pa-2 rounded', c.IsIT ? 'comment-it' : 'comment-user']">
+						<div v-for="(c, i) in detailDialog.comments" :key="i"
+							:class="['comment-bubble mb-3 pa-2 rounded', c.IsIT ? 'comment-it' : 'comment-user']">
 							<div class="d-flex align-center justify-space-between mb-1">
-								<span class="text-caption font-weight-bold">{{ c.CreateUser }} ({{ c.IsIT ? 'Hỗ trợ' : 'Người gửi' }})</span>
-								<span class="text-caption text-medium-emphasis">{{ formatDate(c.CreateTime || c.CreatedAt) }}</span>
+								<span class="text-caption font-weight-bold">{{ c.CreateUser }} ({{ c.IsIT ? 'Hỗ trợ' :
+									'Người gửi' }})</span>
+								<span class="text-caption text-medium-emphasis">{{ formatDate(c.CreateTime ||
+									c.CreatedAt) }}</span>
 							</div>
 							<p class="text-body-2 ma-0 white-space-pre">{{ c.Content }}</p>
-							
+
 							<!-- Ảnh đính kèm của bình luận -->
 							<div v-if="c._attachments && c._attachments.length" class="d-flex flex-wrap ga-1 mt-2">
-								<v-chip v-for="(att, ai) in c._attachments" :key="ai" size="x-small" color="primary" variant="tonal" class="cursor-pointer" @click="previewImage(att.FileID)">
+								<v-chip v-for="(att, ai) in c._attachments" :key="ai" size="x-small" color="primary"
+									variant="tonal" class="cursor-pointer" @click="previewImage(att.FileID)">
 									<v-icon start size="12">mdi-image-outline</v-icon>Ảnh {{ ai + 1 }}
 								</v-chip>
 							</div>
@@ -316,17 +282,11 @@
 
 				<!-- Nhập phản hồi mới -->
 				<div class="pa-3 bg-grey-lighten-5">
-					<v-textarea
-						v-model="detailDialog.newComment"
-						label="Nhập phản hồi..."
-						rows="2"
-						density="compact"
-						variant="outlined"
-						hide-details
-						class="mb-2 bg-white"
-					/>
+					<v-textarea v-model="detailDialog.newComment" label="Nhập phản hồi..." rows="2" density="compact"
+						variant="outlined" hide-details class="mb-2 bg-white" />
 					<div class="d-flex justify-end">
-						<v-btn color="primary" size="small" class="text-none" :loading="detailDialog.isSendingComment" :disabled="!detailDialog.newComment.trim()" @click="sendComment">
+						<v-btn color="primary" size="small" class="text-none" :loading="detailDialog.isSendingComment"
+							:disabled="!detailDialog.newComment.trim()" @click="sendComment">
 							<v-icon start size="14">mdi-send</v-icon>Gửi
 						</v-btn>
 					</div>
@@ -379,29 +339,36 @@
 
 					<input type="color" v-model="annotateDialog.color" title="Màu" class="color-picker-input" />
 
-					<div v-if="annotateDialog.tool !== 'text' && annotateDialog.tool !== 'select'" class="d-flex align-center ga-1" style="min-width:120px;">
+					<div v-if="annotateDialog.tool !== 'text' && annotateDialog.tool !== 'select'"
+						class="d-flex align-center ga-1" style="min-width:120px;">
 						<v-icon size="14">mdi-line-weight</v-icon>
-						<v-slider v-model="annotateDialog.lineWidth" min="1" max="12" step="1" hide-details style="min-width:80px;" />
+						<v-slider v-model="annotateDialog.lineWidth" min="1" max="12" step="1" hide-details
+							style="min-width:80px;" />
 						<span class="text-caption">{{ annotateDialog.lineWidth }}</span>
 					</div>
 
-					<div v-if="annotateDialog.tool === 'text'" class="d-flex align-center ga-1" style="min-width:130px;">
+					<div v-if="annotateDialog.tool === 'text'" class="d-flex align-center ga-1"
+						style="min-width:130px;">
 						<v-icon size="14">mdi-format-size</v-icon>
-						<v-slider v-model="annotateDialog.fontSize" min="10" max="72" step="2" hide-details style="min-width:80px;" />
+						<v-slider v-model="annotateDialog.fontSize" min="10" max="72" step="2" hide-details
+							style="min-width:80px;" />
 						<span class="text-caption">{{ annotateDialog.fontSize }}px</span>
 					</div>
 
-					<v-btn icon size="small" variant="text" :disabled="!annotateDialog.shapes.length" @click="annotateUndo">
+					<v-btn icon size="small" variant="text" :disabled="!annotateDialog.shapes.length"
+						@click="annotateUndo">
 						<v-icon>mdi-undo</v-icon>
 						<v-tooltip activator="parent">Hoàn tác</v-tooltip>
 					</v-btn>
 
-					<v-btn icon size="small" variant="text" color="error" :disabled="annotateDialog.selectedIndex < 0" @click="annotateDeleteSelected">
+					<v-btn icon size="small" variant="text" color="error" :disabled="annotateDialog.selectedIndex < 0"
+						@click="annotateDeleteSelected">
 						<v-icon>mdi-trash-can-outline</v-icon>
 						<v-tooltip activator="parent">Xóa đối tượng đã chọn</v-tooltip>
 					</v-btn>
 
-					<v-btn icon size="small" variant="text" :disabled="!annotateDialog.shapes.length" @click="annotateClear">
+					<v-btn icon size="small" variant="text" :disabled="!annotateDialog.shapes.length"
+						@click="annotateClear">
 						<v-icon>mdi-delete-sweep-outline</v-icon>
 						<v-tooltip activator="parent">Xóa tất cả</v-tooltip>
 					</v-btn>
@@ -409,26 +376,19 @@
 					<v-spacer />
 					<v-icon @click="annotateDialog.show = false" color="grey" class="cursor-pointer">mdi-close</v-icon>
 				</v-card-title>
-				
+
 				<v-divider />
-				
+
 				<v-card-text class="pa-0 canvas-container">
-					<canvas
-						ref="annotateCanvas"
-						class="annotate-canvas"
+					<canvas ref="annotateCanvas" class="annotate-canvas"
 						:style="{ cursor: annotateDialog.tool === 'select' ? 'default' : 'crosshair' }"
-						@mousedown="annotateStart"
-						@mousemove="annotateMove"
-						@mouseup="annotateEnd"
-						@mouseleave="annotateEnd"
-						@touchstart.prevent="annotateTouchStart"
-						@touchmove.prevent="annotateTouchMove"
-						@touchend.prevent="annotateEnd"
-					/>
+						@mousedown="annotateStart" @mousemove="annotateMove" @mouseup="annotateEnd"
+						@mouseleave="annotateEnd" @touchstart.prevent="annotateTouchStart"
+						@touchmove.prevent="annotateTouchMove" @touchend.prevent="annotateEnd" />
 				</v-card-text>
-				
+
 				<v-divider />
-				
+
 				<v-card-actions class="pa-3">
 					<v-btn variant="text" class="text-none" @click="annotateDialog.show = false">Đóng</v-btn>
 					<v-spacer />
@@ -443,24 +403,24 @@
 				<v-card class="pa-3">
 					<v-card-title class="pa-0 mb-2 text-body-1 font-weight-bold">Nhập văn bản</v-card-title>
 					<v-card-text class="pa-0">
-						<v-text-field v-model="annotateDialog.textInput.value" label="Nội dung" autofocus hide-details @keyup.enter="annotateTextConfirm" variant="outlined" density="comfortable" />
+						<v-text-field v-model="annotateDialog.textInput.value" label="Nội dung" autofocus hide-details
+							@keyup.enter="annotateTextConfirm" variant="outlined" density="comfortable" />
 					</v-card-text>
 					<v-card-actions class="pa-0 mt-3 justify-end ga-2">
-						<v-btn variant="text" size="small" class="text-none" @click="annotateDialog.textInput.show = false">Hủy</v-btn>
-						<v-btn color="primary" size="small" class="text-none" @click="annotateTextConfirm">Xác nhận</v-btn>
+						<v-btn variant="text" size="small" class="text-none"
+							@click="annotateDialog.textInput.show = false">Hủy</v-btn>
+						<v-btn color="primary" size="small" class="text-none" @click="annotateTextConfirm">Xác nhận
+						</v-btn>
 					</v-card-actions>
 				</v-card>
 			</v-dialog>
 		</v-dialog>
 
 		<!-- Overlay thông báo đang chụp màn hình -->
-		<v-overlay
-			v-model="isCapturing"
-			class="vercel-screenshot-overlay align-center justify-center"
-			persistent
-			z-index="10000"
-		>
-			<div class="d-flex flex-column align-center pa-6 rounded-lg bg-white" style="box-shadow: 0 4px 20px rgba(0,0,0,0.15); min-width: 220px;">
+		<v-overlay v-model="isCapturing" class="vercel-screenshot-overlay align-center justify-center" persistent
+			z-index="10000">
+			<div class="d-flex flex-column align-center pa-6 rounded-lg bg-white"
+				style="box-shadow: 0 4px 20px rgba(0,0,0,0.15); min-width: 220px;">
 				<v-progress-circular indeterminate color="primary" size="40" class="mb-3" />
 				<span class="text-body-2 font-weight-medium text-high-emphasis">Đang chụp màn hình...</span>
 			</div>

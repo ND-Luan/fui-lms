@@ -1,0 +1,47 @@
+.text-gradient {
+    background: linear-gradient(135deg, #1867c0 0%, #5cbbf6 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.bg-matrix-container {
+    background-color: #f9fbfd;
+    min-height: calc(100dvh - 180px);
+}
+
+.matrix-table {
+    border-collapse: collapse;
+    width: 100%;
+}
+
+.matrix-table th {
+    background-color: #f0f4f8 !important;
+    color: #1e293b !important;
+    border-bottom: 2px solid #cbd5e1 !important;
+    font-size: 0.825rem;
+}
+
+.matrix-table td {
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.matrix-row:hover {
+    background-color: #f1f5f9;
+}
+
+.matrix-select {
+    font-size: 0.8rem;
+    max-width: 250px;
+}
+
+.sticky-col {
+    position: sticky;
+    left: 0;
+    background-color: white;
+    z-index: 2;
+    box-shadow: 2px 0 5px -2px rgba(0, 0, 0, 0.1);
+}
+
+.matrix-row:hover .sticky-col {
+    background-color: #f1f5f9;
+}
