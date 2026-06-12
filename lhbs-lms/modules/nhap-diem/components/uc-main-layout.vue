@@ -300,20 +300,20 @@
 							:class="i < textColumns.length - 1 ? 'border-b' : ''" min-height="40"
 							:disabled="col.isLocked" @click="!col.isLocked && onToggleAiColumn(col.value)">
 							<template v-slot:prepend>
-								<v-checkbox-btn
-									:model-value="action.aiColumnDialog.selectedColumns.includes(col.value)"
-									:disabled="col.isLocked"
-									@update:model-value="onToggleAiColumn(col.value)"
+								<v-checkbox-btn :model-value="action.aiColumnDialog.selectedColumns.includes(col.value)"
+									:disabled="col.isLocked" @update:model-value="onToggleAiColumn(col.value)"
 									color="purple" density="compact" />
 							</template>
 							<v-list-item-title class="text-body-2">
 								{{ col.title }}
-								<span v-if="aiRunCounts[col.value]" class="text-caption text-purple ml-2 font-weight-medium">
+								<span v-if="aiRunCounts[col.value]"
+									class="text-caption text-purple ml-2 font-weight-medium">
 									(Đã chạy {{ aiRunCounts[col.value] }} lần)
 								</span>
 							</v-list-item-title>
 							<template v-slot:append>
-								<v-chip v-if="col.isLocked" size="x-small" color="primary" variant="flat">Đã khóa</v-chip>
+								<v-chip v-if="col.isLocked" size="x-small" color="primary" variant="flat">Đã khóa
+								</v-chip>
 							</template>
 						</v-list-item>
 					</v-list>
@@ -321,8 +321,9 @@
 
 				<v-divider />
 				<v-card-actions class="justify-end ga-2 pa-3 flex-wrap">
-					<v-btn variant="text" color="grey" @click="action.aiColumnDialog.show = false" size="small">Hủy</v-btn>
-					
+					<v-btn variant="text" color="grey" @click="action.aiColumnDialog.show = false" size="small">Hủy
+					</v-btn>
+
 					<template v-if="hasSelectedRunBefore">
 						<v-btn color="purple" variant="outlined" size="small"
 							:disabled="action.aiColumnDialog.selectedColumns.length === 0"
@@ -430,8 +431,10 @@
 
 				<v-card-text class="pa-4" style="max-height: 450px;">
 					<!-- Bộ lọc chỉ hiển thị vượt ký tự nếu là dialog độ dài -->
-					<div v-if="action.aiResultDialog.title?.includes('giới hạn ký tự') && aiWarnings.some(w => w.type === 'limit' || w.type === 'limit_ok')" class="mb-2">
-						<v-switch v-model="showOnlyLimitExceeded" label="Chỉ hiển thị học sinh vượt quá 400 ký tự" color="error" density="compact" hide-details />
+					<div v-if="action.aiResultDialog.title?.includes('giới hạn ký tự') && aiWarnings.some(w => w.type === 'limit' || w.type === 'limit_ok')"
+						class="mb-2">
+						<v-switch v-model="showOnlyLimitExceeded" label="Chỉ hiển thị học sinh vượt quá 400 ký tự"
+							color="error" density="compact" hide-details />
 					</div>
 
 					<div v-if="filteredAiWarnings.length === 0"
@@ -441,7 +444,8 @@
 						<p class="text-caption">
 							{{ action.aiResultDialog.title?.includes('AI')
 							? 'Tất cả nhận xét đều đúng chính tả và nằm trong giới hạn ký tự.'
-							: (showOnlyLimitExceeded ? 'Không có học sinh nào vượt quá giới hạn 400 ký tự.' : 'Tất cả nhận xét đều hợp lệ và nằm trong giới hạn ký tự.') }}
+							: (showOnlyLimitExceeded ? 'Không có học sinh nào vượt quá giới hạn 400 ký tự.' : 'Tất cả
+							nhận xét đều hợp lệ và nằm trong giới hạn ký tự.') }}
 						</p>
 					</div>
 
@@ -452,9 +456,11 @@
 								<span class="text-body-2 font-weight-bold text-primary">
 									Dòng {{ warning.rowNum }} — {{ warning.studentName }}
 								</span>
-								<v-chip size="x-small" :color="warning.type === 'limit' ? 'error' : (warning.type === 'limit_ok' ? 'success' : 'warning')"
+								<v-chip size="x-small"
+									:color="warning.type === 'limit' ? 'error' : (warning.type === 'limit_ok' ? 'success' : 'warning')"
 									variant="tonal">
-									{{ warning.type === 'limit' ? 'Vượt ký tự' : (warning.type === 'limit_ok' ? 'Còn lại: ' + warning.remainingCount + ' ký tự' : 'Lỗi chính tả/cú pháp') }}
+									{{ warning.type === 'limit' ? 'Vượt ký tự' : (warning.type === 'limit_ok' ? 'Còn
+									lại: ' + warning.remainingCount + ' ký tự' : 'Lỗi chính tả/cú pháp') }}
 								</v-chip>
 							</div>
 
@@ -463,7 +469,8 @@
 							</div>
 
 							<!-- Nội dung nhận xét hiện tại -->
-							<div class="text-caption bg-grey-lighten-4 pa-2 rounded mb-2 text-italic" style="white-space: pre-wrap;">
+							<div class="text-caption bg-grey-lighten-4 pa-2 rounded mb-2 text-italic"
+								style="white-space: pre-wrap;">
 								"<span v-html="warning.currentHtml || warning.currentText"></span>"
 							</div>
 
@@ -472,7 +479,8 @@
 								<v-icon size="14" class="mr-1" color="error">mdi-alert-circle-outline</v-icon>
 								{{ warning.message }}
 							</div>
-							<div v-else-if="warning.type === 'limit_ok'" class="text-caption text-success font-weight-medium">
+							<div v-else-if="warning.type === 'limit_ok'"
+								class="text-caption text-success font-weight-medium">
 								<v-icon size="14" class="mr-1" color="success">mdi-check-circle-outline</v-icon>
 								{{ warning.message }}
 							</div>
@@ -487,16 +495,19 @@
 										{{ sug }}
 									</li>
 								</ul>
-								<div class="mt-2 d-flex align-center justify-space-between flex-wrap ga-2 border-t pt-2">
+								<div
+									class="mt-2 d-flex align-center justify-space-between flex-wrap ga-2 border-t pt-2">
 									<div class="text-success font-weight-medium" style="white-space: pre-wrap;">
-										Gợi ý sửa đổi: "<span v-html="warning.correctedHtml || warning.correctedText"></span>"
+										Gợi ý sửa đổi: "<span
+											v-html="warning.correctedHtml || warning.correctedText"></span>"
 									</div>
 									<v-btn v-if="!warning.applied" size="x-small" color="success" variant="tonal"
 										@click="onApplyAiSuggestion(warning)">
 										<v-icon start size="14">mdi-check-bold</v-icon>
 										Áp dụng
 									</v-btn>
-									<span v-else class="text-caption text-success font-weight-bold d-flex align-center ga-1">
+									<span v-else
+										class="text-caption text-success font-weight-bold d-flex align-center ga-1">
 										<v-icon size="16">mdi-check-decagram</v-icon>
 										Đã áp dụng
 									</span>
@@ -508,9 +519,9 @@
 
 				<v-divider />
 				<v-card-actions class="justify-end pa-3 ga-2">
-					
-					<v-btn :color="action.aiResultDialog.title?.includes('AI') ? 'purple' : 'info'" variant="flat" size="small"
-						@click="action.aiResultDialog.show = false">Đóng</v-btn>
+
+					<v-btn :color="action.aiResultDialog.title?.includes('AI') ? 'purple' : 'info'" variant="flat"
+						size="small" @click="action.aiResultDialog.show = false">Đóng</v-btn>
 					<v-btn v-if="hasSpellingWarningsToApply" color="success" variant="flat" size="small"
 						@click="onApplyAllAiSuggestions">
 						<v-icon start>mdi-check-all</v-icon>

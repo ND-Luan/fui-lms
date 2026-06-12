@@ -39,7 +39,8 @@
                 <v-icon start>mdi-plus</v-icon>
                 Thêm phân công
               </v-btn>
-              <v-btn v-if="viewMode === 'matrix'" color="success" :loading="savingMatrix" @click="saveMatrix" class="text-none">
+              <v-btn v-if="viewMode === 'matrix'" color="success" :loading="savingMatrix" @click="saveMatrix"
+                class="text-none">
                 <v-icon start>mdi-content-save-all</v-icon>
                 Lưu ma trận
               </v-btn>
