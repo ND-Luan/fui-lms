@@ -1,5 +1,5 @@
 <template>
-    <div>
+	<div>
         <v-card-title class="text-primary d-flex">
             Quá trình bảng điểm
             <v-spacer></v-spacer>
@@ -36,7 +36,9 @@
             <v-stepper-window class="ma-0 mt-4">
                 <v-stepper-window-item v-for="(item, index) in vueData.DSNhomDiem" :key="index" :value="item.ThuTuNhom">
                     <v-card-title class=" d-flex align-center">
-                        <p class="text-primary">Bảng điểm <v-chip>{{vueData.MaNhomCotDiemItem?.TenNhomCotDiem_VI}}</v-chip></p>
+                        <p class="text-primary">Bảng điểm <v-chip>{{vueData.MaNhomCotDiemItem?.TenNhomCotDiem_VI}}
+                            </v-chip>
+                        </p>
                         <v-chip class="ml-1" :color="item.MauTinhTrang">
                             {{ item.TenTinhTrang }}
                         </v-chip>
@@ -64,17 +66,17 @@
 </template>
 
 <script>
-export default {
-    props: [],
+	export default {
+		props: [],
     data() {
         return { vueData }
     },
     mounted() { },
     computed: {},
     methods: {
-        fn_IsDisabledTinhTrangDiem,
-        onTuChoiDiem,
-        onDuyetDiem
+        fn_IsDisabledTinhTrangDiem() { return { isDisabled: true } },
+        onTuChoiDiem() {},
+        onDuyetDiem() {},
     },
-}
+	}
 </script>

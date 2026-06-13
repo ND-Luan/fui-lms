@@ -32,6 +32,7 @@
 		},
 		data() {
 			return {
+				vueData,
 				form: {
 					KhoiItem: null,
 					LopItem: null,

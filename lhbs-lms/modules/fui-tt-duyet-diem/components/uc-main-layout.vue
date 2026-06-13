@@ -1,405 +1,296 @@
 <template>
-    <div>
-        <v-card>
-            <v-card-title class="text-primary"> Tìm kiếm</v-card-title>
-            <v-card-text>
-                <v-row>
-                    <v-col cols="12" sm="6" md="3">
-                        <v-autocomplete v-model="KhoiID" label="Khối" :items="DSKhoi" item-title="text"
-                            item-value="value">
-                        </v-autocomplete>
-                    </v-col>
-                    <v-col cols="12" sm="6" md="3">
-                        <v-autocomplete v-model="LopID" label="Lớp" :items="DSLop" item-title="TenLop"
-                            item-value="LopID" :disabled="KhoiID === null">
-                        </v-autocomplete>
-                    </v-col>
-                    <v-col cols="12" sm="6" md="3">
-                        <v-autocomplete v-model="MonHocID" label="Môn học" :items="DSMonHoc" item-value="MonHocID"
-                            item-title="MonHocName" :disabled="LopID === null">
-                        </v-autocomplete>
-                    </v-col>
-                    <v-col cols="12" sm="6" md="3">
-                        <v-autocomplete placeholder="Chọn nhóm điểm" v-model="MaNhomCotDiem" label="Nhóm điểm"
-                            :items="DSNhomDiem" style="max-width: 400px" item-value="MaNhomCotDiem"
-                            item-title="TenNhomCotDiem_VI" :disabled="MonHocID === null">
-                        </v-autocomplete>
-                    </v-col>
-                </v-row>
-            </v-card-text>
-        </v-card>
-        <v-card class="mt-4">
-            <v-card-title class="text-primary">
-                Xem điểm
-                <v-chip :color="fn_IsDisabledTinhTrangDiem(DSHocSinh[0]?.TinhTrang, 'GV').color" class="ms-3"
-                    v-if="DSHocSinh.length > 0">
-                    {{ fn_IsDisabledTinhTrangDiem(DSHocSinh[0]?.TinhTrang, 'GV').text }}
-                </v-chip>
-                <v-spacer></v-spacer>
-                <div>
-                    <v-btn icon="mdi-microsoft-excel" color="success" variant="text" @click="instance.download()"
-                        :disabled="!dataSource.length > 0">
-                    </v-btn>
-                    <v-btn color="error"
-                        :disabled="!dataSource.length > 0 || fn_IsDisabledTinhTrangDiem(DSHocSinh[0]?.TinhTrang, 'TT').isDisabled"
-                        @click="onHandleSendTinhTrang(3)">
-                        Từ chối
-                    </v-btn>
-                    <v-btn color="success"
-                        :disabled="!dataSource.length > 0 || fn_IsDisabledTinhTrangDiem(DSHocSinh[0]?.TinhTrang, 'TT').isDisabled"
-                        @click="onHandleSendTinhTrang(2)">
-                        Duyệt
-                    </v-btn>
-                </div>
-            </v-card-title>
-            <uc-jexcel v-if="dataSource.length > 0" v-model="instance" :freezeColumns="2"
-                v-model:dataSource="dataSource" :columns="colHeaders" :exportExcel="exportExcel" :isSubmit="isSubmit"
-                :updateTable="updateTable" :key="keyComp" styleExcel="height: calc(100vh - 252px)">
-            </uc-jexcel>
-        </v-card>
-    </div>
+	<Global>
+        <template #header>
+            <v-card>
+                <v-card-title>{{ TitlePage }} • {{ TitleCap }}</v-card-title>
+                <v-card-text>
+                    <v-row align="center">
+                        <v-col cols="12" sm="3">
+                            <v-select v-model="KhoiItem" label="Chọn khối" :items="DSKhoi" item-title="title"
+                                item-value="value" return-object />
+                        </v-col>
+                        <v-col cols="12" sm="3">
+                            <v-select v-model="LopItem" label="Chọn lớp" :items="DSLop" item-title="TenLop"
+                                item-value="LopID" return-object :disabled="!KhoiItem" />
+                        </v-col>
+                        <v-col cols="12" sm="3">
+                            <v-select v-model="SemesterItem" label="Chọn học kỳ" :items="DSSemester" item-title="title"
+                                item-value="value" return-object :disabled="!LopItem" />
+                        </v-col>
+                        <v-col cols="12" sm="3" class="d-flex align-center ga-2 flex-wrap">
+                            <v-btn variant="outlined" color="primary" :loading="loading" @click="onRefresh">
+                                <v-icon start>mdi-reload</v-icon>Làm mới
+                            </v-btn>
+                        </v-col>
+                    </v-row>
+
+                    <v-row v-if="DSHocSinh.length" align="center" class="mt-1">
+                        <v-col cols="12" class="d-flex align-center ga-2 flex-wrap">
+                            <v-chip color="primary" variant="tonal">Tổng số học sinh: {{ DSHocSinh.length }}</v-chip>
+                            <span v-if="reasonRejectInfo.disabled" class="text-body-2 ms-2">
+                                Lý do từ chối: <span class="text-red">{{ reasonRejectInfo.NoiDungNhanXet }}</span>
+                            </span>
+                            <div class="ml-auto d-flex ga-2">
+                                <v-btn color="error" variant="outlined" prepend-icon="mdi-cancel"
+                                    :disabled="!canActOnDiem" @click="openRejectDialog">
+                                    Từ chối
+                                </v-btn>
+                                <v-btn color="primary" variant="outlined" prepend-icon="mdi-send"
+                                    :disabled="!canActOnDiem" @click="onGuiBGH">
+                                    Gửi BGH
+                                </v-btn>
+                            </div>
+                        </v-col>
+                    </v-row>
+                </v-card-text>
+            </v-card>
+        </template>
+
+        <v-divider />
+
+        <v-progress-linear v-if="loading" color="primary" indeterminate />
+
+        <uc-table v-if="DSHocSinh.length" :model-value="DSHocSinh" :semester="SemesterItem"
+            :lop-id="LopItem?.LopID ?? null" />
+
+        <div v-else class="d-flex flex-column align-center justify-center py-12 text-medium-emphasis">
+            <v-icon size="48" class="mb-3 opacity-40">mdi-table-search</v-icon>
+            <p class="text-body-2">Chọn khối, lớp và học kỳ để xem bảng điểm</p>
+        </div>
+
+        <!-- Dialog Từ chối -->
+        <uc-dialog v-model="isShowDialogReject" title="Từ chối điểm" doneText="Từ chối" @onSubmit="onSubmitReject">
+            <v-row>
+                <v-col cols="12">
+                    <v-select v-model="rejectForm.MonHocLopIDs" multiple label="Chọn môn học" :items="DSMonHoc"
+                        item-title="TenMonHoc_HienThi" item-value="MonHocLopID">
+                        <template #selection="{ item, index }">
+                            <v-chip v-if="index < 3" color="primary" :text="item.raw.TenMonHoc_HienThi" />
+                            <span v-if="index === 3" class="text-grey text-caption align-self-center">
+                                (+{{ rejectForm.MonHocLopIDs.length - 3 }} môn học khác)
+                            </span>
+                        </template>
+                        <template #item="{ props: itemProps, item }">
+                            <v-list-item v-bind="itemProps">
+                                <template #append>
+                                    <v-chip size="x-small" :color="item.raw.MauTinhTrang || 'default'" variant="tonal">
+                                        {{ item.raw.TenTinhTrang }}
+                                    </v-chip>
+                                </template>
+                            </v-list-item>
+                        </template>
+                    </v-select>
+                </v-col>
+                <v-col cols="12">
+                    <v-textarea v-model="rejectForm.ReasonReject" label="Lý do từ chối"
+                        placeholder="Nhập lý do từ chối..." />
+                </v-col>
+            </v-row>
+        </uc-dialog>
+    </Global>
 </template>
 
 <script>
-export default {
-    props: [],
-    data() {
-        //Tao khoi
-        const DSKhoi = Array.from({ length: 12 })
-            .fill(0)
-            .map((_, i) => {
-                return {
-                    text: `Khối ${i + 1}`,
-                    value: i + 1,
-                }
-            })
+	export default {
+		inject: ['snackbarRef', 'iframeRef', 'confirmRef'],
+  data() {
+    const { FunctionRight, SystemRight } = vueData.user
+    const allKhoi = Array.from({ length: 12 }, (_, i) => {
+      const value = i + 1
+      const CapID = value <= 5 ? 1 : value <= 9 ? 2 : 3
+      return { title: `Khối ${value}`, value, CapID }
+    })
+
+    let DSKhoi
+    if (SystemRight === 9) {
+      DSKhoi = allKhoi.filter(x => x.CapID === parseInt(vueData.CapID))
+    } else {
+      const allowed = []
+      if (FunctionRight.includes('11')) allowed.push(1)
+      if (FunctionRight.includes('12')) allowed.push(2)
+      if (FunctionRight.includes('13')) allowed.push(3)
+      if (FunctionRight.includes('14')) allowed.push(4)
+      if (FunctionRight.includes('15')) allowed.push(5)
+      DSKhoi = allKhoi.filter(x => allowed.includes(x.value))
+    }
+
+    return {
+      vueData,
+      loading: false,
+      DSKhoi,
+      DSLop: [],
+      DSMonHoc: [],
+      DSHocSinh: [],
+      RawAPIData: [],
+      KhoiItem: null,
+      LopItem: null,
+      SemesterItem: null,
+      isShowDialogReject: false,
+      rejectForm: {
+        MonHocLopIDs: [],
+        ReasonReject: '',
+      },
+      DSSemester: [
+        { title: 'Giữa kỳ 1', value: 'GK_HK1' },
+        { title: 'Cuối kỳ 1', value: 'CK_HK1' },
+        { title: 'Giữa kỳ 2', value: 'GK_HK2' },
+        { title: 'Cuối kỳ 2', value: 'CK_HK2' },
+      ],
+      EnumTinhTrang: {
+        ChuaLuu: 0, LuuTam: 1, GVBM_GuiDiem: 2, GVCN_TuChoi_GVBM: 3,
+        GVCN_GuiDiem: 4, TT_TuChoi: 5, TT_GuiBGH: 6, BGH_TuChoi: 7, BGH_Duyet: 8,
+      },
+    }
+  },
+  computed: {
+    TitleCap() {
+      return renderText(parseInt(vueData.CapID))
+    },
+    TitlePage() {
+      return getTitlePageByURL(window.location.pathname + window.location.search)
+    },
+    reasonRejectInfo() {
+      const semVal = this.SemesterItem?.value ?? ''
+      const data = this.RawAPIData.filter(x => x.MaCotDiem?.includes(semVal))
+      const obj = data.find(x => x.TinhTrang === this.EnumTinhTrang.TT_TuChoi)
+      return {
+        disabled: !!obj,
+        NoiDungNhanXet: obj?.NoiDungNhanXet ?? '',
+      }
+    },
+    canActOnDiem() {
+      if (!this.DSHocSinh.length) return false
+      // Tổ trưởng chỉ có thể từ chối/gửi khi GVCN đã gửi (TinhTrang = 4)
+      return this.RawAPIData.some(x => x.TinhTrang === this.EnumTinhTrang.GVCN_GuiDiem)
+    },
+  },
+  watch: {
+    'vueData.NienKhoa'() {
+      this.KhoiItem = null
+      this.LopItem = null
+      this.SemesterItem = null
+      this.DSLop = []
+      this.DSMonHoc = []
+      this.DSHocSinh = []
+      this.RawAPIData = []
+    },
+    KhoiItem(v) {
+      this.LopItem = null
+      this.SemesterItem = null
+      this.DSLop = []
+      this.DSMonHoc = []
+      this.DSHocSinh = []
+      this.RawAPIData = []
+      if (v) this.getLop()
+    },
+    LopItem(v) {
+      this.SemesterItem = null
+      this.DSMonHoc = []
+      this.DSHocSinh = []
+      this.RawAPIData = []
+    },
+    SemesterItem(v) {
+      this.DSMonHoc = []
+      this.DSHocSinh = []
+      this.RawAPIData = []
+      if (v) this.getData()
+    },
+  },
+  mounted() {},
+  methods: {
+    async getLop(forceRefresh = false) {
+      if (!this.KhoiItem?.value) return
+      const res = await fetchPromise('lms/Lop_Get_ByKhoiID', {
+        KhoiID: this.KhoiItem.value,
+        NienKhoa: vueData.NienKhoa,
+      }, { forceRefresh })
+      this.DSLop = res ?? []
+    },
+    async getData(forceRefresh = false) {
+      if (!this.LopItem?.LopID || !this.SemesterItem?.value) return
+      this.loading = true
+      try {
+        const res = await fetchPromise('lms/HocSinhBangDiem_TT_BGH_Get', {
+          NienKhoa: vueData.NienKhoa,
+          LopID: this.LopItem.LopID,
+          Semester: this.SemesterItem.value,
+        }, { forceRefresh })
+        this.RawAPIData = res ?? []
+        this.renderDSHocSinh()
+        this.renderDSMonHoc()
+      } finally {
+        this.loading = false
+      }
+    },
+    renderDSHocSinh() {
+      const hocSinhIDs = [...new Set(this.RawAPIData.map(x => x.HocSinhID))]
+      this.DSHocSinh = hocSinhIDs.map(id => {
+        const hs = this.RawAPIData.find(x => x.HocSinhID === id)
         return {
-            instance: null,
-            exportExcel: false,
-            isSubmit: false,
-            keyComp: 0, //Set key để render lại jexcel
-            dataSource: [], //Data của jexcel
-            colHeaders: [], //Header của jexcel
-            DSKhoi: DSKhoi,
-            DSLop: [],
-            DSMonHoc: [],
-            DSNhomDiem: [],
-            DSCotDiem: [],
-            DSCotDiem_ByMaNhomCotDiem: [],
-            KhoiID: null,
-            LopID: null,
-            MonHocID: null,
-            TemplateBangDiemID: null,
-            MaNhomCotDiem: null,
-            MonHocLopID: null,
-            DSHocSinh: []
+          ...hs,
+          DSCotDiem: this.RawAPIData.filter(x => x.HocSinhID === id),
         }
+      })
     },
-    mounted() { },
-    created() { },
-    computed: {},
-    watch: {
-        KhoiID: function (val) {
-            if (val) {
-                this.LopID = null
-                this.MonHocID = null
-                this.MaNhomCotDiem = null
-                this.DSLop = []
-                this.DSMonHoc = []
-                this.DSNhomDiem = []
-                this.dataSource = []
-                this.loadDSLop()
-            }
-        },
-        LopID: function (val) {
-            if (val) {
-                this.dataSource = []
-                this.MonHocID = null
-                this.loadDSMonHoc()
-            }
-        },
-        MonHocID: function (val) {
-            if (val) {
-                let objMonHoc = this.DSMonHoc.find((obj) => obj.MonHocID === val)
-                if (objMonHoc) {
-                    this.MonHocLopID = objMonHoc.MonHocLopID
-                    this.loadDSNhomDiem(objMonHoc.TemplateBangDiemID)
-                }
-                this.MaNhomCotDiem = null
-                this.dataSource = []
-            }
-        },
-        MaNhomCotDiem: function (val) {
-            if (val) {
-                this.loadDSCotDiem()
-            }
-        },
+    renderDSMonHoc() {
+      const uniqueMonHocIDs = [...new Set(this.RawAPIData.map(x => x.MonHocID))]
+      this.DSMonHoc = uniqueMonHocIDs.map(id => {
+        const obj = this.RawAPIData.find(x => x.MonHocID === id)
+        return {
+          TenMonHoc_HienThi: obj.TenMonHoc_HienThi,
+          MonHocLopID: obj.MonHocLopID,
+          TinhTrang: obj.TinhTrang,
+          TenTinhTrang: obj.TenTinhTrang,
+          MauTinhTrang: obj.MauTinhTrang,
+        }
+      })
     },
-    methods: {
-        async loadDSLop() {
-            if (this.KhoiID > 0) {
-                const response = await lopService.GetByKhoiID({
-                    KhoiID: this.KhoiID,
-                })
-                if (response.IsSuccess) {
-                    this.DSLop = response.Result
-
-                }
-            }
-        },
-        async loadDSMonHoc() {
-            if (this.LopID > 0) {
-                const response = await monHocService.GetByLopID({
-                    LopID: this.LopID,
-                })
-                if (response.IsSuccess) {
-                    this.DSMonHoc = response.Result
-                }
-            }
-        },
-        async loadDSNhomDiem(TemplateBangDiemID) {
-            this.TemplateBangDiemID = TemplateBangDiemID
-            if (TemplateBangDiemID > 0) {
-                const response = await NhapDiem_Service.NhomCauTrucDiemGetByTemplateBangDiemID({
-                    TemplateBangDiemID: this.TemplateBangDiemID,
-                })
-                let data = response.Result
-                if (response.IsSuccess) {
-                    const mapArr = data.map((x) => {
-                        return {
-                            CssClass: x.CssClass,
-                            MaNhomCotDiem: x.MaNhomCotDiem,
-                            Semester: x.Semester,
-                            TenNhomCotDiem_EN: x.TenNhomCotDiem_EN,
-                            TenNhomCotDiem_VI: x.TenNhomCotDiem_VI,
-                            ThuTuNhom: x.ThuTuNhom,
-                        }
-                    })
-                    this.DSNhomDiem = [...new Set(mapArr)]
-                }
-
-            }
-        },
-        async loadDSCotDiem() {
-            if (this.MaNhomCotDiem !== '' || this.MaNhomCotDiem !== null) {
-                const response = await NhapDiem_Service.HocSinhBangDiemGetByMonHocIDMaNhom({
-                    LopID: this.LopID,
-                    MonHocID: this.MonHocID,
-                    TemplateBangDiemID: this.TemplateBangDiemID,
-                    MaNhomCotDiem: this.MaNhomCotDiem,
-                })
-                let data = response.Result
-                this.DSHocSinh = [...new Set(response.Result.map(x => x.HocSinhID))].map(x => {
-                    const hs = response.Result.find(y => y.HocSinhID === x)
-                    return {
-                        Ho: hs.Ho,
-                        HocSinhID: hs.HocSinhID,
-                        NgaySinh: hs.NgaySinh,
-                        Nu: hs.Nu,
-                        SoDanhBo: hs.SoDanhBo,
-                        Ten: hs.Ten,
-                        TinhTrang: hs.TinhTrang,
-                    }
-                })
-                console.log(' this.DSHocSinh', this.DSHocSinh);
-                if (!response.IsSuccess) return
-                let SLCotDiem_OfFirstSTD = data.filter((item) => item.HocSinhID === data[0].HocSinhID) // lấy ra các cột điểm của học sinh đầu tiên
-                this.DSCotDiem_ByMaNhomCotDiem = SLCotDiem_OfFirstSTD
-                //Xử lý động cột điểm header jexcel
-                let columnsCotDiem = SLCotDiem_OfFirstSTD
-                    .map((x) => {
-                        if (x.GiaTriCotDiem === 'number') { // cấu hình header cột điểm có dạng number
-                            let column = {
-                                type: 'numeric',
-                                title: x.TenCotDiem_VI,
-                                name: x.MaCotDiem,
-                                typeValue: x.GiaTriCotDiem,
-                                width: 80,
-                                decimal: '.',
-                                mask: '0.00',
-                                backGroundColor: x.HexBackground,
-                                wrapText: true,
-                                readOnly: true
-                            }
-                            return column
-                        } else if (x.GiaTriCotDiem === 'text') { // cấu hình header cột điểm có dạng text
-                            let column = {
-                                type: 'text',
-                                title: x.TenCotDiem_VI,
-                                name: x.MaCotDiem,
-                                typeValue: x.GiaTriCotDiem,
-                                width: this.calculateColumnWidth(x.TenCotDiem_VI),
-                                backGroundColor: x.HexBackground,
-                                wrap: true,
-                                readOnly: true
-                            }
-                            return column
-                        } else if (x.GiaTriCotDiem === 'ICO_Star') { // cấu hình header cột điểm có dạng ICO_Star
-                            let column = {
-                                type: 'html',
-                                title: x.TenCotDiem_VI,
-                                name: x.MaCotDiem,
-                                width: 120,
-                                typeValue: x.GiaTriCotDiem,
-                                backGroundColor: x.HexBackground,
-                                wrap: true,
-                                align: 'center',
-                                readOnly: true
-                            }
-                            return column
-                        }
-                    })
-                let columnThongTinHocSinh = [
-                    {
-                        type: 'text',
-                        title: 'Mã học sinh',
-                        name: 'HocSinhID',
-                        width: 120,
-                        backGroundColor: null,
-                        wrap: true,
-                    },
-                    {
-                        type: 'text',
-                        title: 'Họ tên học sinh',
-                        name: 'HoVaTenHocSinh',
-                        width: 300,
-                        backGroundColor: null,
-                        wrap: true,
-                    },
-                ]
-                this.colHeaders = [...columnThongTinHocSinh, ...columnsCotDiem]
-                //Xử lý data jexcel
-                const dataJexcel = []
-                let indexRow = 1
-                for (var hocSinh of this.DSHocSinh) {
-                    const arrCotDiemExist = data.filter((x) => x.HocSinhID === hocSinh.HocSinhID) // Lấy danh sách điểm của học sinh
-                    if (arrCotDiemExist.length === 0) return
-                    let obj = {
-                        HocSinhID: arrCotDiemExist[0].HocSinhID,
-                        HoVaTenHocSinh: arrCotDiemExist[0].Ho + ' ' + arrCotDiemExist[0].Ten,
-                    }
-                    for (var cotDiemExist of arrCotDiemExist) {
-                        if (cotDiemExist.LoaiCotDiem !== 'Công thức') {
-                            obj[cotDiemExist.MaCotDiem] = cotDiemExist.GiaTriCotDiem === 'number' ? (cotDiemExist.KetQuaDanhGia_VI === '' || cotDiemExist.KetQuaDanhGia_VI === null ? null : parseFloat(cotDiemExist.KetQuaDanhGia_VI)) : cotDiemExist.KetQuaDanhGia_VI
-                        } else if (cotDiemExist.LoaiCotDiem == 'Công thức' && cotDiemExist.GiaTriCotDiem === 'number') {
-                            obj[cotDiemExist.MaCotDiem] = '=' + replaceFormula(columnsCotDiem, cotDiemExist.Formula, indexRow)
-                        } else if (cotDiemExist.LoaiCotDiem == 'Công thức' && cotDiemExist.GiaTriCotDiem === 'ICO_Star') {
-                            obj[cotDiemExist.MaCotDiem] = `=RATING(${replaceFormula(columnsCotDiem, cotDiemExist.Formula, indexRow)})`
-                        }
-                    }
-                    indexRow++
-                    dataJexcel.push(obj)
-                }
-                console.log('$this.colHeaders', this.colHeaders)
-                console.log('dataJexcel', dataJexcel)
-                console.log('dataJexcel', data)
-                this.dataSource = dataJexcel
-                console.log('dataSource[0]', this.dataSource[0])
-                this.keyComp++
-                this.DSCotDiem = data
-            }
-        },
-        updateTable(instance, cell, col, row, val, label, cellName) {
-            cell.style.backgroundColor = this.colHeaders[col]?.backGroundColor
-            this.colHeaders.forEach((x, index) => {
-                if (x.type == 'numeric') {
-                    if (col === index) {
-                        cell.style.textAlign = 'right'
-                    }
-                } else if (x.type == 'text') {
-                    if (col === index) {
-                        cell.style.textAlign = 'left'
-                    }
-                }
-            })
-        },
-        async onHandleSubmit() {
-            let val = this.dataSource
-            //val là dữ liệu trên sheet jexcel
-            let DSCotDiem = this.DSCotDiem_ByMaNhomCotDiem //DS cột điểm của nhóm bảng điểm
-            //   let arrCotDiem = Object.keys(val[0]).splice(2); //Lấy các cột điểm của 1 học sinh
-            dataBeforeInsertToDB = []
-            //Xử lý data mapping giá trị
-            //B1: Vòng lặp thứ nhất để lặp các học sinh
-            //B2: Vòng lặp bên trong để lặp các cột điểm của 1 học sinh
-            console.log('val', val)
-            for (let i = 0; i < val.length; i++) {
-                for (let j = 0; j < DSCotDiem.length; j++) {
-                    const cellAdresss = jexcel.getColumnNameFromId([j + 2, i]) // (j+2) là địa chỉ cột điểm đầu tiên, i là row
-                    // let giaTriCotDiem = val[i][arrCotDiem[j]]
-                    let giaTriCotDiem = this.instance.getCell(cellAdresss).innerHTML
-                    let cotDiem_HS = {
-                        HocSinhID: val[i].HocSinhID,
-                        LopID: this.LopID,
-                        NienKhoa: vueData.NienKhoa,
-                        CotDiemID: DSCotDiem[j].CotDiemID,
-                        KetQuaDanhGia_VI: DSCotDiem[j].GiaTriCotDiem === 'number' ? (giaTriCotDiem === '' || giaTriCotDiem === NaN ? null : parseFloat(giaTriCotDiem)) : giaTriCotDiem,
-                        KetQuaDanhGia_EN: DSCotDiem[j].GiaTriCotDiem === 'number' ? (giaTriCotDiem === '' || giaTriCotDiem === NaN ? null : parseFloat(giaTriCotDiem)) : giaTriCotDiem,
-                        Is_Reject: '',
-                        ReasonReject: '',
-                    }
-                    let typeColumn = DSCotDiem[j].GiaTriCotDiem
-                    let value = cotDiem_HS.KetQuaDanhGia_VI
-                    const min = DSCotDiem[j].DiemMin
-                    const max = DSCotDiem[j].DiemMax
-                    cotDiem_HS.IsError = this.validateSave(typeColumn, value, min, max)
-
-                    if (cotDiem_HS.IsError === 1) {
-                        this.instance.setStyle(cellAdresss, 'background-color', 'red')
-                        Toast.error({
-                            text: `Cột điểm chỉ cho phép nhập thang điểm từ ${min} đến ${max}!`,
-                        })
-                        return
-                    }
-                    cotDiem_HS.KetQuaDanhGia_VI = cotDiem_HS.KetQuaDanhGia_VI === NaN ? null : cotDiem_HS.KetQuaDanhGia_VI
-                    dataBeforeInsertToDB.push(cotDiem_HS)
-                }
-            }
-            console.log('dataBeforeInsertToDB', dataBeforeInsertToDB)
-            let validIndex = dataBeforeInsertToDB.findIndex((item) => item.IsError === 1)
-            if (validIndex != -1) {
-                Toast.error({ text: 'Cột điểm chỉ cho phép nhập thang điểm 10!' })
-                return
-            }
-            // Tạo params lưu xuống BD
-            let params = {
-                MonHocLopID: this.MonHocLopID,
-                LopID: this.LopID,
-                MonHocID: this.MonHocID,
-                TemplateBangDiemID: this.TemplateBangDiemID,
-                KetQuaObjArr: JSON.stringify(dataBeforeInsertToDB),
-            }
-            const { IsSuccess } = await NhapDiem_Service.KQHTMonHocLopIns(params)
-            if (IsSuccess) {
-                Toast.success({ text: 'Nhập điểm thành công!' })
-                this.loadDSCotDiem()
-            }
-            this.keyComp++
-            this.isSubmit = false
-        },
-        validateSave(typeCell, value, min, max) {
-            if ((typeCell === 'number' && value < min) || value > max) {
-                return 1
-            } else {
-                return 0
-            }
-        },
-        async onHandleSendTinhTrang(TinhTrang) {
-            const { IsSuccess } = await NhapDiem_Service.KQHT_MonHocLop_TinhTrang_Udp({
-                NienKhoa: vueData.NienKhoa,
-                MonHocLopID: this.MonHocLopID,
-                LopID: this.LopID,
-                TinhTrang: TinhTrang,
-                MaNhomCotDiem: this.MaNhomCotDiem,
-            })
-            if (IsSuccess) {
-                this.loadDSCotDiem()
-                Toast.success({ text: 'Gửi tổ trưởng thành công!' })
-            }
-        },
-        fn_IsDisabledTinhTrangDiem,
-        // Hàm tính width của cột điểm có giá trị dạng text
-        calculateColumnWidth,
+    async onRefresh() {
+      if (!this.LopItem) {
+        await this.getLop(true)
+        return
+      }
+      await this.getData(true)
     },
-}
+    openRejectDialog() {
+      this.rejectForm = { MonHocLopIDs: [], ReasonReject: '' }
+      this.isShowDialogReject = true
+    },
+    async onSubmitReject() {
+      if (!this.rejectForm.MonHocLopIDs.length) {
+        this.snackbarRef.value.showSnackbar({ message: 'Vui lòng chọn ít nhất 1 môn học', color: 'warning' })
+        return
+      }
+      const ok = await this.confirmRef.value.show({ title: 'Xác nhận từ chối điểm?' })
+      if (!ok) return
+      const res = await fetchPromise('lms/KQHT_MonHocLop_TinhTrang_Udp', {
+        NienKhoa: vueData.NienKhoa,
+        LopID: this.LopItem.LopID,
+        TinhTrang: this.EnumTinhTrang.TT_TuChoi,
+        Suffix_Semester: this.SemesterItem.value,
+        List_MonHocLopID: this.rejectForm.MonHocLopIDs.join(','),
+        ReasonReject: this.rejectForm.ReasonReject,
+      }, { cache: false })
+      if (res) {
+        this.snackbarRef.value.showSnackbar({ message: 'Từ chối thành công', color: 'success' })
+        this.isShowDialogReject = false
+        await this.getData(true)
+      }
+    },
+    async onGuiBGH() {
+      const ok = await this.confirmRef.value.show({ title: 'Xác nhận gửi điểm cho Ban Giám Hiệu?' })
+      if (!ok) return
+      const res = await fetchPromise('lms/KQHT_MonHocLop_TinhTrang_Udp', {
+        NienKhoa: vueData.NienKhoa,
+        LopID: this.LopItem.LopID,
+        TinhTrang: this.EnumTinhTrang.TT_GuiBGH,
+        Suffix_Semester: this.SemesterItem.value,
+      }, { cache: false })
+      if (res) {
+        this.snackbarRef.value.showSnackbar({ message: 'Gửi BGH thành công', color: 'success' })
+        await this.getData(true)
+      }
+    },
+  },
+	}
 </script>

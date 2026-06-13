@@ -6,20 +6,22 @@
 				<v-card-text>
 					<v-row align="center">
 						<v-col cols="12" sm="3">
-							<v-select v-model="KhoiItem" label="Chọn khối" :items="DSKhoi"
-								item-title="TenKhoiHoc" item-value="KhoiID" return-object />
+							<v-select v-model="KhoiItem" label="Chọn khối" :items="DSKhoi" item-title="TenKhoiHoc"
+								item-value="KhoiID" return-object />
 						</v-col>
 						<v-col cols="12" sm="3">
-							<v-select v-model="LopItem" label="Chọn lớp" :items="DSLop"
-								item-title="TenLop" item-value="LopID" :disabled="!KhoiItem" return-object />
+							<v-select v-model="LopItem" label="Chọn lớp" :items="DSLop" item-title="TenLop"
+								item-value="LopID" :disabled="!KhoiItem" return-object />
 						</v-col>
 						<v-col cols="12" sm="3">
 							<v-select v-model="MonHocItem" label="Chọn môn học" :items="DSMonHoc"
-								item-title="TenMonHoc_HienThi" item-value="MonHocID" :disabled="!LopItem" return-object />
+								item-title="TenMonHoc_HienThi" item-value="MonHocID" :disabled="!LopItem"
+								return-object />
 						</v-col>
 						<v-col cols="12" sm="3">
 							<v-select v-model="MaNhomCotDiemItem" label="Chọn nhóm điểm" :items="DSNhomDiem"
-								item-title="TenNhomCotDiem_VI" item-value="MaNhomCotDiem" :disabled="!MonHocItem" return-object />
+								item-title="TenNhomCotDiem_VI" item-value="MaNhomCotDiem" :disabled="!MonHocItem"
+								return-object />
 						</v-col>
 					</v-row>
 					<v-row v-if="DSHocSinh.length > 0" align="center" class="mt-0">
@@ -30,8 +32,7 @@
 							</v-chip>
 							<v-spacer />
 							<v-btn color="primary" variant="outlined" prepend-icon="mdi-send"
-								:disabled="DSHocSinhSelected.length === 0 || TinhTrang?.isDisabled"
-								@click="onGuiDiem">
+								:disabled="DSHocSinhSelected.length === 0 || TinhTrang?.isDisabled" @click="onGuiDiem">
 								Gửi điểm ({{ DSHocSinhSelected.length }})
 							</v-btn>
 						</v-col>
@@ -42,9 +43,8 @@
 
 		<v-divider />
 
-		<v-data-table v-model="DSHocSinhSelected" :headers :items="DSHocSinh" item-value="HocSinhID"
-			:show-select="true" items-per-page="-1" hide-default-footer hover
-			style="max-height: calc(100dvh - 77px); overflow-y: auto;">
+		<v-data-table v-model="DSHocSinhSelected" :headers :items="DSHocSinh" item-value="HocSinhID" :show-select="true"
+			items-per-page="-1" hide-default-footer hover style="max-height: calc(100dvh - 77px); overflow-y: auto;">
 			<template #item.hocSinh="{ item }">
 				<uc-info-student :item="item" />
 			</template>
@@ -64,8 +64,8 @@
 </template>
 
 <script>
-export default {
-    inject: ['snackbarRef', 'iframeRef'],
+	export default {
+		inject: ['snackbarRef', 'iframeRef', 'confirmRef'],
 
     data() {
         return {
@@ -102,14 +102,16 @@ export default {
 
     watch: {
         'vueData.NienKhoa'() {
+            this.KhoiItem = null
             this.LopItem = null
             this.MonHocItem = null
             this.MaNhomCotDiemItem = null
+            this.DSKhoi = []
             this.DSLop = []
             this.DSMonHoc = []
             this.DSNhomDiem = []
             this.DSHocSinh = []
-            this.getLop()
+            this.getKhoi(true)
         },
         KhoiItem(val) {
             if (!val?.KhoiID) return
@@ -120,14 +122,14 @@ export default {
             this.DSMonHoc = []
             this.DSNhomDiem = []
             this.DSHocSinh = []
-            this.getLop()
+            this.getLop(true)
         },
         LopItem(val) {
             if (!val?.LopID) return
             this.MonHocItem = null
             this.MaNhomCotDiemItem = null
             this.DSHocSinh = []
-            this.getMonHoc()
+            this.getMonHoc(true)
         },
         MonHocItem(val) {
             if (!val?.MonHocID) return
@@ -148,24 +150,24 @@ export default {
     },
 
     methods: {
-        async getKhoi() {
-            this.DSKhoi = await fetchPromise('lms/KhoiHocByCapHoc_Get', { CapID: vueData.CapID })
+        async getKhoi(forceRefresh = false) {
+            this.DSKhoi = await fetchPromise('lms/KhoiHocByCapHoc_Get', { CapID: vueData.CapID }, { forceRefresh })
         },
 
-        async getLop() {
+        async getLop(forceRefresh = false) {
             if (!this.KhoiItem?.KhoiID) return
             this.DSLop = await fetchPromise('lms/Lop_Get_ByKhoiID', {
                 NienKhoa: vueData.NienKhoa,
                 KhoiID: this.KhoiItem.KhoiID,
-            })
+            }, { forceRefresh })
         },
 
-        async getMonHoc() {
+        async getMonHoc(forceRefresh = false) {
             this.DSMonHoc = await fetchPromise('lms/MonHoc_Get_ByLopID_BoMon', {
                 NienKhoa: vueData.NienKhoa,
                 LopID: this.LopItem.LopID,
                 HocKi: vueData.NienKhoaItem?.HocKi,
-            })
+            }, { forceRefresh })
         },
 
         async checkVaiTro() {
@@ -247,20 +249,30 @@ export default {
             this.DSHocSinhSelected = _dsHocSinh.map(x => x.HocSinhID)
         },
 
-        onGuiDiem() {
-            confirm({
-                title: `Xác nhận — Gửi điểm cho ${this.DSHocSinh[0]?.TinhTrang === this.EnumTinhTrang.TT_TuChoi ? 'Tổ trưởng' : 'Giáo viên chủ nhiệm'}`,
-                action: () => {
-                    ajaxCALL('lms/KQHT_MonHocLop_TinhTrang_Udp', {
-                        NienKhoa: vueData.NienKhoa,
-                        MonHocLopID: this.MonHocItem.MonHocLopID,
-                        LopID: this.LopItem.LopID,
-                        TinhTrang: 2,
-                        MaNhomCotDiem: this.MaNhomCotDiemItem.MaNhomCotDiem,
-                    }, () => { this.loadHocSinhBangDiem() })
-                },
+        async onGuiDiem() {
+            const isSendToTT = this.DSHocSinh[0]?.TinhTrang === this.EnumTinhTrang.TT_TuChoi
+            const targetName = isSendToTT ? 'Tổ trưởng' : 'Giáo viên chủ nhiệm'
+            const ok = await this.confirmRef.value.show({
+                title: `Xác nhận gửi điểm cho ${targetName}?`
             })
+            if (!ok) return
+
+            const res = await fetchPromise('lms/KQHT_MonHocLop_TinhTrang_Udp', {
+                NienKhoa: vueData.NienKhoa,
+                MonHocLopID: this.MonHocItem.MonHocLopID,
+                LopID: this.LopItem.LopID,
+                TinhTrang: 2,
+                MaNhomCotDiem: this.MaNhomCotDiemItem.MaNhomCotDiem,
+            }, { cache: false })
+
+            if (res || res?.status === 'success') {
+                this.snackbarRef.value.showSnackbar({
+                    message: 'Gửi điểm thành công',
+                    color: 'success'
+                })
+                this.loadHocSinhBangDiem()
+            }
         },
     },
-}
+	}
 </script>

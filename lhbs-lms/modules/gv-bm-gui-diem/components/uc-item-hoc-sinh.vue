@@ -11,8 +11,8 @@
 </template>
 
 <script>
-export default {
-	props: {
+	export default {
+		props: {
 		modelValue: {
 			type: Object,
 			required: true
@@ -394,5 +394,5 @@ export default {
 			CALL('HocSinhBangDiem_Get')
 		}
 	}
-}
+	}
 </script>

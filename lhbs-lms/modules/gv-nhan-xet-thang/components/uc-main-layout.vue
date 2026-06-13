@@ -379,6 +379,7 @@
 
 	data() {
 		return {
+			vueData,
 			DSLop: [],
 			DSThang: [],
 			LopItem: null,
@@ -463,6 +464,17 @@
 	},
 
 	watch: {
+		'vueData.NienKhoa': function (v) {
+			console.log("vueData.NienKhoa",vueData.NienKhoa)
+			if (v) {
+				this.getLop(true)
+				this.LopItem = null
+				this.ThangObj = null
+				this.DSThang = []
+				this.items = []
+				this.isReviewMode = false
+			}
+		},
 		LopItem(LopItem) {
 			if (!LopItem) return
 			this.ThangObj = null
@@ -519,11 +531,11 @@
 		// ─────────────────────────────────────────
 		// Fetch data
 		// ─────────────────────────────────────────
-		async getLop() {
+		async getLop(forceRefresh = false) {
 			this.DSLop = await fetchPromise('lms/Lop_Get_By_CapID', {
 				CapID: vueData.CapID,
 				NienKhoa: vueData.NienKhoa,
-			})
+			}, { forceRefresh })
 		},
 
 		async getThang(forceRefresh = false) {

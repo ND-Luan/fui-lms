@@ -29,6 +29,16 @@
 			vueData.loadingGroups = true
 			this.initPage()
 		},
+		watch: {
+			'vueData.NienKhoaItem': {
+				handler(newVal, oldVal) {
+					if (newVal && oldVal && (newVal.NienKhoa !== oldVal.NienKhoa || newVal.HocKi !== oldVal.HocKi)) {
+						this.initPage()
+					}
+				},
+				deep: true
+			}
+		},
 		methods: {
 			async apiCall1() {
 				vueData.loadingGroups = true

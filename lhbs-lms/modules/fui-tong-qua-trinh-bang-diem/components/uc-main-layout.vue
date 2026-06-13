@@ -290,7 +290,7 @@
           subject.groupMap.set(item.groupKey, {
             groupKey: item.groupKey,
             groupTitle: item.groupTitle,
-            thuTuNhom: item.thuTuNhom,
+            appearanceIndex: item.appearanceIndex,
             columns: [],
           })
         }
@@ -298,7 +298,7 @@
         subject.groupMap.get(item.groupKey).columns.push({
           key: item.key,
           title: item.title,
-          thuTuCotDiem: item.thuTuCotDiem,
+          appearanceIndex: item.appearanceIndex,
         })
       }
 
@@ -308,11 +308,11 @@
           subjectId: subject.subjectId,
           subjectTitle: subject.subjectTitle,
           groups: Array.from(subject.groupMap.values())
-            .sort((a, b) => a.thuTuNhom - b.thuTuNhom)
+            .sort((a, b) => a.appearanceIndex - b.appearanceIndex)
             .map((group) => ({
               groupKey: group.groupKey,
               groupTitle: group.groupTitle,
-              columns: group.columns.sort((a, b) => a.thuTuCotDiem - b.thuTuCotDiem),
+              columns: group.columns.sort((a, b) => a.appearanceIndex - b.appearanceIndex),
             })),
         }))
     },
@@ -322,23 +322,33 @@
     },
   },
   watch: {
+    'vueData.NienKhoa'() {
+      this.KhoiItem = null
+      this.LopItem = null
+      this.MonHocItem = null
+      this.DSKhoi = []
+      this.DSLop = []
+      this.DSMonHoc = []
+      this.resetGrid()
+      this.getKhoi(true)
+    },
     KhoiItem(v) {
       this.LopItem = null
       this.MonHocItem = null
       this.DSLop = []
       this.DSMonHoc = []
       this.resetGrid()
-      if (v) this.getLop()
+      if (v) this.getLop(true)
     },
     LopItem(v) {
       this.MonHocItem = null
       this.DSMonHoc = []
       this.resetGrid()
-      if (v) this.getMonHoc()
+      if (v) this.getMonHoc(true)
     },
     MonHocItem(v) {
       this.resetGrid()
-      if (v) this.onRefresh()
+      if (v) this.onRefresh(true)
     },
     SelectedGroupKeys() {
       this.FilterPreset = 'group'
@@ -411,53 +421,53 @@
       this.ColumnHasScoreMap = {}
       this.keyComp += 1
     },
-    async getKhoi() {
+    async getKhoi(forceRefresh = false) {
       const res = await fetchPromise('lms/KhoiHocByCapHoc_Get', {
         CapID: parseInt(vueData.CapID),
         NienKhoa: vueData.NienKhoa,
         HocKi: vueData.NienKhoaItem.HocKi,
-      })
+      }, { forceRefresh })
       this.DSKhoi = res ?? []
     },
-    async getLop() {
+    async getLop(forceRefresh = false) {
       if (!this.KhoiItem?.KhoiID) return
       const res = await fetchPromise('lms/Lop_Get_ByKhoiID', {
         KhoiID: this.KhoiItem.KhoiID,
         NienKhoa: vueData.NienKhoa,
-      })
+      }, { forceRefresh })
       this.DSLop = res ?? []
     },
-    async getMonHoc() {
+    async getMonHoc(forceRefresh = false) {
       if (!this.LopItem?.LopID) return
       const res = await fetchPromise('lms/MonHoc_Get_ByLopID', {
         LopID: this.LopItem.LopID,
         NienKhoa: vueData.NienKhoa,
-      })
+      }, { forceRefresh })
       const allMon = { MonHocID: 0, MonHocName: 'Tất cả môn', isAll: true }
       this.DSMonHoc = [allMon, ...(res ?? [])]
       this.MonHocItem = allMon
     },
-    async onRefresh() {
+    async onRefresh(forceRefresh = false) {
       if (!this.LopItem?.LopID || !this.MonHocItem) return
       this.loading = true
       try {
         if (this.MonHocItem.isAll) {
-          await this.loadAllSubjects()
+          await this.loadAllSubjects(forceRefresh)
         } else {
-          await this.loadSingleSubject(this.MonHocItem)
+          await this.loadSingleSubject(this.MonHocItem, forceRefresh)
         }
       } finally {
         this.loading = false
       }
     },
-    async loadSingleSubject(subject) {
+    async loadSingleSubject(subject, forceRefresh = false) {
       if (!subject?.MonHocID || !subject?.TemplateBangDiemID) return
       const records = await fetchPromise('lms/HocSinhBangDiem_Get_ByMonHocID', {
         LopID: this.LopItem.LopID,
         MonHocID: subject.MonHocID,
         TemplateBangDiemID: subject.TemplateBangDiemID,
         NienKhoa: vueData.NienKhoa,
-      })
+      }, { forceRefresh })
       const mapped = (records ?? []).map((item) => ({
         ...item,
         _MonHocID: subject.MonHocID,
@@ -466,7 +476,7 @@
       }))
       this.buildGrid(mapped, false)
     },
-    async loadAllSubjects() {
+    async loadAllSubjects(forceRefresh = false) {
       const subjects = this.DSMonHoc.filter((item) => !item.isAll)
       if (!subjects.length) {
         this.resetGrid()
@@ -480,7 +490,7 @@
             MonHocID: subject.MonHocID,
             TemplateBangDiemID: subject.TemplateBangDiemID,
             NienKhoa: vueData.NienKhoa,
-          })
+          }, { forceRefresh })
         )
       )
 
@@ -512,6 +522,7 @@
         monOrderMap[item.MonHocID] = index
       })
 
+      let appearanceIndex = 0
       for (const item of records) {
         const hocSinhID = item.HocSinhID
         if (!studentMap.has(hocSinhID)) {
@@ -549,6 +560,7 @@
             thuTuNhom: item.ThuTuNhom ?? 0,
             thuTuCotDiem: item.ThuTuCotDiem ?? 0,
             monOrder: monOrderMap[item._MonHocID] ?? 999,
+            appearanceIndex: appearanceIndex++,
           })
         }
 
@@ -1071,6 +1083,9 @@
       return Math.max(autoWidth, configWidth)
     },
     sortScoreMeta(a, b) {
+      if ((a.appearanceIndex ?? 0) !== (b.appearanceIndex ?? 0)) {
+        return (a.appearanceIndex ?? 0) - (b.appearanceIndex ?? 0)
+      }
       if ((a.monOrder ?? 0) !== (b.monOrder ?? 0)) return (a.monOrder ?? 0) - (b.monOrder ?? 0)
       if ((a.thuTuNhom ?? 0) !== (b.thuTuNhom ?? 0)) return (a.thuTuNhom ?? 0) - (b.thuTuNhom ?? 0)
       if ((a.thuTuCotDiem ?? 0) !== (b.thuTuCotDiem ?? 0)) return (a.thuTuCotDiem ?? 0) - (b.thuTuCotDiem ?? 0)

@@ -558,6 +558,11 @@
 						})
 						return { MonHocName: mh, activeTab: groups[0].KhoiID, groups, groupsWithWeeks: groups.filter(g => g.weeks?.length > 0) }
 					})
+
+					// Reset các mục lựa chọn cascade khi đổi niên khóa/học kỳ
+					this.cascadeKhoiID = null
+					this.cascadeMonHocName = null
+					this.cascadeTuanID = null
 				},
 				immediate: false,
 			},

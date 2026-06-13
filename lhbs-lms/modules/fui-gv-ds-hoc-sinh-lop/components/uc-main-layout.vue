@@ -161,14 +161,14 @@
 					this.KhoiItem = null
 					this.LopItem = null
 					this.items = []
-					this.getKhoi()
+					this.getKhoi(true)
 				}
 			},
 			KhoiItem(val) {
 				if (!val) return
 				this.LopItem = null
 				this.items = []
-				this.getLop()
+				this.getLop(true)
 			},
 			LopItem(val) {
 				if (!val) return
@@ -182,15 +182,15 @@
 
 	
 		methods: {
-			async getKhoi() {
-				this.DSKhoi = await fetchPromise("lms/KhoiHocByCapHoc_Get", { CapID: vueData.CapID })
+			async getKhoi(forceRefresh = false) {
+				this.DSKhoi = await fetchPromise("lms/KhoiHocByCapHoc_Get", { CapID: vueData.CapID }, { forceRefresh })
 			},
 	
-			async getLop() {
+			async getLop(forceRefresh = false) {
 				const _dsLop = await fetchPromise("lms/Lop_Get_ByKhoiID", {
 					NienKhoa: vueData.NienKhoa,
 					KhoiID: this.KhoiItem.KhoiID,
-				})
+				}, { forceRefresh })
 				this.DSLop = _dsLop.filter(x => x.IsNhom === false)
 			},
 	

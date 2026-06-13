@@ -66,7 +66,7 @@
 						}, res => {
 							Vue.$toast.success("Cập nhật tên tiếng anh học sinh thành công!", { position: "top" })
 							$this.onCloseModalEditProfile()
-							CALL("onRefresh")
+							$this.$emit('refresh')
 						})
 					},
 					cancel: function () {

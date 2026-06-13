@@ -23,9 +23,10 @@
 		</v-form>
 	</uc-dialog>
 </template>
+
 <script>
-export default {
-	props: {
+	export default {
+		props: {
 		modelValue: {
 			type: Object,
 		},
@@ -81,5 +82,5 @@ export default {
 			})
 		}
 	}
-}
+	}
 </script>

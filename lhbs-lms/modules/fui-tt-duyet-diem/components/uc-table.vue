@@ -1,32 +1,33 @@
 <template>
 	<div v-for="hocSinh in DSHocSinh" class="mt-2">
-		<v-lazy :min-height="100" :options="{ 'threshold': 0.3 }">
-			<v-card border>
-				<v-card-title class="font-weight-medium text-primary">
-					Học sinh: {{hocSinh.SoDanhBo}} {{ hocSinh.HoTen}}
-				</v-card-title>
-				<v-data-table-virtual class="custom-border" :headers="getHeaders(hocSinh)" :items="getItems(hocSinh)"
-					:items-per-page="-1" hide-default-footer>
-					<template #item.TenMonHoc_HienThi="{item}">
-						{{item.TenMonHoc_HienThi}}
-						<v-chip v-if="item.TinhTrang" class="ml-2" :color="item.MauTinhTrang" size="small">
-							{{item.TenTinhTrang}}
-						</v-chip>
-					</template>
-					<template #item.log="{ item }">
-						<v-tooltip text="Lịch sử chỉnh sửa" location="top">
-							<template #activator="{ props }">
-								<v-btn v-if="item.Count_Log_Diem > 0" v-bind="props" icon variant="text" @click="redirectLog(item)">
-									<v-icon>mdi-history</v-icon>
-								</v-btn>
-							</template>
-						</v-tooltip>
-					</template>
-				</v-data-table-virtual>
-			</v-card>
-		</v-lazy>
-	</div>
-	<uc-empty v-if="DSHocSinh.length === 0" />
+        <v-lazy :min-height="100" :options="{ 'threshold': 0.3 }">
+            <v-card border>
+                <v-card-title class="font-weight-medium text-primary">
+                    Học sinh: {{hocSinh.SoDanhBo}} {{ hocSinh.HoTen}}
+                </v-card-title>
+                <v-data-table-virtual class="custom-border" :headers="getHeaders(hocSinh)" :items="getItems(hocSinh)"
+                    :items-per-page="-1" hide-default-footer>
+                    <template #item.TenMonHoc_HienThi="{item}">
+                        {{item.TenMonHoc_HienThi}}
+                        <v-chip v-if="item.TinhTrang" class="ml-2" :color="item.MauTinhTrang" size="small">
+                            {{item.TenTinhTrang}}
+                        </v-chip>
+                    </template>
+                    <template #item.log="{ item }">
+                        <v-tooltip text="Lịch sử chỉnh sửa" location="top">
+                            <template #activator="{ props }">
+                                <v-btn v-if="item.Count_Log_Diem > 0" v-bind="props" icon variant="text"
+                                    @click="redirectLog(item)">
+                                    <v-icon>mdi-history</v-icon>
+                                </v-btn>
+                            </template>
+                        </v-tooltip>
+                    </template>
+                </v-data-table-virtual>
+            </v-card>
+        </v-lazy>
+    </div>
+    <uc-empty v-if="DSHocSinh.length === 0" />
 </template>
 
 <script>
@@ -34,7 +35,15 @@
 		props: {
 			modelValue: {
 				type: Array
-			}
+			},
+			semester: {
+				type: Object,
+				default: null
+			},
+			lopId: {
+				type: Number,
+				default: null
+			},
 		},
 		data() {
 			return {
@@ -43,8 +52,11 @@
 			}
 		},
 		watch: {
-			modelValue: function (_) {
-				this.DSHocSinh = _
+			modelValue: {
+				immediate: true,
+				handler(_) {
+					this.DSHocSinh = _ ?? []
+				}
 			}
 		},
 		methods: {
@@ -69,7 +81,7 @@
 					}
 				]
 	
-				const Semester = vueData.Semester
+				const Semester = this.semester
 				const getKi = Semester.value.split('_')[0]
 				const uniqueMaCotDiemHeaders = [...new Set(DSCotDiem.map(x => x.MaCotDiem))]
 				const listMaCotDiem = ['MucDoDanhGia', 'Diem', 'Sao', 'NhanXet',];
@@ -109,7 +121,7 @@
 					const obj = {}
 					const objMonHoc = DSCotDiem.find(x => x.MonHocID === MonHocID)
 					if (objMonHoc) {
-						const arrCotDiemFilter = DSCotDiem.filter(x => x.MonHocID === MonHocID && x.MaCotDiem.includes(vueData.Semester.value))
+						const arrCotDiemFilter = DSCotDiem.filter(x => x.MonHocID === MonHocID && x.MaCotDiem.includes(this.semester?.value ?? ''))
 						console.log("arrCotDiemFilter", arrCotDiemFilter)
 						for (var CotDiem of arrCotDiemFilter) {
 							console.log('=>', CotDiem.MaCotDiem)
@@ -126,8 +138,8 @@
 							TenMonHoc_HienThi: objMonHoc.TenMonHoc_HienThi,
 							NhapDiemUser: objMonHoc.NhapDiemUser,
 							NhapDiemTime: objMonHoc.NhapDiemTime,
-							LopID: vueData.LopItem.LopID,
-							MaNhomCotDiem: vueData.Semester.value,
+							LopID: this.lopId,
+							MaNhomCotDiem: this.semester?.value ?? '',
 							HocSinhID: objMonHoc.HocSinhID,
 							MonHocID: MonHocID,
 							Count_Log_Diem: objMonHoc.Count_Log_Diem
