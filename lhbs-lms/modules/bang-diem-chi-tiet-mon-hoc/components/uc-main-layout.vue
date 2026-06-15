@@ -6,20 +6,26 @@
         <v-card-text>
           <v-row align="center">
             <v-col cols="12" sm="3">
-              <v-select v-model="Semester" label="Chọn học kì" :items="DSSemester" item-title="title" item-value="value">
-            </v-select></v-col>
+              <v-select v-model="Semester" label="Chọn học kì" :items="DSSemester" item-title="title"
+                item-value="value">
+              </v-select>
+            </v-col>
             <v-col cols="12" sm="3">
               <v-select v-model="KhoiID" label="Chọn khối" :items="DSKhoi" item-title="TenKhoiHoc" item-value="KhoiID">
-            </v-select></v-col>
+              </v-select>
+            </v-col>
             <v-col cols="12" sm="3">
-              <v-select v-model="MonHocItem" label="Chọn môn học" :items="DSMonHoc" item-title="MonHocName" item-value="MonHocID" return-object="">
-            </v-select></v-col>
+              <v-select v-model="MonHocItem" label="Chọn môn học" :items="DSMonHoc" item-title="MonHocName"
+                item-value="MonHocID" return-object="">
+              </v-select>
+            </v-col>
             <v-col cols="12" sm="3" class="d-flex align-center ga-2 flex-wrap">
               <v-btn variant="outlined" color="primary" @click="onRefresh">
                 <v-icon start="">mdi-refresh</v-icon>Làm mới
               </v-btn>
-              <v-btn variant="outlined" color="primary" :disabled="DSHocSinh.length === 0 &amp;&amp; DataThongKe.length === 0" @click="exportExcel">
-                <v-icon start="">mdi-file-excel</v-icon>Xuất Excel (2 bảng)
+              <v-btn variant="outlined" color="primary" :disabled="DSHocSinh.length === 0 && DataThongKe.length === 0"
+                @click="exportExcel">
+                <v-icon start="">mdi-file-excel</v-icon>Xuất Excel{{ DataThongKe.length > 0 ? ' (2 bảng)' : '' }}
               </v-btn>
             </v-col>
           </v-row>
@@ -32,8 +38,10 @@
         <span>Thống kê kết quả các khối</span>
       </v-card-title>
       <v-card-text>
-        <v-data-table :items="DataThongKe" :headers="headers" items-per-page="-1" hide-default-footer="" style="max-height: calc(100dvh - 77px); overflow-y: auto;">
-      </v-data-table></v-card-text>
+        <v-data-table :items="DataThongKe" :headers="headers" items-per-page="-1" hide-default-footer=""
+          style="max-height: calc(100dvh - 77px); overflow-y: auto;">
+        </v-data-table>
+      </v-card-text>
     </v-card>
 
     <v-card class="pt-0">
@@ -41,12 +49,14 @@
         <span>Bảng điểm chi tiết môn học</span>
         <v-chip v-if="KhoiID > 0" class="ml-2" color="primary">Khối {{ KhoiID }}</v-chip>
         <v-chip v-if="MonHocItem?.MonHocID > 0" class="ml-2" color="primary">{{ MonHocItem.MonHocName }}</v-chip>
-        <v-chip v-if="DSHocSinh.length > 0" class="ml-2" color="primary">Tổng số học sinh: {{ DSHocSinh.length }}</v-chip>
+        <v-chip v-if="DSHocSinh.length > 0" class="ml-2" color="primary">Tổng số học sinh: {{ DSHocSinh.length }}
+        </v-chip>
       </v-card-title>
 
-      <uc-jexcel v-if="DSHocSinh.length > 0" class="height-excel" :key="keyComp" :columns="columns" :data-source="DSHocSinh" :freeze-columns="freezeColumns">
-      <uc-empty v-else="">
-    </uc-empty></uc-jexcel></v-card>
+      <uc-jexcel v-if="DSHocSinh.length > 0" class="height-excel" :key="keyComp" :columns="columns"
+        :data-source="DSHocSinh" :freeze-columns="freezeColumns" />
+      <uc-card-empty v-else />
+    </v-card>
   </global>
 </template>
 
@@ -183,19 +193,22 @@
       this.getThongKe()
     },
     exportExcel() {
+      const workbook = XLSX.utils.book_new()
+
+      if (this.DataThongKe && this.DataThongKe.length > 0) {
+        const thongKeHeaders = this.headers.map(x => x.title ?? x.value)
+        const thongKeKeys = this.headers.map(x => x.value)
+        const thongKeData = this.DataThongKe.map(item => thongKeKeys.map(key => item[key] ?? ''))
+        const worksheetThongKe = XLSX.utils.aoa_to_sheet([thongKeHeaders, ...thongKeData])
+        XLSX.utils.book_append_sheet(workbook, worksheetThongKe, 'ThongKeKhoi')
+      }
+
       const detailHeaders = this.columns.map(x => x.title ?? x.name)
       const detailKeys = this.columns.map(x => x.name)
       const detailData = this.DSHocSinh.map(item => detailKeys.map(key => item[key] ?? ''))
       const worksheetDetail = XLSX.utils.aoa_to_sheet([detailHeaders, ...detailData])
-
-      const thongKeHeaders = this.headers.map(x => x.title ?? x.value)
-      const thongKeKeys = this.headers.map(x => x.value)
-      const thongKeData = this.DataThongKe.map(item => thongKeKeys.map(key => item[key] ?? ''))
-      const worksheetThongKe = XLSX.utils.aoa_to_sheet([thongKeHeaders, ...thongKeData])
-
-      const workbook = XLSX.utils.book_new()
-      XLSX.utils.book_append_sheet(workbook, worksheetThongKe, 'ThongKeKhoi')
       XLSX.utils.book_append_sheet(workbook, worksheetDetail, 'BangDiemChiTiet')
+
       XLSX.writeFile(
         workbook,
         `Bang_Diem_Chi_Tiet_Khoi${this.KhoiID || ''}_${this.MonHocItem?.MonHocName || 'MonHoc'}.xlsx`
@@ -262,10 +275,12 @@
       const listMonHoc = [5, 46, 76]
 
       const columnsCotDiem = arrDSCotDiemFirstStudent.map((x) => {
+        const title = (listMonHoc.includes(this.MonHocItem?.MonHocID) ? x.TenHienThi_EN : x.TenHienThi_VI) || x.TenHienThi_VI || x.TenHienThi_EN || x.MaCotDiem
+
         if (x.GiaTriCotDiem === 'number') {
           return {
             type: 'numeric',
-            title: listMonHoc.includes(this.MonHocItem?.MonHocID) ? x.TenCotDiem_EN : x.TenCotDiem_VI,
+            title,
             name: x.MaCotDiem,
             typeValue: x.GiaTriCotDiem,
             autoWidth: true,
@@ -273,41 +288,42 @@
             backGroundColor: x.HexBackground,
             width: x.WidthCSS,
             wrapText: true,
-            readOnly: x.LoaiCotDiem === 'Công thức',
+            readOnly: true,
           }
         }
 
         if (x.GiaTriCotDiem === 'text') {
           return {
             type: 'text',
-            title: x.TenCotDiem_VI,
+            title,
             name: x.MaCotDiem,
             width: x.WidthCSS,
             typeValue: x.GiaTriCotDiem,
             backGroundColor: x.HexBackground,
             wrap: true,
             align: arrCotDiemWithAlignCenter.some(item => x.MaCotDiem.includes(item)) ? 'center' : 'left',
-            readOnly: x.LoaiCotDiem === 'Công thức',
+            readOnly: true,
           }
         }
 
         if (x.GiaTriCotDiem === 'ICO_Star') {
           return {
             type: 'html',
-            title: x.TenCotDiem_VI,
+            title,
             name: x.MaCotDiem,
             width: x.WidthCSS,
             typeValue: x.GiaTriCotDiem,
             backGroundColor: x.HexBackground,
             wrap: true,
             align: 'center',
+            readOnly: true,
           }
         }
 
         if (x.GiaTriCotDiem === 'Dropdown_text') {
           return {
             type: 'dropdown',
-            title: x.TenCotDiem_VI,
+            title,
             name: x.MaCotDiem,
             width: x.WidthCSS,
             typeValue: x.GiaTriCotDiem,
@@ -315,6 +331,52 @@
             wrap: true,
             align: 'center',
             source: ['Done', 'Not Yet'],
+            readOnly: true,
+          }
+        }
+
+        if (x.GiaTriCotDiem === 'Dropdown_THC') {
+          return {
+            type: 'dropdown',
+            title,
+            name: x.MaCotDiem,
+            width: x.WidthCSS,
+            typeValue: x.GiaTriCotDiem,
+            backGroundColor: x.HexBackground,
+            wrap: true,
+            align: 'center',
+            source: ['T', 'H', 'C'],
+            readOnly: true,
+          }
+        }
+
+        if (x.GiaTriCotDiem === 'Dropdown_TDC') {
+          return {
+            type: 'dropdown',
+            title,
+            name: x.MaCotDiem,
+            width: x.WidthCSS,
+            typeValue: x.GiaTriCotDiem,
+            backGroundColor: x.HexBackground,
+            wrap: true,
+            align: 'center',
+            source: ['T', 'Đ', 'C'],
+            readOnly: true,
+          }
+        }
+
+        if (x.GiaTriCotDiem === 'Dropdown_CD_D') {
+          return {
+            type: 'dropdown',
+            title,
+            name: x.MaCotDiem,
+            width: x.WidthCSS,
+            typeValue: x.GiaTriCotDiem,
+            backGroundColor: x.HexBackground,
+            wrap: true,
+            align: 'center',
+            source: ['CĐ', 'Đ'],
+            readOnly: true,
           }
         }
 
