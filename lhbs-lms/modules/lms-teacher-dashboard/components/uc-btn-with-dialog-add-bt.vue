@@ -33,6 +33,16 @@
 								v-model="form.TuanHocID" :label="$t('message.ChooseWeek')" />
 						</v-col>
 						<v-col cols="12">
+							<v-select :items="DSSyllabus" item-title="Title" item-value="SyllabusID"
+								v-model="form.SyllabusID" :label="$i18n.locale == 'en' ? 'Curriculum (Textbook)' : 'Chương trình học (Bộ sách)'"
+								clearable />
+						</v-col>
+						<v-col cols="12" v-if="form.SyllabusID">
+							<v-select :items="DSSyllabusNodes" item-title="displayName" item-value="NodeID"
+								v-model="form.NodeID" :label="$i18n.locale == 'en' ? 'Chapter / Lesson' : 'Chương / Bài học'"
+								clearable />
+						</v-col>
+						<v-col cols="12">
 							<v-text-field v-model="form.Chuong" :label="$t('message.Chapter')" />
 						</v-col>
 						<v-col cols="12">
@@ -87,12 +97,16 @@
 				Description: "",
 				TuanHocID: null,
 				Chuong: "",
-				type: this.defaultType ?? 0
+				type: this.defaultType ?? 0,
+				SyllabusID: null,
+				NodeID: null
 			},
 			typeItems: [
 				{ text: this.$i18n.locale == 'en' ? 'Create lesson' : 'Tạo bài học', value: 1 },
 				{ text: this.$i18n.locale == 'en' ? 'Create assignment' : 'Tạo bài tập', value: 0 }
 			],
+			DSSyllabus: [],
+			DSSyllabusNodes: [],
 			vueData,
 		}
 	},
@@ -104,8 +118,59 @@
 		}
 
 	},
-	watch: {},
+	watch: {
+		isOpen(val) {
+			if (val) {
+				this.getSyllabusList();
+			}
+		},
+		'form.SyllabusID'(newSyllabusID) {
+			this.form.NodeID = null;
+			this.DSSyllabusNodes = [];
+			if (newSyllabusID) {
+				this.getSyllabusTree(newSyllabusID);
+			}
+		},
+		'form.NodeID'(newNodeID) {
+			if (newNodeID) {
+				const node = this.DSSyllabusNodes.find(n => n.NodeID === newNodeID);
+				if (node) {
+					this.form.Chuong = node.Title;
+				}
+			}
+		}
+	},
 	methods: {
+		getSyllabusList() {
+			if (!this.khoiItem?.KhoiID || !this.khoiItem?.MonHocID) return;
+			ajaxCALL('lms/EL_Syllabus_GetByLopMon', {
+				KhoiID: this.khoiItem.KhoiID,
+				MonHocID: this.khoiItem.MonHocID,
+				NienKhoa: vueData.NienKhoa
+			}, res => {
+				this.DSSyllabus = res?.data || res || [];
+			});
+		},
+		getSyllabusTree(syllabusID) {
+			ajaxCALL('lms/EL_Syllabus_GetTree', { SyllabusID: syllabusID }, res => {
+				const rawNodes = res?.data || res || [];
+				this.DSSyllabusNodes = this.flattenTree(rawNodes, null, 0);
+			});
+		},
+		flattenTree(nodes, parentId = null, depth = 0) {
+			let result = [];
+			const currentLevel = nodes.filter(n => n.ParentID === parentId);
+			for (const node of currentLevel) {
+				if (node.NodeType === 'CHAPTER' || node.NodeType === 'LESSON') {
+					result.push({
+						...node,
+						displayName: '  '.repeat(depth) + (node.NodeType === 'CHAPTER' ? '📁 ' : '📄 ') + node.Title
+					});
+					result = result.concat(this.flattenTree(nodes, node.NodeID, depth + 1));
+				}
+			}
+			return result;
+		},
 		clearData() {
 
 			this.form.Title = ""
@@ -113,6 +178,9 @@
 			this.form.Description = ""
 			this.form.TuanHocID = null
 			this.form.Chuong = ""
+			this.form.SyllabusID = null
+			this.form.NodeID = null
+			this.DSSyllabusNodes = []
 		},
 		async handleSubmit() {
 

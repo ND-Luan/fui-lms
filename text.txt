@@ -1,0 +1,66 @@
+MonHocID	TenMonHoc_HienThi	CapID
+1	Tiếng Việt	1
+2	Toán	1
+3	Tự nhiên và Xã hội	1
+4	Khoa học	1
+5	Ngoại ngữ	1
+6	Tin học và Công nghệ (Tin học)	1
+8	Đạo đức	1
+9	Nghệ thuật (Âm nhạc)	1
+10	Nghệ thuật (Mĩ thuật)	1
+11	Hoạt động trải nghiệm	1
+12	Giáo dục thể chất	1
+19	Lịch sử và Địa lí	1
+20	Năng lực-Tự chủ và tự học	1
+21	Năng lực-Giao tiếp và hợp tác	1
+22	Năng lực-Giải quyết vấn đề và sáng tạo	1
+23	Phẩm chất-Yêu nước	1
+24	Phẩm chất-Nhân ái	1
+25	Phẩm chất-Chăm chỉ	1
+26	Phẩm chất-Trung thực	1
+27	Phẩm chất-Trách nhiệm	1
+28	Năng lực-Ngôn ngữ	1
+29	Năng lực-Tính toán	1
+30	Năng lực-Khoa học	1
+31	Năng lực-Công nghệ	1
+32	Năng lực-Tin học	1
+33	Năng lực-Thẩm mĩ	1
+34	Năng lực-Thể chất	1
+35	Tin học và Công nghệ (Công nghệ)	1
+36	STEM	1
+37	JA-GD Tài chính	1
+38	AI - Robotics	1
+40	Kĩ năng thế kỉ 21	1
+41	GDKN-Vận động theo nhạc	1
+42	GDKN-Cờ vua	1
+43	GDKN-Bóng rổ	1
+44	AI	2
+46	Ngoại ngữ	2
+47	Công nghệ	2
+52	GDCD	2
+53	Nội dung giáo dục của địa phương	2
+55	Hoạt động trải nghiệm, hướng nghiệp	2
+56	Khoa học tự nhiên	2
+58	JA	2
+60	Lịch sử và Địa lí	2
+65	Nghệ thuật	2
+69	STEM	2
+71	Giáo dục thể chất	2
+72	Tin học	2
+73	Toán	2
+74	Ngữ văn	2
+79	Địa lí	3
+83	Nội dung giáo dục của địa phương	3
+84	Giáo dục Kinh tế và Pháp luật	3
+85	GDQP	3
+86	Hoạt động trải nghiệm, hướng nghiệp	3
+88	Hóa học	3
+91	Vật lí	3
+97	Sinh học	3
+99	STEM	3
+100	Lịch sử	3
+101	Giáo dục thể chất	3
+103	Toán	3
+104	Ngữ văn	3
+105	JA	3
+106	GDKN-Ẩm thực nấu ăn	1

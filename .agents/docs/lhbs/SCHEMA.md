@@ -557,6 +557,7 @@ class tblAlert {
    datetime CreateTime
    varchar(9) UpdateUser
    datetime UpdateTime
+   varchar(50) UserRight
 }
 class tblAlertRead {
    int AlertReadID
