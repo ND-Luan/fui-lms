@@ -45,6 +45,34 @@ function onSelectedHocSinh(item, options = { IsSelect: false }) {
             HocSinhID: _hocSinhID,
             NienKhoa: vueData.NienKhoa
         }, data => {
+            if (!data || !data.HocSinhID) {
+                ajaxCALL("diemc3/LMS_GetLichSuLopHocSinh", {
+                    HocSinhID: _hocSinhID
+                }, res => {
+                    const list = res?.data || [];
+                    if (list.length > 0) {
+                        list.sort((a, b) => b.NienKhoa - a.NienKhoa);
+                        let targetYear = list.find(x => x.NienKhoa <= vueData.NienKhoa);
+                        if (!targetYear) {
+                            targetYear = list[0];
+                        }
+                        
+                        vueData.DSNienKhoa = list;
+                        vueData.HocSinhSelected = { ...item, HocSinhID: _hocSinhID };
+                        
+                        if (vueData.NienKhoa !== targetYear.NienKhoa) {
+                            vueData.NienKhoaItem = targetYear;
+                            vueData.NienKhoa = targetYear.NienKhoa;
+                        } else {
+                            Vue.$toast.error("Không tìm thấy thông tin chi tiết học sinh cho niên khóa " + targetYear.NienKhoa, { position: "top" });
+                        }
+                    } else {
+                        Vue.$toast.error("Học sinh không có dữ liệu lịch sử lớp học", { position: "top" });
+                    }
+                });
+                return;
+            }
+
             vueData.HocSinhSelected = { ...item, ...data }
             ajaxCALL("diemc3/LMS_GetLichSuLopHocSinh", {
                 HocSinhID: vueData.HocSinhSelected.HocSinhID
