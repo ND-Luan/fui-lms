@@ -167,6 +167,14 @@
 		this.GET_EL_Teacher_GetMyClasses()
 	},
 	watch: {
+		'vueData.NienKhoaItem': {
+			handler(newVal, oldVal) {
+				if (newVal && oldVal && (newVal.NienKhoa !== oldVal.NienKhoa || newVal.HocKi !== oldVal.HocKi)) {
+					this.resetAndReload()
+				}
+			},
+			deep: true
+		},
 		khoiID: {
 			immediate: true,
 			handler(val) {
@@ -240,8 +248,16 @@
 		},
 	},
 	methods: {
+		async resetAndReload() {
+			this.KhoiIDSelected = null
+			this.LopNhomIDSelected = null
+			this.DSLop = []
+			this.FocusTaskList = []
+			this.StudentTaskListByKhoi = []
+			await this.GET_EL_Teacher_GetMyClasses()
+		},
 		async GET_EL_Teacher_GetMyClasses() {
-			const response = await fetchPromise('lms/EL_Teacher_GetMyClasses', { HocKi: vueData.NienKhoaItem.HocKi }, { cache: false })
+			const response = await fetchPromise('lms/EL_Teacher_GetMyClasses', { NienKhoa: vueData.NienKhoa, HocKi: vueData.NienKhoaItem.HocKi }, { cache: false })
 			this.DSKhoi = (response ?? []).reduce((result, item) => {
 				let obj = result.find(i => i.KhoiID == item.KhoiID)
 				if (!obj) {

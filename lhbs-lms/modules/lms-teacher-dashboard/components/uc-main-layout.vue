@@ -45,14 +45,14 @@
 				try {
 					// fetchPromise trả về data?.data (unwrapped), nhưng processGroupedDashboardData
 					// expect response.data[] nên phải wrap lại thành { data: res }
-					const res = await fetchPromise('lms/EL_Teacher_GetGroupedDashboard', { HocKi: vueData.NienKhoaItem.HocKi }, { cache: false })
+					const res = await fetchPromise('lms/EL_Teacher_GetGroupedDashboard', { NienKhoa: vueData.NienKhoa, HocKi: vueData.NienKhoaItem.HocKi }, { cache: false })
 					processGroupedDashboardData({ data: res })
 				} finally {
 					vueData.loadingGroups = false
 				}
 			},
 			async apiCall2() {
-				const res = await fetchPromise('lms/EL_Teacher_GetRecentActivities', { PageSize: 10, HocKi: vueData.NienKhoaItem?.HocKi }, { cache: false })
+				const res = await fetchPromise('lms/EL_Teacher_GetRecentActivities', { NienKhoa: vueData.NienKhoa, PageSize: 10, HocKi: vueData.NienKhoaItem?.HocKi }, { cache: false })
 				vueData.activities = res
 			},
 			async apiCall3() {
@@ -60,11 +60,11 @@
 				vueData.contentLibrary = processLibraryData(res)
 			},
 			async apiCall4() {
-				const res = await fetchPromise('lms/EL_Teacher_GetFocusTasks', { HocKi: vueData.NienKhoaItem?.HocKi }, { cache: false })
+				const res = await fetchPromise('lms/EL_Teacher_GetFocusTasks', { NienKhoa: vueData.NienKhoa, HocKi: vueData.NienKhoaItem?.HocKi }, { cache: false })
 				vueData.focusTasks = res
 			},
 			async getFocusTasksStudent() {
-				const res = await fetchPromise('lms/EL_Teacher_GetFocusTasks_Student', {}, { cache: false })
+				const res = await fetchPromise('lms/EL_Teacher_GetFocusTasks_Student', { NienKhoa: vueData.NienKhoa, HocKi: vueData.NienKhoaItem?.HocKi }, { cache: false })
 				vueData.focusTasks_student = res
 			},
 			async reloadFocusApis() {
