@@ -1201,6 +1201,45 @@ class tblEL_Submissions {
    int DurationTime
    int AccessTime
 }
+class tblEL_Syllabus {
+   int SyllabusID
+   nvarchar(255) Title
+   nvarchar(1000) Description
+   int KhoiID
+   int MonHocID
+   int NienKhoa
+   tinyint HocKi
+   bit IsDeleted
+   varchar(9) CreateUser
+   datetime CreateTime
+   varchar(9) UpdateUser
+   datetime UpdateTime
+}
+class tblEL_SyllabusMapping {
+   int MappingID
+   varchar(20) ResourceType
+   int ResourceID
+   int SyllabusID
+   int NodeID
+   bit IsDeleted
+   varchar(9) CreateUser
+   datetime CreateTime
+   varchar(9) UpdateUser
+   datetime UpdateTime
+}
+class tblEL_SyllabusNode {
+   int NodeID
+   int SyllabusID
+   int ParentID
+   nvarchar(255) Title
+   varchar(20) NodeType
+   int SortOrder
+   bit IsDeleted
+   varchar(9) CreateUser
+   datetime CreateTime
+   varchar(9) UpdateUser
+   datetime UpdateTime
+}
 class tblEL_ThongBao {
    int ThongBaoID
    int SubmissionID

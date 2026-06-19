@@ -56,10 +56,8 @@ function onSelectedHocSinh(item, options = { IsSelect: false }) {
                         if (!targetYear) {
                             targetYear = list[0];
                         }
-                        
                         vueData.DSNienKhoa = list;
                         vueData.HocSinhSelected = { ...item, HocSinhID: _hocSinhID };
-                        
                         if (vueData.NienKhoa !== targetYear.NienKhoa) {
                             vueData.NienKhoaItem = targetYear;
                             vueData.NienKhoa = targetYear.NienKhoa;
@@ -72,7 +70,6 @@ function onSelectedHocSinh(item, options = { IsSelect: false }) {
                 });
                 return;
             }
-
             vueData.HocSinhSelected = { ...item, ...data }
             ajaxCALL("diemc3/LMS_GetLichSuLopHocSinh", {
                 HocSinhID: vueData.HocSinhSelected.HocSinhID
