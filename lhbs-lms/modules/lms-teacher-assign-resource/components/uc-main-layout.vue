@@ -14,6 +14,7 @@ export default {
 	props: [],
 	data() {
 		return {
+			vueData,
 			loading: true,
 			CapID: 2,
 			DataDashboard: {
@@ -30,6 +31,11 @@ export default {
 	},
 	async mounted() {
 		this.onLoad()
+	},
+	watch: {
+		'vueData.NienKhoa'() {
+			this.onLoad()
+		}
 	},
 	methods: {
 		async onLoad() {

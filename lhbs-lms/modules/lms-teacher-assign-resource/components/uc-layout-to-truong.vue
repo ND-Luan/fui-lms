@@ -24,9 +24,9 @@
 			<v-col md="4" cols="12" sm="6">
 				<uc-card-dashboard title="Giáo viên tạo bài tập nhiều nhất" icon="mdi-account-outline" color="#1976d2">
 					<template #content>
-						{{ JSON.parse(DataDashboard.ChiTietBT?.GiaoVien_TaoBT_NhieuNhat ?? {})?.GiaoVienID }}
+						{{ JSON.parse(DataDashboard.ChiTietBT?.GiaoVien_TaoBT_NhieuNhat ?? '{}')?.GiaoVienID }}
 						- Số lượng bài tập:
-						{{ JSON.parse(DataDashboard.ChiTietBT?.GiaoVien_TaoBT_NhieuNhat ?? {})?.SoLuongBaiTap }}
+						{{ JSON.parse(DataDashboard.ChiTietBT?.GiaoVien_TaoBT_NhieuNhat ?? '{}')?.SoLuongBaiTap }}
 					</template>
 				</uc-card-dashboard>
 			</v-col>
@@ -43,9 +43,9 @@
 			<v-col md="4" cols="12" sm="6">
 				<uc-card-dashboard title="Giáo viên tạo bài học nhiều nhất" icon="mdi-account-outline" color="green">
 					<template #content>
-						{{ JSON.parse(DataDashboard.ChiTietBH?.GiaoVien_TaoBH_NhieuNhat ?? {})?.GiaoVienID }}
+						{{ JSON.parse(DataDashboard.ChiTietBH?.GiaoVien_TaoBH_NhieuNhat ?? '{}')?.GiaoVienID }}
 						- Số lượng bài học:
-						{{ JSON.parse(DataDashboard.ChiTietBH?.GiaoVien_TaoBH_NhieuNhat ?? {})?.SoLuongBaiHoc }}
+						{{ JSON.parse(DataDashboard.ChiTietBH?.GiaoVien_TaoBH_NhieuNhat ?? '{}')?.SoLuongBaiHoc }}
 					</template>
 				</uc-card-dashboard>
 			</v-col>
