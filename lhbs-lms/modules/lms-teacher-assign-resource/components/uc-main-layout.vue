@@ -10,8 +10,8 @@
 </template>
 
 <script>
-export default {
-	props: [],
+	export default {
+		props: [],
 	data() {
 		return {
 			vueData,
@@ -85,5 +85,5 @@ export default {
 		}
 
 	},
-}
+	}
 </script>

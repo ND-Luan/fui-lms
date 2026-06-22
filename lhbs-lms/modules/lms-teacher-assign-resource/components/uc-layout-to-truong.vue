@@ -34,7 +34,8 @@
 			<v-col md="4" cols="12" sm="6">
 				<uc-card-dashboard title="Tổng số bài học được tạo"
 					:value="DataDashboard.ChiTietBH?.TongBaiHoc_Tao_TheoCap" icon="mdi-book-arrow-up-outline"
-					color="green" /></v-col>
+					color="green" />
+			</v-col>
 			<v-col md="4" cols="12" sm="6">
 				<uc-card-dashboard title="Môn học có bài học nhiều nhất"
 					:value="DataDashboard.ChiTietBH?.MonHoc_TaoBH_NhieuNhat" icon="mdi-book-open-variant-outline"
@@ -74,7 +75,9 @@
 									</span>
 									<v-spacer />
 									<v-btn color="success" variant="text" icon
-										@click="jsonToExcel({ data: DataDashboard.ThongKeBaiTap })"><v-icon>mdi-microsoft-excel</v-icon></v-btn>
+										@click="jsonToExcel({ data: DataDashboard.ThongKeBaiTap })">
+										<v-icon>mdi-microsoft-excel</v-icon>
+									</v-btn>
 								</div>
 								<uc-chart-apex :key="keyChart_BT" :options="chartBT" />
 							</v-tabs-window-item>
@@ -87,7 +90,9 @@
 										:items="DSThangHoc" item-title="Thang_Nam_HienThi" item-value="Thang"
 										style="max-width: 250px;" chips />
 									<v-btn color="success" variant="text" icon
-										@click="jsonToExcel({ data: Data_TuanHoc })"><v-icon>mdi-microsoft-excel</v-icon></v-btn>
+										@click="jsonToExcel({ data: Data_TuanHoc })">
+										<v-icon>mdi-microsoft-excel</v-icon>
+									</v-btn>
 								</div>
 								<uc-chart-apex :options="chartMutilTypeData" v-if="!loading" />
 							</v-tabs-window-item>
@@ -102,7 +107,9 @@
 						<span>Số lượng bài tập giáo viên tạo</span>
 						<v-spacer />
 						<v-btn color="success" variant="text" icon
-							@click="jsonToExcel({ data: DataDashboard.GiaoVienSummary_BT })"><v-icon>mdi-microsoft-excel</v-icon></v-btn>
+							@click="jsonToExcel({ data: DataDashboard.GiaoVienSummary_BT })">
+							<v-icon>mdi-microsoft-excel</v-icon>
+						</v-btn>
 						<!-- <v-btn color="success" variant="text" icon
 							@click="printPDF({ data: pdfExm.content })"><v-icon>mdi-microsoft-excel</v-icon></v-btn> -->
 
@@ -142,7 +149,9 @@
 						<span>Số lượng bài học giáo viên tạo</span>
 						<v-spacer />
 						<v-btn color="success" variant="text" icon
-							@click="jsonToExcel({ data: DataDashboard.GiaoVienSummary_BH })"><v-icon>mdi-microsoft-excel</v-icon></v-btn>
+							@click="jsonToExcel({ data: DataDashboard.GiaoVienSummary_BH })">
+							<v-icon>mdi-microsoft-excel</v-icon>
+						</v-btn>
 
 
 					</v-card-title>
@@ -183,7 +192,9 @@
 								Title: i.Title,
 								PercentScore: i.PercentScore
 							}))
-						})"><v-icon>mdi-microsoft-excel</v-icon></v-btn>
+						})">
+							<v-icon>mdi-microsoft-excel</v-icon>
+						</v-btn>
 					</v-card-title>
 					<v-card-text>
 						<uc-chart-apex :options="chartHeatmap" v-if="chartHeatmap.series.length > 0" />
@@ -246,7 +257,9 @@
 							<span class="text-body-1 font-weight-medium text-primary">Theo khối</span>
 							<v-spacer></v-spacer>
 							<v-btn color="success" variant="text" icon
-								@click="jsonToExcel({ data: Data_TiLeHoanThanh_Khoi })"><v-icon>mdi-microsoft-excel</v-icon></v-btn>
+								@click="jsonToExcel({ data: Data_TiLeHoanThanh_Khoi })">
+								<v-icon>mdi-microsoft-excel</v-icon>
+							</v-btn>
 
 						</div>
 						<uc-chart-apex :options="ChartBar_TileHoanThanh_Khoi"
@@ -258,7 +271,9 @@
 							<span class="text-body-1 font-weight-medium text-primary">Theo lớp</span>
 							<v-spacer></v-spacer>
 							<v-btn color="success" variant="text" icon
-								@click="jsonToExcel({ data: Data_TiLeHoanThanh_Lop })"><v-icon>mdi-microsoft-excel</v-icon></v-btn>
+								@click="jsonToExcel({ data: Data_TiLeHoanThanh_Lop })">
+								<v-icon>mdi-microsoft-excel</v-icon>
+							</v-btn>
 						</div>
 						<uc-chart-apex :options="ChartBar_TileHoanThanh_Lop"
 							v-if="ChartBar_TileHoanThanh_Lop.series.length > 0" />
@@ -275,8 +290,8 @@
 </template>
 
 <script>
-export default {
-	props: {
+	export default {
+		props: {
 		CapIDParent: {
 			type: Number,
 			default: 2
@@ -1125,5 +1140,5 @@ export default {
 		jsonToExcel,
 		dayjs
 	},
-}
+	}
 </script>

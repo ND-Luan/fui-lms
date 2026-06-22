@@ -51,6 +51,11 @@
 										:disabled="items.length === 0 || isReadOnly" @click="onImport">
 										Import dữ liệu từ Excel
 									</v-btn>
+									<v-btn v-if="items.length > 0"
+										prepend-icon="mdi-export" color="success" variant="outlined"
+										@click="onExportExcel">
+										Xuất Excel
+									</v-btn>
 									<v-btn prepend-icon="mdi-content-save" color="info" variant="outlined"
 										:disabled="items.length === 0 || isReadOnly" @click="onSave">
 										Lưu tạm tất cả
@@ -1162,6 +1167,122 @@
 			}
 
 			return headers
+		},
+
+		async onExportExcel() {
+			if (!this.items.length) return
+			if (!window.XLSX) {
+				const promise = new Promise((resolve) => {
+					const s = document.createElement('script')
+					s.src = 'https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js'
+					s.onload = () => resolve(window.XLSX)
+					document.head.appendChild(s)
+				})
+				await promise
+			}
+			const XLSX = window.XLSX
+
+			const exportHeaders = ['Mã học sinh', 'Số danh bộ', 'Họ tên']
+			const exportKeys = ['HocSinhID', 'SoDanhBo', 'HoTen']
+
+			const renderHeader = this.renderHeader()
+			for (const h of renderHeader) {
+				const key = h.value || h.key
+				if (key === 'HocSinh' || key === 'hocSinh') {
+					continue
+				}
+				if (key === 'gvcn_extra') {
+					exportHeaders.push('Phối hợp CMHS')
+					exportKeys.push('PhoiHopCMHS')
+					if (!this.isKhoiCanLoai) {
+						exportHeaders.push('Phân loại tuyển thẳng')
+						exportKeys.push('PhanLoai_TuyenThang')
+						exportHeaders.push('Flyers')
+						exportKeys.push('Flyers')
+						exportHeaders.push('Điểm Tiếng Anh')
+						exportKeys.push('DiemTA')
+						exportHeaders.push('Đăng ký học tiếp')
+						exportKeys.push('DKHocTiep_Display')
+						exportHeaders.push('Đề xuất / ND cam kết')
+						exportKeys.push('DeXuat_NDCamKet')
+					}
+					continue
+				}
+				if (key === 'NgayNghi') {
+					exportHeaders.push('Ngày nghỉ / Vi phạm')
+					exportKeys.push('NgayNghi_Display')
+					continue
+				}
+				if (key === 'NhanXetToan_HTML') {
+					exportHeaders.push(h.title)
+					exportKeys.push('NhanXetToan_HTML_Strip')
+					exportHeaders.push('Điểm Toán')
+					exportKeys.push('DiemToan')
+					continue
+				}
+				if (key === 'NhanXetTiengViet_HTML') {
+					exportHeaders.push(h.title)
+					exportKeys.push('NhanXetTiengViet_HTML_Strip')
+					exportHeaders.push('Điểm Tiếng Việt')
+					exportKeys.push('DiemTiengViet')
+					continue
+				}
+
+				exportHeaders.push(h.title)
+				exportKeys.push(key)
+			}
+
+			const dataRows = this.items.map(item => {
+				return exportKeys.map(key => {
+					if (key === 'DKHocTiep_Display') {
+						return item.DKHocTiep ? 'Đăng ký học tiếp' : 'Không'
+					}
+					if (key === 'NgayNghi_Display') {
+						let lines = []
+						if (item.NgayNghi?.TongSoTiet > 0) {
+							lines.push(`Tổng số tiết vắng: ${item.NgayNghi.TongSoTiet}`)
+						}
+						if (item.NgayNghi?.MonVang?.length > 0) {
+							const monVangStr = item.NgayNghi.MonVang.map(m => m.TenMonHoc).join(', ')
+							lines.push(`Môn vắng: ${monVangStr}`)
+						}
+						if (typeof this.getViPhamCuaHocSinh === 'function') {
+							const vps = this.getViPhamCuaHocSinh(item.HocSinhID)
+							if (vps && vps.length > 0) {
+								vps.forEach(vp => {
+									const unit = vp.LoaiViPham === 2 ? 'ngày' : 'tiết'
+									lines.push(`${this.tenViPhamVI(vp.TenViPham)} (${vp.SoLuong_HS} ${unit})`)
+								})
+							}
+						}
+						return lines.join('\n')
+					}
+					if (key === 'NhanXetToan_HTML_Strip') {
+						return this.stripHtml(item.NhanXetToan_HTML)
+					}
+					if (key === 'NhanXetTiengViet_HTML_Strip') {
+						return this.stripHtml(item.NhanXetTiengViet_HTML)
+					}
+					const val = item[key]
+					if (typeof val === 'string' && (val.includes('<') || val.includes('>'))) {
+						return this.stripHtml(val)
+					}
+					return val ?? ''
+				})
+			})
+
+			const worksheet = XLSX.utils.aoa_to_sheet([exportHeaders, ...dataRows])
+			const workbook = XLSX.utils.book_new()
+			XLSX.utils.book_append_sheet(workbook, worksheet, 'NhanXetThang')
+			const fileName = `NhanXetThang_${this.LopItem?.TenLop || 'Lop'}_Thang_${this.ThangObj?.Thang || 'Thang'}.xlsx`
+			XLSX.writeFile(workbook, fileName)
+		},
+
+		stripHtml(html) {
+			if (!html) return ''
+			const temp = document.createElement('div')
+			temp.innerHTML = html
+			return temp.textContent || temp.innerText || ''
 		},
 	},
 	}

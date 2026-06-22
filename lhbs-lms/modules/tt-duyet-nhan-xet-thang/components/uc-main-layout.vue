@@ -38,6 +38,9 @@
                             <v-btn color="primary" variant="outlined" prepend-icon="mdi-refresh" @click="onRefresh">
                                 Làm mới
                             </v-btn>
+                            <v-btn v-if="items.length > 0" color="success" variant="outlined" prepend-icon="mdi-file-excel" @click="onExportExcel">
+                                Xuất Excel
+                            </v-btn>
                         </v-col>
 
                         <v-col cols="12" class="d-flex justify-space-between align-center flex-wrap ga-2">
@@ -618,6 +621,161 @@
           })
         if (isSend) Vue.$toast.success(`Đẩy ${item.HocSinhID} - ${item.HoTen} dữ liệu tháng sang ME`, { position: 'top' })
       }
+    },
+
+    async onExportExcel() {
+      if (!this.items.length) return
+      if (!window.XLSX) {
+        const promise = new Promise((resolve) => {
+          const s = document.createElement('script')
+          s.src = 'https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js'
+          s.onload = () => resolve(window.XLSX)
+          document.head.appendChild(s)
+        })
+        await promise
+      }
+      const XLSX = window.XLSX
+
+      const exportHeaders = ['Mã học sinh', 'Số danh bộ', 'Họ tên']
+      const exportKeys = ['HocSinhID', 'SoDanhBo', 'HoTen']
+
+      // Generate the full headers list regardless of screen size
+      const getFullHeaders = () => {
+        const columns = [
+          {
+            key: 'hocSinh',
+            title: 'Học sinh',
+          },
+        ]
+
+        if (!this.ThangObj?.Is_HienThiPhuHuynh) {
+          columns.push({ key: 'gvcn_extra', title: '' })
+          columns.push({ key: 'NhanXetGVCN_VePhuHuynh_HTML', title: 'Nhận xét về Phụ huynh' })
+          columns.push({ key: 'NhanXetGVCN_VeHocSinh_HTML', title: 'Nhận xét về Học sinh' })
+        }
+
+        if (this.CapID === 1 && this.ThangObj?.Is_HienThiPhuHuynh) {
+          columns.push({ key: 'NhanXetToan_HTML', title: 'Nhận xét môn Toán' })
+          columns.push({ key: 'NhanXetTiengViet_HTML', title: 'Nhận xét môn Tiếng Việt' })
+          columns.push({ key: 'NhanXetMonHocKhac_HTML', title: 'Nhận xét môn học khác' })
+          columns.push({ key: 'HoatDongGiaoDucKhac_HTML', title: 'Hoạt động giáo dục khác' })
+          columns.push({ key: 'PhamChatNangLuc_HTML', title: 'Phẩm chất - Năng lực' })
+        }
+
+        if ((this.CapID === 2 || this.CapID === 3) && this.ThangObj?.Is_HienThiPhuHuynh) {
+          columns.push({ key: 'NgayNghi', title: 'Ngày nghỉ / Vi phạm' })
+          if (this.isCuoiKi) {
+            columns.push({ key: 'UuDiem', title: 'Ưu điểm' })
+            columns.push({ key: 'NhuocDiem', title: 'Nhược điểm' })
+            columns.push({ key: 'DeXuat', title: 'Đề xuất' })
+            if (this.ThangObj?.Thang === 5) {
+              columns.push({ key: 'NhanXetGVCN', title: 'Nhận xét ghi học bạ' })
+            }
+          } else {
+            columns.push({ key: 'NoiDungKienThuc_HTML', title: 'Về học tập' })
+            columns.push({ key: 'NoiDungNangLuc_HTML', title: 'Về nền nếp' })
+            columns.push({ key: 'NoiDungHoatDongKhac_HTML', title: 'Mong muốn phối hợp' })
+          }
+        }
+        return columns
+      }
+
+      const fullHeaders = getFullHeaders()
+      for (const h of fullHeaders) {
+        const key = h.value || h.key
+        if (key === 'HocSinh' || key === 'hocSinh') {
+          continue
+        }
+        if (key === 'gvcn_extra') {
+          exportHeaders.push('Phối hợp CMHS')
+          exportKeys.push('PhoiHopCMHS')
+          if (!this.isKhoiCanLoai) {
+            exportHeaders.push('Phân loại tuyển thẳng')
+            exportKeys.push('PhanLoai_TuyenThang')
+            exportHeaders.push('Flyers')
+            exportKeys.push('Flyers')
+            exportHeaders.push('Điểm Tiếng Anh')
+            exportKeys.push('DiemTA')
+            exportHeaders.push('Đăng ký học tiếp')
+            exportKeys.push('DKHocTiep_Display')
+            exportHeaders.push('Đề xuất / ND cam kết')
+            exportKeys.push('DeXuat_NDCamKet')
+          }
+          continue
+        }
+        if (key === 'NgayNghi') {
+          exportHeaders.push('Ngày nghỉ / Vi phạm')
+          exportKeys.push('NgayNghi_Display')
+          continue
+        }
+        if (key === 'NhanXetToan_HTML') {
+          exportHeaders.push(h.title)
+          exportKeys.push('NhanXetToan_HTML_Strip')
+          exportHeaders.push('Điểm Toán')
+          exportKeys.push('DiemToan')
+          continue
+        }
+        if (key === 'NhanXetTiengViet_HTML') {
+          exportHeaders.push(h.title)
+          exportKeys.push('NhanXetTiengViet_HTML_Strip')
+          exportHeaders.push('Điểm Tiếng Việt')
+          exportKeys.push('DiemTiengViet')
+          continue
+        }
+
+        exportHeaders.push(h.title)
+        exportKeys.push(key)
+      }
+
+      const dataRows = this.items.map(item => {
+        return exportKeys.map(key => {
+          if (key === 'DKHocTiep_Display') {
+            return item.DKHocTiep ? 'Đăng ký học tiếp' : 'Không'
+          }
+          if (key === 'NgayNghi_Display') {
+            let lines = []
+            if (item.NgayNghi?.TongSoTiet > 0) {
+              lines.push(`Tổng số tiết vắng: ${item.NgayNghi.TongSoTiet}`)
+            }
+            if (item.NgayNghi?.MonVang?.length > 0) {
+              const monVangStr = item.NgayNghi.MonVang.map(m => m.TenMonHoc).join(', ')
+              lines.push(`Môn vắng: ${monVangStr}`)
+            }
+            if (item.LoaiViPham_Group?.length > 0) {
+              item.LoaiViPham_Group.forEach(lvp => {
+                lines.push(`Vi phạm: ${lvp.TenViPham}`)
+              })
+            }
+            return lines.join('\n')
+          }
+          if (key === 'NhanXetToan_HTML_Strip') {
+            return this.stripHtml(item.NhanXetToan_HTML)
+          }
+          if (key === 'NhanXetTiengViet_HTML_Strip') {
+            return this.stripHtml(item.NhanXetTiengViet_HTML)
+          }
+          const val = item[key]
+          if (typeof val === 'string' && (val.includes('<') || val.includes('>'))) {
+            return this.stripHtml(val)
+          }
+          return val ?? ''
+        })
+      })
+
+      const worksheet = XLSX.utils.aoa_to_sheet([exportHeaders, ...dataRows])
+      const workbook = XLSX.utils.book_new()
+      XLSX.utils.book_append_sheet(workbook, worksheet, 'NhanXetThang')
+      
+      const lop = this.DSLop.find(x => x.LopID === this.LopID)
+      const fileName = `DuyetNhanXetThang_${lop?.TenLop || 'Lop'}_Thang_${this.ThangObj?.Thang || 'Thang'}.xlsx`
+      XLSX.writeFile(workbook, fileName)
+    },
+
+    stripHtml(html) {
+      if (!html) return ''
+      const temp = document.createElement('div')
+      temp.innerHTML = html
+      return temp.textContent || temp.innerText || ''
     },
   },
 	}
