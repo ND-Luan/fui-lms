@@ -18,7 +18,7 @@ const GRADE_CONFIG = {
         { key: 'HK', label: 'Điểm HK + Cambridge' },
     ],
     SCORE_TYPES_CAP3: [
-        // { key: 'HK', label: 'Điểm HK' },
+        { key: 'HK', label: 'Điểm học kì' },
         { key: 'TA2', label: 'Điểm TA2 + IELTS' },
     ],
     VALID_COT_DIEM_SUFFIXES: [

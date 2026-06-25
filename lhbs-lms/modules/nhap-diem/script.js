@@ -545,8 +545,43 @@ const ExportService = {
         XLSX.utils.book_append_sheet(workbook, worksheet, 'Sheet1');
         XLSX.writeFile(workbook, fileName);
     },
-    /** Chuẩn bị dữ liệu export */
-    prepareExportData(DSHocSinh, DSCotDiem_ByMaNhomCotDiem, instance, freezeColumns, filter) {
+    /** Export workbook nhiều sheet */
+    exportWorkbook(sheets, fileName) {
+        const workbook = XLSX.utils.book_new();
+        const usedSheetNames = new Set();
+        sheets.forEach((sheet, index) => {
+            const headerNames = sheet.headers.map(x => x.name);
+            const exportData = sheet.data.map(item => headerNames.map(h => item[h] ?? ""));
+            const worksheet = XLSX.utils.aoa_to_sheet([headerNames, ...exportData]);
+            XLSX.utils.book_append_sheet(
+                workbook,
+                worksheet,
+                this.normalizeSheetName(sheet.name || `Sheet${index + 1}`, usedSheetNames)
+            );
+        });
+        XLSX.writeFile(workbook, this.normalizeFileName(fileName));
+    },
+    normalizeSheetName(name, usedSheetNames = new Set()) {
+        const baseName = String(name || 'Sheet')
+            .replace(/[\\/?*[\]:]/g, ' ')
+            .trim()
+            .slice(0, 31);
+        let safeName = baseName || 'Sheet';
+        let count = 1;
+        while (usedSheetNames.has(safeName)) {
+            const suffix = `_${count}`;
+            safeName = `${(baseName || 'Sheet').slice(0, 31 - suffix.length)}${suffix}`;
+            count++;
+        }
+        usedSheetNames.add(safeName);
+        return safeName;
+    },
+    normalizeFileName(fileName) {
+        return String(fileName || 'Bang_Diem.xlsx')
+            .replace(/[\\/:*?"<>|]/g, '_')
+            .replace(/\s+/g, '_');
+    },
+    prepareExportData(DSHocSinh, DSCotDiem_ByMaNhomCotDiem, instance, freezeColumns, filter, apiData = []) {
         const dataExcel = [];
         const isEnglish = FilterService.isEnglishSubject(filter.MonHocItem?.MonHocID);
         const isGroup76 = filter.MonHocItem?.MonHocID === 76;
@@ -561,7 +596,13 @@ const ExportService = {
             for (let j = 0; j < DSCotDiem_ByMaNhomCotDiem.length; j++) {
                 let giaTriCotDiem = DSHocSinh[i][DSCotDiem_ByMaNhomCotDiem[j].value];
                 if (DSCotDiem_ByMaNhomCotDiem[j].LoaiCotDiem === CONSTANTS.FORMULA_COLUMN) {
-                    giaTriCotDiem = instance[0].records[i][j + freezeColumns]?.element?.innerHTML;
+                    const htmlValue = instance?.[0]?.records?.[i]?.[j + freezeColumns]?.element?.innerHTML;
+                    if (htmlValue !== undefined && htmlValue !== null && htmlValue !== '') {
+                        giaTriCotDiem = htmlValue;
+                    } else {
+                        const dbRecord = (apiData || []).find(x => x.HocSinhID === DSHocSinh[i].HocSinhID && x.MaCotDiem === DSCotDiem_ByMaNhomCotDiem[j].value);
+                        giaTriCotDiem = dbRecord ? dbRecord.KetQuaDanhGia_VI : '';
+                    }
                 }
                 if (DSCotDiem_ByMaNhomCotDiem[j].GiaTriCotDiem === 'number') {
                     giaTriCotDiem = (giaTriCotDiem === null || giaTriCotDiem === NaN || giaTriCotDiem === '')

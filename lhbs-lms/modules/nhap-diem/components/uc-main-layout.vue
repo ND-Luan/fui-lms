@@ -84,7 +84,7 @@
 
 			<!-- Filter -->
 			<v-card-text>
-				<uc-filter v-model="filter" @onRefresh="onRefresh" />
+				<uc-filter ref="filterRef" v-model="filter" @onRefresh="onRefresh" />
 			</v-card-text>
 			<v-divider />
 
@@ -144,10 +144,30 @@
 					Lấy điểm Test
 				</v-btn>
 
-				<v-btn @click="onExportExcel" color="primary" variant="outlined" size="small" :disabled="!hasStudents">
-					<v-icon start>mdi-microsoft-excel</v-icon>
-					Xuất Excel
-				</v-btn>
+				<v-menu>
+					<template v-slot:activator="{ props }">
+						<v-btn v-bind="props" color="primary" variant="outlined" size="small" :disabled="!hasStudents"
+							:loading="action.exportDialog.loading">
+							<v-icon start>mdi-microsoft-excel</v-icon>
+							Xuất Excel
+							<v-icon end>mdi-menu-down</v-icon>
+						</v-btn>
+					</template>
+					<v-list density="compact">
+						<v-list-item @click="onExportExcel">
+							<template v-slot:prepend>
+								<v-icon size="small">mdi-file-excel-outline</v-icon>
+							</template>
+							<v-list-item-title>Xuất lớp hiện tại</v-list-item-title>
+						</v-list-item>
+						<v-list-item @click="onOpenExportManyClassesDialog">
+							<template v-slot:prepend>
+								<v-icon size="small">mdi-table-multiple</v-icon>
+							</template>
+							<v-list-item-title>Xuất nhiều lớp</v-list-item-title>
+						</v-list-item>
+					</v-list>
+				</v-menu>
 			</v-card-text>
 
 			<v-divider v-if="hasStudents" />
@@ -536,6 +556,38 @@
 			</v-card>
 		</v-dialog>
 
+		<!-- Dialog Xuất Excel nhiều lớp -->
+		<v-dialog v-model="action.exportDialog.show" max-width="520">
+			<v-card rounded="lg">
+				<v-card-title class="d-flex align-center ga-2 pt-4 pb-2 px-4">
+					<v-icon color="primary" size="22">mdi-table-multiple</v-icon>
+					<span class="text-body-1 font-weight-bold">Xuất Excel nhiều lớp</span>
+				</v-card-title>
+				<v-divider />
+
+				<v-card-text class="pt-3 px-4 pb-2">
+					<div class="text-body-2 text-medium-emphasis mb-3">
+						Xuất các lớp cùng môn {{ filter.MonHocItem?.TenMonHoc_HienThi || filter.MonHocItem?.MonHocName }}
+						và cùng mã nhóm {{ filter.MaNhomCotDiemItem?.TenNhomCotDiem_VI }}.
+					</div>
+					<v-select v-model="action.exportDialog.selectedLopIDs" :items="exportableClasses"
+						item-title="TenLop" item-value="LopID" label="Chọn lớp" multiple chips closable-chips
+						variant="outlined" density="compact" hide-details="auto" />
+				</v-card-text>
+
+				<v-divider />
+				<v-card-actions class="justify-end pa-3 ga-2">
+					<v-btn variant="text" size="small" @click="action.exportDialog.show = false"
+						:disabled="action.exportDialog.loading">Đóng</v-btn>
+					<v-btn color="primary" variant="flat" size="small" @click="onExportManyClasses"
+						:loading="action.exportDialog.loading">
+						<v-icon start>mdi-microsoft-excel</v-icon>
+						Xuất Excel
+					</v-btn>
+				</v-card-actions>
+			</v-card>
+		</v-dialog>
+
 	</Global>
 </template>
 
@@ -572,6 +624,11 @@
 					show: false,
 					selectedColumns: [],
 					reason: ''
+				},
+				exportDialog: {
+					show: false,
+					selectedLopIDs: [],
+					loading: false
 				}
 			},
 
@@ -737,6 +794,10 @@
 			return this.action.aiColumnDialog.selectedColumns.some(colVal => 
 				this.aiRunCounts && this.aiRunCounts[colVal] > 0
 			);
+		},
+
+		exportableClasses() {
+			return this.$refs.filterRef?.DSLop || [];
 		},
 
 		hasSpellingWarningsToApply() {
@@ -1147,7 +1208,7 @@
 		onExportExcel() {
 			try {
 				const exportData = BangDiemService.export.prepareExportData(
-					this.DSHocSinh, this.DSCotDiem_ByMaNhomCotDiem, this.instance, this.freezeColumns, this.filter
+					this.DSHocSinh, this.DSCotDiem_ByMaNhomCotDiem, this.instance, this.freezeColumns, this.filter, this.DSHocSinh_API
 				);
 				const fileName = `Bang_Diem_Lop_${this.filter.LopItem.TenLop}_${this.filter.MonHocItem.MonHocName}.xlsx`;
 				BangDiemService.export.exportExcel(this.headers, exportData, fileName);
@@ -1155,6 +1216,82 @@
 			} catch (error) {
 				console.error('onExportExcel error:', error);
 				this.showSnackbar('Có lỗi xảy ra khi xuất Excel!', 'error');
+			}
+		},
+
+		onOpenExportManyClassesDialog() {
+			if (!this.filter.KhoiItem || !this.filter.LopItem || !this.filter.MonHocItem || !this.filter.MaNhomCotDiemItem) {
+				this.showSnackbar('Vui lòng chọn đủ khối, lớp, môn học và mã nhóm trước khi xuất Excel!', 'warning');
+				return;
+			}
+			const currentLopID = this.filter.LopItem?.LopID;
+			this.action.exportDialog.selectedLopIDs = currentLopID ? [currentLopID] : [];
+			this.action.exportDialog.show = true;
+		},
+
+		async onExportManyClasses() {
+			const selectedLopIDs = this.action.exportDialog.selectedLopIDs || [];
+			if (!selectedLopIDs.length) {
+				this.showSnackbar('Vui lòng chọn ít nhất một lớp!', 'warning');
+				return;
+			}
+
+			this.action.exportDialog.loading = true;
+			try {
+				const sheets = [];
+				for (const lopID of selectedLopIDs) {
+					const lopItem = this.exportableClasses.find(x => String(x.LopID) === String(lopID));
+					if (!lopItem) continue;
+
+					// Lấy thông tin MonHocItem cho lớp này để có MonHocLopID và TemplateBangDiemID chính xác
+					const listMonHoc = await ajaxCALLPromise("lms/MonHoc_Get_ByLopID", {
+						NienKhoa: this.vueData.NienKhoa,
+						HocKi: this.vueData.NienKhoaItem.HocKi,
+						LopID: lopID
+					});
+					const targetMonHocID = this.filter.MonHocItem?.MonHocID;
+					const lopMonHocItem = listMonHoc?.find(x => x.MonHocID === targetMonHocID);
+					if (!lopMonHocItem) continue;
+
+					const exportFilter = {
+						...this.filter,
+						LopItem: lopItem,
+						MonHocItem: lopMonHocItem
+					};
+					const result = await BangDiemService.initialize(exportFilter, this.vueData);
+					if (!result.students?.length) continue;
+
+					const exportData = BangDiemService.export.prepareExportData(
+						result.students,
+						result.DSCotDiem_ByMaNhomCotDiem,
+						null,
+						result.freezeColumns,
+						exportFilter,
+						result.apiData
+					);
+					sheets.push({
+						name: lopItem.TenLop,
+						headers: result.headers,
+						data: exportData
+					});
+				}
+
+				if (!sheets.length) {
+					this.showSnackbar('Không có dữ liệu để xuất ở các lớp đã chọn!', 'warning');
+					return;
+				}
+
+				const monName = this.filter.MonHocItem?.TenMonHoc_HienThi || this.filter.MonHocItem?.MonHocName || 'MonHoc';
+				const maNhom = this.filter.MaNhomCotDiemItem?.MaNhomCotDiem || 'Nhom';
+				const fileName = `Bang_Diem_${monName}_${maNhom}_${sheets.length}_Lop.xlsx`;
+				BangDiemService.export.exportWorkbook(sheets, fileName);
+				this.action.exportDialog.show = false;
+				this.showSnackbar(`Xuất Excel ${sheets.length} lớp thành công!`, 'success');
+			} catch (error) {
+				console.error('onExportManyClasses error:', error);
+				this.showSnackbar('Có lỗi xảy ra khi xuất Excel nhiều lớp!', 'error');
+			} finally {
+				this.action.exportDialog.loading = false;
 			}
 		},
 

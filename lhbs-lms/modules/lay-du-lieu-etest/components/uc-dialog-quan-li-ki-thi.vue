@@ -18,24 +18,31 @@
 
 				<v-card-text class="pa-4">
 
-					<!-- ── Chọn kì thi + lớp ── -->
+					<!-- ── Chọn kì thi + khối + môn ── -->
 					<v-row dense class="mb-4">
-						<v-col cols="12" sm="7">
+						<v-col cols="12" sm="4">
 							<v-autocomplete v-model="selectedExam" :items="exams" :loading="loadingExams"
 								item-title="name" item-value="id" return-object label="Chọn kì thi"
 								placeholder="Tìm kì thi..." density="compact" variant="outlined" hide-details clearable
 								no-data-text="Không có dữ liệu" prepend-inner-icon="mdi-magnify"
 								@update:model-value="onExamChange" />
 						</v-col>
-						<v-col cols="12" sm="5">
-							<v-select v-model="selectedLopID" :items="lopOptions" item-title="label" item-value="key"
-								label="Chọn lớp" density="compact" variant="outlined" hide-details
-								:disabled="!selectedExam" @update:model-value="loadPreview" />
+						<v-col cols="12" sm="4">
+							<v-select v-model="selectedKhoiKeyID" :items="khoiOptions" item-title="TenKhoi"
+								item-value="KhoiKeyID" label="Chọn khối" density="compact" variant="outlined"
+								hide-details :disabled="!selectedExam || loadingKhoi" :loading="loadingKhoi"
+								@update:model-value="onKhoiChange" />
+						</v-col>
+						<v-col cols="12" sm="4">
+							<v-select v-model="selectedMonHocID" :items="monHocOptions" item-title="TenMon"
+								item-value="MonHocID" label="Chọn môn học" density="compact" variant="outlined"
+								hide-details :disabled="!selectedKhoiKeyID || loadingMonHoc" :loading="loadingMonHoc"
+								@update:model-value="loadPreview" />
 						</v-col>
 					</v-row>
 
 					<!-- ⚠️ Warning: lớp chọn khác tab active -->
-					<v-alert v-if="activeTabWarning && selectedLopID" type="warning" density="compact" variant="tonal"
+					<v-alert v-if="activeTabWarning" type="warning" density="compact" variant="tonal"
 						class="mb-3 text-body-2" :text="activeTabWarning" />
 
 					<!-- Loading -->
@@ -72,23 +79,10 @@
 									</v-col>
 								</v-row>
 
-								<!-- Trường mapping: DiemTong hoặc SoCauDung -->
+								<!-- Điểm học kì: điền trực tiếp giá trị API trả về -->
 								<v-divider class="my-3" />
-								<div class="text-body-2 font-weight-medium mb-2">Điền giá trị từ trường:</div>
-								<v-btn-toggle v-model="mappingField" mandatory density="compact" variant="outlined"
-									color="primary">
-									<v-btn value="DiemTong" size="small">
-										<v-icon start size="14">mdi-counter</v-icon>
-										DiemTong
-									</v-btn>
-									<v-btn value="SoCauDung" size="small">
-										<v-icon start size="14">mdi-format-list-numbered</v-icon>
-										SoCauDung
-									</v-btn>
-								</v-btn-toggle>
-								<div class="text-caption text-medium-emphasis mt-1">
-									<span v-if="mappingField === 'DiemTong'">Dùng điểm tổng đã tính sẵn từ kì thi</span>
-									<span v-else>Dùng số câu đúng → jspreadsheet tự tính điểm</span>
+								<div class="text-caption text-medium-emphasis">
+									Dữ liệu điểm học kì được điền trực tiếp vào cột đã mapping.
 								</div>
 							</v-card-text>
 						</v-card>
@@ -124,13 +118,13 @@
 					<!-- Chưa chọn kì thi -->
 					<div v-else-if="!selectedExam" class="text-center text-medium-emphasis py-10">
 						<v-icon size="48" color="grey-lighten-1">mdi-clipboard-search-outline</v-icon>
-						<div class="mt-2">Chọn kì thi và lớp để xem dữ liệu</div>
+						<div class="mt-2">Chọn kì thi, khối và môn học để xem dữ liệu</div>
 					</div>
 
-					<!-- Đã chọn kì thi, chưa chọn lớp -->
-					<div v-else-if="selectedExam && !selectedLopID" class="text-center text-medium-emphasis py-10">
-						<v-icon size="48" color="grey-lighten-1">mdi-google-classroom</v-icon>
-						<div class="mt-2">Chọn lớp để xem dữ liệu điểm</div>
+					<!-- Đã chọn kì thi, chưa chọn khối/môn -->
+					<div v-else-if="selectedExam && (!selectedKhoiKeyID || !selectedMonHocID)" class="text-center text-medium-emphasis py-10">
+						<v-icon size="48" color="grey-lighten-1">mdi-school-outline</v-icon>
+						<div class="mt-2">Chọn khối và môn học để xem dữ liệu điểm</div>
 					</div>
 
 					<!-- Đã chọn đủ nhưng không có data -->
@@ -184,7 +178,12 @@
 			exams: [],
 			selectedExam: null,
 
-			selectedLopID: null,
+			loadingKhoi: false,
+			khoiOptions: [],
+			selectedKhoiKeyID: null,
+			loadingMonHoc: false,
+			monHocOptions: [],
+			selectedMonHocID: null,
 			loadingPreview: false,
 			rawScoreData: [],
 			previewRows: [],
@@ -194,16 +193,10 @@
 
 			// Mapping: { [TenKyNang]: maCotDiem }
 			skillMapping: {},
-			// Trường dùng để điền: 'DiemTong' | 'SoCauDung'
-			mappingField: 'SoCauDung',
 		}
 	},
 
 	computed: {
-		lopOptions() {
-			return this.classes.map(cls => ({ key: cls.id, label: cls.name }))
-		},
-
 		// Các TenKyNang duy nhất — lấy từ rawScoreData đã filter theo HocSinhID tab active
 		// Dùng previewRows để biết đang show HS nào, rồi lấy skills của họ
 		detectedSkills() {
@@ -220,27 +213,28 @@
 		// Cột điểm lấy từ tab đang active (activeTabMeta) — không phải lớp đang chọn trong dialog
 		// Vì HS có thể chuyển lớp: API trả Nhom cũ nhưng jspreadsheet đã đặt đúng tab
 		scoreDescOptions() {
-			const meta = this.activeTabMeta ?? this.wsMeta?.find(m => m.cls?.id === this.selectedLopID)
+			const meta = this.activeTabMeta ?? this.wsMeta?.[0]
 			if (!meta?.scoreDescs) return []
 			return meta.scoreDescs
-				.filter(d => d.key && !d.readOnly)
+				.filter(d => d.key && (!d.readOnly || d._isDirectScore || d.key?.endsWith('_Total_Point')))
 				.map(d => ({ key: d.key, label: d.title ?? d.key }))
 		},
 
 		// Cảnh báo nếu lớp chọn trong dialog khác tab đang active
 		activeTabWarning() {
-			if (!this.activeTabMeta || !this.selectedLopID) return null
-			const activeID = this.activeTabMeta.cls?.id
-			if (activeID === this.selectedLopID) return null
-			const activeName = this.activeTabMeta.cls?.name ?? activeID
-			const selectedName = this.classes.find(c => c.id === this.selectedLopID)?.name ?? this.selectedLopID
-			return `⚠️ Dữ liệu kì thi lấy từ "${selectedName}" nhưng sẽ apply vào tab đang active: "${activeName}". Chỉ học sinh có HocSinhID khớp mới được điền.`
+			if (!this.activeTabMeta || !this.selectedKhoiKeyID) return null
+			const activeName = this.activeTabMeta.cls?.name ?? ''
+			const selectedKhoi = this.khoiOptions.find(k => k.KhoiKeyID === this.selectedKhoiKeyID)?.TenKhoi ?? ''
+			const activeKhoi = this._getKhoiFromClassName(activeName)
+			if (!activeKhoi || selectedKhoi.includes(String(activeKhoi))) return null
+			return `Dữ liệu kì thi lấy theo "${selectedKhoi}" nhưng tab đang active là "${activeName}". Chỉ học sinh có HocSinhID khớp mới được điền.`
 		},
 
 		canApply() {
 			return (
 				!!this.selectedExam &&
-				!!this.selectedLopID &&
+				!!this.selectedKhoiKeyID &&
+				!!this.selectedMonHocID &&
 				this.previewRows.length > 0 &&
 				this.detectedSkills.some(s => !!this.skillMapping[s])
 			)
@@ -258,11 +252,12 @@
 				{ title: 'Mã HS', key: 'hocSinhID', width: '110px' },
 				{ title: 'Họ và tên', key: 'hoTen', width: '180px' },
 			]
-			const skillCols = this.detectedSkills.flatMap(s => [
-				{ title: `${s} - Số câu`, key: `skill_${s}_SoCauHoi`,  align: 'center', width: '95px' },
-				{ title: `${s} - Đúng`,   key: `skill_${s}_SoCauDung`, align: 'center', width: '85px' },
-				{ title: `${s} - Điểm`,   key: `skill_${s}_DiemTong`,  align: 'center', width: '85px' },
-			])
+			const skillCols = this.detectedSkills.map(s => ({
+				title: s,
+				key: `skill_${s}_DiemTong`,
+				align: 'center',
+				width: '95px',
+			}))
 			return [...base, ...skillCols]
 		},
 
@@ -291,11 +286,13 @@
 		onDialogToggle(val) {
 			if (val) {
 				this.selectedExam = null
-				this.selectedLopID = null
+				this.selectedKhoiKeyID = null
+				this.selectedMonHocID = null
+				this.khoiOptions = []
+				this.monHocOptions = []
 				this.rawScoreData = []
 				this.previewRows = []
 				this.skillMapping = {}
-				this.mappingField = 'SoCauDung'
 				this.fetchExams()
 			}
 		},
@@ -319,28 +316,69 @@
 			}
 		},
 
-		onExamChange() {
-			this.selectedLopID = null
+		async onExamChange() {
+			this.selectedKhoiKeyID = null
+			this.selectedMonHocID = null
+			this.khoiOptions = []
+			this.monHocOptions = []
 			this.rawScoreData = []
 			this.previewRows = []
 			this.skillMapping = {}
 			this.selectedStudentIDs = []
+			if (!this.selectedExam) return
+
+			this.loadingKhoi = true
+			try {
+				const data = await fetchPromise('qlktt/ThongKe_SelectKhoi', {
+					KyThiID: String(this.selectedExam.id),
+				})
+				this.khoiOptions = (data ?? []).filter(k => {
+					const id = Number(k.KhoiKeyID)
+					const name = String(k.TenKhoi ?? '')
+					return (id >= 15 && id <= 17) || [10, 11, 12].some(khoi => name.includes(String(khoi)))
+				})
+			} finally {
+				this.loadingKhoi = false
+			}
+		},
+
+		async onKhoiChange() {
+			this.selectedMonHocID = null
+			this.monHocOptions = []
+			this.rawScoreData = []
+			this.previewRows = []
+			this.skillMapping = {}
+			this.selectedStudentIDs = []
+			if (!this.selectedExam || !this.selectedKhoiKeyID) return
+
+			this.loadingMonHoc = true
+			try {
+				this.monHocOptions = await fetchPromise('qlktt/ThongKe_SelectMonHoc', {
+					KyThiID: String(this.selectedExam.id),
+					KhoiKeyID: this.selectedKhoiKeyID,
+				}) ?? []
+			} finally {
+				this.loadingMonHoc = false
+			}
 		},
 
 		async loadPreview() {
-			if (!this.selectedExam || !this.selectedLopID) return
+			if (!this.selectedExam || !this.selectedKhoiKeyID || !this.selectedMonHocID) return
 			this.loadingPreview = true
 			this.rawScoreData = []
 			this.previewRows = []
 			this.skillMapping = {}
 			try {
-				const data = await fetchPromise('/qlktt/LMS_KhaiBaoCauHinhAnhVan', {
-					KyThiID: this.selectedExam.id,
+				const data = await fetchPromise('qlktt/ThongKe_SelectBangDiemTheoMon', {
+					KyThiID: String(this.selectedExam.id),
+					KhoiKeyID: this.selectedKhoiKeyID,
+					MonHocID: this.selectedMonHocID,
+					XemChiTiet: false,
 				})
-				this.rawScoreData = data ?? []
+				this.rawScoreData = this._normalizeBangDiemRows(data ?? [])
 				// ✅ Filter chính xác theo HocSinhID của tab active (activeTabMeta)
 				// Union với filter theo Nhom để không bỏ sót HS nào
-				const filtered = this._filterForPreview(this.rawScoreData, this.selectedLopID)
+				const filtered = this._filterForPreview(this.rawScoreData)
 				this.previewRows = this._buildPreviewRows(filtered)
 				// Auto-select tất cả học sinh
 				this.selectedStudentIDs = this.previewRows.map(r => String(r.hocSinhID))
@@ -366,6 +404,8 @@
 				'Nghe': ['Listening', 'Nghe', 'listening'],
 				'Đọc':  ['Reading', 'Doc', 'reading'],
 				'Viết': ['Writing', 'Viet', 'writing'],
+				'Ngôn ngữ': ['Language', 'NgonNgu', 'ngôn ngữ'],
+				'Điểm tổng': ['Total', 'DiemTong', 'điểm tổng'],
 			}
 
 			for (const skill of skills) {
@@ -400,6 +440,37 @@
 				row[`skill_${s}`] = r.DiemTong ?? null
 			}
 			return [...map.values()]
+		},
+
+		_normalizeBangDiemRows(rows) {
+			const skillColumns = [
+				{ field: 'Nghe', label: 'Nghe' },
+				{ field: 'Ngôn ngữ', label: 'Ngôn ngữ' },
+				{ field: 'Đọc', label: 'Đọc' },
+				{ field: 'Viết', label: 'Viết' },
+				{ field: 'Nói', label: 'Nói' },
+				{ field: 'Điểm tổng', label: 'Điểm tổng' },
+			]
+			const result = []
+			for (const row of rows) {
+				const hocSinhID = row.HocSinhID
+				if (!hocSinhID) continue
+				const hoTen = row['Họ tên'] ?? `${row.Ho ?? ''} ${row.Ten ?? ''}`.trim()
+				for (const skill of skillColumns) {
+					if (row[skill.field] === null || row[skill.field] === undefined) continue
+					result.push({
+						HocSinhID: hocSinhID,
+						Ho: '',
+						Ten: hoTen,
+						Nhom: row['Lớp'] ?? row.Nhom ?? row.TenLop ?? '',
+						TenKyNang: skill.label,
+						SoCauHoi: row.SoCauHoi ?? null,
+						SoCauDung: row[skill.field],
+						DiemTong: row[skill.field],
+					})
+				}
+			}
+			return result
 		},
 
 		_getKhoiFromLopID(lopID) {
@@ -449,14 +520,19 @@
 
 			if (!activeStudentIDs) {
 				// Chưa có activeTabMeta → fallback filter theo Nhom
-				return this._filterByLop(data, lopID)
+				return lopID ? this._filterByLop(data, lopID) : data
 			}
 
+			if (!lopID) return data.filter(r => activeStudentIDs.has(String(r.HocSinhID)))
+
 			// Union: khớp HocSinhID trong tab active OR khớp Nhom (tránh bỏ sót)
-			return data.filter(r =>
-				activeStudentIDs.has(String(r.HocSinhID)) ||
-				this._matchesLop(r, lopID)
-			)
+			return data.filter(r => activeStudentIDs.has(String(r.HocSinhID)) || this._matchesLop(r, lopID))
+		},
+
+		_getKhoiFromClassName(name) {
+			const normalized = String(name ?? '').includes('-') ? String(name).split('-').pop() : String(name ?? '')
+			const match = normalized.match(/^(\d+)/)
+			return match ? Number(match[1]) : null
 		},
 
 		async doApply(isActive) {
@@ -479,7 +555,7 @@
 					const maCotDiem = activeMapping[r.TenKyNang]
 					if (!maCotDiem) continue
 
-					const val = this.mappingField === 'SoCauDung' ? r.SoCauDung : r.DiemTong
+					const val = r.DiemTong
 					if (val === null || val === undefined) continue
 
 					if (!studentScores.has(r.HocSinhID)) {
@@ -490,9 +566,10 @@
 
 				this.$emit('apply', {
 					exam: this.selectedExam,
-					lopID: this.selectedLopID,
+					khoiKeyID: this.selectedKhoiKeyID,
+					monHocID: this.selectedMonHocID,
 					skillMapping: activeMapping,   // { TenKyNang → maCotDiem }
-					mappingField: this.mappingField, // 'DiemTong' | 'SoCauDung'
+					mappingField: 'DiemTong',
 					rows: this.previewRows,
 					rawRows: this.rawScoreData,
 					studentScores,                 // Map<hocSinhID, { maCotDiem: value }>

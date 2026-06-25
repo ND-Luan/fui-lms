@@ -1146,6 +1146,7 @@
 				const prefix = this.activeNhomCotDiem
 				const processedKeys = new Set()
 				const isCap2 = this.config.cap === 'cap2'
+				const isDirectScoreMode = isCap2 || (this.config.cap === 'cap3' && this.config.scoreType === 'HK')
 
 				const colTitle = (c, forcePfx = null) => {
 					if (!isCap2) return c.title
@@ -1157,8 +1158,8 @@
 					const c = cols[i]
 					if (c.key?.includes('_IELTS_')) continue
 					if (processedKeys.has(c.key)) continue
-					// cap2: ẩn _Conv bên HK
-					if (isCap2 && c.key?.endsWith('_Conv') && !c.key?.includes('_CB_')) continue
+					// HK direct score: ẩn các cột quy đổi, chỉ giữ cột điểm.
+					if (isDirectScoreMode && c.key?.endsWith('_Conv') && !c.key?.includes('_CB_')) continue
 
 					// CB col
 					const isCBPointCol = c.key?.includes('_CB_') && c.key?.endsWith('_Point') && !c.formula
@@ -1193,15 +1194,14 @@
 
 					if (isInputCol) {
 						const expectedConvKey = c.key.replace('_Point', '_Conv')
-						const convColIdx = cols.findIndex((col, ci) => ci > i && col.key === expectedConvKey)
+						const convColIdx = isDirectScoreMode ? -1 : cols.findIndex((col, ci) => ci > i && col.key === expectedConvKey)
 						const convCol = convColIdx !== -1 ? cols[convColIdx] : null
 						if (convColIdx !== -1) { processedKeys.add(expectedConvKey); i = convColIdx }
 
 						processedKeys.add(c.key)
 
-						if (isCap2) {
-							// ✅ cap2: KHÔNG có SoCauDung/DiemTho
-							// Điền thẳng điểm từ QuanLiKiThi, không cần nhập tay
+						if (isDirectScoreMode) {
+							// Điền thẳng điểm từ QuanLiKiThi, không qua SoCauDung.
 							scoreDescs.push({
 								title: colTitle(c), key: c.key,
 								colType: 'numeric', readOnly: false, width: '130px',
