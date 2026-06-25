@@ -51,11 +51,21 @@
 										:disabled="items.length === 0 || isReadOnly" @click="onImport">
 										Import dữ liệu từ Excel
 									</v-btn>
-									<v-btn v-if="items.length > 0"
-										prepend-icon="mdi-export" color="success" variant="outlined"
-										@click="onExportExcel">
-										Xuất Excel
-									</v-btn>
+									<v-menu v-if="items.length > 0">
+										<template #activator="{ props }">
+											<v-btn v-bind="props" color="success" variant="outlined" prepend-icon="mdi-file-excel">
+												Xuất Excel <v-icon end>mdi-chevron-down</v-icon>
+											</v-btn>
+										</template>
+										<v-list>
+											<v-list-item @click="onExportExcel('class')">
+												<v-list-item-title>Xuất lớp hiện tại</v-list-item-title>
+											</v-list-item>
+											<v-list-item @click="onExportExcel('grade')">
+												<v-list-item-title>Xuất toàn bộ khối</v-list-item-title>
+											</v-list-item>
+										</v-list>
+									</v-menu>
 									<v-btn prepend-icon="mdi-content-save" color="info" variant="outlined"
 										:disabled="items.length === 0 || isReadOnly" @click="onSave">
 										Lưu tạm tất cả
@@ -1169,7 +1179,7 @@
 			return headers
 		},
 
-		async onExportExcel() {
+		async onExportExcel(exportType = 'class') {
 			if (!this.items.length) return
 			if (!window.XLSX) {
 				const promise = new Promise((resolve) => {
@@ -1232,50 +1242,108 @@
 				exportKeys.push(key)
 			}
 
-			const dataRows = this.items.map(item => {
-				return exportKeys.map(key => {
-					if (key === 'DKHocTiep_Display') {
-						return item.DKHocTiep ? 'Đăng ký học tiếp' : 'Không'
+			const mapItemsToRows = (itemsList) => {
+				return itemsList.map(item => {
+					if (!item.NgayNghi) {
+						const existDSTreVang = (vueData.DSChuyenCan_TreVang ?? []).find(n => n.HocSinhID === item.HocSinhID)
+						item.NgayNghi = {
+							MonVang: existDSTreVang ? JSON.parse(existDSTreVang.MonVang) : [],
+							TongSoTiet: existDSTreVang?.TongSoTiet || null,
+						}
 					}
-					if (key === 'NgayNghi_Display') {
-						let lines = []
-						if (item.NgayNghi?.TongSoTiet > 0) {
-							lines.push(`Tổng số tiết vắng: ${item.NgayNghi.TongSoTiet}`)
+					return exportKeys.map(key => {
+						if (key === 'DKHocTiep_Display') {
+							return item.DKHocTiep ? 'Đăng ký học tiếp' : 'Không'
 						}
-						if (item.NgayNghi?.MonVang?.length > 0) {
-							const monVangStr = item.NgayNghi.MonVang.map(m => m.TenMonHoc).join(', ')
-							lines.push(`Môn vắng: ${monVangStr}`)
-						}
-						if (typeof this.getViPhamCuaHocSinh === 'function') {
-							const vps = this.getViPhamCuaHocSinh(item.HocSinhID)
-							if (vps && vps.length > 0) {
-								vps.forEach(vp => {
-									const unit = vp.LoaiViPham === 2 ? 'ngày' : 'tiết'
-									lines.push(`${this.tenViPhamVI(vp.TenViPham)} (${vp.SoLuong_HS} ${unit})`)
-								})
+						if (key === 'NgayNghi_Display') {
+							let lines = []
+							if (item.NgayNghi?.TongSoTiet > 0) {
+								lines.push(`Tổng số tiết vắng: ${item.NgayNghi.TongSoTiet}`)
 							}
+							if (item.NgayNghi?.MonVang?.length > 0) {
+								const monVangStr = item.NgayNghi.MonVang.map(m => m.TenMonHoc).join(', ')
+								lines.push(`Môn vắng: ${monVangStr}`)
+							}
+							if (typeof this.getViPhamCuaHocSinh === 'function') {
+								const vps = this.getViPhamCuaHocSinh(item.HocSinhID)
+								if (vps && vps.length > 0) {
+									vps.forEach(vp => {
+										const unit = vp.LoaiViPham === 2 ? 'ngày' : 'tiết'
+										lines.push(`${this.tenViPhamVI(vp.TenViPham)} (${vp.SoLuong_HS} ${unit})`)
+									})
+								}
+							}
+							return lines.join('\n')
 						}
-						return lines.join('\n')
-					}
-					if (key === 'NhanXetToan_HTML_Strip') {
-						return this.stripHtml(item.NhanXetToan_HTML)
-					}
-					if (key === 'NhanXetTiengViet_HTML_Strip') {
-						return this.stripHtml(item.NhanXetTiengViet_HTML)
-					}
-					const val = item[key]
-					if (typeof val === 'string' && (val.includes('<') || val.includes('>'))) {
-						return this.stripHtml(val)
-					}
-					return val ?? ''
+						if (key === 'NhanXetToan_HTML_Strip') {
+							return this.stripHtml(item.NhanXetToan_HTML)
+						}
+						if (key === 'NhanXetTiengViet_HTML_Strip') {
+							return this.stripHtml(item.NhanXetTiengViet_HTML)
+						}
+						const val = item[key]
+						if (typeof val === 'string' && (val.includes('<') || val.includes('>'))) {
+							return this.stripHtml(val)
+						}
+						return val ?? ''
+					})
 				})
-			})
+			}
 
-			const worksheet = XLSX.utils.aoa_to_sheet([exportHeaders, ...dataRows])
 			const workbook = XLSX.utils.book_new()
-			XLSX.utils.book_append_sheet(workbook, worksheet, 'NhanXetThang')
-			const fileName = `NhanXetThang_${this.LopItem?.TenLop || 'Lop'}_Thang_${this.ThangObj?.Thang || 'Thang'}.xlsx`
-			XLSX.writeFile(workbook, fileName)
+
+			if (exportType === 'grade') {
+				const currentLop = this.DSLop.find(x => x.LopID === (this.LopItem?.LopID || this.LopID))
+				if (!currentLop) return
+				const targetKhoiID = currentLop.KhoiID
+				const classesInGrade = this.DSLop.filter(x => x.KhoiID === targetKhoiID)
+
+				// Eager load month list in parallel
+				const monthPromises = classesInGrade.map(async (cls) => {
+					const thangList = await fetchPromise('lms/NhanXetThang_Lop_Get_GV', {
+						NienKhoa: vueData.NienKhoa,
+						LopID: cls.LopID,
+					})
+					const match = thangList?.find(t => t.Thang === this.ThangObj.Thang)
+					return {
+						class: cls,
+						lopNhanXetThangID: match?.Lop_NhanXetThangID
+					}
+				})
+				const resolvedMonths = await Promise.all(monthPromises)
+
+				// Eager load comments in parallel
+				const commentPromises = resolvedMonths
+					.filter(m => m.lopNhanXetThangID)
+					.map(async (m) => {
+						const items = await fetchPromise('lms/NhanXetThang_Get', {
+							Lop_NhanXetThangID: m.lopNhanXetThangID,
+							LopID: m.class.LopID,
+						})
+						return {
+							className: m.class.TenLop,
+							items: items || []
+						}
+					})
+				const classComments = await Promise.all(commentPromises)
+
+				classComments.forEach(cc => {
+					if (cc.items.length) {
+						const rows = mapItemsToRows(cc.items)
+						const worksheet = XLSX.utils.aoa_to_sheet([exportHeaders, ...rows])
+						XLSX.utils.book_append_sheet(workbook, worksheet, cc.className)
+					}
+				})
+
+				const fileName = `NhanXetThang_Khoi_${currentLop.KhoiID}_Thang_${this.ThangObj?.Thang || ''}.xlsx`
+				XLSX.writeFile(workbook, fileName)
+			} else {
+				const rows = mapItemsToRows(this.items)
+				const worksheet = XLSX.utils.aoa_to_sheet([exportHeaders, ...rows])
+				XLSX.utils.book_append_sheet(workbook, worksheet, this.LopItem?.TenLop || 'NhanXetThang')
+				const fileName = `NhanXetThang_${this.LopItem?.TenLop || 'Lop'}_Thang_${this.ThangObj?.Thang || 'Thang'}.xlsx`
+				XLSX.writeFile(workbook, fileName)
+			}
 		},
 
 		stripHtml(html) {

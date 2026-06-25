@@ -38,9 +38,21 @@
                             <v-btn color="primary" variant="outlined" prepend-icon="mdi-refresh" @click="onRefresh">
                                 Làm mới
                             </v-btn>
-                            <v-btn v-if="items.length > 0" color="success" variant="outlined" prepend-icon="mdi-file-excel" @click="onExportExcel">
-                                Xuất Excel
-                            </v-btn>
+                            <v-menu v-if="items.length > 0">
+                                <template #activator="{ props }">
+                                    <v-btn v-bind="props" color="success" variant="outlined" prepend-icon="mdi-file-excel">
+                                        Xuất Excel <v-icon end>mdi-chevron-down</v-icon>
+                                    </v-btn>
+                                </template>
+                                <v-list>
+                                    <v-list-item @click="onExportExcel('class')">
+                                        <v-list-item-title>Xuất lớp hiện tại</v-list-item-title>
+                                    </v-list-item>
+                                    <v-list-item @click="onExportExcel('grade')">
+                                        <v-list-item-title>Xuất toàn bộ khối</v-list-item-title>
+                                    </v-list-item>
+                                </v-list>
+                            </v-menu>
                         </v-col>
 
                         <v-col cols="12" class="d-flex justify-space-between align-center flex-wrap ga-2">
@@ -623,7 +635,7 @@
       }
     },
 
-    async onExportExcel() {
+    async onExportExcel(exportType = 'class') {
       if (!this.items.length) return
       if (!window.XLSX) {
         const promise = new Promise((resolve) => {
@@ -727,48 +739,105 @@
         exportKeys.push(key)
       }
 
-      const dataRows = this.items.map(item => {
-        return exportKeys.map(key => {
-          if (key === 'DKHocTiep_Display') {
-            return item.DKHocTiep ? 'Đăng ký học tiếp' : 'Không'
-          }
-          if (key === 'NgayNghi_Display') {
-            let lines = []
-            if (item.NgayNghi?.TongSoTiet > 0) {
-              lines.push(`Tổng số tiết vắng: ${item.NgayNghi.TongSoTiet}`)
+      const mapItemsToRows = (itemsList) => {
+        return itemsList.map(item => {
+          if (!item.NgayNghi) {
+            const existDSTreVang = vueData.DSChuyenCan_TreVang?.find(n => n.HocSinhID === item.HocSinhID)
+            item.NgayNghi = {
+              MonVang: existDSTreVang ? JSON.parse(existDSTreVang.MonVang) : [],
+              TongSoTiet: existDSTreVang?.TongSoTiet || null,
             }
-            if (item.NgayNghi?.MonVang?.length > 0) {
-              const monVangStr = item.NgayNghi.MonVang.map(m => m.TenMonHoc).join(', ')
-              lines.push(`Môn vắng: ${monVangStr}`)
+          }
+          return exportKeys.map(key => {
+            if (key === 'DKHocTiep_Display') {
+              return item.DKHocTiep ? 'Đăng ký học tiếp' : 'Không'
             }
-            if (item.LoaiViPham_Group?.length > 0) {
-              item.LoaiViPham_Group.forEach(lvp => {
-                lines.push(`Vi phạm: ${lvp.TenViPham}`)
-              })
+            if (key === 'NgayNghi_Display') {
+              let lines = []
+              if (item.NgayNghi?.TongSoTiet > 0) {
+                lines.push(`Tổng số tiết vắng: ${item.NgayNghi.TongSoTiet}`)
+              }
+              if (item.NgayNghi?.MonVang?.length > 0) {
+                const monVangStr = item.NgayNghi.MonVang.map(m => m.TenMonHoc).join(', ')
+                lines.push(`Môn vắng: ${monVangStr}`)
+              }
+              if (item.LoaiViPham_Group?.length > 0) {
+                item.LoaiViPham_Group.forEach(lvp => {
+                  lines.push(`Vi phạm: ${lvp.TenViPham}`)
+                })
+              }
+              return lines.join('\n')
             }
-            return lines.join('\n')
-          }
-          if (key === 'NhanXetToan_HTML_Strip') {
-            return this.stripHtml(item.NhanXetToan_HTML)
-          }
-          if (key === 'NhanXetTiengViet_HTML_Strip') {
-            return this.stripHtml(item.NhanXetTiengViet_HTML)
-          }
-          const val = item[key]
-          if (typeof val === 'string' && (val.includes('<') || val.includes('>'))) {
-            return this.stripHtml(val)
-          }
-          return val ?? ''
+            if (key === 'NhanXetToan_HTML_Strip') {
+              return this.stripHtml(item.NhanXetToan_HTML)
+            }
+            if (key === 'NhanXetTiengViet_HTML_Strip') {
+              return this.stripHtml(item.NhanXetTiengViet_HTML)
+            }
+            const val = item[key]
+            if (typeof val === 'string' && (val.includes('<') || val.includes('>'))) {
+              return this.stripHtml(val)
+            }
+            return val ?? ''
+          })
         })
-      })
+      }
 
-      const worksheet = XLSX.utils.aoa_to_sheet([exportHeaders, ...dataRows])
       const workbook = XLSX.utils.book_new()
-      XLSX.utils.book_append_sheet(workbook, worksheet, 'NhanXetThang')
-      
-      const lop = this.DSLop.find(x => x.LopID === this.LopID)
-      const fileName = `DuyetNhanXetThang_${lop?.TenLop || 'Lop'}_Thang_${this.ThangObj?.Thang || 'Thang'}.xlsx`
-      XLSX.writeFile(workbook, fileName)
+
+      if (exportType === 'grade') {
+        const currentLop = this.DSLop.find(x => x.LopID === (this.LopItem?.LopID || this.LopID))
+        if (!currentLop) return
+        const targetKhoiID = currentLop.KhoiID
+        const classesInGrade = this.DSLop.filter(x => x.KhoiID === targetKhoiID)
+
+        // Eager load month list in parallel
+        const monthPromises = classesInGrade.map(async (cls) => {
+          const thangList = await fetchPromise('lms/NhanXetThang_Lop_Get', {
+            NienKhoa: vueData.NienKhoa,
+            LopID: cls.LopID,
+          })
+          const match = thangList?.find(t => t.Thang === this.ThangObj.Thang)
+          return {
+            class: cls,
+            lopNhanXetThangID: match?.Lop_NhanXetThangID
+          }
+        })
+        const resolvedMonths = await Promise.all(monthPromises)
+
+        // Eager load comments in parallel
+        const commentPromises = resolvedMonths
+          .filter(m => m.lopNhanXetThangID)
+          .map(async (m) => {
+            const items = await fetchPromise('lms/NhanXetThang_Get', {
+              Lop_NhanXetThangID: m.lopNhanXetThangID,
+              LopID: m.class.LopID,
+            })
+            return {
+              className: m.class.TenLop,
+              items: items || []
+            }
+          })
+        const classComments = await Promise.all(commentPromises)
+
+        classComments.forEach(cc => {
+          if (cc.items.length) {
+            const rows = mapItemsToRows(cc.items)
+            const worksheet = XLSX.utils.aoa_to_sheet([exportHeaders, ...rows])
+            XLSX.utils.book_append_sheet(workbook, worksheet, cc.className)
+          }
+        })
+
+        const fileName = `DuyetNhanXetThang_Khoi_${currentLop.KhoiID}_Thang_${this.ThangObj?.Thang || ''}.xlsx`
+        XLSX.writeFile(workbook, fileName)
+      } else {
+        const rows = mapItemsToRows(this.items)
+        const worksheet = XLSX.utils.aoa_to_sheet([exportHeaders, ...rows])
+        XLSX.utils.book_append_sheet(workbook, worksheet, this.LopItem?.TenLop || 'NhanXetThang')
+        const lop = this.DSLop.find(x => x.LopID === this.LopID)
+        const fileName = `DuyetNhanXetThang_${lop?.TenLop || 'Lop'}_Thang_${this.ThangObj?.Thang || 'Thang'}.xlsx`
+        XLSX.writeFile(workbook, fileName)
+      }
     },
 
     stripHtml(html) {
