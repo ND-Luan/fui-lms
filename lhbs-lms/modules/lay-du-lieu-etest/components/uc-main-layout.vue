@@ -101,13 +101,15 @@
 						Chọn cấp, học kì, loại điểm rồi bấm
 						<v-chip color="primary" size="small" class="mx-1">Tải dữ liệu</v-chip>
 					</div>
-					<div class="text-body-2 text-medium-emphasis mt-1">Cấp 2: mỗi khối là 1 tab, các lớp gộp chung · Cấp 3: mỗi lớp là 1 tab</div>
+					<div class="text-body-2 text-medium-emphasis mt-1">Cấp 2: mỗi khối là 1 tab, các lớp gộp chung · Cấp
+						3: mỗi lớp là 1 tab</div>
 				</div>
 			</v-container>
 
 			<div v-if="ready">
 				<v-tabs v-model="activeWsIdx" color="primary" density="compact">
-					<v-tab v-for="(meta, idx) in wsMeta" :key="idx" :value="idx">{{ meta.tabName ?? meta.cls?.name }}</v-tab>
+					<v-tab v-for="(meta, idx) in wsMeta" :key="idx" :value="idx">{{ meta.tabName ?? meta.cls?.name }}
+					</v-tab>
 				</v-tabs>
 				<v-divider />
 				<v-tabs-window v-model="activeWsIdx">

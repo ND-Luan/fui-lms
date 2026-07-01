@@ -122,7 +122,8 @@
 					</div>
 
 					<!-- Đã chọn kì thi, chưa chọn khối/môn -->
-					<div v-else-if="selectedExam && (!selectedKhoiKeyID || !selectedMonHocID)" class="text-center text-medium-emphasis py-10">
+					<div v-else-if="selectedExam && (!selectedKhoiKeyID || !selectedMonHocID)"
+						class="text-center text-medium-emphasis py-10">
 						<v-icon size="48" color="grey-lighten-1">mdi-school-outline</v-icon>
 						<div class="mt-2">Chọn khối và môn học để xem dữ liệu điểm</div>
 					</div>

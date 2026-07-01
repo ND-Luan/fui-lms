@@ -600,13 +600,7 @@ function processBeforeExport() {
         for (let j = 0; j < DSCotDiem.length; j++) {
             let giaTriCotDiem = val[i][DSCotDiem[j].MaCotDiem]
             if (DSCotDiem[j].LoaiCotDiem === 'Công thức') {
-                const htmlValue = vueData.instance?.[0]?.records?.[i]?.[j + vueData.freezeColumns]?.element?.innerHTML;
-                if (htmlValue !== undefined && htmlValue !== null && htmlValue !== '') {
-                    giaTriCotDiem = htmlValue;
-                } else {
-                    const dbRecord = (vueData.DSCotDiem || []).find(x => x.HocSinhID === val[i].HocSinhID && x.MaCotDiem === DSCotDiem[j].MaCotDiem);
-                    giaTriCotDiem = dbRecord ? dbRecord.KetQuaDanhGia_VI : '';
-                }
+                giaTriCotDiem = vueData.instance[0].records[i][j + vueData.freezeColumns]?.element?.innerHTML
             }
             if (DSCotDiem[j].GiaTriCotDiem === 'number') {
                 if (giaTriCotDiem === null || giaTriCotDiem === NaN || giaTriCotDiem === '') {
