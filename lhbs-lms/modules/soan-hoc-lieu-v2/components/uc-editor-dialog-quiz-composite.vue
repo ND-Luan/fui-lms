@@ -51,8 +51,7 @@
 						</v-card-title>
 						<v-card-text>
 							<f-editor v-model="textEditor" variant="outlined" :height="300"
-							 :imageapi="vueData.v_Set.apiImageAdapter"
-								placeholder="Dán nội dung câu hỏi vào đây...">
+								:imageapi="vueData.v_Set.apiImageAdapter" placeholder="Dán nội dung câu hỏi vào đây...">
 							</f-editor>
 						</v-card-text>
 					</v-card>
@@ -146,17 +145,13 @@
 
 <script>
 	export default {
+		inject: ['snackbarRef', 'iframeRef', 'confirmRef'],
 		props: {
 			text: {
 				type: Array,
 				default: () => []
 			},
 	
-			// Test method
-			testMethod() {
-				console.log('Test method called!');
-				alert('Test method works!');
-			},
 			hasGroups: {
 				type: Boolean,
 				default: false
@@ -222,6 +217,9 @@
 		},
 	
 		methods: {
+			notify(message, color = 'success') {
+				this.snackbarRef?.value?.showSnackbar?.({ message, color });
+			},
 			getFormatHint() {
 				const found = this.supportedQuestionTypes.find(t => t.value === this.selectedQuestionType);
 				return found ? found.hint : 'Chọn loại câu hỏi để xem hướng dẫn format';
@@ -236,7 +234,7 @@
 				console.log('🔍 generatePreview called');
 	
 				if (!this.textEditor.trim()) {
-					alert('Vui lòng nhập nội dung câu hỏi');
+					this.notify('Vui lòng nhập nội dung câu hỏi', 'warning');
 					return;
 				}
 	
@@ -254,13 +252,13 @@
 					console.log(`📊 Results: ${validQuestions} valid, ${errorQuestions} errors`);
 	
 					if (errorQuestions > 0) {
-						alert(`⚠️ Kết quả parse:\n✅ ${validQuestions} câu thành công\n❌ ${errorQuestions} câu lỗi\n\nVui lòng kiểm tra preview và sửa lỗi.`);
+						this.notify(`Kết quả parse: ${validQuestions} câu thành công, ${errorQuestions} câu lỗi. Vui lòng kiểm tra preview.`, 'warning');
 					} else {
-						alert(`✅ Parse thành công ${validQuestions} câu hỏi!`);
+						this.notify(`Parse thành công ${validQuestions} câu hỏi!`);
 					}
 				} catch (error) {
 					console.error('❌ Parse error:', error);
-					alert('Lỗi phân tích nội dung: ' + error.message);
+					this.notify('Lỗi phân tích nội dung: ' + error.message, 'error');
 				}
 			},
 	
@@ -613,7 +611,7 @@
 	
 			onImport(isActive) {
 				if (this.previewQuestions.length === 0) {
-					alert('Vui lòng tạo preview trước khi import');
+					this.notify('Vui lòng tạo preview trước khi import', 'warning');
 					return;
 				}
 	
@@ -634,31 +632,3 @@
 		}
 	}
 </script>
-
-<style scoped>
-	.question-preview {
-		background: #f8f9fa;
-		padding: 16px;
-		border-radius: 8px;
-		border-left: 4px solid #2196f3;
-	}
-
-	.prompt-preview {
-		font-weight: 500;
-		margin-bottom: 12px;
-	}
-
-	.option-preview {
-		padding: 8px 12px;
-		margin: 4px 0;
-		border-radius: 4px;
-		background: white;
-		border: 1px solid #e0e0e0;
-	}
-
-	.correct-option {
-		background: #e8f5e8;
-		border-color: #4caf50;
-		color: #2e7d32;
-	}
-</style>

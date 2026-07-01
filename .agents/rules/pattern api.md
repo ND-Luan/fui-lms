@@ -247,3 +247,23 @@ Register it in `proj.json` — add an entry in the `modules` array:
 }
 ```
 
+## Background upload & File deletion pattern
+
+When implementing file uploads (images, documents, videos, assignments...):
+1. **Non-blocking Background Upload:**
+   - Always use `UploadManager` to run uploads asynchronously under the hood.
+   - Close the upload dialog immediately after initiating the task. Do not freeze the screen with a blocking loading overlay.
+2. **Centralized Upload Helpers:**
+   - Instead of configuring raw tasks manually, prefer calling the helper methods on `UploadManager` to automatically handle token authorization headers and payloads:
+     - **For general files (`/FileData`):** Use `UploadManager.uploadLmsFile(file, { onComplete, onError })`
+     - **For LMS files (`/LMS_FileData`):** Use `UploadManager.uploadLmsFileData(file, { onComplete, onError })`
+     - **For Google Drive uploads:** Use `UploadManager.uploadToGoogleDrive(file, { accessToken, onComplete, onError })` (this automatically handles multipart formatting and sets permissions to public reader).
+     - **For YouTube video uploads:** Use `UploadManager.uploadToYouTube(file, { accessToken, playlistId, title, onComplete, onError })` (this handles the resumable session creation, binary PUT transmission, and adds the video to the playlist).
+   - Only use the raw `UploadManager.addUploadTask` method directly when dealing with custom third-party URLs that do not have dedicated helpers.
+3. **File Deletion:**
+   - Ensure the user has the ability to delete uploaded files.
+   - The deletion action must invoke the correct backend API (to remove it from the database, or to call the third-party storage deletion API if files are hosted externally).
+   - **For LMS files:** Call `UploadManager.deleteLmsFile(fileId, { onComplete, onError })` to delete files uploaded via `FileData` or `LMS_FileData`.
+   - **For Google Drive deletions:** Call `UploadManager.deleteFromGoogleDrive(fileId, { accessToken, onComplete, onError })` to delete the file permanently from Drive.
+   - **For YouTube video deletions:** Call `UploadManager.deleteFromYouTube(videoId, { accessToken, onComplete, onError })` to delete the video permanently from YouTube.
+

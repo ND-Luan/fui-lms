@@ -229,7 +229,8 @@
 
 <script>
 	export default {
-  name: 'uc-quiz-composite-groups-editor',
+		name: 'uc-quiz-composite-groups-editor',
+  inject: ['snackbarRef', 'iframeRef', 'confirmRef'],
   props: {
     modelValue: {
       type: Object,
@@ -313,6 +314,9 @@
   },
   
   methods: {
+    notify(message, color = 'success') {
+      this.snackbarRef?.value?.showSnackbar?.({ message, color });
+    },
     // ======================== GROUP MANAGEMENT ========================
     addGroup() {
       const newGroup = {
@@ -328,13 +332,14 @@
       this.activeGroupIndex = this.editableData.groups.length - 1;
     },
     
-    removeGroup(groupIndex) {
+    async removeGroup(groupIndex) {
       if (this.editableData.groups.length <= 1) {
-        alert('Phải có ít nhất 1 nhóm câu hỏi');
+        this.notify('Phải có ít nhất 1 nhóm câu hỏi', 'warning');
         return;
       }
       
-      if (confirm('Xóa nhóm này sẽ xóa tất cả câu hỏi bên trong. Bạn có chắc?')) {
+      const ok = await this.confirmRef.value.show({ title: 'Xóa nhóm này sẽ xóa tất cả câu hỏi bên trong. Bạn có chắc?' });
+      if (ok) {
         this.editableData.groups.splice(groupIndex, 1);
         this.activeGroupIndex = Math.min(this.activeGroupIndex, this.editableData.groups.length - 1);
       }
@@ -548,54 +553,5 @@
       return typeMap[type] || type;
     }
   }
-}
+	}
 </script>
-
-<style scoped>
-	.quiz-composite-groups-editor {
-		max-width: 100%;
-	}
-
-	.group-tab {
-		min-width: 120px;
-	}
-
-	.question-title {
-		font-weight: 500;
-		color: #1976d2;
-	}
-
-	.question-editor {
-		border: 1px solid #e0e0e0;
-		border-radius: 8px;
-		padding: 16px;
-		background: #fafafa;
-	}
-
-	/* Animation cho expansion panels */
-	.v-expansion-panel {
-		transition: all 0.3s ease;
-	}
-
-	.v-expansion-panel:hover {
-		box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-	}
-
-	/* Custom styling cho group tabs */
-	.v-tab--selected {
-		background: rgba(25, 118, 210, 0.1);
-		border-radius: 8px 8px 0 0;
-	}
-
-	/* Responsive adjustments */
-	@media (max-width: 768px) {
-		.quiz-composite-groups-editor {
-			padding: 8px;
-		}
-
-		.group-tab {
-			min-width: 100px;
-			font-size: 0.875rem;
-		}
-	}
-</style>

@@ -211,3 +211,84 @@
     content: "❌ Không thể thả - Tạo vòng lặp";
     background: #f44336;
 }
+
+/* Match the cleaner editor surface in soan-hoc-lieu.css.css */
+.node-item {
+    padding: 8px 10px;
+    background: transparent;
+    border: 0;
+    border-radius: 8px;
+    box-shadow: none;
+    transition: background-color 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.node-item:hover {
+    background: rgba(var(--v-theme-primary), 0.06);
+    border-color: transparent;
+    box-shadow: none;
+    transform: none;
+}
+
+.tree-container.drag-active,
+.nested-tree.drag-active {
+    overflow-x: hidden;
+}
+
+.node-wrapper.is-dragging {
+    opacity: 0.55;
+    transform: none;
+    filter: none;
+}
+
+.node-item.drop-target {
+    transform: none !important;
+}
+
+.drop-indicator {
+    height: 2px;
+    background: rgb(var(--v-theme-primary));
+    box-shadow: 0 0 0 3px rgba(var(--v-theme-primary), 0.12);
+}
+
+.node-wrapper {
+    transition: transform 0.18s ease, opacity 0.18s ease;
+}
+
+.node-item.drop-moved {
+    animation: movedNodeFlash 0.9s ease;
+}
+
+@keyframes movedNodeFlash {
+    0% {
+        background: rgba(var(--v-theme-success), 0.24);
+        box-shadow: inset 3px 0 0 rgb(var(--v-theme-success));
+    }
+
+    60% {
+        background: rgba(var(--v-theme-success), 0.12);
+        box-shadow: inset 3px 0 0 rgb(var(--v-theme-success));
+    }
+
+    100% {
+        background: transparent;
+        box-shadow: none;
+    }
+}
+
+.node-title {
+    color: #1f2937;
+    font-size: 0.875rem;
+    letter-spacing: 0;
+}
+
+.node-actions {
+    background: transparent;
+    border: 0;
+    border-radius: 8px;
+}
+
+.nested-tree {
+    margin-left: 20px;
+    padding-left: 12px;
+    border-left: 1px solid rgba(0, 0, 0, 0.12);
+}

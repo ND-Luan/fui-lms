@@ -1,8 +1,7 @@
 <template>
-	<div class="layout-container">
-		<!-- Header Section -->
-		<div class="header-section">
-			<v-card flat>
+	<Global upload-manager>
+		<template #header>
+			<v-card>
 				<v-card-text class="header-content">
 					<span class="page-title">Soạn thảo học liệu</span>
 					<template v-if="selectedKhoi !== null">
@@ -27,7 +26,7 @@
 					</div>
 				</v-card-text>
 			</v-card>
-		</div>
+		</template>
 		<v-divider />
 
 		<!-- Main Content -->
@@ -126,6 +125,10 @@
 								</v-chip>
 							</div>
 							<div class="tree-actions">
+								<v-btn size="small" variant="text" color="primary" @click="refreshTree" :loading="isLoadingTree">
+									<v-icon start>mdi-refresh</v-icon>
+									Tải lại
+								</v-btn>
 								<v-btn size="small" variant="text" @click="collapseAll">
 									<v-icon start>mdi-collapse-all</v-icon>
 									Thu gọn
@@ -161,13 +164,14 @@
 			</div>
 		</div>
 		<!-- THÊM: Tích hợp Dialog vào đây -->
-		<uc-noi-dung-dialog v-model:is-open="isDialogOpen" :item="editingItem" @save="onSaveItem" />
-	</div>
+		<uc-noi-dung-dialog v-model:is-open="isDialogOpen" :item="editingItem" @save="onSaveItem" @refresh-tree="fetchTreeNoiDung" @update-item="editingItem = $event" />
+	</Global>
 </template>
 
 <script>
 	export default {
-		name: 'uc-soan-hoc-lieu-view',
+		name: 'uc-main-layout',
+	inject: ['snackbarRef', 'iframeRef', 'confirmRef'],
 	props: ['khoiIdProp', 'monHocIdProp'],
 	data() {
 		return {
@@ -208,9 +212,9 @@
 			]
 		}
 	},
-	mounted() {
-		this.getDSBoSach()
-	},
+		mounted() {
+			this.getDSBoSach()
+		},
 	watch: {
 		selectedKhoi: function (selectedKhoi) {
 			this.selectedMon = null
@@ -226,15 +230,18 @@
 			if (selectedMon) this.fetchHocLieu()
 		}
 	},
-	methods: {
-		getDSBoSach() {
-			ajaxCALL('lms/FP_BoSach_GetList', null, res => {
-				this.DSBoSach = res.data
-				this.selectedBoSach = res.data[0] ? res.data[0].BoSachID : null
-			})
-		},
-		getDSMonHoc() {
-			ajaxCALL("lms/MonHoc_Select", null, res => this.DSMonHoc = res.data)
+		methods: {
+			notify(message, color = 'success') {
+				this.snackbarRef?.value?.showSnackbar?.({ message, color });
+			},
+			async getDSBoSach() {
+				const res = await fetchPromise('lms/FP_BoSach_GetList');
+				this.DSBoSach = res ?? [];
+				this.selectedBoSach = this.DSBoSach[0] ? this.DSBoSach[0].BoSachID : null;
+			},
+			async getDSMonHoc() {
+				const res = await fetchPromise('lms/MonHoc_Select');
+				this.DSMonHoc = res ?? [];
 		},
 		getKhoiName(khoiId) {
 			const khoi = this.DSKhoi.find(item => item.id === khoiId);
@@ -244,16 +251,13 @@
 			const mon = this.DSMonHoc.find(item => item.MonHocID === monHocId);
 			return mon ? (mon.MonHocName || mon.TenMonHoc_HienThi || mon.TenMonHoc || '') : '';
 		},
-		fetchHocLieu() {
-			ajaxCALL('lms/FP_HocLieu_GetByLopMon', {
-				KhoiID: this.selectedKhoi,
-				MonHocID: this.selectedMon
-			}, (res) => {
-				if (res && res.data) {
-					this.DSHocLieu = res.data;
-				}
-			});
-		},
+			async fetchHocLieu() {
+				const res = await fetchPromise('lms/FP_HocLieu_GetByLopMon', {
+					KhoiID: this.selectedKhoi,
+					MonHocID: this.selectedMon
+				});
+				this.DSHocLieu = res ?? [];
+			},
 		async selectHocLieu(sach) {
 
 			this.selectedHocLieu = sach;
@@ -263,30 +267,36 @@
 			this.isLoadingTree = false;
 			console.log("Cây đã được xây dựng xong:", this.treeNoiDung);
 		},
-		fetchTreeNoiDung() {
-			return new Promise((resolve, reject) => {
+			async fetchTreeNoiDung() {
 				if (!this.selectedHocLieu) {
-					return reject("Chưa chọn học liệu");
+					throw new Error("Chưa chọn học liệu");
 				}
-				ajaxCALL('lms/FP_NoiDung_GetTreeByHocLieu', { HocLieuID: this.selectedHocLieu.HocLieuID }, (res) => {
-					if (res && res.data && res.data.length > 1) {
-						const flatList = res.data[1] || [];
-						this.buildTree(flatList);
-						this.treeKey += 1;
-						resolve();
-					} else {
-						this.treeNoiDung = [];
-						reject("Dữ liệu API không hợp lệ");
-					}
-				});
-			});
-		},
+				const res = await fetchPromise('lms/FP_NoiDung_GetTreeByHocLieu', {
+					HocLieuID: this.selectedHocLieu.HocLieuID
+				}, { forceRefresh: true });
+				const flatList = Array.isArray(res?.[1]) ? res[1] : [];
+				this.buildTree(flatList);
+				this.treeKey += 1;
+			},
+			async refreshTree() {
+				if (!this.selectedHocLieu) return;
+				this.isLoadingTree = true;
+				try {
+					await this.fetchTreeNoiDung();
+					this.notify("Tải lại cấu trúc thành công!");
+				} catch (e) {
+					console.error(e);
+					this.notify("Tải lại thất bại!", "error");
+				} finally {
+					this.isLoadingTree = false;
+				}
+			},
 		// HÀM MỚI: Mở dialog
 		onOpenDialog(itemToEdit = null) {
-			if (!this.selectedHocLieu) {
-				Vue.$toast.warning("Vui lòng chọn một cuốn sách trước.");
-				return;
-			}
+				if (!this.selectedHocLieu) {
+					this.notify("Vui lòng chọn một cuốn sách trước.", "warning");
+					return;
+				}
 
 			if (itemToEdit) {
 				// Trường hợp Sửa hoặc Thêm con
@@ -359,36 +369,31 @@
 		},
 
 		// HÀM MỚI: Xử lý sự kiện save từ dialog
-		onSaveItem(item) {
-			console.log("Dữ liệu nhận từ dialog để lưu:", item);
-			item.ParentID = item.ParentID ?? 0
-			ajaxCALL('lms/FP_NoiDung_Save', item, (res) => {
-				if (res.data && res.data[0]) {
-					Vue.$toast.success("Đã lưu thành công!");
-					this.fetchTreeNoiDung(); // Tải lại cây để cập nhật
+			async onSaveItem(item) {
+				console.log("Dữ liệu nhận từ dialog để lưu:", item);
+				item.ParentID = item.ParentID ?? 0
+				const res = await fetchPromise('lms/FP_NoiDung_Save', item, { cache: false });
+				if (res?.[0] || res) {
+					this.notify("Đã lưu thành công!");
+					if (res[0]) {
+						this.editingItem = res[0];
+					}
+					this.fetchTreeNoiDung();
 				} else {
-					Vue.$toast.error("Lưu thất bại!");
+					this.notify("Lưu thất bại!", "error");
 				}
-			});
-		},
+			},
 
 		// HÀM MỚI: Xử lý sự kiện delete từ cây
-		onDeleteNode(node) {
-			function escapeHTML(str) {
-				const div = document.createElement('div');
-				div.textContent = str;
-				return div.innerHTML;
-			}
-			console.log('node', node)
-			confirm({
-				title: `Bạn có chắc chắn muốn xóa mục "${escapeHTML(node.TenNoiDung)}" và tất cả các mục con của nó?`,
-				action: () => {
-					ajaxCALL('lms/FP_NoiDung_Delete', { NoiDungID: node.NoiDungID }, (res) => {
-						Vue.$toast.success("Đã xóa thành công!");
-						this.fetchTreeNoiDung();
-					});
-				}
-			});
+			async onDeleteNode(node) {
+				console.log('node', node)
+				const ok = await this.confirmRef.value.show({
+					title: `Bạn có chắc chắn muốn xóa mục "${node.TenNoiDung}" và tất cả các mục con của nó?`
+				});
+				if (!ok) return;
+				await fetchPromise('lms/FP_NoiDung_Delete', { NoiDungID: node.NoiDungID }, { cache: false });
+				this.notify("Đã xóa thành công!");
+				this.fetchTreeNoiDung();
 		},
 		buildTree(flatList) {
 			if (!flatList || flatList.length === 0) { this.treeNoiDung = []; return; }
@@ -412,7 +417,7 @@
 			console.log("Thêm mục gốc mới...");
 			this.onOpenDialog();
 		},
-		onTreeUpdate(newTree) {
+			async onTreeUpdate(newTree) {
 			console.log("Cấu trúc cây mới:", newTree);
 			this.treeNoiDung = newTree; // Fix: sử dụng newTree thay vì newNodes
 
@@ -432,10 +437,8 @@
 			flatten(newTree, null);
 
 			console.log("Dữ liệu gửi lên API UpdateTreeStructure:", JSON.stringify(dataToUpdate));
-			ajaxCALL('lms/FP_NoiDung_UpdateTreeStructure', { JsonData: JSON.stringify(dataToUpdate) }, (res) => {
-				// Vue.$toast.success("Đã cập nhật cấu trúc cây!");
+				await fetchPromise('lms/FP_NoiDung_UpdateTreeStructure', { JsonData: JSON.stringify(dataToUpdate) }, { cache: false });
 				console.log("Cập nhật thành công!");
-			});
 		},
 		getTreeStats() {
 			const countNodes = (nodes) => nodes.reduce((count, node) => count + 1 + (node.children ? countNodes(node.children) : 0), 0);

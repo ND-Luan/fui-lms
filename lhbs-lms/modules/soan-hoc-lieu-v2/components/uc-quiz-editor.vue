@@ -179,8 +179,8 @@
 				<v-text-field v-model="item.text" density="compact" variant="outlined" hide-details class="mr-2"
 					:placeholder="'Nội dung mục ' + (index + 1)"></v-text-field>
 				<v-select v-model="item.groupId" :items="editableData.groups" item-title="text" item-value="id"
-					label="Thuộc nhóm" density="compact" variant="outlined" hide-details
-					style="max-width: 200px;"></v-select>
+					label="Thuộc nhóm" density="compact" variant="outlined" hide-details style="max-width: 200px;">
+				</v-select>
 				<v-btn icon="mdi-delete-outline" variant="text" size="small" color="red"
 					@click="removeOption('items', index)">
 				</v-btn>
@@ -336,7 +336,8 @@
 				<label v-else>
 					Danh sách câu hỏi
 				</label>
-				<div> <!-- <uc-editor-dialog-quiz-composite v-model:text="currentQuestionsList" /> -->
+				<div>
+					<!-- <uc-editor-dialog-quiz-composite v-model:text="currentQuestionsList" /> -->
 					<uc-editor-dialog-quiz-composite v-model:text="currentQuestionsList"
 						:has-groups="editableData.hasGroups" :groups="editableData.groups || []"
 						:target-group-index="activeGroupIndex" @update:text="handleImportQuestions" />
@@ -482,6 +483,7 @@
 <script>
 	export default {
 		name: 'uc-quiz-editor',
+		inject: ['snackbarRef', 'iframeRef', 'confirmRef'],
 		props: {
 			loaiNoiDung: {
 				type: String,
@@ -578,6 +580,9 @@
 			}
 		},
 		methods: {
+			notify(message, color = 'success') {
+				this.snackbarRef?.value?.showSnackbar?.({ message, color });
+			},
 	
 			ensureDataStructure(type, data) {
 				let defaults = {};
@@ -729,10 +734,12 @@
 				this.activeGroupIndex = this.editableData.groups.length - 1;
 			},
 	
-			removeGroup(groupIndex) {
+			async removeGroup(groupIndex) {
 				if (this.editableData.groups && this.editableData.groups.length <= 1) {
-					alert('Phải có ít nhất 1 nhóm câu hỏi'); return;
-				} if (confirm('Xóa nhóm này sẽ xóa tất cả câu hỏi bên trong. Bạn có chắc?')) {
+					this.notify('Phải có ít nhất 1 nhóm câu hỏi', 'warning'); return;
+				}
+				const ok = await this.confirmRef.value.show({ title: 'Xóa nhóm này sẽ xóa tất cả câu hỏi bên trong. Bạn có chắc?' });
+				if (ok) {
 					const
 						newGroups = [...this.editableData.groups]; newGroups.splice(groupIndex, 1); this.editableData = {
 							...this.editableData,
@@ -842,7 +849,7 @@
 					// Import vào group cụ thể
 					const targetGroup = this.editableData.groups[targetGroupIndex];
 					if (!targetGroup) {
-						alert('Không tìm thấy nhóm đích');
+						this.notify('Không tìm thấy nhóm đích', 'error');
 						return;
 					}
 	
@@ -857,7 +864,7 @@
 					// Switch to target group
 					this.activeGroupIndex = targetGroupIndex;
 	
-					alert(`✅ Đã import ${questions.length} câu hỏi vào "${targetGroup.title}"`);
+					this.notify(`Đã import ${questions.length} câu hỏi vào "${targetGroup.title}"`);
 				} else {
 					// Import vào danh sách flat
 					const currentQuestions = this.editableData.questions || [];
@@ -868,7 +875,7 @@
 						questions: newQuestions
 					};
 	
-					alert(`✅ Đã import ${questions.length} câu hỏi`);
+					this.notify(`Đã import ${questions.length} câu hỏi`);
 				}
 	
 				// Auto expand câu hỏi đầu tiên vừa import
@@ -883,20 +890,3 @@
 		}
 	}
 </script>
-
-<style scoped>
-	.form-label {
-		font-size: 0.9rem;
-		font-weight: 500;
-		color: #555;
-		display: block;
-		margin-bottom: 8px;
-	}
-
-	.question-editor {
-		border: 2px dashed #e0e0e0;
-		padding: 16px;
-		margin-top: 16px;
-		border-radius: 8px;
-	}
-</style>

@@ -1,5 +1,5 @@
 <template>
-	<div class="tree-container" @drop.prevent="onDrop" @dragover.prevent="onDragOver" @dragleave="onDragLeave"
+	<div class="tree-container" @drop.stop.prevent="onDrop" @dragover.stop.prevent="onDragOver" @dragleave="onDragLeave"
 		:class="{ 'drag-active': isDragging }">
 
 		<div v-if="isDragging && dropType === 'between'" class="drop-indicator"
@@ -9,7 +9,7 @@
 			:class="{ 'is-dragging': index === draggedIndex }" :draggable="true" :data-node-id="node.NoiDungID"
 			@dragstart="onDragStart(index, $event)" @dragend="onDragEnd">
 
-			<div class="node-item">
+			<div class="node-item" :class="{ 'drop-moved': node._dropMovedAt }">
 				<v-icon class="drag-handle">mdi-drag-vertical</v-icon>
 				<v-icon class="node-icon">{{ getIcon(node.LoaiNoiDung) }}</v-icon>
 				<span class="node-title">{{ node.TenNoiDung }}</span>
@@ -54,14 +54,14 @@
 				</div>
 			</div>
 
-			<uc-editable-treeview-v2 v-if="node.children && node.children.length > 0" class="nested-tree"
-				:class="{ 'drag-active': isDragging }" :nodes="node.children" :parent-node="node"
-				:hoc-lieu-id="hocLieuId" @update="handleChildUpdate(node, $event)" @edit="(n) => $emit('edit', n)"
+			<uc-editable-treeview-v2 v-if="node.children && node.children.length > 0 && !isNodeCollapsed(node)"
+				class="nested-tree" :class="{ 'drag-active': isDragging }" :nodes="node.children" :parent-node="node"
+				:hoc-lieu-id="hocLieuId" :collapsed-node-ids="collapsedNodeIds" :drag-state="dragState"
+				@update="handleChildUpdate(node, $event)" @edit="(n) => $emit('edit', n)"
 				@add-new="(n) => $emit('add-new', n)" @delete="(n) => $emit('delete', n)" />
 		</div>
 	</div>
 </template>
-
 
 <script>
 	export default {
@@ -69,7 +69,9 @@
 		props: {
 			nodes: { type: Array, required: true },
 			hocLieuId: { type: Number, required: true },
-			parentNode: { type: Object, default: null }
+			parentNode: { type: Object, default: null },
+			collapsedNodeIds: { type: Object, default: () => ({}) },
+			dragState: { type: Object, default: () => ({ info: null }) }
 		},
 		emits: ['update', 'add-new', 'edit', 'delete'],
 		data() {
@@ -81,6 +83,11 @@
 				isDropOnNode: false,
 				dropTargetNode: null,
 				dropType: 'between'
+			}
+		},
+		computed: {
+			activeDragInfo() {
+				return this.dragState.info || this.dragInfo;
 			}
 		},
 		methods: {
@@ -116,19 +123,44 @@
 					this.$emit('update', this.nodes);
 				}
 			},
+
+			getDirectNodeWrappers() {
+				return Array.from(this.$el.children).filter(el => el.classList.contains('node-wrapper'));
+			},
+
+			getNodeByWrapper(wrapper) {
+				const nodeId = Number(wrapper?.dataset?.nodeId);
+				return this.nodes.find(node => Number(node.NoiDungID) === nodeId) || null;
+			},
+
+			isNodeCollapsed(node) {
+				return !!this.collapsedNodeIds[node.NoiDungID];
+			},
+
+			markNodeMoved(node) {
+				node._dropMovedAt = Date.now();
+				window.setTimeout(() => {
+					if (node._dropMovedAt) {
+						delete node._dropMovedAt;
+					}
+				}, 900);
+			},
 	
 			onDragStart(index, event) {
 				event.stopPropagation();
 	
 				this.draggedIndex = index;
-				this.dragInfo = {
+				const info = {
 					node: this.nodes[index],
 					index,
-					parent: this.parentNode
-				}
+					parent: this.parentNode,
+					sourceNodes: this.nodes
+				};
+				this.dragInfo = info;
+				this.dragState.info = info;
 				this.isDragging = true;
 				event.dataTransfer.effectAllowed = 'move';
-				event.dataTransfer.setData('text/plain', index);
+				event.dataTransfer.setData('text/plain', String(this.nodes[index].NoiDungID));
 			},
 	
 			onDragOver(event) {
@@ -137,8 +169,7 @@
 				this.detectDropZone(event);
 	
 				if (this.dropType === 'between') {
-					const containerRect = this.$el.getBoundingClientRect();
-					const directChildren = Array.from(this.$el.children).filter(el => el.classList.contains('node-wrapper'));
+					const directChildren = this.getDirectNodeWrappers();
 					let newDropPosition = null;
 	
 					for (let i = 0; i < directChildren.length; i++) {
@@ -158,7 +189,7 @@
 				}
 			},
 			detectDropZone(event) {
-				const nodeElements = this.$el.querySelectorAll('.node-wrapper');
+				const nodeElements = this.getDirectNodeWrappers();
 				let dropTarget = null;
 				let dropType = 'between';
 				nodeElements.forEach(nodeEl => {
@@ -193,15 +224,12 @@
 						nodeItem.classList.add('drop-target');
 	
 						// 🆕 Thêm class để phân biệt loại drop
-						const targetNodeIndex = Array.from(this.$el.querySelectorAll('.node-wrapper')).indexOf(target);
-						const targetNode = this.nodes[targetNodeIndex];
-						const draggedNode = this.dragInfo?.node;
+						const targetNode = this.getNodeByWrapper(target);
+						const draggedNode = this.activeDragInfo?.node;
 	
 						if (draggedNode && targetNode) {
 							if (this.wouldCreateCircularReference(draggedNode, targetNode)) {
 								nodeItem.classList.add('invalid-drop');
-							} else if (this.isParentChildRelation(draggedNode, targetNode)) {
-								nodeItem.classList.add('parent-to-child');
 							}
 						}
 					}
@@ -218,6 +246,8 @@
 			onDragEnd() {
 				this.isDragging = false;
 				this.draggedIndex = null;
+				this.dragInfo = null;
+				this.dragState.info = null;
 				this.dropIndicatorPosition = null;
 				this.isDropOnNode = false;
 				this.dropTargetNode = null;
@@ -228,14 +258,13 @@
 			onDrop(event) {
 				event.preventDefault();
 	
-				if (!this.dragInfo) return;
+				if (!this.activeDragInfo) return;
 	
 				// 🆕 Kiểm tra invalid drop trước khi thực hiện
 				if (this.isDropOnNode && this.dropTargetNode) {
-					const targetNodeIndex = Array.from(this.$el.querySelectorAll('.node-wrapper')).indexOf(this.dropTargetNode);
-					const targetNode = this.nodes[targetNodeIndex];
+					const targetNode = this.getNodeByWrapper(this.dropTargetNode);
 	
-					if (this.wouldCreateCircularReference(this.dragInfo.node, targetNode)) {
+					if (!targetNode || this.wouldCreateCircularReference(this.activeDragInfo.node, targetNode)) {
 						console.log('❌ Drop cancelled - Would create circular reference');
 						this.onDragEnd();
 						return;
@@ -250,11 +279,10 @@
 			},
 	
 			handleDropAsChild() {
-				const draggedNode = this.dragInfo.node;
+				const draggedNode = this.activeDragInfo.node;
 				const targetNodeElement = this.dropTargetNode;
 	
-				const targetNodeIndex = Array.from(this.$el.querySelectorAll('.node-wrapper')).indexOf(targetNodeElement);
-				const targetNode = this.nodes[targetNodeIndex];
+				const targetNode = this.getNodeByWrapper(targetNodeElement);
 	
 				if (!targetNode) return;
 	
@@ -265,13 +293,7 @@
 					return;
 				}
 	
-				// 🆕 XỬ LÝ KÉO CHA VÀO CON
-				if (this.isParentChildRelation(draggedNode, targetNode)) {
-					this.handleParentToChildDrop(draggedNode, targetNode);
-				} else {
-					// Logic cũ cho kéo con vào cha
-					this.handleNormalChildDrop(draggedNode, targetNode);
-				}
+				this.handleNormalChildDrop(draggedNode, targetNode);
 			},
 			
 			findNodeInTree(nodeId) {
@@ -303,22 +325,22 @@
 			},
 	
 			wouldCreateCircularReference(draggedNode, targetNode) {
-				// Only circular if draggedNode is ancestor of targetNode
-				const isAncestor = (potentialChild, ancestorId) => {
-					let currentParentId = potentialChild.ParentID;
-	
-					while (currentParentId) {
-						if (currentParentId === ancestorId) {
+				if (!draggedNode || !targetNode) return false;
+				if (draggedNode.NoiDungID === targetNode.NoiDungID) return true;
+
+				const containsNode = (nodes) => {
+					for (const node of nodes || []) {
+						if (node.NoiDungID === targetNode.NoiDungID) {
 							return true;
 						}
-						// Need to find parent node in tree to continue traversal
-						const parentNode = this.findNodeInTree(currentParentId);
-						currentParentId = parentNode?.ParentID;
+						if (containsNode(node.children)) {
+							return true;
+						}
 					}
 					return false;
 				};
 	
-				return isAncestor(targetNode, draggedNode.NoiDungID);
+				return containsNode(draggedNode.children);
 			},
 	
 	
@@ -366,57 +388,83 @@
 	
 			// 🔄 Logic cũ cho trường hợp bình thường
 			handleNormalChildDrop(draggedNode, targetNode) {
+				if (draggedNode.NoiDungID === targetNode.NoiDungID) return;
+				const dragInfo = this.activeDragInfo;
+				const sourceNodes = dragInfo.sourceNodes;
+
+				if (sourceNodes === targetNode.children) return;
+
 				if (!targetNode.children) {
 					targetNode.children = [];
 				}
 	
+				const sourceIndex = sourceNodes.findIndex(node => node.NoiDungID === draggedNode.NoiDungID);
+				if (sourceIndex === -1) return;
+				const [itemToMove] = sourceNodes.splice(sourceIndex, 1);
+
 				const updatedNode = {
-					...draggedNode,
+					...itemToMove,
 					ParentID: targetNode.NoiDungID,
 					ThuTu: targetNode.children.length
 				};
+				this.markNodeMoved(updatedNode);
 	
 				targetNode.children.push(updatedNode);
-	
-				const draggedIndex = this.dragInfo.index;
-				this.nodes.splice(draggedIndex, 1);
-	
-				this.reorderSiblings();
+				this.reorderNodes(sourceNodes);
+				this.reorderNodes(targetNode.children);
 				this.$emit('update', this.nodes);
 			},
 	
 			handleDropBetween() {
-				const draggedIndex = this.draggedIndex;
-				const children = Array.from(this.$el.children).filter(el => el.classList.contains('node-wrapper'));
+				const dragInfo = this.activeDragInfo;
+				if (!dragInfo) return;
+
+				const children = this.getDirectNodeWrappers();
 				let dropIndex = children.length;
 	
 				for (let i = 0; i < children.length; i++) {
 					if (this.dropIndicatorPosition <= children[i].offsetTop) {
 						dropIndex = i; break;
 					}
-				} if (draggedIndex === null || draggedIndex === dropIndex) return
-				const newNodes = [...this.nodes];
-				const itemToMove = newNodes.splice(draggedIndex, 1)[0];
-				if (draggedIndex < dropIndex) { newNodes.splice(dropIndex - 1, 0, itemToMove); }
-				else {
-					newNodes.splice(dropIndex, 0, itemToMove);
 				}
-				newNodes.forEach((node, index) => {
+
+				const sourceNodes = dragInfo.sourceNodes;
+				const sourceIndex = sourceNodes.findIndex(node => node.NoiDungID === dragInfo.node.NoiDungID);
+				if (sourceIndex === -1) return;
+
+				const sameLevel = sourceNodes === this.nodes;
+				if (sameLevel && (sourceIndex === dropIndex || sourceIndex + 1 === dropIndex)) return;
+
+				const [itemToMove] = sourceNodes.splice(sourceIndex, 1);
+				let insertIndex = dropIndex;
+				if (sameLevel && sourceIndex < dropIndex) {
+					insertIndex -= 1;
+				}
+				const movedNode = {
+					...itemToMove,
+					ParentID: this.parentNode?.NoiDungID || null
+				};
+				this.markNodeMoved(movedNode);
+				this.nodes.splice(insertIndex, 0, movedNode);
+
+				this.reorderNodes(sourceNodes);
+				this.reorderNodes(this.nodes);
+				this.$emit('update', this.nodes);
+			},
+
+			reorderNodes(nodes) {
+				nodes.forEach((node, index) => {
 					node.ThuTu = index;
 				});
-	
-				this.$emit('update', newNodes);
 			},
 	
 			reorderSiblings() {
-				this.nodes.forEach((node, index) => {
-					node.ThuTu = index;
-				});
+				this.reorderNodes(this.nodes);
 			},
 	
 			clearVisualFeedback() {
 				this.$el.querySelectorAll('.drop-target').forEach(el => {
-					el.classList.remove('drop-target');
+					el.classList.remove('drop-target', 'parent-to-child', 'invalid-drop');
 				});
 			},
 	

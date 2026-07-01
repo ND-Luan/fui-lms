@@ -1,9 +1,9 @@
 <template>
     <v-dialog v-model="visible" :max-width="config.maxWidth || 420" persistent>
         <v-card>
-            <v-card-title class="d-flex align-center ga-2 pt-4" :class="titleClass">
-                <v-icon :color="typeConfig.color">{{ typeConfig.icon }}</v-icon>
-                {{ config.title }}
+            <v-card-title class="global-confirm-dialog__title d-flex align-start ga-2 pt-4" :class="titleClass">
+                <v-icon class="global-confirm-dialog__icon" :color="typeConfig.color">{{ typeConfig.icon }}</v-icon>
+                <span class="global-confirm-dialog__title-text">{{ config.title }}</span>
             </v-card-title>
 
             <v-card-text v-if="config.text" class="text-body-2">
@@ -84,3 +84,19 @@ export default {
     },
 }
 </script>
+
+<style scoped>
+.global-confirm-dialog__title {
+    white-space: normal;
+}
+
+.global-confirm-dialog__icon {
+    flex: 0 0 auto;
+}
+
+.global-confirm-dialog__title-text {
+    min-width: 0;
+    overflow-wrap: anywhere;
+    white-space: normal;
+}
+</style>

@@ -193,6 +193,7 @@
 
 <script>
 	export default {
+		inject: ['snackbarRef', 'iframeRef', 'confirmRef'],
 	props: {
 		text: {
 			type: Array,
@@ -328,6 +329,9 @@
 	},
 
 	methods: {
+		notify(message, color = 'success') {
+			this.snackbarRef?.value?.showSnackbar?.({ message, color });
+		},
 		validateAndPreview() {
 			this.processing = true;
 			this.validationError = '';
@@ -536,7 +540,7 @@
 
 		handleImport(isActive) {
 			if (this.validQuestions.length === 0) {
-				alert('Không có câu hỏi hợp lệ để import');
+				this.notify('Không có câu hỏi hợp lệ để import', 'warning');
 				return;
 			}
 
@@ -552,7 +556,7 @@
 			// Show success message
 			const validCount = this.validQuestions.length;
 			const targetInfo = this.hasGroups ? ` vào "${this.selectedGroup?.title}"` : '';
-			alert(`✅ Đã import thành công ${validCount} câu hỏi${targetInfo}!`);
+			this.notify(`Đã import thành công ${validCount} câu hỏi${targetInfo}!`);
 
 			// Reset and close
 			this.clearAll();
@@ -566,66 +570,5 @@
 			this.selectedGroupIndex = this.targetGroupIndex;
 		}
 	}
-}
+	}
 </script>
-
-<style scoped>
-	.question-preview {
-		background: #f8f9fa;
-		padding: 16px;
-		border-radius: 8px;
-		border-left: 4px solid #2196f3;
-	}
-
-	.prompt-preview {
-		font-weight: 500;
-		color: #1976d2;
-		margin-bottom: 12px;
-	}
-
-	.options-preview {
-		margin-top: 8px;
-	}
-
-	.option-item {
-		padding: 8px 12px;
-		margin: 4px 0;
-		border-radius: 4px;
-		background: white;
-		border: 1px solid #e0e0e0;
-		transition: all 0.2s;
-	}
-
-	.correct-option {
-		background: #e8f5e8;
-		border-color: #4caf50;
-		color: #2e7d32;
-		font-weight: 500;
-	}
-
-	.other-preview {
-		padding: 12px;
-		background: #fff3e0;
-		border-radius: 4px;
-		border-left: 3px solid #ff9800;
-	}
-
-	.json-example {
-		background: #2d3748;
-		color: #e2e8f0;
-		padding: 16px;
-		border-radius: 8px;
-		font-family: 'Courier New', monospace;
-		font-size: 12px;
-		line-height: 1.4;
-		white-space: pre-wrap;
-		overflow-x: auto;
-	}
-
-	.text-error {
-		background: #ffebee;
-		border-left: 4px solid #f44336;
-		padding: 12px;
-		border-radius: 4px;
-	}
-</style>

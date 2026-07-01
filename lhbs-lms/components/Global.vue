@@ -6,6 +6,7 @@
         <GlobalUiSnackbar ref="snackbarRef" />
         <GlobalIframeWindow ref="iframeWin" />
         <GlobalConfirmDialog ref="confirmRef" />
+        <GlobalUploadManager v-if="uploadManager" />
         <uc-system-toolbar v-if="!isInIframe" />
         <uc-ticket-status v-if="!isInIframe" />
         <v-responsive>
@@ -91,6 +92,7 @@
         avatarUrl: { type: String, default: '' },
         schoolName: { type: String, default: '' },
         version: { type: String, default: '' },
+        uploadManager: { type: Boolean, default: false },
         // Override menu nếu cần (thường không cần truyền — tự lấy RAW_MENU)
         menuLeft: { type: Array, default: null },
     },
