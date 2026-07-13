@@ -1,29 +1,25 @@
 <template>
-	<v-dialog v-model="isShow" :width="width" :close-on-back="false" v-bind="$attrs" persistent>
-		<v-card rounded="lg">
-			<v-card-title class="d-flex align-center ga-2 pt-4 pb-2 px-4">
+	<v-dialog v-model="isShow" :width="width" :close-on-back="false" v-bind="$attrs">
+		<v-card>
+			<v-card-title class="d-flex">
 				<slot name="title" v-if="!title"></slot>
-				<div v-else class="flex-grow-1">
-					<p :class="classTitle" class="text-body-1 font-weight-bold mb-0">
+				<div v-else>
+					<p :class="classTitle">
 						{{ title }}
 					</p>
-					<p class="text-caption mb-0" v-if="$slots.subTitle">
+					<p class="text-caption">
 						<slot name="subTitle"></slot>
 					</p>
 				</div>
-				<v-spacer v-if="!title"></v-spacer>
-				<v-btn icon size="small" variant="text" @click="onClose" color="grey">
-					<v-icon>mdi-close</v-icon>
-				</v-btn>
+				<v-spacer></v-spacer>
+				<v-icon @click="onClose" color="grey">mdi-close</v-icon>
 			</v-card-title>
-			<v-divider />
-			<v-card-text class="pt-3 px-4 pb-4">
+			<v-card-text style="padding: 16px 24px 16px">
 				<slot></slot>
 			</v-card-text>
-			<v-divider />
-			<v-card-actions class="justify-end ga-2 pa-3">
-				<v-btn variant="text" color="grey" @click="onClose">{{ closeText }}</v-btn>
-				<v-btn v-if="isShowDoneBtn" color="primary" variant="flat" prepend-icon="mdi-content-save"
+			<v-card-actions>
+				<!-- <v-btn text @click="onClose" prepend-icon="mdi-close" variant="plain">{{ closeText }}</v-btn> -->
+				<v-btn v-if="isShowDoneBtn" text color="primary" variant="outlined" prepend-icon="mdi-content-save"
 					@click="handleSubmit">
 					{{ doneText }}
 				</v-btn>

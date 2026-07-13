@@ -125,7 +125,8 @@
 								</v-chip>
 							</div>
 							<div class="tree-actions">
-								<v-btn size="small" variant="text" color="primary" @click="refreshTree" :loading="isLoadingTree">
+								<v-btn size="small" variant="text" color="primary" @click="refreshTree"
+									:loading="isLoadingTree">
 									<v-icon start>mdi-refresh</v-icon>
 									Tải lại
 								</v-btn>
@@ -164,7 +165,8 @@
 			</div>
 		</div>
 		<!-- THÊM: Tích hợp Dialog vào đây -->
-		<uc-noi-dung-dialog v-model:is-open="isDialogOpen" :item="editingItem" @save="onSaveItem" @refresh-tree="fetchTreeNoiDung" @update-item="editingItem = $event" />
+		<uc-noi-dung-dialog v-model:is-open="isDialogOpen" :item="editingItem" @save="onSaveItem"
+			@refresh-tree="fetchTreeNoiDung" @update-item="editingItem = $event" />
 	</Global>
 </template>
 
@@ -194,21 +196,21 @@
 			DSBoSach: [],
 			DSMonHoc: [],
 			DSKhoi: [
-				{ id: 0, name: "Mầm non" },
-				{ id: 1, name: "Khối 1" },
-				{ id: 2, name: "Khối 2" },
-				{ id: 3, name: "Khối 3" },
-				{ id: 4, name: "Khối 4" },
-				{ id: 5, name: "Khối 5" },
+				{ id: 0, name: "Mầm non", CapID: 0 },
+				{ id: 1, name: "Khối 1" , CapID: 1},
+				{ id: 2, name: "Khối 2" , CapID: 1},
+				{ id: 3, name: "Khối 3" , CapID: 1},
+				{ id: 4, name: "Khối 4" , CapID: 1},
+				{ id: 5, name: "Khối 5" , CapID: 1},
 
-				{ id: 6, name: "Khối 6" },
-				{ id: 7, name: "Khối 7" },
-				{ id: 8, name: "Khối 8" },
-				{ id: 9, name: "Khối 9" },
+				{ id: 6, name: "Khối 6" , CapID: 2},
+				{ id: 7, name: "Khối 7" , CapID: 2},
+				{ id: 8, name: "Khối 8" , CapID: 2},
+				{ id: 9, name: "Khối 9" , CapID: 2},
 
-				{ id: 10, name: "Khối 10" },
-				{ id: 11, name: "Khối 11" },
-				{ id: 12, name: "Khối 12" },
+				{ id: 10, name: "Khối 10" , CapID: 3},
+				{ id: 11, name: "Khối 11" , CapID: 3},
+				{ id: 12, name: "Khối 12" , CapID: 3},
 			]
 		}
 	},
@@ -240,7 +242,8 @@
 				this.selectedBoSach = this.DSBoSach[0] ? this.DSBoSach[0].BoSachID : null;
 			},
 			async getDSMonHoc() {
-				const res = await fetchPromise('lms/MonHoc_Select');
+				const capid = this.DSKhoi.find(x=> x.id == this.selectedKhoi)?.CapID
+				const res = await fetchPromise('lms/MonHoc_Get_ByCapID', {CapID: capid});
 				this.DSMonHoc = res ?? [];
 		},
 		getKhoiName(khoiId) {

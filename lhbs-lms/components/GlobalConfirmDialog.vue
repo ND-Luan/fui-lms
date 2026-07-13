@@ -1,5 +1,5 @@
 <template>
-    <v-dialog v-model="visible" :max-width="config.maxWidth || 420" persistent>
+	<v-dialog v-model="visible" :max-width="config.maxWidth || 420" persistent>
         <v-card>
             <v-card-title class="global-confirm-dialog__title d-flex align-start ga-2 pt-4" :class="titleClass">
                 <v-icon class="global-confirm-dialog__icon" :color="typeConfig.color">{{ typeConfig.icon }}</v-icon>
@@ -24,8 +24,8 @@
 </template>
 
 <script>
-export default {
-    name: 'GlobalConfirmDialog',
+	export default {
+		name: 'GlobalConfirmDialog',
     data() {
         return {
             visible: false,
@@ -82,21 +82,5 @@ export default {
             }
         },
     },
-}
+	}
 </script>
-
-<style scoped>
-.global-confirm-dialog__title {
-    white-space: normal;
-}
-
-.global-confirm-dialog__icon {
-    flex: 0 0 auto;
-}
-
-.global-confirm-dialog__title-text {
-    min-width: 0;
-    overflow-wrap: anywhere;
-    white-space: normal;
-}
-</style>

@@ -326,13 +326,23 @@
 				const file = this.selectedFile
 				
 				if (this.useRealUpload) {
-					// Real upload using centralized UploadManager helper
+					// Real upload using actual UploadManager
 					if (!window.UploadManager) {
 						this.snackbarRef.value?.showSnackbar({ message: 'UploadManager không hoạt động!', color: 'error' })
 						return
 					}
 
-					window.UploadManager.uploadLmsFile(file, {
+					window.UploadManager.addUploadTask({
+						file: file,
+						uploadUrl: 'https://file.lhbs.vn/lms/upload/FileData',
+						headers: {
+							Authorization: $awt
+						},
+						bodyBuilder: (f) => {
+							const formData = new FormData()
+							formData.append('File', f)
+							return formData
+						},
 						onComplete: (res) => {
 							this.snackbarRef.value?.showSnackbar({
 								message: `Tải lên thực tế thành công: ${file.name}`,
