@@ -105,25 +105,16 @@
 			TitlePage() {
 				return getTitlePageByURL(window.location.pathname + window.location.search)
 			},
-			academicYearAndSemester() {
-				return {
-					nienKhoa: vueData.NienKhoa,
-					hocKi: vueData.NienKhoaItem?.HocKi
-				}
-			}
 		},
 		watch: {
-			academicYearAndSemester: {
-				deep: true,
-				async handler(v) {
-					this.LopID = null
-					this.items = []
-					this.DSLop = []
-					this.DSHocSinhLop = []
-					await this.getKhoi(true)
-					if (this.KhoiID) {
-						this.getLop(true)
-					}
+			'vueData.NienKhoa': {
+				async handler() {
+					await this.reloadFilterBySchoolYear()
+				}
+			},
+			'vueData.NienKhoaItem.HocKi': {
+				async handler() {
+					await this.reloadFilterBySchoolYear()
 				}
 			},
 			KhoiID(v) {
@@ -143,6 +134,16 @@
 			this.getKhoi()
 		},
 		methods: {
+			async reloadFilterBySchoolYear() {
+				this.LopID = null
+				this.items = []
+				this.DSLop = []
+				this.DSHocSinhLop = []
+				await this.getKhoi(true)
+				if (this.KhoiID) {
+					await this.getLop(true)
+				}
+			},
 			async getKhoi(force = false) {
 				try {
 					const res = await fetchPromise('lms/KhoiHocByCapHoc_Get', {
