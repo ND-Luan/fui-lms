@@ -51,70 +51,71 @@
 		},
 		watch: {
 			selectedLopID() {
-				this.initSheet()
+				this.scheduleInit()
 			},
 			sheetKey() {
-				this.initSheet()
+				this.scheduleInit()
 			},
 			rows: {
 				deep: true,
 				handler() {
-					if (!this.instance) {
-						this.initSheet()
-					}
+					this.scheduleInit()
 				}
 			}
 		},
 		mounted() {
-			this.initSheet()
+			this.scheduleInit()
 		},
 		methods: {
 			getInstance() {
 				return this.instance
 			},
-			initSheet() {
+			scheduleInit() {
 				if (this.selectedLopID === '__ALL__') return
-				setTimeout(() => {
-					const container = this.$refs.sheetRef
-					if (!container) return
+				this.$nextTick(() => {
+					window.setTimeout(() => this.initSheet(), 50)
+				})
+			},
+			initSheet() {
+				const container = this.$refs.sheetRef
+				if (!container) return
 
-					if (this.instance) {
-						try {
-							const s = Array.isArray(this.instance) ? this.instance[0] : this.instance
-							if (s && typeof s.destroy === 'function') s.destroy()
-						} catch (e) {}
-						this.instance = null
-					}
-					container.innerHTML = ''
+				if (this.instance) {
+					try {
+						const s = Array.isArray(this.instance) ? this.instance[0] : this.instance
+						if (s && typeof s.destroy === 'function') s.destroy()
+					} catch (e) {}
+					this.instance = null
+				}
+				container.innerHTML = ''
 
-					if (typeof jspreadsheet === 'function') {
-						this.instance = jspreadsheet(container, {
-							worksheets: [{
-								data: this.rows,
-								columns: this.columns,
-								nestedHeaders: this.nestedHeaders,
-								rowResize: true,
-								columnDrag: false,
-								tableWidth: '100%',
-								tableOverflow: true,
-								tableHeight: this.renLuyenSheetHeight,
-								lazyLoading: false,
-								freezeColumns: 2,
-								wordWrap: true,
-								allowInsertColumn: false,
-								allowInsertRow: false,
-								showHeader: true
-							}],
-							contextMenu: () => false,
-							onchange: (worksheet, cell, x, y, value) => {
-								if (Array.isArray(this.rows) && this.rows[y]) {
-									this.rows[y][x] = value
-									this.$emit('update:rows', this.rows)
-								}
+				if (typeof jspreadsheet === 'function') {
+					this.instance = jspreadsheet(container, {
+						worksheets: [{
+							data: Array.isArray(this.rows) ? this.rows : [],
+							columns: this.columns,
+							nestedHeaders: this.nestedHeaders,
+							rowResize: true,
+							columnDrag: false,
+							tableWidth: '100%',
+							tableOverflow: true,
+							tableHeight: this.renLuyenSheetHeight,
+							lazyLoading: false,
+							freezeColumns: 2,
+							wordWrap: true,
+							allowInsertColumn: false,
+							allowInsertRow: false,
+							showHeader: true
+						}],
+						contextMenu: () => false,
+						onchange: (worksheet, cell, x, y, value) => {
+							if (Array.isArray(this.rows) && this.rows[y]) {
+								this.rows[y][x] = value
+								this.$emit('update:rows', this.rows)
 							}
-						})
-					}
-				}, 50)
+						}
+					})
+				}
 			}
 		}
 	}

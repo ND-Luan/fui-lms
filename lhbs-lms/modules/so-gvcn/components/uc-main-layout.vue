@@ -138,11 +138,11 @@
 			huongNghiepRows: [],
 			huongNghiepSheetInstance: null,
 			sheetKey: 0,
-			sheetHeight: 'calc(100vh - 10px)',
-			keHoachSheetHeight: 'calc(100vh - 300px)',
-			renLuyenSheetHeight: 'calc(100vh - 280px)',
-			soLienLacSheetHeight: 'calc(100vh - 280px)',
-			huongNghiepSheetHeight: 'calc(100vh - 280px)',
+			sheetHeight: 			'calc(100vh )',
+			keHoachSheetHeight: 	'calc(100vh )',
+			renLuyenSheetHeight: 	'calc(100vh )',
+			soLienLacSheetHeight: 	'calc(100vh )',
+			huongNghiepSheetHeight: 'calc(100vh )',
 			keHoachSheetColumns: [
 				{ title: 'Tháng', width: 70, readOnly: true },
 				{ title: 'Chủ đề', width: 220 },
@@ -302,8 +302,9 @@
 			],
 			studentSheetColumns: [
 				{ title: 'STT', width: 60, readOnly: true },
-				{ title: 'Họ và tên học sinh', width: 220, readOnly: true },
 				{ title: 'Mã học sinh', width: 110, readOnly: true },
+				{ title: 'Số danh bộ', width: 110, readOnly: true },
+				{ title: 'Họ và tên học sinh', width: 220, readOnly: true, align: 'left' },
 				{ title: 'Lớp mới', width: 90, readOnly: true },
 				{ title: 'Lớp cũ', width: 90, readOnly: true },
 				{ title: 'Toán', width: 80, readOnly: true },
@@ -329,6 +330,8 @@
 				{ title: 'SDT mẹ', width: 120, readOnly: true },
 				{ title: 'Người đỡ đầu', width: 160, readOnly: true },
 				{ title: 'SDT người đỡ đầu', width: 140, readOnly: true },
+				{ title: 'Ăn sáng', width: 80, readOnly: true },
+				{ title: 'Xe', width: 80, readOnly: true },
 				{ title: 'Địa chỉ', width: 380, align: 'left', readOnly: true },
 				{ title: 'Ghi chú', width: 220, readOnly: true }
 			],
@@ -430,11 +433,11 @@
 			var namHocDiem = nienKhoaDiem + '-' + this.currentNienKhoa
 			return [
 				[
-					{ title: '', colspan: 5 },
+					{ title: '', colspan: 6 },
 					{ title: 'ĐTB môn cả năm ' + namHocDiem, colspan: 12 },
 					{ title: 'KQ ' + namHocDiem, colspan: 2 },
 					{ title: 'NHẬN XÉT CỦA GVCN ' + namHocDiem, colspan: 1 },
-					{ title: 'THÔNG TIN GIA ĐÌNH', colspan: 8 },
+					{ title: 'THÔNG TIN GIA ĐÌNH', colspan: 10 },
 					{ title: '', colspan: 1 },
 					{ title: '', colspan: 1 }
 				]
@@ -708,6 +711,8 @@
 				SDTMe: info.DienThoaiMe || row.SDTMe || '',
 				NguoiDoDau: info.NguoiDoDau || row.NguoiDoDau || '',
 				SDTNguoiDoDau: info.DienThoaiDoDau || row.SDTNguoiDoDau || '',
+				AnSang: info.AnSang ?? row.AnSang ?? '',
+				Xe: info.Xe ?? row.Xe ?? '',
 				DiaChi: info.DiaChi || row.DiaChi || ''
 			}
 		},
@@ -826,8 +831,9 @@
 			})
 			return uniqueRows.map((x, index) => [
 				index + 1,
+				x.MaHocSinh || x.HocSinhID || '',
+				x.SoDanhBo || '',
 				x.HoTen || '',
-				x.MaHocSinh || '',
 				x.LopMoi || x.TenLop || '',
 				x.LopCu || '',
 				x.Toan || x['Toán'] || '',
@@ -853,6 +859,8 @@
 				x.SDTMe || '',
 				x.NguoiDoDau || '',
 				x.SDTNguoiDoDau || '',
+				this.renderCheckedValue(x.AnSang),
+				this.renderCheckedValue(x.Xe),
 				x.DiaChi || '',
 				x.GhiChu || ''
 			])
@@ -1609,8 +1617,8 @@
 			this.getKeHoachExportMonths().forEach((month, index) => {
 				const start = 1 + offset + (index * rowCount)
 				merges.push({ s: { r: start, c: 0 }, e: { r: start + rowCount - 1, c: 0 } })
-				merges.push({ s: { r: start, c: 1 }, e: { r: start + 1, c: 1 } })
-				merges.push({ s: { r: start, c: 2 }, e: { r: start + 1, c: 2 } })
+				merges.push({ s: { r: start, c: 1 }, e: { r: start + rowCount - 1, c: 1 } })
+				merges.push({ s: { r: start, c: 2 }, e: { r: start + rowCount - 1, c: 2 } })
 				merges.push({ s: { r: start, c: 8 }, e: { r: start + rowCount - 1, c: 8 } })
 			})
 			return merges
@@ -1980,6 +1988,9 @@
 		cleanSheetValue(value) {
 			return value == null ? '' : String(value).trim()
 		},
+		renderCheckedValue(value) {
+			return value === true || value === 'true' || value === 1 || value === '1' || value === 'X' ? 'X' : ''
+		},
 		cleanSheetNumber(value) {
 			if (value == null || value === '') return 0
 			const num = Number(value)
@@ -1987,24 +1998,22 @@
 		},
 		buildStudentSheetExportAoA() {
 			const namHocDiem = (Number(this.currentNienKhoa || 0) - 1) + '-' + this.currentNienKhoa
+			const headerRow = Array(this.studentSheetColumns.length).fill('')
+			headerRow[6] = 'ĐTB môn cả năm ' + namHocDiem
+			headerRow[18] = 'KQ ' + namHocDiem
+			headerRow[20] = 'NHẬN XÉT CỦA GVCN ' + namHocDiem
+			headerRow[21] = 'THÔNG TIN GIA ĐÌNH'
 			return [
-				[
-					'', '', '', '', '',
-					'ĐTB môn cả năm ' + namHocDiem, '', '', '', '', '', '', '', '', '', '', '',
-					'KQ ' + namHocDiem, '',
-					'NHẬN XÉT CỦA GVCN ' + namHocDiem,
-					'THÔNG TIN GIA ĐÌNH', '', '', '', '', '', '', '',
-					'', ''
-				],
+				headerRow,
 				this.studentSheetColumns.map(x => x.title),
 				...(this.studentSheetRows || [])
 			]
 		},
 		buildStudentSheetExportMerges() {
 			return [
-				{ s: { r: 0, c: 5 }, e: { r: 0, c: 16 } },
-				{ s: { r: 0, c: 17 }, e: { r: 0, c: 18 } },
-				{ s: { r: 0, c: 20 }, e: { r: 0, c: 27 } }
+				{ s: { r: 0, c: 6 }, e: { r: 0, c: 17 } },
+				{ s: { r: 0, c: 18 }, e: { r: 0, c: 19 } },
+				{ s: { r: 0, c: 21 }, e: { r: 0, c: 30 } }
 			]
 		},
 		safeSheetName(name) {

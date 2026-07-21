@@ -12,12 +12,7 @@
 						</v-card-title>
 						<v-divider />
 						<v-card-text class="pa-0 so-gvcn-card-sheet-wrap">
-							<uc-jexcel :key="card.key + '-' + sheetKey" :data-source="card.rows"
-								:columns="card.columns" :nestedHeaders="card.nestedHeaders || []"
-								:freeze-columns="card.freezeColumns || 0" table-height="auto"
-								table-width="100%" :disable-lazy-loading="true" class="so-gvcn-sheet"
-								@update:dataSource="$emit('update-card-rows', card, $event)"
-								@on-change="$emit('handle-card-change', card, $event)" />
+							<div :ref="`sheetRef_${card.key}`" class="w-100 so-gvcn-sheet"></div>
 						</v-card-text>
 					</v-card>
 				</v-col>
@@ -36,6 +31,85 @@
 		sheetHeight: { type: String, default: 'calc(100vh - 230px)' },
 		sheetKey: { type: [Number, String], default: 0 }
 	},
-	emits: ['update-card-rows', 'handle-card-change']
+		data() {
+			return {
+				sheetInstances: {}
+			}
+		},
+		emits: ['update-card-rows', 'handle-card-change'],
+		methods: {
+			destroySheet(cardKey) {
+				const instance = this.sheetInstances[cardKey]
+				if (!instance) return
+				try {
+					const sheet = Array.isArray(instance) ? instance[0] : instance
+					if (sheet && typeof sheet.destroy === 'function') sheet.destroy()
+				} catch (e) {}
+				delete this.sheetInstances[cardKey]
+			},
+			initSheet(card) {
+				this.$nextTick(() => {
+					const container = this.$refs[`sheetRef_${card.key}`]
+					if (!container || !card.rows || !card.rows.length) {
+						this.destroySheet(card.key)
+						return
+					}
+
+					this.destroySheet(card.key)
+					container.innerHTML = ''
+
+					if (typeof jspreadsheet === 'function') {
+						const sheet = jspreadsheet(container, {
+							worksheets: [{
+								data: card.rows,
+								columns: card.columns,
+								nestedHeaders: card.nestedHeaders || [],
+								rowResize: true,
+								columnDrag: false,
+								tableWidth: '100%',
+								tableOverflow: true,
+								tableHeight: card.height || 'auto',
+								lazyLoading: false,
+								freezeColumns: card.freezeColumns || 0,
+								wordWrap: true,
+								allowInsertColumn: false,
+								allowInsertRow: false,
+								showHeader: true
+							}],
+							contextMenu: () => false,
+							onchange: (worksheet, cell, x, y, value) => {
+								const rows = worksheet.getData()
+								this.$emit('update-card-rows', card, rows)
+								this.$emit('handle-card-change', card, { worksheet, cell, x, y, value, rows })
+							}
+						})
+						this.sheetInstances[card.key] = sheet
+					}
+				})
+			},
+			initAllSheets() {
+				;(this.chiTieuCards || []).forEach(card => this.initSheet(card))
+			},
+			destroyAllSheets() {
+				Object.keys(this.sheetInstances).forEach(key => this.destroySheet(key))
+			}
+		},
+		watch: {
+			chiTieuCards: {
+				deep: true,
+				handler() {
+					this.initAllSheets()
+				}
+			},
+			sheetKey() {
+				this.initAllSheets()
+			}
+		},
+		mounted() {
+			this.initAllSheets()
+		},
+		beforeUnmount() {
+			this.destroyAllSheets()
+		}
 	}
 </script>

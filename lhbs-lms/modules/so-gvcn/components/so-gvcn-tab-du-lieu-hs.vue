@@ -1,9 +1,8 @@
 <template>
 	<v-card-text class="pa-0 so-gvcn-sheet-wrap" :style="{ height: sheetHeight, 'overflow-y': 'auto' }">
-		<uc-jexcel v-if="rows && rows.length" :key="sheetKey" v-model="sheetInstance"
-			:data-source="rows" :columns="computedColumns" :freeze-columns="5"
-			:nestedHeaders="nestedHeaders" :table-height="sheetHeight" table-width="100%"
-			:disable-lazy-loading="true" class="so-gvcn-sheet so-gvcn-student-sheet" />
+		<template v-if="rows && rows.length">
+			<div ref="sheetRef" class="w-100 so-gvcn-sheet so-gvcn-student-sheet"></div>
+		</template>
 		<uc-card-empty v-else />
 	</v-card-text>
 </template>
@@ -22,8 +21,9 @@
 			sheetInstance: null,
 			baseColumns: [
 				{ title: 'STT', width: 45, readOnly: true },
-				{ title: 'Họ và tên học sinh', width: 180, readOnly: true },
-				{ title: 'Mã học sinh', width: 95, readOnly: true },
+				{ title: 'Mã học sinh', width: 110, readOnly: true },
+				{ title: 'Số danh bộ', width: 110, readOnly: true },
+				{ title: 'Họ và tên học sinh', width: 220, readOnly: true, align: 'left' },
 				{ title: 'Lớp mới', width: 70, readOnly: true },
 				{ title: 'Lớp cũ', width: 70, readOnly: true },
 				{ title: 'Toán', isScoreCol: true, readOnly: true },
@@ -49,6 +49,8 @@
 				{ title: 'SDT mẹ', width: 105, readOnly: true },
 				{ title: 'Người đỡ đầu', width: 130, readOnly: true },
 				{ title: 'SDT người đỡ đầu', width: 125, readOnly: true },
+				{ title: 'Ăn sáng', width: 80, readOnly: true },
+				{ title: 'Xe', width: 80, readOnly: true },
 				{ title: 'Địa chỉ', width: 240, align: 'left', readOnly: true },
 				{ title: 'Ghi chú', width: 150, readOnly: true }
 			]
@@ -69,7 +71,6 @@
 				}
 
 				if (col.isScoreCol) {
-					// Đối với các cột điểm: tính vừa khít độ dài tiêu đề + dữ liệu điểm số
 					const calculatedWidth = Math.max(45, maxLen * 8.5 + 16)
 					return {
 						...col,
@@ -84,6 +85,73 @@
 				}
 			})
 		}
+	},
+	methods: {
+		destroySheet() {
+			if (!this.sheetInstance) return
+			try {
+				const sheet = Array.isArray(this.sheetInstance) ? this.sheetInstance[0] : this.sheetInstance
+				if (sheet && typeof sheet.destroy === 'function') sheet.destroy()
+			} catch (e) {}
+			this.sheetInstance = null
+		},
+		initSheet() {
+			this.$nextTick(() => {
+				const container = this.$refs.sheetRef
+				if (!container || !this.rows || !this.rows.length) {
+					this.destroySheet()
+					return
+				}
+
+				this.destroySheet()
+				container.innerHTML = ''
+
+				if (typeof jspreadsheet === 'function') {
+					this.sheetInstance = jspreadsheet(container, {
+						worksheets: [{
+							data: this.rows,
+							columns: this.computedColumns,
+							nestedHeaders: this.nestedHeaders,
+							rowResize: true,
+							columnDrag: false,
+							tableWidth: '100%',
+							tableOverflow: true,
+							tableHeight: this.sheetHeight,
+							lazyLoading: false,
+							freezeColumns: 5,
+							wordWrap: true,
+							allowInsertColumn: false,
+							allowInsertRow: false,
+							showHeader: true
+						}],
+						contextMenu: () => false
+					})
+				}
+			})
+		}
+	},
+	watch: {
+		rows: {
+			deep: true,
+			handler() {
+				this.initSheet()
+			}
+		},
+		nestedHeaders: {
+			deep: true,
+			handler() {
+				this.initSheet()
+			}
+		},
+		sheetKey() {
+			this.initSheet()
+		}
+	},
+	mounted() {
+		this.initSheet()
+	},
+	beforeUnmount() {
+		this.destroySheet()
 	}
 	}
 </script>
