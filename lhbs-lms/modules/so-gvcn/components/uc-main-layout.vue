@@ -46,7 +46,7 @@
 		</template>
 
 		<v-card>
-			<v-card-text class="pa-0">
+			<v-card-text class="pa-0" style="height: calc(100vh - 78px);">
 				<v-row no-gutters>
 					<v-col cols="12">
 						<v-tabs v-model="tab" density="compact">
@@ -92,6 +92,7 @@
 
 							<v-window-item value="so-lien-lac">
 								<so-gvcn-tab-so-lien-lac ref="tabSoLienLacRef" v-model:rows="soLienLacRows"
+									:selected-lop-i-d="selectedLopID"
 									:columns="soLienLacColumns" :nested-headers="soLienLacNestedHeaders"
 									:sheet-height="sheetHeight" :so-lien-lac-sheet-height="soLienLacSheetHeight"
 									:sheet-key="sheetKey" />
@@ -99,6 +100,7 @@
 
 							<v-window-item value="huong-nghiep">
 								<so-gvcn-tab-huong-nghiep ref="tabHuongNghiepRef" :rows="huongNghiepRows"
+									:selected-lop-i-d="selectedLopID"
 									:columns="huongNghiepColumns" :nested-headers="huongNghiepNestedHeaders"
 									:sheet-height="sheetHeight" :huong-nghiep-sheet-height="huongNghiepSheetHeight"
 									:sheet-key="sheetKey" @update-rows="updateHuongNghiepRows" />
@@ -136,11 +138,11 @@
 			huongNghiepRows: [],
 			huongNghiepSheetInstance: null,
 			sheetKey: 0,
-			sheetHeight: 'calc(100vh - 230px)',
-			keHoachSheetHeight: 'calc(100vh - 430px)',
-			renLuyenSheetHeight: 'calc(100vh - 370px)',
-			soLienLacSheetHeight: 'calc(100vh - 385px)',
-			huongNghiepSheetHeight: 'calc(100vh - 360px)',
+			sheetHeight: 'calc(100vh - 10px)',
+			keHoachSheetHeight: 'calc(100vh - 300px)',
+			renLuyenSheetHeight: 'calc(100vh - 280px)',
+			soLienLacSheetHeight: 'calc(100vh - 280px)',
+			huongNghiepSheetHeight: 'calc(100vh - 280px)',
 			keHoachSheetColumns: [
 				{ title: 'Tháng', width: 70, readOnly: true },
 				{ title: 'Chủ đề', width: 220 },
@@ -318,7 +320,7 @@
 				{ title: 'Sinh', width: 80, readOnly: true },
 				{ title: 'KQRL', width: 90, readOnly: true },
 				{ title: 'KQHT', width: 90, readOnly: true },
-				{ title: 'Nhận xét GVCN', width: 500, align: 'left', readOnly: true },
+				{ title: 'Nhận xét GVCN', width: 600, align: 'left', readOnly: true },
 				{ title: 'Cha', width: 160, readOnly: true },
 				{ title: 'Nghề nghiệp cha', width: 160, readOnly: true },
 				{ title: 'SDT cha', width: 120, readOnly: true },
@@ -508,11 +510,11 @@
 		},
 		onResize() {
 			const vh = window.innerHeight
-			this.sheetHeight = Math.max(300, vh - 200) + 'px'
-			this.keHoachSheetHeight = Math.max(250, vh - 380) + 'px'
-			this.renLuyenSheetHeight = Math.max(250, vh - 310) + 'px'
-			this.soLienLacSheetHeight = Math.max(250, vh - 310) + 'px'
-			this.huongNghiepSheetHeight = Math.max(250, vh - 310) + 'px'
+			this.sheetHeight = Math.max(320, vh - 190) + 'px'
+			this.keHoachSheetHeight = Math.max(280, vh - 290) + 'px'
+			this.renLuyenSheetHeight = Math.max(280, vh - 260) + 'px'
+			this.soLienLacSheetHeight = Math.max(280, vh - 260) + 'px'
+			this.huongNghiepSheetHeight = Math.max(280, vh - 260) + 'px'
 		},
 		statusText(status) {
 			return ({ NEW: 'Chưa tạo', DRAFT: 'Đã lưu', SUBMITTED: 'Đã lưu' })[status] || status || 'Chưa tạo'
@@ -544,7 +546,7 @@
 				}
 			},
 		async ensureSpecificClassForClassTabs() {
-			if (!this.isTeacher || this.tab === 'du-lieu-hs' || this.selectedLopID !== '__ALL__') return
+			if (this.tab === 'du-lieu-hs' || this.selectedLopID !== '__ALL__') return
 			const firstClass = this.classList[0]
 			if (firstClass) await this.onClassChange(firstClass.LopID)
 		},
@@ -791,6 +793,8 @@
 			if (students.length > 0) {
 				this.renLuyenRows = this.toRenLuyenRows(students)
 				this.soLienLacRows = this.toSoLienLacRows(students)
+				this.studentSheetRows = this.toSheetRows(students)
+				this.applyStudentDropdownOptions()
 			}
 			this.sheetKey++
 		},
@@ -1567,8 +1571,8 @@
 
 			this.getKeHoachExportMonths().forEach(month => {
 				const item = this.findMonthPlan(month.value)
-				rows.push([month.label, 'Chủ đề:', item.ChuDe || this.getDefaultKeHoachChuDe(month.value), '', '', '', '', '', item.DanhGia || ''])
-				rows.push(['', 'Mục tiêu:', item.MucTieu || '', '', '', '', '', '', ''])
+				rows.push([month.label, item.ChuDe || this.getDefaultKeHoachChuDe(month.value), item.MucTieu || '', '', '', '', '', '', item.DanhGia || ''])
+				rows.push(['', '', '', '', '', '', '', '', ''])
 				this.getKeHoachTaskLabels().forEach(label => {
 					rows.push([
 						'',
@@ -1605,10 +1609,13 @@
 			this.getKeHoachExportMonths().forEach((month, index) => {
 				const start = 1 + offset + (index * rowCount)
 				merges.push({ s: { r: start, c: 0 }, e: { r: start + rowCount - 1, c: 0 } })
+				merges.push({ s: { r: start, c: 1 }, e: { r: start + 1, c: 1 } })
+				merges.push({ s: { r: start, c: 2 }, e: { r: start + 1, c: 2 } })
 				merges.push({ s: { r: start, c: 8 }, e: { r: start + rowCount - 1, c: 8 } })
 			})
 			return merges
 		},
+
 		buildKeHoachThangTuanExportCols() {
 			return [
 				{ wch: 8 },
@@ -1719,9 +1726,12 @@
 			this.getKeHoachExportMonths().forEach((month, index) => {
 				const start = 1 + (index * rowCount)
 				this.applySheetMerge(sheet, 'A' + start, 1, rowCount)
-				this.applySheetMerge(sheet, 'H' + start, 1, rowCount)
+				this.applySheetMerge(sheet, 'B' + start, 1, 2)
+				this.applySheetMerge(sheet, 'C' + start, 1, 2)
+				this.applySheetMerge(sheet, 'I' + start, 1, rowCount)
 			})
 		},
+
 		applySheetMerge(sheet, cell, colspan, rowspan) {
 			const originalAlert = window.alert
 			try {

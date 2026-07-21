@@ -113,7 +113,7 @@
 				</v-tabs>
 				<v-divider />
 				<v-tabs-window v-model="activeWsIdx">
-					<v-tabs-window-item v-for="(meta, idx) in wsMeta" :key="idx" :value="idx">
+					<v-tabs-window-item v-for="(meta, idx) in wsMeta" :key="idx" :value="idx" eager>
 						<v-card-text class="pa-0">
 							<div :ref="el => { if (el) { spreadsheetRefs[idx] = el; tryInitSpreadsheet(idx) } }"
 								class="spreadsheet-wrap" />
@@ -174,6 +174,14 @@
 			selectedSemesterHocKy() {
 				const opt = this.semesterPeriodOptions.find(o => o.key === this.config.semesterPeriod)
 				return opt?.HocKi ?? 2
+			},
+		},
+
+		watch: {
+			activeWsIdx(val) {
+				this.$nextTick(() => {
+					this.tryInitSpreadsheet(val)
+				})
 			},
 		},
 

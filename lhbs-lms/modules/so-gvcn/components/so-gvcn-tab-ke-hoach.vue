@@ -135,7 +135,9 @@
 			months.forEach((month, index) => {
 				const start = 1 + (index * rowCount)
 				this.applyMerge(sheet, 'A' + start, 1, rowCount)
-				this.applyMerge(sheet, 'H' + start, 1, rowCount)
+				this.applyMerge(sheet, 'B' + start, 1, 2)
+				this.applyMerge(sheet, 'C' + start, 1, 2)
+				this.applyMerge(sheet, 'I' + start, 1, rowCount)
 			})
 		},
 		applyMerge(sheet, cell, colspan, rowspan) {

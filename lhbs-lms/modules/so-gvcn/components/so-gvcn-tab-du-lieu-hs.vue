@@ -40,7 +40,7 @@
 				{ title: 'Sinh', isScoreCol: true, readOnly: true },
 				{ title: 'KQRL', width: 65, readOnly: true },
 				{ title: 'KQHT', width: 65, readOnly: true },
-				{ title: 'Nhận xét GVCN', width: 280, align: 'left', readOnly: true },
+				{ title: 'Nhận xét GVCN', width: 380, align: 'left', readOnly: true },
 				{ title: 'Cha', width: 140, readOnly: true },
 				{ title: 'Nghề nghiệp cha', width: 130, readOnly: true },
 				{ title: 'SDT cha', width: 105, readOnly: true },
@@ -80,7 +80,7 @@
 				const autoWidth = Math.max(45, Math.min(maxLen * 8 + 20, 320))
 				return {
 					...col,
-					width: col.width ? Math.min(col.width, autoWidth) : Math.ceil(autoWidth)
+					width: col.width ? Math.max(col.width, autoWidth) : Math.ceil(autoWidth)
 				}
 			})
 		}

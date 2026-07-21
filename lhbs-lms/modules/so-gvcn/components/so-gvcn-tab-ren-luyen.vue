@@ -23,10 +23,7 @@
 				</v-expansion-panel>
 			</v-expansion-panels>
 			<div class="so-gvcn-sheet-wrap">
-				<uc-jexcel :key="`ren-${sheetKey}`" v-model="sheetInstance" v-model:dataSource="rowsModel"
-					:columns="columns" :freeze-columns="2" :nestedHeaders="nestedHeaders"
-					:table-height="renLuyenSheetHeight" table-width="100%" :disable-lazy-loading="true"
-					class="so-gvcn-sheet" />
+				<div ref="sheetRef" class="so-gvcn-sheet w-100"></div>
 			</div>
 		</template>
 	</v-card-text>
@@ -35,33 +32,90 @@
 <script>
 	export default {
 		name: 'so-gvcn-tab-ren-luyen',
-	props: {
-		selectedLopID: { type: String, default: '__ALL__' },
-		selectedClass: { type: Object, default: null },
-		schoolYearText: { type: String, default: '' },
-		rows: { type: Array, default: () => [] },
-		columns: { type: Array, default: () => [] },
-		nestedHeaders: { type: Array, default: () => [] },
-		sheetHeight: { type: String, default: 'calc(100vh - 230px)' },
-		renLuyenSheetHeight: { type: String, default: 'calc(100vh - 370px)' },
-		sheetKey: { type: [Number, String], default: 0 }
-	},
-	emits: ['update:rows'],
-	data() {
-		return {
-			sheetInstance: null
+		props: {
+			selectedLopID: { type: String, default: '__ALL__' },
+			selectedClass: { type: Object, default: null },
+			schoolYearText: { type: String, default: '' },
+			rows: { type: Array, default: () => [] },
+			columns: { type: Array, default: () => [] },
+			nestedHeaders: { type: Array, default: () => [] },
+			sheetHeight: { type: String, default: 'calc(100vh - 230px)' },
+			renLuyenSheetHeight: { type: String, default: 'calc(100vh - 370px)' },
+			sheetKey: { type: [Number, String], default: 0 }
+		},
+		emits: ['update:rows'],
+		data() {
+			return {
+				instance: null
+			}
+		},
+		watch: {
+			selectedLopID() {
+				this.initSheet()
+			},
+			sheetKey() {
+				this.initSheet()
+			},
+			rows: {
+				deep: true,
+				handler() {
+					if (!this.instance) {
+						this.initSheet()
+					}
+				}
+			}
+		},
+		mounted() {
+			this.initSheet()
+		},
+		methods: {
+			getInstance() {
+				return this.instance
+			},
+			initSheet() {
+				if (this.selectedLopID === '__ALL__') return
+				setTimeout(() => {
+					const container = this.$refs.sheetRef
+					if (!container) return
+
+					if (this.instance) {
+						try {
+							const s = Array.isArray(this.instance) ? this.instance[0] : this.instance
+							if (s && typeof s.destroy === 'function') s.destroy()
+						} catch (e) {}
+						this.instance = null
+					}
+					container.innerHTML = ''
+
+					if (typeof jspreadsheet === 'function') {
+						this.instance = jspreadsheet(container, {
+							worksheets: [{
+								data: this.rows,
+								columns: this.columns,
+								nestedHeaders: this.nestedHeaders,
+								rowResize: true,
+								columnDrag: false,
+								tableWidth: '100%',
+								tableOverflow: true,
+								tableHeight: this.renLuyenSheetHeight,
+								lazyLoading: false,
+								freezeColumns: 2,
+								wordWrap: true,
+								allowInsertColumn: false,
+								allowInsertRow: false,
+								showHeader: true
+							}],
+							contextMenu: () => false,
+							onchange: (worksheet, cell, x, y, value) => {
+								if (Array.isArray(this.rows) && this.rows[y]) {
+									this.rows[y][x] = value
+									this.$emit('update:rows', this.rows)
+								}
+							}
+						})
+					}
+				}, 50)
+			}
 		}
-	},
-	computed: {
-		rowsModel: {
-			get() { return this.rows },
-			set(val) { this.$emit('update:rows', val) }
-		}
-	},
-	methods: {
-		getInstance() {
-			return this.sheetInstance
-		}
-	}
 	}
 </script>
