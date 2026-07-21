@@ -7,7 +7,7 @@
 <script>
 	export default {
 		inject: ['snackbarRef'],
-		emits: ['onChange', 'update:modelValue', 'update:dataSource', 'update:minDimensions', 'rowData', 'addressCell'],
+		emits: ['onChange', 'on-change', 'update:modelValue', 'update:dataSource', 'update:minDimensions', 'rowData', 'addressCell'],
 		props: {
 			modelValue: {},
 			onLoad: {
@@ -156,6 +156,7 @@
 						search: this.search,
 						pagination: this.pagination,
 						paginationOptions: [10, 25, 50, 100],
+						showHeader: this.tableHeader !== false,
 					}
 				]
 				return {
@@ -378,7 +379,9 @@
 				const finalValue = instance.getValueFromCoords(x, y);
 	
 				this.$emit('update:dataSource', dataObjects);
-				this.$emit('onChange', { instance, cell, x, y, value: finalValue, dataObjects });
+				const changePayload = { instance, cell, x, y, value: finalValue, dataObjects };
+				this.$emit('onChange', changePayload);
+				this.$emit('on-change', changePayload);
 				this.$emit('rowData', rowData);
 				this.$emit('addressCell', [x, y]);
 			},
