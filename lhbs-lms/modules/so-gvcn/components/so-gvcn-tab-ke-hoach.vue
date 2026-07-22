@@ -70,7 +70,7 @@
 			this.$nextTick(() => this.initSheet())
 		},
 		dataAoA: {
-			deep: true,
+			deep: false,
 			handler() {
 				this.initSheet()
 			}
@@ -110,7 +110,6 @@
 							tableOverflow: true,
 							tableHeight: this.keHoachSheetHeight,
 							lazyLoading: false,
-							freezeColumns: 1,
 							wordWrap: true,
 							allowInsertColumn: false,
 							allowInsertRow: false,
@@ -135,8 +134,6 @@
 			months.forEach((month, index) => {
 				const start = 1 + (index * rowCount)
 				this.applyMerge(sheet, 'A' + start, 1, rowCount)
-				this.applyMerge(sheet, 'B' + start, 1, 2)
-				this.applyMerge(sheet, 'C' + start, 1, 2)
 				this.applyMerge(sheet, 'I' + start, 1, rowCount)
 			})
 		},

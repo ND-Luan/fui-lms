@@ -108,8 +108,7 @@
       this.lopFetchedCount = null
       try {
         const data = await new Promise((resolve, reject) => {
-          ajaxCALL(
-            `https://tapi.lhbs.vn/student/LMS_GetLop?NamHoc=${vueData.NienKhoa}`,
+          ajaxCALL(`student/LMS_GetLopChuNhiem?NamHoc=${vueData.NienKhoa}`,
             null,
             res => resolve(res.data),
             err => reject(err)

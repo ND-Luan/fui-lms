@@ -55,12 +55,6 @@
 			},
 			sheetKey() {
 				this.scheduleInit()
-			},
-			rows: {
-				deep: true,
-				handler() {
-					this.scheduleInit()
-				}
 			}
 		},
 		mounted() {
@@ -101,7 +95,7 @@
 							tableOverflow: true,
 							tableHeight: this.renLuyenSheetHeight,
 							lazyLoading: false,
-							freezeColumns: 2,
+							freezeColumns: 4,
 							wordWrap: true,
 							allowInsertColumn: false,
 							allowInsertRow: false,

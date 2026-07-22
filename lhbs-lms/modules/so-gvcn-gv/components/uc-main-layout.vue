@@ -869,8 +869,6 @@
 			this.getKeHoachExportMonths().forEach((month, index) => {
 				const start = 1 + (index * rowCount)
 				this.applySheetMerge(sheet, 'A' + start, 1, rowCount)
-				this.applySheetMerge(sheet, 'B' + start, 1, rowCount)
-				this.applySheetMerge(sheet, 'C' + start, 1, rowCount)
 				this.applySheetMerge(sheet, 'I' + start, 1, rowCount)
 			})
 		},
