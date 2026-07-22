@@ -160,7 +160,11 @@
 				{ title: 'Mã học sinh', name: 'MaHocSinh', width: 110, readOnly: true },
 				{ title: 'Số danh bộ', name: 'SoDanhBo', width: 110, readOnly: true },
 				{ title: 'Họ và tên học sinh', name: 'HoTen', width: 245, readOnly: true },
-				{ title: 'Dự kiến chọn môn thi TN (1)', name: 'MonThiTN', width: 260 },
+				{
+					title: 'Dự kiến chọn môn thi TN (1)', name: 'MonThiTN', width: 260,
+					type: 'dropdown', autocomplete: true,
+					source: ['Toán', 'Ngữ văn', 'Ngoại ngữ', 'Vật lí', 'Hóa học', 'Sinh học', 'Lịch sử', 'Địa lí', 'Giáo dục kinh tế và pháp luật', 'Tin học', 'Công nghệ']
+				},
 				{ title: 'KQ trắc nghiệm nghề nghiệp (Sở thích - Năng lực) - (2)', name: 'KQTracNghiem', width: 440 }
 			],
 			chiTieuCards: [
@@ -261,7 +265,10 @@
 								{ title: 'Họ và tên cha mẹ', name: 'ChaMe', width: 230 },
 								{ title: 'Nghề nghiệp', name: 'NgheNghiep', width: 170 },
 								{ title: 'Điện thoại', name: 'DienThoai', width: 190 },
-								{ title: 'Nhiệm vụ', name: 'NhiemVu', width: 120 }
+								{
+									title: 'Nhiệm vụ', name: 'NhiemVu', width: 140,
+									type: 'dropdown', source: ['Trưởng ban', 'Phó ban', 'Thành viên']
+								}
 							],
 							rows: Array.from({ length: 5 }, function (_, index) { return [index + 1, '', '', '', '', '', ''] })
 						},
@@ -274,7 +281,10 @@
 								{ title: 'STT', name: 'STT', width: 70 },
 								{ title: 'Mã học sinh', name: 'HocSinhID', width: 95, readOnly: true },
 								{ title: 'Họ và tên học sinh', name: 'HocSinh', width: 230, type: 'dropdown', source: [], autocomplete: true },
-								{ title: 'Chức vụ', name: 'ChucVu', width: 180 },
+								{
+									title: 'Chức vụ', name: 'ChucVu', width: 180,
+									type: 'dropdown', source: ['Lớp trưởng', 'Lớp phó học tập', 'Lớp phó văn thể mỹ', 'Bí thư', 'Phó bí thư', 'Tổ trưởng', 'Tổ phó', 'Thủ quỹ']
+								},
 								{ title: 'Ghi chú', name: 'GhiChu', width: 180 }
 							],
 							rows: Array.from({ length: 10 }, function (_, index) { return [index + 1, '', '', '', ''] })
@@ -387,20 +397,25 @@
 		}
 	},
 	computed: {
-		currentNienKhoa() {
-			return vueData.NienKhoa || new Date().getFullYear()
-		},
-		classOptions() {
-			return [
-				{ LopID: '__ALL__', TenLop: 'Tất cả lớp' },
-				...this.classList
-			]
-		},
+			currentNienKhoa() {
+				return vueData.NienKhoa || new Date().getFullYear()
+			},
+			classOptions() {
+				return this.isTeacherOrLead
+					? this.classList
+					: [
+						{ LopID: '__ALL__', TenLop: 'Tất cả lớp' },
+						...this.classList
+					]
+			},
 			userSystemRight() {
-				return Number(vueData?.user?.SystemRight || 0)
+				return Number(vueData?.user?.SystemRight || vueData?.SystemRight || vueData?.sys_SystemRight || 0)
+			},
+			isTeacherOrLead() {
+				return [1, 5].includes(this.userSystemRight)
 			},
 			isTeacher() {
-				return this.userSystemRight === 1
+				return this.isTeacherOrLead
 			},
 			isBghOrAdmin() {
 				return [3, 9].includes(this.userSystemRight)
@@ -564,34 +579,76 @@
 			if (window.showMessage) return showMessage({ title: message })
 			alert(message)
 		},
-		async getList() {
-			this.loading.list = true
-			try {
-				this.allStudentRows = await ajaxCALLPromise('lms/SoGVCNDanhSachHocSinhLop', {
-					NienKhoa: this.filter.NienKhoa,
-					CapID: this.filter.CapID,
-					LopID: ''
-				})
-				// Nếu user có SystemRight = 1 (Giáo viên chủ nhiệm), chỉ lọc giữ lại danh sách học sinh của lớp GVCN phụ trách
-				const sysRight = String(vueData.SystemRight ?? vueData.sys_SystemRight ?? '')
-				if (sysRight === '1' && vueData.LopID) {
-					this.allStudentRows = (this.allStudentRows || []).filter(x => `${x.LopID}` === `${vueData.LopID}`)
+			async getList() {
+				this.loading.list = true
+				try {
+					this.allStudentRows = await ajaxCALLPromise('lms/SoGVCNDanhSachHocSinhLop', {
+						NienKhoa: this.filter.NienKhoa,
+						CapID: this.filter.CapID,
+						LopID: ''
+					})
+					// Giáo viên và tổ trưởng chỉ thấy lớp đang chủ nhiệm trong niên khóa hiện tại.
+					if (this.isTeacherOrLead) {
+						const teacherClassIds = await this.getTeacherHomeroomClassIds()
+						this.allStudentRows = (this.allStudentRows || []).filter(row => teacherClassIds.has(String(row.LopID)))
+					}
+					this.classList = this.buildClassList(this.allStudentRows)
+					await this.mergeTongKetDiem(this.classList)
+					await this.mergeThongTinGiaDinh()
+					if (!this.classOptions.some(x => String(x.LopID) === String(this.selectedLopID))) {
+						this.selectedLopID = this.isTeacherOrLead ? (this.classList[0]?.LopID || '__ALL__') : '__ALL__'
+					}
+					await this.onClassChange(this.selectedLopID)
+					await this.ensureSpecificClassForClassTabs()
+				} finally {
+					this.loading.list = false
 				}
-				this.classList = this.buildClassList(this.allStudentRows)
-				await this.mergeTongKetDiem(this.classList)
-				await this.mergeThongTinGiaDinh()
-				if (!this.classOptions.some(x => x.LopID === this.selectedLopID)) this.selectedLopID = '__ALL__'
-				await this.onClassChange(this.selectedLopID)
-				await this.ensureSpecificClassForClassTabs()
-			} finally {
-				this.loading.list = false
-			}
-		},
-		async ensureSpecificClassForClassTabs() {
-			if (this.tab === 'du-lieu-hs' || this.selectedLopID !== '__ALL__') return
-			const firstClass = this.classList[0]
-			if (firstClass) await this.onClassChange(firstClass.LopID)
-		},
+			},
+			async getTeacherHomeroomClassIds() {
+				const userID = String(vueData?.user?.UserID || vueData?.sys_UserID || '').trim()
+				const fallbackLopID = vueData?.LopID ? String(vueData.LopID) : ''
+				const khoiIds = [...new Set((this.allStudentRows || []).map(row => Number(row.KhoiID)).filter(Boolean))]
+				const classRows = (await Promise.all(khoiIds.map(khoiID => ajaxCALLPromise('lms/Lop_Get_ByKhoiID', {
+					NienKhoa: this.filter.NienKhoa,
+					KhoiID: khoiID
+				}).catch(() => [])))).flat()
+				const matchedIds = classRows.concat(this.allStudentRows || [])
+					.filter(row => row && row.IsNhom !== true && this.isHomeroomClassOfCurrentUser(row, userID))
+					.map(row => String(row.LopID))
+				if (!matchedIds.length && fallbackLopID) matchedIds.push(fallbackLopID)
+				return new Set(matchedIds)
+			},
+			isHomeroomClassOfCurrentUser(row, userID) {
+				if (!row || !userID) return false
+				const candidateKeys = [
+					'GVCN',
+					'GVCNID',
+					'GVCN_ID',
+					'GVCNUserID',
+					'UserID_GVCN',
+					'GiaoVienChuNhiemID',
+					'GiaoVienChuNhiem',
+					'GiaoVienID',
+					'MaGiaoVien',
+					'NhanVienID',
+					'TeacherID',
+					'UserID'
+				]
+				return candidateKeys.some(key => this.valueMatchesUserID(row[key], userID))
+			},
+			valueMatchesUserID(value, userID) {
+				if (value === undefined || value === null || !userID) return false
+				return String(value)
+					.split(/[;,|]/)
+					.map(item => item.trim())
+					.some(item => item === userID)
+			},
+			async ensureSpecificClassForClassTabs() {
+				if (this.selectedLopID !== '__ALL__') return
+				if (this.tab === 'du-lieu-hs' && !this.isTeacherOrLead) return
+				const firstClass = this.classList[0]
+				if (firstClass) await this.onClassChange(firstClass.LopID)
+			},
 		getRenLuyenMonthNote() {
 			return 'Ghi tóm tắt vi phạm - tái phạm - số ngày nghỉ - thời gian/xử lí/có mời PH/có cam kết lần...\nGhi nhận tiến bộ về mặt nào đó, thành tích, đóng góp'
 		},
@@ -762,7 +819,7 @@
 				this.setStudentSheets(this.allStudentRows)
 				return
 			}
-			const item = this.classList.find(x => x.LopID === lopID)
+			const item = this.classList.find(x => String(x.LopID) === String(lopID))
 			if (item) await this.openSo(item)
 		},
 		resetSo() {
@@ -845,7 +902,7 @@
 		async getStudents() {
 			this.loading.students = true
 			try {
-				const rows = this.allStudentRows.filter(x => x.LopID === this.filter.LopID)
+				const rows = this.allStudentRows.filter(x => String(x.LopID) === String(this.filter.LopID))
 				this.setStudentSheets(rows)
 			} finally {
 				this.loading.students = false
@@ -887,7 +944,7 @@
 				x.Sinh || '',
 				x.KQRL || '',
 				x.KQHT || '',
-				x.NhanXetGVCN || '',
+				this.buildNhanXetGVCN(x),
 				x.Cha || '',
 				x.NgheNghiepCha || '',
 				x.SDTCha || '',
@@ -917,7 +974,7 @@
 				x.MaHocSinh || x.HocSinhID || '',
 				x.SoDanhBo || '',
 				x.HoTen || '',
-				this.getSavedMonthlyValue(this.renLuyenSavedRows, x.HSLopID, 0, 'NoiDung') || x.CanHoTro || '',
+				this.getSavedMonthlyValue(this.renLuyenSavedRows, x.HSLopID, 0, 'NoiDung'),
 				this.getSavedMonthlyValue(this.renLuyenSavedRows, x.HSLopID, 99, 'NoiDung'),
 				this.getSavedMonthlyValue(this.renLuyenSavedRows, x.HSLopID, 8, 'NoiDung'),
 				this.getSavedMonthlyValue(this.renLuyenSavedRows, x.HSLopID, 9, 'NoiDung'),
@@ -925,8 +982,8 @@
 				this.getSavedMonthlyValue(this.renLuyenSavedRows, x.HSLopID, 11, 'NoiDung'),
 				this.getSavedMonthlyValue(this.renLuyenSavedRows, x.HSLopID, 12, 'NoiDung'),
 				this.getSavedMonthlyValue(this.renLuyenSavedRows, x.HSLopID, 91, 'NoiDung'), // NHẬN XÉT HKI
-				this.getSavedMonthlyValue(this.renLuyenSavedRows, x.HSLopID, 81, 'NoiDung') || x.KQRLHK1 || x.KQRL || '', // KQRL HKI
-				this.getSavedMonthlyValue(this.renLuyenSavedRows, x.HSLopID, 82, 'NoiDung') || x.KQHTHK1 || x.KQHT || '', // KQHT HKI
+				this.getSavedMonthlyValue(this.renLuyenSavedRows, x.HSLopID, 81, 'NoiDung'), // KQRL HKI
+				this.getSavedMonthlyValue(this.renLuyenSavedRows, x.HSLopID, 82, 'NoiDung'), // KQHT HKI
 				this.getSavedMonthlyValue(this.renLuyenSavedRows, x.HSLopID, 1, 'NoiDung'),
 				this.getSavedMonthlyValue(this.renLuyenSavedRows, x.HSLopID, 3, 'NoiDung'),
 				this.getSavedMonthlyValue(this.renLuyenSavedRows, x.HSLopID, 4, 'NoiDung'),
@@ -934,7 +991,7 @@
 				this.getSavedMonthlyValue(this.renLuyenSavedRows, x.HSLopID, 92, 'NoiDung'), // NHẬN XÉT HKII
 				this.getSavedMonthlyValue(this.renLuyenSavedRows, x.HSLopID, 93, 'NoiDung'), // KQRL HKII
 				this.getSavedMonthlyValue(this.renLuyenSavedRows, x.HSLopID, 94, 'NoiDung'), // KQHT HKII
-					this.getSavedMonthlyValue(this.renLuyenSavedRows, x.HSLopID, 95, 'NoiDung'), // DANH HIỆU
+				this.getSavedMonthlyValue(this.renLuyenSavedRows, x.HSLopID, 95, 'NoiDung'), // DANH HIỆU
 				this.getSavedMonthlyValue(this.renLuyenSavedRows, x.HSLopID, 96, 'NoiDung')  // THÀNH TÍCH KHÁC
 			])
 		},
@@ -1096,7 +1153,7 @@
 		},
 		getSelectedClassStudents() {
 			if (this.selectedLopID === '__ALL__') return []
-			return (this.allStudentRows || []).filter(x => x.LopID === this.selectedLopID)
+			return (this.allStudentRows || []).filter(x => String(x.LopID) === String(this.selectedLopID))
 		},
 		findSelectedStudent(value) {
 			const text = this.cleanSheetValue(value)
@@ -1248,22 +1305,30 @@
 				RowIndex: index + 1
 			})).filter(row => row.MatGiaoDuc || row.YeuCau || row.Tot !== 0 || row.Kha !== 0 || row.Dat !== 0 || row.ChuaDat !== 0 || row.BienPhap)
 
-			const danhHieuRows = (danhHieuCard.rows || []).map((row, index) => ({
+			const danhHieuSourceRows = (danhHieuCard.rows && danhHieuCard.rows.length)
+				? danhHieuCard.rows
+				: [['', '', '', '']]
+			const danhHieuRows = danhHieuSourceRows.map((row, index) => ({
 				LoaiChiTieu: 'DANH_HIEU',
 				YeuCau: this.cleanSheetCell(row, 0, 'YeuCau'),
-				HSXS: this.cleanSheetCell(row, 1, 'HSXS'),
-				HSG: this.cleanSheetCell(row, 2, 'HSG'),
+				HSXS: this.cleanSheetNumber(this.cleanSheetCell(row, 1, 'HSXS')),
+				HSG: this.cleanSheetNumber(this.cleanSheetCell(row, 2, 'HSG')),
 				GhiChu: this.cleanSheetCell(row, 3, 'GhiChu'),
 				RowIndex: index + 1
-			})).filter(row => row.YeuCau || row.HSXS || row.HSG || row.GhiChu)
+			}))
 
-			const phongTraoRows = (phongTraoCard.rows || []).map((row, index) => ({
-				LoaiChiTieu: 'PHONG_TRAO',
-				YeuCau: this.cleanSheetCell(row, 0, 'YeuCau'),
-				NoiDung: this.cleanSheetCell(row, 1, 'NoiDung'),
-				GhiChu: this.cleanSheetCell(row, 2, 'GhiChu'),
-				RowIndex: index + 1
-			})).filter(row => row.YeuCau || row.NoiDung || row.GhiChu)
+			const phongTraoRows = (phongTraoCard.rows || []).map((row, index) => {
+				const yeuCau = this.cleanSheetCell(row, 0, 'YeuCau')
+				const noiDung = this.cleanSheetCell(row, 1, 'NoiDung')
+				const ghiChu = this.cleanSheetCell(row, 2, 'GhiChu')
+				return {
+					LoaiChiTieu: 'PHONG_TRAO',
+					YeuCau: yeuCau,
+					NoiDung: yeuCau || noiDung || ghiChu ? noiDung : ' ',
+					GhiChu: ghiChu,
+					RowIndex: index + 1
+				}
+			})
 
 			return giaoDucRows.concat(danhHieuRows, phongTraoRows)
 		},
@@ -1453,13 +1518,19 @@
 		},
 		serializeGiaoVienBoMonRows() {
 			const card = this.getChiTieuCard('giao-vien-bo-mon')
-			return (card.rows || []).map((row, index) => ({
-				BoMon: this.cleanSheetCell(row, 0, 'BoMon'),
-				HocKy: this.cleanSheetCell(row, 1, 'HocKy'),
-				GiaoVien: this.cleanSheetCell(row, 2, 'GiaoVien'),
-				ThayDoi: this.cleanSheetCell(row, 3, 'ThayDoi'),
-				RowIndex: index + 1
-			})).filter(row => row.BoMon || row.HocKy || row.GiaoVien || row.ThayDoi)
+			return (card.rows || []).map((row, index) => {
+				const giaoVien = this.cleanSheetCell(row, 2, 'GiaoVien')
+				const teacher = (this.allTeachers || []).find(item => item.text === giaoVien || item.name === giaoVien) || {}
+				const hocKyValue = this.cleanSheetCell(row, 1, 'HocKy')
+				return {
+					BoMon: this.cleanSheetCell(row, 0, 'BoMon'),
+					HocKy: String(hocKyValue).includes('2') ? 2 : (hocKyValue ? 1 : null),
+					GiaoVienID: teacher.id || '',
+					GiaoVien: giaoVien,
+					ThayDoi: this.cleanSheetCell(row, 3, 'ThayDoi'),
+					RowIndex: index + 1
+				}
+			}).filter(row => row.BoMon || row.HocKy || row.GiaoVien || row.ThayDoi)
 		},
 		applyBanDaiDienCMHSRows() {
 			const card = this.getChiTieuCard('ban-dai-dien-cmhs')
@@ -1490,7 +1561,7 @@
 				return {
 				STT: this.cleanSheetCell(row, 0, 'STT') || index + 1,
 				HSLopID: student.HSLopID || '',
-				HocSinhID: this.cleanSheetCell(row, 1, 'HocSinhID') || student.HocSinhID || student.MaHocSinh || '',
+				HocSinhID: student.HocSinhID || '',
 				MaHocSinh: this.cleanSheetCell(row, 1, 'HocSinhID') || student.MaHocSinh || student.HocSinhID || '',
 				HocSinh: this.cleanSheetCell(row, 2, 'HocSinh'),
 				ChaMe: this.cleanSheetCell(row, 3, 'ChaMe'),
@@ -1950,7 +2021,7 @@
 				: this.parseHuongNghiepSavedRows(this.form.HuongNghiep)
 			const studentRows = this.selectedLopID === '__ALL__'
 				? []
-				: (this.allStudentRows || []).filter(x => x.LopID === this.selectedLopID)
+				: (this.allStudentRows || []).filter(x => String(x.LopID) === String(this.selectedLopID))
 			const rows = studentRows.map((student, index) => {
 				const saved = savedRows.find(row => `${row.HSLopID || ''}` === `${student.HSLopID || ''}`)
 					|| savedRows.find(row => `${row.HocSinhID || ''}` === `${student.HocSinhID || ''}`)
@@ -2006,7 +2077,7 @@
 			const sourceRows = sheet && typeof sheet.getData === 'function' ? sheet.getData() : (this.huongNghiepRows || [])
 			const sourceStudents = this.selectedLopID === '__ALL__'
 				? []
-				: (this.allStudentRows || []).filter(x => x.LopID === this.selectedLopID)
+				: (this.allStudentRows || []).filter(x => String(x.LopID) === String(this.selectedLopID))
 			return sourceRows.map((row, index) => {
 				const student = sourceStudents[index] || {}
 				return {
@@ -2069,6 +2140,24 @@
 		},
 		cleanSheetValue(value) {
 			return value == null ? '' : String(value).trim()
+		},
+		buildNhanXetGVCN(student) {
+			const nhanXetChuanBiNienKhoa = this.htmlToPlainText(student?.NhanXetGVCN)
+			const nhanXetVeHocSinh = this.htmlToPlainText(student?.NhanXetGVCN_VeHocSinh_HTML)
+			const parts = []
+			if (nhanXetChuanBiNienKhoa) parts.push('Nhận xét chuẩn bị niên khóa: ' + nhanXetChuanBiNienKhoa)
+			if (nhanXetVeHocSinh) parts.push('Nhận xét về học sinh: ' + nhanXetVeHocSinh)
+			return parts.join('\n\n')
+		},
+		htmlToPlainText(value) {
+			if (value == null || value === '') return ''
+			const container = document.createElement('div')
+			container.innerHTML = String(value)
+			return (container.innerText || container.textContent || '')
+				.replace(/\u00a0/g, ' ')
+				.replace(/[\u200B-\u200D\uFEFF]/g, '')
+				.replace(/\n{3,}/g, '\n\n')
+				.trim()
 		},
 		renderCheckedValue(value) {
 			return value === true || value === 'true' || value === 1 || value === '1' || value === 'X' ? 'X' : ''
@@ -2142,31 +2231,30 @@
 					this.form.GiaoVienBoMon = JSON.stringify({ version: 1, rows: giaoVienBoMonRows })
 					this.form.BanDaiDienCMHS = JSON.stringify({ version: 1, rows: banDaiDienCMHSRows })
 					this.form.CanBoLop = JSON.stringify({ version: 1, rows: canBoLopRows })
-					await ajaxCALLPromise('lms/SoGVCNSave', this.form)
 					await ajaxCALLPromise('lms/SoGVCNChiTieuSave', {
 						SoGVCNID: this.form.SoGVCNID,
 						JsonRows: JSON.stringify(chiTieuRows)
 					})
-					await ajaxCALLPromise('lms/SoGVCNPhuLucSave', {
+					await ajaxCALLPromise('lms/SoGVCNPhuLucTab2Save', {
 						SoGVCNID: this.form.SoGVCNID,
 						JsonSiSo: JSON.stringify(siSoRows),
 						JsonGiaoVienBoMon: JSON.stringify(giaoVienBoMonRows),
 						JsonBanDaiDienCMHS: JSON.stringify(banDaiDienCMHSRows),
-						JsonCanBoLop: JSON.stringify(canBoLopRows),
-						JsonHuongNghiep: JSON.stringify(this.serializeHuongNghiepRows())
+						JsonCanBoLop: JSON.stringify(canBoLopRows)
 					})
+					this.chiTieuSavedRows = chiTieuRows
+					this.siSoSavedRows = siSoRows
+					this.giaoVienBoMonSavedRows = giaoVienBoMonRows
+					this.banDaiDienCMHSSavedRows = banDaiDienCMHSRows
+					this.canBoLopSavedRows = canBoLopRows
 				} else if (this.tab === 'huong-nghiep') {
 					const huongNghiepRows = this.serializeHuongNghiepRows()
 					this.form.HuongNghiep = JSON.stringify({ version: 1, rows: huongNghiepRows })
-					await ajaxCALLPromise('lms/SoGVCNSave', this.form)
-					await ajaxCALLPromise('lms/SoGVCNPhuLucSave', {
+					await ajaxCALLPromise('lms/SoGVCNHuongNghiepSave', {
 						SoGVCNID: this.form.SoGVCNID,
-						JsonSiSo: JSON.stringify(this.serializeSiSoRows()),
-						JsonGiaoVienBoMon: JSON.stringify(this.serializeGiaoVienBoMonRows()),
-						JsonBanDaiDienCMHS: JSON.stringify(this.serializeBanDaiDienCMHSRows()),
-						JsonCanBoLop: JSON.stringify(this.serializeCanBoLopRows()),
 						JsonHuongNghiep: JSON.stringify(huongNghiepRows)
 					})
+					this.huongNghiepSavedRows = huongNghiepRows
 				} else if (this.tab === 'ren-luyen') {
 					if (this.form.SoGVCNID && this.selectedLopID !== '__ALL__') {
 						await ajaxCALLPromise('lms/SoGVCNTheoDoiRenLuyenSave', {
@@ -2182,10 +2270,8 @@
 						})
 					}
 				}
-				await this.getDetail()
-				if (this.tab !== 'ren-luyen' && this.tab !== 'so-lien-lac') {
-					await this.getList()
-				}
+				if (this.detail) this.detail.TrangThai = this.detail.TrangThai === 'NEW' ? 'DRAFT' : this.detail.TrangThai
+				if (this.selectedClass) this.selectedClass.TrangThai = this.selectedClass.TrangThai === 'NEW' ? 'DRAFT' : this.selectedClass.TrangThai
 				const tabNames = {
 					'chi-tieu': 'chỉ tiêu',
 					'huong-nghiep': 'hướng nghiệp',
@@ -2278,7 +2364,6 @@
 			try {
 				const rows = this.parseKeHoachSheetRows()
 				await Promise.all(rows.map(row => ajaxCALLPromise('lms/SoGVCNKeHoachThangSave', row)))
-				await this.getDetail()
 				this.initKeHoachSheet()
 				this.notify('Đã lưu kế hoạch tháng')
 			} finally {
