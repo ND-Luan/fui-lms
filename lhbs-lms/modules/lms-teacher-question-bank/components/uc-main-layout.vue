@@ -1,5 +1,5 @@
 <template>
-  <Global>
+	<Global>
     <template #header>
       <v-card>
         <v-card-text class="d-flex align-center ga-2 flex-wrap py-2">
@@ -16,7 +16,8 @@
           </template>
           <template v-if="selectedGroup">
             <v-icon size="small" class="text-medium-emphasis">mdi-chevron-right</v-icon>
-            <v-chip size="small" color="secondary" variant="tonal" closable @click:close="selectedGroup = null; DSQuestion = []">
+            <v-chip size="small" color="secondary" variant="tonal" closable
+              @click:close="selectedGroup = null; DSQuestion = []">
               {{ selectedGroup.Title }}
             </v-chip>
           </template>
@@ -47,7 +48,7 @@
                 <v-icon size="small">{{ khoi._open ? 'mdi-chevron-down' : 'mdi-chevron-right' }}</v-icon>
               </template>
               <v-list-item-title class="text-body-2 font-weight-medium">{{ khoi.TenKhoiHoc || ('Khối ' + khoi.KhoiID)
-              }}</v-list-item-title>
+                }}</v-list-item-title>
               <template #append>
                 <v-progress-circular v-if="khoi._loading" size="14" width="2" indeterminate />
               </template>
@@ -88,22 +89,23 @@
                 mdi-paperclip
               </v-icon>
             </v-list-item-title>
-            <v-list-item-subtitle v-if="uploadingGroups[group.Id]?.text"
-              class="text-caption text-primary">
+            <v-list-item-subtitle v-if="uploadingGroups[group.Id]?.text" class="text-caption text-primary">
               {{ uploadingGroups[group.Id].text }}
             </v-list-item-subtitle>
 
             <v-list-item-subtitle v-else-if="group.Description" class="text-caption">
               {{ group.Description }}
             </v-list-item-subtitle>
-      <template #append>
-                <div class="d-flex align-center ga-1">
-                  <v-progress-circular v-if="uploadingGroups[group.Id]" size="14" width="2" indeterminate color="primary" />
-                  <v-btn icon size="x-small" variant="text" color="primary" @click.stop="openEditGroup(group)">
+            <template #append>
+              <div class="d-flex align-center ga-1">
+                <v-progress-circular v-if="uploadingGroups[group.Id]" size="14" width="2" indeterminate
+                  color="primary" />
+                <v-btn icon size="x-small" variant="text" color="primary" @click.stop="openEditGroup(group)">
                   <v-icon size="small">mdi-pencil</v-icon>
                   <v-tooltip activator="parent" location="top">Sửa</v-tooltip>
                 </v-btn>
-                <v-btn icon size="x-small" variant="text" color="error" v-if="!uploadingGroups[group.Id]" @click.stop="deleteGroup(group)">
+                <v-btn icon size="x-small" variant="text" color="error" v-if="!uploadingGroups[group.Id]"
+                  @click.stop="deleteGroup(group)">
                   <v-icon size="small">mdi-delete-outline</v-icon>
                   <v-tooltip activator="parent" location="top">Xóa</v-tooltip>
                 </v-btn>
@@ -171,7 +173,8 @@
           <template #item.media="{ item }">
             <template v-if="uploadingQuestions[item.Id]">
               <v-progress-circular size="14" width="2" indeterminate color="primary" />
-              <v-tooltip activator="parent" location="top">{{ uploadingQuestions[item.Id].text || 'Đang upload...' }}</v-tooltip>
+              <v-tooltip activator="parent" location="top">{{ uploadingQuestions[item.Id].text || 'Đang upload...' }}
+              </v-tooltip>
             </template>
             <v-icon v-else-if="hasMedia(item.ConfigJson, 'question')" color="teal" size="small">mdi-paperclip</v-icon>
             <span v-else class="text-medium-emphasis text-caption">-</span>
@@ -182,7 +185,8 @@
                 <v-icon>mdi-pencil</v-icon>
                 <v-tooltip activator="parent" location="top">Chỉnh sửa</v-tooltip>
               </v-btn>
-              <v-btn v-if="!uploadingQuestions[item.Id]" icon size="small" variant="text" color="error" @click="deleteQuestion(item)">
+              <v-btn v-if="!uploadingQuestions[item.Id]" icon size="small" variant="text" color="error"
+                @click="deleteQuestion(item)">
                 <v-icon>mdi-delete-outline</v-icon>
                 <v-tooltip activator="parent" location="top">Xóa</v-tooltip>
               </v-btn>
@@ -201,11 +205,8 @@
     <!-- Dialog Nhóm -->
     <uc-dialog-group v-model="dialogGroup" :item="formGroup"
       :upload-context="selectedMon ? { MonHocName: selectedMon.TenMonHoc_HienThi, KhoiID: selectedMon.KhoiID } : {}"
-      :is-uploading="!!uploadingGroups[formGroup.Id]"
-      :uploading-text="uploadingGroups[formGroup.Id]?.text || ''"
-      @saved="onGroupSaved"
-      @upload-start="onGroupUploadStart"
-      @upload-end="onGroupUploadEnd"
+      :is-uploading="!!uploadingGroups[formGroup.Id]" :uploading-text="uploadingGroups[formGroup.Id]?.text || ''"
+      @saved="onGroupSaved" @upload-start="onGroupUploadStart" @upload-end="onGroupUploadEnd"
       @upload-progress="onGroupUploadProgress" />
 
     <!-- Dialog Câu hỏi -->
@@ -213,10 +214,8 @@
       :group-id="selectedGroup ? selectedGroup.Id : null" :mon-hoc-id="selectedMon ? selectedMon.MonHocID : null"
       :upload-context="selectedMon ? { MonHocName: selectedMon.TenMonHoc_HienThi, KhoiID: selectedMon.KhoiID } : {}"
       :is-uploading="!!uploadingQuestions[formQuestion.Id]"
-      :uploading-text="uploadingQuestions[formQuestion.Id]?.text || ''"
-      @saved="onQuestionSaved"
-      @upload-start="onQuestionUploadStart"
-      @upload-end="onQuestionUploadEnd"
+      :uploading-text="uploadingQuestions[formQuestion.Id]?.text || ''" @saved="onQuestionSaved"
+      @upload-start="onQuestionUploadStart" @upload-end="onQuestionUploadEnd"
       @upload-progress="onQuestionUploadProgress" />
 
     <!-- Dialog Quản lý kỹ năng -->
@@ -226,8 +225,8 @@
 </template>
 
 <script>
-export default {
-  inject: ['snackbarRef', 'iframeRef', 'confirmRef'],
+	export default {
+		inject: ['snackbarRef', 'iframeRef', 'confirmRef'],
   data() {
     return {
       vueData,
@@ -275,6 +274,13 @@ export default {
     },
   },
   watch: {
+    'vueData.NienKhoa'() {
+      this.selectedMon = null
+      this.selectedGroup = null
+      this.DSGroup = []
+      this.DSQuestion = []
+      this.getTeacherKhoiMon()
+    },
     selectedMon(v) {
       this.DSGroup = []; this.selectedGroup = null; this.DSQuestion = []
       if (v) this.getGroups()
@@ -426,5 +432,5 @@ export default {
     onQuestionUploadEnd({ id }) { delete this.uploadingQuestions[id] },
     onQuestionUploadProgress({ id, text }) { if (this.uploadingQuestions[id]) this.uploadingQuestions[id].text = text },
   },
-}
+	}
 </script>

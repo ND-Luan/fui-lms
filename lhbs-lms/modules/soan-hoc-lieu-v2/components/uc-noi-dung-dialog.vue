@@ -39,32 +39,32 @@
 						<div v-else-if="isVideo">
 							<v-row>
 								<v-col cols="12">
-									<v-file-input accept="video/*" label="Tải tập tin"
+									<v-file-input accept="video/*" label="Tải video"
 										@update:modelValue="uploadFileYoutube" />
 									<!-- <f-file-upload :url="vueData.v_Set.apiFile" label="Tải tập tin lên"
 										@update:modelValue="(file) => editableItem.DataJson.url = file.Files[0].FILE_URL + '/' + file.Files[0].FILE_NAME "
 										:filters="filters" color="primary" variant="tonal" /> -->
 								</v-col>
 								<v-col cols="12">
-									<v-text-field label="Đường dẫn (URL)" v-model="editableItem.DataJson.url"
-										variant="outlined" density="compact"
-										placeholder="https://www.youtube.com/watch?v=..."></v-text-field>
+									<v-alert type="info" variant="tonal">
+										Video được phát hành qua YouTube và tự động lưu một bản kiểm tra trong LMS.
+									</v-alert>
 								</v-col>
 							</v-row>
 						</div>
 						<div v-else-if="isAudio">
 							<v-row>
 								<v-col cols="12">
-									<v-file-input accept="audio/*" label="Tải tập tin"
+									<v-file-input accept="audio/*" label="Tải audio"
 										@update:modelValue="uploadFileGGDrive" />
 									<!-- <f-file-upload :url="vueData.v_Set.apiFile" label="Tải tập tin lên"
 																@update:modelValue="(file) => editableItem.DataJson.url = file.Files[0].FILE_URL + '/' + file.Files[0].FILE_NAME "
 																:filters="filters" color="primary" variant="tonal" /> -->
 								</v-col>
 								<v-col cols="12">
-									<v-text-field label="Đường dẫn (URL)" v-model="editableItem.DataJson.url"
-										variant="outlined" density="compact"
-										placeholder="https://www.youtube.com/watch?v=..."></v-text-field>
+									<v-alert type="info" variant="tonal">
+										Audio được phát hành qua Google Drive và tự động lưu một bản kiểm tra trong LMS.
+									</v-alert>
 								</v-col>
 							</v-row>
 						</div>
@@ -84,9 +84,9 @@
 
 							<!-- Tab Content -->
 							<v-tabs-window v-model="activeTab" class="editor-content">
-								<!-- Tab 1: F-Editor (Rich Text) -->
+								<!-- Tab 1: F-Editor (Rich Text) với tích hợp GeoGebra -->
 								<v-tabs-window-item value="rich" class="tab-content">
-									<f-editor :imageapi="vueData.v_Set.apiImageAdapter" v-model="textContent"
+									<uc-ggb-editor :imageapi="vueData.v_Set.apiImageAdapter" v-model="textContent"
 										label="Nội dung văn bản" variant="outlined" :height="400" />
 								</v-tabs-window-item>
 
@@ -102,7 +102,7 @@
 							</v-tabs-window>
 						</div>
 						<div v-else-if="isSlide">
-							<v-file-input accept=".doc,.docx,.ppt,.pptx,.pdf" label="Tải tập tin"
+							<v-file-input accept=".doc,.docx,.ppt,.pptx,.pdf" label="Tải tài liệu"
 								@update:modelValue="uploadFileGGDrive" />
 							<!-- <f-file-upload :url="vueData.v_Set.apiFile" label="Tải tập tin lên" :filters="filters"
 								@update:modelValue="(file) => onUploadFile(file)" color="primary" variant="tonal" /> -->
@@ -190,7 +190,14 @@
 	export default {
 		name: 'uc-noi-dung-dialog',
 		inject: ['snackbarRef', 'iframeRef', 'confirmRef'],
-		props: ['isOpen', 'item'],
+		props: {
+			isOpen: Boolean,
+			item: Object,
+			resourceContext: {
+				type: Object,
+				default: () => ({}),
+			},
+		},
 		emits: ['update:isOpen', 'save'],
 		data() {
 			return {
@@ -365,150 +372,181 @@
 				) return 'PPT';
 				return '';
 			},
+			async ensureDraftNode(file) {
+				const targetItem = this.editableItem;
+				if (targetItem.NoiDungID) return true;
+
+				const draftItem = this.buildSavePayload({
+					HocLieuID: targetItem.HocLieuID,
+					ParentID: targetItem.ParentID || 0,
+					LoaiNoiDung: targetItem.LoaiNoiDung,
+					TenNoiDung: targetItem.TenNoiDung || file.name,
+					ThuTu: targetItem.ThuTu,
+					DataJson: JSON.stringify({}),
+				}, targetItem);
+				const result = await fetchPromise('lms/FP_NoiDung_Save', draftItem, { cache: false });
+				const saved = Array.isArray(result) ? result[0] : result;
+				if (!saved?.NoiDungID) {
+					this.notify('Không thể tạo mục nháp để tải file.', 'error');
+					return false;
+				}
+
+				Object.assign(targetItem, saved);
+				this.ensureDataJsonObject(targetItem);
+				this.$emit('update-item', saved);
+				this.$emit('refresh-tree');
+				return true;
+			},
+			buildLmsFileMetadata(uploaded, file, targetItem) {
+				const contentType = uploaded.FILE_CONTENTTYPE || file.type || '';
+				return {
+					uploadSource: 'db',
+					fileId: uploaded.FILE_ID,
+					fileName: uploaded.FILE_NAME || file.name,
+					contentType,
+					fileSize: Number(uploaded.FILE_SIZE || file.size || 0),
+					url: uploaded.FILE_URL || `/FileData/${uploaded.FILE_ID}`,
+					title: uploaded.FILE_NAME || file.name,
+					slideType: this.getSlideContentType(contentType),
+					mediaType: targetItem.LoaiNoiDung === 'AUDIO' ? 'audio' : undefined,
+					origin: 'HOC_LIEU',
+					sourceHocLieuID: targetItem.HocLieuID,
+					sourceNoiDungID: targetItem.NoiDungID,
+				};
+			},
+			async saveUploadedFileToNode(targetItem, metadata) {
+				const nodeDataList = await fetchPromise('lms/FP_NoiDung_GetDetail', {
+					NoiDungID: targetItem.NoiDungID,
+				});
+				const nodeData = Array.isArray(nodeDataList) ? nodeDataList[0] : nodeDataList;
+				if (!nodeData) throw new Error('Không tìm thấy mục nội dung vừa tạo.');
+
+				nodeData.DataJson = JSON.stringify(metadata);
+				await fetchPromise('lms/FP_NoiDung_Save', this.buildSavePayload(nodeData, targetItem), { cache: false });
+			},
+			async registerUploadedFileInResourceLibrary(targetItem, metadata) {
+				await fetchPromise('lms/FP_TaiNguyen_File_Register', {
+					KhoiID: this.resourceContext?.KhoiID ?? null,
+					MonHocID: this.resourceContext?.MonHocID ?? null,
+					TenNoiDung: metadata.fileName,
+					LoaiNoiDung: targetItem.LoaiNoiDung,
+					DataJson: JSON.stringify(metadata),
+				}, { cache: false });
+			},
+			archiveFileToLmsInBackground(file, targetItem) {
+				const uploadManager = this.getUploadManager();
+				if (!uploadManager) return;
+
+				uploadManager.uploadLmsFile(file, {
+					onComplete: async response => {
+						try {
+							const uploaded = response?.Files?.[0];
+							if (!uploaded?.FILE_ID) throw new Error('API lưu trữ không trả về FILE_ID.');
+
+							const archiveMetadata = {
+								...this.buildLmsFileMetadata(uploaded, file, targetItem),
+								archivePurpose: 'AUDIT',
+								publishSource: targetItem.LoaiNoiDung === 'VIDEO' ? 'youtube' : 'ggdrive',
+							};
+							await this.registerUploadedFileInResourceLibrary(targetItem, archiveMetadata);
+							this.notify(`Đã lưu bản kiểm tra “${archiveMetadata.fileName}” vào kho LMS.`);
+						} catch (error) {
+							console.error('Background LMS archive failed:', error);
+							this.notify(
+								`Nội dung vẫn được phát hành, nhưng chưa lưu được bản kiểm tra của “${file.name}”.`,
+								'warning'
+							);
+						}
+					},
+					onError: error => {
+						console.error('Background LMS archive upload failed:', error);
+						this.notify(
+							`Nội dung vẫn tiếp tục phát hành, nhưng lưu nền “${file.name}” vào LMS thất bại.`,
+							'warning'
+						);
+					},
+				});
+			},
+			async savePublishedMetadata(targetItem, metadata) {
+				targetItem.DataJson = metadata;
+				await this.saveUploadedFileToNode(targetItem, metadata);
+				this.$emit('refresh-tree');
+			},
 			async uploadFileGGDrive(file) {
-				if (!file) return;
+				const selectedFile = Array.isArray(file) ? file[0] : file;
+				if (!selectedFile) return;
 				const uploadManager = this.getUploadManager();
 				if (!uploadManager) return;
 				const targetItem = this.editableItem;
-				const oldFile = typeof targetItem.DataJson === 'object' && targetItem.DataJson !== null
-					? { ...targetItem.DataJson }
-					: targetItem.DataJson;
 
-				// Xóa file cũ ngay lập tức khi bắt đầu upload file mới
-				await this.deleteOldFileAfterReplace(oldFile);
-				targetItem.DataJson = {};
+				if (!await this.ensureDraftNode(selectedFile)) return;
+				this.archiveFileToLmsInBackground(selectedFile, targetItem);
+				this.notify(`Đang phát hành ${selectedFile.name} lên Google Drive...`, 'info');
 
-				// Nếu chưa có NoiDungID (thêm mới), tự động lưu bản nháp để lấy ID trước khi upload
-				if (!targetItem.NoiDungID) {
-					const draftItem = this.buildSavePayload({
-						HocLieuID: targetItem.HocLieuID,
-						ParentID: targetItem.ParentID || 0,
-						LoaiNoiDung: targetItem.LoaiNoiDung,
-						TenNoiDung: file.name,
-						ThuTu: targetItem.ThuTu,
-						DataJson: JSON.stringify({})
-					}, targetItem);
-					const res = await fetchPromise('lms/FP_NoiDung_Save', draftItem, { cache: false });
-					if (res?.[0]) {
-						Object.assign(targetItem, res[0]);
-						this.ensureDataJsonObject(targetItem);
-						this.$emit('update-item', res[0]);
-						this.$emit('refresh-tree');
-					} else {
-						this.notify("Không thể tạo mục nháp để tải lên.", "error");
-						return;
-					}
-				}
-
-				this.notify(`Đang chuẩn bị upload: ${file.name}`, "info");
-
-				await uploadManager.uploadLmsGoogleDrive(file, {
-					folderPath: `${targetItem.TenHocLieu || this.item.TenHocLieu}/${vueData.user.UserID}`,
-					onComplete: async (fileDrive) => {
+				uploadManager.uploadLmsGoogleDrive(selectedFile, {
+					folderPath: `${targetItem.TenHocLieu || this.item?.TenHocLieu || 'HocLieu'}/${vueData.user.UserID}`,
+					onComplete: async fileDrive => {
 						try {
-							this.ensureDataJsonObject(targetItem);
-							if (targetItem.LoaiNoiDung === 'AUDIO') targetItem.DataJson.mediaType = 'audio';
-							else targetItem.DataJson.slideType = this.getSlideContentType(file.type);
-
-							targetItem.DataJson.title = file.name;
-							targetItem.DataJson.fileName = file.name;
-							targetItem.DataJson.uploadSource = 'ggdrive';
-							targetItem.DataJson.driveFileId = fileDrive.id;
-							targetItem.DataJson.url = `https://drive.google.com/file/d/${fileDrive.id}/preview`;
-
-							const currentNoiDungId = targetItem?.NoiDungID || this.item?.NoiDungID;
-							if (currentNoiDungId) {
-								const nodeDataList = await fetchPromise('lms/FP_NoiDung_GetDetail', { NoiDungID: currentNoiDungId });
-								const nodeData = Array.isArray(nodeDataList) ? nodeDataList[0] : nodeDataList;
-								if (nodeData) {
-									nodeData.DataJson = JSON.stringify(targetItem.DataJson);
-									await fetchPromise('lms/FP_NoiDung_Save', this.buildSavePayload(nodeData, targetItem), { cache: false });
-									this.$emit('refresh-tree');
-									this.notify(`Đã cập nhật tài liệu cho mục "${nodeData.TenNoiDung}"`);
-								}
-							} else {
-								this.notify(`Upload thành công: ${file.name}`);
-							}
+							const metadata = {
+								title: selectedFile.name,
+								fileName: selectedFile.name,
+								contentType: selectedFile.type || '',
+								fileSize: Number(selectedFile.size || 0),
+								uploadSource: 'ggdrive',
+								driveFileId: fileDrive.id,
+								url: `https://drive.google.com/file/d/${fileDrive.id}/preview`,
+								slideType: this.getSlideContentType(selectedFile.type),
+								mediaType: targetItem.LoaiNoiDung === 'AUDIO' ? 'audio' : undefined,
+							};
+							await this.savePublishedMetadata(targetItem, metadata);
+							this.notify(`Đã phát hành “${selectedFile.name}” lên Google Drive.`);
 						} catch (error) {
-							console.error('Google Drive post upload failed:', error);
-							this.notify(error.message || "Không thể hoàn tất cấu hình Google Drive.", "error");
+							console.error('Google Drive post-upload failed:', error);
+							this.notify(error.message || 'Không thể hoàn tất phát hành Google Drive.', 'error');
 						}
 					},
-					onError: (error) => {
-						console.error('Google Drive upload failed:', error);
-						this.notify(`Upload thất bại: ${file.name}`, "error");
-					}
+					onError: error => this.notify(
+						error?.message || `Phát hành ${selectedFile.name} lên Google Drive thất bại.`,
+						'error'
+					),
 				});
 			},
 			async uploadFileYoutube(file) {
-				if (!file) return;
+				const selectedFile = Array.isArray(file) ? file[0] : file;
+				if (!selectedFile) return;
 				const uploadManager = this.getUploadManager();
 				if (!uploadManager) return;
 				const targetItem = this.editableItem;
-				const oldFile = typeof targetItem.DataJson === 'object' && targetItem.DataJson !== null
-					? { ...targetItem.DataJson }
-					: targetItem.DataJson;
 
-				// Xóa video cũ ngay lập tức khi bắt đầu upload video mới
-				await this.deleteOldFileAfterReplace(oldFile);
-				targetItem.DataJson = {};
+				if (!await this.ensureDraftNode(selectedFile)) return;
+				this.archiveFileToLmsInBackground(selectedFile, targetItem);
+				this.notify(`Đang phát hành ${selectedFile.name} lên YouTube...`, 'info');
 
-				// Nếu chưa có NoiDungID (thêm mới), tự động lưu bản nháp để lấy ID trước khi upload
-				if (!targetItem.NoiDungID) {
-					const draftItem = this.buildSavePayload({
-						HocLieuID: targetItem.HocLieuID,
-						ParentID: targetItem.ParentID || 0,
-						LoaiNoiDung: targetItem.LoaiNoiDung,
-						TenNoiDung: file.name,
-						ThuTu: targetItem.ThuTu,
-						DataJson: JSON.stringify({})
-					}, targetItem);
-					const res = await fetchPromise('lms/FP_NoiDung_Save', draftItem, { cache: false });
-					if (res?.[0]) {
-						Object.assign(targetItem, res[0]);
-						this.ensureDataJsonObject(targetItem);
-						this.$emit('update-item', res[0]);
-						this.$emit('refresh-tree');
-					} else {
-						this.notify("Không thể tạo mục nháp để tải lên video.", "error");
-						return;
-					}
-				}
-
-				this.notify(`Đang chuẩn bị upload video: ${file.name}`, "info");
-
-				await uploadManager.uploadLmsYoutube(file, {
-					playlistName: targetItem.TenHocLieu || this.item?.TenHocLieu,
-					title: file.name,
-					onComplete: async (videoResult) => {
+				uploadManager.uploadLmsYoutube(selectedFile, {
+					playlistName: targetItem.TenHocLieu || this.item?.TenHocLieu || 'HocLieu',
+					title: selectedFile.name,
+					onComplete: async videoResult => {
 						try {
-							this.ensureDataJsonObject(targetItem);
-							targetItem.DataJson.url = videoResult.source;
-							targetItem.DataJson.videoId = videoResult.id;
-							targetItem.DataJson.uploadSource = 'youtube';
-
-							const currentNoiDungId = targetItem?.NoiDungID || this.item?.NoiDungID;
-							if (currentNoiDungId) {
-								const nodeDataList = await fetchPromise('lms/FP_NoiDung_GetDetail', { NoiDungID: currentNoiDungId });
-								const nodeData = Array.isArray(nodeDataList) ? nodeDataList[0] : nodeDataList;
-								if (nodeData) {
-									nodeData.DataJson = JSON.stringify(targetItem.DataJson);
-									await fetchPromise('lms/FP_NoiDung_Save', this.buildSavePayload(nodeData, targetItem), { cache: false });
-									this.$emit('refresh-tree');
-									this.notify(`Đã cập nhật video cho mục "${nodeData.TenNoiDung}"`);
-								}
-							} else {
-								this.notify(`Upload video thành công: ${file.name}`);
-							}
+							const metadata = {
+								title: selectedFile.name,
+								fileName: selectedFile.name,
+								contentType: selectedFile.type || 'video/*',
+								fileSize: Number(selectedFile.size || 0),
+								uploadSource: 'youtube',
+								videoId: videoResult.id,
+								url: videoResult.source,
+							};
+							await this.savePublishedMetadata(targetItem, metadata);
+							this.notify(`Đã phát hành “${selectedFile.name}” lên YouTube.`);
 						} catch (error) {
-							console.error('Youtube post upload failed:', error);
-							this.notify(error.message || "Không thể hoàn tất upload YouTube.", "error");
+							console.error('YouTube post-upload failed:', error);
+							this.notify(error.message || 'Không thể hoàn tất phát hành YouTube.', 'error');
 						}
 					},
-					onError: (error) => {
-						console.error('Youtube upload failed:', error);
-						this.notify(`Upload video thất bại: ${file.name}`, "error");
-					}
+					onError: error => this.notify(
+						error?.message || `Phát hành ${selectedFile.name} lên YouTube thất bại.`,
+						'error'
+					),
 				});
 			},
 
@@ -546,18 +584,10 @@
 					return;
 				}
 
-				this.loadingPage.isLoading = true;
-				this.loadingPage.text = "Đang xóa tập tin...";
-				try {
-					await this.deleteCurrentFileResource(currentFile);
-					this.editableItem.DataJson = {};
-					this.notify("Đã xóa tập tin.");
-				} catch (error) {
-					console.error('Delete file failed:', error);
-					this.notify("Không thể xóa tập tin gốc. Vui lòng thử lại.", "error");
-				} finally {
-					this.loadingPage.isLoading = false;
-				}
+				// Chỉ gỡ liên kết khỏi node học liệu. FileData và metadata trong kho tài
+				// nguyên có thể vẫn đang được tái sử dụng nên không được xóa vật lý tại đây.
+				this.editableItem.DataJson = {};
+				this.notify("Đã gỡ tập tin khỏi nội dung. File vẫn còn trong kho tài nguyên.");
 			},
 			async deleteCurrentFileResource(fileInfo) {
 				if (this.isYouTubeFile(fileInfo)) {

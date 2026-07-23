@@ -4,9 +4,8 @@
 		<div v-if="loaiNoiDung === 'QUIZ_SINGLE_CHOICE'">
 			<!-- <v-textarea label="Câu hỏi/Yêu cầu" v-model="editableData.prompt" variant="outlined" rows="2" auto-grow>
 			</v-textarea> -->
-			<f-editor label="Câu hỏi/Yêu cầu" v-model="editableData.prompt" :imageapi="vueData.v_Set.apiImageAdapter"
-				variant="outlined" rows="2" auto-grow>
-			</f-editor>
+			<uc-ggb-editor label="Câu hỏi/Yêu cầu" v-model="editableData.prompt"
+				:imageapi="vueData.v_Set.apiImageAdapter" variant="outlined" rows="2" auto-grow />
 			<div class="d-flex align-center justify-space-between form-label mt-4">
 				<label>Các lựa chọn và đáp án đúng:</label>
 				<v-checkbox v-model="editableData.isAdvanced" label="Soạn đáp án nâng cao" />
@@ -34,9 +33,8 @@
 		<div v-else-if="loaiNoiDung === 'QUIZ_MULTIPLE_CHOICE'">
 			<!-- <v-textarea label="Câu hỏi/Yêu cầu" v-model="editableData.prompt" variant="outlined" rows="2" auto-grow>
 			</v-textarea> -->
-			<f-editor label="Câu hỏi/Yêu cầu" v-model="editableData.prompt" variant="outlined" rows="2" auto-grow
-				:imageapi="vueData.v_Set.apiImageAdapter">
-			</f-editor>
+			<uc-ggb-editor label="Câu hỏi/Yêu cầu" v-model="editableData.prompt"
+				:imageapi="vueData.v_Set.apiImageAdapter" variant="outlined" rows="2" auto-grow />
 
 			<div class="d-flex align-center justify-space-between form-label mt-4">
 				<label class="form-label mt-4">Các lựa chọn (chọn các đáp án đúng):</label>
@@ -62,9 +60,8 @@
 		<div v-else-if="loaiNoiDung === 'QUIZ_MATCHING'">
 			<!-- <v-textarea label="Câu hỏi/Yêu cầu" v-model="editableData.prompt" variant="outlined" rows="2" auto-grow>
 			</v-textarea> -->
-			<f-editor label="Câu hỏi/Yêu cầu" v-model="editableData.prompt" variant="outlined" rows="2" auto-grow
-				:imageapi="vueData.v_Set.apiImageAdapter">
-			</f-editor>
+			<uc-ggb-editor label="Câu hỏi/Yêu cầu" v-model="editableData.prompt"
+				:imageapi="vueData.v_Set.apiImageAdapter" variant="outlined" rows="2" auto-grow />
 			<div>
 				<v-checkbox v-model="editableData.isAdvanced" label="Soạn đáp án nâng cao" />
 			</div>
@@ -93,9 +90,8 @@
 		<div v-else-if="loaiNoiDung === 'QUIZ_ORDERING'">
 			<!-- <v-textarea label="Câu hỏi/Yêu cầu" v-model="editableData.prompt" variant="outlined" rows="2" auto-grow>
 			</v-textarea> -->
-			<f-editor label="Câu hỏi/Yêu cầu" v-model="editableData.prompt" variant="outlined" rows="2" auto-grow
-				:imageapi="vueData.v_Set.apiImageAdapter">
-			</f-editor>
+			<uc-ggb-editor label="Câu hỏi/Yêu cầu" v-model="editableData.prompt"
+				:imageapi="vueData.v_Set.apiImageAdapter" variant="outlined" rows="2" auto-grow />
 			<div class="d-flex align-center justify-space-between form-label mt-4">
 				<label class="form-label mt-4">Các mục (nhập theo thứ tự đúng):</label>
 				<v-checkbox v-model="editableData.isAdvanced" label="Soạn đáp án nâng cao" />
@@ -116,9 +112,8 @@
 		<div v-else-if="loaiNoiDung === 'QUIZ_DRAG_DROP_CATEGORIZE'">
 			<!-- <v-textarea label="Câu hỏi/Yêu cầu" v-model="editableData.prompt" variant="outlined" rows="2" auto-grow>
 			</v-textarea> -->
-			<f-editor label="Câu hỏi/Yêu cầu" v-model="editableData.prompt" variant="outlined" rows="2" auto-grow
-				:imageapi="vueData.v_Set.apiImageAdapter">
-			</f-editor>
+			<uc-ggb-editor label="Câu hỏi/Yêu cầu" v-model="editableData.prompt"
+				:imageapi="vueData.v_Set.apiImageAdapter" variant="outlined" rows="2" auto-grow />
 			<label class="form-label mt-4">Các nhóm:</label>
 			<div v-for="(cat, index) in editableData.categories" :key="index" class="d-flex align-center mb-2">
 				<v-text-field v-model="cat.name" density="compact" variant="outlined" hide-details
@@ -144,7 +139,7 @@
 
 		<!-- ==================== 6. QUIZ_FILL_IN_BLANK ==================== -->
 		<div v-else-if="loaiNoiDung === 'QUIZ_FILL_IN_BLANK'">
-			<f-editor v-model="editableData.prompt" :imageapi="vueData.v_Set.apiImageAdapter"></f-editor>
+			<uc-ggb-editor v-model="editableData.prompt" :imageapi="vueData.v_Set.apiImageAdapter" />
 			<!-- <v-textarea label="Hướng dẫn" v-model="editableData.prompt" variant="outlined" rows="2" auto-grow>
 			</v-textarea> -->
 			<label class="form-label mt-4">Nội dung câu (thêm các phần text và chỗ trống):</label>
@@ -162,7 +157,7 @@
 		</div>
 		<!-- ==================== 7. Soạn thảo: Nối nhóm (QUIZ_CONNECTION) ==================== -->
 		<div v-else-if="loaiNoiDung === 'QUIZ_CONNECTION'">
-			<f-editor v-model="editableData.prompt" :imageapi="vueData.v_Set.apiImageAdapter"></f-editor>
+			<uc-ggb-editor v-model="editableData.prompt" :imageapi="vueData.v_Set.apiImageAdapter" />
 			<!-- <v-textarea label="Câu hỏi/Yêu cầu" v-model="editableData.prompt" variant="outlined" rows="2" auto-grow>
 			</v-textarea> -->
 			<label class="form-label mt-4">Các nhóm:</label>
@@ -438,12 +433,11 @@
 		<div v-else-if="loaiNoiDung === 'QUIZ_TRUE_FALSE'">
 			<!-- <v-textarea label="Câu hỏi/Yêu cầu" v-model="editableData.prompt" variant="outlined" rows="2" auto-grow>
 			</v-textarea> -->
-			<f-editor label="Câu hỏi/Yêu cầu" v-model="editableData.prompt" :imageapi="vueData.v_Set.apiImageAdapter"
-				variant="outlined" rows="2" auto-grow>
-			</f-editor>
+			<uc-ggb-editor label="Câu hỏi/Yêu cầu" v-model="editableData.prompt"
+				:imageapi="vueData.v_Set.apiImageAdapter" variant="outlined" rows="2" auto-grow />
 			<div class="d-flex align-center justify-space-between form-label mt-4">
 				<label>Các lựa chọn và đáp án đúng:</label>
-				<v-checkbox v-model="editableData.isAdvanced" label="Soạn đáp án nâng cao">
+				<v-checkbox v-model="editableData.isAdvanced" label="Soạn đáp án nâng cao" />
 			</div>
 			<div>
 
@@ -585,54 +579,7 @@
 			},
 	
 			ensureDataStructure(type, data) {
-				let defaults = {};
-				switch (type) {
-					case 'QUIZ_SINGLE_CHOICE':
-						defaults = { prompt: '', options: [{ id: 'a', text: '' }], correctAnswer: null, isAdvanced: false };
-						break;
-					case 'QUIZ_MULTIPLE_CHOICE':
-						defaults = { prompt: '', options: [{ id: 'a', text: '' }], correctAnswers: [], isAdvanced: false };
-						break;
-					case 'QUIZ_MATCHING':
-						defaults = { prompt: '', columnA: [{ id: 'a1', text: '' }], columnB: [{ id: 'b1', text: '' }], correctPairs: [{ from: "a1", to: "b1" }] };
-						break;
-					case 'QUIZ_ORDERING':
-						defaults = { prompt: '', items: [{ id: 'i1', text: '' }] };
-						break;
-					case 'QUIZ_DRAG_DROP_CATEGORIZE':
-						defaults = { prompt: '', categories: [{ id: 'cat1', name: '' }], items: [] };
-						break;
-					case 'QUIZ_FILL_IN_BLANK':
-						defaults = { prompt: '', parts: [{ type: 'text', value: '' }] };
-						break;
-					case 'QUIZ_CONNECTION':
-						defaults = { prompt: '', groups: [{ id: 'g1', text: '' }], items: [] };
-						break;
-					case 'QUIZ_COMPOSITE':
-						defaults = {
-							title: '',
-							timeLimit: 1800,
-							totalPoints: 10,
-							passingScore: 5,
-							hasGroups: false,
-							groups: [],
-							questions: []
-						};
-						break;
-					case 'QUIZ_TRUE_FALSE':
-						defaults = {
-							prompt: '', options: [{ id: 'a', text: '', correctAnswer: null, inCorrectAnswer: null }]
-							// , correctAnswer: [], inCorrectAnswer: []
-						};
-						break;
-				}
-				const merged = { ...defaults, ...data };
-				for (const key in defaults) {
-					if (Array.isArray(defaults[key]) && (!merged[key] || merged[key].length === 0)) {
-						if (!data || !data[key]) merged[key] = defaults[key];
-					}
-				}
-				return merged;
+				return window.QuizHelpers ? window.QuizHelpers.ensureDataStructure(type, data) : data;
 			},
 	
 			// SỬA: Logic thêm/xóa
@@ -736,23 +683,29 @@
 	
 			async removeGroup(groupIndex) {
 				if (this.editableData.groups && this.editableData.groups.length <= 1) {
-					this.notify('Phải có ít nhất 1 nhóm câu hỏi', 'warning'); return;
+					this.notify('Phải có ít nhất 1 nhóm câu hỏi', 'warning');
+					return;
 				}
 				const ok = await this.confirmRef.value.show({ title: 'Xóa nhóm này sẽ xóa tất cả câu hỏi bên trong. Bạn có chắc?' });
 				if (ok) {
-					const
-						newGroups = [...this.editableData.groups]; newGroups.splice(groupIndex, 1); this.editableData = {
-							...this.editableData,
-							groups: newGroups
-						}; this.activeGroupIndex = Math.min(this.activeGroupIndex, newGroups.length - 1);
+					const newGroups = [...this.editableData.groups];
+					newGroups.splice(groupIndex, 1);
+					this.editableData = {
+						...this.editableData,
+						groups: newGroups
+					};
+					this.activeGroupIndex = Math.min(this.activeGroupIndex, newGroups.length - 1);
 				}
-			}, generateId() { return 'id_' + Math.random().toString(36).substr(2, 9); }, updateGroupPoints() {
+			},
+
+			generateId(prefix = 'id') {
+				return window.QuizHelpers ? window.QuizHelpers.generateId(prefix) : (prefix + '_' + Math.random().toString(36).substr(2, 9));
+			},
+
+			updateGroupPoints() {
 				if (this.currentGroup) {
-					const
-						points = this.currentGroup.questions?.reduce((sum, q) => sum + (q.points || 1), 0) || 0;
+					const points = this.currentGroup.questions?.reduce((sum, q) => sum + (q.points || 1), 0) || 0;
 					this.currentGroup.points = points;
-	
-					// Update total points
 					this.editableData.totalPoints = this.totalPointsCalculated;
 				}
 			},

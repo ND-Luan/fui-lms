@@ -1,6 +1,9 @@
 <template>
 	<div>
-		<div class="px-2 text-h6 text-primary">
+		<div class="px-2 text-h6 text-primary d-flex align-center mb-2">
+			<v-btn v-if="canGoBack" icon="mdi-arrow-left" variant="text" color="primary" class="mr-1" @click="goBack">
+				<v-tooltip activator="parent" location="bottom">Quay lại</v-tooltip>
+			</v-btn>
 			<v-icon class="mr-2" color="white" size="large">mdi-school</v-icon>
 			Danh sách học liệu - {{TenCap}}
 		</div>
@@ -37,10 +40,12 @@
 				vueData,
 				panel: undefined,
 				isLoading: false,
-				DSHocLieu: []
+				DSHocLieu: [],
+				canGoBack: false
 			}
 		},
 		mounted() {
+			this.canGoBack = window.history.length > 1
 			//mở expand để gọi vô watch
 			this.panel = [0]
 		},
@@ -75,6 +80,7 @@
 					KhoiID: khoi.id,
 					MonHocID: 0,
 					BoSachID: 0,
+					Loai: 'HOC_LIEU',
 				}, res => {
 					this.DSHocLieu = res.data
 					this.isLoading = false
@@ -83,6 +89,9 @@
 			}
 		},
 		methods: {
+			goBack() {
+				window.history.back()
+			},
 			getIcon(name, index) {
 				// Icons dựa trên tên khối/môn
 				const iconMap = {

@@ -17,8 +17,8 @@
 		<template v-slot:default="{ isActive }">
 			<v-card title="Chỉnh sửa nội dung">
 				<v-card-text>
-					<f-editor v-model="contentEditor" :imageapi="vueData.v_Set.apiImageAdapter" variant="outlined"
-						rows="6" auto-grow label="Nội dung (hỗ trợ HTML và LaTeX)"
+					<uc-ggb-editor v-model="contentEditor" :imageapi="vueData.v_Set.apiImageAdapter" variant="outlined"
+						rows="6" auto-grow label="Nội dung (hỗ trợ HTML, LaTeX & GeoGebra)"
 						@update:modelValue="val => console.log('upd', val)" @input="v => console.log('v', v)" />
 					<!-- Preview -->
 					<div class="preview-section mt-4">

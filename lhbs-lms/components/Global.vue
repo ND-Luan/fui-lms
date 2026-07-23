@@ -6,7 +6,7 @@
         <GlobalUiSnackbar ref="snackbarRef" />
         <GlobalIframeWindow ref="iframeWin" />
         <GlobalConfirmDialog ref="confirmRef" />
-        <GlobalUploadManager v-if="uploadManager" />
+        <GlobalUploadManager />
         <uc-system-toolbar v-if="!isInIframe" />
         <uc-ticket-status v-if="!isInIframe" />
         <v-responsive>

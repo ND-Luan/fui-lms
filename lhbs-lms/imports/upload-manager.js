@@ -35,14 +35,18 @@
          * Standard document/file upload to LMS FileData endpoint (https://file.lhbs.vn/lms/upload/FileData)
          */
         uploadLmsFile(file, { onComplete, onError } = {}) {
+            const defaultUrl = (typeof vueData !== 'undefined' && vueData?.v_Set?.apiFile)
+                ? vueData.v_Set.apiFile
+                : 'https://file.lhbs.vn/lms/upload/FileData';
             return this.addUploadTask({
                 file,
-                uploadUrl: 'https://file.lhbs.vn/lms/upload/FileData',
+                uploadUrl: defaultUrl,
                 headers: {
                     authorization: typeof $awt !== 'undefined' ? $awt : ''
                 },
                 bodyBuilder: (f) => {
                     const formData = new FormData();
+                    formData.append('file', f);
                     formData.append('File', f);
                     return formData;
                 },
@@ -97,7 +101,8 @@
                 xhr: xhr
             };
 
-            this.tasks.push(task);
+            const state = getOrCreateState();
+            state.tasks = [...state.tasks, task];
 
             // Start the actual upload asynchronously
             this.startUpload(task, file, uploadUrl, method, headers, bodyBuilder, onComplete, onError);
@@ -137,18 +142,32 @@
                 }
             });
 
+            // Helper to set reactive properties safely
+            const setTaskProp = (t, prop, val) => {
+                t[prop] = val;
+                if (typeof Vue !== 'undefined' && typeof Vue.set === 'function') {
+                    Vue.set(t, prop, val);
+                }
+                // Trigger array reactivity for Vue 2/3
+                const state = getOrCreateState();
+                state.tasks = [...state.tasks];
+            };
+
             // Track upload progress
             xhr.upload.onprogress = (event) => {
-                if (event.lengthComputable) {
-                    task.progress = Math.round((event.loaded / event.total) * 100);
+                if (event.lengthComputable && event.total > 0) {
+                    const percent = Math.min(99, Math.round((event.loaded / event.total) * 100));
+                    setTaskProp(task, 'progress', percent);
+                } else {
+                    setTaskProp(task, 'progress', 50);
                 }
             };
 
             xhr.onload = () => {
                 if (xhr.status >= 200 && xhr.status < 300) {
-                    task.status = 'success';
-                    task.progress = 100;
-                    task.statusText = 'Upload hoàn tất';
+                    setTaskProp(task, 'status', 'success');
+                    setTaskProp(task, 'progress', 100);
+                    setTaskProp(task, 'statusText', 'Upload hoàn tất');
                     let responseData = {};
                     try {
                         responseData = JSON.parse(xhr.responseText);
@@ -187,7 +206,7 @@
                 task.status = 'uploading';
                 task.statusText = 'Đang truyền dữ liệu file...';
                 task.xhr = new XMLHttpRequest();
-                
+
                 const uploadUrl = 'https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart';
                 const method = 'POST';
                 const headers = { Authorization: 'Bearer ' + accessToken };
@@ -222,7 +241,7 @@
                     } catch (e) {
                         console.error('Exception granting drive permission:', e);
                     }
-                    
+
                     this.updateTask(currentTaskId, { statusText: 'Hoàn tất' });
                     if (onComplete) {
                         onComplete({
@@ -294,13 +313,13 @@
                     task.status = 'uploading';
                     task.statusText = 'Đang truyền dữ liệu video...';
                     task.xhr = new XMLHttpRequest();
-                    
+
                     const headers = {
                         'Authorization': `Bearer ${accessToken}`,
                         'Content-Length': file.size.toString(),
                         'Content-Type': file.type
                     };
-                    
+
                     this.startUpload(task, file, uploadUrl, 'PUT', headers, (f) => f, async (res) => {
                         if (playlistId) {
                             this.updateTask(currentTaskId, { statusText: 'Đang cập nhật video vào danh sách phát...' });
@@ -486,22 +505,22 @@
          */
         async deleteLmsFile(fileId, { onComplete, onError } = {}) {
             try {
-                const res = await fetch('https://file.lhbs.vn/lms/delete/FileData', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        authorization: typeof $awt !== 'undefined' ? $awt : ''
-                    },
-                    body: JSON.stringify({ FILE_ID: fileId })
-                });
-                if (res.ok) {
+                // Tách lấy FILE_ID thuần (loại bỏ /FileData/ hoặc các dấu / ở đầu nếu có)
+                const cleanFileId = typeof fileId === 'string'
+                    ? fileId.replace(/^\/FileData\//i, '').replace(/^\//, '')
+                    : fileId;
+
+                const res = await fetchPromise('lms/FileData_Delete', { FileID: cleanFileId }, { cache: false });
+                if (res !== null && res !== undefined) {
                     if (onComplete) onComplete();
+                    return true;
                 } else {
-                    throw new Error(`Delete LMS file failed: ${res.statusText}`);
+                    throw new Error('Xóa file thất bại');
                 }
             } catch (err) {
-                console.error(err);
+                console.error('Lỗi khi xóa file:', err);
                 if (onError) onError(err);
+                throw err;
             }
         },
 
@@ -548,7 +567,7 @@
                     try {
                         const errorData = await res.json();
                         errorMessage = errorData?.error?.message || errorMessage;
-                    } catch (e) {}
+                    } catch (e) { }
                     throw new Error(`Delete from YouTube failed: ${errorMessage}`);
                 }
             } catch (err) {

@@ -23,6 +23,28 @@ BEGIN
 END;
 GO
 
+-- Giữ ThumbnailURL làm ảnh chính để tương thích với các màn hình cũ.
+-- ThumbnailURLs lưu toàn bộ danh sách ảnh dưới dạng JSON.
+IF NOT EXISTS (SELECT * FROM sys.columns WHERE object_id = OBJECT_ID(N'[dbo].[tblHocLieu_FP]') AND name = 'ThumbnailURLs')
+BEGIN
+    ALTER TABLE dbo.tblHocLieu_FP ADD ThumbnailURLs NVARCHAR(MAX) NULL;
+END;
+GO
+
+UPDATE dbo.tblHocLieu_FP
+SET ThumbnailURLs = N'["' + STRING_ESCAPE(ThumbnailURL, 'json') + N'"]'
+WHERE NULLIF(ThumbnailURL, '') IS NOT NULL
+    AND NULLIF(ThumbnailURLs, '') IS NULL;
+GO
+
+IF NOT EXISTS (SELECT * FROM sys.check_constraints WHERE name = 'CK_tblHocLieu_FP_ThumbnailURLs_JSON')
+BEGIN
+    ALTER TABLE dbo.tblHocLieu_FP
+    ADD CONSTRAINT CK_tblHocLieu_FP_ThumbnailURLs_JSON
+    CHECK (ThumbnailURLs IS NULL OR ISJSON(ThumbnailURLs) = 1);
+END;
+GO
+
 
 -- =================================================================================
 -- 2. CẬP NHẬT CÁC STORED PROCEDURES ĐỂ HỖ TRỢ PHÂN LOẠI
@@ -37,41 +59,33 @@ GO
 ALTER PROCEDURE [dbo].[spAPI_FP_HocLieu_GetAll]
     @PageNumber INT = 1,
     @PageSize INT = 10,
-    @KhoiID INT = NULL,
-    @MonHocID INT = NULL,
-    @BoSachID INT = NULL,
+    @KhoiID INT = 0,
+    @MonHocID INT = 0,
+    @BoSachID INT = 0,
     @Loai VARCHAR(50) = 'HOC_LIEU' -- Mặc định là học liệu cũ để tương thích ngược
 AS
 BEGIN
     SET NOCOUNT ON;
 
-	DECLARE @Table_HocLieu_Exist TABLE (HocLieuID INT)
-	INSERT INTO @Table_HocLieu_Exist 
-	SELECT DISTINCT hl.HocLieuID FROM dbo.tblNoiDungHocLieu_FP nd 
-		INNER JOIN dbo.tblHocLieu_FP hl ON hl.HocLieuID = nd.HocLieuID AND hl.Is_Xoa = 0 
-            AND (@KhoiID IS NULL OR @KhoiID = 0 OR hl.KhoiID = @KhoiID)
-            AND (hl.Loai = @Loai)
-	WHERE nd.Is_Xoa = 0
-
     SELECT
         hl.HocLieuID, hl.TenHocLieu, hl.KhoiID, hl.HocKy, hl.TinhTrang,
         bs.TenBoSach, mh.MonHocName AS TenMonHoc,
-		hl.ThumbnailURL,
-		hl.MonHocID,
-		bs.BoSachID,
+        hl.ThumbnailURL,
+        hl.ThumbnailURLs,
+        hl.MonHocID,
+        hl.BoSachID,
         hl.Loai,
-        (SELECT COUNT(*) FROM dbo.tblHocLieu_FP WHERE Is_Xoa = 0 AND Loai = @Loai) AS TotalRecords
+        COUNT(*) OVER () AS TotalRecords
     FROM
         dbo.tblHocLieu_FP hl
-    INNER JOIN dbo.tblBoSach_FP bs ON hl.BoSachID = bs.BoSachID
-    INNER JOIN dbo.tblMonHoc mh ON hl.MonHocID = mh.MonHocID
+    LEFT JOIN dbo.tblBoSach_FP bs ON hl.BoSachID = bs.BoSachID
+    LEFT JOIN dbo.tblMonHoc mh ON hl.MonHocID = mh.MonHocID
     WHERE
         hl.Is_Xoa = 0
-        AND hl.Loai = @Loai
-        AND (@KhoiID IS NULL OR @KhoiID = 0 OR hl.KhoiID = @KhoiID)
-        AND (@MonHocID IS NULL  OR @MonHocID = 0 OR hl.MonHocID = @MonHocID)
-        AND (@BoSachID IS NULL  OR @BoSachID = 0 OR hl.BoSachID = @BoSachID)
-		AND hl.HocLieuID IN (SELECT HocLieuID FROM @Table_HocLieu_Exist)
+        AND (@Loai IS NULL OR hl.Loai = @Loai OR hl.Loai IS NULL)
+        AND (ISNULL(@KhoiID, 0) = 0 OR hl.KhoiID = @KhoiID)
+        AND (ISNULL(@MonHocID, 0) = 0 OR hl.MonHocID = @MonHocID)
+        AND (ISNULL(@BoSachID, 0) = 0 OR hl.BoSachID = @BoSachID)
     ORDER BY
         hl.UpdateTime DESC
     OFFSET (@PageNumber - 1) * @PageSize ROWS
@@ -89,12 +103,13 @@ GO
 ALTER PROCEDURE [dbo].[spAPI_FP_HocLieu_Save]
     @HocLieuID INT,
     @TenHocLieu NVARCHAR(255),
-    @BoSachID INT,
-    @MonHocID INT,
-    @KhoiID INT,
-    @HocKy INT,
+    @BoSachID INT = NULL,
+    @MonHocID INT = NULL,
+    @KhoiID INT = NULL,
+    @HocKy INT = NULL,
     @TinhTrang VARCHAR(50),
-    @ThumbnailURL VARCHAR(500),
+    @ThumbnailURL NVARCHAR(1000),
+    @ThumbnailURLs NVARCHAR(MAX) = NULL,
     @Loai VARCHAR(50) = 'HOC_LIEU', -- Thêm mới để hỗ trợ lưu loại tài nguyên
     @sys_UserID VARCHAR(50)
 AS
@@ -109,6 +124,7 @@ BEGIN
             HocKy = @HocKy, 
             TinhTrang = @TinhTrang, 
             ThumbnailURL = @ThumbnailURL, 
+            ThumbnailURLs = @ThumbnailURLs,
             Loai = @Loai,
             UpdateUser = @sys_UserID, 
             UpdateTime = GETDATE() 
@@ -116,10 +132,34 @@ BEGIN
     END
     ELSE
     BEGIN
-        INSERT INTO dbo.tblHocLieu_FP (TenHocLieu, BoSachID, MonHocID, KhoiID, HocKy, TinhTrang, ThumbnailURL, Loai, CreateUser, CreateTime) 
-        VALUES (@TenHocLieu, @BoSachID, @MonHocID, @KhoiID, @HocKy, @TinhTrang, @ThumbnailURL, @Loai, @sys_UserID, GETDATE());
+        INSERT INTO dbo.tblHocLieu_FP (TenHocLieu, BoSachID, MonHocID, KhoiID, HocKy, TinhTrang, ThumbnailURL, ThumbnailURLs, Loai, CreateUser, CreateTime) 
+        VALUES (@TenHocLieu, @BoSachID, @MonHocID, @KhoiID, @HocKy, @TinhTrang, @ThumbnailURL, @ThumbnailURLs, @Loai, @sys_UserID, GETDATE());
     END
 
     SELECT * FROM dbo.tblHocLieu_FP WHERE HocLieuID = ISNULL(@HocLieuID, SCOPE_IDENTITY());
 END
+GO
+
+
+-- Tạo spAPI_FileData_Delete để xóa dữ liệu filedata
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+CREATE OR ALTER PROCEDURE [dbo].[spAPI_FileData_Delete]
+    @FileID VARCHAR(100)
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    DELETE FROM dbo.FileData 
+    WHERE FileID = @FileID;
+
+    SELECT @@ROWCOUNT AS DeletedRows;
+END
+GO
+
+-- Cấp quyền thực thi cho Stored Procedure
+GRANT EXECUTE ON [dbo].[spAPI_FileData_Delete] TO [public];
 GO

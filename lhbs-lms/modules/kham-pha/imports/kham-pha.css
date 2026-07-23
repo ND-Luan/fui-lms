@@ -3,6 +3,35 @@
 /* Import Vietnamese fonts */
 @import url('https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@300;400;500;600;700;800;900&family=Be+Vietnam+Pro:wght@300;400;500;600;700;800;900&display=swap');
 
+
+.sach-card {
+    display: flex;
+    flex-direction: column;
+}
+
+.sach-info {
+    flex-grow: 1;
+    /* Đẩy action xuống dưới */
+    padding: 16px;
+}
+
+.sach-title {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #212529;
+    line-height: 1.4;
+    margin-bottom: 4px;
+}
+
+.sach-description {
+    font-size: 0.85rem;
+    color: #6c757d;
+}
+
+.sach-meta {
+    padding: 8px 16px;
+}
+
 /* CSS Variables */
 :root {
   /* LHBS Color System - Simplified */

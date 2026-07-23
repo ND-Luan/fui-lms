@@ -11,8 +11,8 @@
 			<div class="ml-2" v-if="item.type === 'question' && globalQuestionNumber !== 0">
 				<v-chip v-if="isQuestionTextField === false" label variant="outlined" color="primary"
 					@click="isQuestionTextField = true; $nextTick(() => { $refs.questionInput.focus() });">
-					{{ $t('message.Question') }} {{ selectedQuestionData.ordinalNumber }} <v-icon
-						end>mdi-pencil-circle</v-icon>
+					{{ $t('message.Question') }} {{ selectedQuestionData.ordinalNumber }} <v-icon end>mdi-pencil-circle
+					</v-icon>
 				</v-chip>
 				<v-text-field v-else ref="questionInput" v-model="selectedQuestionData.ordinalNumber"
 					hide-details="auto" @blur="isQuestionTextField = false" />
@@ -23,10 +23,19 @@
 			<v-spacer></v-spacer>
 			<div class="d-flex">
 				<v-spacer></v-spacer>
-				<v-btn v-if="item.type === 'group'" variant="outlined" color="primary"
-					@click="onOpenModalImportFromHocLieu()"><v-icon start class="me-1">mdi-download</v-icon> Import từ
-					kho học liệu</v-btn>
-				<v-btn v-else icon variant="text" @click="onOpenModalKiNang()"><v-icon>mdi-cog-outline</v-icon></v-btn>
+				<v-btn v-if="item.type === 'group'" variant="outlined" color="primary" class="me-2"
+					@click="onOpenModalImportFromHocLieu()">
+					<v-icon start class="me-1">mdi-download</v-icon> Import từ
+					kho học liệu
+				</v-btn>
+				<v-btn v-if="item.type === 'group'" variant="outlined" color="secondary"
+					@click="onOpenModalImportFromBank()">
+					<v-icon start class="me-1">mdi-database-search</v-icon> Import từ
+					ngân hàng câu hỏi
+				</v-btn>
+				<v-btn v-else-if="item.type === 'question'" icon variant="text" @click="onOpenModalKiNang()">
+					<v-icon>mdi-cog-outline</v-icon>
+				</v-btn>
 			</div>
 		</div>
 		<v-divider class="my-2" />
@@ -340,12 +349,14 @@
 	<uc-loading-page v-model="loadingPage.isLoading" v-model:text="loadingPage.text" />
 	<uc-question-from-hoc-lieu v-if="isShowModalImportFromHocLieu" v-model:isOpen="isShowModalImportFromHocLieu"
 		:assignmentDetail="assignment" @importJson="bindingImport" />
+	<uc-question-from-bank v-if="isShowModalImportFromBank" v-model:isOpen="isShowModalImportFromBank"
+		:assignmentDetail="assignment" @importJson="bindingImport" />
 	<uc-chon-ki-nang v-model:dialog="isShowModalSkill" @skillApplied="handleSubmitSkill"></uc-chon-ki-nang>
 </template>
 
 <script>
 	export default {
-		name: 'uc-assignment-properties',
+		name: 'uc-assignment-properties', 
 		props: { groups: { type: Array, default: () => [] }, item: Object, assignment: Object, inDrawer: { type: Boolean, default: false } },
 		emits: ['update:groups', 'update:item', 'close'],
 		data() {
@@ -361,6 +372,7 @@
 				isSaveFile: false,
 				isQuestionTextField: false,
 				isShowModalImportFromHocLieu: false,
+				isShowModalImportFromBank: false,
 				isShowModalSkill: false,
 				skills: new Map(),
 				editingBlankState: {}
@@ -371,6 +383,7 @@
 				this.editingBlankState = {}
 				this.isQuestionTextField = false
 				this.isShowModalImportFromHocLieu = false
+				this.isShowModalImportFromBank = false
 				this.isShowModalSkill = false
 			}
 		},
@@ -636,6 +649,9 @@
 			},
 			onOpenModalImportFromHocLieu() {
 				this.isShowModalImportFromHocLieu = true
+			},
+			onOpenModalImportFromBank() {
+				this.isShowModalImportFromBank = true
 			},
 			bindingImport(val) {
 				const cloned = JSON.parse(JSON.stringify(val))

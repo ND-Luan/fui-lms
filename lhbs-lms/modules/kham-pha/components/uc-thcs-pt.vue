@@ -1,6 +1,9 @@
 <template>
 	<div>
-		<div class="px-2 text-h6 text-primary">
+		<div class="px-2 text-h6 text-primary d-flex align-center mb-2">
+			<v-btn v-if="canGoBack" icon="mdi-arrow-left" variant="text" color="primary" class="mr-1" @click="goBack">
+				<v-tooltip activator="parent" location="bottom">Quay lại</v-tooltip>
+			</v-btn>
 			<v-icon class="mr-2" color="white" size="large">mdi-school</v-icon>
 			Danh sách học liệu - {{ TenCap }}
 		</div>
@@ -31,9 +34,10 @@
 		</v-expansion-panels>
 	</div>
 </template>
+
 <script>
 	export default {
-	data() {
+		data() {
 		const config = {
 			2: {
 				batBuoc: [73, 74],
@@ -55,6 +59,7 @@
 			DSHocLieu: [],
 			DSMonHoc: [],
 			panel: undefined,
+			canGoBack: false,
 
 			DSToHop: [
 				{ id: 1, name: "Môn học bắt buộc", List_MonHocID: capCfg.batBuoc || [] },
@@ -133,13 +138,17 @@
 	},
 
 	methods: {
+		goBack() {
+			window.history.back()
+		},
 		getDSHocLieu() {
 			ajaxCALL("lms/FP_HocLieu_GetAll", {
 				PageNumber: 1,
 				PageSize: 1000,
 				KhoiID: 0,
 				MonHocID: 0,
-				BoSachID: 0
+				BoSachID: 0,
+				Loai: 'HOC_LIEU'
 			}, res => {
 				this.DSHocLieu = res.data
 				this.panel = 0
@@ -154,5 +163,5 @@
 			})
 		}
 	}
-}
+	}
 </script>
