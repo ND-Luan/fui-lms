@@ -1,7 +1,8 @@
 <template>
 	<div>
 		<div class="px-2 text-h6 text-primary d-flex align-center mb-2">
-			<v-btn v-if="canGoBack" icon="mdi-arrow-left" variant="text" color="primary" class="mr-1" @click="goBack">
+			<v-btn v-if="canGoBack" icon variant="text" class="mr-1" @click="goBack">
+				<v-icon color="white" size="large">mdi-arrow-left</v-icon>
 				<v-tooltip activator="parent" location="bottom">Quay lại</v-tooltip>
 			</v-btn>
 			<v-icon class="mr-2" color="white" size="large">mdi-school</v-icon>

@@ -1,1 +1,20 @@
-{"data":[{"canGoBack":"window.history.length > 1"}],"watch":{},"controls":[{"prop":"fluid style='background: linear-gradient(135deg, #e3f2fd, #fce4ec); min-height: 100dvh;' class='pa-4'","rows":[{"prop":"","cols":[{"el":"v-btn","attr":{"icon":"mdi-arrow-left","variant":"text","color":"primary","v-if":"canGoBack","v-on:click":"history.back()"}},{"el":"div","attr":{"class":"d-flex ga-4 flex-column align-center justify-center ","style":"height: calc(100dvh - 80px);"},"innerHTML":[{"el":"p","attr":{"class":"mb-8 font-weight-bold text-primary text-h4"},"innerHTML":"Chọn cấp để vào học liệu số"},{"el":"v-hover","attr":{"v-slot":"{ isHovering, props }"},"innerHTML":[{"el":"v-card","attr":{"v-bind":"props",":elevation":"isHovering ? 12 : 4","class":"rounded-xl transition-swing","color":"amber-lighten-5","v-on:click":"redirect('/kham-pha?capid=1')"},"innerHTML":[{"el":"v-card-title","attr":{"class":"text-h6 font-weight-bold d-flex align-center"},"innerHTML":[{"el":"v-icon","attr":{"class":"me-2","color":"orange","size":"32"},"innerHTML":"mdi-school"},{"el":"p","innerHTML":"Tiểu học"}]},{"el":"v-card-text","attr":{"class":"text-body-1 d-flex align-center justify-center"},"innerHTML":[{"el":"p","innerHTML":"Dành cho các khối từ 1"},{"el":"v-icon","attr":{"class":"mx-2","size":"20"},"innerHTML":"mdi-arrow-right"},{"el":"p","innerHTML":"5"}]}]}]},{"el":"v-hover","attr":{"v-slot":"{ isHovering, props }"},"innerHTML":[{"el":"v-card","attr":{"v-bind":"props",":elevation":"isHovering ? 12 : 4","class":"rounded-xl transition-swing","color":"amber-lighten-5","v-on:click":"redirect('/kham-pha?capid=2')"},"innerHTML":[{"el":"v-card-title","attr":{"class":"text-h6 font-weight-bold d-flex align-center"},"innerHTML":[{"el":"v-icon","attr":{"class":"me-2","color":"orange","size":"32"},"innerHTML":"mdi-school"},{"el":"p","innerHTML":"Trung học cơ sở"}]},{"el":"v-card-text","attr":{"class":"text-body-1 d-flex align-center justify-center"},"innerHTML":[{"el":"p","innerHTML":"Dành cho các khối từ 6"},{"el":"v-icon","attr":{"class":"mx-2","size":"20"},"innerHTML":"mdi-arrow-right"},{"el":"p","innerHTML":"9"}]}]}]},{"el":"v-hover","attr":{"v-slot":"{ isHovering, props }"},"innerHTML":[{"el":"v-card","attr":{"v-bind":"props",":elevation":"isHovering ? 12 : 4","class":"rounded-xl transition-swing","color":"amber-lighten-5","v-on:click":"redirect('/kham-pha?capid=3')"},"innerHTML":[{"el":"v-card-title","attr":{"class":"text-h6 font-weight-bold d-flex align-center"},"innerHTML":[{"el":"v-icon","attr":{"class":"me-2","color":"orange","size":"32"},"innerHTML":"mdi-school"},{"el":"p","innerHTML":"Trung học phổ thông"}]},{"el":"v-card-text","attr":{"class":"text-body-1 d-flex align-center justify-center"},"innerHTML":[{"el":"p","innerHTML":"Dành cho các khối từ 10"},{"el":"v-icon","attr":{"class":"mx-2","size":"20"},"innerHTML":"mdi-arrow-right"},{"el":"p","innerHTML":"12"}]}]}]}]}]}]}],"set":{}}
+{
+  "data": [],
+  "watch": {},
+  "controls": [
+    {
+      "prop": "fluid pa-0",
+      "rows": [
+        {
+          "prop": ":no-gutters='true'",
+          "cols": [
+            {
+              "el": "uc-main-layout"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "set": {}
+}

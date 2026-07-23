@@ -1,0 +1,510 @@
+:root {
+    --lh-emerald: #10B981;
+    --lh-emerald-light: #6EE7B7;
+    --lh-emerald-dark: #047857;
+    --lh-sapphire: #0EA5E9;
+    --lh-sapphire-light: #7DD3FC;
+    --lh-sapphire-dark: #0369A1;
+    --lh-gold: #F59E0B;
+    --lh-gold-light: #FDE68A;
+    --lh-gold-dark: #D97706;
+    --lh-white: #FFFFFF;
+    --lh-gray-50: #F9FAFB;
+    --lh-gray-100: #F3F4F6;
+    --lh-gray-200: #E5E7EB;
+    --lh-gray-300: #D1D5DB;
+    --lh-gray-400: #9CA3AF;
+    --lh-gray-500: #6B7280;
+    --lh-gray-600: #4B5563;
+    --lh-gray-700: #374151;
+    --lh-gray-800: #1F2937;
+    --lh-gray-900: #111827;
+    --lh-gradient-hero: linear-gradient(135deg, #10B981 0%, #0EA5E9 50%, #F59E0B 100%);
+    --lh-gradient-emerald: linear-gradient(135deg, #10B981 0%, #6EE7B7 100%);
+    --lh-gradient-sapphire: linear-gradient(135deg, #0EA5E9 0%, #7DD3FC 100%);
+    --lh-gradient-gold: linear-gradient(135deg, #F59E0B 0%, #FDE68A 100%);
+    --lh-glass-white: rgba(255, 255, 255, 0.25);
+    --lh-glass-emerald: rgba(16, 185, 129, 0.15);
+    --lh-glass-sapphire: rgba(14, 165, 233, 0.15);
+    --lh-glass-gold: rgba(245, 158, 11, 0.15);
+    --lh-backdrop-blur: blur(20px);
+    --lh-backdrop-blur-sm: blur(10px);
+    --lh-shadow-sm: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+    --lh-shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    --lh-shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    --lh-shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    --lh-shadow-2xl: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+    --lh-radius-sm: 0.375rem;
+    --lh-radius-md: 0.5rem;
+    --lh-radius-lg: 0.75rem;
+    --lh-radius-xl: 1rem;
+    --lh-radius-2xl: 1.5rem;
+    --lh-radius-3xl: 2rem;
+    --lh-radius-full: 9999px;
+    --lh-space-1: 0.25rem;
+    --lh-space-2: 0.5rem;
+    --lh-space-3: 0.75rem;
+    --lh-space-4: 1rem;
+    --lh-space-5: 1.25rem;
+    --lh-space-6: 1.5rem;
+    --lh-space-8: 2rem;
+    --lh-space-10: 2.5rem;
+    --lh-space-12: 3rem;
+    --lh-space-16: 4rem;
+    --lh-space-20: 5rem;
+    --lh-font-display: 'Poppins', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    --lh-font-body: 'Inter', 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
+    --lh-text-sm: 0.875rem;
+    --lh-text-base: 1rem;
+    --lh-text-lg: 1.125rem;
+    --lh-text-xl: 1.25rem;
+    --lh-text-2xl: 1.5rem;
+    --lh-text-3xl: 1.875rem;
+    --lh-text-4xl: 2.25rem;
+    --lh-text-5xl: 3rem;
+    --lh-transition-fast: 150ms ease-out;
+    --lh-transition-base: 300ms ease-out;
+    --lh-transition-slow: 500ms ease-out;
+    --lh-transition-bounce: 600ms cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+html {
+    scroll-behavior: smooth;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+/* body layout removed to prevent global duplication in scoped component */
+
+body::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background:
+        radial-gradient(circle at 20% 50%, rgba(16, 185, 129, 0.1) 0%, transparent 50%),
+        radial-gradient(circle at 80% 20%, rgba(14, 165, 233, 0.1) 0%, transparent 50%),
+        radial-gradient(circle at 40% 80%, rgba(245, 158, 11, 0.1) 0%, transparent 50%);
+    z-index: -1;
+    animation: bg-float 20s ease-in-out infinite;
+}
+@keyframes bg-float {
+    0%,
+    100% {
+        transform: scale(1) rotate(0deg);
+    }
+    50% {
+        transform: scale(1.1) rotate(1deg);
+    }
+}
+.lh-header {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    padding: var(--lh-space-4) var(--lh-space-4) 0;
+    z-index: 10;
+}
+.lh-header-container {
+    max-width: 800px;
+    margin: 0 auto;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+.lh-school-brand {
+    display: flex;
+    align-items: center;
+    gap: var(--lh-space-3);
+    background: var(--lh-glass-white);
+    backdrop-filter: var(--lh-backdrop-blur);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: var(--lh-radius-2xl);
+    padding: var(--lh-space-3) var(--lh-space-4);
+    box-shadow: var(--lh-shadow-lg);
+    text-decoration: none;
+    color: inherit;
+    transition: all var(--lh-transition-base);
+    animation: header-fadeIn 1s ease-out 0.5s both;
+}
+.lh-school-brand:hover {
+    background: rgba(255, 255, 255, 0.4);
+    transform: translateY(-2px);
+    box-shadow: var(--lh-shadow-xl);
+}
+@keyframes header-fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+.lh-school-logo {
+    width: 48px;
+    height: 48px;
+    object-fit: contain;
+    border-radius: var(--lh-radius-lg);
+    box-shadow: var(--lh-shadow-sm);
+    background: var(--lh-white);
+    padding: 2px;
+    transition: all var(--lh-transition-base);
+}
+.lh-school-brand:hover .lh-school-logo {
+    transform: scale(1.05);
+    box-shadow: var(--lh-shadow-md);
+}
+.lh-school-info {
+    display: flex;
+    flex-direction: column;
+    line-height: 1.2;
+}
+.lh-school-name {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
+    font-weight: 600;
+    font-size: var(--lh-text-lg);
+    color: var(--lh-white);
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+    margin-bottom: 2px;
+}
+.lh-school-subtitle {
+    font-size: var(--lh-text-sm);
+    color: rgba(255, 255, 255, 0.85);
+    font-weight: 500;
+}
+.lh-container {
+    background: var(--lh-glass-white);
+    backdrop-filter: var(--lh-backdrop-blur);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: var(--lh-radius-3xl);
+    padding: var(--lh-space-20) var(--lh-space-8) var(--lh-space-12);
+    box-shadow: var(--lh-shadow-2xl);
+    text-align: center;
+    max-width: 800px;
+    width: 100%;
+    position: relative;
+    overflow: hidden;
+    animation: container-fadeIn 0.8s ease-out;
+    margin-top: var(--lh-space-8);
+}
+@keyframes container-fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(30px) scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+.lh-title {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
+    font-size: var(--lh-text-4xl);
+    font-weight: 700;
+    color: var(--lh-white);
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+    margin-bottom: var(--lh-space-3);
+    animation: title-glow 3s ease-in-out infinite alternate;
+}
+@keyframes title-glow {
+    0% {
+        filter: brightness(1);
+        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+    }
+    100% {
+        filter: brightness(1.1);
+        text-shadow: 0 2px 8px rgba(0, 0, 0, 0.4), 0 0 20px rgba(255, 255, 255, 0.2);
+    }
+}
+.lh-subtitle {
+    font-size: var(--lh-text-lg);
+    color: rgba(255, 255, 255, 0.9);
+    margin-bottom: var(--lh-space-12);
+    font-weight: 500;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+.lh-container-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--lh-space-4);
+    background: var(--lh-gradient-hero);
+    min-height: 100vh;
+}
+.lh-levels-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--lh-space-6);
+    margin-top: var(--lh-space-8);
+}
+.lh-level-card {
+    background: var(--lh-glass-white);
+    backdrop-filter: var(--lh-backdrop-blur-sm);
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-radius: var(--lh-radius-2xl);
+    padding: var(--lh-space-8) var(--lh-space-6);
+    text-decoration: none;
+    color: inherit;
+    transition: all var(--lh-transition-base);
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+    display: block;
+    transform: translateY(0);
+    animation: card-slideUp 0.8s ease-out;
+    animation-fill-mode: both;
+}
+.lh-level-card:nth-child(1) {
+    background: var(--lh-glass-gold);
+    border-color: rgba(245, 158, 11, 0.4);
+    animation-delay: 0.1s;
+}
+.lh-level-card:nth-child(2) {
+    background: var(--lh-glass-sapphire);
+    border-color: rgba(14, 165, 233, 0.4);
+    animation-delay: 0.2s;
+}
+.lh-level-card:nth-child(3) {
+    background: var(--lh-glass-emerald);
+    border-color: rgba(16, 185, 129, 0.4);
+    animation-delay: 0.3s;
+}
+@keyframes card-slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(50px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+.lh-level-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
+    opacity: 0;
+    transition: opacity var(--lh-transition-base);
+    border-radius: inherit;
+}
+.lh-level-card:hover::before {
+    opacity: 1;
+}
+.lh-level-card:hover {
+    transform: translateY(-8px) scale(1.02);
+    box-shadow: var(--lh-shadow-2xl);
+    border-color: rgba(255, 255, 255, 0.6);
+}
+.lh-level-card:active {
+    transform: translateY(-4px) scale(1.01);
+}
+.lh-level-icon {
+    font-size: var(--lh-text-5xl);
+    margin-bottom: var(--lh-space-4);
+    display: block;
+    animation: icon-float 3s ease-in-out infinite;
+}
+@keyframes icon-float {
+    0%,
+    100% {
+        transform: translateY(0px) rotate(0deg);
+    }
+    50% {
+        transform: translateY(-10px) rotate(2deg);
+    }
+}
+.lh-level-title {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
+    font-size: var(--lh-text-2xl);
+    font-weight: 600;
+    color: var(--lh-gray-900);
+    margin-bottom: var(--lh-space-2);
+}
+.lh-level-subtitle {
+    color: var(--lh-gray-600);
+    font-weight: 500;
+    font-size: var(--lh-text-base);
+    margin-bottom: var(--lh-space-3);
+}
+.lh-level-description {
+    color: var(--lh-gray-500);
+    font-size: var(--lh-text-sm);
+    font-style: italic;
+    margin-bottom: var(--lh-space-4);
+    line-height: 1.6;
+}
+.lh-level-arrow {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--lh-space-2);
+    font-weight: 600;
+    color: var(--lh-gray-700);
+    font-size: var(--lh-text-sm);
+    transition: all var(--lh-transition-base);
+}
+.lh-level-arrow::after {
+    content: '→';
+    font-size: var(--lh-text-lg);
+    transition: transform var(--lh-transition-base);
+}
+.lh-level-card:hover .lh-level-arrow::after {
+    transform: translateX(4px);
+}
+@media (max-width: 768px) {
+    .lh-header {
+        padding: var(--lh-space-3) var(--lh-space-3) 0;
+    }
+    .lh-school-brand {
+        padding: var(--lh-space-2) var(--lh-space-3);
+        gap: var(--lh-space-2);
+    }
+    .lh-school-logo {
+        width: 40px;
+        height: 40px;
+    }
+    .lh-school-name {
+        font-size: var(--lh-text-base);
+    }
+    .lh-school-subtitle {
+        font-size: var(--lh-text-sm);
+    }
+    .lh-container {
+        padding: var(--lh-space-16) var(--lh-space-4) var(--lh-space-8);
+        margin: var(--lh-space-4);
+        margin-top: var(--lh-space-6);
+    }
+    .lh-title {
+        font-size: var(--lh-text-3xl);
+    }
+    .lh-subtitle {
+        font-size: var(--lh-text-base);
+    }
+    .lh-levels-grid {
+        grid-template-columns: 1fr;
+        gap: var(--lh-space-4);
+    }
+    .lh-level-card {
+        padding: var(--lh-space-6) var(--lh-space-4);
+    }
+    .lh-level-icon {
+        font-size: var(--lh-text-4xl);
+    }
+    .lh-level-title {
+        font-size: var(--lh-text-xl);
+    }
+}
+@media (max-width: 480px) {
+    .lh-school-brand {
+        flex-direction: column;
+        text-align: center;
+        padding: var(--lh-space-2);
+        gap: var(--lh-space-1);
+    }
+    .lh-school-logo {
+        width: 36px;
+        height: 36px;
+    }
+    .lh-school-name {
+        font-size: var(--lh-text-sm);
+    }
+    .lh-school-subtitle {
+        font-size: 11px;
+    }
+    .lh-container {
+        padding: var(--lh-space-12) var(--lh-space-3) var(--lh-space-6);
+        margin: var(--lh-space-2);
+        margin-top: var(--lh-space-4);
+        border-radius: var(--lh-radius-2xl);
+    }
+    .lh-title {
+        font-size: var(--lh-text-2xl);
+    }
+    .lh-subtitle {
+        font-size: var(--lh-text-sm);
+        margin-bottom: var(--lh-space-8);
+    }
+    .lh-level-card {
+        padding: var(--lh-space-4);
+    }
+    .lh-level-icon {
+        font-size: var(--lh-text-3xl);
+    }
+}
+.lh-loading {
+    opacity: 0;
+    animation: fadeIn 0.5s ease-out 0.2s forwards;
+}
+@keyframes fadeIn {
+    to {
+        opacity: 1;
+    }
+}
+.lh-level-card::after {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: conic-gradient(from 0deg,
+            transparent,
+            rgba(255, 255, 255, 0.1),
+            transparent);
+    opacity: 0;
+    transition: opacity var(--lh-transition-slow);
+    animation: shimmer 3s linear infinite;
+}
+.lh-level-card:hover::after {
+    opacity: 1;
+}
+@keyframes shimmer {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
+}
+.lh-level-card:focus {
+    outline: 3px solid var(--lh-sapphire);
+    outline-offset: 2px;
+}
+.lh-level-card:focus-visible {
+    outline: 3px solid var(--lh-sapphire);
+    outline-offset: 2px;
+}
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}
+@media (prefers-contrast: high) {
+    .lh-level-card {
+        border-width: 3px;
+        background: rgba(255, 255, 255, 0.9);
+    }
+    .lh-title,
+    .lh-level-title {
+        color: var(--lh-gray-900) !important;
+        text-shadow: none !important;
+    }
+    .lh-school-name {
+        color: var(--lh-gray-900) !important;
+        text-shadow: none !important;
+    }
+}
