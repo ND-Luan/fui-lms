@@ -43,13 +43,12 @@
         </v-card-text>
         <v-card-actions class="px-4 pb-4 ga-2 flex-wrap">
           <v-btn color="primary" variant="tonal" :loading="loadingFetchLop"
-            :disabled="loadingFetchLop || loadingSyncLop"
-            @click="onFetchLop" prepend-icon="mdi-download">
+            :disabled="loadingFetchLop || loadingSyncLop" @click="onFetchLop" prepend-icon="mdi-download">
             Lấy dữ liệu lớp
           </v-btn>
           <v-btn color="success" :loading="loadingSyncLop"
-            :disabled="loadingFetchLop || loadingSyncLop || lopFetchedCount === null"
-            @click="onSyncLop" prepend-icon="mdi-sync">
+            :disabled="loadingFetchLop || loadingSyncLop || lopFetchedCount === null" @click="onSyncLop"
+            prepend-icon="mdi-sync">
             Đồng bộ vào DB
           </v-btn>
         </v-card-actions>
