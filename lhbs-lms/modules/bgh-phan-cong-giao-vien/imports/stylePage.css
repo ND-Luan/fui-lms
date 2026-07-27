@@ -1,12 +1,20 @@
-.text-gradient {
-    background: linear-gradient(135deg, #1867c0 0%, #5cbbf6 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
+.matrix-container {
+    min-height: calc(100dvh - 180px);
+    padding: 12px;
+    background: #f7f9fc;
 }
 
-.bg-matrix-container {
-    background-color: #f9fbfd;
-    min-height: calc(100dvh - 180px);
+.matrix-summary {
+    min-height: 36px;
+    padding: 0 4px 10px;
+}
+
+.matrix-shell {
+    overflow: auto;
+    max-height: calc(100dvh - 245px);
+    background: #fff;
+    border: 1px solid #e5eaf0;
+    border-radius: 10px;
 }
 
 .matrix-table {
@@ -15,23 +23,27 @@
 }
 
 .matrix-table th {
-    background-color: #f0f4f8 !important;
-    color: #1e293b !important;
-    border-bottom: 2px solid #cbd5e1 !important;
-    font-size: 0.825rem;
+    height: 42px !important;
+    padding: 0 12px !important;
+    background-color: #f6f8fb !important;
+    color: #334155 !important;
+    border-bottom: 1px solid #dfe5ec !important;
+    font-size: 0.78rem;
 }
 
 .matrix-table td {
-    border-bottom: 1px solid #e2e8f0;
+    height: 48px !important;
+    padding: 2px 12px !important;
+    border-bottom: 1px solid #edf0f4;
 }
 
 .matrix-row:hover {
-    background-color: #f1f5f9;
+    background-color: #f8fafc;
 }
 
 .matrix-select {
-    font-size: 0.8rem;
-    max-width: 250px;
+    max-width: 240px;
+    font-size: 0.78rem;
 }
 
 .sticky-col {
@@ -39,9 +51,19 @@
     left: 0;
     background-color: white;
     z-index: 2;
-    box-shadow: 2px 0 5px -2px rgba(0, 0, 0, 0.1);
+    border-right: 1px solid #edf0f4;
 }
 
 .matrix-row:hover .sticky-col {
-    background-color: #f1f5f9;
+    background-color: #f8fafc;
+}
+
+@media (max-width: 960px) {
+    .matrix-container {
+        padding: 8px;
+    }
+
+    .matrix-shell {
+        max-height: calc(100dvh - 290px);
+    }
 }

@@ -22,7 +22,7 @@
               <v-select v-model="LopID" label="Chọn lớp học" :items="DSLop" item-title="TenLop" item-value="LopID"
                 hide-details />
             </v-col>
-            <v-col cols="12" sm="4" md="2" v-if="viewMode === 'matrix'">
+            <v-col cols="12" sm="4" md="3" v-if="viewMode === 'matrix'">
               <v-select v-model="filterMonHocIds" label="Lọc môn học" :items="DSMonHoc" item-title="MonHocName"
                 item-value="MonHocID" multiple clearable hide-details />
             </v-col>
@@ -39,10 +39,11 @@
                 <v-icon start>mdi-plus</v-icon>
                 Thêm phân công
               </v-btn>
-              <v-btn v-if="viewMode === 'matrix'" color="success" :loading="savingMatrix" @click="saveMatrix"
-                class="text-none">
-                <v-icon start>mdi-content-save-all</v-icon>
-                Lưu ma trận
+              <v-btn v-if="viewMode === 'matrix'" color="primary" :loading="savingMatrix"
+                :disabled="matrixChangeCount === 0" @click="saveMatrix" class="text-none">
+                <v-icon start>mdi-content-save-outline</v-icon>
+                Lưu thay đổi
+                <v-badge v-if="matrixChangeCount" :content="matrixChangeCount" color="error" inline />
               </v-btn>
             </v-col>
           </v-row>
@@ -55,7 +56,7 @@
     <!-- VIEW MODE: LIST -->
     <template v-if="viewMode === 'list'">
       <GlobalDataTable :headers="headers" :items="filterDS" item-value="GVLopID" items-per-page="-1"
-        hide-default-footer>
+        hide-default-footer hover :vDataTableHeight="'calc(100dvh - 77px)'">
         <template #item.STT="{ index }">
           {{ index + 1 }}
         </template>
@@ -107,18 +108,26 @@
         <p class="text-body-2">Không tìm thấy lớp học nào trong khối hiện tại để hiển thị ma trận.</p>
       </div>
 
-      <div v-else class="pa-4 bg-matrix-container">
+      <div v-else class="matrix-container">
+        <div class="matrix-summary d-flex align-center ga-3">
+          <v-icon size="18" color="primary">mdi-table-large</v-icon>
+          <span class="text-body-2 font-weight-medium">{{ matrixRows.length }} lớp</span>
+          <span class="text-caption text-medium-emphasis">• {{ filteredMonHocs.length }} môn đang hiển thị</span>
+          <v-spacer />
+          <span v-if="matrixChangeCount" class="text-caption text-warning">
+            {{ matrixChangeCount }} ô chưa lưu
+          </span>
+        </div>
         <!-- Dynamic matrix table -->
-        <v-card class="elevation-1 border overflow-hidden">
-          <v-table class="matrix-table text-caption" fixed-header
-            style="max-height: calc(100dvh - 300px); overflow-y: auto;">
+        <div class="matrix-shell">
+          <v-table class="matrix-table text-caption" fixed-header>
             <thead>
               <tr class="bg-grey-lighten-4">
                 <th class="font-weight-bold text-center" style="width: 50px;">STT</th>
                 <th class="font-weight-bold text-left sticky-col" style="width: 140px; min-width: 120px;">Lớp học</th>
                 <th class="font-weight-bold text-left" style="width: 260px; min-width: 220px;">Giáo viên chủ nhiệm / GV
                   Lớp</th>
-                <th v-for="sub in DSMonHoc" :key="sub.MonHocID" v-show="isMonHocVisible(sub.MonHocID)"
+                <th v-for="sub in filteredMonHocs" :key="sub.MonHocID"
                   class="font-weight-bold text-left" style="width: 260px; min-width: 220px;">
                   {{ sub.MonHocName }}
                 </th>
@@ -135,7 +144,7 @@
                     variant="underlined" class="matrix-select" />
                 </td>
                 <!-- Subject Cells -->
-                <td v-for="sub in DSMonHoc" :key="sub.MonHocID" v-show="isMonHocVisible(sub.MonHocID)">
+                <td v-for="sub in filteredMonHocs" :key="sub.MonHocID">
                   <v-autocomplete v-model="row.Subjects[sub.MonHocID]" :items="DSGiaoVien"
                     :item-title="renderTextGiangVien" item-value="GiaoVienID" placeholder="Chọn GV bộ môn..." clearable
                     hide-details density="compact" variant="underlined" class="matrix-select" />
@@ -143,7 +152,7 @@
               </tr>
             </tbody>
           </v-table>
-        </v-card>
+        </div>
       </div>
     </template>
 
@@ -282,6 +291,18 @@
         return this.DSMonHoc
       }
       return this.DSMonHoc.filter(sub => this.filterMonHocIds.includes(sub.MonHocID))
+    },
+    matrixChangeCount() {
+      if (!this.initialMatrixRows.length) return 0
+      return this.matrixRows.reduce((count, row) => {
+        const initial = this.initialMatrixRows.find(x => x.LopID === row.LopID)
+        if (!initial) return count
+        let rowChanges = row.GVCN !== initial.GVCN ? 1 : 0
+        this.DSMonHoc.forEach(sub => {
+          if (row.Subjects[sub.MonHocID] !== initial.Subjects[sub.MonHocID]) rowChanges++
+        })
+        return count + rowChanges
+      }, 0)
     }
   },
   watch: {
@@ -356,11 +377,6 @@
     }
   },
   methods: {
-    isMonHocVisible(monHocID) {
-      if (!this.filterMonHocIds || this.filterMonHocIds.length === 0) return true
-      return this.filterMonHocIds.includes(monHocID)
-    },
-
     showSnackbar(message, color = 'success') {
       if (this.snackbarRef?.value?.showSnackbar) {
         this.snackbarRef.value.showSnackbar({ message, color })
@@ -401,20 +417,20 @@
       }))
     },
 
-    async getGiaoVienLop() {
+    async getGiaoVienLop(options = {}) {
       if (!this.LopID) return
       const res = await fetchPromise('lms/GiaoVienLop_Get_ByLopID', {
         LopID: this.LopID,
         NienKhoa: parseInt(vueData.NienKhoa || new Date().getFullYear()),
         HocKi: this.HocKi
-      })
+      }, options)
       this.DSPhanCongGiaoVien = res ?? []
     },
 
     // ==========================================
     // MATRIX LOAD & SAVE LOGIC
     // ==========================================
-    async loadMatrixData() {
+    async loadMatrixData(changedLopIds = null) {
       if (!this.DSLop || this.DSLop.length === 0) {
         this.matrixRows = []
         this.blockKhoiTruong = null
@@ -423,20 +439,30 @@
         return
       }
 
-      this.loadingMatrix = true
+      const isPartialRefresh = Array.isArray(changedLopIds)
+      if (!isPartialRefresh) this.loadingMatrix = true
       try {
         const nienKhoa = parseInt(vueData.NienKhoa || new Date().getFullYear())
-        const requests = this.DSLop.map(lop => ({
+        const targetLops = Array.isArray(changedLopIds)
+          ? this.DSLop.filter(lop => changedLopIds.includes(lop.LopID))
+          : this.DSLop
+        const requests = targetLops.map(lop => ({
           url: 'lms/GiaoVienLop_Get_ByLopID',
           params: { LopID: lop.LopID, NienKhoa: nienKhoa, HocKi: this.HocKi }
         }))
 
-        // Call fetchBatchPromise
-        const results = await fetchBatchPromise(requests)
+        // The table owns its loading state, so these reads stay silent and do not
+        // trigger the page-level overlay that previously looked like a reload.
+        const results = await Promise.all(requests.map(request =>
+          fetchPromise(request.url, request.params, {
+            silent: true,
+            forceRefresh: isPartialRefresh
+          })
+        ))
 
-        const matrixRows = []
+        const refreshedRows = []
 
-        this.DSLop.forEach((lop, idx) => {
+        targetLops.forEach((lop, idx) => {
           const assignments = results[idx] ?? []
           
           const row = {
@@ -458,22 +484,26 @@
             }
           })
 
-          matrixRows.push(row)
+          refreshedRows.push(row)
         })
 
-        this.matrixRows = matrixRows
-        
-        // Deep copy of matrix rows for initial comparison
-        this.initialMatrixRows = JSON.parse(JSON.stringify(matrixRows))
+        if (Array.isArray(changedLopIds)) {
+          const refreshedById = new Map(refreshedRows.map(row => [row.LopID, row]))
+          this.matrixRows = this.matrixRows.map(row => refreshedById.get(row.LopID) || row)
+        } else {
+          this.matrixRows = refreshedRows
+        }
+        this.initialMatrixRows = JSON.parse(JSON.stringify(this.matrixRows))
       } catch (err) {
         console.error(err)
         this.showSnackbar('Lỗi tải dữ liệu ma trận', 'error')
       } finally {
-        this.loadingMatrix = false
+        if (!isPartialRefresh) this.loadingMatrix = false
       }
     },
 
     async saveMatrix() {
+      if (this.matrixChangeCount === 0) return
       const ok = await this.confirmRef.value.show({ title: 'Xác nhận lưu thay đổi ma trận phân công?' })
       if (!ok) return
 
@@ -485,6 +515,7 @@
 
       const deleteQueue = [] // GVLopID
       const insertQueue = [] // new records
+      const changedLopIds = new Set()
 
       // 2. Check each Class row
       this.matrixRows.forEach(row => {
@@ -493,6 +524,7 @@
 
         // 2a. Check GVCN
         if (row.GVCN !== initialRow.GVCN) {
+          changedLopIds.add(row.LopID)
           if (initialRow.GVCN_Record) {
             deleteQueue.push(initialRow.GVCN_Record)
           }
@@ -518,6 +550,7 @@
           const initialGV = initialRow.Subjects[sub.MonHocID]
 
           if (currentGV !== initialGV) {
+            changedLopIds.add(row.LopID)
             const oldGVLopID = initialRow.Subjects_Record[sub.MonHocID]
             if (oldGVLopID) {
               deleteQueue.push(oldGVLopID)
@@ -558,7 +591,7 @@
         }
 
         this.showSnackbar('Lưu thay đổi ma trận thành công', 'success')
-        await this.loadMatrixData()
+        await this.loadMatrixData([...changedLopIds])
       } catch (err) {
         console.error(err)
         this.showSnackbar('Lỗi khi lưu thay đổi ma trận', 'error')
@@ -678,7 +711,7 @@
         if (res) {
           this.showSnackbar('Cập nhật phân công thành công', 'success')
           this.dialog.show = false
-          this.getGiaoVienLop()
+          await this.getGiaoVienLop({ silent: true, forceRefresh: true })
         }
       } else {
         const insertPayload = {
@@ -692,7 +725,7 @@
         if (res) {
           this.showSnackbar('Thêm phân công thành công', 'success')
           this.dialog.show = false
-          this.getGiaoVienLop()
+          await this.getGiaoVienLop({ silent: true, forceRefresh: true })
         }
       }
     },
@@ -708,7 +741,7 @@
 
       if (res) {
         this.showSnackbar('Xóa phân công thành công', 'success')
-        this.getGiaoVienLop()
+        await this.getGiaoVienLop({ silent: true, forceRefresh: true })
       }
     }
   }

@@ -40,8 +40,8 @@
 </template>
 
 <script>
-export default {
-	inject: ['snackbarRef', 'iframeRef'],
+	export default {
+		inject: ['snackbarRef', 'iframeRef'],
 	data() {
 		return {
 			vueData,
@@ -63,13 +63,5 @@ export default {
 			}
 		}
 	}
-}
+	}
 </script>
-
-<style scoped>
-@import "../stylePage.css";
-
-.width-card {
-	width: 320px;
-}
-</style>
