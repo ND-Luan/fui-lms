@@ -478,9 +478,6 @@
 			return 'diemc2'
 		},
 		async getTongKetCap1Rows(rows) {
-			// API này chỉ dùng để lấy tổng kết lớp 5 cho học sinh đã lên cấp 2.
-			// Khi đang xem trực tiếp cấp Tiểu học thì không cần gọi.
-			if (Number(this.filter.CapID) === 1) return []
 			const cap1Targets = this.buildTongKetTargets(rows).filter(item => item.KhoiID >= 1 && item.KhoiID <= 5)
 			if (!cap1Targets.length) return []
 			const hasCap1LopCu = (rows || []).some(row => {

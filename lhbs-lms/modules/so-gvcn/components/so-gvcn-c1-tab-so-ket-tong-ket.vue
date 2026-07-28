@@ -1,7 +1,8 @@
 <template>
 	<div class="pa-4">
 		<v-alert type="info" variant="tonal" class="mb-4">
-			Quản lý Đánh giá Sơ kết HKI và Tổng kết cuối năm học (5 Phẩm chất & Năng lực TT27) cùng Thành tích khen thưởng học sinh.
+			Quản lý Đánh giá Sơ kết HKI và Tổng kết cuối năm học (5 Phẩm chất & Năng lực TT27) cùng Thành tích khen
+			thưởng học sinh.
 		</v-alert>
 		<v-card variant="outlined" class="d-flex align-center justify-center py-12 text-medium-emphasis">
 			<div class="text-center">
@@ -14,10 +15,10 @@
 </template>
 
 <script>
-export default {
-	name: 'so-gvcn-c1-tab-so-ket-tong-ket',
+	export default {
+		name: 'so-gvcn-c1-tab-so-ket-tong-ket',
 	props: {
 		selectedLopID: { type: String, default: '__ALL__' }
 	}
-}
+	}
 </script>

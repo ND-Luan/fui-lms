@@ -8,8 +8,8 @@
 </template>
 
 <script>
-export default {
-	name: 'so-gvcn-c1-tab-thong-tin-to-chuc',
+	export default {
+		name: 'so-gvcn-c1-tab-thong-tin-to-chuc',
 	props: {
 		rows: { type: Array, default: () => [] },
 		sheetHeight: { type: String, default: 'calc(100vh - 230px)' },
@@ -131,5 +131,5 @@ export default {
 	beforeUnmount() {
 		this.destroySheet()
 	}
-}
+	}
 </script>

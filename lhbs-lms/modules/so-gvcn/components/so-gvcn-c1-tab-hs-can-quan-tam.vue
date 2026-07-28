@@ -14,10 +14,10 @@
 </template>
 
 <script>
-export default {
-	name: 'so-gvcn-c1-tab-hs-can-quan-tam',
+	export default {
+		name: 'so-gvcn-c1-tab-hs-can-quan-tam',
 	props: {
 		selectedLopID: { type: String, default: '__ALL__' }
 	}
-}
+	}
 </script>

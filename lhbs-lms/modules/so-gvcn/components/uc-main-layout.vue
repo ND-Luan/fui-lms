@@ -53,7 +53,8 @@
 							<v-tab value="du-lieu-hs">{{ isCap1 ? 'TT & Tổ chức lớp' : 'Dữ liệu HS lớp' }}</v-tab>
 							<v-tab value="chi-tieu">{{ isCap1 ? 'KH & Công tác CN' : 'XD chỉ tiêu_giải pháp' }}</v-tab>
 							<v-tab value="ke-hoach">{{ isCap1 ? 'HS cần quan tâm' : 'KH GD tháng_tuần' }}</v-tab>
-							<v-tab value="ren-luyen">{{ isCap1 ? 'Nhận xét tháng (LMS)' : 'Hồ sơ theo dõi QTRL' }}</v-tab>
+							<v-tab value="ren-luyen">{{ isCap1 ? 'Nhận xét tháng (LMS)' : 'Hồ sơ theo dõi QTRL' }}
+							</v-tab>
 							<v-tab v-if="isCap1" value="so-ket-tong-ket">Sơ kết, Tổng kết & Thành tích</v-tab>
 							<v-tab value="so-lien-lac">{{ isCap1 ? 'Họp PHHS & BHYT' : 'Sổ liên lạc điện tử' }}</v-tab>
 							<v-tab v-if="!isCap1" value="huong-nghiep">Hướng nghiệp</v-tab>
@@ -63,8 +64,9 @@
 						<v-window v-model="tab">
 							<!-- Tab 1 -->
 							<v-window-item value="du-lieu-hs">
-								<so-gvcn-c1-tab-thong-tin-to-chuc v-if="isCap1" :rows="studentSheetRows" :sheet-height="sheetHeight"
-									:sheet-key="sheetKey" :selected-lop-i-d="selectedLopID" ref="tabDuLieuHsRef" />
+								<so-gvcn-c1-tab-thong-tin-to-chuc v-if="isCap1" :rows="studentSheetRows"
+									:sheet-height="sheetHeight" :sheet-key="sheetKey" :selected-lop-i-d="selectedLopID"
+									ref="tabDuLieuHsRef" />
 								<so-gvcn-tab-du-lieu-hs v-else :rows="studentSheetRows" :sheet-height="sheetHeight"
 									:sheet-key="sheetKey" :nested-headers="studentNestedHeaders" ref="tabDuLieuHsRef" />
 							</v-window-item>
