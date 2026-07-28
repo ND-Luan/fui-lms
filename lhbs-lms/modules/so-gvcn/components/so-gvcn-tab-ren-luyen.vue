@@ -87,7 +87,11 @@
 					this.instance = jspreadsheet(container, {
 						worksheets: [{
 							data: Array.isArray(this.rows) ? this.rows : [],
-							columns: this.columns,
+							columns: (this.columns || []).map(column => (
+								!column.readOnly && column.type !== 'numeric' && column.align !== 'center'
+									? { ...column, align: 'justify' }
+									: column
+							)),
 							nestedHeaders: this.nestedHeaders,
 							rowResize: true,
 							columnDrag: false,

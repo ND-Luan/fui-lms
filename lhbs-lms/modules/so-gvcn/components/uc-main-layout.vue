@@ -16,7 +16,7 @@
 					<v-row dense align="center">
 						<v-col cols="12" sm="2">
 							<v-select v-model="filter.CapID" :items="capOptions" item-title="text" item-value="value"
-								label="Cấp học" density="compact" variant="outlined" hide-details disabled />
+								label="Cấp học" density="compact" variant="outlined" hide-details />
 						</v-col>
 						<v-col cols="12" sm="3">
 							<v-select v-model="selectedLopID" :items="classOptions" item-title="TenLop"
@@ -50,31 +50,39 @@
 				<v-row no-gutters>
 					<v-col cols="12">
 						<v-tabs v-model="tab" density="compact">
-							<v-tab value="du-lieu-hs">Dữ liệu HS lớp</v-tab>
-							<v-tab value="chi-tieu">XD chỉ tiêu_giải pháp</v-tab>
-							<v-tab value="ke-hoach">KH GD tháng_tuần</v-tab>
-							<v-tab value="ren-luyen">Hồ sơ theo dõi QTRL của HS</v-tab>
-							<v-tab value="so-lien-lac">Sổ liên lạc điện tử</v-tab>
-							<v-tab value="huong-nghiep">Hướng nghiệp</v-tab>
+							<v-tab value="du-lieu-hs">{{ isCap1 ? 'TT & Tổ chức lớp' : 'Dữ liệu HS lớp' }}</v-tab>
+							<v-tab value="chi-tieu">{{ isCap1 ? 'KH & Công tác CN' : 'XD chỉ tiêu_giải pháp' }}</v-tab>
+							<v-tab value="ke-hoach">{{ isCap1 ? 'HS cần quan tâm' : 'KH GD tháng_tuần' }}</v-tab>
+							<v-tab value="ren-luyen">{{ isCap1 ? 'Nhận xét tháng (LMS)' : 'Hồ sơ theo dõi QTRL' }}</v-tab>
+							<v-tab v-if="isCap1" value="so-ket-tong-ket">Sơ kết, Tổng kết & Thành tích</v-tab>
+							<v-tab value="so-lien-lac">{{ isCap1 ? 'Họp PHHS & BHYT' : 'Sổ liên lạc điện tử' }}</v-tab>
+							<v-tab v-if="!isCap1" value="huong-nghiep">Hướng nghiệp</v-tab>
 						</v-tabs>
 						<v-divider />
 
 						<v-window v-model="tab">
+							<!-- Tab 1 -->
 							<v-window-item value="du-lieu-hs">
-								<so-gvcn-tab-du-lieu-hs :rows="studentSheetRows" :sheet-height="sheetHeight"
+								<so-gvcn-c1-tab-thong-tin-to-chuc v-if="isCap1" :rows="studentSheetRows" :sheet-height="sheetHeight"
+									:sheet-key="sheetKey" :selected-lop-i-d="selectedLopID" ref="tabDuLieuHsRef" />
+								<so-gvcn-tab-du-lieu-hs v-else :rows="studentSheetRows" :sheet-height="sheetHeight"
 									:sheet-key="sheetKey" :nested-headers="studentNestedHeaders" ref="tabDuLieuHsRef" />
 							</v-window-item>
 
+							<!-- Tab 2 -->
 							<v-window-item value="chi-tieu" eager>
-								<so-gvcn-tab-chi-tieu ref="tabChiTieuRef" :selected-lop-i-d="selectedLopID"
+								<so-gvcn-c1-tab-ke-hoach-cong-tac v-if="isCap1" :selected-lop-i-d="selectedLopID" />
+								<so-gvcn-tab-chi-tieu v-else ref="tabChiTieuRef" :selected-lop-i-d="selectedLopID"
 									:chi-tieu-cards="chiTieuCards" :chi-tieu-giao-duc-title="chiTieuGiaoDucTitle"
 									:sheet-height="sheetHeight" :sheet-key="sheetKey"
 									@update-card-rows="updateChiTieuCardRows"
 									@handle-card-change="handleChiTieuCardChange" />
 							</v-window-item>
 
+							<!-- Tab 3 -->
 							<v-window-item value="ke-hoach" eager>
-								<so-gvcn-tab-ke-hoach ref="tabKeHoachRef" :selected-lop-i-d="selectedLopID"
+								<so-gvcn-c1-tab-hs-can-quan-tam v-if="isCap1" :selected-lop-i-d="selectedLopID" />
+								<so-gvcn-tab-ke-hoach v-else ref="tabKeHoachRef" :selected-lop-i-d="selectedLopID"
 									:selected-class="selectedClass" :school-year-text="getCurrentSchoolYearText()"
 									:sheet-height="sheetHeight" :ke-hoach-sheet-height="keHoachSheetHeight"
 									:columns="keHoachSheetColumns" :nested-headers="keHoachSheetNestedHeaders"
@@ -83,22 +91,32 @@
 									:get-ke-hoach-month-row-count="getKeHoachMonthRowCount" />
 							</v-window-item>
 
+							<!-- Tab 4 -->
 							<v-window-item value="ren-luyen" eager>
-								<so-gvcn-tab-ren-luyen ref="tabRenLuyenRef" v-model:rows="renLuyenRows"
+								<so-gvcn-c1-tab-nhan-xet-thang-lms v-if="isCap1" :selected-lop-i-d="selectedLopID" />
+								<so-gvcn-tab-ren-luyen v-else ref="tabRenLuyenRef" v-model:rows="renLuyenRows"
 									:selected-lop-i-d="selectedLopID" :selected-class="selectedClass"
 									:school-year-text="getCurrentSchoolYearText()" :columns="renLuyenColumns"
 									:nested-headers="renLuyenNestedHeaders" :sheet-height="sheetHeight"
 									:ren-luyen-sheet-height="renLuyenSheetHeight" :sheet-key="sheetKey" />
 							</v-window-item>
 
+							<!-- Tab 5 (C1 only) -->
+							<v-window-item v-if="isCap1" value="so-ket-tong-ket" eager>
+								<so-gvcn-c1-tab-so-ket-tong-ket :selected-lop-i-d="selectedLopID" />
+							</v-window-item>
+
+							<!-- Tab 6 -->
 							<v-window-item value="so-lien-lac">
-								<so-gvcn-tab-so-lien-lac ref="tabSoLienLacRef" v-model:rows="soLienLacRows"
+								<so-gvcn-c1-tab-hop-ph-bhyt v-if="isCap1" :selected-lop-i-d="selectedLopID" />
+								<so-gvcn-tab-so-lien-lac v-else ref="tabSoLienLacRef" v-model:rows="soLienLacRows"
 									:selected-lop-i-d="selectedLopID" :columns="soLienLacColumns"
 									:nested-headers="soLienLacNestedHeaders" :sheet-height="sheetHeight"
 									:so-lien-lac-sheet-height="soLienLacSheetHeight" :sheet-key="sheetKey" />
 							</v-window-item>
 
-							<v-window-item value="huong-nghiep">
+							<!-- Tab Hướng nghiệp (C2, C3 only) -->
+							<v-window-item v-if="!isCap1" value="huong-nghiep">
 								<so-gvcn-tab-huong-nghiep ref="tabHuongNghiepRef" :rows="huongNghiepRows"
 									:selected-lop-i-d="selectedLopID" :columns="huongNghiepColumns"
 									:nested-headers="huongNghiepNestedHeaders" :sheet-height="sheetHeight"
@@ -125,6 +143,7 @@
 			allTeachers: [],
 			allStudentRows: [],
 			selectedLopID: '__ALL__',
+			classSelectionInitialized: false,
 			studentSheetRows: [],
 			sheetInstance: null,
 			renLuyenRows: [],
@@ -202,8 +221,8 @@
 							height: '65px',
 							columns: [
 								{ title: 'Yêu cầu cần đạt', name: 'YeuCau', width: 260 },
-								{ title: 'HSXS', name: 'HSXS', width: 180 },
-								{ title: 'HSG', name: 'HSG', width: 180 },
+								{ title: 'HSXS', name: 'HSXS', width: 180, align: 'center' },
+								{ title: 'HSG', name: 'HSG', width: 180, align: 'center' },
 								{ title: 'Ghi chú / biện pháp', name: 'GhiChu', width: 360 }
 							],
 							rows: [
@@ -229,10 +248,10 @@
 						height: '115px',
 						columns: [
 							{ title: ' ', name: 'Moc', width: 90, readOnly: true },
-							{ title: 'Sĩ số', name: 'SiSo', width: 80 },
-							{ title: 'Nam', name: 'Nam', width: 170 },
-							{ title: 'Chuyển đi', name: 'ChuyenDi', width: 170 },
-							{ title: 'Chuyển đến', name: 'ChuyenDen', width: 170 }
+							{ title: 'Sĩ số', name: 'SiSo', width: 80, align: 'center' },
+							{ title: 'Nam', name: 'Nam', width: 170, align: 'center' },
+							{ title: 'Chuyển đi', name: 'ChuyenDi', width: 170, align: 'center' },
+							{ title: 'Chuyển đến', name: 'ChuyenDen', width: 170, align: 'center' }
 						],
 						rows: [
 							['Đầu năm', '', '', '', ''],
@@ -259,12 +278,12 @@
 							md: 12,
 							height: '200px',
 							columns: [
-								{ title: 'STT', name: 'STT', width: 60 },
+								{ title: 'STT', name: 'STT', width: 60, align: 'center' },
 								{ title: 'Mã học sinh', name: 'HocSinhID', width: 95, readOnly: true },
 								{ title: 'Họ và tên học sinh', name: 'HocSinh', width: 230, type: 'dropdown', source: [], autocomplete: true },
 								{ title: 'Họ và tên cha mẹ', name: 'ChaMe', width: 230 },
 								{ title: 'Nghề nghiệp', name: 'NgheNghiep', width: 170 },
-								{ title: 'Điện thoại', name: 'DienThoai', width: 190 },
+								{ title: 'Điện thoại', name: 'DienThoai', width: 190, align: 'center' },
 								{
 									title: 'Nhiệm vụ', name: 'NhiemVu', width: 140,
 									type: 'dropdown', source: ['Trưởng ban', 'Phó ban', 'Thành viên']
@@ -278,7 +297,7 @@
 							md: 12,
 							height: '320px',
 							columns: [
-								{ title: 'STT', name: 'STT', width: 70 },
+								{ title: 'STT', name: 'STT', width: 70, align: 'center' },
 								{ title: 'Mã học sinh', name: 'HocSinhID', width: 95, readOnly: true },
 								{ title: 'Họ và tên học sinh', name: 'HocSinh', width: 230, type: 'dropdown', source: [], autocomplete: true },
 								{
@@ -310,6 +329,7 @@
 				HuongNghiep: ''
 			},
 			capOptions: [
+				{ text: 'Tiểu học', value: 1 },
 				{ text: 'Trung học', value: '2,3' }
 			],
 			studentSheetColumns: [
@@ -397,6 +417,9 @@
 		}
 	},
 	computed: {
+			isCap1() {
+				return Number(this.filter.CapID || vueData.CapID || 0) === 1
+			},
 			currentNienKhoa() {
 				return vueData.NienKhoa || new Date().getFullYear()
 			},
@@ -429,13 +452,14 @@
 				return 'I. XÂY DỰNG CHỈ TIÊU HAI MẶT GIÁO DỤC LỚP ' + tenLop + ' NĂM HỌC ' + this.getCurrentSchoolYearText()
 			},
 			showSaveButton() {
-				return this.selectedLopID !== '__ALL__' && ['chi-tieu', 'ke-hoach', 'ren-luyen', 'so-lien-lac', 'huong-nghiep'].includes(this.tab)
+				return this.selectedLopID !== '__ALL__' && ['chi-tieu', 'ke-hoach', 'ren-luyen', 'nhan-xet-lms', 'so-lien-lac', 'huong-nghiep'].includes(this.tab)
 			},
 			saveButtonText() {
 				switch (this.tab) {
 					case 'chi-tieu': return 'Lưu chỉ tiêu'
 					case 'ke-hoach': return 'Lưu kế hoạch tháng'
 					case 'ren-luyen': return 'Lưu rèn luyện'
+					case 'nhan-xet-lms': return 'Lưu nhận xét LMS'
 					case 'so-lien-lac': return 'Lưu sổ liên lạc'
 					case 'huong-nghiep': return 'Lưu hướng nghiệp'
 					default: return 'Lưu'
@@ -509,9 +533,15 @@
 		window.removeEventListener('resize', this.onResize)
 	},
 	watch: {
+		'filter.CapID'() {
+			this.selectedLopID = '__ALL__'
+			this.classSelectionInitialized = false
+			this.getList()
+		},
 		currentNienKhoa() {
 			this.filter.NienKhoa = this.currentNienKhoa
 			this.selectedLopID = '__ALL__'
+			this.classSelectionInitialized = false
 			this.getList()
 		},
 		tab(newTab) {
@@ -590,13 +620,21 @@
 					// Giáo viên và tổ trưởng chỉ thấy lớp đang chủ nhiệm trong niên khóa hiện tại.
 					if (this.isTeacherOrLead) {
 						const teacherClassIds = await this.getTeacherHomeroomClassIds()
-						this.allStudentRows = (this.allStudentRows || []).filter(row => teacherClassIds.has(String(row.LopID)))
+						const teacherRows = (this.allStudentRows || []).filter(row => teacherClassIds.has(String(row.LopID)))
+						// SoGVCNDanhSachHocSinhLop đã giới hạn dữ liệu theo quyền người dùng.
+						// Một số response không có mã GVCN/UserID để đối chiếu; trong trường
+						// hợp đó không được ghi đè danh sách API bằng một mảng rỗng.
+						if (teacherRows.length) this.allStudentRows = teacherRows
 					}
 					this.classList = this.buildClassList(this.allStudentRows)
+					if (!this.classSelectionInitialized) {
+						this.selectedLopID = this.classList[0]?.LopID || '__ALL__'
+						this.classSelectionInitialized = true
+					}
 					await this.mergeTongKetDiem(this.classList)
 					await this.mergeThongTinGiaDinh()
 					if (!this.classOptions.some(x => String(x.LopID) === String(this.selectedLopID))) {
-						this.selectedLopID = this.isTeacherOrLead ? (this.classList[0]?.LopID || '__ALL__') : '__ALL__'
+						this.selectedLopID = this.classList[0]?.LopID || '__ALL__'
 					}
 					await this.onClassChange(this.selectedLopID)
 					await this.ensureSpecificClassForClassTabs()
@@ -716,21 +754,29 @@
 			return 'diemc2'
 		},
 		async getTongKetCap1Rows(rows) {
-			const cap1Targets = this.buildTongKetTargets(rows).filter(item => item.KhoiID >= 1 && item.KhoiID <= 5)
+			let cap1Targets = this.buildTongKetTargets(rows).filter(item => item.KhoiID >= 1 && item.KhoiID <= 5)
+			if (!cap1Targets.length && this.selectedLopID && this.selectedLopID !== '__ALL__') {
+				cap1Targets = [{ LopID: this.selectedLopID, KhoiID: 1 }]
+			}
+			if (!cap1Targets.length) {
+				const uniqueLopIds = [...new Set((rows || []).map(r => r.LopID).filter(Boolean))]
+				cap1Targets = uniqueLopIds.map(id => ({ LopID: id, KhoiID: 1 }))
+			}
 			if (!cap1Targets.length) return []
-			const hasCap1LopCu = (rows || []).some(row => {
-				const khoiCu = Number(row.KhoiID || 0) - 1
-				return khoiCu >= 1 && khoiCu <= 5 && row.LopCuID
-			})
-			if (!hasCap1LopCu) return []
-			const data = await ajaxCALLPromise('lms/SoGVCNTongKetCap1LenCap2', {
-				NienKhoa: this.filter.NienKhoa - 1,
-				JsonLop: JSON.stringify(cap1Targets.map(item => ({ LopID: item.LopID })))
-			}).catch(() => [])
-			if (Array.isArray(data?.[0])) return data[0]
-			return Array.isArray(data) ? data : []
+			const chunks = await Promise.all(cap1Targets.map(target => ajaxCALLPromise('psmark1/LMS_GetBangTongHopKetQua', {
+				LopID: target.LopID,
+				KyDanhGia: 4
+			}).catch(() => [])))
+			return chunks.flat()
 		},
 		applyTongKet(row, tongKet) {
+			let xepLoaiKQGD = tongKet.HocLuc || row.KQHT || ''
+			if (tongKet.HoanThanhXuatSac === 'x') xepLoaiKQGD = 'Hoàn thành xuất sắc'
+			else if (tongKet.HoanThanhTot === 'x') xepLoaiKQGD = 'Hoàn thành tốt'
+			else if (tongKet.HoanThanh === 'x') xepLoaiKQGD = 'Hoàn thành'
+			else if (tongKet.ChuaHoanThanh === 'x') xepLoaiKQGD = 'Chưa hoàn thành'
+			else if (tongKet.DanhGia) xepLoaiKQGD = tongKet.DanhGia
+
 			return {
 				...row,
 				Toan: this.pickTongKetValue(tongKet, ['toan', 'Toan', 'DiemToan', 'Diem_Toan', 'Toán'], row.Toan || row['Toán'] || ''),
@@ -746,7 +792,8 @@
 				Hoa: tongKet.hoa || row.Hoa || row['Hóa'] || '',
 				Sinh: tongKet.sinh || row.Sinh || '',
 				DTB: tongKet.DTB || row.DTB || '',
-				KQHT: tongKet.HocLuc || row.KQHT || '',
+				KQHT: xepLoaiKQGD,
+				KhenThuong: tongKet.KhenThuong || row.KhenThuong || '',
 				KQRL: tongKet.KQRenLuyen || row.KQRL || '',
 				DanhHieu: tongKet.DanhHieu || row.DanhHieu || '',
 				Phep: tongKet.Phep ?? row.Phep,
@@ -894,8 +941,7 @@
 			if (students.length > 0) {
 				this.renLuyenRows = this.toRenLuyenRows(students)
 				this.soLienLacRows = this.toSoLienLacRows(students)
-				this.studentSheetRows = this.toSheetRows(students)
-				this.applyStudentDropdownOptions()
+				this.setStudentSheets(students)
 			}
 			this.sheetKey++
 		},
@@ -909,9 +955,42 @@
 			}
 		},
 		setStudentSheets(rows) {
-			this.studentSheetRows = this.toSheetRows(rows)
+			this.studentSheetRows = this.isCap1 ? this.toCap1SheetRows(rows) : this.toSheetRows(rows)
 			this.applyStudentDropdownOptions()
 			this.sheetKey++
+		},
+		toCap1SheetRows(rows) {
+			const uniqueRows = []
+			const seenKeys = new Set()
+			;(rows || []).forEach(x => {
+				const key = x.HSLopID ? ('hsl:' + x.HSLopID) : ('hs:' + (x.HocSinhID || '') + '_' + (x.LopID || ''))
+				if (!seenKeys.has(key)) {
+					seenKeys.add(key)
+					uniqueRows.push(x)
+				}
+			})
+			return uniqueRows.map((x, index) => [
+				index + 1,
+				x.HoTen || x.HoTenHocSinh || '',
+				x.MaHocSinh || x.HocSinhID || '',
+				x.NgaySinh || '',
+				(x.GioiTinh === 'Nữ' || x.Phai === 'x' || x.IsNu) ? 'x' : '',
+				x.TenDanToc || x.DanToc || 'Kinh',
+				x.KQHT || x.DanhGia || '',
+				x.KhenThuong || '',
+				this.buildNhanXetGVCN(x),
+				x.SoThich || x.DacDiem || '',
+				x.Cha || x.HoTenCha || '',
+				x.NgheNghiepCha || '',
+				x.SDTCha || x.DienThoaiCha || '',
+				x.Me || x.HoTenMe || '',
+				x.NgheNghiepMe || '',
+				x.SDTMe || x.DienThoaiMe || '',
+				x.NguoiDoDau || '',
+				x.SDTNguoiDoDau || x.DienThoaiDoDau || '',
+				x.DiaChi || '',
+				x.GhiChu || ''
+			])
 		},
 		toSheetRows(rows) {
 			const uniqueRows = []

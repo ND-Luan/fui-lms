@@ -111,12 +111,19 @@
 					if (typeof jspreadsheet === 'function') {
 						const wsConfig = {
 							data: card.rows,
-							columns: card.columns,
+							columns: (card.columns || []).map(column => (
+								!column.readOnly && column.type !== 'numeric' && column.align !== 'center'
+									? { ...column, align: 'justify' }
+									: column
+							)),
 							rowResize: true,
 							columnDrag: false,
 							tableWidth: '100%',
 							tableOverflow: true,
-							tableHeight: card.height || 'auto',
+							// The first table only has two data rows. Let it grow to its
+							// natural height so its nested headers do not create an inner
+							// vertical scrollbar.
+							tableHeight: card.key === 'chi-tieu-giao-duc' ? 'auto' : (card.height || 'auto'),
 							lazyLoading: false,
 							wordWrap: true,
 							allowInsertColumn: false,
