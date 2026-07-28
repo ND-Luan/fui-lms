@@ -1379,6 +1379,7 @@ class tblHocLieu_FP {
    datetime UpdateTime
    varchar(50) UpdateUser
    varchar(50) Loai
+   nvarchar(max) ThumbnailURLs
 }
 class tblHocSinh {
    int HocSinhID

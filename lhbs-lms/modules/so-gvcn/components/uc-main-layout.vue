@@ -50,7 +50,8 @@
 				<v-row no-gutters>
 					<v-col cols="12">
 						<v-tabs v-model="tab" density="compact">
-							<v-tab value="du-lieu-hs">{{ isCap1 ? 'TT & Tổ chức lớp' : 'Dữ liệu HS lớp' }}</v-tab>
+							<v-tab value="du-lieu-hs">{{ isCap1 ? 'THÔNG TIN HS LỚP' : 'Dữ liệu HS lớp' }}</v-tab>
+							<v-tab v-if="isCap1" value="to-chuc-lop">Tổ chức lớp</v-tab>
 							<v-tab value="chi-tieu">{{ isCap1 ? 'KH & Công tác CN' : 'XD chỉ tiêu_giải pháp' }}</v-tab>
 							<v-tab value="ke-hoach">{{ isCap1 ? 'HS cần quan tâm' : 'KH GD tháng_tuần' }}</v-tab>
 							<v-tab value="ren-luyen">{{ isCap1 ? 'Nhận xét tháng (LMS)' : 'Hồ sơ theo dõi QTRL' }}
@@ -65,10 +66,22 @@
 							<!-- Tab 1 -->
 							<v-window-item value="du-lieu-hs">
 								<so-gvcn-c1-tab-thong-tin-to-chuc v-if="isCap1" :rows="studentSheetRows"
-									:sheet-height="sheetHeight" :sheet-key="sheetKey" :selected-lop-i-d="selectedLopID"
+									view="thong-tin" :sheet-height="sheetHeight" :sheet-key="sheetKey"
+									:selected-lop-i-d="selectedLopID"
 									ref="tabDuLieuHsRef" />
 								<so-gvcn-tab-du-lieu-hs v-else :rows="studentSheetRows" :sheet-height="sheetHeight"
 									:sheet-key="sheetKey" :nested-headers="studentNestedHeaders" ref="tabDuLieuHsRef" />
+							</v-window-item>
+
+							<!-- Tab Tổ chức lớp (C1 only) -->
+							<v-window-item v-if="isCap1" value="to-chuc-lop">
+								<so-gvcn-c1-tab-to-chuc-lop
+									:sheet-height="sheetHeight" :selected-lop-i-d="selectedLopID"
+									:students="getSelectedClassStudents()"
+									:can-bo-rows="getChiTieuCard('can-bo-lop').rows"
+									:parent-rows="getChiTieuCard('ban-dai-dien-cmhs').rows"
+									:group-rows="toNhomHocSinhSavedRows"
+									ref="tabToChucLopRef" />
 							</v-window-item>
 
 							<!-- Tab 2 -->
@@ -135,6 +148,7 @@
 
 <script>
 	export default {
+		inject: ['snackbarRef', 'iframeRef', 'confirmRef'],
 		data() {
 		return {
 			vueData,
@@ -209,7 +223,7 @@
 								{ title: 'Khá', name: 'Kha', width: 110, type: 'numeric' },
 								{ title: 'Đạt', name: 'Dat', width: 110, type: 'numeric' },
 								{ title: 'Chưa đạt', name: 'ChuaDat', width: 120, type: 'numeric' },
-								{ title: 'Biện pháp', name: 'BienPhap', width: 300 }
+								{ title: 'Biện pháp', name: 'BienPhap', width: 600 }
 							],
 							rows: [
 								['Kết quả rèn luyện', '', '', '', '', '', ''],
@@ -317,6 +331,7 @@
 			giaoVienBoMonSavedRows: [],
 			banDaiDienCMHSSavedRows: [],
 			canBoLopSavedRows: [],
+			toNhomHocSinhSavedRows: [],
 			huongNghiepSavedRows: [],
 			selectedClass: null,
 			detail: {},
@@ -454,10 +469,13 @@
 				return 'I. XÂY DỰNG CHỈ TIÊU HAI MẶT GIÁO DỤC LỚP ' + tenLop + ' NĂM HỌC ' + this.getCurrentSchoolYearText()
 			},
 			showSaveButton() {
-				return this.selectedLopID !== '__ALL__' && ['chi-tieu', 'ke-hoach', 'ren-luyen', 'nhan-xet-lms', 'so-lien-lac', 'huong-nghiep'].includes(this.tab)
+				const isC1OrganizationTab = this.isCap1 && this.tab === 'to-chuc-lop'
+				return this.selectedLopID !== '__ALL__' && (isC1OrganizationTab
+					|| ['chi-tieu', 'ke-hoach', 'ren-luyen', 'nhan-xet-lms', 'so-lien-lac', 'huong-nghiep'].includes(this.tab))
 			},
 			saveButtonText() {
 				switch (this.tab) {
+					case 'to-chuc-lop': return 'Lưu tổ chức lớp'
 					case 'chi-tieu': return 'Lưu chỉ tiêu'
 					case 'ke-hoach': return 'Lưu kế hoạch tháng'
 					case 'ren-luyen': return 'Lưu rèn luyện'
@@ -548,7 +566,9 @@
 		},
 		tab(newTab) {
 			this.ensureSpecificClassForClassTabs()
-			if (newTab === 'chi-tieu') {
+			if (newTab === 'to-chuc-lop') {
+				setTimeout(() => this.$refs.tabToChucLopRef?.initAllSheets(), 50)
+			} else if (newTab === 'chi-tieu') {
 				setTimeout(() => this.$refs.tabChiTieuRef?.initAllSheets(), 50)
 			} else if (newTab === 'ke-hoach') {
 				// Dùng setTimeout để chờ Vuetify tab transition hoàn thành trước khi jspreadsheet init
@@ -633,7 +653,6 @@
 						this.selectedLopID = this.classList[0]?.LopID || '__ALL__'
 						this.classSelectionInitialized = true
 					}
-					await this.mergeTongKetDiem(this.classList)
 					await this.mergeThongTinGiaDinh()
 					if (!this.classOptions.some(x => String(x.LopID) === String(this.selectedLopID))) {
 						this.selectedLopID = this.classList[0]?.LopID || '__ALL__'
@@ -715,21 +734,27 @@
 		async mergeTongKetDiem(classes) {
 			this.loading.tongKet = true
 			try {
-				const targets = this.buildTongKetTargets(this.allStudentRows).filter(item => item.KhoiID >= 6)
+				const selectedRows = this.selectedLopID && this.selectedLopID !== '__ALL__'
+					? this.allStudentRows.filter(row => String(row.LopID) === String(this.selectedLopID))
+					: []
+				const targets = this.buildTongKetTargets(selectedRows).filter(item => item.KhoiID >= 6)
 				const chunks = await Promise.all(targets.map(item => ajaxCALLPromise(`${this.getDiemSub(item.KhoiID)}/LMS_GetTongKetDTBMonHocByLop`, {
 					KhoiID: item.KhoiID,
 					LopID: item.LopID,
 					HocKy: 0,
 					NienKhoa: this.filter.NienKhoa - 1
 				}).catch(() => [])))
-				const cap1Rows = await this.getTongKetCap1Rows(this.allStudentRows)
+				const cap1Rows = this.isCap1
+					? await this.getTongKetCap1Rows(selectedRows)
+					: []
 				const map = new Map()
 				chunks.flat().concat(cap1Rows).forEach(row => {
-					if (row.HocSinhLopID) map.set(`hsl:${row.HocSinhLopID}`, row)
+					const hocSinhLopID = row.HocSinhLopID || row.HSLopID
+					if (hocSinhLopID) map.set(`hsl:${hocSinhLopID}`, row)
 					if (row.HocSinhID) map.set(`hs:${row.HocSinhID}`, row)
 				})
 				this.allStudentRows = this.allStudentRows.map(row => {
-					const tongKet = map.get(`hsl:${row.HSLopID}`) || map.get(`hs:${row.HocSinhID}`)
+					const tongKet = map.get(`hs:${row.HocSinhID}`) || map.get(`hsl:${row.HSLopID}`)
 					return tongKet ? this.applyTongKet(row, tongKet) : row
 				})
 			} finally {
@@ -756,14 +781,8 @@
 			return 'diemc2'
 		},
 		async getTongKetCap1Rows(rows) {
-			let cap1Targets = this.buildTongKetTargets(rows).filter(item => item.KhoiID >= 1 && item.KhoiID <= 5)
-			if (!cap1Targets.length && this.selectedLopID && this.selectedLopID !== '__ALL__') {
-				cap1Targets = [{ LopID: this.selectedLopID, KhoiID: 1 }]
-			}
-			if (!cap1Targets.length) {
-				const uniqueLopIds = [...new Set((rows || []).map(r => r.LopID).filter(Boolean))]
-				cap1Targets = uniqueLopIds.map(id => ({ LopID: id, KhoiID: 1 }))
-			}
+			const cap1Targets = this.buildTongKetTargets(rows)
+				.filter(item => item.KhoiID >= 1 && item.KhoiID <= 5)
 			if (!cap1Targets.length) return []
 			const chunks = await Promise.all(cap1Targets.map(target => ajaxCALLPromise('psmark1/LMS_GetBangTongHopKetQua', {
 				LopID: target.LopID,
@@ -773,10 +792,10 @@
 		},
 		applyTongKet(row, tongKet) {
 			let xepLoaiKQGD = tongKet.HocLuc || row.KQHT || ''
-			if (tongKet.HoanThanhXuatSac === 'x') xepLoaiKQGD = 'Hoàn thành xuất sắc'
-			else if (tongKet.HoanThanhTot === 'x') xepLoaiKQGD = 'Hoàn thành tốt'
-			else if (tongKet.HoanThanh === 'x') xepLoaiKQGD = 'Hoàn thành'
-			else if (tongKet.ChuaHoanThanh === 'x') xepLoaiKQGD = 'Chưa hoàn thành'
+			if (this.isTongKetChecked(tongKet.HoanThanhXuatSac)) xepLoaiKQGD = 'Hoàn thành xuất sắc'
+			else if (this.isTongKetChecked(tongKet.HoanThanhTot)) xepLoaiKQGD = 'Hoàn thành tốt'
+			else if (this.isTongKetChecked(tongKet.HoanThanh)) xepLoaiKQGD = 'Hoàn thành'
+			else if (this.isTongKetChecked(tongKet.ChuaHoanThanh)) xepLoaiKQGD = 'Chưa hoàn thành'
 			else if (tongKet.DanhGia) xepLoaiKQGD = tongKet.DanhGia
 
 			return {
@@ -795,13 +814,16 @@
 				Sinh: tongKet.sinh || row.Sinh || '',
 				DTB: tongKet.DTB || row.DTB || '',
 				KQHT: xepLoaiKQGD,
-				KhenThuong: tongKet.KhenThuong || row.KhenThuong || '',
+				KhenThuong: tongKet.KhenThuong || tongKet.DanhHieu || row.KhenThuong || row.DanhHieu || '',
 				KQRL: tongKet.KQRenLuyen || row.KQRL || '',
 				DanhHieu: tongKet.DanhHieu || row.DanhHieu || '',
 				Phep: tongKet.Phep ?? row.Phep,
 				KhongPhep: tongKet.KhongPhep ?? row.KhongPhep,
 				TongBuoiNghi: tongKet.TongBuoiNghi ?? row.TongBuoiNghi
 			}
+		},
+		isTongKetChecked(value) {
+			return value === true || value === 1 || String(value || '').trim().toLowerCase() === 'x'
 		},
 		pickTongKetValue(source, keys, fallback) {
 			for (const key of keys) {
@@ -868,6 +890,7 @@
 				this.setStudentSheets(this.allStudentRows)
 				return
 			}
+			await this.mergeTongKetDiem()
 			const item = this.classList.find(x => String(x.LopID) === String(lopID))
 			if (item) await this.openSo(item)
 		},
@@ -880,6 +903,7 @@
 			this.giaoVienBoMonSavedRows = []
 			this.banDaiDienCMHSSavedRows = []
 			this.canBoLopSavedRows = []
+			this.toNhomHocSinhSavedRows = []
 			this.huongNghiepSavedRows = []
 			this.keHoachSheetRows = this.buildKeHoachThangTuanExportAoA(false, true)
 			this.keHoachSheetStyle = this.buildKeHoachSheetStyle(false)
@@ -926,6 +950,7 @@
 			this.banDaiDienCMHSSavedRows = Array.isArray(data?.[7]) ? data[7] : []
 			this.canBoLopSavedRows = Array.isArray(data?.[8]) ? data[8] : []
 			this.huongNghiepSavedRows = Array.isArray(data?.[9]) ? data[9] : []
+			this.toNhomHocSinhSavedRows = Array.isArray(data?.[10]) ? data[10] : []
 			this.keHoachSheetRows = this.buildKeHoachThangTuanExportAoA(false, true)
 			this.keHoachSheetStyle = this.buildKeHoachSheetStyle(false)
 			this.initKeHoachSheet()
@@ -977,7 +1002,7 @@
 				x.MaHocSinh || x.HocSinhID || '',
 				x.NgaySinh || '',
 				(x.GioiTinh === 'Nữ' || x.Phai === 'x' || x.IsNu) ? 'x' : '',
-				x.TenDanToc || x.DanToc || 'Kinh',
+				x.TenDanToc || x.DanToc || '',
 				x.KQHT || x.DanhGia || '',
 				x.KhenThuong || '',
 				this.buildNhanXetGVCN(x),
@@ -1631,7 +1656,8 @@
 					saved.ChaMe || '',
 					saved.NgheNghiep || '',
 					saved.DienThoai || '',
-					saved.NhiemVu || ''
+					saved.NhiemVu || '',
+					...(this.isCap1 ? [saved.GhiChu || ''] : [])
 				]
 			})
 		},
@@ -1649,9 +1675,10 @@
 				NgheNghiep: this.cleanSheetCell(row, 4, 'NgheNghiep'),
 				DienThoai: this.cleanSheetCell(row, 5, 'DienThoai'),
 				NhiemVu: this.cleanSheetCell(row, 6, 'NhiemVu'),
+				GhiChu: this.cleanSheetCell(row, 7, 'GhiChu'),
 				RowIndex: index + 1
 				}
-			}).filter(row => row.HocSinh || row.ChaMe || row.NgheNghiep || row.DienThoai || row.NhiemVu)
+			}).filter(row => row.HocSinh || row.ChaMe || row.NgheNghiep || row.DienThoai || row.NhiemVu || row.GhiChu)
 		},
 		applyCanBoLopRows() {
 			const card = this.getChiTieuCard('can-bo-lop')
@@ -2290,6 +2317,10 @@
 			}
 		},
 		async onSaveDraft() {
+			if (this.tab === 'to-chuc-lop' && this.isCap1) {
+				const ok = await this.confirmRef.value.show({ title: 'Xác nhận lưu thông tin tổ chức lớp?' })
+				if (!ok) return
+			}
 			if (document.activeElement && typeof document.activeElement.blur === 'function') {
 				document.activeElement.blur()
 			}
@@ -2301,7 +2332,42 @@
 			})
 			this.loading.save = true
 			try {
-				if (this.tab === 'chi-tieu') {
+				if (this.tab === 'to-chuc-lop' && this.isCap1) {
+					const organization = this.$refs.tabToChucLopRef?.getOrganizationRows() || {}
+					const canBoCard = this.getChiTieuCard('can-bo-lop')
+					const parentCard = this.getChiTieuCard('ban-dai-dien-cmhs')
+					canBoCard.rows = (organization.canBoRows || []).map((row, index) => [
+						row.STT || index + 1,
+						row.MaHocSinh || row.HocSinhID || '',
+						row.HocSinh || '',
+						row.ChucVu || '',
+						row.GhiChu || ''
+					])
+					parentCard.rows = (organization.parentRows || []).map((row, index) => [
+						row.STT || index + 1,
+						row.MaHocSinh || row.HocSinhID || '',
+						row.HocSinh || '',
+						row.ChaMe || '',
+						row.NgheNghiep || '',
+						row.DienThoai || '',
+						row.NhiemVu || '',
+						row.GhiChu || ''
+					])
+					const banDaiDienCMHSRows = this.serializeBanDaiDienCMHSRows()
+					const canBoLopRows = this.serializeCanBoLopRows()
+					const toNhomHocSinhRows = organization.groupRows || []
+					await ajaxCALLPromise('lms/SoGVCNPhuLucTab2Save', {
+						SoGVCNID: this.form.SoGVCNID,
+						JsonSiSo: JSON.stringify(this.serializeSiSoRows()),
+						JsonGiaoVienBoMon: JSON.stringify(this.serializeGiaoVienBoMonRows()),
+						JsonBanDaiDienCMHS: JSON.stringify(banDaiDienCMHSRows),
+						JsonCanBoLop: JSON.stringify(canBoLopRows),
+						JsonToNhomHocSinh: JSON.stringify(toNhomHocSinhRows)
+					})
+					this.banDaiDienCMHSSavedRows = banDaiDienCMHSRows
+					this.canBoLopSavedRows = canBoLopRows
+					this.toNhomHocSinhSavedRows = toNhomHocSinhRows
+				} else if (this.tab === 'chi-tieu') {
 					const chiTieuRows = this.serializeChiTieuStructuredRows()
 					this.form.ChiTieu = this.serializeChiTieuRows()
 					const siSoRows = this.serializeSiSoRows()
@@ -2356,7 +2422,8 @@
 				const tabNames = {
 					'chi-tieu': 'chỉ tiêu',
 					'huong-nghiep': 'hướng nghiệp',
-					'du-lieu-hs': 'dữ liệu HS lớp',
+					'du-lieu-hs': this.isCap1 ? 'thông tin HS lớp' : 'dữ liệu HS lớp',
+					'to-chuc-lop': 'tổ chức lớp',
 					'ren-luyen': 'hồ sơ theo dõi rèn luyện',
 					'so-lien-lac': 'sổ liên lạc'
 				}

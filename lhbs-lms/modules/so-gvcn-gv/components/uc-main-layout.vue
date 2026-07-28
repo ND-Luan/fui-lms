@@ -403,7 +403,9 @@
 						LopID: ''
 					})
 					this.classList = this.buildClassList(this.allStudentRows)
-					await this.mergeTongKetDiem(this.classList)
+					if (this.selectedLopID === '__ALL__') {
+						this.selectedLopID = this.classList[0]?.LopID || '__ALL__'
+					}
 					await this.mergeThongTinGiaDinh()
 					if (!this.classOptions.some(x => x.LopID === this.selectedLopID)) this.selectedLopID = '__ALL__'
 				await this.onClassChange(this.selectedLopID)
@@ -437,16 +439,18 @@
 		async mergeTongKetDiem(classes) {
 			this.loading.tongKet = true
 			try {
-				const targets = this.buildTongKetTargets(this.allStudentRows).filter(item => item.KhoiID >= 6)
+				const selectedRows = this.selectedLopID && this.selectedLopID !== '__ALL__'
+					? this.allStudentRows.filter(row => String(row.LopID) === String(this.selectedLopID))
+					: []
+				const targets = this.buildTongKetTargets(selectedRows).filter(item => item.KhoiID >= 6)
 				const chunks = await Promise.all(targets.map(item => ajaxCALLPromise(`${this.getDiemSub(item.KhoiID)}/LMS_GetTongKetDTBMonHocByLop`, {
 					KhoiID: item.KhoiID,
 					LopID: item.LopID,
 					HocKy: 0,
 					NienKhoa: this.filter.NienKhoa - 1
 				}).catch(() => [])))
-				const cap1Rows = await this.getTongKetCap1Rows(this.allStudentRows)
 				const map = new Map()
-				chunks.flat().concat(cap1Rows).forEach(row => {
+				chunks.flat().forEach(row => {
 					if (row.HocSinhLopID) map.set(`hsl:${row.HocSinhLopID}`, row)
 					if (row.HocSinhID) map.set(`hs:${row.HocSinhID}`, row)
 				})
@@ -579,6 +583,7 @@
 				this.setStudentSheets(this.allStudentRows)
 				return
 			}
+			await this.mergeTongKetDiem()
 			const item = this.classList.find(x => x.LopID === lopID)
 			if (item) await this.openSo(item)
 		},

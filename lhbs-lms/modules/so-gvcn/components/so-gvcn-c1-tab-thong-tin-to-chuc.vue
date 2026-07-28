@@ -1,10 +1,98 @@
 <template>
-	<v-card-text class="pa-0 so-gvcn-sheet-wrap" :style="{ height: sheetHeight, 'overflow-y': 'auto' }">
-		<template v-if="rows && rows.length">
-			<div ref="sheetRef" class="w-100 so-gvcn-sheet so-gvcn-student-sheet"></div>
+	<div>
+		<template v-if="view === 'thong-tin'">
+			<v-card-text class="pa-0 so-gvcn-sheet-wrap" :style="{ height: sheetHeight, 'overflow-y': 'auto' }">
+				<template v-if="rows && rows.length">
+					<div ref="sheetRef" class="w-100 so-gvcn-sheet so-gvcn-student-sheet"></div>
+				</template>
+				<uc-card-empty v-else />
+			</v-card-text>
 		</template>
-		<uc-card-empty v-else />
-	</v-card-text>
+
+		<template v-else>
+			<div class="pa-3 overflow-y-auto bg-grey-lighten-4" :style="{ height: sheetHeight }">
+					<v-card class="mb-4" variant="outlined">
+						<v-card-title class="text-subtitle-1 font-weight-bold">I. BAN CÁN SỰ LỚP</v-card-title>
+						<v-table density="compact" class="organization-table">
+							<thead>
+								<tr>
+									<th class="text-center stt-column">STT</th>
+									<th>HỌ VÀ TÊN HỌC SINH</th>
+									<th>NHIỆM VỤ</th>
+									<th>GHI CHÚ</th>
+								</tr>
+							</thead>
+							<tbody>
+								<tr v-for="(row, index) in localCanBoRows" :key="'can-bo-' + index">
+									<td class="text-center">{{ index + 1 }}</td>
+									<td>
+										<v-autocomplete v-model="row.HocSinh" :items="studentNames"
+											density="compact" variant="plain" hide-details clearable
+											@update:model-value="onCanBoStudentChange(row)" />
+									</td>
+									<td>
+										<v-select v-model="row.ChucVu" :items="studentDutyOptions"
+											density="compact" variant="plain" hide-details clearable />
+									</td>
+									<td><v-text-field v-model="row.GhiChu" density="compact" variant="plain" hide-details /></td>
+								</tr>
+							</tbody>
+						</v-table>
+					</v-card>
+
+					<v-card class="mb-4" variant="outlined">
+						<v-card-title class="text-subtitle-1 font-weight-bold">
+							II. BAN ĐẠI DIỆN CHA MẸ HỌC SINH LỚP
+						</v-card-title>
+						<v-table density="compact" class="organization-table">
+							<thead>
+								<tr>
+									<th class="text-center stt-column">STT</th>
+									<th>HỌ VÀ TÊN PHỤ HUYNH</th>
+									<th>NHIỆM VỤ</th>
+									<th>GHI CHÚ</th>
+								</tr>
+							</thead>
+							<tbody>
+								<tr v-for="(row, index) in localParentRows" :key="'ph-' + index">
+									<td class="text-center">{{ index + 1 }}</td>
+									<td><v-text-field v-model="row.ChaMe" density="compact" variant="plain" hide-details /></td>
+									<td>
+										<v-select v-model="row.NhiemVu" :items="parentDutyOptions"
+											density="compact" variant="plain" hide-details clearable />
+									</td>
+									<td><v-text-field v-model="row.GhiChu" density="compact" variant="plain" hide-details /></td>
+								</tr>
+							</tbody>
+						</v-table>
+					</v-card>
+
+					<v-card variant="outlined">
+						<v-card-title class="text-subtitle-1 font-weight-bold">
+							III. DANH SÁCH HỌC SINH CHIA THEO TỔ/NHÓM
+						</v-card-title>
+						<v-table density="compact" class="organization-table">
+							<thead>
+								<tr>
+									<th class="group-column">TỔ/NHÓM</th>
+									<th>HỌ VÀ TÊN</th>
+									<th>NHIỆM VỤ</th>
+									<th>BAN</th>
+								</tr>
+							</thead>
+							<tbody>
+								<tr v-for="(row, index) in localGroupRows" :key="'to-' + row.HocSinhID + '-' + index">
+									<td><v-text-field v-model="row.ToNhom" density="compact" variant="plain" hide-details /></td>
+									<td>{{ row.HocSinh }}</td>
+									<td><v-text-field v-model="row.NhiemVu" density="compact" variant="plain" hide-details /></td>
+									<td><v-text-field v-model="row.Ban" density="compact" variant="plain" hide-details /></td>
+								</tr>
+							</tbody>
+						</v-table>
+					</v-card>
+			</div>
+		</template>
+	</div>
 </template>
 
 <script>
@@ -12,6 +100,11 @@
 		name: 'so-gvcn-c1-tab-thong-tin-to-chuc',
 	props: {
 		rows: { type: Array, default: () => [] },
+		view: { type: String, default: 'thong-tin' },
+		students: { type: Array, default: () => [] },
+		canBoRows: { type: Array, default: () => [] },
+		parentRows: { type: Array, default: () => [] },
+		groupRows: { type: Array, default: () => [] },
 		sheetHeight: { type: String, default: 'calc(100vh - 230px)' },
 		sheetKey: { type: [Number, String], default: 0 },
 		nestedHeaders: { type: Array, default: () => [] }
@@ -19,6 +112,14 @@
 	data() {
 		return {
 			sheetInstance: null,
+			localCanBoRows: [],
+			localParentRows: [],
+			localGroupRows: [],
+			studentDutyOptions: [
+				'Lớp trưởng', 'Lớp phó học tập', 'Lớp phó văn thể mỹ',
+				'Tổ trưởng', 'Tổ phó', 'Thủ quỹ'
+			],
+			parentDutyOptions: ['Trưởng ban', 'Phó ban', 'Thành viên'],
 			baseColumns: [
 				{ title: 'STT', width: 50, readOnly: true },
 				{ title: 'HỌ VÀ TÊN HỌC SINH', width: 220, readOnly: true, align: 'left' },
@@ -44,6 +145,25 @@
 		}
 	},
 	computed: {
+		studentNames() {
+			return (this.students || []).map(row => row.HoTen || row.HoTenHocSinh || '').filter(Boolean)
+		},
+		computedNestedHeaders() {
+			if (this.nestedHeaders && this.nestedHeaders.length) return this.nestedHeaders
+			return [[
+				{ title: '', colspan: 1 },
+				{ title: '', colspan: 1 },
+				{ title: '', colspan: 1 },
+				{ title: '', colspan: 1 },
+				{ title: '', colspan: 1 },
+				{ title: '', colspan: 1 },
+				{ title: 'KẾT QUẢ NĂM HỌC 2025-2026', colspan: 2 },
+				{ title: 'ĐẶC ĐIỂM, TÌNH HÌNH HỌC SINH', colspan: 2 },
+				{ title: 'THÔNG TIN GIA ĐÌNH', colspan: 8 },
+				{ title: '', colspan: 1 },
+				{ title: '', colspan: 1 }
+			]]
+		},
 		computedColumns() {
 			if (!this.rows || !this.rows.length) return this.baseColumns
 
@@ -65,6 +185,71 @@
 		}
 	},
 	methods: {
+		copyRows(rows, minimumLength) {
+			const copied = (rows || []).map(row => Array.isArray(row)
+				? row.slice()
+				: { ...row })
+			while (copied.length > minimumLength) {
+				const lastRow = copied[copied.length - 1]
+				const values = Array.isArray(lastRow) ? lastRow.slice(1) : Object.values(lastRow)
+				if (values.some(value => value !== null && value !== undefined && String(value).trim() !== '')) break
+				copied.pop()
+			}
+			while (copied.length < minimumLength) copied.push({})
+			return copied
+		},
+		syncOrganizationRows() {
+			this.localCanBoRows = this.copyRows(this.canBoRows, 6).map((row, index) => ({
+				STT: row.STT || row[0] || index + 1,
+				HocSinhID: row.HocSinhID || row.MaHocSinh || row[1] || '',
+				HocSinh: row.HocSinh || row[2] || '',
+				ChucVu: row.ChucVu || row[3] || '',
+				GhiChu: row.GhiChu || row[4] || ''
+			}))
+			this.localParentRows = this.copyRows(this.parentRows, 6).map((row, index) => ({
+				STT: row.STT || row[0] || index + 1,
+				HocSinhID: row.HocSinhID || row.MaHocSinh || row[1] || '',
+				HocSinh: row.HocSinh || row[2] || '',
+				ChaMe: row.ChaMe || row[3] || '',
+				NgheNghiep: row.NgheNghiep || row[4] || '',
+				DienThoai: row.DienThoai || row[5] || '',
+				NhiemVu: row.NhiemVu || row[6] || '',
+				GhiChu: row.GhiChu || row[7] || ''
+			}))
+			const savedGroupRows = this.groupRows || []
+			this.localGroupRows = (this.students || []).map(student => {
+				const saved = savedGroupRows.find(row =>
+					(row.HSLopID && String(row.HSLopID) === String(student.HSLopID))
+					|| (row.HocSinhID && String(row.HocSinhID) === String(student.HocSinhID))) || {}
+				return {
+					HSLopID: student.HSLopID || '',
+					HocSinhID: student.HocSinhID || '',
+					MaHocSinh: student.MaHocSinh || '',
+					HocSinh: student.HoTen || student.HoTenHocSinh || '',
+					ToNhom: saved.ToNhom || student.ToNhom || '',
+					NhiemVu: saved.NhiemVu || student.NhiemVuTo || '',
+					Ban: saved.Ban || student.Ban || ''
+				}
+			})
+		},
+		onCanBoStudentChange(row) {
+			const student = (this.students || []).find(item =>
+				(item.HoTen || item.HoTenHocSinh || '') === row.HocSinh)
+			if (!student) return
+			row.HSLopID = student.HSLopID || ''
+			row.HocSinhID = student.HocSinhID || ''
+			row.MaHocSinh = student.MaHocSinh || student.HocSinhID || ''
+		},
+		getOrganizationRows() {
+			return {
+				canBoRows: this.localCanBoRows,
+				parentRows: this.localParentRows,
+				groupRows: this.localGroupRows.map((row, index) => ({
+					...row,
+					RowIndex: index + 1
+				}))
+			}
+		},
 		destroySheet() {
 			if (!this.sheetInstance) return
 			try {
@@ -89,7 +274,7 @@
 						worksheets: [{
 							data: this.rows,
 							columns: this.computedColumns,
-							nestedHeaders: this.nestedHeaders && this.nestedHeaders.length ? this.nestedHeaders : undefined,
+							nestedHeaders: this.computedNestedHeaders,
 							rowResize: true,
 							columnDrag: false,
 							tableWidth: '100%',
@@ -109,6 +294,33 @@
 		}
 	},
 	watch: {
+		view(value) {
+			if (value === 'thong-tin') this.initSheet()
+		},
+		students: {
+			deep: true,
+			handler() {
+				this.syncOrganizationRows()
+			}
+		},
+		canBoRows: {
+			deep: true,
+			handler() {
+				this.syncOrganizationRows()
+			}
+		},
+		parentRows: {
+			deep: true,
+			handler() {
+				this.syncOrganizationRows()
+			}
+		},
+		groupRows: {
+			deep: true,
+			handler() {
+				this.syncOrganizationRows()
+			}
+		},
 		rows: {
 			deep: true,
 			handler() {
@@ -126,6 +338,7 @@
 		}
 	},
 	mounted() {
+		this.syncOrganizationRows()
 		this.initSheet()
 	},
 	beforeUnmount() {
@@ -133,3 +346,27 @@
 	}
 	}
 </script>
+
+<style scoped>
+	.organization-table {
+		table-layout: fixed;
+	}
+
+	.organization-table th {
+		background: #f5f5f5;
+		font-weight: 700 !important;
+	}
+
+	.organization-table th,
+	.organization-table td {
+		border: 1px solid rgba(0, 0, 0, 0.18);
+	}
+
+	.stt-column {
+		width: 64px;
+	}
+
+	.group-column {
+		width: 130px;
+	}
+</style>
