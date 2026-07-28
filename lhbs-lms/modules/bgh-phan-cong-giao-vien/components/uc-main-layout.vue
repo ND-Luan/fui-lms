@@ -55,8 +55,8 @@
 
     <!-- VIEW MODE: LIST -->
     <template v-if="viewMode === 'list'">
-      <GlobalDataTable :headers="headers" :items="filterDS" item-value="GVLopID" items-per-page="-1"
-        hide-default-footer hover :vDataTableHeight="'calc(100dvh - 77px)'">
+      <GlobalDataTable :headers="headers" :items="filterDS" item-value="GVLopID" items-per-page="-1" hide-default-footer
+        hover height="calc(100vh - 181px)">
         <template #item.STT="{ index }">
           {{ index + 1 }}
         </template>
@@ -120,15 +120,15 @@
         </div>
         <!-- Dynamic matrix table -->
         <div class="matrix-shell">
-          <v-table class="matrix-table text-caption" fixed-header>
+          <v-table class="matrix-table text-caption" fixed-header style="height: calc(100vh - 181px)">
             <thead>
               <tr class="bg-grey-lighten-4">
                 <th class="font-weight-bold text-center" style="width: 50px;">STT</th>
                 <th class="font-weight-bold text-left sticky-col" style="width: 140px; min-width: 120px;">Lớp học</th>
-                <th class="font-weight-bold text-left" style="width: 260px; min-width: 220px;">Giáo viên chủ nhiệm / GV
+                <th class="font-weight-bold text-left" style="width: 280px; min-width: 240px;">Giáo viên chủ nhiệm / GV
                   Lớp</th>
-                <th v-for="sub in filteredMonHocs" :key="sub.MonHocID"
-                  class="font-weight-bold text-left" style="width: 260px; min-width: 220px;">
+                <th v-for="sub in filteredMonHocs" :key="sub.MonHocID" class="font-weight-bold text-left"
+                  style="width: 280px; min-width: 240px;">
                   {{ sub.MonHocName }}
                 </th>
               </tr>
@@ -140,14 +140,15 @@
                 <!-- GVCN Cell -->
                 <td>
                   <v-autocomplete v-model="row.GVCN" :items="DSGiaoVien" :item-title="renderTextGiangVien"
-                    item-value="GiaoVienID" placeholder="Chọn GVCN..." clearable hide-details density="compact"
-                    variant="underlined" class="matrix-select" />
+                    item-value="GiaoVienID" multiple chips closable-chips placeholder="Chọn GVCN..." :clearable="false"
+                    hide-details density="compact" variant="underlined" class="matrix-select" />
                 </td>
                 <!-- Subject Cells -->
                 <td v-for="sub in filteredMonHocs" :key="sub.MonHocID">
                   <v-autocomplete v-model="row.Subjects[sub.MonHocID]" :items="DSGiaoVien"
-                    :item-title="renderTextGiangVien" item-value="GiaoVienID" placeholder="Chọn GV bộ môn..." clearable
-                    hide-details density="compact" variant="underlined" class="matrix-select" />
+                    :item-title="renderTextGiangVien" item-value="GiaoVienID" multiple chips closable-chips
+                    placeholder="Chọn GV bộ môn..." :clearable="false" hide-details density="compact" variant="underlined"
+                    class="matrix-select" />
                 </td>
               </tr>
             </tbody>
@@ -297,9 +298,15 @@
       return this.matrixRows.reduce((count, row) => {
         const initial = this.initialMatrixRows.find(x => x.LopID === row.LopID)
         if (!initial) return count
-        let rowChanges = row.GVCN !== initial.GVCN ? 1 : 0
+        
+        const currentGVCN = [...(row.GVCN || [])].sort().join(',')
+        const initialGVCN = [...(initial.GVCN || [])].sort().join(',')
+        let rowChanges = currentGVCN !== initialGVCN ? 1 : 0
+        
         this.DSMonHoc.forEach(sub => {
-          if (row.Subjects[sub.MonHocID] !== initial.Subjects[sub.MonHocID]) rowChanges++
+          const currentSub = [...(row.Subjects[sub.MonHocID] || [])].sort().join(',')
+          const initialSub = [...(initial.Subjects[sub.MonHocID] || [])].sort().join(',')
+          if (currentSub !== initialSub) rowChanges++
         })
         return count + rowChanges
       }, 0)
@@ -433,9 +440,6 @@
     async loadMatrixData(changedLopIds = null) {
       if (!this.DSLop || this.DSLop.length === 0) {
         this.matrixRows = []
-        this.blockKhoiTruong = null
-        this.blockKhoiTruong_Record = null
-        this.initialBlockKhoiTruong = null
         return
       }
 
@@ -451,8 +455,6 @@
           params: { LopID: lop.LopID, NienKhoa: nienKhoa, HocKi: this.HocKi }
         }))
 
-        // The table owns its loading state, so these reads stay silent and do not
-        // trigger the page-level overlay that previously looked like a reload.
         const results = await Promise.all(requests.map(request =>
           fetchPromise(request.url, request.params, {
             silent: true,
@@ -468,19 +470,31 @@
           const row = {
             LopID: lop.LopID,
             TenLop: lop.TenLop,
-            GVCN: null,             // VaiTro = 1
-            GVCN_Record: null,      // GVLopID (int)
-            Subjects: {},           // MonHocID -> string GiaoVienID
-            Subjects_Record: {}     // MonHocID -> int GVLopID
+            GVCN: [],                // Array string GiaoVienID
+            GVCN_Record: {},         // GiaoVienID -> GVLopID (int)
+            Subjects: {},            // MonHocID -> Array string GiaoVienID
+            Subjects_Record: {}      // MonHocID -> { GiaoVienID -> GVLopID }
           }
 
+          // Khoi tao mảng cho từng môn học
+          this.DSMonHoc.forEach(sub => {
+            row.Subjects[sub.MonHocID] = []
+            row.Subjects_Record[sub.MonHocID] = {}
+          })
+
           assignments.forEach(asg => {
+            const gvId = asg.GiaoVienID?.trim()
+            if (!gvId) return
             if (asg.VaiTro === 1) {
-              row.GVCN = asg.GiaoVienID
-              row.GVCN_Record = asg.GVLopID
+              row.GVCN.push(gvId)
+              row.GVCN_Record[gvId] = asg.GVLopID
             } else if (asg.VaiTro === 3) {
-              row.Subjects[asg.MonHocID] = asg.GiaoVienID
-              row.Subjects_Record[asg.MonHocID] = asg.GVLopID
+              if (!row.Subjects[asg.MonHocID]) {
+                row.Subjects[asg.MonHocID] = []
+                row.Subjects_Record[asg.MonHocID] = {}
+              }
+              row.Subjects[asg.MonHocID].push(gvId)
+              row.Subjects_Record[asg.MonHocID][gvId] = asg.GVLopID
             }
           })
 
@@ -488,15 +502,19 @@
         })
 
         if (Array.isArray(changedLopIds)) {
-          const refreshedById = new Map(refreshedRows.map(row => [row.LopID, row]))
-          this.matrixRows = this.matrixRows.map(row => refreshedById.get(row.LopID) || row)
+          refreshedRows.forEach(refRow => {
+            const mIdx = this.matrixRows.findIndex(x => x.LopID === refRow.LopID)
+            if (mIdx !== -1) this.matrixRows.splice(mIdx, 1, JSON.parse(JSON.stringify(refRow)))
+            const iIdx = this.initialMatrixRows.findIndex(x => x.LopID === refRow.LopID)
+            if (iIdx !== -1) this.initialMatrixRows.splice(iIdx, 1, JSON.parse(JSON.stringify(refRow)))
+          })
         } else {
-          this.matrixRows = refreshedRows
+          this.matrixRows = JSON.parse(JSON.stringify(refreshedRows))
+          this.initialMatrixRows = JSON.parse(JSON.stringify(refreshedRows))
         }
-        this.initialMatrixRows = JSON.parse(JSON.stringify(this.matrixRows))
       } catch (err) {
         console.error(err)
-        this.showSnackbar('Lỗi tải dữ liệu ma trận', 'error')
+        this.showSnackbar('Không thể tải ma trận phân công', 'error')
       } finally {
         if (!isPartialRefresh) this.loadingMatrix = false
       }
@@ -517,23 +535,31 @@
       const insertQueue = [] // new records
       const changedLopIds = new Set()
 
-      // 2. Check each Class row
       this.matrixRows.forEach(row => {
         const initialRow = this.initialMatrixRows.find(x => x.LopID === row.LopID)
         if (!initialRow) return
 
-        // 2a. Check GVCN
-        if (row.GVCN !== initialRow.GVCN) {
-          changedLopIds.add(row.LopID)
-          if (initialRow.GVCN_Record) {
-            deleteQueue.push(initialRow.GVCN_Record)
+        // 1. So sánh GVCN
+        const curGVCN = row.GVCN || []
+        const initGVCN = initialRow.GVCN || []
+
+        // Giáo viên bị xóa khỏi GVCN
+        initGVCN.forEach(gvId => {
+          if (!curGVCN.includes(gvId)) {
+            changedLopIds.add(row.LopID)
+            const oldRecordId = initialRow.GVCN_Record[gvId]
+            if (oldRecordId) deleteQueue.push(oldRecordId)
           }
-          if (row.GVCN) {
+        })
+        // Giáo viên mới thêm vào GVCN
+        curGVCN.forEach(gvId => {
+          if (!initGVCN.includes(gvId)) {
+            changedLopIds.add(row.LopID)
             insertQueue.push({
               NienKhoa: nienKhoa,
               KhoiID: parseInt(this.KhoiID),
               LopID: row.LopID.toString(),
-              GiaoVienID: row.GVCN,
+              GiaoVienID: gvId,
               VaiTro: 1,
               MaDonVi: 1,
               MonHocID: 0,
@@ -542,25 +568,31 @@
               Enable: true
             })
           }
-        }
+        })
 
-        // 2b. Check each Subject
+        // 2. So sánh từng Môn học
         this.DSMonHoc.forEach(sub => {
-          const currentGV = row.Subjects[sub.MonHocID]
-          const initialGV = initialRow.Subjects[sub.MonHocID]
+          const curSubGVs = row.Subjects[sub.MonHocID] || []
+          const initSubGVs = initialRow.Subjects[sub.MonHocID] || []
 
-          if (currentGV !== initialGV) {
-            changedLopIds.add(row.LopID)
-            const oldGVLopID = initialRow.Subjects_Record[sub.MonHocID]
-            if (oldGVLopID) {
-              deleteQueue.push(oldGVLopID)
+          // Giáo viên bị xóa khỏi môn học này
+          initSubGVs.forEach(gvId => {
+            if (!curSubGVs.includes(gvId)) {
+              changedLopIds.add(row.LopID)
+              const oldRecordId = initialRow.Subjects_Record[sub.MonHocID]?.[gvId]
+              if (oldRecordId) deleteQueue.push(oldRecordId)
             }
-            if (currentGV) {
+          })
+
+          // Giáo viên được phân công mới cho môn học này
+          curSubGVs.forEach(gvId => {
+            if (!initSubGVs.includes(gvId)) {
+              changedLopIds.add(row.LopID)
               insertQueue.push({
                 NienKhoa: nienKhoa,
                 KhoiID: parseInt(this.KhoiID),
                 LopID: row.LopID.toString(),
-                GiaoVienID: currentGV,
+                GiaoVienID: gvId,
                 VaiTro: 3,
                 MaDonVi: 1,
                 MonHocID: sub.MonHocID,
@@ -569,12 +601,11 @@
                 Enable: true
               })
             }
-          }
+          })
         })
       })
 
       try {
-        // Step 1: Delete changes in parallel
         if (deleteQueue.length > 0) {
           const delRequests = deleteQueue.map(id => 
             fetchPromise('lms/GiaoVienLop_Del', { GVLopID: id, Sys_UserID: sysUserId }, { cache: false })
@@ -582,7 +613,6 @@
           await Promise.all(delRequests)
         }
 
-        // Step 2: Insert changes in batch
         if (insertQueue.length > 0) {
           await fetchPromise('lms/GiaoVienLop_Batch_Ins', {
             PhanCongInput: JSON.stringify(insertQueue),
