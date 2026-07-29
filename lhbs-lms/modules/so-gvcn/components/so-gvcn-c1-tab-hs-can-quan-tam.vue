@@ -19,9 +19,11 @@
 			sheetHeight: { type: String, default: 'calc(100vh - 230px)' },
 			sheetKey: { type: [Number, String], default: 0 }
 		},
+		created() {
+			this.instance = null
+		},
 		data() {
 			return {
-				instance: null,
 				timer: null,
 				columns: [
 					{ title: 'MÃ HỌC SINH', width: 120, readOnly: true },
@@ -81,7 +83,9 @@
 			nestedHeaders() {
 				return [
 					[
-						{ title: '', colspan: 3 },
+						{ title: '', colspan: 1 },
+						{ title: '', colspan: 1 },
+						{ title: '', colspan: 1 },
 						{ title: 'GHI NHẬN/ THEO DÕI QUÁ TRÌNH RÈN LUYỆN CỦA HỌC SINH CẦN QUAN TÂM', colspan: 14 }
 					]
 				]
@@ -170,7 +174,12 @@
 						allowInsertRow: false,
 						showHeader: true
 					}],
-					contextMenu: () => false
+					contextMenu: () => false,
+					onload: (el) => {
+						if (typeof jspreadsheet !== 'undefined' && jspreadsheet.helpers && typeof jspreadsheet.helpers.freezeColumns === 'function') {
+							jspreadsheet.helpers.freezeColumns(el, 3)
+						}
+					}
 				})
 			}
 		}

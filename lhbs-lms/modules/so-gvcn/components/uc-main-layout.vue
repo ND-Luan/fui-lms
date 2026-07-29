@@ -52,7 +52,8 @@
 						<v-tabs v-model="tab" density="compact">
 							<v-tab value="du-lieu-hs">{{ isCap1 ? 'THÔNG TIN HS LỚP' : 'Dữ liệu HS lớp' }}</v-tab>
 							<v-tab v-if="isCap1" value="to-chuc-lop">Tổ chức lớp</v-tab>
-							<v-tab value="chi-tieu">{{ isCap1 ? 'KH chủ nhiệm năm học' : 'XD chỉ tiêu_giải pháp' }}</v-tab>
+							<v-tab value="chi-tieu">{{ isCap1 ? 'KH chủ nhiệm năm học' : 'XD chỉ tiêu_giải pháp' }}
+							</v-tab>
 							<v-tab v-if="isCap1" value="cong-tac-cn">Công tác chủ nhiệm tháng</v-tab>
 							<v-tab value="ke-hoach">{{ isCap1 ? 'HS cần quan tâm' : 'KH GD tháng_tuần' }}</v-tab>
 							<v-tab value="ren-luyen">{{ isCap1 ? 'Nhận xét tháng (LMS)' : 'Hồ sơ theo dõi QTRL' }}
@@ -62,7 +63,8 @@
 							<v-tab v-if="isCap1" value="so-ket-hk1">Sơ kết HKI</v-tab>
 							<v-tab v-if="isCap1" value="tong-ket-nam">Tổng kết năm học</v-tab>
 							<v-tab v-if="isCap1" value="theo-doi-thanh-tich">Theo dõi thành tích HS</v-tab>
-							<v-tab value="so-lien-lac">{{ isCap1 ? 'Theo dõi PH đi họp' : 'Sổ liên lạc điện tử' }}</v-tab>
+							<v-tab value="so-lien-lac">{{ isCap1 ? 'Theo dõi PH đi họp' : 'Sổ liên lạc điện tử' }}
+							</v-tab>
 							<v-tab v-if="isCap1" value="noi-dung-hop-ph">Nội dung họp PHHS</v-tab>
 							<v-tab v-if="isCap1" value="theo-doi-bhyt">Theo dõi BHYT & BHTN</v-tab>
 							<v-tab v-if="!isCap1" value="huong-nghiep">Hướng nghiệp</v-tab>
@@ -74,29 +76,26 @@
 							<v-window-item value="du-lieu-hs">
 								<so-gvcn-c1-tab-thong-tin-to-chuc v-if="isCap1" :rows="studentSheetRows"
 									view="thong-tin" :sheet-height="sheetHeight" :sheet-key="sheetKey"
-									:selected-lop-i-d="selectedLopID"
-									ref="tabDuLieuHsRef" />
+									:selected-lop-i-d="selectedLopID" ref="tabDuLieuHsRef" />
 								<so-gvcn-tab-du-lieu-hs v-else :rows="studentSheetRows" :sheet-height="sheetHeight"
 									:sheet-key="sheetKey" :nested-headers="studentNestedHeaders" ref="tabDuLieuHsRef" />
 							</v-window-item>
 
 							<!-- Tab Tổ chức lớp (C1 only) -->
 							<v-window-item v-if="isCap1" value="to-chuc-lop">
-								<so-gvcn-c1-tab-to-chuc-lop
-									:sheet-height="sheetHeight" :selected-lop-i-d="selectedLopID"
-									:students="getSelectedClassStudents()"
+								<so-gvcn-c1-tab-to-chuc-lop :sheet-height="sheetHeight"
+									:selected-lop-i-d="selectedLopID" :students="getSelectedClassStudents()"
 									:can-bo-rows="getChiTieuCard('can-bo-lop').rows"
 									:parent-rows="getChiTieuCard('ban-dai-dien-cmhs').rows"
-									:group-rows="toNhomHocSinhSavedRows"
-									ref="tabToChucLopRef" />
+									:group-rows="toNhomHocSinhSavedRows" ref="tabToChucLopRef" />
 							</v-window-item>
 
 							<!-- Tab 3: KH chủ nhiệm năm học (C1) / Chỉ tiêu (C2, C3) -->
 							<v-window-item value="chi-tieu" eager>
 								<so-gvcn-c1-tab-ke-hoach-nam-hoc v-if="isCap1" ref="tabKeHoachNamHocRef"
-									:selected-lop-i-d="selectedLopID"
-									:selected-class="selectedClass" :school-year-text="getCurrentSchoolYearText()"
-									:sheet-height="sheetHeight" :annual-plan="keHoachNamHocData" />
+									:selected-lop-i-d="selectedLopID" :selected-class="selectedClass"
+									:school-year-text="getCurrentSchoolYearText()" :sheet-height="sheetHeight"
+									:annual-plan="keHoachNamHocData" />
 								<so-gvcn-tab-chi-tieu v-else ref="tabChiTieuRef" :selected-lop-i-d="selectedLopID"
 									:chi-tieu-cards="chiTieuCards" :chi-tieu-giao-duc-title="chiTieuGiaoDucTitle"
 									:sheet-height="sheetHeight" :sheet-key="sheetKey"
@@ -109,18 +108,16 @@
 								<so-gvcn-c1-tab-cong-tac-chu-nhiem ref="tabCongTacChuNhiemRef"
 									:selected-lop-i-d="selectedLopID" :sheet-height="sheetHeight"
 									:month-sheet-height="keHoachSheetHeight" :month-list="monthList"
-									:week-list="weeklyPlanList"
-									:nien-khoa="currentNienKhoa"
+									:week-list="weeklyPlanList" :nien-khoa="currentNienKhoa"
 									:get-ke-hoach-export-months="getKeHoachExportMonths" />
 							</v-window-item>
 
 							<!-- Hồ sơ HS cần quan tâm (C1) / Kế hoạch tháng tuần (C2, C3) -->
 							<v-window-item value="ke-hoach" eager>
 								<so-gvcn-c1-tab-hs-can-quan-tam v-if="isCap1" ref="tabHsCanQuanTamRef"
-									:selected-lop-i-d="selectedLopID"
-									:students="getSelectedClassStudents()"
-									:saved-rows="hsCanQuanTamSavedRows"
-									:sheet-height="sheetHeight" :sheet-key="sheetKey" />
+									:selected-lop-i-d="selectedLopID" :students="getSelectedClassStudents()"
+									:saved-rows="hsCanQuanTamSavedRows" :sheet-height="sheetHeight"
+									:sheet-key="sheetKey" />
 								<so-gvcn-tab-ke-hoach v-else ref="tabKeHoachRef" :selected-lop-i-d="selectedLopID"
 									:selected-class="selectedClass" :school-year-text="getCurrentSchoolYearText()"
 									:sheet-height="sheetHeight" :ke-hoach-sheet-height="keHoachSheetHeight"
@@ -133,10 +130,8 @@
 							<!-- Tab 4 -->
 							<v-window-item value="ren-luyen" eager>
 								<so-gvcn-c1-tab-nhan-xet-thang-lms v-if="isCap1" ref="tabNhanXetThangLmsRef"
-									:selected-lop-i-d="selectedLopID"
-									:students="getSelectedClassStudents()"
-									:saved-rows="nhanXetThangLmsSavedRows"
-									:sheet-height="sheetHeight" />
+									:selected-lop-i-d="selectedLopID" :students="getSelectedClassStudents()"
+									:saved-rows="nhanXetThangLmsSavedRows" :sheet-height="sheetHeight" />
 								<so-gvcn-tab-ren-luyen v-else ref="tabRenLuyenRef" v-model:rows="renLuyenRows"
 									:selected-lop-i-d="selectedLopID" :selected-class="selectedClass"
 									:school-year-text="getCurrentSchoolYearText()" :columns="renLuyenColumns"
@@ -146,56 +141,44 @@
 
 							<!-- Tab Theo dõi sĩ số tháng (C1 only) -->
 							<v-window-item v-if="isCap1" value="theo-doi-si-so" eager>
-								<so-gvcn-c1-tab-theo-doi-si-so ref="tabTheoDoiSiSoRef"
-									:selected-lop-i-d="selectedLopID"
-									:students="getSelectedClassStudents()"
-									:saved-rows="siSoSavedRows"
+								<so-gvcn-c1-tab-theo-doi-si-so ref="tabTheoDoiSiSoRef" :selected-lop-i-d="selectedLopID"
+									:students="getSelectedClassStudents()" :saved-rows="siSoSavedRows"
 									:sheet-height="sheetHeight" />
 							</v-window-item>
 
 							<!-- Tab Thống kê độ tuổi HS (C1 only) -->
 							<v-window-item v-if="isCap1" value="thong-ke-do-tuoi" eager>
 								<so-gvcn-c1-tab-thong-ke-do-tuoi ref="tabThongKeDoTuoiRef"
-									:selected-lop-i-d="selectedLopID"
-									:students="getSelectedClassStudents()"
-									:saved-rows="thongKeDoTuoiSavedRows"
-									:sheet-height="sheetHeight" />
+									:selected-lop-i-d="selectedLopID" :students="getSelectedClassStudents()"
+									:saved-rows="thongKeDoTuoiSavedRows" :sheet-height="sheetHeight" />
 							</v-window-item>
 
 							<!-- Tab Sơ kết HKI (C1 only) -->
 							<v-window-item v-if="isCap1" value="so-ket-hk1" eager>
-								<so-gvcn-c1-tab-so-ket-tong-ket ref="tabSoKetHk1Ref"
-									:selected-lop-i-d="selectedLopID"
-									:students="getSelectedClassStudents()"
-									:saved-rows="soKetHk1SavedRows"
+								<so-gvcn-c1-tab-so-ket-tong-ket ref="tabSoKetHk1Ref" :selected-lop-i-d="selectedLopID"
+									:students="getSelectedClassStudents()" :saved-rows="soKetHk1SavedRows"
 									:sheet-height="sheetHeight" />
 							</v-window-item>
 
 							<!-- Tab Tổng kết năm học (C1 only) -->
 							<v-window-item v-if="isCap1" value="tong-ket-nam" eager>
 								<so-gvcn-c1-tab-tong-ket-nam-hoc ref="tabTongKetNamRef"
-									:selected-lop-i-d="selectedLopID"
-									:students="getSelectedClassStudents()"
-									:saved-rows="tongKetNamSavedRows"
-									:sheet-height="sheetHeight" />
+									:selected-lop-i-d="selectedLopID" :students="getSelectedClassStudents()"
+									:saved-rows="tongKetNamSavedRows" :sheet-height="sheetHeight" />
 							</v-window-item>
 
 							<!-- Tab Theo dõi thành tích HS (C1 only) -->
 							<v-window-item v-if="isCap1" value="theo-doi-thanh-tich" eager>
 								<so-gvcn-c1-tab-theo-doi-thanh-tich ref="tabTheoDoiThanhTichRef"
-									:selected-lop-i-d="selectedLopID"
-									:students="getSelectedClassStudents()"
-									:saved-rows="thanhTichSavedRows"
-									:sheet-height="sheetHeight" />
+									:selected-lop-i-d="selectedLopID" :students="getSelectedClassStudents()"
+									:saved-rows="thanhTichSavedRows" :sheet-height="sheetHeight" />
 							</v-window-item>
 
 							<!-- Tab 6 -->
 							<v-window-item value="so-lien-lac">
 								<so-gvcn-c1-tab-theo-doi-ph-hop v-if="isCap1" ref="tabTheoDoiPhHopRef"
-									:selected-lop-i-d="selectedLopID"
-									:students="getSelectedClassStudents()"
-									:saved-rows="theoDoiPhHopSavedRows"
-									:sheet-height="sheetHeight" />
+									:selected-lop-i-d="selectedLopID" :students="getSelectedClassStudents()"
+									:saved-rows="theoDoiPhHopSavedRows" :sheet-height="sheetHeight" />
 								<so-gvcn-tab-so-lien-lac v-else ref="tabSoLienLacRef" v-model:rows="soLienLacRows"
 									:selected-lop-i-d="selectedLopID" :columns="soLienLacColumns"
 									:nested-headers="soLienLacNestedHeaders" :sheet-height="sheetHeight"
@@ -205,18 +188,15 @@
 							<!-- Tab Nội dung họp PHHS (C1 only) -->
 							<v-window-item v-if="isCap1" value="noi-dung-hop-ph" eager>
 								<so-gvcn-c1-tab-noi-dung-hop-ph ref="tabNoiDungHopPhRef"
-									:selected-lop-i-d="selectedLopID"
-									:saved-rows="noiDungHopPhSavedRows"
+									:selected-lop-i-d="selectedLopID" :saved-rows="noiDungHopPhSavedRows"
 									:sheet-height="sheetHeight" />
 							</v-window-item>
 
 							<!-- Tab Theo dõi BHYT, BHTN của HS (C1 only) -->
 							<v-window-item v-if="isCap1" value="theo-doi-bhyt" eager>
 								<so-gvcn-c1-tab-theo-doi-bhyt-bhtn ref="tabTheoDoiBhytRef"
-									:selected-lop-i-d="selectedLopID"
-									:students="getSelectedClassStudents()"
-									:saved-rows="theoDoiBhytSavedRows"
-									:sheet-height="sheetHeight" />
+									:selected-lop-i-d="selectedLopID" :students="getSelectedClassStudents()"
+									:saved-rows="theoDoiBhytSavedRows" :sheet-height="sheetHeight" />
 							</v-window-item>
 
 							<!-- Tab Hướng nghiệp (C2, C3 only) -->

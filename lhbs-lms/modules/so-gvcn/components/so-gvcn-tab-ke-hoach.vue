@@ -61,9 +61,10 @@
 		getKeHoachMonthRowCount: { type: Function, required: true }
 	},
 	data() {
-		return {
-			instance: null
-		}
+		return {}
+	},
+	created() {
+		this.instance = null
 	},
 	watch: {
 		selectedLopID() {

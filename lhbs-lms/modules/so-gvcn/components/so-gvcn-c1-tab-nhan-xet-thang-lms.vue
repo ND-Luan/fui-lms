@@ -1,152 +1,23 @@
 <template>
-	<v-card-text class="pa-0 so-gvcn-sheet-wrap" :style="{ height: sheetHeight, 'overflow-y': 'auto' }">
-		<v-alert v-if="selectedLopID === '__ALL__'" type="info" variant="tonal" density="compact" class="ma-2">
-			Chọn một lớp ở thanh trên để theo dõi nhận xét tháng học sinh (LMS).
+	<div class="pa-4">
+		<v-alert type="info" variant="tonal" class="mb-4">
+			Quản lý Nhận xét tháng học sinh trên hệ thống LMS (Tháng 8 đến Tháng 5, HKI & HKII).
 		</v-alert>
-		<div v-else class="so-gvcn-sheet-wrap">
-			<div ref="sheetRef" class="w-100 so-gvcn-sheet so-gvcn-nhan-xet-thang-lms-sheet"></div>
-		</div>
-	</v-card-text>
+		<v-card variant="outlined" class="d-flex align-center justify-center py-12 text-medium-emphasis">
+			<div class="text-center">
+				<v-icon size="48" class="mb-2 opacity-50">mdi-comment-text-multiple-outline</v-icon>
+				<div class="text-body-1 font-weight-medium">Tab 4: Nhận xét tháng học sinh (LMS)</div>
+				<div class="text-caption">Tương ứng sheet: NHẬN XÉT THÁNG HỌC SINH (LMS)</div>
+			</div>
+		</v-card>
+	</div>
 </template>
 
 <script>
 	export default {
 		name: 'so-gvcn-c1-tab-nhan-xet-thang-lms',
-		props: {
-			selectedLopID: { type: [String, Number], default: '__ALL__' },
-			students: { type: Array, default: () => [] },
-			savedRows: { type: Array, default: () => [] },
-			sheetHeight: { type: String, default: 'calc(100vh - 230px)' }
-		},
-		data() {
-			return {
-				instance: null,
-				columns: [
-					{ title: 'STT', width: 60, readOnly: true },
-					{ title: 'SỐ DANH BỘ', width: 120, readOnly: true },
-					{ title: 'HỌ VÀ TÊN HỌC SINH', width: 200, readOnly: true },
-					{ title: 'THÁNG 8', width: 180 },
-					{ title: 'THÁNG 9', width: 180 },
-					{ title: 'THÁNG 10', width: 180 },
-					{ title: 'THÁNG 11', width: 180 },
-					{ title: 'THÁNG 12', width: 180 },
-					{ title: 'NHẬN XÉT HKI', width: 220 },
-					{ title: 'THÁNG 1 & 2', width: 180 },
-					{ title: 'THÁNG 3', width: 180 },
-					{ title: 'THÁNG 4', width: 180 },
-					{ title: 'THÁNG 5', width: 180 },
-					{ title: 'NHẬN XÉT HKII', width: 220 }
-				]
-			}
-		},
-		watch: {
-			selectedLopID() {
-				this.initSheet()
-			},
-			students: {
-				deep: false,
-				handler() {
-					this.initSheet()
-				}
-			},
-			savedRows: {
-				deep: false,
-				handler() {
-					this.initSheet()
-				}
-			}
-		},
-		mounted() {
-			this.initSheet()
-		},
-		beforeUnmount() {
-			this.destroySheet()
-		},
-		computed: {
-			nestedHeaders() {
-				return [
-					[
-						{ title: '', colspan: 3 },
-						{ title: 'NỘI DUNG NHẬN XÉT THÁNG HỌC SINH (LMS)', colspan: 11 }
-					]
-				]
-			}
-		},
-		methods: {
-			getInstance() {
-				return this.instance
-			},
-			getRows() {
-				const sheet = Array.isArray(this.instance) ? this.instance[0] : this.instance
-				return sheet && typeof sheet.getData === 'function' ? sheet.getData() : []
-			},
-			buildRows() {
-				const findSaved = (hslopID) => (this.savedRows || []).find(r => r.HSLopID === hslopID) || {}
-				return (this.students || []).map((student, idx) => {
-					const saved = findSaved(student.HSLopID)
-					return [
-						idx + 1,
-						student.SoDanhBo || '',
-						student.HoTen || student.HoTenHocSinh || '',
-						saved.Thang8 || '',
-						saved.Thang9 || '',
-						saved.Thang10 || '',
-						saved.Thang11 || '',
-						saved.Thang12 || '',
-						saved.NhanXetHKI || '',
-						saved.Thang1_2 || '',
-						saved.Thang3 || '',
-						saved.Thang4 || '',
-						saved.Thang5 || '',
-						saved.NhanXetHKII || ''
-					]
-				})
-			},
-			destroySheet() {
-				if (!this.instance) return
-				try {
-					const sheet = Array.isArray(this.instance) ? this.instance[0] : this.instance
-					if (sheet && typeof sheet.destroy === 'function') sheet.destroy()
-					else if (this.$refs.sheetRef && typeof jspreadsheet !== 'undefined'
-						&& typeof jspreadsheet.destroy === 'function') {
-						jspreadsheet.destroy(this.$refs.sheetRef)
-					}
-				} catch (error) {}
-				this.instance = null
-			},
-			initSheet() {
-				if (this.selectedLopID === '__ALL__') {
-					this.destroySheet()
-					return
-				}
-				this.$nextTick(() => {
-					const container = this.$refs.sheetRef
-					if (!container) return
-					this.destroySheet()
-					container.innerHTML = ''
-					if (typeof jspreadsheet === 'function') {
-						this.instance = jspreadsheet(container, {
-							worksheets: [{
-								data: this.buildRows(),
-								columns: this.columns,
-								nestedHeaders: this.nestedHeaders,
-								rowResize: true,
-								columnDrag: false,
-								tableWidth: '100%',
-								tableOverflow: true,
-								tableHeight: this.sheetHeight,
-								lazyLoading: false,
-								freezeColumns: 3,
-								wordWrap: true,
-								allowInsertColumn: false,
-								allowInsertRow: false,
-								showHeader: true
-							}],
-							contextMenu: () => false
-						})
-					}
-				})
-			}
-		}
+	props: {
+		selectedLopID: { type: String, default: '__ALL__' }
+	}
 	}
 </script>

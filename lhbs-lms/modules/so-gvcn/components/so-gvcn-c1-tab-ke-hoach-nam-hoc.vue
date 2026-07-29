@@ -25,8 +25,7 @@
 					<v-list-item v-for="card in planCards.slice(1)" :key="card.key" :value="card.key"
 						:active="activeCardKey === card.key" class="mb-1 rounded" @click="scrollToCard(card)">
 						<template #prepend>
-							<v-icon size="small" class="mr-2"
-								:color="activeCardKey === card.key ? 'primary' : ''">
+							<v-icon size="small" class="mr-2" :color="activeCardKey === card.key ? 'primary' : ''">
 								{{ card.icon }}
 							</v-icon>
 						</template>
@@ -48,9 +47,11 @@
 				<v-row dense class="pb-16">
 					<v-col cols="12" class="py-2">
 						<v-card :id="planCards[0].domId" variant="outlined" elevation="0">
-							<v-card-title class="px-3 py-2 text-subtitle-2 font-weight-bold text-primary d-flex align-start"
+							<v-card-title
+								class="px-3 py-2 text-subtitle-2 font-weight-bold text-primary d-flex align-start"
 								style="white-space: pre-line; line-height: 1.6;">
-								<v-icon start color="primary" class="mr-2 mt-1" size="small">{{ planCards[0].icon }}</v-icon>
+								<v-icon start color="primary" class="mr-2 mt-1" size="small">{{ planCards[0].icon }}
+								</v-icon>
 								{{ planCards[0].title }}
 							</v-card-title>
 							<v-divider />
@@ -59,10 +60,10 @@
 									<div :ref="planCards[0].refName" class="w-100 so-gvcn-sheet"
 										:style="{ height: planCards[0].height }"></div>
 								</div>
-								<v-textarea v-model="planText.advantages" label="2. Thuận lợi" rows="4"
-									auto-grow variant="outlined" density="compact" class="mt-3 mb-2" />
-								<v-textarea v-model="planText.difficulties" label="3. Khó khăn" rows="4"
-									auto-grow variant="outlined" density="compact" hide-details />
+								<v-textarea v-model="planText.advantages" label="2. Thuận lợi" rows="4" auto-grow
+									variant="outlined" density="compact" class="mt-3 mb-2" />
+								<v-textarea v-model="planText.difficulties" label="3. Khó khăn" rows="4" auto-grow
+									variant="outlined" density="compact" hide-details />
 							</v-card-text>
 						</v-card>
 					</v-col>
@@ -70,7 +71,8 @@
 					<v-col cols="12" class="py-2">
 						<v-card variant="outlined" elevation="0">
 							<v-card-title class="px-3 py-2 text-subtitle-2 font-weight-bold text-primary">
-								<v-icon start color="primary" class="mr-2" size="small">mdi-clipboard-text-outline</v-icon>
+								<v-icon start color="primary" class="mr-2" size="small">mdi-clipboard-text-outline
+								</v-icon>
 								II. NỘI DUNG KẾ HOẠCH CHỦ NHIỆM
 							</v-card-title>
 							<v-divider />
@@ -88,31 +90,28 @@
 									</div>
 
 									<template v-if="card.key === 'duy-tri-so-luong'">
-										<v-textarea v-model="planText.attendanceTarget"
-											label="1.1. Chỉ tiêu phấn đấu" rows="4" auto-grow variant="outlined"
-											density="compact" class="mb-2" />
+										<v-textarea v-model="planText.attendanceTarget" label="1.1. Chỉ tiêu phấn đấu"
+											rows="4" auto-grow variant="outlined" density="compact" class="mb-2" />
 										<v-textarea v-model="planText.attendanceSolution"
 											label="1.2. Nhiệm vụ và giải pháp" rows="4" auto-grow variant="outlined"
 											density="compact" hide-details />
 									</template>
 									<v-textarea v-if="card.key === 'pham-chat-nang-luc'"
-										v-model="planText.qualitySolution" label="b. Nhiệm vụ và giải pháp"
-										rows="4" auto-grow variant="outlined" density="compact" class="mt-3"
-										hide-details />
+										v-model="planText.qualitySolution" label="b. Nhiệm vụ và giải pháp" rows="4"
+										auto-grow variant="outlined" density="compact" class="mt-3" hide-details />
 									<v-textarea v-if="card.key === 'mon-hoc-hoat-dong'"
-										v-model="planText.academicSolution" label="b. Nhiệm vụ và giải pháp"
-										rows="4" auto-grow variant="outlined" density="compact" class="mt-3"
-										hide-details />
+										v-model="planText.academicSolution" label="b. Nhiệm vụ và giải pháp" rows="4"
+										auto-grow variant="outlined" density="compact" class="mt-3" hide-details />
 									<template v-if="card.key === 'phong-trao-vo-sach'">
-										<v-textarea v-model="planText.handwritingTarget"
-											label="a. Chỉ tiêu phấn đấu" rows="4" auto-grow variant="outlined"
-											density="compact" class="mb-2" />
+										<v-textarea v-model="planText.handwritingTarget" label="a. Chỉ tiêu phấn đấu"
+											rows="4" auto-grow variant="outlined" density="compact" class="mb-2" />
 										<v-textarea v-model="planText.handwritingSolution"
 											label="b. Nhiệm vụ và giải pháp" rows="4" auto-grow variant="outlined"
 											density="compact" hide-details />
 									</template>
 									<div v-if="card.key === 'hoat-dong-khac'">
-										<div class="text-body-2 font-weight-bold mb-2">3.1. Hoạt động ngoài giờ lên lớp</div>
+										<div class="text-body-2 font-weight-bold mb-2">3.1. Hoạt động ngoài giờ lên lớp
+										</div>
 										<v-textarea v-model="planText.extracurricularTarget" label="a. Chỉ tiêu"
 											rows="4" auto-grow variant="outlined" density="compact" class="mb-2" />
 										<v-textarea v-model="planText.extracurricularSolution"
@@ -135,20 +134,19 @@
 										<v-textarea v-model="planText.laborTarget"
 											label="a. Chỉ tiêu (số lượng, tỉ lệ %)" rows="4" auto-grow
 											variant="outlined" density="compact" class="mb-2" />
-										<v-textarea v-model="planText.laborSolution"
-											label="b. Nhiệm vụ và giải pháp" rows="4" auto-grow variant="outlined"
-											density="compact" class="mb-3" />
+										<v-textarea v-model="planText.laborSolution" label="b. Nhiệm vụ và giải pháp"
+											rows="4" auto-grow variant="outlined" density="compact" class="mb-3" />
 
-										<div class="text-body-2 font-weight-bold mb-2">3.4. Công tác xã hội hoá giáo dục</div>
+										<div class="text-body-2 font-weight-bold mb-2">3.4. Công tác xã hội hoá giáo dục
+										</div>
 										<v-textarea v-model="planText.socializationTarget"
 											label="a. Chỉ tiêu (số lượng, tỉ lệ %)" rows="4" auto-grow
 											variant="outlined" density="compact" class="mb-2" />
 										<v-textarea v-model="planText.socializationSolution"
 											label="b. Nhiệm vụ và giải pháp" rows="4" auto-grow variant="outlined"
 											density="compact" class="mb-3" />
-										<v-textarea v-model="planText.classTitle"
-											label="* Lớp phấn đấu đạt danh hiệu" rows="3" auto-grow
-											variant="outlined" density="compact" hide-details />
+										<v-textarea v-model="planText.classTitle" label="* Lớp phấn đấu đạt danh hiệu"
+											rows="3" auto-grow variant="outlined" density="compact" hide-details />
 									</div>
 								</section>
 							</v-card-text>
