@@ -1,17 +1,17 @@
 <template>
 	<v-card-text class="pa-0 so-gvcn-sheet-wrap" :style="{ height: sheetHeight, 'overflow-y': 'auto' }">
 		<v-alert v-if="selectedLopID === '__ALL__'" type="info" variant="tonal" density="compact" class="ma-2">
-			Chọn một lớp ở thanh trên để theo dõi nhận xét tháng học sinh (LMS).
+			Chọn một lớp ở thanh trên để theo dõi tình hình Phụ huynh tham dự họp.
 		</v-alert>
 		<div v-else class="so-gvcn-sheet-wrap">
-			<div ref="sheetRef" class="w-100 so-gvcn-sheet so-gvcn-nhan-xet-thang-lms-sheet"></div>
+			<div ref="sheetRef" class="w-100 so-gvcn-sheet so-gvcn-theo-doi-ph-hop-sheet"></div>
 		</div>
 	</v-card-text>
 </template>
 
 <script>
 	export default {
-		name: 'so-gvcn-c1-tab-nhan-xet-thang-lms',
+		name: 'so-gvcn-c1-tab-theo-doi-ph-hop',
 		props: {
 			selectedLopID: { type: [String, Number], default: '__ALL__' },
 			students: { type: Array, default: () => [] },
@@ -25,17 +25,19 @@
 					{ title: 'STT', width: 60, readOnly: true },
 					{ title: 'SỐ DANH BỘ', width: 120, readOnly: true },
 					{ title: 'HỌ VÀ TÊN HỌC SINH', width: 200, readOnly: true },
-					{ title: 'THÁNG 8', width: 180 },
-					{ title: 'THÁNG 9', width: 180 },
-					{ title: 'THÁNG 10', width: 180 },
-					{ title: 'THÁNG 11', width: 180 },
-					{ title: 'THÁNG 12', width: 180 },
-					{ title: 'NHẬN XÉT HKI', width: 220 },
-					{ title: 'THÁNG 1 & 2', width: 180 },
-					{ title: 'THÁNG 3', width: 180 },
-					{ title: 'THÁNG 4', width: 180 },
-					{ title: 'THÁNG 5', width: 180 },
-					{ title: 'NHẬN XÉT HKII', width: 220 }
+					{ title: 'HỌ VÀ TÊN PHỤ HUYNH', width: 200 },
+					// Họp PH Đầu năm
+					{ title: 'Có mặt (X)', width: 90, align: 'center' },
+					{ title: 'Vắng mặt', width: 100, align: 'center' },
+					{ title: 'Ý kiến / Ghi chú Đầu năm', width: 220 },
+					// Họp PH Cuối HKI
+					{ title: 'Có mặt (X)', width: 90, align: 'center' },
+					{ title: 'Vắng mặt', width: 100, align: 'center' },
+					{ title: 'Ý kiến / Ghi chú Cuối HKI', width: 220 },
+					// Họp PH Cuối năm (HKII)
+					{ title: 'Có mặt (X)', width: 90, align: 'center' },
+					{ title: 'Vắng mặt', width: 100, align: 'center' },
+					{ title: 'Ý kiến / Ghi chú Cuối năm', width: 220 }
 				]
 			}
 		},
@@ -66,8 +68,10 @@
 			nestedHeaders() {
 				return [
 					[
-						{ title: '', colspan: 3 },
-						{ title: 'NỘI DUNG NHẬN XÉT THÁNG HỌC SINH (LMS)', colspan: 11 }
+						{ title: '', colspan: 4 },
+						{ title: 'HỌP PHHS ĐẦU NĂM HỌC', colspan: 3 },
+						{ title: 'HỌP PHHS CUỐI HỌC KỲ I', colspan: 3 },
+						{ title: 'HỌP PHHS CUỐI NĂM HỌC', colspan: 3 }
 					]
 				]
 			}
@@ -84,21 +88,21 @@
 				const findSaved = (hslopID) => (this.savedRows || []).find(r => r.HSLopID === hslopID) || {}
 				return (this.students || []).map((student, idx) => {
 					const saved = findSaved(student.HSLopID)
+					const parentName = student.HoTenCha || student.HoTenMe || student.HoTenNguoiDoDau || ''
 					return [
 						idx + 1,
 						student.SoDanhBo || '',
 						student.HoTen || student.HoTenHocSinh || '',
-						saved.Thang8 || '',
-						saved.Thang9 || '',
-						saved.Thang10 || '',
-						saved.Thang11 || '',
-						saved.Thang12 || '',
-						saved.NhanXetHKI || '',
-						saved.Thang1_2 || '',
-						saved.Thang3 || '',
-						saved.Thang4 || '',
-						saved.Thang5 || '',
-						saved.NhanXetHKII || ''
+						saved.TenPhuHuynh || parentName,
+						saved.DauNamCoMat || '',
+						saved.DauNamVangMat || '',
+						saved.DauNamYKien || '',
+						saved.HK1CoMat || '',
+						saved.HK1VangMat || '',
+						saved.HK1YKien || '',
+						saved.CuoiNamCoMat || '',
+						saved.CuoiNamVangMat || '',
+						saved.CuoiNamYKien || ''
 					]
 				})
 			},

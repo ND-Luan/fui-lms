@@ -52,12 +52,19 @@
 						<v-tabs v-model="tab" density="compact">
 							<v-tab value="du-lieu-hs">{{ isCap1 ? 'THÔNG TIN HS LỚP' : 'Dữ liệu HS lớp' }}</v-tab>
 							<v-tab v-if="isCap1" value="to-chuc-lop">Tổ chức lớp</v-tab>
-							<v-tab value="chi-tieu">{{ isCap1 ? 'KH & Công tác CN' : 'XD chỉ tiêu_giải pháp' }}</v-tab>
+							<v-tab value="chi-tieu">{{ isCap1 ? 'KH chủ nhiệm năm học' : 'XD chỉ tiêu_giải pháp' }}</v-tab>
+							<v-tab v-if="isCap1" value="cong-tac-cn">Công tác chủ nhiệm tháng</v-tab>
 							<v-tab value="ke-hoach">{{ isCap1 ? 'HS cần quan tâm' : 'KH GD tháng_tuần' }}</v-tab>
 							<v-tab value="ren-luyen">{{ isCap1 ? 'Nhận xét tháng (LMS)' : 'Hồ sơ theo dõi QTRL' }}
 							</v-tab>
-							<v-tab v-if="isCap1" value="so-ket-tong-ket">Sơ kết, Tổng kết & Thành tích</v-tab>
-							<v-tab value="so-lien-lac">{{ isCap1 ? 'Họp PHHS & BHYT' : 'Sổ liên lạc điện tử' }}</v-tab>
+							<v-tab v-if="isCap1" value="theo-doi-si-so">Theo dõi sĩ số tháng</v-tab>
+							<v-tab v-if="isCap1" value="thong-ke-do-tuoi">Thống kê độ tuổi HS</v-tab>
+							<v-tab v-if="isCap1" value="so-ket-hk1">Sơ kết HKI</v-tab>
+							<v-tab v-if="isCap1" value="tong-ket-nam">Tổng kết năm học</v-tab>
+							<v-tab v-if="isCap1" value="theo-doi-thanh-tich">Theo dõi thành tích HS</v-tab>
+							<v-tab value="so-lien-lac">{{ isCap1 ? 'Theo dõi PH đi họp' : 'Sổ liên lạc điện tử' }}</v-tab>
+							<v-tab v-if="isCap1" value="noi-dung-hop-ph">Nội dung họp PHHS</v-tab>
+							<v-tab v-if="isCap1" value="theo-doi-bhyt">Theo dõi BHYT & BHTN</v-tab>
 							<v-tab v-if="!isCap1" value="huong-nghiep">Hướng nghiệp</v-tab>
 						</v-tabs>
 						<v-divider />
@@ -84,9 +91,12 @@
 									ref="tabToChucLopRef" />
 							</v-window-item>
 
-							<!-- Tab 2 -->
+							<!-- Tab 3: KH chủ nhiệm năm học (C1) / Chỉ tiêu (C2, C3) -->
 							<v-window-item value="chi-tieu" eager>
-								<so-gvcn-c1-tab-ke-hoach-cong-tac v-if="isCap1" :selected-lop-i-d="selectedLopID" />
+								<so-gvcn-c1-tab-ke-hoach-nam-hoc v-if="isCap1" ref="tabKeHoachNamHocRef"
+									:selected-lop-i-d="selectedLopID"
+									:selected-class="selectedClass" :school-year-text="getCurrentSchoolYearText()"
+									:sheet-height="sheetHeight" :annual-plan="keHoachNamHocData" />
 								<so-gvcn-tab-chi-tieu v-else ref="tabChiTieuRef" :selected-lop-i-d="selectedLopID"
 									:chi-tieu-cards="chiTieuCards" :chi-tieu-giao-duc-title="chiTieuGiaoDucTitle"
 									:sheet-height="sheetHeight" :sheet-key="sheetKey"
@@ -94,9 +104,23 @@
 									@handle-card-change="handleChiTieuCardChange" />
 							</v-window-item>
 
-							<!-- Tab 3 -->
+							<!-- Công tác chủ nhiệm tháng (C1 only) -->
+							<v-window-item v-if="isCap1" value="cong-tac-cn" eager>
+								<so-gvcn-c1-tab-cong-tac-chu-nhiem ref="tabCongTacChuNhiemRef"
+									:selected-lop-i-d="selectedLopID" :sheet-height="sheetHeight"
+									:month-sheet-height="keHoachSheetHeight" :month-list="monthList"
+									:week-list="weeklyPlanList"
+									:nien-khoa="currentNienKhoa"
+									:get-ke-hoach-export-months="getKeHoachExportMonths" />
+							</v-window-item>
+
+							<!-- Hồ sơ HS cần quan tâm (C1) / Kế hoạch tháng tuần (C2, C3) -->
 							<v-window-item value="ke-hoach" eager>
-								<so-gvcn-c1-tab-hs-can-quan-tam v-if="isCap1" :selected-lop-i-d="selectedLopID" />
+								<so-gvcn-c1-tab-hs-can-quan-tam v-if="isCap1" ref="tabHsCanQuanTamRef"
+									:selected-lop-i-d="selectedLopID"
+									:students="getSelectedClassStudents()"
+									:saved-rows="hsCanQuanTamSavedRows"
+									:sheet-height="sheetHeight" :sheet-key="sheetKey" />
 								<so-gvcn-tab-ke-hoach v-else ref="tabKeHoachRef" :selected-lop-i-d="selectedLopID"
 									:selected-class="selectedClass" :school-year-text="getCurrentSchoolYearText()"
 									:sheet-height="sheetHeight" :ke-hoach-sheet-height="keHoachSheetHeight"
@@ -108,7 +132,11 @@
 
 							<!-- Tab 4 -->
 							<v-window-item value="ren-luyen" eager>
-								<so-gvcn-c1-tab-nhan-xet-thang-lms v-if="isCap1" :selected-lop-i-d="selectedLopID" />
+								<so-gvcn-c1-tab-nhan-xet-thang-lms v-if="isCap1" ref="tabNhanXetThangLmsRef"
+									:selected-lop-i-d="selectedLopID"
+									:students="getSelectedClassStudents()"
+									:saved-rows="nhanXetThangLmsSavedRows"
+									:sheet-height="sheetHeight" />
 								<so-gvcn-tab-ren-luyen v-else ref="tabRenLuyenRef" v-model:rows="renLuyenRows"
 									:selected-lop-i-d="selectedLopID" :selected-class="selectedClass"
 									:school-year-text="getCurrentSchoolYearText()" :columns="renLuyenColumns"
@@ -116,18 +144,79 @@
 									:ren-luyen-sheet-height="renLuyenSheetHeight" :sheet-key="sheetKey" />
 							</v-window-item>
 
-							<!-- Tab 5 (C1 only) -->
-							<v-window-item v-if="isCap1" value="so-ket-tong-ket" eager>
-								<so-gvcn-c1-tab-so-ket-tong-ket :selected-lop-i-d="selectedLopID" />
+							<!-- Tab Theo dõi sĩ số tháng (C1 only) -->
+							<v-window-item v-if="isCap1" value="theo-doi-si-so" eager>
+								<so-gvcn-c1-tab-theo-doi-si-so ref="tabTheoDoiSiSoRef"
+									:selected-lop-i-d="selectedLopID"
+									:students="getSelectedClassStudents()"
+									:saved-rows="siSoSavedRows"
+									:sheet-height="sheetHeight" />
+							</v-window-item>
+
+							<!-- Tab Thống kê độ tuổi HS (C1 only) -->
+							<v-window-item v-if="isCap1" value="thong-ke-do-tuoi" eager>
+								<so-gvcn-c1-tab-thong-ke-do-tuoi ref="tabThongKeDoTuoiRef"
+									:selected-lop-i-d="selectedLopID"
+									:students="getSelectedClassStudents()"
+									:saved-rows="thongKeDoTuoiSavedRows"
+									:sheet-height="sheetHeight" />
+							</v-window-item>
+
+							<!-- Tab Sơ kết HKI (C1 only) -->
+							<v-window-item v-if="isCap1" value="so-ket-hk1" eager>
+								<so-gvcn-c1-tab-so-ket-tong-ket ref="tabSoKetHk1Ref"
+									:selected-lop-i-d="selectedLopID"
+									:students="getSelectedClassStudents()"
+									:saved-rows="soKetHk1SavedRows"
+									:sheet-height="sheetHeight" />
+							</v-window-item>
+
+							<!-- Tab Tổng kết năm học (C1 only) -->
+							<v-window-item v-if="isCap1" value="tong-ket-nam" eager>
+								<so-gvcn-c1-tab-tong-ket-nam-hoc ref="tabTongKetNamRef"
+									:selected-lop-i-d="selectedLopID"
+									:students="getSelectedClassStudents()"
+									:saved-rows="tongKetNamSavedRows"
+									:sheet-height="sheetHeight" />
+							</v-window-item>
+
+							<!-- Tab Theo dõi thành tích HS (C1 only) -->
+							<v-window-item v-if="isCap1" value="theo-doi-thanh-tich" eager>
+								<so-gvcn-c1-tab-theo-doi-thanh-tich ref="tabTheoDoiThanhTichRef"
+									:selected-lop-i-d="selectedLopID"
+									:students="getSelectedClassStudents()"
+									:saved-rows="thanhTichSavedRows"
+									:sheet-height="sheetHeight" />
 							</v-window-item>
 
 							<!-- Tab 6 -->
 							<v-window-item value="so-lien-lac">
-								<so-gvcn-c1-tab-hop-ph-bhyt v-if="isCap1" :selected-lop-i-d="selectedLopID" />
+								<so-gvcn-c1-tab-theo-doi-ph-hop v-if="isCap1" ref="tabTheoDoiPhHopRef"
+									:selected-lop-i-d="selectedLopID"
+									:students="getSelectedClassStudents()"
+									:saved-rows="theoDoiPhHopSavedRows"
+									:sheet-height="sheetHeight" />
 								<so-gvcn-tab-so-lien-lac v-else ref="tabSoLienLacRef" v-model:rows="soLienLacRows"
 									:selected-lop-i-d="selectedLopID" :columns="soLienLacColumns"
 									:nested-headers="soLienLacNestedHeaders" :sheet-height="sheetHeight"
 									:so-lien-lac-sheet-height="soLienLacSheetHeight" :sheet-key="sheetKey" />
+							</v-window-item>
+
+							<!-- Tab Nội dung họp PHHS (C1 only) -->
+							<v-window-item v-if="isCap1" value="noi-dung-hop-ph" eager>
+								<so-gvcn-c1-tab-noi-dung-hop-ph ref="tabNoiDungHopPhRef"
+									:selected-lop-i-d="selectedLopID"
+									:saved-rows="noiDungHopPhSavedRows"
+									:sheet-height="sheetHeight" />
+							</v-window-item>
+
+							<!-- Tab Theo dõi BHYT, BHTN của HS (C1 only) -->
+							<v-window-item v-if="isCap1" value="theo-doi-bhyt" eager>
+								<so-gvcn-c1-tab-theo-doi-bhyt-bhtn ref="tabTheoDoiBhytRef"
+									:selected-lop-i-d="selectedLopID"
+									:students="getSelectedClassStudents()"
+									:saved-rows="theoDoiBhytSavedRows"
+									:sheet-height="sheetHeight" />
 							</v-window-item>
 
 							<!-- Tab Hướng nghiệp (C2, C3 only) -->
@@ -164,6 +253,15 @@
 			sheetInstance: null,
 			renLuyenRows: [],
 			renLuyenSavedRows: [],
+			hsCanQuanTamSavedRows: [],
+			nhanXetThangLmsSavedRows: [],
+			soKetHk1SavedRows: [],
+			tongKetNamSavedRows: [],
+			thanhTichSavedRows: [],
+			thongKeDoTuoiSavedRows: [],
+			theoDoiPhHopSavedRows: [],
+			noiDungHopPhSavedRows: [],
+			theoDoiBhytSavedRows: [],
 			renLuyenSheetInstance: null,
 			soLienLacRows: [],
 			soLienLacSavedRows: [],
@@ -326,6 +424,7 @@
 						}
 			],
 			monthList: [],
+			weeklyPlanList: [],
 			chiTieuSavedRows: [],
 			siSoSavedRows: [],
 			giaoVienBoMonSavedRows: [],
@@ -333,6 +432,7 @@
 			canBoLopSavedRows: [],
 			toNhomHocSinhSavedRows: [],
 			huongNghiepSavedRows: [],
+			keHoachNamHocData: null,
 			selectedClass: null,
 			detail: {},
 			form: {
@@ -471,12 +571,13 @@
 			showSaveButton() {
 				const isC1OrganizationTab = this.isCap1 && this.tab === 'to-chuc-lop'
 				return this.selectedLopID !== '__ALL__' && (isC1OrganizationTab
-					|| ['chi-tieu', 'ke-hoach', 'ren-luyen', 'nhan-xet-lms', 'so-lien-lac', 'huong-nghiep'].includes(this.tab))
+					|| ['chi-tieu', 'cong-tac-cn', 'ke-hoach', 'ren-luyen', 'nhan-xet-lms', 'so-lien-lac', 'huong-nghiep'].includes(this.tab))
 			},
 			saveButtonText() {
 				switch (this.tab) {
 					case 'to-chuc-lop': return 'Lưu tổ chức lớp'
-					case 'chi-tieu': return 'Lưu chỉ tiêu'
+					case 'chi-tieu': return this.isCap1 ? 'Lưu KH năm học' : 'Lưu chỉ tiêu'
+					case 'cong-tac-cn': return 'Lưu công tác tháng'
 					case 'ke-hoach': return 'Lưu kế hoạch tháng'
 					case 'ren-luyen': return 'Lưu rèn luyện'
 					case 'nhan-xet-lms': return 'Lưu nhận xét LMS'
@@ -486,11 +587,11 @@
 				}
 			},
 			saveButtonDisabled() {
-				if (this.tab === 'ke-hoach') return !this.form.SoGVCNID
+				if (this.tab === 'ke-hoach' || this.tab === 'cong-tac-cn') return !this.form.SoGVCNID
 				return !this.form.SoGVCNID || this.loading.save
 			},
 			saveButtonLoading() {
-				if (this.tab === 'ke-hoach') return this.loading.month
+				if (this.tab === 'ke-hoach' || this.tab === 'cong-tac-cn') return this.loading.month
 				return this.loading.save
 			},
 			studentNestedHeaders() {
@@ -571,10 +672,17 @@
 			} else if (newTab === 'chi-tieu') {
 				setTimeout(() => this.$refs.tabChiTieuRef?.initAllSheets(), 50)
 			} else if (newTab === 'ke-hoach') {
-				// Dùng setTimeout để chờ Vuetify tab transition hoàn thành trước khi jspreadsheet init
-				setTimeout(() => this.initKeHoachSheet(), 50)
+				if (this.isCap1) {
+					this.getHsCanQuanTam()
+				} else {
+					setTimeout(() => this.initKeHoachSheet(), 50)
+				}
 			} else if (newTab === 'ren-luyen') {
-				setTimeout(() => this.$refs.tabRenLuyenRef?.scheduleInit(), 50)
+				if (this.isCap1) {
+					this.getHsNhanXetThangLms()
+				} else {
+					setTimeout(() => this.$refs.tabRenLuyenRef?.scheduleInit(), 50)
+				}
 			}
 		}
 	},
@@ -868,8 +976,12 @@
 			else if (khoi >= 10 && khoi <= 12) set.add(3)
 		},
 		applyThongTinGiaDinh(row, info) {
+			const danToc = info.TenDanToc || info.DanToc || info['Dân tộc']
+				|| row.TenDanToc || row.DanToc || ''
 			return {
 				...row,
+				TenDanToc: danToc,
+				DanToc: danToc,
 				Cha: info.Cha || row.Cha || '',
 				NgheNghiepCha: info.NgheNghiepCha || row.NgheNghiepCha || '',
 				SDTCha: info.DienThoaiCha || row.SDTCha || '',
@@ -898,6 +1010,7 @@
 			this.selectedClass = null
 			this.detail = {}
 			this.monthList = []
+			this.weeklyPlanList = []
 			this.chiTieuSavedRows = []
 			this.siSoSavedRows = []
 			this.giaoVienBoMonSavedRows = []
@@ -905,6 +1018,7 @@
 			this.canBoLopSavedRows = []
 			this.toNhomHocSinhSavedRows = []
 			this.huongNghiepSavedRows = []
+			this.keHoachNamHocData = null
 			this.keHoachSheetRows = this.buildKeHoachThangTuanExportAoA(false, true)
 			this.keHoachSheetStyle = this.buildKeHoachSheetStyle(false)
 			this.initKeHoachSheet()
@@ -937,11 +1051,26 @@
 				this.loading.detail = false
 			}
 		},
+		async getHsCanQuanTam() {
+			if (!this.form.SoGVCNID || !this.isCap1) return
+			const hsResponse = await ajaxCALLPromise(`lms/SoGVCNHsCanQuanTamGet/${this.form.SoGVCNID}`).catch(() => [])
+			this.hsCanQuanTamSavedRows = Array.isArray(hsResponse) ? hsResponse : (Array.isArray(hsResponse?.[0]) ? hsResponse[0] : [])
+		},
+		async getHsNhanXetThangLms() {
+			if (!this.form.SoGVCNID || !this.isCap1) return
+			const res = await ajaxCALLPromise(`lms/SoGVCNHsNhanXetThangLmsGet/${this.form.SoGVCNID}`).catch(() => [])
+			this.nhanXetThangLmsSavedRows = Array.isArray(res) ? res : (Array.isArray(res?.[0]) ? res[0] : [])
+		},
 		async getDetail() {
 			if (!this.form.SoGVCNID) return
 			const data = await ajaxCALLPromise(`lms/SoGVCNGet/${this.form.SoGVCNID}`)
 			this.detail = Array.isArray(data) ? (data[0]?.[0] || {}) : data
 			this.monthList = Array.isArray(data?.[1]) ? data[1] : []
+			const weeklyResponse = await ajaxCALLPromise(`lms/SoGVCNKeHoachTuanGet/${this.form.SoGVCNID}`)
+				.catch(() => [])
+			this.weeklyPlanList = Array.isArray(weeklyResponse?.[0])
+				? weeklyResponse[0]
+				: (Array.isArray(weeklyResponse) ? weeklyResponse : [])
 			this.chiTieuSavedRows = Array.isArray(data?.[2]) ? data[2] : []
 			this.renLuyenSavedRows = Array.isArray(data?.[3]) ? data[3] : []
 			this.soLienLacSavedRows = Array.isArray(data?.[4]) ? data[4] : []
@@ -951,6 +1080,11 @@
 			this.canBoLopSavedRows = Array.isArray(data?.[8]) ? data[8] : []
 			this.huongNghiepSavedRows = Array.isArray(data?.[9]) ? data[9] : []
 			this.toNhomHocSinhSavedRows = Array.isArray(data?.[10]) ? data[10] : []
+			if (this.isCap1) {
+				await this.getKeHoachNamHoc()
+				if (this.tab === 'ke-hoach') await this.getHsCanQuanTam()
+				if (this.tab === 'ren-luyen') await this.getHsNhanXetThangLms()
+			}
 			this.keHoachSheetRows = this.buildKeHoachThangTuanExportAoA(false, true)
 			this.keHoachSheetStyle = this.buildKeHoachSheetStyle(false)
 			this.initKeHoachSheet()
@@ -979,6 +1113,27 @@
 				this.setStudentSheets(rows)
 			} finally {
 				this.loading.students = false
+			}
+		},
+		async getKeHoachNamHoc() {
+			if (!this.form.SoGVCNID) {
+				this.keHoachNamHocData = null
+				return
+			}
+			const response = await ajaxCALLPromise(`lms/SoGVCNKeHoachNamHocGet/${this.form.SoGVCNID}`)
+				.catch(() => [])
+			const firstResult = Array.isArray(response) ? response[0] : response
+			const row = Array.isArray(firstResult) ? (firstResult[0] || {}) : (firstResult || {})
+			const json = row.JsonData || row.KeHoachNamHoc || ''
+			if (!json) {
+				this.keHoachNamHocData = null
+				return
+			}
+			try {
+				this.keHoachNamHocData = typeof json === 'string' ? JSON.parse(json) : json
+			} catch (error) {
+				console.error('Dữ liệu kế hoạch năm học không hợp lệ:', error)
+				this.keHoachNamHocData = null
 			}
 		},
 		setStudentSheets(rows) {
@@ -2207,7 +2362,13 @@
 			return row[key] ?? row[index] ?? ''
 		},
 		parseKeHoachSheetRows() {
-			const tabRefInstance = this.$refs.tabKeHoachRef?.getInstance ? this.$refs.tabKeHoachRef.getInstance() : null
+			const activeRef = this.tab === 'cong-tac-cn'
+				? this.$refs.tabCongTacChuNhiemRef
+				: this.$refs.tabKeHoachRef
+			if (this.tab === 'cong-tac-cn' && activeRef?.getSaveRows) {
+				return activeRef.getSaveRows(this.form.SoGVCNID)
+			}
+			const tabRefInstance = activeRef?.getInstance ? activeRef.getInstance() : null
 			const inst = tabRefInstance || this.keHoachSheetInstance
 			const sheet = Array.isArray(inst) ? inst[0] : inst
 			const source = sheet && typeof sheet.getData === 'function'
@@ -2310,7 +2471,7 @@
 			return text
 		},
 		onSaveButtonClick() {
-			if (this.tab === 'ke-hoach') {
+			if (this.tab === 'ke-hoach' || this.tab === 'cong-tac-cn') {
 				this.saveKeHoachSheet()
 			} else {
 				this.onSaveDraft()
@@ -2372,6 +2533,14 @@
 					if (this.toNhomHocSinhSavedRows.length !== toNhomHocSinhRows.length) {
 						throw new Error('Dữ liệu tổ/nhóm chưa được lưu đầy đủ. Vui lòng thử lại.')
 					}
+				} else if (this.tab === 'chi-tieu' && this.isCap1) {
+					const planData = this.$refs.tabKeHoachNamHocRef?.getPlanData?.()
+					if (!planData) throw new Error('Không đọc được dữ liệu kế hoạch chủ nhiệm năm học.')
+					await ajaxCALLPromise('lms/SoGVCNKeHoachNamHocSave', {
+						SoGVCNID: this.form.SoGVCNID,
+						JsonData: JSON.stringify(planData)
+					})
+					this.keHoachNamHocData = planData
 				} else if (this.tab === 'chi-tieu') {
 					const chiTieuRows = this.serializeChiTieuStructuredRows()
 					this.form.ChiTieu = this.serializeChiTieuRows()
@@ -2413,6 +2582,22 @@
 							SoGVCNID: this.form.SoGVCNID,
 							JsonRows: JSON.stringify(this.serializeRenLuyenMonthlyRows())
 						})
+					} else if (this.isCap1 && this.form.SoGVCNID && this.selectedLopID !== '__ALL__') {
+						const rowsToSave = this.serializeNhanXetThangLmsRows()
+						await ajaxCALLPromise('lms/SoGVCNHsNhanXetThangLmsSave', {
+							SoGVCNID: this.form.SoGVCNID,
+							JsonRows: JSON.stringify(rowsToSave)
+						})
+						this.nhanXetThangLmsSavedRows = rowsToSave
+					}
+				} else if (this.tab === 'ke-hoach' && this.isCap1) {
+					if (this.form.SoGVCNID && this.selectedLopID !== '__ALL__') {
+						const rowsToSave = this.serializeHsCanQuanTamRows()
+						await ajaxCALLPromise('lms/SoGVCNHsCanQuanTamSave', {
+							SoGVCNID: this.form.SoGVCNID,
+							JsonRows: JSON.stringify(rowsToSave)
+						})
+						this.hsCanQuanTamSavedRows = rowsToSave
 					}
 				} else if (this.tab === 'so-lien-lac') {
 					if (this.form.SoGVCNID && this.selectedLopID !== '__ALL__') {
@@ -2425,7 +2610,8 @@
 				if (this.detail) this.detail.TrangThai = this.detail.TrangThai === 'NEW' ? 'DRAFT' : this.detail.TrangThai
 				if (this.selectedClass) this.selectedClass.TrangThai = this.selectedClass.TrangThai === 'NEW' ? 'DRAFT' : this.selectedClass.TrangThai
 				const tabNames = {
-					'chi-tieu': 'chỉ tiêu',
+					'chi-tieu': this.isCap1 ? 'kế hoạch chủ nhiệm năm học' : 'chỉ tiêu',
+					'ke-hoach': this.isCap1 ? 'hồ sơ HS cần quan tâm' : 'kế hoạch chủ nhiệm',
 					'huong-nghiep': 'hướng nghiệp',
 					'du-lieu-hs': this.isCap1 ? 'thông tin HS lớp' : 'dữ liệu HS lớp',
 					'to-chuc-lop': 'tổ chức lớp',
@@ -2437,6 +2623,63 @@
 			} finally {
 				this.loading.save = false
 			}
+		},
+
+		serializeNhanXetThangLmsRows() {
+			const sheet = this.$refs.tabNhanXetThangLmsRef?.getInstance()
+			const sourceRows = sheet && typeof sheet.getData === 'function' ? sheet.getData() : []
+			const students = this.getSelectedClassStudents()
+			const rows = []
+			sourceRows.forEach((row, rowIndex) => {
+				const student = students[rowIndex] || {}
+				if (!student.HSLopID) return
+				rows.push({
+					HSLopID: student.HSLopID,
+					HocSinhID: student.HocSinhID || null,
+					Thang8: this.cleanSheetValue(row[3]),
+					Thang9: this.cleanSheetValue(row[4]),
+					Thang10: this.cleanSheetValue(row[5]),
+					Thang11: this.cleanSheetValue(row[6]),
+					Thang12: this.cleanSheetValue(row[7]),
+					NhanXetHKI: this.cleanSheetValue(row[8]),
+					Thang1_2: this.cleanSheetValue(row[9]),
+					Thang3: this.cleanSheetValue(row[10]),
+					Thang4: this.cleanSheetValue(row[11]),
+					Thang5: this.cleanSheetValue(row[12]),
+					NhanXetHKII: this.cleanSheetValue(row[13])
+				})
+			})
+			return rows
+		},
+
+		serializeHsCanQuanTamRows() {
+			const sheet = this.$refs.tabHsCanQuanTamRef?.getInstance()
+			const sourceRows = sheet && typeof sheet.getData === 'function' ? sheet.getData() : []
+			const students = this.getSelectedClassStudents()
+			const rows = []
+			sourceRows.forEach((row, rowIndex) => {
+				const student = students[rowIndex] || {}
+				if (!student.HSLopID) return
+				rows.push({
+					HSLopID: student.HSLopID,
+					HocSinhID: student.HocSinhID || null,
+					CanHoTroDacBiet: this.cleanSheetValue(row[3]),
+					Thang8: this.cleanSheetValue(row[4]),
+					Thang9: this.cleanSheetValue(row[5]),
+					Thang10: this.cleanSheetValue(row[6]),
+					Thang11: this.cleanSheetValue(row[7]),
+					Thang12: this.cleanSheetValue(row[8]),
+					NhanXetHKI: this.cleanSheetValue(row[9]),
+					KetQuaHKI: this.cleanSheetValue(row[10]),
+					Thang1_2: this.cleanSheetValue(row[11]),
+					Thang3: this.cleanSheetValue(row[12]),
+					Thang4: this.cleanSheetValue(row[13]),
+					Thang5: this.cleanSheetValue(row[14]),
+					NhanXetCuoiNam: this.cleanSheetValue(row[15]),
+					KetQuaCuoiNam: this.cleanSheetValue(row[16])
+				})
+			})
+			return rows
 		},
 
 		serializeRenLuyenMonthlyRows() {
@@ -2505,7 +2748,10 @@
 			if (document.activeElement && typeof document.activeElement.blur === 'function') {
 				document.activeElement.blur()
 			}
-			const tabRefInstance = this.$refs.tabKeHoachRef?.getInstance ? this.$refs.tabKeHoachRef.getInstance() : null
+			const activeRef = this.tab === 'cong-tac-cn'
+				? this.$refs.tabCongTacChuNhiemRef
+				: this.$refs.tabKeHoachRef
+			const tabRefInstance = activeRef?.getInstance ? activeRef.getInstance() : null
 			const inst = tabRefInstance || this.keHoachSheetInstance
 			const sheet = Array.isArray(inst) ? inst[0] : inst
 			if (sheet && typeof sheet.closeEditor === 'function') {
@@ -2517,6 +2763,15 @@
 			try {
 				const rows = this.parseKeHoachSheetRows()
 				await Promise.all(rows.map(row => ajaxCALLPromise('lms/SoGVCNKeHoachThangSave', row)))
+				if (this.tab === 'cong-tac-cn') {
+					await Promise.all(rows.map(row => ajaxCALLPromise('lms/SoGVCNKeHoachTuanClear', {
+						SoGVCNID: this.form.SoGVCNID,
+						Thang: row.Thang
+					})))
+					const weekRows = this.$refs.tabCongTacChuNhiemRef?.getSaveWeekRows?.(this.form.SoGVCNID) || []
+					await Promise.all(weekRows.map(row => ajaxCALLPromise('lms/SoGVCNKeHoachTuanSave', row)))
+					await this.getDetail()
+				}
 				this.initKeHoachSheet()
 				this.notify('Đã lưu kế hoạch tháng')
 			} finally {

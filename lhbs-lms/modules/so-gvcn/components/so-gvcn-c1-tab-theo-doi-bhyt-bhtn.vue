@@ -1,17 +1,17 @@
 <template>
 	<v-card-text class="pa-0 so-gvcn-sheet-wrap" :style="{ height: sheetHeight, 'overflow-y': 'auto' }">
 		<v-alert v-if="selectedLopID === '__ALL__'" type="info" variant="tonal" density="compact" class="ma-2">
-			Chọn một lớp ở thanh trên để theo dõi nhận xét tháng học sinh (LMS).
+			Chọn một lớp ở thanh trên để theo dõi BHYT và BHTN của học sinh.
 		</v-alert>
 		<div v-else class="so-gvcn-sheet-wrap">
-			<div ref="sheetRef" class="w-100 so-gvcn-sheet so-gvcn-nhan-xet-thang-lms-sheet"></div>
+			<div ref="sheetRef" class="w-100 so-gvcn-sheet so-gvcn-theo-doi-bhyt-bhtn-sheet"></div>
 		</div>
 	</v-card-text>
 </template>
 
 <script>
 	export default {
-		name: 'so-gvcn-c1-tab-nhan-xet-thang-lms',
+		name: 'so-gvcn-c1-tab-theo-doi-bhyt-bhtn',
 		props: {
 			selectedLopID: { type: [String, Number], default: '__ALL__' },
 			students: { type: Array, default: () => [] },
@@ -25,17 +25,16 @@
 					{ title: 'STT', width: 60, readOnly: true },
 					{ title: 'SỐ DANH BỘ', width: 120, readOnly: true },
 					{ title: 'HỌ VÀ TÊN HỌC SINH', width: 200, readOnly: true },
-					{ title: 'THÁNG 8', width: 180 },
-					{ title: 'THÁNG 9', width: 180 },
-					{ title: 'THÁNG 10', width: 180 },
-					{ title: 'THÁNG 11', width: 180 },
-					{ title: 'THÁNG 12', width: 180 },
-					{ title: 'NHẬN XÉT HKI', width: 220 },
-					{ title: 'THÁNG 1 & 2', width: 180 },
-					{ title: 'THÁNG 3', width: 180 },
-					{ title: 'THÁNG 4', width: 180 },
-					{ title: 'THÁNG 5', width: 180 },
-					{ title: 'NHẬN XÉT HKII', width: 220 }
+					{ title: 'NGÀY SINH', width: 110, readOnly: true },
+					// Bảo hiểm y tế (BHYT)
+					{ title: 'Số thẻ BHYT', width: 160 },
+					{ title: 'Đã tham gia (X)', width: 110, align: 'center' },
+					{ title: 'Diện miễn/giảm', width: 140 },
+					{ title: 'Hạn sử dụng BHYT', width: 140 },
+					// Bảo hiểm thân thể / Tai nạn (BHTN)
+					{ title: 'Đã tham gia (X)', width: 110, align: 'center' },
+					{ title: 'Số tiền / Đợt đóng', width: 140 },
+					{ title: 'Ghi chú / Trạng thái', width: 240 }
 				]
 			}
 		},
@@ -66,8 +65,10 @@
 			nestedHeaders() {
 				return [
 					[
-						{ title: '', colspan: 3 },
-						{ title: 'NỘI DUNG NHẬN XÉT THÁNG HỌC SINH (LMS)', colspan: 11 }
+						{ title: '', colspan: 4 },
+						{ title: 'BẢO HIỂM Y TẾ (BHYT)', colspan: 4 },
+						{ title: 'BẢO HIỂM THÂN THỂ / TAI NẠN (BHTN)', colspan: 2 },
+						{ title: '', colspan: 1 }
 					]
 				]
 			}
@@ -88,17 +89,14 @@
 						idx + 1,
 						student.SoDanhBo || '',
 						student.HoTen || student.HoTenHocSinh || '',
-						saved.Thang8 || '',
-						saved.Thang9 || '',
-						saved.Thang10 || '',
-						saved.Thang11 || '',
-						saved.Thang12 || '',
-						saved.NhanXetHKI || '',
-						saved.Thang1_2 || '',
-						saved.Thang3 || '',
-						saved.Thang4 || '',
-						saved.Thang5 || '',
-						saved.NhanXetHKII || ''
+						student.NgaySinh || '',
+						saved.SoTheBHYT || student.MaSoBHXH || '',
+						saved.BHYTDaThamGia || '',
+						saved.BHYTMienGiam || '',
+						saved.BHYTHanSuDung || '',
+						saved.BHTNDaThamGia || '',
+						saved.BHTNSoTien || '',
+						saved.GhiChu || ''
 					]
 				})
 			},
@@ -136,7 +134,7 @@
 								tableOverflow: true,
 								tableHeight: this.sheetHeight,
 								lazyLoading: false,
-								freezeColumns: 3,
+								freezeColumns: 4,
 								wordWrap: true,
 								allowInsertColumn: false,
 								allowInsertRow: false,

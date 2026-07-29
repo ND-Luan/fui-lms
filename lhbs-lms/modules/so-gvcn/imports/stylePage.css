@@ -1,0 +1,181 @@
+/* Base Tab & Layout Window */
+.v-window,
+.v-window-item {
+    height: 100%;
+}
+
+.so-gvcn-page .v-tabs {
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.so-gvcn-page .section-title {
+    font-weight: 600;
+    color: #1f2937;
+}
+
+.so-gvcn-page .v-row > .v-col:focus-within {
+    position: relative;
+    z-index: 10;
+}
+
+/* Left Vertical Navigation in Tab 2 */
+.chi-tieu-vertical-tabs .v-list-item--active {
+    background-color: rgba(var(--v-theme-primary), 0.1) !important;
+    border-left: 3px solid rgb(var(--v-theme-primary)) !important;
+}
+
+/* Full Sheet Layout Wrap (Tabs 1, 3, 4, 5, 6) */
+.so-gvcn-sheet-wrap {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    min-height: 420px;
+    overflow: hidden;
+}
+
+.so-gvcn-sheet {
+    width: 100%;
+}
+
+.so-gvcn-sheet-wrap .wrapper-jexcel,
+.so-gvcn-sheet-wrap .jexcel_container,
+.so-gvcn-sheet-wrap .jspreadsheet_container {
+    flex: 1 1 auto;
+    min-height: 0;
+    max-width: 100%;
+    height: 100%;
+    overflow: auto !important;
+}
+
+.so-gvcn-sheet-wrap .jexcel_content,
+.so-gvcn-sheet-wrap .jspreadsheet_content {
+    flex: 1 1 auto;
+    min-height: 0 !important;
+    max-height: none !important;
+    overflow: auto !important;
+}
+
+/* Card Sheet Wrap (Tab 2 - Allow dropdown to overflow card boundary) */
+.so-gvcn-card-sheet-wrap,
+.so-gvcn-card-sheet-wrap .wrapper-jexcel,
+.so-gvcn-card-sheet-wrap .jexcel_container,
+.so-gvcn-card-sheet-wrap .jspreadsheet_container,
+.so-gvcn-card-sheet-wrap .jexcel_content,
+.so-gvcn-card-sheet-wrap .jspreadsheet_content {
+    overflow: visible !important;
+}
+
+.so-gvcn-card-sheet-wrap .jexcel > tbody > tr > td.dropdown {
+    overflow: visible !important;
+}
+
+.so-gvcn-card-sheet-wrap .jexcel_editor {
+    min-width: 100% !important;
+    box-sizing: border-box !important;
+    z-index: 9999 !important;
+}
+
+.so-gvcn-card-sheet-wrap table {
+    white-space: pre-line;
+}
+
+/* Dropdown Popup Styling & Layering */
+.so-gvcn-card-sheet-wrap .jdropdown-content,
+.so-gvcn-card-sheet-wrap .jdropdown-container,
+.so-gvcn-card-sheet-wrap .jdropdown-picker,
+.jdropdown-content,
+.jdropdown-container,
+.jdropdown-picker {
+    background: #fff !important;
+    border: 1px solid #90caf9 !important;
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.18) !important;
+    z-index: 100000 !important;
+    overflow: visible !important;
+}
+
+.so-gvcn-card-sheet-wrap .jdropdown-content,
+.jdropdown-content {
+    max-height: 220px !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+}
+
+/* Sticky Headers & Freezed Columns Styling */
+.so-gvcn-sheet-wrap table thead tr {
+    height: 28px !important;
+}
+
+.so-gvcn-sheet-wrap table thead tr:first-child,
+.so-gvcn-sheet-wrap table thead tr:first-child td,
+.so-gvcn-sheet-wrap table thead tr:first-child th,
+.so-gvcn-sheet-wrap table td[data-column],
+.so-gvcn-sheet-wrap table th[data-column] {
+    position: sticky !important;
+    top: 0 !important;
+    z-index: 31 !important;
+    background: #f5f5f5 !important;
+}
+
+.so-gvcn-sheet-wrap table thead tr:nth-child(2),
+.so-gvcn-sheet-wrap table thead tr:nth-child(2) td,
+.so-gvcn-sheet-wrap table thead tr:nth-child(2) th {
+    position: sticky !important;
+    top: 28px !important;
+    z-index: 30 !important;
+    background: #f5f5f5 !important;
+}
+
+.so-gvcn-sheet-wrap table td.jss_freezed,
+.so-gvcn-sheet-wrap table th.jss_freezed {
+    background: #fff !important;
+    z-index: 20 !important;
+}
+
+.so-gvcn-sheet-wrap table thead td.jss_freezed,
+.so-gvcn-sheet-wrap table thead th.jss_freezed {
+    background: #f5f5f5 !important;
+    z-index: 40 !important;
+}
+
+/* Student Data Sheet (Tab 1 Special Nested Header Adjustments) */
+.so-gvcn-student-sheet table thead tr:first-child td:first-child,
+.so-gvcn-student-sheet table thead tr:first-child th:first-child {
+    visibility: hidden !important;
+    z-index: 1 !important;
+}
+
+.so-gvcn-student-sheet table thead tr:nth-child(2) td:nth-child(-n+6),
+.so-gvcn-student-sheet table thead tr:nth-child(2) th:nth-child(-n+6) {
+    visibility: visible !important;
+    z-index: 45 !important;
+    background: #f5f5f5 !important;
+}
+
+/*
+ * Tab HS cần quan tâm: đặt cuối file để các rule chung phía trên không
+ * ghi đè vị trí và thứ tự lớp của ba cột frozen.
+ */
+.so-gvcn-hs-can-quan-tam-sheet td[data-column="0,1,2"],
+.so-gvcn-hs-can-quan-tam-sheet th[data-column="0,1,2"] {
+    position: sticky !important;
+    left: 0 !important;
+    z-index: 61 !important;
+    background-color: #f5f5f5 !important;
+}
+
+.so-gvcn-hs-can-quan-tam-sheet td.jss_freezed,
+.so-gvcn-hs-can-quan-tam-sheet th.jss_freezed {
+    z-index: 50 !important;
+    background-color: #fff !important;
+}
+
+.so-gvcn-hs-can-quan-tam-sheet thead td.jss_freezed,
+.so-gvcn-hs-can-quan-tam-sheet thead th.jss_freezed {
+    z-index: 60 !important;
+    background-color: #f5f5f5 !important;
+}
+
+.so-gvcn-hs-can-quan-tam-sheet td[data-x="2"].jss_freezed,
+.so-gvcn-hs-can-quan-tam-sheet th[data-x="2"].jss_freezed {
+    box-shadow: 1px 0 0 #bdbdbd;
+}

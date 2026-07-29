@@ -1,17 +1,17 @@
 <template>
 	<v-card-text class="pa-0 so-gvcn-sheet-wrap" :style="{ height: sheetHeight, 'overflow-y': 'auto' }">
 		<v-alert v-if="selectedLopID === '__ALL__'" type="info" variant="tonal" density="compact" class="ma-2">
-			Chọn một lớp ở thanh trên để theo dõi nhận xét tháng học sinh (LMS).
+			Chọn một lớp ở thanh trên để theo dõi thành tích & khen thưởng học sinh.
 		</v-alert>
 		<div v-else class="so-gvcn-sheet-wrap">
-			<div ref="sheetRef" class="w-100 so-gvcn-sheet so-gvcn-nhan-xet-thang-lms-sheet"></div>
+			<div ref="sheetRef" class="w-100 so-gvcn-sheet so-gvcn-theo-doi-thanh-tich-sheet"></div>
 		</div>
 	</v-card-text>
 </template>
 
 <script>
 	export default {
-		name: 'so-gvcn-c1-tab-nhan-xet-thang-lms',
+		name: 'so-gvcn-c1-tab-theo-doi-thanh-tich',
 		props: {
 			selectedLopID: { type: [String, Number], default: '__ALL__' },
 			students: { type: Array, default: () => [] },
@@ -25,17 +25,11 @@
 					{ title: 'STT', width: 60, readOnly: true },
 					{ title: 'SỐ DANH BỘ', width: 120, readOnly: true },
 					{ title: 'HỌ VÀ TÊN HỌC SINH', width: 200, readOnly: true },
-					{ title: 'THÁNG 8', width: 180 },
-					{ title: 'THÁNG 9', width: 180 },
-					{ title: 'THÁNG 10', width: 180 },
-					{ title: 'THÁNG 11', width: 180 },
-					{ title: 'THÁNG 12', width: 180 },
-					{ title: 'NHẬN XÉT HKI', width: 220 },
-					{ title: 'THÁNG 1 & 2', width: 180 },
-					{ title: 'THÁNG 3', width: 180 },
-					{ title: 'THÁNG 4', width: 180 },
-					{ title: 'THÁNG 5', width: 180 },
-					{ title: 'NHẬN XÉT HKII', width: 220 }
+					{ title: 'THÀNH TÍCH / GIẢI THƯỞNG ĐẠT ĐƯỢC', width: 280 },
+					{ title: 'CẤP ĐẠT GIẢI (Trường/Quận/TP/Quốc gia)', width: 240 },
+					{ title: 'THỜI GIAN / NGÀY KHEN THƯỞNG', width: 160 },
+					{ title: 'HÌNH THỨC KHEN THƯỞNG', width: 200 },
+					{ title: 'GHI CHÚ / QUYẾT ĐỊNH KHEN THƯỞNG', width: 250 }
 				]
 			}
 		},
@@ -67,7 +61,7 @@
 				return [
 					[
 						{ title: '', colspan: 3 },
-						{ title: 'NỘI DUNG NHẬN XÉT THÁNG HỌC SINH (LMS)', colspan: 11 }
+						{ title: 'THEO DÕI THÀNH TÍCH VÀ KHEN THƯỞNG HỌC SINH', colspan: 5 }
 					]
 				]
 			}
@@ -88,17 +82,11 @@
 						idx + 1,
 						student.SoDanhBo || '',
 						student.HoTen || student.HoTenHocSinh || '',
-						saved.Thang8 || '',
-						saved.Thang9 || '',
-						saved.Thang10 || '',
-						saved.Thang11 || '',
-						saved.Thang12 || '',
-						saved.NhanXetHKI || '',
-						saved.Thang1_2 || '',
-						saved.Thang3 || '',
-						saved.Thang4 || '',
-						saved.Thang5 || '',
-						saved.NhanXetHKII || ''
+						saved.ThanhTich || '',
+						saved.CapDatGiai || '',
+						saved.ThoiGian || '',
+						saved.HinhThucKhenThuong || '',
+						saved.GhiChu || ''
 					]
 				})
 			},

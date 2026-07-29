@@ -1,17 +1,17 @@
 <template>
 	<v-card-text class="pa-0 so-gvcn-sheet-wrap" :style="{ height: sheetHeight, 'overflow-y': 'auto' }">
 		<v-alert v-if="selectedLopID === '__ALL__'" type="info" variant="tonal" density="compact" class="ma-2">
-			Chọn một lớp ở thanh trên để theo dõi nhận xét tháng học sinh (LMS).
+			Chọn một lớp ở thanh trên để theo dõi Tổng kết cuối năm học.
 		</v-alert>
 		<div v-else class="so-gvcn-sheet-wrap">
-			<div ref="sheetRef" class="w-100 so-gvcn-sheet so-gvcn-nhan-xet-thang-lms-sheet"></div>
+			<div ref="sheetRef" class="w-100 so-gvcn-sheet so-gvcn-tong-ket-nam-sheet"></div>
 		</div>
 	</v-card-text>
 </template>
 
 <script>
 	export default {
-		name: 'so-gvcn-c1-tab-nhan-xet-thang-lms',
+		name: 'so-gvcn-c1-tab-tong-ket-nam-hoc',
 		props: {
 			selectedLopID: { type: [String, Number], default: '__ALL__' },
 			students: { type: Array, default: () => [] },
@@ -25,17 +25,21 @@
 					{ title: 'STT', width: 60, readOnly: true },
 					{ title: 'SỐ DANH BỘ', width: 120, readOnly: true },
 					{ title: 'HỌ VÀ TÊN HỌC SINH', width: 200, readOnly: true },
-					{ title: 'THÁNG 8', width: 180 },
-					{ title: 'THÁNG 9', width: 180 },
-					{ title: 'THÁNG 10', width: 180 },
-					{ title: 'THÁNG 11', width: 180 },
-					{ title: 'THÁNG 12', width: 180 },
-					{ title: 'NHẬN XÉT HKI', width: 220 },
-					{ title: 'THÁNG 1 & 2', width: 180 },
-					{ title: 'THÁNG 3', width: 180 },
-					{ title: 'THÁNG 4', width: 180 },
-					{ title: 'THÁNG 5', width: 180 },
-					{ title: 'NHẬN XÉT HKII', width: 220 }
+					// Năng lực cốt lõi
+					{ title: 'Tự phục vụ, tự quản', width: 150 },
+					{ title: 'Hợp tác', width: 130 },
+					{ title: 'Tự học và giải quyết vấn đề', width: 180 },
+					// Phẩm chất chủ yếu
+					{ title: 'Yêu nước', width: 120 },
+					{ title: 'Nhân ái', width: 120 },
+					{ title: 'Chăm chỉ', width: 120 },
+					{ title: 'Trung thực', width: 120 },
+					{ title: 'Trách nhiệm', width: 120 },
+					// Tổng kết Cuối năm
+					{ title: 'Đánh giá KQ Rèn luyện & Học tập', width: 240 },
+					{ title: 'Danh hiệu Khen thưởng cuối năm', width: 240 },
+					{ title: 'Hoàn thành chương trình lớp học/tiểu học', width: 260 },
+					{ title: 'Ghi chú / Nhận xét tổng kết', width: 250 }
 				]
 			}
 		},
@@ -67,7 +71,9 @@
 				return [
 					[
 						{ title: '', colspan: 3 },
-						{ title: 'NỘI DUNG NHẬN XÉT THÁNG HỌC SINH (LMS)', colspan: 11 }
+						{ title: 'NĂNG LỰC CỐT LÕI (TT27)', colspan: 3 },
+						{ title: 'PHẨM CHẤT CHỦ YẾU (TT27)', colspan: 5 },
+						{ title: 'ĐÁNH GIÁ TỔNG KẾT CUỐI NĂM HỌC', colspan: 4 }
 					]
 				]
 			}
@@ -88,17 +94,18 @@
 						idx + 1,
 						student.SoDanhBo || '',
 						student.HoTen || student.HoTenHocSinh || '',
-						saved.Thang8 || '',
-						saved.Thang9 || '',
-						saved.Thang10 || '',
-						saved.Thang11 || '',
-						saved.Thang12 || '',
-						saved.NhanXetHKI || '',
-						saved.Thang1_2 || '',
-						saved.Thang3 || '',
-						saved.Thang4 || '',
-						saved.Thang5 || '',
-						saved.NhanXetHKII || ''
+						saved.NLTuPhucVu || '',
+						saved.NLHopTac || '',
+						saved.NLTuHoc || '',
+						saved.PCYeuNuoc || '',
+						saved.PCNhanAi || '',
+						saved.PCChamChi || '',
+						saved.PCTrungThuc || '',
+						saved.PCTrachNhiem || '',
+						saved.KetQuaRenLuyenHocTap || '',
+						saved.KhenThuongCuoiNam || '',
+						saved.HoanThanhChuongTrinh || '',
+						saved.GhiChuCuoiNam || ''
 					]
 				})
 			},
