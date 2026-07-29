@@ -11,85 +11,98 @@
 
 		<template v-else>
 			<div class="pa-3 overflow-y-auto bg-grey-lighten-4" :style="{ height: sheetHeight }">
-					<v-card class="mb-4" variant="outlined">
-						<v-card-title class="text-subtitle-1 font-weight-bold">I. BAN CÁN SỰ LỚP</v-card-title>
-						<v-table density="compact" class="organization-table">
-							<thead>
-								<tr>
-									<th class="text-center stt-column">STT</th>
-									<th>HỌ VÀ TÊN HỌC SINH</th>
-									<th>NHIỆM VỤ</th>
-									<th>GHI CHÚ</th>
-								</tr>
-							</thead>
-							<tbody>
-								<tr v-for="(row, index) in localCanBoRows" :key="'can-bo-' + index">
-									<td class="text-center">{{ index + 1 }}</td>
-									<td>
-										<v-autocomplete v-model="row.HocSinh" :items="studentNames"
-											density="compact" variant="plain" hide-details clearable
-											@update:model-value="onCanBoStudentChange(row)" />
-									</td>
-									<td>
-										<v-select v-model="row.ChucVu" :items="studentDutyOptions"
-											density="compact" variant="plain" hide-details clearable />
-									</td>
-									<td><v-text-field v-model="row.GhiChu" density="compact" variant="plain" hide-details /></td>
-								</tr>
-							</tbody>
-						</v-table>
-					</v-card>
+				<v-card class="mb-4" variant="outlined">
+					<v-card-title class="text-subtitle-1 font-weight-bold">I. BAN CÁN SỰ LỚP</v-card-title>
+					<v-table density="compact" class="organization-table">
+						<thead>
+							<tr>
+								<th class="text-center stt-column">STT</th>
+								<th>HỌ VÀ TÊN HỌC SINH</th>
+								<th>NHIỆM VỤ</th>
+								<th>GHI CHÚ</th>
+							</tr>
+						</thead>
+						<tbody>
+							<tr v-for="(row, index) in localCanBoRows" :key="'can-bo-' + index">
+								<td class="text-center">{{ index + 1 }}</td>
+								<td>
+									<v-autocomplete v-model="row.HocSinh" :items="studentNames" density="compact"
+										variant="plain" hide-details clearable
+										@update:model-value="onCanBoStudentChange(row)" />
+								</td>
+								<td>
+									<v-select v-model="row.ChucVu" :items="studentDutyOptions" density="compact"
+										variant="plain" hide-details clearable />
+								</td>
+								<td>
+									<v-text-field v-model="row.GhiChu" density="compact" variant="plain" hide-details />
+								</td>
+							</tr>
+						</tbody>
+					</v-table>
+				</v-card>
 
-					<v-card class="mb-4" variant="outlined">
-						<v-card-title class="text-subtitle-1 font-weight-bold">
-							II. BAN ĐẠI DIỆN CHA MẸ HỌC SINH LỚP
-						</v-card-title>
-						<v-table density="compact" class="organization-table">
-							<thead>
-								<tr>
-									<th class="text-center stt-column">STT</th>
-									<th>HỌ VÀ TÊN PHỤ HUYNH</th>
-									<th>NHIỆM VỤ</th>
-									<th>GHI CHÚ</th>
-								</tr>
-							</thead>
-							<tbody>
-								<tr v-for="(row, index) in localParentRows" :key="'ph-' + index">
-									<td class="text-center">{{ index + 1 }}</td>
-									<td><v-text-field v-model="row.ChaMe" density="compact" variant="plain" hide-details /></td>
-									<td>
-										<v-select v-model="row.NhiemVu" :items="parentDutyOptions"
-											density="compact" variant="plain" hide-details clearable />
-									</td>
-									<td><v-text-field v-model="row.GhiChu" density="compact" variant="plain" hide-details /></td>
-								</tr>
-							</tbody>
-						</v-table>
-					</v-card>
+				<v-card class="mb-4" variant="outlined">
+					<v-card-title class="text-subtitle-1 font-weight-bold">
+						II. BAN ĐẠI DIỆN CHA MẸ HỌC SINH LỚP
+					</v-card-title>
+					<v-table density="compact" class="organization-table">
+						<thead>
+							<tr>
+								<th class="text-center stt-column">STT</th>
+								<th>HỌ VÀ TÊN PHỤ HUYNH</th>
+								<th>NHIỆM VỤ</th>
+								<th>GHI CHÚ</th>
+							</tr>
+						</thead>
+						<tbody>
+							<tr v-for="(row, index) in localParentRows" :key="'ph-' + index">
+								<td class="text-center">{{ index + 1 }}</td>
+								<td>
+									<v-text-field v-model="row.ChaMe" density="compact" variant="plain" hide-details />
+								</td>
+								<td>
+									<v-select v-model="row.NhiemVu" :items="parentDutyOptions" density="compact"
+										variant="plain" hide-details clearable />
+								</td>
+								<td>
+									<v-text-field v-model="row.GhiChu" density="compact" variant="plain" hide-details />
+								</td>
+							</tr>
+						</tbody>
+					</v-table>
+				</v-card>
 
-					<v-card variant="outlined">
-						<v-card-title class="text-subtitle-1 font-weight-bold">
-							III. DANH SÁCH HỌC SINH CHIA THEO TỔ/NHÓM
-						</v-card-title>
-						<v-table density="compact" class="organization-table">
-							<thead>
-								<tr>
-									<th class="group-column">TỔ/NHÓM</th>
-									<th>HỌ VÀ TÊN</th>
-									<th>NHIỆM VỤ</th>
-									<th>BAN</th>
-								</tr>
-							</thead>
-							<tbody>
-								<tr v-for="(row, index) in localGroupRows" :key="'to-' + row.HocSinhID + '-' + index">
-									<td><v-text-field v-model="row.ToNhom" density="compact" variant="plain" hide-details /></td>
-									<td>{{ row.HocSinh }}</td>
-									<td><v-text-field v-model="row.NhiemVu" density="compact" variant="plain" hide-details /></td>
-									<td><v-text-field v-model="row.Ban" density="compact" variant="plain" hide-details /></td>
-								</tr>
-							</tbody>
-						</v-table>
-					</v-card>
+				<v-card variant="outlined">
+					<v-card-title class="text-subtitle-1 font-weight-bold">
+						III. DANH SÁCH HỌC SINH CHIA THEO TỔ/NHÓM
+					</v-card-title>
+					<v-table density="compact" class="organization-table">
+						<thead>
+							<tr>
+								<th class="group-column">TỔ/NHÓM</th>
+								<th>HỌ VÀ TÊN</th>
+								<th>NHIỆM VỤ</th>
+								<th>BAN</th>
+							</tr>
+						</thead>
+						<tbody>
+							<tr v-for="(row, index) in localGroupRows" :key="'to-' + row.HocSinhID + '-' + index">
+								<td>
+									<v-text-field v-model="row.ToNhom" density="compact" variant="plain" hide-details />
+								</td>
+								<td>{{ row.HocSinh }}</td>
+								<td>
+									<v-text-field v-model="row.NhiemVu" density="compact" variant="plain"
+										hide-details />
+								</td>
+								<td>
+									<v-text-field v-model="row.Ban" density="compact" variant="plain" hide-details />
+								</td>
+							</tr>
+						</tbody>
+					</v-table>
+				</v-card>
 			</div>
 		</template>
 	</div>
@@ -346,27 +359,3 @@
 	}
 	}
 </script>
-
-<style scoped>
-	.organization-table {
-		table-layout: fixed;
-	}
-
-	.organization-table th {
-		background: #f5f5f5;
-		font-weight: 700 !important;
-	}
-
-	.organization-table th,
-	.organization-table td {
-		border: 1px solid rgba(0, 0, 0, 0.18);
-	}
-
-	.stt-column {
-		width: 64px;
-	}
-
-	.group-column {
-		width: 130px;
-	}
-</style>

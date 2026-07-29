@@ -1667,8 +1667,8 @@
 				const student = this.findSelectedStudent(this.cleanSheetCell(row, 2, 'HocSinh')) || {}
 				return {
 				STT: this.cleanSheetCell(row, 0, 'STT') || index + 1,
-				HSLopID: student.HSLopID || '',
-				HocSinhID: student.HocSinhID || '',
+				HSLopID: student.HSLopID || null,
+				HocSinhID: student.HocSinhID || null,
 				MaHocSinh: this.cleanSheetCell(row, 1, 'HocSinhID') || student.MaHocSinh || student.HocSinhID || '',
 				HocSinh: this.cleanSheetCell(row, 2, 'HocSinh'),
 				ChaMe: this.cleanSheetCell(row, 3, 'ChaMe'),
@@ -1706,8 +1706,8 @@
 				const student = this.findSelectedStudent(this.cleanSheetCell(row, 2, 'HocSinh')) || {}
 				return {
 				STT: this.cleanSheetCell(row, 0, 'STT') || index + 1,
-				HSLopID: student.HSLopID || '',
-				HocSinhID: student.HocSinhID || '',
+				HSLopID: student.HSLopID || null,
+				HocSinhID: student.HocSinhID || null,
 				MaHocSinh: this.cleanSheetCell(row, 1, 'HocSinhID') || student.MaHocSinh || '',
 				HocSinh: this.cleanSheetCell(row, 2, 'HocSinh'),
 				ChucVu: this.cleanSheetCell(row, 3, 'ChucVu'),
@@ -2337,14 +2337,14 @@
 					const canBoCard = this.getChiTieuCard('can-bo-lop')
 					const parentCard = this.getChiTieuCard('ban-dai-dien-cmhs')
 					canBoCard.rows = (organization.canBoRows || []).map((row, index) => [
-						row.STT || index + 1,
+						index + 1,
 						row.MaHocSinh || row.HocSinhID || '',
 						row.HocSinh || '',
 						row.ChucVu || '',
 						row.GhiChu || ''
 					])
 					parentCard.rows = (organization.parentRows || []).map((row, index) => [
-						row.STT || index + 1,
+						index + 1,
 						row.MaHocSinh || row.HocSinhID || '',
 						row.HocSinh || '',
 						row.ChaMe || '',
@@ -2355,7 +2355,8 @@
 					])
 					const banDaiDienCMHSRows = this.serializeBanDaiDienCMHSRows()
 					const canBoLopRows = this.serializeCanBoLopRows()
-					const toNhomHocSinhRows = organization.groupRows || []
+					const toNhomHocSinhRows = (organization.groupRows || []).filter(row =>
+						row.ToNhom || row.NhiemVu || row.Ban)
 					await ajaxCALLPromise('lms/SoGVCNPhuLucTab2Save', {
 						SoGVCNID: this.form.SoGVCNID,
 						JsonSiSo: JSON.stringify(this.serializeSiSoRows()),
@@ -2367,6 +2368,10 @@
 					this.banDaiDienCMHSSavedRows = banDaiDienCMHSRows
 					this.canBoLopSavedRows = canBoLopRows
 					this.toNhomHocSinhSavedRows = toNhomHocSinhRows
+					await this.getDetail()
+					if (this.toNhomHocSinhSavedRows.length !== toNhomHocSinhRows.length) {
+						throw new Error('Dữ liệu tổ/nhóm chưa được lưu đầy đủ. Vui lòng thử lại.')
+					}
 				} else if (this.tab === 'chi-tieu') {
 					const chiTieuRows = this.serializeChiTieuStructuredRows()
 					this.form.ChiTieu = this.serializeChiTieuRows()

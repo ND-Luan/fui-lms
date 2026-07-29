@@ -1,48 +1,43 @@
 <template>
 	<v-card-text class="pa-2" :style="{ height: sheetHeight, overflow: 'hidden' }">
-		<v-alert v-if="selectedLopID === '__ALL__'" type="info" variant="tonal" density="compact">
-			Chọn một lớp ở thanh trên để nhập thông tin tổ chức lớp.
-		</v-alert>
-		<div v-else class="d-flex h-100 ga-3">
-			<div class="flex-shrink-0 overflow-y-auto"
-				style="width: 260px; border-right: 1px solid rgba(0, 0, 0, 0.12);">
-				<v-list density="compact" nav color="primary" class="pa-0">
-					<v-list-item v-for="card in organizationCards" :key="card.key" :value="card.key"
-						:active="activeCardKey === card.key" class="mb-1 rounded"
-						@click="scrollToCard(card)">
-						<template #prepend>
-							<v-icon size="small" class="mr-2"
-								:color="activeCardKey === card.key ? 'primary' : ''">
-								{{ card.icon }}
-							</v-icon>
-						</template>
-						<v-list-item-title class="text-caption font-weight-bold text-wrap"
-							style="line-height: 1.3;">
-							{{ card.navTitle }}
-						</v-list-item-title>
-					</v-list-item>
-				</v-list>
-			</div>
+    <v-alert v-if="selectedLopID === '__ALL__'" type="info" variant="tonal" density="compact">
+      Chọn một lớp ở thanh trên để nhập thông tin tổ chức lớp.
+    </v-alert>
+    <div v-else class="d-flex h-100 ga-3">
+      <div class="flex-shrink-0 overflow-y-auto" style="width: 260px; border-right: 1px solid rgba(0, 0, 0, 0.12);">
+        <v-list density="compact" nav color="primary" class="pa-0">
+          <v-list-item v-for="card in organizationCards" :key="card.key" :value="card.key"
+            :active="activeCardKey === card.key" class="mb-1 rounded" @click="scrollToCard(card)">
+            <template #prepend>
+              <v-icon size="small" class="mr-2" :color="activeCardKey === card.key ? 'primary' : ''">
+                {{ card.icon }}
+              </v-icon>
+            </template>
+            <v-list-item-title class="text-caption font-weight-bold text-wrap" style="line-height: 1.3;">
+              {{ card.navTitle }}
+            </v-list-item-title>
+          </v-list-item>
+        </v-list>
+      </div>
 
-			<div ref="scrollContainer" class="flex-grow-1 h-100 overflow-y-auto pr-1">
-				<v-row dense class="pb-16">
-					<v-col v-for="card in organizationCards" :key="card.key" cols="12" class="py-1 mb-16">
-						<v-card :id="card.domId" outlined elevation="0" style="margin-bottom: 120px;">
-							<v-card-title
-								class="px-3 py-2 text-subtitle-2 font-weight-bold text-primary d-flex align-center">
-								<v-icon start color="primary" class="mr-2" size="small">{{ card.icon }}</v-icon>
-								{{ card.title }}
-							</v-card-title>
-							<v-divider />
-							<v-card-text class="pa-0 so-gvcn-card-sheet-wrap">
-								<div :ref="card.refName" class="w-100 so-gvcn-sheet"></div>
-							</v-card-text>
-						</v-card>
-					</v-col>
-				</v-row>
-			</div>
-		</div>
-	</v-card-text>
+      <div ref="scrollContainer" class="flex-grow-1 h-100 overflow-y-auto pr-1">
+        <v-row dense class="pb-16">
+          <v-col v-for="card in organizationCards" :key="card.key" cols="12" class="py-1 mb-16">
+            <v-card :id="card.domId" outlined elevation="0" style="margin-bottom: 120px;">
+              <v-card-title class="px-3 py-2 text-subtitle-2 font-weight-bold text-primary d-flex align-center">
+                <v-icon start color="primary" class="mr-2" size="small">{{ card.icon }}</v-icon>
+                {{ card.title }}
+              </v-card-title>
+              <v-divider />
+              <v-card-text class="pa-0 so-gvcn-card-sheet-wrap">
+                <div :ref="card.refName" class="w-100 so-gvcn-sheet"></div>
+              </v-card-text>
+            </v-card>
+          </v-col>
+        </v-row>
+      </div>
+    </div>
+  </v-card-text>
 </template>
 
 <script>
@@ -125,7 +120,7 @@
 					const studentName = row.HocSinh || row[2] || ''
 					const student = this.findStudent(studentName)
 					return [
-						row.STT || row[0] || index + 1,
+						index + 1,
 						row.MaHocSinh || row.HocSinhID || row[1] || student.MaHocSinh || student.HocSinhID || '',
 						row.SoDanhBo || student.SoDanhBo || '',
 						studentName,
@@ -133,12 +128,20 @@
 						row.GhiChu || row[4] || ''
 					]
 				})
-				const parentData = this.trimRows(this.parentRows, 6).map((row, index) => [
-					row.STT || row[0] || index + 1,
-					row.ChaMe || row[3] || '',
-					row.NhiemVu || row[6] || '',
-					row.GhiChu || row[7] || ''
-				])
+				const parentData = this.trimRows(this.parentRows, 6).map((row, index) => {
+					const studentName = row.HocSinh || row[2] || ''
+					const student = this.findStudent(studentName)
+					const parent = this.getParentSummary(student)
+					return [
+						index + 1,
+						row.MaHocSinh || row.HocSinhID || row[1] || student.MaHocSinh || student.HocSinhID || '',
+						row.SoDanhBo || student.SoDanhBo || '',
+						studentName,
+						parent.names || row.ChaMe || row[3] || '',
+						row.NhiemVu || row[6] || '',
+						row.GhiChu || row[7] || ''
+					]
+				})
 				const groupMap = new Map((this.groupRows || []).map(row => [
 					String(row.HSLopID || row.HocSinhID || ''),
 					row
@@ -154,6 +157,7 @@
 						saved.Ban || ''
 					]
 				})
+				this.sortGroupRows(groupData)
 
 				this.organizationCards = [
 					{
@@ -172,8 +176,8 @@
 								title: 'HỌ VÀ TÊN HỌC SINH', name: 'HocSinh', width: 320,
 								type: 'dropdown', source: studentNames, autocomplete: true
 							},
-							{ title: 'NHIỆM VỤ', name: 'ChucVu', width: 260 },
-							{ title: 'GHI CHÚ', name: 'GhiChu', width: 420 }
+							{ title: 'NHIỆM VỤ', name: 'ChucVu', width: 260, align: 'justify' },
+							{ title: 'GHI CHÚ', name: 'GhiChu', width: 420, align: 'justify' }
 						],
 						rows: canBoData
 					},
@@ -187,9 +191,15 @@
 						height: '245px',
 						columns: [
 							{ title: 'STT', name: 'STT', width: 65, align: 'center', readOnly: true },
-							{ title: 'HỌ VÀ TÊN PHỤ HUYNH', name: 'ChaMe', width: 360 },
-							{ title: 'NHIỆM VỤ', name: 'NhiemVu', width: 260 },
-							{ title: 'GHI CHÚ', name: 'GhiChu', width: 420 }
+							{ title: 'MÃ HỌC SINH', name: 'MaHocSinh', width: 130, readOnly: true },
+							{ title: 'SỐ DANH BỘ', name: 'SoDanhBo', width: 130, readOnly: true },
+							{
+								title: 'HỌ VÀ TÊN HỌC SINH', name: 'HocSinh', width: 300,
+								type: 'dropdown', source: studentNames, autocomplete: true
+							},
+							{ title: 'HỌ VÀ TÊN PHỤ HUYNH', name: 'ChaMe', width: 340, readOnly: true },
+							{ title: 'NHIỆM VỤ', name: 'NhiemVu', width: 260, align: 'justify' },
+							{ title: 'GHI CHÚ', name: 'GhiChu', width: 420, align: 'justify' }
 						],
 						rows: parentData
 					},
@@ -206,8 +216,8 @@
 							{ title: 'MÃ HỌC SINH', name: 'MaHocSinh', width: 130, readOnly: true },
 							{ title: 'SỐ DANH BỘ', name: 'SoDanhBo', width: 130, readOnly: true },
 							{ title: 'HỌ VÀ TÊN', name: 'HocSinh', width: 320, readOnly: true },
-							{ title: 'NHIỆM VỤ', name: 'NhiemVu', width: 300 },
-							{ title: 'BAN', name: 'Ban', width: 300 }
+							{ title: 'NHIỆM VỤ', name: 'NhiemVu', width: 300, align: 'justify' },
+							{ title: 'BAN', name: 'Ban', width: 300, align: 'justify' }
 						],
 						rows: groupData.length ? groupData : [['', '', '', '']]
 					}
@@ -271,6 +281,9 @@
 										worksheet.setValueFromCoords(2, Number(y), student.SoDanhBo || '', true)
 									}
 								}
+								if (card.key === 'ban-dai-dien-cmhs' && Number(x) === 3) {
+									this.fillParentRow(worksheet, Number(y), value)
+								}
 								card.rows = worksheet.getData()
 							}
 						})
@@ -287,18 +300,80 @@
 				return (this.students || []).find(student =>
 					String(student.HoTen || student.HoTenHocSinh || '').trim() === cleanName) || {}
 			},
+			getLiveCardRows(card) {
+				const instance = this.sheetInstances[card.key]
+				const worksheet = Array.isArray(instance) ? instance[0] : instance
+				if (worksheet && typeof worksheet.closeEditor === 'function') {
+					try {
+						worksheet.closeEditor(true)
+					} catch (error) {}
+				}
+				if (worksheet && typeof worksheet.getData === 'function') {
+					const rows = worksheet.getData()
+					card.rows = rows
+					return rows
+				}
+				return card.rows || []
+			},
+			getParentSummary(student) {
+				const father = student?.Cha || student?.HoTenCha || ''
+				const mother = student?.Me || student?.HoTenMe || ''
+				const fatherJob = student?.NgheNghiepCha || ''
+				const motherJob = student?.NgheNghiepMe || ''
+				const fatherPhone = student?.SDTCha || student?.DienThoaiCha || ''
+				const motherPhone = student?.SDTMe || student?.DienThoaiMe || ''
+				return {
+					names: father || mother ? ['Cha: ' + father, 'Mẹ: ' + mother].join('\n') : '',
+					jobs: fatherJob || motherJob ? ['Cha: ' + fatherJob, 'Mẹ: ' + motherJob].join('\n') : '',
+					phones: fatherPhone || motherPhone ? ['Cha: ' + fatherPhone, 'Mẹ: ' + motherPhone].join('\n') : ''
+				}
+			},
+			fillParentRow(worksheet, rowIndex, studentName) {
+				if (!worksheet || typeof worksheet.getData !== 'function'
+					|| typeof worksheet.setValueFromCoords !== 'function') return
+				const student = this.findStudent(studentName)
+				const parent = this.getParentSummary(student)
+				worksheet.setValueFromCoords(1, rowIndex, student.MaHocSinh || student.HocSinhID || '', true)
+				worksheet.setValueFromCoords(2, rowIndex, student.SoDanhBo || '', true)
+				worksheet.setValueFromCoords(4, rowIndex, parent.names, true)
+			},
+			sortGroupRows(rows) {
+				return (rows || []).sort((rowA, rowB) => {
+					const groupA = String(rowA?.[0] || '').trim()
+					const groupB = String(rowB?.[0] || '').trim()
+					if (!groupA && groupB) return 1
+					if (groupA && !groupB) return -1
+					const groupCompare = groupA.localeCompare(groupB, 'vi', {
+						numeric: true,
+						sensitivity: 'base'
+					})
+					if (groupCompare !== 0) return groupCompare
+
+					const bookA = String(rowA?.[2] || '').trim()
+					const bookB = String(rowB?.[2] || '').trim()
+					const bookCompare = bookA.localeCompare(bookB, 'vi', {
+						numeric: true,
+						sensitivity: 'base'
+					})
+					if (bookCompare !== 0) return bookCompare
+					return String(rowA?.[3] || '').localeCompare(String(rowB?.[3] || ''), 'vi')
+				})
+			},
 			getOrganizationRows() {
 				const canBoCard = this.organizationCards.find(card => card.key === 'can-bo-lop') || {}
 				const parentCard = this.organizationCards.find(card => card.key === 'ban-dai-dien-cmhs') || {}
 				const groupCard = this.organizationCards.find(card => card.key === 'to-nhom-hoc-sinh') || {}
+				const canBoRows = this.getLiveCardRows(canBoCard)
+				const parentRows = this.getLiveCardRows(parentCard)
+				const groupRows = this.getLiveCardRows(groupCard)
 
 				return {
-					canBoRows: (canBoCard.rows || []).map((row, index) => {
+					canBoRows: canBoRows.map((row, index) => {
 						const student = this.findStudent(row[3])
 						return {
-							STT: row[0] || index + 1,
-							HSLopID: student.HSLopID || '',
-							HocSinhID: student.HocSinhID || '',
+							STT: index + 1,
+							HSLopID: student.HSLopID || null,
+							HocSinhID: student.HocSinhID || null,
 							MaHocSinh: row[1] || student.MaHocSinh || student.HocSinhID || '',
 							SoDanhBo: row[2] || student.SoDanhBo || '',
 							HocSinh: row[3] || '',
@@ -306,17 +381,28 @@
 							GhiChu: row[5] || ''
 						}
 					}),
-					parentRows: (parentCard.rows || []).map((row, index) => ({
-						STT: row[0] || index + 1,
-						ChaMe: row[1] || '',
-						NhiemVu: row[2] || '',
-						GhiChu: row[3] || ''
-					})),
-					groupRows: (groupCard.rows || []).map((row, index) => {
+					parentRows: parentRows.map((row, index) => {
+						const student = this.findStudent(row[3])
+						const parent = this.getParentSummary(student)
+						return {
+							STT: index + 1,
+							HSLopID: student.HSLopID || null,
+							HocSinhID: student.HocSinhID || null,
+							MaHocSinh: row[1] || student.MaHocSinh || student.HocSinhID || '',
+							SoDanhBo: row[2] || student.SoDanhBo || '',
+							HocSinh: row[3] || '',
+							ChaMe: row[4] || '',
+							NgheNghiep: parent.jobs,
+							DienThoai: parent.phones,
+							NhiemVu: row[5] || '',
+							GhiChu: row[6] || ''
+						}
+					}),
+					groupRows: this.sortGroupRows(groupRows).map((row, index) => {
 						const student = this.findStudent(row[3])
 						return {
-							HSLopID: student.HSLopID || '',
-							HocSinhID: student.HocSinhID || '',
+							HSLopID: student.HSLopID || null,
+							HocSinhID: student.HocSinhID || null,
 							MaHocSinh: row[1] || student.MaHocSinh || student.HocSinhID || '',
 							SoDanhBo: row[2] || student.SoDanhBo || '',
 							HocSinh: row[3] || '',
