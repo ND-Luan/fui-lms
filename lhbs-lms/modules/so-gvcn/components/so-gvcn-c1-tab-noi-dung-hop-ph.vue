@@ -21,8 +21,9 @@
 			return {
 				instance: null,
 				columns: [
-					{ title: 'STT', width: 60, readOnly: true },
-					{ title: 'ĐỜT HỌP PHHS', width: 180, readOnly: true },
+					{ title: 'STT', width: 60, readOnly: true, align: 'center' },
+					{ title: 'Hội PHHS', width: 140, readOnly: true },
+					{ title: 'NỘI DUNG HỌP PHỤ HUYNH', width: 280, readOnly: true },
 					{ title: 'THỜI GIAN / NGÀY HỌP', width: 160 },
 					{ title: 'ĐỊA ĐIỂM / HÌNH THỨC', width: 180 },
 					{ title: 'NỘI DUNG CHÍNH CUỘC HỌP', width: 420 },
@@ -30,11 +31,9 @@
 					{ title: 'KẾT LUẬN / THÔNG QUA BIÊN BẢN', width: 320 }
 				],
 				defaultMeetings: [
-					'Họp PHHS Đầu năm học',
-					'Họp PHHS Cuối Học kỳ I',
-					'Họp PHHS Cuối năm học',
-					'Họp PHHS Chuyên đề / Đột xuất 1',
-					'Họp PHHS Chuyên đề / Đột xuất 2'
+					'NỘI DUNG HỌP PHỤ HUYNH LẦN 1',
+					'NỘI DUNG HỌP PHỤ HUYNH LẦN 2',
+					'NỘI DUNG HỌP PHỤ HUYNH LẦN 3'
 				]
 			}
 		},
@@ -59,7 +58,7 @@
 			nestedHeaders() {
 				return [
 					[
-						{ title: '', colspan: 2 },
+						{ title: '', colspan: 3 },
 						{ title: 'THÔNG TIN VÀ NỘI DUNG BIÊN BẢN HỌP PHỤ HUYNH HỌC SINH', colspan: 5 }
 					]
 				]
@@ -82,6 +81,7 @@
 					const saved = findSaved(idx, meetingTitle)
 					return [
 						idx + 1,
+						'Hội PHHS',
 						meetingTitle,
 						saved.ThoiGian || '',
 						saved.DiaDiem || '',
@@ -114,7 +114,7 @@
 					this.destroySheet()
 					container.innerHTML = ''
 					if (typeof jspreadsheet === 'function') {
-						this.instance = jspreadsheet(container, {
+						this.instance = soGvcnJspreadsheet.create(container, {
 							worksheets: [{
 								data: this.buildRows(),
 								columns: this.columns,
@@ -125,6 +125,7 @@
 								tableOverflow: true,
 								tableHeight: this.sheetHeight,
 								lazyLoading: false,
+								freezeColumns: 3,
 								wordWrap: true,
 								allowInsertColumn: false,
 								allowInsertRow: false,

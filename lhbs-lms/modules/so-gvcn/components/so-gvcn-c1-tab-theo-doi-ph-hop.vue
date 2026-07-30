@@ -22,22 +22,12 @@
 			return {
 				instance: null,
 				columns: [
-					{ title: 'STT', width: 60, readOnly: true },
-					{ title: 'SỐ DANH BỘ', width: 120, readOnly: true },
-					{ title: 'HỌ VÀ TÊN HỌC SINH', width: 200, readOnly: true },
-					{ title: 'HỌ VÀ TÊN PHỤ HUYNH', width: 200 },
-					// Họp PH Đầu năm
-					{ title: 'Có mặt (X)', width: 90, align: 'center' },
-					{ title: 'Vắng mặt', width: 100, align: 'center' },
-					{ title: 'Ý kiến / Ghi chú Đầu năm', width: 220 },
-					// Họp PH Cuối HKI
-					{ title: 'Có mặt (X)', width: 90, align: 'center' },
-					{ title: 'Vắng mặt', width: 100, align: 'center' },
-					{ title: 'Ý kiến / Ghi chú Cuối HKI', width: 220 },
-					// Họp PH Cuối năm (HKII)
-					{ title: 'Có mặt (X)', width: 90, align: 'center' },
-					{ title: 'Vắng mặt', width: 100, align: 'center' },
-					{ title: 'Ý kiến / Ghi chú Cuối năm', width: 220 }
+					{ title: 'STT', width: 60, readOnly: true, align: 'center' },
+					{ title: 'Họ và tên học sinh', width: 250, readOnly: true },
+					{ title: 'I', width: 100, type: 'checkbox' },
+					{ title: 'II', width: 100, type: 'checkbox' },
+					{ title: 'III', width: 100, type: 'checkbox' },
+					{ title: 'Ghi chú', width: 350 }
 				]
 			}
 		},
@@ -68,10 +58,9 @@
 			nestedHeaders() {
 				return [
 					[
-						{ title: '', colspan: 4 },
-						{ title: 'HỌP PHHS ĐẦU NĂM HỌC', colspan: 3 },
-						{ title: 'HỌP PHHS CUỐI HỌC KỲ I', colspan: 3 },
-						{ title: 'HỌP PHHS CUỐI NĂM HỌC', colspan: 3 }
+						{ title: '', colspan: 2 },
+						{ title: 'Kiểm diện PH đi họp', colspan: 3 },
+						{ title: '', colspan: 1 }
 					]
 				]
 			}
@@ -88,21 +77,13 @@
 				const findSaved = (hslopID) => (this.savedRows || []).find(r => r.HSLopID === hslopID) || {}
 				return (this.students || []).map((student, idx) => {
 					const saved = findSaved(student.HSLopID)
-					const parentName = student.HoTenCha || student.HoTenMe || student.HoTenNguoiDoDau || ''
 					return [
 						idx + 1,
-						student.SoDanhBo || '',
 						student.HoTen || student.HoTenHocSinh || '',
-						saved.TenPhuHuynh || parentName,
-						saved.DauNamCoMat || '',
-						saved.DauNamVangMat || '',
-						saved.DauNamYKien || '',
-						saved.HK1CoMat || '',
-						saved.HK1VangMat || '',
-						saved.HK1YKien || '',
-						saved.CuoiNamCoMat || '',
-						saved.CuoiNamVangMat || '',
-						saved.CuoiNamYKien || ''
+						!!(saved.Lan1 || saved.DauNamCoMat),
+						!!(saved.Lan2 || saved.HK1CoMat),
+						!!(saved.Lan3 || saved.CuoiNamCoMat),
+						saved.GhiChu || ''
 					]
 				})
 			},
@@ -129,7 +110,7 @@
 					this.destroySheet()
 					container.innerHTML = ''
 					if (typeof jspreadsheet === 'function') {
-						this.instance = jspreadsheet(container, {
+						this.instance = soGvcnJspreadsheet.create(container, {
 							worksheets: [{
 								data: this.buildRows(),
 								columns: this.columns,
@@ -140,7 +121,7 @@
 								tableOverflow: true,
 								tableHeight: this.sheetHeight,
 								lazyLoading: false,
-								freezeColumns: 3,
+								freezeColumns: 2,
 								wordWrap: true,
 								allowInsertColumn: false,
 								allowInsertRow: false,

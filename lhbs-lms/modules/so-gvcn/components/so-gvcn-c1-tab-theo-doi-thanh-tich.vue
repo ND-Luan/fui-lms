@@ -22,14 +22,10 @@
 			return {
 				instance: null,
 				columns: [
-					{ title: 'STT', width: 60, readOnly: true },
-					{ title: 'SỐ DANH BỘ', width: 120, readOnly: true },
-					{ title: 'HỌ VÀ TÊN HỌC SINH', width: 200, readOnly: true },
-					{ title: 'THÀNH TÍCH / GIẢI THƯỞNG ĐẠT ĐƯỢC', width: 280 },
-					{ title: 'CẤP ĐẠT GIẢI (Trường/Quận/TP/Quốc gia)', width: 240 },
-					{ title: 'THỜI GIAN / NGÀY KHEN THƯỞNG', width: 160 },
-					{ title: 'HÌNH THỨC KHEN THƯỞNG', width: 200 },
-					{ title: 'GHI CHÚ / QUYẾT ĐỊNH KHEN THƯỞNG', width: 250 }
+					{ title: 'STT', width: 60, readOnly: true, align: 'center' },
+					{ title: 'Họ và tên học sinh', width: 250, readOnly: true },
+					{ title: 'HKI', width: 350 },
+					{ title: 'Cuối năm học', width: 350 }
 				]
 			}
 		},
@@ -60,8 +56,8 @@
 			nestedHeaders() {
 				return [
 					[
-						{ title: '', colspan: 3 },
-						{ title: 'THEO DÕI THÀNH TÍCH VÀ KHEN THƯỞNG HỌC SINH', colspan: 5 }
+						{ title: '', colspan: 2 },
+						{ title: 'Nội dung khen thưởng/ Thành tích đạt được', colspan: 2 }
 					]
 				]
 			}
@@ -80,13 +76,9 @@
 					const saved = findSaved(student.HSLopID)
 					return [
 						idx + 1,
-						student.SoDanhBo || '',
 						student.HoTen || student.HoTenHocSinh || '',
-						saved.ThanhTich || '',
-						saved.CapDatGiai || '',
-						saved.ThoiGian || '',
-						saved.HinhThucKhenThuong || '',
-						saved.GhiChu || ''
+						saved.HKI || saved.ThanhTich || '',
+						saved.CuoiNam || ''
 					]
 				})
 			},
@@ -113,7 +105,7 @@
 					this.destroySheet()
 					container.innerHTML = ''
 					if (typeof jspreadsheet === 'function') {
-						this.instance = jspreadsheet(container, {
+						this.instance = soGvcnJspreadsheet.create(container, {
 							worksheets: [{
 								data: this.buildRows(),
 								columns: this.columns,
@@ -124,7 +116,7 @@
 								tableOverflow: true,
 								tableHeight: this.sheetHeight,
 								lazyLoading: false,
-								freezeColumns: 3,
+								freezeColumns: 2,
 								wordWrap: true,
 								allowInsertColumn: false,
 								allowInsertRow: false,

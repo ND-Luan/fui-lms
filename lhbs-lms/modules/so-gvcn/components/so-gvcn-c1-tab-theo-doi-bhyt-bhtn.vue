@@ -22,19 +22,11 @@
 			return {
 				instance: null,
 				columns: [
-					{ title: 'STT', width: 60, readOnly: true },
-					{ title: 'SỐ DANH BỘ', width: 120, readOnly: true },
-					{ title: 'HỌ VÀ TÊN HỌC SINH', width: 200, readOnly: true },
-					{ title: 'NGÀY SINH', width: 110, readOnly: true },
-					// Bảo hiểm y tế (BHYT)
-					{ title: 'Số thẻ BHYT', width: 160 },
-					{ title: 'Đã tham gia (X)', width: 110, align: 'center' },
-					{ title: 'Diện miễn/giảm', width: 140 },
-					{ title: 'Hạn sử dụng BHYT', width: 140 },
-					// Bảo hiểm thân thể / Tai nạn (BHTN)
-					{ title: 'Đã tham gia (X)', width: 110, align: 'center' },
-					{ title: 'Số tiền / Đợt đóng', width: 140 },
-					{ title: 'Ghi chú / Trạng thái', width: 240 }
+					{ title: 'STT', width: 60, readOnly: true, align: 'center' },
+					{ title: 'HỌ VÀ TÊN HỌC SINH', width: 250, readOnly: true },
+					{ title: 'BHYT', width: 180 },
+					{ title: 'BHTN', width: 180 },
+					{ title: 'Ghi chú', width: 350 }
 				]
 			}
 		},
@@ -65,9 +57,8 @@
 			nestedHeaders() {
 				return [
 					[
-						{ title: '', colspan: 4 },
-						{ title: 'BẢO HIỂM Y TẾ (BHYT)', colspan: 4 },
-						{ title: 'BẢO HIỂM THÂN THỂ / TAI NẠN (BHTN)', colspan: 2 },
+						{ title: '', colspan: 2 },
+						{ title: 'KHOẢN MUA HOẶC ĐÓNG GÓP', colspan: 2 },
 						{ title: '', colspan: 1 }
 					]
 				]
@@ -87,15 +78,9 @@
 					const saved = findSaved(student.HSLopID)
 					return [
 						idx + 1,
-						student.SoDanhBo || '',
 						student.HoTen || student.HoTenHocSinh || '',
-						student.NgaySinh || '',
-						saved.SoTheBHYT || student.MaSoBHXH || '',
-						saved.BHYTDaThamGia || '',
-						saved.BHYTMienGiam || '',
-						saved.BHYTHanSuDung || '',
-						saved.BHTNDaThamGia || '',
-						saved.BHTNSoTien || '',
+						saved.BHYT || '',
+						saved.BHTN || '',
 						saved.GhiChu || ''
 					]
 				})
@@ -123,7 +108,7 @@
 					this.destroySheet()
 					container.innerHTML = ''
 					if (typeof jspreadsheet === 'function') {
-						this.instance = jspreadsheet(container, {
+						this.instance = soGvcnJspreadsheet.create(container, {
 							worksheets: [{
 								data: this.buildRows(),
 								columns: this.columns,
@@ -134,7 +119,7 @@
 								tableOverflow: true,
 								tableHeight: this.sheetHeight,
 								lazyLoading: false,
-								freezeColumns: 4,
+								freezeColumns: 2,
 								wordWrap: true,
 								allowInsertColumn: false,
 								allowInsertRow: false,

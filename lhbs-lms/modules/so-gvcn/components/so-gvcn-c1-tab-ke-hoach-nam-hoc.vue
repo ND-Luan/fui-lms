@@ -22,7 +22,22 @@
 					<v-list-subheader class="text-caption font-weight-bold text-primary px-3 mt-2">
 						II. NỘI DUNG KẾ HOẠCH
 					</v-list-subheader>
-					<v-list-item v-for="card in planCards.slice(1)" :key="card.key" :value="card.key"
+					<v-list-item :value="planCards[1].key" :active="activeCardKey === planCards[1].key"
+						class="mb-1 rounded" @click="scrollToCard(planCards[1])">
+						<template #prepend>
+							<v-icon size="small" class="mr-2"
+								:color="activeCardKey === planCards[1].key ? 'primary' : ''">
+								{{ planCards[1].icon }}
+							</v-icon>
+						</template>
+						<v-list-item-title class="text-caption font-weight-bold text-wrap" style="line-height: 1.3;">
+							{{ planCards[1].navTitle }}
+						</v-list-item-title>
+					</v-list-item>
+					<v-list-subheader class="text-caption font-weight-bold text-primary px-3 mt-2">
+						2. CHẤT LƯỢNG GIÁO DỤC
+					</v-list-subheader>
+					<v-list-item v-for="card in planCards.slice(2, 5)" :key="card.key" :value="card.key"
 						:active="activeCardKey === card.key" class="mb-1 rounded" @click="scrollToCard(card)">
 						<template #prepend>
 							<v-icon size="small" class="mr-2" :color="activeCardKey === card.key ? 'primary' : ''">
@@ -31,6 +46,18 @@
 						</template>
 						<v-list-item-title class="text-caption font-weight-bold text-wrap" style="line-height: 1.3;">
 							{{ card.navTitle }}
+						</v-list-item-title>
+					</v-list-item>
+					<v-list-item :value="planCards[5].key" :active="activeCardKey === planCards[5].key"
+						class="mb-1 rounded" @click="scrollToCard(planCards[5])">
+						<template #prepend>
+							<v-icon size="small" class="mr-2"
+								:color="activeCardKey === planCards[5].key ? 'primary' : ''">
+								{{ planCards[5].icon }}
+							</v-icon>
+						</template>
+						<v-list-item-title class="text-caption font-weight-bold text-wrap" style="line-height: 1.3;">
+							{{ planCards[5].navTitle }}
 						</v-list-item-title>
 					</v-list-item>
 				</v-list>
@@ -79,6 +106,10 @@
 							<v-card-text class="pa-0">
 								<section v-for="(card, index) in planCards.slice(1)" :id="card.domId" :key="card.key"
 									class="pa-3" :class="{ 'border-t': index > 0 }">
+									<div v-if="card.key === 'pham-chat-nang-luc'"
+										class="text-subtitle-1 font-weight-bold text-primary mb-3">
+										2. CHẤT LƯỢNG GIÁO DỤC
+									</div>
 									<div class="text-subtitle-2 font-weight-bold text-primary mb-3"
 										style="white-space: pre-line; line-height: 1.6;">
 										{{ card.title }}
@@ -243,7 +274,7 @@
 						icon: 'mdi-account-star-outline',
 						domId: 'ke-hoach-nam-hoc-muc-ii-pcnl',
 						refName: 'annualQualityCompetencyRef',
-						title: '2. CHẤT LƯỢNG GIÁO DỤC\n2.1. PHẨM CHẤT – NĂNG LỰC\na. CHỈ TIÊU PHẤN ĐẤU',
+						title: '2.1. PHẨM CHẤT – NĂNG LỰC\na. CHỈ TIÊU PHẤN ĐẤU',
 						height: '205px',
 						freezeColumns: 1,
 						columns: this.buildQualityCompetencyColumns(),
@@ -492,8 +523,14 @@
 			},
 			scrollToCard(card) {
 				this.activeCardKey = card.key
-				const target = document.getElementById(card.domId)
-				if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' })
+				const container = this.$refs.scrollContainer
+				const target = this.$el.querySelector(`#${card.domId}`)
+				if (!container || !target) return
+
+				const top = target.getBoundingClientRect().top
+					- container.getBoundingClientRect().top
+					+ container.scrollTop
+				container.scrollTo({ top, behavior: 'smooth' })
 			},
 			destroySheet(key) {
 				const instance = this.sheetInstances[key]
@@ -514,7 +551,7 @@
 					if (!container || typeof jspreadsheet !== 'function') return
 					this.destroySheet(card.key)
 					container.innerHTML = ''
-					this.sheetInstances[card.key] = jspreadsheet(container, {
+					this.sheetInstances[card.key] = soGvcnJspreadsheet.create(container, {
 						worksheets: [{
 							data: card.rows,
 							columns: card.columns,

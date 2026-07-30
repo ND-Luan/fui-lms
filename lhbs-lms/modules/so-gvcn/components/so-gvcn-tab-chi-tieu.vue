@@ -138,7 +138,7 @@
 						}
 
 						try {
-							const sheet = jspreadsheet(container, {
+							const sheet = soGvcnJspreadsheet.create(container, {
 								worksheets: [wsConfig],
 								contextMenu: () => false,
 								onchange: (worksheet, cell, x, y, value) => {

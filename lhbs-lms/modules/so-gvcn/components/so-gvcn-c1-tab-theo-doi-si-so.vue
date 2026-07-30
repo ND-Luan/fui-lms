@@ -1,7 +1,7 @@
 <template>
 	<v-card-text class="pa-0 so-gvcn-sheet-wrap" :style="{ height: sheetHeight, 'overflow-y': 'auto' }">
 		<v-alert v-if="selectedLopID === '__ALL__'" type="info" variant="tonal" density="compact" class="ma-2">
-			Chọn một lớp ở thanh trên để theo dõi biến động sĩ số học sinh theo tháng.
+			Chọn một lớp ở thanh trên để theo dõi sĩ số học sinh theo từng tháng.
 		</v-alert>
 		<div v-else class="so-gvcn-sheet-wrap">
 			<div ref="sheetRef" class="w-100 so-gvcn-sheet so-gvcn-theo-doi-si-so-sheet"></div>
@@ -21,35 +21,29 @@
 		data() {
 			return {
 				instance: null,
-				columns: [
-					{ title: 'STT', width: 60, readOnly: true },
-					{ title: 'MỐC / THÁNG THEO DÕI', width: 180, readOnly: true },
-					{ title: 'SĨ SỐ ĐẦU THÁNG', width: 140, type: 'numeric' },
-					{ title: 'NAM', width: 100, type: 'numeric' },
-					{ title: 'NỮ', width: 100, type: 'numeric' },
-					{ title: 'SĨ SỐ TĂNG (CHUYỂN ĐẾN)', width: 180, type: 'numeric' },
-					{ title: 'SĨ SỐ GIẢM (CHUYỂN ĐI)', width: 180, type: 'numeric' },
-					{ title: 'SĨ SỐ CUỐI THÁNG', width: 140, type: 'numeric' },
-					{ title: 'DANH SÁCH HS BIẾN ĐỘNG / GHI CHÚ', width: 320 }
-				],
 				defaultMonths: [
-					'Đầu năm học (Tháng 8)',
+					'Tháng 8',
 					'Tháng 9',
 					'Tháng 10',
 					'Tháng 11',
 					'Tháng 12',
-					'Cuối Học kỳ I',
-					'Tháng 1 & 2',
+					'Tháng 01',
+					'Tháng 02',
 					'Tháng 3',
 					'Tháng 4',
-					'Tháng 5',
-					'Cuối Học kỳ II (Cuối năm)'
+					'Tháng 5'
 				]
 			}
 		},
 		watch: {
 			selectedLopID() {
 				this.initSheet()
+			},
+			students: {
+				deep: true,
+				handler() {
+					this.initSheet()
+				}
 			},
 			savedRows: {
 				deep: false,
@@ -64,18 +58,6 @@
 		beforeUnmount() {
 			this.destroySheet()
 		},
-		computed: {
-			nestedHeaders() {
-				return [
-					[
-						{ title: '', colspan: 2 },
-						{ title: 'SĨ SỐ ĐẦU KỲ / THÁNG', colspan: 3 },
-						{ title: 'BIẾN ĐỘNG SĨ SỐ TRONG THÁNG', colspan: 2 },
-						{ title: '', colspan: 2 }
-					]
-				]
-			}
-		},
 		methods: {
 			getInstance() {
 				return this.instance
@@ -84,26 +66,110 @@
 				const sheet = Array.isArray(this.instance) ? this.instance[0] : this.instance
 				return sheet && typeof sheet.getData === 'function' ? sheet.getData() : []
 			},
-			buildRows() {
-				const findSaved = (mocIndex, mocText) => {
-					return (this.savedRows || []).find(r => r.MocIndex === mocIndex || r.MocText === mocText) || {}
+			// Tự động phân tích danh sách dân tộc xuất hiện trong lớp
+			getEthnicList() {
+				const ethnicSet = new Set()
+				;(this.students || []).forEach(st => {
+					const dt = (st.TenDanToc || st.DanToc || '').trim()
+					if (dt) ethnicSet.add(dt)
+				})
+				const list = Array.from(ethnicSet)
+				if (list.includes('Kinh')) {
+					return ['Kinh', ...list.filter(e => e !== 'Kinh')]
 				}
+				return list.length ? list : ['Kinh']
+			},
 
-				return this.defaultMonths.map((mocText, idx) => {
-					const saved = findSaved(idx, mocText)
+			// Dự phòng cho giai đoạn sau: tự động tính tổng số, nữ và dân tộc.
+			// Hiện tại chưa gọi hàm này theo yêu cầu nghiệp vụ.
+			getClassSummary(ethnicList) {
+				let total = 0, nu = 0
+				const ethnicMap = {}
+				ethnicList.forEach(e => ethnicMap[e] = 0)
+
+				;(this.students || []).forEach(st => {
+					total++
+					const isNu = (st.GioiTinh === 'Nữ' || st.Phai === 'x' || st.IsNu)
+					if (isNu) nu++
+
+					const dt = (st.TenDanToc || st.DanToc || '').trim()
+					if (dt && ethnicMap[dt] !== undefined) {
+						ethnicMap[dt]++
+					}
+				})
+
+				return { total, nu, ethnicMap }
+			},
+
+			buildColumnsAndHeaders() {
+				const ethnicList = this.getEthnicList()
+				const columns = [
+					{ title: 'Thời điểm', width: 140, readOnly: true },
+					{ title: 'Tổng số', width: 90, align: 'center', readOnly: true },
+					{ title: 'Nữ', width: 90, align: 'center', readOnly: true }
+				]
+
+				// Nhóm Dân tộc
+				ethnicList.forEach(eth => {
+					columns.push({ title: eth, width: 100, align: 'center', readOnly: true })
+				})
+
+				// Cột Đội viên, Nhi đồng, Con liệt sĩ, Con thương binh
+				columns.push({ title: 'Đội viên', width: 100, align: 'center', type: 'numeric' })
+				columns.push({ title: 'Nhi đồng', width: 100, align: 'center', type: 'numeric' })
+				columns.push({ title: 'Con liệt sĩ', width: 100, align: 'center', type: 'numeric' })
+				columns.push({ title: 'Con thương binh', width: 120, align: 'center', type: 'numeric' })
+
+				// Khuyết tật (Có đánh giá, Không đánh giá)
+				columns.push({ title: 'Có đánh giá', width: 110, align: 'center', type: 'numeric' })
+				columns.push({ title: 'Không đánh giá', width: 120, align: 'center', type: 'numeric' })
+
+				// Hộ nghèo, Lí do tăng giảm
+				columns.push({ title: 'Hộ nghèo', width: 100, align: 'center', type: 'numeric' })
+				columns.push({ title: 'Học sinh tăng giảm, lí do', width: 280 })
+
+				const nestedHeaders = [
+					[
+						{ title: '', colspan: 1 },
+						{ title: '', colspan: 1 },
+						{ title: '', colspan: 1 },
+						{ title: 'Dân tộc', colspan: ethnicList.length },
+						{ title: '', colspan: 1 },
+						{ title: '', colspan: 1 },
+						{ title: '', colspan: 1 },
+						{ title: '', colspan: 1 },
+						{ title: 'Khuyết tật', colspan: 2 },
+						{ title: '', colspan: 1 },
+						{ title: '', colspan: 1 }
+					]
+				]
+
+				return { columns, nestedHeaders, ethnicList }
+			},
+
+			buildRows(ethnicList) {
+				const findSaved = (thoiDiem) => (this.savedRows || []).find(r => r.ThoiDiem === thoiDiem) || {}
+
+				return this.defaultMonths.map(thoiDiem => {
+					const saved = findSaved(thoiDiem)
+					const ethnicValues = ethnicList.map(() => '')
 					return [
-						idx + 1,
-						mocText,
-						saved.SiSoDauThang ?? '',
-						saved.Nam ?? '',
-						saved.Nu ?? '',
-						saved.ChuyenDen ?? '',
-						saved.ChuyenDi ?? '',
-						saved.SiSoCuoiThang ?? '',
-						saved.GhiChuBienDong ?? ''
+						thoiDiem,
+						'',
+						'',
+						...ethnicValues,
+						saved.DoiVien ?? '',
+						saved.NhiDong ?? '',
+						saved.ConLietSi ?? '',
+						saved.ConThuongBinh ?? '',
+						saved.KhuyetTatCoDanhGia ?? saved.KhuyetTat ?? '',
+						saved.KhuyetTatKhongDanhGia ?? '',
+						saved.HoNgheo ?? '',
+						saved.TangGiamLiDo ?? ''
 					]
 				})
 			},
+
 			destroySheet() {
 				if (!this.instance) return
 				try {
@@ -116,6 +182,7 @@
 				} catch (error) {}
 				this.instance = null
 			},
+
 			initSheet() {
 				if (this.selectedLopID === '__ALL__') {
 					this.destroySheet()
@@ -126,18 +193,23 @@
 					if (!container) return
 					this.destroySheet()
 					container.innerHTML = ''
+
+					const { columns, nestedHeaders, ethnicList } = this.buildColumnsAndHeaders()
+					const data = this.buildRows(ethnicList)
+
 					if (typeof jspreadsheet === 'function') {
-						this.instance = jspreadsheet(container, {
+						this.instance = soGvcnJspreadsheet.create(container, {
 							worksheets: [{
-								data: this.buildRows(),
-								columns: this.columns,
-								nestedHeaders: this.nestedHeaders,
+								data: data,
+								columns: columns,
+								nestedHeaders: nestedHeaders,
 								rowResize: true,
 								columnDrag: false,
 								tableWidth: '100%',
 								tableOverflow: true,
 								tableHeight: this.sheetHeight,
 								lazyLoading: false,
+								freezeColumns: 1,
 								wordWrap: true,
 								allowInsertColumn: false,
 								allowInsertRow: false,

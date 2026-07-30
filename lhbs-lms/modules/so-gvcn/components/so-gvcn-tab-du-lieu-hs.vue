@@ -107,7 +107,7 @@
 				container.innerHTML = ''
 
 				if (typeof jspreadsheet === 'function') {
-					this.sheetInstance = jspreadsheet(container, {
+					this.sheetInstance = soGvcnJspreadsheet.create(container, {
 						worksheets: [{
 							data: this.rows,
 							columns: this.computedColumns,
@@ -118,7 +118,7 @@
 							tableOverflow: true,
 							tableHeight: this.sheetHeight,
 							lazyLoading: false,
-							freezeColumns: 5,
+							freezeColumns: 4,
 							wordWrap: true,
 							allowInsertColumn: false,
 							allowInsertRow: false,

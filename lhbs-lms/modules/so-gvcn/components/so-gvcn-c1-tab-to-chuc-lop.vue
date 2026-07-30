@@ -227,8 +227,14 @@
 			},
 			scrollToCard(card) {
 				this.activeCardKey = card.key
-				const target = document.getElementById(card.domId)
-				if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' })
+				const container = this.$refs.scrollContainer
+				const target = this.$el.querySelector(`#${card.domId}`)
+				if (!container || !target) return
+
+				const top = target.getBoundingClientRect().top
+					- container.getBoundingClientRect().top
+					+ container.scrollTop
+				container.scrollTo({ top, behavior: 'smooth' })
 			},
 			destroySheet(cardKey) {
 				const instance = this.sheetInstances[cardKey]

@@ -20,26 +20,7 @@
 		},
 		data() {
 			return {
-				instance: null,
-				columns: [
-					{ title: 'STT', width: 60, readOnly: true },
-					{ title: 'NHÓM TUỔI / NĂM SINH', width: 220, readOnly: true },
-					{ title: 'TỔNG SỐ HỌC SINH', width: 150, type: 'numeric' },
-					{ title: 'NAM', width: 120, type: 'numeric' },
-					{ title: 'NỮ', width: 120, type: 'numeric' },
-					{ title: 'DÂN TỘC THIỂU SỐ', width: 160, type: 'numeric' },
-					{ title: 'KHUYẾT TẬT / CẦN HỖ TRỢ', width: 200, type: 'numeric' },
-					{ title: 'TỶ LỆ (%)', width: 120, type: 'numeric' },
-					{ title: 'GHI CHÚ / ĐÁNH GIÁ', width: 280 }
-				],
-				defaultAgeGroups: [
-					'Đúng độ tuổi',
-					'Trước 1 tuổi (Sớm tuổi)',
-					'Sau 1 tuổi (Trễ 1 tuổi)',
-					'Sau 2 tuổi (Trễ 2 tuổi)',
-					'Sau 3 tuổi trở lên (Khác)',
-					'TỔNG CỘNG'
-				]
+				instance: null
 			}
 		},
 		watch: {
@@ -65,17 +46,6 @@
 		beforeUnmount() {
 			this.destroySheet()
 		},
-		computed: {
-			nestedHeaders() {
-				return [
-					[
-						{ title: '', colspan: 2 },
-						{ title: 'THỐNG KÊ ĐỘ TUỔI HỌC SINH LỚP', colspan: 5 },
-						{ title: '', colspan: 2 }
-					]
-				]
-			}
-		},
 		methods: {
 			getInstance() {
 				return this.instance
@@ -84,27 +54,83 @@
 				const sheet = Array.isArray(this.instance) ? this.instance[0] : this.instance
 				return sheet && typeof sheet.getData === 'function' ? sheet.getData() : []
 			},
-			buildRows() {
-				const findSaved = (groupIndex, groupText) => {
-					return (this.savedRows || []).find(r => r.GroupIndex === groupIndex || r.GroupText === groupText) || {}
+			// Tự động phân tích danh sách dân tộc xuất hiện trong lớp
+			getEthnicList() {
+				const ethnicSet = new Set()
+				;(this.students || []).forEach(st => {
+					const dt = (st.TenDanToc || st.DanToc || '').trim()
+					if (dt) ethnicSet.add(dt)
+				})
+				const list = Array.from(ethnicSet)
+				// Ưu tiên đưa 'Kinh' lên đầu nếu có
+				if (list.includes('Kinh')) {
+					return ['Kinh', ...list.filter(e => e !== 'Kinh')]
 				}
+				return list.length ? list : ['Kinh']
+			},
+			buildColumnsAndHeaders() {
+				const ethnicList = this.getEthnicList()
+				const columns = [
+					{ title: 'Các độ tuổi', width: 220 },
+					{ title: 'Nam', width: 100, align: 'center', type: 'numeric' },
+					{ title: 'Nữ', width: 100, align: 'center', type: 'numeric' }
+				]
 
-				return this.defaultAgeGroups.map((groupText, idx) => {
-					const saved = findSaved(idx, groupText)
-					const isTotal = groupText === 'TỔNG CỘNG'
+				// Cột Dân tộc
+				ethnicList.forEach(eth => {
+					columns.push({ title: eth, width: 110, align: 'center', type: 'numeric' })
+				})
+
+				// Cột Khuyết tật (nhập số lượng)
+				columns.push({ title: 'Khuyết tật', width: 140, align: 'center', type: 'numeric' })
+
+				const nestedHeaders = [
+					[
+						{ title: '', colspan: 1 },
+						{ title: '', colspan: 1 },
+						{ title: '', colspan: 1 },
+						{ title: 'Dân tộc', colspan: ethnicList.length },
+						{ title: '', colspan: 1 }
+					]
+				]
+
+				return { columns, nestedHeaders, ethnicList }
+			},
+
+			buildRows(ethnicList) {
+				const savedRows = this.savedRows || []
+				const rowCount = Math.max(20, savedRows.length)
+				return Array.from({ length: rowCount }, (_, index) => {
+					const saved = savedRows[index] || {}
+					const ethnicCounts = saved.EthnicCounts || saved.DanToc || {}
 					return [
-						isTotal ? '' : idx + 1,
-						groupText,
-						saved.TongSo ?? '',
+						saved.AgeLabel || '',
 						saved.Nam ?? '',
 						saved.Nu ?? '',
-						saved.DanTocThieuSo ?? '',
-						saved.KhuyetTat ?? '',
-						saved.TyLe ?? '',
-						saved.GhiChu ?? ''
+						...ethnicList.map(eth => ethnicCounts[eth] ?? ''),
+						saved.KhuyetTat ?? ''
 					]
 				})
 			},
+
+			getSerializableRows() {
+				const ethnicList = this.getEthnicList()
+				return this.getRows().map(row => {
+					const ethnicCounts = {}
+					ethnicList.forEach((eth, index) => {
+						ethnicCounts[eth] = row[3 + index] ?? ''
+					})
+					return {
+						AgeLabel: row[0] ?? '',
+						Nam: row[1] ?? '',
+						Nu: row[2] ?? '',
+						EthnicCounts: ethnicCounts,
+						KhuyetTat: row[3 + ethnicList.length] ?? ''
+					}
+				}).filter(row => row.AgeLabel || row.Nam || row.Nu
+					|| row.KhuyetTat || Object.values(row.EthnicCounts).some(value => value !== ''))
+			},
+
 			destroySheet() {
 				if (!this.instance) return
 				try {
@@ -117,6 +143,7 @@
 				} catch (error) {}
 				this.instance = null
 			},
+
 			initSheet() {
 				if (this.selectedLopID === '__ALL__') {
 					this.destroySheet()
@@ -127,18 +154,23 @@
 					if (!container) return
 					this.destroySheet()
 					container.innerHTML = ''
+
+					const { columns, nestedHeaders, ethnicList } = this.buildColumnsAndHeaders()
+					const data = this.buildRows(ethnicList)
+
 					if (typeof jspreadsheet === 'function') {
-						this.instance = jspreadsheet(container, {
+						this.instance = soGvcnJspreadsheet.create(container, {
 							worksheets: [{
-								data: this.buildRows(),
-								columns: this.columns,
-								nestedHeaders: this.nestedHeaders,
+								data: data,
+								columns: columns,
+								nestedHeaders: nestedHeaders,
 								rowResize: true,
 								columnDrag: false,
 								tableWidth: '100%',
 								tableOverflow: true,
 								tableHeight: this.sheetHeight,
 								lazyLoading: false,
+								freezeColumns: 1,
 								wordWrap: true,
 								allowInsertColumn: false,
 								allowInsertRow: false,

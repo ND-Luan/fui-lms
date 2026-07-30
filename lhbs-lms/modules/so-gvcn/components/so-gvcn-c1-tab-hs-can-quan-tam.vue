@@ -157,7 +157,7 @@
 				container.innerHTML = ''
 				if (typeof jspreadsheet !== 'function') return
 
-				this.instance = jspreadsheet(container, {
+				this.instance = soGvcnJspreadsheet.create(container, {
 					worksheets: [{
 						data: this.buildRows(),
 						columns: this.columns,
@@ -174,12 +174,7 @@
 						allowInsertRow: false,
 						showHeader: true
 					}],
-					contextMenu: () => false,
-					onload: (el) => {
-						if (typeof jspreadsheet !== 'undefined' && jspreadsheet.helpers && typeof jspreadsheet.helpers.freezeColumns === 'function') {
-							jspreadsheet.helpers.freezeColumns(el, 3)
-						}
-					}
+					contextMenu: () => false
 				})
 			}
 		}

@@ -84,7 +84,7 @@
 				container.innerHTML = ''
 
 				if (typeof jspreadsheet === 'function') {
-					this.instance = jspreadsheet(container, {
+					this.instance = soGvcnJspreadsheet.create(container, {
 						worksheets: [{
 							data: Array.isArray(this.rows) ? this.rows : [],
 							columns: (this.columns || []).map(column => (
