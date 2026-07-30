@@ -1,7 +1,7 @@
 CREATE OR ALTER PROCEDURE dbo.spAPI_SoGVCNKeHoachNamHocSave
 	@SoGVCNID varchar(10),
 	@JsonData nvarchar(max),
-	@sys_UserID varchar(10),
+	@sys_UserID varchar(9),
 	@sys_SystemRight varchar(10)
 AS
 BEGIN
@@ -9,7 +9,7 @@ BEGIN
 	SET XACT_ABORT ON;
 
 	DECLARE @ID int = TRY_CONVERT(int, @SoGVCNID);
-	DECLARE @UserID int = TRY_CONVERT(int, @sys_UserID);
+	DECLARE @UserID varchar(9) = @sys_UserID;
 
 	IF @ID IS NULL OR NOT EXISTS (
 		SELECT 1
@@ -21,6 +21,27 @@ BEGIN
 
 	IF ISJSON(@JsonData) <> 1
 		THROW 50002, N'Dữ liệu kế hoạch chủ nhiệm năm học không hợp lệ.', 1;
+
+	IF EXISTS (
+		SELECT 1
+		FROM OPENJSON(@JsonData, '$.subjectTargets')
+		WITH
+		(
+			Tot_TiLe decimal(5,2) '$.Tot_TiLe',
+			Dat_TiLe decimal(5,2) '$.Dat_TiLe',
+			CanCoGang_TiLe decimal(5,2) '$.CanCoGang_TiLe',
+			HoanThanhTot_TiLe decimal(5,2) '$.HoanThanhTot_TiLe',
+			HoanThanh_TiLe decimal(5,2) '$.HoanThanh_TiLe',
+			ChuaHoanThanh_TiLe decimal(5,2) '$.ChuaHoanThanh_TiLe'
+		) AS target
+		WHERE (target.Tot_TiLe IS NOT NULL AND target.Tot_TiLe NOT BETWEEN 0 AND 100)
+		   OR (target.Dat_TiLe IS NOT NULL AND target.Dat_TiLe NOT BETWEEN 0 AND 100)
+		   OR (target.CanCoGang_TiLe IS NOT NULL AND target.CanCoGang_TiLe NOT BETWEEN 0 AND 100)
+		   OR (target.HoanThanhTot_TiLe IS NOT NULL AND target.HoanThanhTot_TiLe NOT BETWEEN 0 AND 100)
+		   OR (target.HoanThanh_TiLe IS NOT NULL AND target.HoanThanh_TiLe NOT BETWEEN 0 AND 100)
+		   OR (target.ChuaHoanThanh_TiLe IS NOT NULL AND target.ChuaHoanThanh_TiLe NOT BETWEEN 0 AND 100)
+	)
+		THROW 50003, N'Tỉ lệ chỉ tiêu phải nằm trong khoảng từ 0 đến 100.', 1;
 
 	BEGIN TRANSACTION;
 
@@ -131,5 +152,4 @@ BEGIN
 END;
 GO
 
-GRANT EXECUTE ON dbo.spAPI_SoGVCNKeHoachNamHocSave TO [public];
-GO
+GRANT EXECUTE ON [dbo].[spAPI_SoGVCNKeHoachNamHocSave] TO [lmslhbs];

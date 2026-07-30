@@ -1,6 +1,6 @@
 CREATE OR ALTER PROCEDURE dbo.spAPI_SoGVCNKeHoachTuanGet
-	@url1_SoGVCNID varchar(10),
-	@sys_UserID varchar(10),
+	@SoGVCNID varchar(10),
+	@sys_UserID varchar(9),
 	@sys_SystemRight varchar(10)
 AS
 BEGIN
@@ -20,7 +20,7 @@ BEGIN
 	FROM dbo.tblSoGVCNKeHoachTuan tuan
 	JOIN dbo.tblSoGVCNKeHoachThang thang
 	  ON thang.KeHoachThangID = tuan.KeHoachThangID
-	WHERE thang.SoGVCNID = TRY_CONVERT(int, @url1_SoGVCNID)
+	WHERE thang.SoGVCNID = TRY_CONVERT(int, @SoGVCNID)
 	  AND thang.Enable = 1
 	  AND tuan.Enable = 1
 	ORDER BY
@@ -30,5 +30,7 @@ BEGIN
 END;
 GO
 
-GRANT EXECUTE ON dbo.spAPI_SoGVCNKeHoachTuanGet TO [public];
+REVOKE EXECUTE ON dbo.spAPI_SoGVCNKeHoachTuanGet FROM [public];
 GO
+
+GRANT EXECUTE ON [dbo].[spAPI_SoGVCNKeHoachTuanGet] TO [lmslhbs];

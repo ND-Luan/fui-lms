@@ -17,10 +17,10 @@ BEGIN
 		NguyenNhan nvarchar(max) NULL,
 		Enable bit NOT NULL
 			CONSTRAINT DF_tblSoGVCNKeHoachTuan_Enable DEFAULT (1),
-		CreateUser varchar(20) NULL,
+		CreateUser varchar(9) NULL,
 		CreateTime datetime NOT NULL
 			CONSTRAINT DF_tblSoGVCNKeHoachTuan_CreateTime DEFAULT (GETDATE()),
-		UpdateUser varchar(20) NULL,
+		UpdateUser varchar(9) NULL,
 		UpdateTime datetime NOT NULL
 			CONSTRAINT DF_tblSoGVCNKeHoachTuan_UpdateTime DEFAULT (GETDATE()),
 		CONSTRAINT FK_tblSoGVCNKeHoachTuan_KeHoachThang

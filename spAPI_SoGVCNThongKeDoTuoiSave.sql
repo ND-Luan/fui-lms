@@ -1,7 +1,7 @@
 CREATE OR ALTER PROCEDURE dbo.spAPI_SoGVCNThongKeDoTuoiSave
 	@SoGVCNID varchar(10),
 	@JsonRows nvarchar(max),
-	@sys_UserID varchar(10),
+	@sys_UserID varchar(9),
 	@sys_SystemRight varchar(10)
 AS
 BEGIN
@@ -9,7 +9,7 @@ BEGIN
 	SET XACT_ABORT ON;
 
 	DECLARE @ID int = TRY_CONVERT(int, @SoGVCNID);
-	DECLARE @UserID int = TRY_CONVERT(int, @sys_UserID);
+	DECLARE @UserID varchar(9) = @sys_UserID;
 
 	IF @ID IS NULL OR NOT EXISTS (
 		SELECT 1
@@ -28,24 +28,30 @@ BEGIN
 	USING (
 		SELECT
 			JSON_VALUE(src.value, '$.AgeLabel') AS AgeLabel,
-			TRY_CONVERT(int, JSON_VALUE(src.value, '$.KhuyetTat')) AS KhuyetTat
+			JSON_VALUE(src.value, '$.Nam') AS Nam,
+			JSON_VALUE(src.value, '$.Nu') AS Nu,
+			JSON_VALUE(src.value, '$.DanTocJson') AS DanTocJson,
+			JSON_VALUE(src.value, '$.KhuyetTat') AS KhuyetTat
 		FROM OPENJSON(@JsonRows) AS src
 		WHERE JSON_VALUE(src.value, '$.AgeLabel') IS NOT NULL
 	) AS source
 	ON (target.SoGVCNID = @ID AND target.AgeLabel = source.AgeLabel)
 	WHEN MATCHED THEN
 		UPDATE SET
+			target.Nam = source.Nam,
+			target.Nu = source.Nu,
+			target.DanTocJson = source.DanTocJson,
 			target.KhuyetTat = source.KhuyetTat,
 			target.Enable = 1,
 			target.UpdateUser = @UserID,
 			target.UpdateTime = GETDATE()
 	WHEN NOT MATCHED THEN
 		INSERT (
-			SoGVCNID, AgeLabel, KhuyetTat,
+			SoGVCNID, AgeLabel, Nam, Nu, DanTocJson, KhuyetTat,
 			CreateUser, UpdateUser
 		)
 		VALUES (
-			@ID, source.AgeLabel, source.KhuyetTat,
+			@ID, source.AgeLabel, source.Nam, source.Nu, source.DanTocJson, source.KhuyetTat,
 			@UserID, @UserID
 		);
 
@@ -55,4 +61,5 @@ BEGIN
 END;
 GO
 
-GRANT EXECUTE ON dbo.spAPI_SoGVCNThongKeDoTuoiSave TO [lmslhbs];
+
+GRANT EXECUTE ON [dbo].[spAPI_SoGVCNThongKeDoTuoiSave] TO [lmslhbs];

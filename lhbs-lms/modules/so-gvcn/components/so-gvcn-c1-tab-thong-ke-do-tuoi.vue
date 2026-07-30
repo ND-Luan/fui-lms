@@ -102,7 +102,12 @@
 				const rowCount = Math.max(20, savedRows.length)
 				return Array.from({ length: rowCount }, (_, index) => {
 					const saved = savedRows[index] || {}
-					const ethnicCounts = saved.EthnicCounts || saved.DanToc || {}
+					let ethnicCounts = saved.EthnicCounts || saved.DanToc || {}
+					if (saved.DanTocJson) {
+						try {
+							ethnicCounts = JSON.parse(saved.DanTocJson)
+						} catch (error) {}
+					}
 					return [
 						saved.AgeLabel || '',
 						saved.Nam ?? '',
@@ -124,11 +129,11 @@
 						AgeLabel: row[0] ?? '',
 						Nam: row[1] ?? '',
 						Nu: row[2] ?? '',
-						EthnicCounts: ethnicCounts,
+						DanTocJson: JSON.stringify(ethnicCounts),
 						KhuyetTat: row[3 + ethnicList.length] ?? ''
 					}
 				}).filter(row => row.AgeLabel || row.Nam || row.Nu
-					|| row.KhuyetTat || Object.values(row.EthnicCounts).some(value => value !== ''))
+					|| row.KhuyetTat || Object.values(JSON.parse(row.DanTocJson)).some(value => value !== ''))
 			},
 
 			destroySheet() {

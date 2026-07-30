@@ -1,7 +1,7 @@
 CREATE OR ALTER PROCEDURE dbo.spAPI_SoGVCNTheoDoiSiSoThangSave
 	@SoGVCNID varchar(10),
 	@JsonRows nvarchar(max),
-	@sys_UserID varchar(10),
+	@sys_UserID varchar(9),
 	@sys_SystemRight varchar(10)
 AS
 BEGIN
@@ -9,7 +9,7 @@ BEGIN
 	SET XACT_ABORT ON;
 
 	DECLARE @ID int = TRY_CONVERT(int, @SoGVCNID);
-	DECLARE @UserID int = TRY_CONVERT(int, @sys_UserID);
+	DECLARE @UserID varchar(9) = @sys_UserID;
 
 	IF @ID IS NULL OR NOT EXISTS (
 		SELECT 1
@@ -28,13 +28,16 @@ BEGIN
 	USING (
 		SELECT
 			JSON_VALUE(src.value, '$.ThoiDiem') AS ThoiDiem,
-			TRY_CONVERT(int, JSON_VALUE(src.value, '$.DoiVien')) AS DoiVien,
-			TRY_CONVERT(int, JSON_VALUE(src.value, '$.NhiDong')) AS NhiDong,
-			TRY_CONVERT(int, JSON_VALUE(src.value, '$.ConLietSi')) AS ConLietSi,
-			TRY_CONVERT(int, JSON_VALUE(src.value, '$.ConThuongBinh')) AS ConThuongBinh,
-			TRY_CONVERT(int, JSON_VALUE(src.value, '$.KhuyetTatCoDanhGia')) AS KhuyetTatCoDanhGia,
-			TRY_CONVERT(int, JSON_VALUE(src.value, '$.KhuyetTatKhongDanhGia')) AS KhuyetTatKhongDanhGia,
-			TRY_CONVERT(int, JSON_VALUE(src.value, '$.HoNgheo')) AS HoNgheo,
+			JSON_VALUE(src.value, '$.TongSo') AS TongSo,
+			JSON_VALUE(src.value, '$.Nu') AS Nu,
+			JSON_VALUE(src.value, '$.DanTocJson') AS DanTocJson,
+			JSON_VALUE(src.value, '$.DoiVien') AS DoiVien,
+			JSON_VALUE(src.value, '$.NhiDong') AS NhiDong,
+			JSON_VALUE(src.value, '$.ConLietSi') AS ConLietSi,
+			JSON_VALUE(src.value, '$.ConThuongBinh') AS ConThuongBinh,
+			JSON_VALUE(src.value, '$.KhuyetTatCoDanhGia') AS KhuyetTatCoDanhGia,
+			JSON_VALUE(src.value, '$.KhuyetTatKhongDanhGia') AS KhuyetTatKhongDanhGia,
+			JSON_VALUE(src.value, '$.HoNgheo') AS HoNgheo,
 			JSON_VALUE(src.value, '$.TangGiamLiDo') AS TangGiamLiDo
 		FROM OPENJSON(@JsonRows) AS src
 		WHERE JSON_VALUE(src.value, '$.ThoiDiem') IS NOT NULL
@@ -42,6 +45,9 @@ BEGIN
 	ON (target.SoGVCNID = @ID AND target.ThoiDiem = source.ThoiDiem)
 	WHEN MATCHED THEN
 		UPDATE SET
+			target.TongSo = source.TongSo,
+			target.Nu = source.Nu,
+			target.DanTocJson = source.DanTocJson,
 			target.DoiVien = source.DoiVien,
 			target.NhiDong = source.NhiDong,
 			target.ConLietSi = source.ConLietSi,
@@ -56,11 +62,13 @@ BEGIN
 	WHEN NOT MATCHED THEN
 		INSERT (
 			SoGVCNID, ThoiDiem,
+			TongSo, Nu, DanTocJson,
 			DoiVien, NhiDong, ConLietSi, ConThuongBinh, KhuyetTatCoDanhGia, KhuyetTatKhongDanhGia, HoNgheo, TangGiamLiDo,
 			CreateUser, UpdateUser
 		)
 		VALUES (
 			@ID, source.ThoiDiem,
+			source.TongSo, source.Nu, source.DanTocJson,
 			source.DoiVien, source.NhiDong, source.ConLietSi, source.ConThuongBinh, source.KhuyetTatCoDanhGia, source.KhuyetTatKhongDanhGia, source.HoNgheo, source.TangGiamLiDo,
 			@UserID, @UserID
 		);
@@ -71,4 +79,5 @@ BEGIN
 END;
 GO
 
-GRANT EXECUTE ON dbo.spAPI_SoGVCNTheoDoiSiSoThangSave TO [lmslhbs];
+
+GRANT EXECUTE ON [dbo].[spAPI_SoGVCNTheoDoiSiSoThangSave] TO [lmslhbs];

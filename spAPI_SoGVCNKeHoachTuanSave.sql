@@ -8,7 +8,7 @@ CREATE OR ALTER PROCEDURE dbo.spAPI_SoGVCNKeHoachTuanSave
 	@KeHoachThucHien nvarchar(max),
 	@KetQua nvarchar(max),
 	@NguyenNhan nvarchar(max),
-	@sys_UserID varchar(10),
+	@sys_UserID varchar(9),
 	@sys_SystemRight varchar(10)
 AS
 BEGIN
@@ -85,5 +85,4 @@ BEGIN
 END;
 GO
 
-GRANT EXECUTE ON dbo.spAPI_SoGVCNKeHoachTuanSave TO [public];
-GO
+GRANT EXECUTE ON [dbo].[spAPI_SoGVCNKeHoachTuanSave] TO [lmslhbs];

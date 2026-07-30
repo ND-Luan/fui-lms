@@ -22,9 +22,9 @@ BEGIN
 		NhanXetHKII nvarchar(max) NULL,
 		Enable bit NOT NULL CONSTRAINT DF_tblSoGVCNHocSinhNhanXetThangLms_Enable DEFAULT (1),
 		CreateTime datetime NOT NULL CONSTRAINT DF_tblSoGVCNHocSinhNhanXetThangLms_CreateTime DEFAULT (GETDATE()),
-		CreateUser int NULL,
+		CreateUser varchar(9) NULL,
 		UpdateTime datetime NOT NULL CONSTRAINT DF_tblSoGVCNHocSinhNhanXetThangLms_UpdateTime DEFAULT (GETDATE()),
-		UpdateUser int NULL,
+		UpdateUser varchar(9) NULL,
 		CONSTRAINT PK_tblSoGVCNHocSinhNhanXetThangLms PRIMARY KEY CLUSTERED (NhanXetThangLmsID ASC)
 	);
 END;

@@ -23,6 +23,8 @@
 				instance: null,
 				columns: [
 					{ title: 'STT', width: 60, readOnly: true, align: 'center' },
+					{ title: 'Mã học sinh', width: 110, readOnly: true, align: 'center' },
+					{ title: 'Số danh bộ', width: 110, readOnly: true, align: 'center' },
 					{ title: 'Họ và tên học sinh', width: 250, readOnly: true },
 					{ title: 'I', width: 100, type: 'checkbox' },
 					{ title: 'II', width: 100, type: 'checkbox' },
@@ -58,7 +60,7 @@
 			nestedHeaders() {
 				return [
 					[
-						{ title: '', colspan: 2 },
+						{ title: '', colspan: 4 },
 						{ title: 'Kiểm diện PH đi họp', colspan: 3 },
 						{ title: '', colspan: 1 }
 					]
@@ -74,11 +76,14 @@
 				return sheet && typeof sheet.getData === 'function' ? sheet.getData() : []
 			},
 			buildRows() {
-				const findSaved = (hslopID) => (this.savedRows || []).find(r => r.HSLopID === hslopID) || {}
+				const findSaved = (hslopID) => (this.savedRows || [])
+					.find(r => String(r.HSLopID) === String(hslopID)) || {}
 				return (this.students || []).map((student, idx) => {
 					const saved = findSaved(student.HSLopID)
 					return [
 						idx + 1,
+						student.MaHocSinh || student.HocSinhID || '',
+						student.SoDanhBo || '',
 						student.HoTen || student.HoTenHocSinh || '',
 						!!(saved.Lan1 || saved.DauNamCoMat),
 						!!(saved.Lan2 || saved.HK1CoMat),
@@ -121,7 +126,7 @@
 								tableOverflow: true,
 								tableHeight: this.sheetHeight,
 								lazyLoading: false,
-								freezeColumns: 2,
+								freezeColumns: 4,
 								wordWrap: true,
 								allowInsertColumn: false,
 								allowInsertRow: false,

@@ -1,28 +1,38 @@
 <template>
-	<v-card-text class="pa-0" :style="{ height: sheetHeight, overflow: 'hidden' }">
+	<v-card-text class="pa-2 so-gvcn-sheet-wrap" :style="{ height: sheetHeight, overflow: 'hidden' }">
 		<v-alert v-if="selectedLopID === '__ALL__'" type="info" variant="tonal" density="compact" class="ma-2">
 			Chọn một lớp ở thanh trên để xem và biên soạn Tổng kết cuối năm học.
 		</v-alert>
 
-		<v-row v-else no-gutters class="h-100">
-			<v-col cols="12" md="3" lg="2" class="border-e h-100 overflow-y-auto">
-				<v-list density="compact" nav>
-					<v-list-subheader>ĐÁNH GIÁ TỔNG QUAN</v-list-subheader>
-					<v-list-item title="1. Công tác duy trì số lượng" @click="scrollToSection('sectionDuyTri')" />
-					<v-list-item title="2. Về năng lực, phẩm chất" @click="scrollToSection('sectionNlPc')" />
-					<v-list-item title="3. Về kiến thức, kĩ năng" @click="scrollToSection('sectionKienThuc')" />
-					<v-list-subheader>KẾT QUẢ CUỐI NĂM</v-list-subheader>
-					<v-list-item title="1. Về năng lực, phẩm chất" @click="scrollToSection('sectionKetQuaNlPc')" />
-					<v-list-item title="2. Về môn học và HĐGD" @click="scrollToSection('sectionMonHoc')" />
-					<v-list-item title="3. Đánh giá kết quả giáo dục" @click="scrollToSection('sectionKetQuaGd')" />
-					<v-list-item title="4. Khen thưởng" @click="scrollToSection('sectionKhenThuong')" />
-					<v-list-item title="5. Hoàn thành chương trình lớp" @click="scrollToSection('sectionHoanThanh')" />
-					<v-list-item title="6. Hoạt động, phong trào khác" @click="scrollToSection('sectionPhongTrao')" />
+		<div v-else class="d-flex h-100 ga-3">
+			<div class="flex-shrink-0 overflow-y-auto"
+				style="width: 260px; border-right: 1px solid rgba(0, 0, 0, 0.12);">
+				<v-list density="compact" nav color="primary" class="pa-0">
+					<v-list-subheader class="text-caption font-weight-bold text-primary px-3">
+						ĐÁNH GIÁ TỔNG QUAN
+					</v-list-subheader>
+					<v-list-item v-for="item in navItems.slice(0, 3)" :key="item.key"
+						:value="item.key" :active="activeSection === item.key" class="mb-1 rounded"
+						@click="scrollToSection(item)">
+						<v-list-item-title class="text-caption font-weight-bold text-wrap">
+							{{ item.title }}
+						</v-list-item-title>
+					</v-list-item>
+					<v-list-subheader class="text-caption font-weight-bold text-primary px-3 mt-2">
+						KẾT QUẢ CUỐI NĂM
+					</v-list-subheader>
+					<v-list-item v-for="item in navItems.slice(3)" :key="item.key"
+						:value="item.key" :active="activeSection === item.key" class="mb-1 rounded"
+						@click="scrollToSection(item)">
+						<v-list-item-title class="text-caption font-weight-bold text-wrap">
+							{{ item.title }}
+						</v-list-item-title>
+					</v-list-item>
 				</v-list>
-			</v-col>
+			</div>
 
-			<v-col ref="scrollContainer" cols="12" md="9" lg="10" class="h-100 overflow-y-auto pa-3 bg-grey-lighten-4">
-				<div class="text-h6 text-center font-weight-bold mb-4">TỔNG KẾT NĂM HỌC</div>
+			<div ref="scrollContainer" class="flex-grow-1 h-100 overflow-y-auto pr-1">
+				<div class="text-h6 text-center font-weight-bold py-3">TỔNG KẾT NĂM HỌC</div>
 				<v-card ref="sectionDuyTri" class="mb-4" variant="outlined">
 					<v-card-title class="text-subtitle-1 font-weight-bold">1. Công tác duy trì số lượng</v-card-title>
 					<v-card-text><v-textarea v-model="localForm.DuyTriSoLuong" rows="4" variant="outlined" density="compact" hide-details /></v-card-text>
@@ -35,21 +45,37 @@
 					<v-card-title class="text-subtitle-1 font-weight-bold">3. Về kiến thức, kĩ năng</v-card-title>
 					<v-card-text><v-textarea v-model="localForm.KienThucKyNang" rows="4" variant="outlined" density="compact" hide-details /></v-card-text>
 				</v-card>
-				<v-card ref="sectionKetQuaNlPc" class="mb-4" variant="outlined">
-					<v-card-title class="text-subtitle-1 font-weight-bold">KẾT QUẢ CUỐI NĂM — 1. Về năng lực, phẩm chất</v-card-title>
-					<div class="pa-2"><div ref="sheetRef1" class="w-100 so-gvcn-sheet"></div></div>
-				</v-card>
-				<v-card ref="sectionMonHoc" class="mb-4" variant="outlined">
-					<v-card-title class="text-subtitle-1 font-weight-bold">2. Về môn học và hoạt động giáo dục</v-card-title>
-					<div class="pa-2"><div ref="sheetRef2" class="w-100 so-gvcn-sheet"></div></div>
-				</v-card>
-				<v-card ref="sectionKetQuaGd" class="mb-4" variant="outlined">
-					<v-card-title class="text-subtitle-1 font-weight-bold">3. Về đánh giá kết quả giáo dục</v-card-title>
-					<div class="pa-2"><div ref="sheetRef3" class="w-100 so-gvcn-sheet"></div></div>
-				</v-card>
-				<v-card ref="sectionKhenThuong" class="mb-4" variant="outlined">
-					<v-card-title class="text-subtitle-1 font-weight-bold">4. Khen thưởng</v-card-title>
-					<div class="pa-2"><div ref="sheetRef4" class="w-100 so-gvcn-sheet"></div></div>
+				<v-card class="mb-4" variant="outlined">
+					<v-card-title class="text-subtitle-1 font-weight-bold text-primary">
+						KẾT QUẢ CUỐI NĂM HỌC
+					</v-card-title>
+					<v-divider />
+					<v-card-text class="pa-0">
+						<section ref="sectionKetQuaNlPc" class="pa-3">
+							<div class="text-subtitle-2 font-weight-bold text-primary mb-3">
+								1. Về năng lực, phẩm chất
+							</div>
+							<div ref="sheetRef1" class="w-100 so-gvcn-sheet"></div>
+						</section>
+						<section ref="sectionMonHoc" class="pa-3 border-t">
+							<div class="text-subtitle-2 font-weight-bold text-primary mb-3">
+								2. Về môn học và hoạt động giáo dục
+							</div>
+							<div ref="sheetRef2" class="w-100 so-gvcn-sheet"></div>
+						</section>
+						<section ref="sectionKetQuaGd" class="pa-3 border-t">
+							<div class="text-subtitle-2 font-weight-bold text-primary mb-3">
+								3. Về đánh giá kết quả giáo dục
+							</div>
+							<div ref="sheetRef3" class="w-100 so-gvcn-sheet"></div>
+						</section>
+						<section ref="sectionKhenThuong" class="pa-3 border-t">
+							<div class="text-subtitle-2 font-weight-bold text-primary mb-3">
+								4. Khen thưởng
+							</div>
+							<div ref="sheetRef4" class="w-100 so-gvcn-sheet"></div>
+						</section>
+					</v-card-text>
 				</v-card>
 				<v-card ref="sectionHoanThanh" class="mb-4" variant="outlined">
 					<v-card-title class="text-subtitle-1 font-weight-bold">5. Hoàn thành chương trình lớp học</v-card-title>
@@ -59,8 +85,8 @@
 					<v-card-title class="text-subtitle-1 font-weight-bold">6. Các hoạt động, phong trào khác</v-card-title>
 					<v-card-text><v-textarea v-model="localForm.PhongTraoKhac" rows="4" variant="outlined" density="compact" hide-details /></v-card-text>
 				</v-card>
-			</v-col>
-		</v-row>
+			</div>
+		</div>
 	</v-card-text>
 </template>
 
@@ -78,6 +104,18 @@
 				sheet2Instance: null,
 				sheet3Instance: null,
 				sheet4Instance: null,
+				activeSection: 'duy-tri',
+				navItems: [
+					{ key: 'duy-tri', refName: 'sectionDuyTri', title: '1. Công tác duy trì số lượng' },
+					{ key: 'nang-luc-pham-chat', refName: 'sectionNlPc', title: '2. Về năng lực, phẩm chất' },
+					{ key: 'kien-thuc-ky-nang', refName: 'sectionKienThuc', title: '3. Về kiến thức, kĩ năng' },
+					{ key: 'ket-qua-nl-pc', refName: 'sectionKetQuaNlPc', title: '1. Về năng lực, phẩm chất' },
+					{ key: 'mon-hoc-hdgd', refName: 'sectionMonHoc', title: '2. Về môn học và HĐGD' },
+					{ key: 'ket-qua-giao-duc', refName: 'sectionKetQuaGd', title: '3. Đánh giá kết quả giáo dục' },
+					{ key: 'khen-thuong', refName: 'sectionKhenThuong', title: '4. Khen thưởng' },
+					{ key: 'hoan-thanh-chuong-trinh', refName: 'sectionHoanThanh', title: '5. Hoàn thành chương trình lớp' },
+					{ key: 'phong-trao-khac', refName: 'sectionPhongTrao', title: '6. Hoạt động, phong trào khác' }
+				],
 				localForm: {
 					DuyTriSoLuong: '',
 					NangLucPhamChat: '',
@@ -119,11 +157,12 @@
 			this.destroyAllSheets()
 		},
 		methods: {
-			scrollToSection(refName) {
+			scrollToSection(item) {
+				this.activeSection = item.key
 				let container = this.$refs.scrollContainer
 				if (Array.isArray(container)) container = container[0]
 				container = container?.$el || container
-				let target = this.$refs[refName]
+				let target = this.$refs[item.refName]
 				if (Array.isArray(target)) target = target[0]
 				target = target?.$el || target
 				if (!container || !target) return
@@ -160,6 +199,18 @@
 				this.sheet2Instance = null
 				this.sheet3Instance = null
 				this.sheet4Instance = null
+				const sheetRefs = ['sheetRef1', 'sheetRef2', 'sheetRef3', 'sheetRef4']
+				sheetRefs.forEach(refName => {
+					let container = this.$refs[refName]
+					if (Array.isArray(container)) container = container[0]
+					if (!container) return
+					try {
+						if (typeof jspreadsheet !== 'undefined' && typeof jspreadsheet.destroy === 'function') {
+							jspreadsheet.destroy(container)
+						}
+					} catch (error) {}
+					container.innerHTML = ''
+				})
 			},
 
 			initAllSheets() {
@@ -179,20 +230,20 @@
 							['Cần cố gắng (C)', savedSheet1[2]?.[1]||'', savedSheet1[2]?.[2]||'', savedSheet1[2]?.[3]||'', savedSheet1[2]?.[4]||'', savedSheet1[2]?.[5]||'', savedSheet1[2]?.[6]||'', savedSheet1[2]?.[7]||'', savedSheet1[2]?.[8]||'', savedSheet1[2]?.[9]||'', savedSheet1[2]?.[10]||'', savedSheet1[2]?.[11]||'', savedSheet1[2]?.[12]||'', savedSheet1[2]?.[13]||'', savedSheet1[2]?.[14]||'', savedSheet1[2]?.[15]||'', savedSheet1[2]?.[16]||'', savedSheet1[2]?.[17]||'', savedSheet1[2]?.[18]||'', savedSheet1[2]?.[19]||'', savedSheet1[2]?.[20]||'', savedSheet1[2]?.[21]||'', savedSheet1[2]?.[22]||'', savedSheet1[2]?.[23]||'', savedSheet1[2]?.[24]||'', savedSheet1[2]?.[25]||'', savedSheet1[2]?.[26]||'', savedSheet1[2]?.[27]||'', savedSheet1[2]?.[28]||'', savedSheet1[2]?.[29]||'', savedSheet1[2]?.[30]||'']
 						]
 
-						const cols1 = [{ title: 'Xếp loại', width: 140, readOnly: true }]
+						const cols1 = [{ title: 'Xếp loại', width: 150, readOnly: true }]
 						const fields1 = [
 							'Yêu nước', 'Nhân ái', 'Chăm chỉ', 'Trung thực', 'Trách nhiệm',
 							'Tự chủ và tự học', 'Giao tiếp và hợp tác', 'GQVĐ và sáng tạo',
 							'Ngôn ngữ', 'Tính toán', 'Khoa học', 'Thẩm mĩ', 'Thể chất', 'Công nghệ', 'Tin học'
 						]
 						fields1.forEach(() => {
-							cols1.push({ title: 'SỐ LƯỢNG', width: 80, align: 'center', type: 'numeric' })
-							cols1.push({ title: 'TỈ LỆ', width: 80, align: 'center' })
+							cols1.push({ title: 'SỐ LƯỢNG', width: 95, align: 'center', type: 'numeric' })
+							cols1.push({ title: 'TỈ LỆ', width: 85, align: 'center', type: 'numeric' })
 						})
 
 						const nested1 = [
 							[
-								{ title: 'Xếp loại', colspan: 1 },
+								{ title: '', colspan: 1 },
 								{ title: 'Phẩm chất', colspan: 10 },
 								{ title: 'Năng lực', colspan: 20 }
 							],
@@ -210,7 +261,11 @@
 								tableOverflow: true,
 								tableWidth: '100%',
 								freezeColumns: 1,
-								wordWrap: true
+								wordWrap: true,
+								allowInsertRow: false,
+								allowDeleteRow: false,
+								allowInsertColumn: false,
+								allowDeleteColumn: false
 							}],
 							contextMenu: () => false
 						})
@@ -225,19 +280,19 @@
 							['Chưa hoàn thành (C)', savedSheet2[2]?.[1]||'', savedSheet2[2]?.[2]||'', savedSheet2[2]?.[3]||'', savedSheet2[2]?.[4]||'', savedSheet2[2]?.[5]||'', savedSheet2[2]?.[6]||'', savedSheet2[2]?.[7]||'', savedSheet2[2]?.[8]||'', savedSheet2[2]?.[9]||'', savedSheet2[2]?.[10]||'', savedSheet2[2]?.[11]||'', savedSheet2[2]?.[12]||'', savedSheet2[2]?.[13]||'', savedSheet2[2]?.[14]||'', savedSheet2[2]?.[15]||'', savedSheet2[2]?.[16]||'', savedSheet2[2]?.[17]||'', savedSheet2[2]?.[18]||'', savedSheet2[2]?.[19]||'', savedSheet2[2]?.[20]||'', savedSheet2[2]?.[21]||'', savedSheet2[2]?.[22]||'']
 						]
 
-						const cols2 = [{ title: 'Xếp loại', width: 160, readOnly: true }]
+						const cols2 = [{ title: 'Xếp loại', width: 150, readOnly: true }]
 						const fields2 = [
 							'Tiếng Việt', 'Toán', 'Tiếng Anh', 'Lịch sử & Địa lí', 'Khoa học',
 							'Tin học - Công nghệ', 'Đạo đức', 'Giáo dục thể chất', 'Âm nhạc', 'Mĩ thuật', 'HĐTN'
 						]
 						fields2.forEach(() => {
-							cols2.push({ title: 'SỐ LƯỢNG', width: 80, align: 'center', type: 'numeric' })
-							cols2.push({ title: 'TỈ LỆ', width: 80, align: 'center' })
+							cols2.push({ title: 'SỐ LƯỢNG', width: 95, align: 'center', type: 'numeric' })
+							cols2.push({ title: 'TỈ LỆ', width: 85, align: 'center', type: 'numeric' })
 						})
 
 						const nested2 = [
 							[
-								{ title: 'Xếp loại', colspan: 1 },
+								{ title: '', colspan: 1 },
 								{ title: 'Môn học và hoạt động giáo dục', colspan: 22 }
 							],
 							[
@@ -254,7 +309,11 @@
 								tableOverflow: true,
 								tableWidth: '100%',
 								freezeColumns: 1,
-								wordWrap: true
+								wordWrap: true,
+								allowInsertRow: false,
+								allowDeleteRow: false,
+								allowInsertColumn: false,
+								allowDeleteColumn: false
 							}],
 							contextMenu: () => false
 						})
@@ -275,11 +334,18 @@
 								data: defaultSheet3Data,
 								columns: [
 									{ title: 'Xếp loại', width: 180, readOnly: true },
-									{ title: 'SỐ LƯỢNG', width: 100, align: 'center', type: 'numeric' },
-									{ title: 'TỈ LỆ', width: 100, align: 'center' }
+									{ title: 'SỐ LƯỢNG', width: 95, align: 'center', type: 'numeric' },
+									{ title: 'TỈ LỆ', width: 85, align: 'center', type: 'numeric' }
 								],
 								tableOverflow: true,
-								tableWidth: '100%'
+								tableWidth: '100%',
+								freezeColumns: 1,
+								wordWrap: true,
+								rowResize: true,
+								allowInsertRow: false,
+								allowDeleteRow: false,
+								allowInsertColumn: false,
+								allowDeleteColumn: false
 							}],
 							contextMenu: () => false
 						})
@@ -298,11 +364,18 @@
 								data: defaultSheet4Data,
 								columns: [
 									{ title: 'Danh hiệu', width: 320, readOnly: true },
-									{ title: 'SỐ LƯỢNG', width: 100, align: 'center', type: 'numeric' },
-									{ title: 'TỈ LỆ', width: 100, align: 'center' }
+									{ title: 'SỐ LƯỢNG', width: 95, align: 'center', type: 'numeric' },
+									{ title: 'TỈ LỆ', width: 85, align: 'center', type: 'numeric' }
 								],
 								tableOverflow: true,
-								tableWidth: '100%'
+								tableWidth: '100%',
+								freezeColumns: 1,
+								wordWrap: true,
+								rowResize: true,
+								allowInsertRow: false,
+								allowDeleteRow: false,
+								allowInsertColumn: false,
+								allowDeleteColumn: false
 							}],
 							contextMenu: () => false
 						})

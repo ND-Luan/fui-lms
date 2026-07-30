@@ -1,6 +1,6 @@
 CREATE OR ALTER PROCEDURE dbo.spAPI_SoGVCNToNhomHocSinhGet
 	@url1_SoGVCNID varchar(10),
-	@sys_UserID varchar(10),
+	@sys_UserID varchar(9),
 	@sys_SystemRight varchar(10)
 AS
 BEGIN
@@ -22,3 +22,5 @@ BEGIN
 	  AND Enable = 1
 	ORDER BY RowIndex, ToNhomHocSinhID;
 END;
+
+GRANT EXECUTE ON [dbo].[spAPI_SoGVCNToNhomHocSinhGet] TO [lmslhbs];

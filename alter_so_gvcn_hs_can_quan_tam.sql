@@ -38,10 +38,10 @@ BEGIN
 
 		Enable bit NOT NULL
 			CONSTRAINT DF_tblSoGVCNHocSinhCanQuanTam_Enable DEFAULT (1),
-		CreateUser int NULL,
+		CreateUser varchar(9) NULL,
 		CreateTime datetime NOT NULL
 			CONSTRAINT DF_tblSoGVCNHocSinhCanQuanTam_CreateTime DEFAULT (GETDATE()),
-		UpdateUser int NULL,
+		UpdateUser varchar(9) NULL,
 		UpdateTime datetime NOT NULL
 			CONSTRAINT DF_tblSoGVCNHocSinhCanQuanTam_UpdateTime DEFAULT (GETDATE()),
 		CONSTRAINT FK_tblSoGVCNHocSinhCanQuanTam_SoGVCN

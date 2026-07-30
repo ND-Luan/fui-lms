@@ -33,14 +33,29 @@ var soGvcnJspreadsheet = window.soGvcnJspreadsheet = {
 		tables.forEach((table, tableIndex) => {
 			const freezeCount = Number(freezeCounts[tableIndex] || freezeCounts[0]) || 0
 			if (!freezeCount) return
-			const headerCells = table.querySelectorAll('thead td[data-x], thead th[data-x]')
-			const frozenHeaderByColumn = new Map()
-			headerCells.forEach((cell) => {
+			table.classList.add('so-gvcn-manual-freeze')
+
+			const tableColumns = Array.from(table.querySelectorAll('colgroup col'))
+			const dataColumnWidths = tableColumns
+				.slice(1)
+				.map(column => Number(column.getAttribute('width')) || column.getBoundingClientRect().width || 0)
+			const frozenLeftByColumn = new Map()
+			let frozenWidth = 0
+			for (let columnIndex = 0; columnIndex < freezeCount; columnIndex += 1) {
+				frozenLeftByColumn.set(columnIndex, frozenWidth)
+				frozenWidth += dataColumnWidths[columnIndex] || 0
+			}
+
+			table.querySelectorAll('thead [data-x], tbody [data-x]').forEach((cell) => {
 				const columnIndex = Number(cell.dataset.x)
-				if (columnIndex < freezeCount && cell.classList.contains('jss_freezed')) {
-					frozenHeaderByColumn.set(columnIndex, cell)
-				}
+				if (!Number.isFinite(columnIndex) || columnIndex >= freezeCount) return
+				cell.classList.add('jss_freezed')
+				cell.style.setProperty('--so-gvcn-freeze-left', `${frozenLeftByColumn.get(columnIndex) || 0}px`)
+				cell.style.setProperty('position', 'sticky', 'important')
+				cell.style.setProperty('z-index', cell.closest('thead') ? '42' : '22', 'important')
+				cell.style.setProperty('background-color', cell.closest('thead') ? '#f5f5f5' : '#fff', 'important')
 			})
+
 			table.querySelectorAll('thead tr.jss_nested td[data-column], thead tr.jss_nested th[data-column]')
 				.forEach((cell) => {
 					const columns = String(cell.dataset.column || '')
@@ -48,10 +63,11 @@ var soGvcnJspreadsheet = window.soGvcnJspreadsheet = {
 						.map(Number)
 						.filter(Number.isFinite)
 					if (!columns.length || columns.some(columnIndex => columnIndex >= freezeCount)) return
-					const firstHeader = frozenHeaderByColumn.get(columns[0])
-					if (!firstHeader) return
 					cell.classList.add('jss_freezed')
-					cell.style.left = firstHeader.style.left || window.getComputedStyle(firstHeader).left
+					cell.style.setProperty('--so-gvcn-freeze-left', `${frozenLeftByColumn.get(columns[0]) || 0}px`)
+					cell.style.setProperty('position', 'sticky', 'important')
+					cell.style.setProperty('z-index', '43', 'important')
+					cell.style.setProperty('background-color', '#f5f5f5', 'important')
 				})
 		})
 	},

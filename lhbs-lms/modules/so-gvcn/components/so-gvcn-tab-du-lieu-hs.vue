@@ -40,6 +40,7 @@
 				{ title: 'Sinh', isScoreCol: true, readOnly: true },
 				{ title: 'KQRL', width: 65, readOnly: true },
 				{ title: 'KQHT', width: 65, readOnly: true },
+				{ title: 'Danh hiệu', width: 180, readOnly: true },
 				{ title: 'Nhận xét GVCN', width: 380, align: 'left', readOnly: true },
 				{ title: 'Cha', width: 140, readOnly: true },
 				{ title: 'Nghề nghiệp cha', width: 130, readOnly: true },

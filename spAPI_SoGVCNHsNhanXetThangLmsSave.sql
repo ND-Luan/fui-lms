@@ -1,7 +1,7 @@
 CREATE OR ALTER PROCEDURE dbo.spAPI_SoGVCNHsNhanXetThangLmsSave
 	@SoGVCNID varchar(10),
 	@JsonRows nvarchar(max),
-	@sys_UserID varchar(10),
+	@sys_UserID varchar(9),
 	@sys_SystemRight varchar(10)
 AS
 BEGIN
@@ -9,7 +9,7 @@ BEGIN
 	SET XACT_ABORT ON;
 
 	DECLARE @ID int = TRY_CONVERT(int, @SoGVCNID);
-	DECLARE @UserID int = TRY_CONVERT(int, @sys_UserID);
+	DECLARE @UserID varchar(9) = @sys_UserID;
 
 	IF @ID IS NULL OR NOT EXISTS (
 		SELECT 1
@@ -81,4 +81,5 @@ BEGIN
 END;
 GO
 
-GRANT EXECUTE ON dbo.spAPI_SoGVCNHsNhanXetThangLmsSave TO [lmslhbs];
+
+GRANT EXECUTE ON [dbo].[spAPI_SoGVCNHsNhanXetThangLmsSave] TO [lmslhbs];

@@ -27,8 +27,8 @@
 					'Tháng 10',
 					'Tháng 11',
 					'Tháng 12',
-					'Tháng 01',
-					'Tháng 02',
+					'Tháng 1',
+					'Tháng 2',
 					'Tháng 3',
 					'Tháng 4',
 					'Tháng 5'
@@ -105,28 +105,28 @@
 				const ethnicList = this.getEthnicList()
 				const columns = [
 					{ title: 'Thời điểm', width: 140, readOnly: true },
-					{ title: 'Tổng số', width: 90, align: 'center', readOnly: true },
-					{ title: 'Nữ', width: 90, align: 'center', readOnly: true }
+					{ title: 'Tổng số', width: 90, align: 'center', type: 'text', readOnly: false },
+					{ title: 'Nữ', width: 90, align: 'center', type: 'text', readOnly: false }
 				]
 
 				// Nhóm Dân tộc
 				ethnicList.forEach(eth => {
-					columns.push({ title: eth, width: 100, align: 'center', readOnly: true })
+					columns.push({ title: eth, width: 100, align: 'center', type: 'text', readOnly: false })
 				})
 
 				// Cột Đội viên, Nhi đồng, Con liệt sĩ, Con thương binh
-				columns.push({ title: 'Đội viên', width: 100, align: 'center', type: 'numeric' })
-				columns.push({ title: 'Nhi đồng', width: 100, align: 'center', type: 'numeric' })
-				columns.push({ title: 'Con liệt sĩ', width: 100, align: 'center', type: 'numeric' })
-				columns.push({ title: 'Con thương binh', width: 120, align: 'center', type: 'numeric' })
+				columns.push({ title: 'Đội viên', width: 100, align: 'center', type: 'text', readOnly: false })
+				columns.push({ title: 'Nhi đồng', width: 100, align: 'center', type: 'text', readOnly: false })
+				columns.push({ title: 'Con liệt sĩ', width: 100, align: 'center', type: 'text', readOnly: false })
+				columns.push({ title: 'Con thương binh', width: 120, align: 'center', type: 'text', readOnly: false })
 
 				// Khuyết tật (Có đánh giá, Không đánh giá)
-				columns.push({ title: 'Có đánh giá', width: 110, align: 'center', type: 'numeric' })
-				columns.push({ title: 'Không đánh giá', width: 120, align: 'center', type: 'numeric' })
+				columns.push({ title: 'Có đánh giá', width: 110, align: 'center', type: 'text', readOnly: false })
+				columns.push({ title: 'Không đánh giá', width: 120, align: 'center', type: 'text', readOnly: false })
 
 				// Hộ nghèo, Lí do tăng giảm
-				columns.push({ title: 'Hộ nghèo', width: 100, align: 'center', type: 'numeric' })
-				columns.push({ title: 'Học sinh tăng giảm, lí do', width: 280 })
+				columns.push({ title: 'Hộ nghèo', width: 100, align: 'center', type: 'text', readOnly: false })
+				columns.push({ title: 'Học sinh tăng giảm, lí do', width: 280, readOnly: false })
 
 				const nestedHeaders = [
 					[
@@ -152,11 +152,19 @@
 
 				return this.defaultMonths.map(thoiDiem => {
 					const saved = findSaved(thoiDiem)
-					const ethnicValues = ethnicList.map(() => '')
+					let savedEthnicCounts = saved.DanTocJson || saved.DanToc || {}
+					if (typeof savedEthnicCounts === 'string') {
+						try {
+							savedEthnicCounts = JSON.parse(savedEthnicCounts)
+						} catch (error) {
+							savedEthnicCounts = {}
+						}
+					}
+					const ethnicValues = ethnicList.map(eth => savedEthnicCounts?.[eth] ?? '')
 					return [
 						thoiDiem,
-						'',
-						'',
+						saved.TongSo ?? '',
+						saved.Nu ?? '',
 						...ethnicValues,
 						saved.DoiVien ?? '',
 						saved.NhiDong ?? '',

@@ -1,5 +1,5 @@
 <template>
-	<v-card-text class="pa-2" :style="{ height: sheetHeight, overflow: 'hidden' }">
+	<v-card-text class="pa-2 so-gvcn-sheet-wrap" :style="{ height: sheetHeight, overflow: 'hidden' }">
 		<v-alert v-if="selectedLopID === '__ALL__'" type="info" variant="tonal" density="compact">
 			Chọn một lớp ở thanh trên để lập kế hoạch chủ nhiệm năm học.
 		</v-alert>
@@ -587,6 +587,31 @@
 				const number = Number(value)
 				return Number.isFinite(number) ? number : null
 			},
+			throwTargetValidationError(message) {
+				if (window.Vue && Vue.$toast) {
+					Vue.$toast.error(message, { position: 'top' })
+				} else if (window.showMessage) {
+					showMessage({ title: message })
+				} else {
+					alert(message)
+				}
+				throw new Error(message)
+			},
+			validateSubjectTargetRows(rows, subjects, ratingLabels) {
+				subjects.forEach((subject, subjectIndex) => {
+					const subjectName = subject.TenMonHoc_HienThi || subject.MonHocName || subject.TenMonHoc || `Môn học ${subject.MonHocID}`
+					ratingLabels.forEach((ratingLabel, ratingIndex) => {
+						const quantity = this.toNullableNumber(rows?.[ratingIndex]?.[1 + subjectIndex * 2])
+						const percentage = this.toNullableNumber(rows?.[ratingIndex]?.[2 + subjectIndex * 2])
+						if (quantity !== null && quantity < 0) {
+							this.throwTargetValidationError(`Số lượng của "${subjectName}" - mức "${ratingLabel}" không được nhỏ hơn 0.`)
+						}
+						if (percentage !== null && (percentage < 0 || percentage > 100)) {
+							this.throwTargetValidationError(`Tỉ lệ của "${subjectName}" - mức "${ratingLabel}" phải nằm trong khoảng từ 0 đến 100.`)
+						}
+					})
+				})
+			},
 			buildNormalizedSubjectTargets(rows, subjects, ratingFields) {
 				const lopID = String(this.selectedClass?.LopID || this.selectedLopID || '').trim()
 				return subjects.map((subject, subjectIndex) => {
@@ -638,6 +663,16 @@
 				result.classStatistics = this.buildNormalizedClassStatistics(result.sectionI)
 				result.qualityCompetencyTargets = result['pham-chat-nang-luc']
 				result.academicTargets = result['mon-hoc-hoat-dong']
+				this.validateSubjectTargetRows(
+					result.qualityCompetencyTargets,
+					this.qualityCompetencySubjects,
+					['Tốt', 'Đạt', 'Cần cố gắng']
+				)
+				this.validateSubjectTargetRows(
+					result.academicTargets,
+					this.academicSubjects,
+					['Hoàn thành tốt', 'Hoàn thành', 'Chưa hoàn thành']
+				)
 				result.subjectTargets = [
 					...this.buildNormalizedSubjectTargets(
 						result.qualityCompetencyTargets,

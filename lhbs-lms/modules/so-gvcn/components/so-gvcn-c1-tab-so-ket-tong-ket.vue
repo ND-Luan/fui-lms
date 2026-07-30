@@ -1,36 +1,84 @@
 <template>
-	<v-card-text class="pa-0" :style="{ height: sheetHeight, overflow: 'hidden' }">
+	<v-card-text class="pa-2 so-gvcn-sheet-wrap" :style="{ height: sheetHeight, overflow: 'hidden' }">
 		<v-alert v-if="selectedLopID === '__ALL__'" type="info" variant="tonal" density="compact" class="ma-2">
-			Chọn một lớp ở thanh trên để theo dõi sơ kết Học kỳ I.
+			Chọn một lớp ở thanh trên để theo dõi sơ kết Học KÌ I.
 		</v-alert>
-		<v-row v-else no-gutters class="h-100">
-			<v-col cols="12" md="3" lg="2" class="border-e h-100 overflow-y-auto">
-				<v-list density="compact" nav>
-					<v-list-subheader>ĐÁNH GIÁ HOẠT ĐỘNG LỚP</v-list-subheader>
+		<div v-else class="d-flex h-100 ga-3">
+			<div class="flex-shrink-0 overflow-y-auto"
+				style="width: 260px; border-right: 1px solid rgba(0, 0, 0, 0.12);">
+				<v-list density="compact" nav color="primary" class="pa-0">
+					<v-list-subheader class="text-caption font-weight-bold text-primary px-3">
+						ĐÁNH GIÁ HOẠT ĐỘNG LỚP
+					</v-list-subheader>
 					<v-list-item v-for="card in cards.slice(0, 3)" :key="card.key"
-						:title="card.navTitle" @click="scrollToCard(card)" />
-					<v-list-subheader>KẾT QUẢ HỌC KỲ I</v-list-subheader>
+						:value="card.key" :active="activeCardKey === card.key" class="mb-1 rounded"
+						@click="scrollToCard(card)">
+						<v-list-item-title class="text-caption font-weight-bold text-wrap">
+							{{ card.navTitle }}
+						</v-list-item-title>
+					</v-list-item>
+					<v-list-subheader class="text-caption font-weight-bold text-primary px-3 mt-2">
+						KẾT QUẢ HỌC KÌ I
+					</v-list-subheader>
 					<v-list-item v-for="card in cards.slice(3, 5)" :key="card.key"
-						:title="card.navTitle" @click="scrollToCard(card)" />
-					<v-list-subheader>PHƯƠNG HƯỚNG HỌC KỲ II</v-list-subheader>
-					<v-list-item :title="cards[5].navTitle" @click="scrollToCard(cards[5])" />
+						:value="card.key" :active="activeCardKey === card.key" class="mb-1 rounded"
+						@click="scrollToCard(card)">
+						<v-list-item-title class="text-caption font-weight-bold text-wrap">
+							{{ card.navTitle }}
+						</v-list-item-title>
+					</v-list-item>
+					<v-list-subheader class="text-caption font-weight-bold text-primary px-3 mt-2">
+						PHƯƠNG HƯỚNG HỌC KÌ II
+					</v-list-subheader>
+					<v-list-item :value="cards[5].key" :active="activeCardKey === cards[5].key"
+						class="mb-1 rounded" @click="scrollToCard(cards[5])">
+						<v-list-item-title class="text-caption font-weight-bold text-wrap">
+							{{ cards[5].navTitle }}
+						</v-list-item-title>
+					</v-list-item>
 				</v-list>
-			</v-col>
+			</div>
 
-			<v-col ref="scrollContainer" cols="12" md="9" lg="10" class="h-100 overflow-y-auto pa-3">
-				<div class="text-h6 text-center font-weight-bold mb-1">SƠ KẾT HỌC KỲ I</div>
+			<div ref="scrollContainer" class="flex-grow-1 h-100 overflow-y-auto pr-1">
+				<div class="text-h6 text-center font-weight-bold pt-3 mb-1">SƠ KẾT HỌC KÌ I</div>
 				<div class="text-body-2 text-center mb-4">
 					Đánh giá nội dung hoạt động của lớp theo kế hoạch đã xây dựng đầu năm
 				</div>
-				<v-card v-for="card in cards" :key="card.key" :ref="card.cardRef"
+				<v-card v-for="card in cards.slice(0, 3)" :key="card.key" :ref="card.cardRef"
 					variant="outlined" class="mb-4">
 					<v-card-title class="text-subtitle-1 font-weight-bold">{{ card.title }}</v-card-title>
 					<v-card-text class="pa-2">
-						<div :ref="card.sheetRef" class="w-100 so-gvcn-sheet"></div>
+						<v-textarea v-model="noteValues[card.key]"
+							label="Nội dung nhận xét" variant="outlined" rows="8" auto-grow hide-details />
 					</v-card-text>
 				</v-card>
-			</v-col>
-		</v-row>
+
+				<v-card variant="outlined" class="mb-4">
+					<v-card-title class="text-subtitle-1 font-weight-bold text-primary">
+						KẾT QUẢ HỌC KÌ I
+					</v-card-title>
+					<v-divider />
+					<v-card-text class="pa-0">
+						<section v-for="(card, index) in cards.slice(3, 5)" :key="card.key"
+							:ref="card.cardRef" class="pa-3" :class="{ 'border-t': index > 0 }">
+							<div class="text-subtitle-2 font-weight-bold text-primary mb-3">
+								{{ card.title }}
+							</div>
+							<div :ref="card.sheetRef"
+								class="w-100 so-gvcn-sheet so-gvcn-so-ket-result-sheet"></div>
+						</section>
+					</v-card-text>
+				</v-card>
+
+				<v-card :ref="cards[5].cardRef" variant="outlined" class="mb-4">
+					<v-card-title class="text-subtitle-1 font-weight-bold">{{ cards[5].title }}</v-card-title>
+					<v-card-text class="pa-2">
+						<v-textarea v-model="noteValues[cards[5].key]" label="Nội dung phương hướng"
+							variant="outlined" rows="8" auto-grow hide-details />
+					</v-card-text>
+				</v-card>
+			</div>
+		</div>
 	</v-card-text>
 </template>
 
@@ -46,6 +94,8 @@
 		data() {
 			return {
 				instances: {},
+				noteValues: {},
+				activeCardKey: 'duy-tri-si-so',
 				cards: [
 					{
 						key: 'duy-tri-si-so',
@@ -53,7 +103,8 @@
 						title: '1. Công tác duy trì số lượng',
 						cardRef: 'cardDuyTriSiSo',
 						sheetRef: 'sheetDuyTriSiSo',
-						type: 'note'
+						type: 'note',
+						inputType: 'textarea'
 					},
 					{
 						key: 'danh-gia-nl-pc',
@@ -61,7 +112,8 @@
 						title: '2. Về năng lực, phẩm chất',
 						cardRef: 'cardDanhGiaNlPc',
 						sheetRef: 'sheetDanhGiaNlPc',
-						type: 'note'
+						type: 'note',
+						inputType: 'textarea'
 					},
 					{
 						key: 'danh-gia-kien-thuc',
@@ -69,12 +121,13 @@
 						title: '3. Về kiến thức, kĩ năng',
 						cardRef: 'cardDanhGiaKienThuc',
 						sheetRef: 'sheetDanhGiaKienThuc',
-						type: 'note'
+						type: 'note',
+						inputType: 'textarea'
 					},
 					{
 						key: 'ket-qua-nl-pc',
 						navTitle: '1. Về năng lực, phẩm chất',
-						title: 'KẾT QUẢ HỌC KỲ I — 1. Về năng lực, phẩm chất',
+						title: '1. Về năng lực, phẩm chất',
 						cardRef: 'cardKetQuaNlPc',
 						sheetRef: 'sheetKetQuaNlPc',
 						type: 'quality'
@@ -82,7 +135,7 @@
 					{
 						key: 'ket-qua-mon-hoc',
 						navTitle: '2. Về môn học và HĐGD',
-						title: 'KẾT QUẢ HỌC KỲ I — 2. Về môn học và hoạt động giáo dục',
+						title: '2. Về môn học và hoạt động giáo dục',
 						cardRef: 'cardKetQuaMonHoc',
 						sheetRef: 'sheetKetQuaMonHoc',
 						type: 'subject'
@@ -90,24 +143,30 @@
 					{
 						key: 'phuong-huong-hk2',
 						navTitle: 'Nội dung phương hướng',
-						title: 'PHƯƠNG HƯỚNG HỌC KỲ II',
+						title: 'PHƯƠNG HƯỚNG HỌC KÌ II',
 						cardRef: 'cardPhuongHuongHk2',
 						sheetRef: 'sheetPhuongHuongHk2',
-						type: 'note'
+						type: 'note',
+						inputType: 'textarea'
 					}
 				]
 			}
 		},
 		watch: {
 			selectedLopID() {
+				this.syncNoteValues()
 				this.initSheets()
 			},
 			savedRows: {
 				deep: false,
 				handler() {
+					this.syncNoteValues()
 					this.initSheets()
 				}
 			}
+		},
+		created() {
+			this.syncNoteValues()
 		},
 		mounted() {
 			this.initSheets()
@@ -118,6 +177,44 @@
 		methods: {
 			getInstance() {
 				return this.instances
+			},
+			getNoteValues() {
+				return { ...this.noteValues }
+			},
+			parseSavedData() {
+				const source = Array.isArray(this.savedRows) ? (this.savedRows[0] || {}) : (this.savedRows || {})
+				const json = source.JsonData ?? source
+				if (!json) return {}
+				try {
+					return typeof json === 'string' ? JSON.parse(json) : json
+				} catch (error) {
+					return {}
+				}
+			},
+			syncNoteValues() {
+				const saved = this.parseSavedData()
+				const textareaCards = (this.cards || []).filter(card => card.inputType === 'textarea')
+				textareaCards.forEach(card => {
+					const value = saved.notes?.[card.key]
+					this.noteValues[card.key] = Array.isArray(value) ? value.join('\n') : (value || '')
+				})
+			},
+			getData() {
+				const readSheet = key => {
+					const instance = this.instances[key]
+					const sheet = Array.isArray(instance) ? instance[0] : instance
+					if (sheet && typeof sheet.closeEditor === 'function') {
+						try { sheet.closeEditor(true) } catch (error) {}
+					}
+					return sheet && typeof sheet.getData === 'function' ? sheet.getData() : []
+				}
+				return {
+					version: 1,
+					type: 'c1-semester-1-summary',
+					notes: { ...this.noteValues },
+					qualityResults: readSheet('ket-qua-nl-pc'),
+					subjectResults: readSheet('ket-qua-mon-hoc')
+				}
 			},
 			getSheet(card) {
 				let target = this.$refs[card.sheetRef]
@@ -130,6 +227,7 @@
 				return target?.$el || target
 			},
 			scrollToCard(card) {
+				this.activeCardKey = card.key
 				let container = this.$refs.scrollContainer
 				if (Array.isArray(container)) container = container[0]
 				container = container?.$el || container
@@ -151,37 +249,32 @@
 					freezeColumns: 0
 				}
 			},
-			buildGroupedConfig(categories, ratings) {
+			buildGroupedConfig(categories, ratings, savedRows = []) {
 				const groups = categories.flatMap(category => category.items)
-				const columns = [{ title: 'Xếp loại', width: 170, readOnly: true }]
+				const columns = [{ title: 'Xếp loại', width: 150, readOnly: true }]
 				const nestedCategory = [{ title: '', colspan: 1 }]
 				const nestedGroup = [{ title: '', colspan: 1 }]
-				const nestedMetric = [{ title: '', colspan: 1 }]
 				categories.forEach(category => {
 					nestedCategory.push({ title: category.title, colspan: category.items.length * 2 })
 					category.items.forEach(group => {
 						columns.push(
-							{ title: '', width: 90, type: 'numeric', align: 'center' },
-							{ title: '', width: 90, align: 'center' }
+							{ title: 'Số lượng', width: 95, type: 'numeric', align: 'center' },
+							{ title: 'Tỉ lệ', width: 85, type: 'numeric', align: 'center' }
 						)
 						nestedGroup.push({ title: group, colspan: 2 })
-						nestedMetric.push(
-							{ title: 'Số lượng', colspan: 1 },
-							{ title: 'Tỉ lệ', colspan: 1 }
-						)
 					})
 				})
 				return {
-					data: ratings.map(rating => [
-						rating,
-						...Array.from({ length: groups.length * 2 }, () => '')
-					]),
+					data: ratings.map((rating, index) => Array.isArray(savedRows[index])
+						? [rating, ...savedRows[index].slice(1)]
+						: [rating, ...Array.from({ length: groups.length * 2 }, () => '')]),
 					columns,
-					nestedHeaders: [nestedCategory, nestedGroup, nestedMetric],
+					nestedHeaders: [nestedCategory, nestedGroup],
 					freezeColumns: 1
 				}
 			},
 			buildCardConfig(card) {
+				const saved = this.parseSavedData()
 				if (card.type === 'quality') {
 					return this.buildGroupedConfig([
 						{
@@ -192,11 +285,11 @@
 							title: 'Năng lực',
 							items: [
 								'Tự chủ và tự học', 'Giao tiếp và hợp tác', 'GQVĐ và sáng tạo',
-								'Ngôn ngữ', 'Tính toán', 'Khoa học', 'Thẩm mĩ', 'Thể chất',
-								'Công nghệ', 'Tin học'
+								'Ngôn ngữ', 'Tính toán', 'Khoa học', 'Công nghệ', 'Tin học',
+								'Thẩm mĩ', 'Thể chất'
 							]
 						}
-					], ['Tốt (T)', 'Đạt (Đ)', 'Cần cố gắng (C)'])
+					], ['Tốt (T)', 'Đạt (Đ)', 'Cần cố gắng (C)'], saved.qualityResults)
 				}
 				if (card.type === 'subject') {
 					return this.buildGroupedConfig([
@@ -208,7 +301,7 @@
 								'Âm nhạc', 'Mĩ thuật', 'Hoạt động trải nghiệm'
 							]
 						}
-					], ['Hoàn thành tốt (T)', 'Hoàn thành (H)', 'Chưa hoàn thành (C)'])
+					], ['Hoàn thành tốt (T)', 'Hoàn thành (H)', 'Chưa hoàn thành (C)'], saved.subjectResults)
 				}
 				return this.buildNoteConfig(card)
 			},
@@ -230,6 +323,7 @@
 					this.destroySheets()
 					if (typeof jspreadsheet !== 'function') return
 					this.cards.forEach(card => {
+						if (card.inputType === 'textarea') return
 						const container = this.getSheet(card)
 						if (!container) return
 						container.innerHTML = ''
@@ -241,7 +335,7 @@
 								columnDrag: false,
 								tableWidth: '100%',
 								tableOverflow: true,
-								tableHeight: card.type === 'note' ? '260px' : '360px',
+								tableHeight: '205px',
 								lazyLoading: false,
 								wordWrap: true,
 								allowInsertColumn: false,
@@ -256,3 +350,12 @@
 		}
 	}
 </script>
+
+<style scoped>
+	:deep(.so-gvcn-so-ket-result-sheet .jss_content) {
+		height: 205px !important;
+		max-height: 205px !important;
+		overflow-x: auto !important;
+		overflow-y: hidden !important;
+	}
+</style>

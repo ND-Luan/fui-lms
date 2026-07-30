@@ -22,8 +22,10 @@
 			return {
 				instance: null,
 				columns: [
-					{ title: 'STT', width: 60, readOnly: true, align: 'center' },
-					{ title: 'Họ và tên học sinh', width: 250, readOnly: true },
+					{ title: 'STT', width: 50, readOnly: true, align: 'center' },
+					{ title: 'Mã học sinh', width: 110, readOnly: true },
+					{ title: 'Số danh bộ', width: 110, readOnly: true },
+					{ title: 'Họ và tên học sinh', width: 220, readOnly: true },
 					{ title: 'HKI', width: 350 },
 					{ title: 'Cuối năm học', width: 350 }
 				]
@@ -56,7 +58,7 @@
 			nestedHeaders() {
 				return [
 					[
-						{ title: '', colspan: 2 },
+						{ title: '', colspan: 4 },
 						{ title: 'Nội dung khen thưởng/ Thành tích đạt được', colspan: 2 }
 					]
 				]
@@ -76,6 +78,8 @@
 					const saved = findSaved(student.HSLopID)
 					return [
 						idx + 1,
+						student.MaHocSinh || student.HocSinhID || '',
+						student.SoDanhBo || '',
 						student.HoTen || student.HoTenHocSinh || '',
 						saved.HKI || saved.ThanhTich || '',
 						saved.CuoiNam || ''
@@ -116,7 +120,7 @@
 								tableOverflow: true,
 								tableHeight: this.sheetHeight,
 								lazyLoading: false,
-								freezeColumns: 2,
+								freezeColumns: 4,
 								wordWrap: true,
 								allowInsertColumn: false,
 								allowInsertRow: false,

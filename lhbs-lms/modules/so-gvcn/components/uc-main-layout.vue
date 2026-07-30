@@ -58,10 +58,10 @@
 							<v-tab value="ke-hoach">{{ isCap1 ? 'HS cần quan tâm' : 'KH GD tháng_tuần' }}</v-tab>
 							<v-tab value="ren-luyen">{{ isCap1 ? 'Nhận xét tháng (LMS)' : 'Hồ sơ theo dõi QTRL' }}
 							</v-tab>
-							<v-tab v-if="isCap1" value="theo-doi-si-so">Theo dõi sĩ số tháng</v-tab>
-							<v-tab v-if="isCap1" value="thong-ke-do-tuoi">Thống kê độ tuổi HS</v-tab>
 							<v-tab v-if="isCap1" value="so-ket-hk1">Sơ kết HKI</v-tab>
 							<v-tab v-if="isCap1" value="tong-ket-nam">Tổng kết năm học</v-tab>
+							<v-tab v-if="isCap1" value="theo-doi-si-so">Theo dõi sĩ số HS theo tháng</v-tab>
+							<v-tab v-if="isCap1" value="thong-ke-do-tuoi">Thống kê độ tuổi HS</v-tab>
 							<v-tab v-if="isCap1" value="theo-doi-thanh-tich">Theo dõi thành tích HS</v-tab>
 							<v-tab value="so-lien-lac">{{ isCap1 ? 'Theo dõi PH đi họp' : 'Sổ liên lạc điện tử' }}
 							</v-tab>
@@ -139,20 +139,6 @@
 									:ren-luyen-sheet-height="renLuyenSheetHeight" :sheet-key="sheetKey" />
 							</v-window-item>
 
-							<!-- Tab Theo dõi sĩ số tháng (C1 only) -->
-							<v-window-item v-if="isCap1" value="theo-doi-si-so" eager>
-								<so-gvcn-c1-tab-theo-doi-si-so ref="tabTheoDoiSiSoRef" :selected-lop-i-d="selectedLopID"
-									:students="getSelectedClassStudents()" :saved-rows="siSoSavedRows"
-									:sheet-height="sheetHeight" />
-							</v-window-item>
-
-							<!-- Tab Thống kê độ tuổi HS (C1 only) -->
-							<v-window-item v-if="isCap1" value="thong-ke-do-tuoi" eager>
-								<so-gvcn-c1-tab-thong-ke-do-tuoi ref="tabThongKeDoTuoiRef"
-									:selected-lop-i-d="selectedLopID" :students="getSelectedClassStudents()"
-									:saved-rows="thongKeDoTuoiSavedRows" :sheet-height="sheetHeight" />
-							</v-window-item>
-
 							<!-- Tab Sơ kết HKI (C1 only) -->
 							<v-window-item v-if="isCap1" value="so-ket-hk1" eager>
 								<so-gvcn-c1-tab-so-ket-tong-ket ref="tabSoKetHk1Ref" :selected-lop-i-d="selectedLopID"
@@ -165,6 +151,20 @@
 								<so-gvcn-c1-tab-tong-ket-nam-hoc ref="tabTongKetNamRef"
 									:selected-lop-i-d="selectedLopID" :saved-data="tongKetNamC1SavedData"
 									:sheet-height="sheetHeight" />
+							</v-window-item>
+
+							<!-- Tab Theo dõi sĩ số tháng (C1 only) -->
+							<v-window-item v-if="isCap1" value="theo-doi-si-so" eager>
+								<so-gvcn-c1-tab-theo-doi-si-so ref="tabTheoDoiSiSoRef" :selected-lop-i-d="selectedLopID"
+									:students="getSelectedClassStudents()" :saved-rows="siSoSavedRows"
+									:sheet-height="sheetHeight" />
+							</v-window-item>
+
+							<!-- Tab Thống kê độ tuổi HS (C1 only) -->
+							<v-window-item v-if="isCap1" value="thong-ke-do-tuoi" eager>
+								<so-gvcn-c1-tab-thong-ke-do-tuoi ref="tabThongKeDoTuoiRef"
+									:selected-lop-i-d="selectedLopID" :students="getSelectedClassStudents()"
+									:saved-rows="thongKeDoTuoiSavedRows" :sheet-height="sheetHeight" />
 							</v-window-item>
 
 							<!-- Tab Theo dõi thành tích HS (C1 only) -->
@@ -237,6 +237,7 @@
 			nhanXetThangLmsSavedRows: [],
 			soKetHk1SavedRows: [],
 			tongKetNamSavedRows: [],
+			tongKetNamC1SavedData: {},
 			thanhTichSavedRows: [],
 			thongKeDoTuoiSavedRows: [],
 			theoDoiPhHopSavedRows: [],
@@ -450,6 +451,7 @@
 				{ title: 'Sinh', width: 80, readOnly: true },
 				{ title: 'KQRL', width: 90, readOnly: true },
 				{ title: 'KQHT', width: 90, readOnly: true },
+				{ title: 'Danh hiệu', width: 180, readOnly: true },
 				{ title: 'Nhận xét GVCN', width: 600, align: 'left', readOnly: true },
 				{ title: 'Cha', width: 160, readOnly: true },
 				{ title: 'Nghề nghiệp cha', width: 160, readOnly: true },
@@ -551,7 +553,7 @@
 			showSaveButton() {
 				const isC1OrganizationTab = this.isCap1 && this.tab === 'to-chuc-lop'
 				return this.selectedLopID !== '__ALL__' && (isC1OrganizationTab
-					|| ['chi-tieu', 'cong-tac-cn', 'ke-hoach', 'ren-luyen', 'nhan-xet-lms', 'so-lien-lac', 'huong-nghiep'].includes(this.tab))
+					|| ['chi-tieu', 'cong-tac-cn', 'ke-hoach', 'ren-luyen', 'nhan-xet-lms', 'so-ket-hk1', 'tong-ket-nam', 'theo-doi-si-so', 'thong-ke-do-tuoi', 'theo-doi-thanh-tich', 'so-lien-lac', 'huong-nghiep'].includes(this.tab))
 			},
 			saveButtonText() {
 				switch (this.tab) {
@@ -561,7 +563,12 @@
 					case 'ke-hoach': return 'Lưu kế hoạch tháng'
 					case 'ren-luyen': return 'Lưu rèn luyện'
 					case 'nhan-xet-lms': return 'Lưu nhận xét LMS'
-					case 'so-lien-lac': return 'Lưu sổ liên lạc'
+					case 'so-ket-hk1': return 'Lưu sơ kết HKI'
+					case 'tong-ket-nam': return 'Lưu tổng kết năm học'
+					case 'theo-doi-si-so': return 'Lưu theo dõi sĩ số'
+					case 'thong-ke-do-tuoi': return 'Lưu thống kê độ tuổi'
+					case 'theo-doi-thanh-tich': return 'Lưu thành tích'
+					case 'so-lien-lac': return this.isCap1 ? 'Lưu theo dõi PH đi họp' : 'Lưu sổ liên lạc'
 					case 'huong-nghiep': return 'Lưu hướng nghiệp'
 					default: return 'Lưu'
 				}
@@ -581,7 +588,7 @@
 				[
 					{ title: '', colspan: 6 },
 					{ title: 'ĐTB môn cả năm ' + namHocDiem, colspan: 12 },
-					{ title: 'KQ ' + namHocDiem, colspan: 2 },
+					{ title: 'KQ ' + namHocDiem, colspan: 3 },
 					{ title: 'NHẬN XÉT CỦA GVCN ' + namHocDiem, colspan: 1 },
 					{ title: 'THÔNG TIN GIA ĐÌNH', colspan: 8 },
 					{ title: 'ĐĂNG KÍ', colspan: 2 },
@@ -663,6 +670,8 @@
 				} else {
 					setTimeout(() => this.$refs.tabRenLuyenRef?.scheduleInit(), 50)
 				}
+			} else if (newTab === 'so-ket-hk1' && this.isCap1) {
+				this.getSoKetHk1()
 			} else if (newTab === 'noi-dung-hop-ph' && this.isCap1) {
 				this.getNoiDungHopPh()
 			} else if (newTab === 'so-lien-lac' && this.isCap1) {
@@ -1005,6 +1014,9 @@
 			this.weeklyPlanList = []
 			this.chiTieuSavedRows = []
 			this.siSoSavedRows = []
+			this.hsCanQuanTamSavedRows = []
+			this.soKetHk1SavedRows = []
+			this.tongKetNamC1SavedData = {}
 			this.giaoVienBoMonSavedRows = []
 			this.banDaiDienCMHSSavedRows = []
 			this.canBoLopSavedRows = []
@@ -1045,42 +1057,57 @@
 		},
 		async getHsCanQuanTam() {
 			if (!this.form.SoGVCNID || !this.isCap1) return
-			const hsResponse = await ajaxCALLPromise(`lms/SoGVCNHsCanQuanTamGet/${this.form.SoGVCNID}`).catch(() => [])
-			this.hsCanQuanTamSavedRows = Array.isArray(hsResponse) ? hsResponse : (Array.isArray(hsResponse?.[0]) ? hsResponse[0] : [])
+			const hsResponse = await ajaxCALLPromise('lms/SoGVCNHsCanQuanTamGet', {
+				SoGVCNID: this.form.SoGVCNID
+			})
+			const responseData = Array.isArray(hsResponse?.data) ? hsResponse.data : hsResponse
+			this.hsCanQuanTamSavedRows = Array.isArray(responseData?.[0])
+				? responseData[0]
+				: (Array.isArray(responseData) ? responseData : [])
 		},
 		async getHsNhanXetThangLms() {
 			if (!this.form.SoGVCNID || !this.isCap1) return
-			const res = await ajaxCALLPromise(`lms/SoGVCNHsNhanXetThangLmsGet/${this.form.SoGVCNID}`).catch(() => [])
+			const res = await ajaxCALLPromise('lms/SoGVCNHsNhanXetThangLmsGet', { SoGVCNID: this.form.SoGVCNID }).catch(() => [])
 			this.nhanXetThangLmsSavedRows = Array.isArray(res) ? res : (Array.isArray(res?.[0]) ? res[0] : [])
+		},
+		async getSoKetHk1() {
+			if (!this.form.SoGVCNID || !this.isCap1) return
+			const res = await ajaxCALLPromise('lms/SoGVCNSoKetHKIGet', { SoGVCNID: this.form.SoGVCNID })
+			this.soKetHk1SavedRows = Array.isArray(res?.[0]) ? res[0] : (Array.isArray(res) ? res : [])
 		},
 		async getNoiDungHopPh() {
 			if (!this.form.SoGVCNID || !this.isCap1) return
-			const res = await ajaxCALLPromise(`lms/SoGVCNNoiDungHopPHGet/${this.form.SoGVCNID}`).catch(() => [])
+			const res = await ajaxCALLPromise('lms/SoGVCNNoiDungHopPHGet', { SoGVCNID: this.form.SoGVCNID }).catch(() => [])
 			this.noiDungHopPhSavedRows = Array.isArray(res) ? res : (Array.isArray(res?.[0]) ? res[0] : [])
 		},
 		async getTheoDoiPhHop() {
 			if (!this.form.SoGVCNID || !this.isCap1) return
-			const res = await ajaxCALLPromise(`lms/SoGVCNTheoDoiPhuHuynhHopGet/${this.form.SoGVCNID}`).catch(() => [])
-			this.theoDoiPhHopSavedRows = Array.isArray(res) ? res : (Array.isArray(res?.[0]) ? res[0] : [])
+			const res = await ajaxCALLPromise('lms/SoGVCNTheoDoiPhuHuynhHopGet', { SoGVCNID: this.form.SoGVCNID }).catch(() => [])
+			this.theoDoiPhHopSavedRows = Array.isArray(res?.[0])
+				? res[0]
+				: (Array.isArray(res) ? res : [])
 		},
 		async getTheoDoiThanhTich() {
 			if (!this.form.SoGVCNID || !this.isCap1) return
-			const res = await ajaxCALLPromise(`lms/SoGVCNTheoDoiThanhTichGet/${this.form.SoGVCNID}`).catch(() => [])
+			const res = await ajaxCALLPromise('lms/SoGVCNTheoDoiThanhTichGet', { SoGVCNID: this.form.SoGVCNID }).catch(() => [])
 			this.thanhTichSavedRows = Array.isArray(res) ? res : (Array.isArray(res?.[0]) ? res[0] : [])
 		},
 		async getThongKeDoTuoi() {
 			if (!this.form.SoGVCNID || !this.isCap1) return
-			const res = await ajaxCALLPromise(`lms/SoGVCNThongKeDoTuoiGet/${this.form.SoGVCNID}`).catch(() => [])
+			const res = await ajaxCALLPromise('lms/SoGVCNThongKeDoTuoiGet', { SoGVCNID: this.form.SoGVCNID }).catch(() => [])
 			this.thongKeDoTuoiSavedRows = Array.isArray(res) ? res : (Array.isArray(res?.[0]) ? res[0] : [])
 		},
 		async getTheoDoiSiSoThang() {
 			if (!this.form.SoGVCNID || !this.isCap1) return
-			const res = await ajaxCALLPromise(`lms/SoGVCNTheoDoiSiSoThangGet/${this.form.SoGVCNID}`).catch(() => [])
-			this.siSoSavedRows = Array.isArray(res) ? res : (Array.isArray(res?.[0]) ? res[0] : [])
+			const res = await ajaxCALLPromise('lms/SoGVCNTheoDoiSiSoThangGet', { SoGVCNID: this.form.SoGVCNID }).catch(() => [])
+			this.siSoSavedRows = Array.isArray(res?.[0])
+				? res[0]
+				: (Array.isArray(res) ? res : [])
 		},
 		async getTongKetNamC1() {
 			if (!this.form.SoGVCNID || !this.isCap1) return
-			const res = await ajaxCALLPromise(`lms/SoGVCNTongKetNamC1Get/${this.form.SoGVCNID}`).catch(() => [])
+			this.tongKetNamC1SavedData = {}
+			const res = await ajaxCALLPromise('lms/SoGVCNTongKetNamC1Get', { SoGVCNID: this.form.SoGVCNID }).catch(() => [])
 			const row = Array.isArray(res) ? (res[0]?.[0] || res[0]) : res
 			if (row) {
 				const parseJson = (str) => {
@@ -1104,7 +1131,7 @@
 			const data = await ajaxCALLPromise(`lms/SoGVCNGet/${this.form.SoGVCNID}`)
 			this.detail = Array.isArray(data) ? (data[0]?.[0] || {}) : data
 			this.monthList = Array.isArray(data?.[1]) ? data[1] : []
-			const weeklyResponse = await ajaxCALLPromise(`lms/SoGVCNKeHoachTuanGet/${this.form.SoGVCNID}`)
+			const weeklyResponse = await ajaxCALLPromise('lms/SoGVCNKeHoachTuanGet', { SoGVCNID: this.form.SoGVCNID })
 				.catch(() => [])
 			this.weeklyPlanList = Array.isArray(weeklyResponse?.[0])
 				? weeklyResponse[0]
@@ -1122,6 +1149,7 @@
 				await this.getKeHoachNamHoc()
 				if (this.tab === 'ke-hoach') await this.getHsCanQuanTam()
 				if (this.tab === 'ren-luyen') await this.getHsNhanXetThangLms()
+				if (this.tab === 'so-ket-hk1') await this.getSoKetHk1()
 				if (this.tab === 'noi-dung-hop-ph') await this.getNoiDungHopPh()
 				if (this.tab === 'so-lien-lac') await this.getTheoDoiPhHop()
 				if (this.tab === 'theo-doi-thanh-tich') await this.getTheoDoiThanhTich()
@@ -1164,7 +1192,7 @@
 				this.keHoachNamHocData = null
 				return
 			}
-			const response = await ajaxCALLPromise(`lms/SoGVCNKeHoachNamHocGet/${this.form.SoGVCNID}`)
+			const response = await ajaxCALLPromise('lms/SoGVCNKeHoachNamHocGet', { SoGVCNID: this.form.SoGVCNID })
 				.catch(() => [])
 			const firstResult = Array.isArray(response) ? response[0] : response
 			const row = Array.isArray(firstResult) ? (firstResult[0] || {}) : (firstResult || {})
@@ -1249,6 +1277,7 @@
 				x.Sinh || '',
 				x.KQRL || '',
 				x.KQHT || '',
+				x.DanhHieu || '',
 				this.buildNhanXetGVCN(x),
 				x.Cha || '',
 				x.NgheNghiepCha || '',
@@ -2485,8 +2514,9 @@
 			const headerRow = Array(this.studentSheetColumns.length).fill('')
 			headerRow[6] = 'ĐTB môn cả năm ' + namHocDiem
 			headerRow[18] = 'KQ ' + namHocDiem
-			headerRow[20] = 'NHẬN XÉT CỦA GVCN ' + namHocDiem
-			headerRow[21] = 'THÔNG TIN GIA ĐÌNH'
+			headerRow[21] = 'NHẬN XÉT CỦA GVCN ' + namHocDiem
+			headerRow[22] = 'THÔNG TIN GIA ĐÌNH'
+			headerRow[30] = 'ĐĂNG KÍ'
 			return [
 				headerRow,
 				this.studentSheetColumns.map(x => x.title),
@@ -2496,8 +2526,9 @@
 		buildStudentSheetExportMerges() {
 			return [
 				{ s: { r: 0, c: 6 }, e: { r: 0, c: 17 } },
-				{ s: { r: 0, c: 18 }, e: { r: 0, c: 19 } },
-				{ s: { r: 0, c: 21 }, e: { r: 0, c: 30 } }
+				{ s: { r: 0, c: 18 }, e: { r: 0, c: 20 } },
+				{ s: { r: 0, c: 22 }, e: { r: 0, c: 29 } },
+				{ s: { r: 0, c: 30 }, e: { r: 0, c: 31 } }
 			]
 		},
 		safeSheetName(name) {
@@ -2515,7 +2546,7 @@
 			return text
 		},
 		onSaveButtonClick() {
-			if (this.tab === 'ke-hoach' || this.tab === 'cong-tac-cn') {
+			if (this.tab === 'cong-tac-cn' || (this.tab === 'ke-hoach' && !this.isCap1)) {
 				this.saveKeHoachSheet()
 			} else {
 				this.onSaveDraft()
@@ -2641,7 +2672,7 @@
 							SoGVCNID: this.form.SoGVCNID,
 							JsonRows: JSON.stringify(rowsToSave)
 						})
-						this.hsCanQuanTamSavedRows = rowsToSave
+						await this.getHsCanQuanTam()
 					}
 				} else if (this.tab === 'so-lien-lac') {
 					if (this.form.SoGVCNID && this.selectedLopID !== '__ALL__') {
@@ -2658,6 +2689,15 @@
 								JsonRows: JSON.stringify(this.serializeSoLienLacMonthlyRows())
 							})
 						}
+					}
+				} else if (this.tab === 'so-ket-hk1' && this.isCap1) {
+					if (this.form.SoGVCNID && this.selectedLopID !== '__ALL__') {
+						const payload = this.$refs.tabSoKetHk1Ref?.getData?.() || {}
+						await ajaxCALLPromise('lms/SoGVCNSoKetHKISave', {
+							SoGVCNID: this.form.SoGVCNID,
+							JsonData: JSON.stringify(payload)
+						})
+						await this.getSoKetHk1()
 					}
 				} else if (this.tab === 'noi-dung-hop-ph' && this.isCap1) {
 					if (this.form.SoGVCNID && this.selectedLopID !== '__ALL__') {
@@ -2728,6 +2768,7 @@
 					'du-lieu-hs': this.isCap1 ? 'thông tin HS lớp' : 'dữ liệu HS lớp',
 					'to-chuc-lop': 'tổ chức lớp',
 					'ren-luyen': 'hồ sơ theo dõi rèn luyện',
+					'so-ket-hk1': 'sơ kết HKI',
 					'so-lien-lac': 'sổ liên lạc',
 					'noi-dung-hop-ph': 'nội dung họp PHHS'
 				}
@@ -2766,7 +2807,11 @@
 		},
 
 		serializeHsCanQuanTamRows() {
-			const sheet = this.$refs.tabHsCanQuanTamRef?.getInstance()
+			const instance = this.$refs.tabHsCanQuanTamRef?.getInstance()
+			const sheet = Array.isArray(instance) ? instance[0] : instance
+			if (sheet && typeof sheet.closeEditor === 'function') {
+				try { sheet.closeEditor(true) } catch (error) {}
+			}
 			const sourceRows = sheet && typeof sheet.getData === 'function' ? sheet.getData() : []
 			const students = this.getSelectedClassStudents()
 			const rows = []
@@ -2814,9 +2859,9 @@
 		},
 
 		serializeTheoDoiPhHopRows() {
-			const sheet = this.$refs.tabTheoDoiPhHopRef?.getInstance()
-			const sourceRows = sheet && typeof sheet.getData === 'function' ? sheet.getData() : []
+			const sourceRows = this.$refs.tabTheoDoiPhHopRef?.getRows?.() || []
 			const students = this.getSelectedClassStudents()
+			const isChecked = value => value === true || value === 1 || value === '1' || value === 'true'
 			const rows = []
 			sourceRows.forEach((row, rowIndex) => {
 				const student = students[rowIndex] || {}
@@ -2824,10 +2869,10 @@
 				rows.push({
 					HSLopID: student.HSLopID,
 					HocSinhID: student.HocSinhID || null,
-					Lan1: !!row[2],
-					Lan2: !!row[3],
-					Lan3: !!row[4],
-					GhiChu: this.cleanSheetValue(row[5])
+					Lan1: isChecked(row[4]),
+					Lan2: isChecked(row[5]),
+					Lan3: isChecked(row[6]),
+					GhiChu: this.cleanSheetValue(row[7])
 				})
 			})
 			return rows
@@ -2844,8 +2889,8 @@
 				rows.push({
 					HSLopID: student.HSLopID,
 					HocSinhID: student.HocSinhID || null,
-					HKI: this.cleanSheetValue(row[2]),
-					CuoiNam: this.cleanSheetValue(row[3])
+					HKI: this.cleanSheetValue(row[4]),
+					CuoiNam: this.cleanSheetValue(row[5])
 				})
 			})
 			return rows
@@ -2856,8 +2901,8 @@
 		},
 
 		serializeTheoDoiSiSoThangRows() {
-			const sheet = this.$refs.tabTheoDoiSiSoRef?.getInstance()
-			const sourceRows = sheet && typeof sheet.getData === 'function' ? sheet.getData() : []
+			const sourceRows = this.$refs.tabTheoDoiSiSoRef?.getRows?.() || []
+			const ethnicList = this.$refs.tabTheoDoiSiSoRef?.getEthnicList?.() || []
 			const rows = []
 			sourceRows.forEach((row) => {
 				const thoiDiem = this.cleanSheetValue(row[0])
@@ -2872,16 +2917,26 @@
 				// (len - 7): NhiDong
 				// (len - 8): DoiVien
 				const len = row.length
-				const parseIntVal = (val) => (val !== '' && val !== null && val !== undefined ? parseInt(val) || 0 : null)
+				const cleanValue = (val) => {
+					const value = this.cleanSheetValue(val)
+					return value === '' ? null : value
+				}
+				const ethnicCounts = {}
+				ethnicList.forEach((ethnicName, index) => {
+					ethnicCounts[ethnicName] = cleanValue(row[3 + index])
+				})
 				rows.push({
 					ThoiDiem: thoiDiem,
-					DoiVien: parseIntVal(row[len - 8]),
-					NhiDong: parseIntVal(row[len - 7]),
-					ConLietSi: parseIntVal(row[len - 6]),
-					ConThuongBinh: parseIntVal(row[len - 5]),
-					KhuyetTatCoDanhGia: parseIntVal(row[len - 4]),
-					KhuyetTatKhongDanhGia: parseIntVal(row[len - 3]),
-					HoNgheo: parseIntVal(row[len - 2]),
+					TongSo: cleanValue(row[1]),
+					Nu: cleanValue(row[2]),
+					DanTocJson: JSON.stringify(ethnicCounts),
+					DoiVien: cleanValue(row[len - 8]),
+					NhiDong: cleanValue(row[len - 7]),
+					ConLietSi: cleanValue(row[len - 6]),
+					ConThuongBinh: cleanValue(row[len - 5]),
+					KhuyetTatCoDanhGia: cleanValue(row[len - 4]),
+					KhuyetTatKhongDanhGia: cleanValue(row[len - 3]),
+					HoNgheo: cleanValue(row[len - 2]),
 					TangGiamLiDo: this.cleanSheetValue(row[len - 1])
 				})
 			})

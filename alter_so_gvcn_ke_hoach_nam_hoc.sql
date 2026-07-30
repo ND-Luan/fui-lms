@@ -16,10 +16,10 @@ BEGIN
 		JsonData nvarchar(max) NOT NULL,
 		Enable bit NOT NULL
 			CONSTRAINT DF_tblSoGVCNKeHoachNamHoc_Enable DEFAULT (1),
-		CreateUser int NULL,
+		CreateUser varchar(9) NULL,
 		CreateTime datetime NOT NULL
 			CONSTRAINT DF_tblSoGVCNKeHoachNamHoc_CreateTime DEFAULT (GETDATE()),
-		UpdateUser int NULL,
+		UpdateUser varchar(9) NULL,
 		UpdateTime datetime NOT NULL
 			CONSTRAINT DF_tblSoGVCNKeHoachNamHoc_UpdateTime DEFAULT (GETDATE()),
 		CONSTRAINT FK_tblSoGVCNKeHoachNamHoc_SoGVCN
@@ -56,10 +56,10 @@ BEGIN
 		ChuaHoanThanh_SoLuong int NULL,
 		ChuaHoanThanh_TiLe decimal(5,2) NULL,
 
-		CreateUser int NULL,
+		CreateUser varchar(9) NULL,
 		CreateTime datetime NOT NULL
 			CONSTRAINT DF_tblSoGVCNKeHoachNamHocChiTieu_CreateTime DEFAULT (GETDATE()),
-		UpdateUser int NULL,
+		UpdateUser varchar(9) NULL,
 		UpdateTime datetime NOT NULL
 			CONSTRAINT DF_tblSoGVCNKeHoachNamHocChiTieu_UpdateTime DEFAULT (GETDATE()),
 
@@ -117,10 +117,10 @@ BEGIN
 		HoCanNgheo int NULL,
 		CBCCVC int NULL,
 		GhiChu nvarchar(500) NULL,
-		CreateUser int NULL,
+		CreateUser varchar(9) NULL,
 		CreateTime datetime NOT NULL
 			CONSTRAINT DF_tblSoGVCNKeHoachNamHocThongKeLop_CreateTime DEFAULT (GETDATE()),
-		UpdateUser int NULL,
+		UpdateUser varchar(9) NULL,
 		UpdateTime datetime NOT NULL
 			CONSTRAINT DF_tblSoGVCNKeHoachNamHocThongKeLop_UpdateTime DEFAULT (GETDATE()),
 		CONSTRAINT FK_tblSoGVCNKeHoachNamHocThongKeLop_SoGVCN

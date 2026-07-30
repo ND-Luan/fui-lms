@@ -109,7 +109,8 @@
 				})
 			},
 			buildRows() {
-				const findSaved = (hslopID) => (this.savedRows || []).find(r => r.HSLopID === hslopID) || {}
+				const findSaved = (hslopID) => (this.savedRows || [])
+					.find(row => String(row.HSLopID) === String(hslopID)) || {}
 				return (this.students || []).map((student) => {
 					const saved = findSaved(student.HSLopID)
 					return [
