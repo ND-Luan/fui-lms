@@ -486,15 +486,19 @@
             const gvId = asg.GiaoVienID?.trim()
             if (!gvId) return
             if (asg.VaiTro === 1) {
-              row.GVCN.push(gvId)
-              row.GVCN_Record[gvId] = asg.GVLopID
+              if (!row.GVCN.includes(gvId)) {
+                row.GVCN.push(gvId)
+                row.GVCN_Record[gvId] = asg.GVLopID
+              }
             } else if (asg.VaiTro === 3) {
               if (!row.Subjects[asg.MonHocID]) {
                 row.Subjects[asg.MonHocID] = []
                 row.Subjects_Record[asg.MonHocID] = {}
               }
-              row.Subjects[asg.MonHocID].push(gvId)
-              row.Subjects_Record[asg.MonHocID][gvId] = asg.GVLopID
+              if (!row.Subjects[asg.MonHocID].includes(gvId)) {
+                row.Subjects[asg.MonHocID].push(gvId)
+                row.Subjects_Record[asg.MonHocID][gvId] = asg.GVLopID
+              }
             }
           })
 

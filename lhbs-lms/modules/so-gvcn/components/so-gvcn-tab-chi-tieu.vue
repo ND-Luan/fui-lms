@@ -120,10 +120,9 @@
 							columnDrag: false,
 							tableWidth: '100%',
 							tableOverflow: true,
-							// The first table only has two data rows. Let it grow to its
-							// natural height so its nested headers do not create an inner
-							// vertical scrollbar.
-							tableHeight: card.key === 'chi-tieu-giao-duc' ? 'auto' : (card.height || 'auto'),
+							// The tables with fixed small rows grow to their natural height
+							// so word wrap does not create an inner vertical scrollbar.
+							tableHeight: ['chi-tieu-giao-duc', 'danh-hieu'].includes(card.key) ? 'auto' : (card.height || 'auto'),
 							lazyLoading: false,
 							wordWrap: true,
 							allowInsertColumn: false,

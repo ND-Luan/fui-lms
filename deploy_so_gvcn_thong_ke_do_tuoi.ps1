@@ -2,6 +2,7 @@ $ErrorActionPreference = 'Stop'
 
 $configPath = Join-Path $PSScriptRoot '.agents\scripts\db_config.json'
 $sqlFiles = @(
+    'alter_so_gvcn_userid_varchar9.sql',
     'alter_so_gvcn_thong_ke_do_tuoi.sql',
     'spAPI_SoGVCNThongKeDoTuoiSave.sql',
     'spAPI_SoGVCNThongKeDoTuoiGet.sql'

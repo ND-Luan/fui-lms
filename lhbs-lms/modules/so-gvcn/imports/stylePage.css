@@ -107,12 +107,10 @@
 
 .so-gvcn-sheet-wrap table thead tr:first-child,
 .so-gvcn-sheet-wrap table thead tr:first-child td,
-.so-gvcn-sheet-wrap table thead tr:first-child th,
-.so-gvcn-sheet-wrap table td[data-column],
-.so-gvcn-sheet-wrap table th[data-column] {
+.so-gvcn-sheet-wrap table thead tr:first-child th {
     position: sticky !important;
     top: 0 !important;
-    z-index: 31 !important;
+    z-index: 33 !important;
     background: #f5f5f5 !important;
 }
 
@@ -122,6 +120,15 @@
     position: sticky !important;
     top: 28px !important;
     z-index: 30 !important;
+    background: #f5f5f5 !important;
+}
+
+.so-gvcn-sheet-wrap table thead tr:nth-child(3),
+.so-gvcn-sheet-wrap table thead tr:nth-child(3) td,
+.so-gvcn-sheet-wrap table thead tr:nth-child(3) th {
+    position: sticky !important;
+    top: 56px !important;
+    z-index: 29 !important;
     background: #f5f5f5 !important;
 }
 
@@ -160,4 +167,34 @@
     position: static !important;
     left: auto !important;
     z-index: 0 !important;
+}
+
+.so-gvcn-so-ket-content {
+    min-width: 0;
+}
+
+.so-gvcn-so-ket-result-sheet,
+.so-gvcn-summary-result-sheet,
+.so-gvcn-so-ket-result-sheet .jss_container,
+.so-gvcn-summary-result-sheet .jss_container,
+.so-gvcn-so-ket-result-sheet .jss_content,
+.so-gvcn-summary-result-sheet .jss_content {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    box-sizing: border-box;
+}
+
+.so-gvcn-so-ket-result-sheet .jss_content,
+.so-gvcn-summary-result-sheet .jss_content {
+    height: 205px !important;
+    max-height: 205px !important;
+    overflow-x: auto !important;
+    overflow-y: auto !important;
+}
+
+.so-gvcn-so-ket-result-sheet table.jss_worksheet,
+.so-gvcn-summary-result-sheet table.jss_worksheet {
+    width: max-content !important;
+    min-width: 100% !important;
 }

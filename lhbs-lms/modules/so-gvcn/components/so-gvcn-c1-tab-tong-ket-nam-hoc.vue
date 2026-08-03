@@ -55,25 +55,29 @@
 							<div class="text-subtitle-2 font-weight-bold text-primary mb-3">
 								1. Về năng lực, phẩm chất
 							</div>
-							<div ref="sheetRef1" class="w-100 so-gvcn-sheet"></div>
+							<div ref="sheetRef1"
+								class="w-100 so-gvcn-sheet so-gvcn-summary-result-sheet"></div>
 						</section>
 						<section ref="sectionMonHoc" class="pa-3 border-t">
 							<div class="text-subtitle-2 font-weight-bold text-primary mb-3">
 								2. Về môn học và hoạt động giáo dục
 							</div>
-							<div ref="sheetRef2" class="w-100 so-gvcn-sheet"></div>
+							<div ref="sheetRef2"
+								class="w-100 so-gvcn-sheet so-gvcn-summary-result-sheet"></div>
 						</section>
 						<section ref="sectionKetQuaGd" class="pa-3 border-t">
 							<div class="text-subtitle-2 font-weight-bold text-primary mb-3">
 								3. Về đánh giá kết quả giáo dục
 							</div>
-							<div ref="sheetRef3" class="w-100 so-gvcn-sheet"></div>
+							<div ref="sheetRef3"
+								class="w-100 so-gvcn-sheet so-gvcn-summary-result-sheet"></div>
 						</section>
 						<section ref="sectionKhenThuong" class="pa-3 border-t">
 							<div class="text-subtitle-2 font-weight-bold text-primary mb-3">
 								4. Khen thưởng
 							</div>
-							<div ref="sheetRef4" class="w-100 so-gvcn-sheet"></div>
+							<div ref="sheetRef4"
+								class="w-100 so-gvcn-sheet so-gvcn-summary-result-sheet"></div>
 						</section>
 					</v-card-text>
 				</v-card>
@@ -175,6 +179,9 @@
 			getData() {
 				const getSheetData = (inst) => {
 					const sheet = Array.isArray(inst) ? inst[0] : inst
+					if (sheet && typeof sheet.closeEditor === 'function') {
+						try { sheet.closeEditor(true) } catch (error) {}
+					}
 					return sheet && typeof sheet.getData === 'function' ? sheet.getData() : []
 				}
 
@@ -185,6 +192,114 @@
 					Sheet3: getSheetData(this.sheet3Instance),
 					Sheet4: getSheetData(this.sheet4Instance)
 				}
+			},
+
+			getStructuredRatings(allMonHoc = []) {
+				const getSheetData = (inst) => {
+					const sheet = Array.isArray(inst) ? inst[0] : inst
+					if (sheet && typeof sheet.closeEditor === 'function') {
+						try { sheet.closeEditor(true) } catch (error) {}
+					}
+					return sheet && typeof sheet.getData === 'function' ? sheet.getData() : []
+				}
+
+				const ratings = []
+
+				// 1. Sheet 1: Năng lực phẩm chất
+				const sheet1Rows = getSheetData(this.sheet1Instance)
+				const fields1 = [
+					{ name: 'Yêu nước', code: 'PC_YEU_NUOC', type: 'QUALITY' },
+					{ name: 'Nhân ái', code: 'PC_NHAN_AI', type: 'QUALITY' },
+					{ name: 'Chăm chỉ', code: 'PC_CHAM_CHI', type: 'QUALITY' },
+					{ name: 'Trung thực', code: 'PC_TRUNG_THUC', type: 'QUALITY' },
+					{ name: 'Trách nhiệm', code: 'PC_TRACH_NHIEM', type: 'QUALITY' },
+					{ name: 'Tự chủ và tự học', code: 'NL_TU_CHU', type: 'QUALITY' },
+					{ name: 'Giao tiếp và hợp tác', code: 'NL_GIAO_TIEP', type: 'QUALITY' },
+					{ name: 'GQVĐ và sáng tạo', code: 'NL_GQVD', type: 'QUALITY' },
+					{ name: 'Ngôn ngữ', code: 'NL_NGON_NGU', type: 'QUALITY' },
+					{ name: 'Tính toán', code: 'NL_TINH_TOAN', type: 'QUALITY' },
+					{ name: 'Khoa học', code: 'NL_KHOA_HOC', type: 'QUALITY' },
+					{ name: 'Thẩm mĩ', code: 'NL_THAM_MI', type: 'QUALITY' },
+					{ name: 'Thể chất', code: 'NL_THE_CHAT', type: 'QUALITY' },
+					{ name: 'Công nghệ', code: 'NL_CONG_NGHE', type: 'QUALITY' },
+					{ name: 'Tin học', code: 'NL_TIN_HOC', type: 'QUALITY' }
+				]
+				const sheet1RatingCodes = ['TOT', 'DAT', 'CAN_CO_GANG']
+				sheet1Rows.forEach((row, ratingIdx) => {
+					const ratingCode = sheet1RatingCodes[ratingIdx] || 'TOT'
+					fields1.forEach((item, fIdx) => {
+						const colIdx = 1 + (fIdx * 2)
+						const qty = parseInt(row[colIdx]) || 0
+						const rate = parseFloat(row[colIdx + 1]) || 0
+						ratings.push({
+							LoaiDanhGia: 'QUALITY',
+							MonHocID: null,
+							TieuChiCode: item.code,
+							TenTieuChi: item.name,
+							MucXepLoaiCode: ratingCode,
+							SoLuong: qty,
+							TiLe: rate
+						})
+					})
+				})
+
+				// 2. Sheet 2: Môn học và HĐGD
+				const sheet2Rows = getSheetData(this.sheet2Instance)
+				const fields2 = [
+					'Tiếng Việt', 'Toán', 'Tiếng Anh', 'Lịch sử & Địa lí', 'Khoa học',
+					'Tin học - Công nghệ', 'Đạo đức', 'Giáo dục thể chất', 'Âm nhạc', 'Mĩ thuật', 'HĐTN'
+				]
+				const sheet2RatingCodes = ['HT_TOT', 'HOAN_THANH', 'CHUA_HT']
+				sheet2Rows.forEach((row, ratingIdx) => {
+					const ratingCode = sheet2RatingCodes[ratingIdx] || 'HT_TOT'
+					fields2.forEach((subName, subIdx) => {
+						const colIdx = 1 + (subIdx * 2)
+						const qty = parseInt(row[colIdx]) || 0
+						const rate = parseFloat(row[colIdx + 1]) || 0
+						const foundMon = (allMonHoc || []).find(m => m.TenMonHoc_HienThi === subName || m.TenMonHoc === subName)
+						ratings.push({
+							LoaiDanhGia: 'SUBJECT',
+							MonHocID: foundMon ? foundMon.MonHocID : null,
+							TieuChiCode: foundMon ? null : subName,
+							TenTieuChi: subName,
+							MucXepLoaiCode: ratingCode,
+							SoLuong: qty,
+							TiLe: rate
+						})
+					})
+				})
+
+				// 3. Sheet 3: Đánh giá kết quả giáo dục
+				const sheet3Rows = getSheetData(this.sheet3Instance)
+				const sheet3RatingCodes = ['HT_XUAT_SAC', 'HT_TOT', 'HOAN_THANH', 'CHUA_HT']
+				sheet3Rows.forEach((row, rIdx) => {
+					const ratingCode = sheet3RatingCodes[rIdx] || 'HOAN_THANH'
+					ratings.push({
+						LoaiDanhGia: 'KET_QUA_GD',
+						MonHocID: null,
+						TieuChiCode: 'KET_QUA_GD',
+						TenTieuChi: row[0] || '',
+						MucXepLoaiCode: ratingCode,
+						SoLuong: parseInt(row[1]) || 0,
+						TiLe: parseFloat(row[2]) || 0
+					})
+				})
+
+				// 4. Sheet 4: Khen thưởng
+				const sheet4Rows = getSheetData(this.sheet4Instance)
+				sheet4Rows.forEach((row, rIdx) => {
+					ratings.push({
+						LoaiDanhGia: 'KHEN_THUONG',
+						MonHocID: null,
+						TieuChiCode: `KHEN_THUONG_${rIdx + 1}`,
+						TenTieuChi: row[0] || '',
+						MucXepLoaiCode: `KHEN_THUONG_${rIdx + 1}`,
+						SoLuong: parseInt(row[1]) || 0,
+						TiLe: parseFloat(row[2]) || 0
+					})
+				})
+
+				return ratings
 			},
 
 			destroyAllSheets() {
@@ -260,6 +375,7 @@
 								nestedHeaders: nested1,
 								tableOverflow: true,
 								tableWidth: '100%',
+								tableHeight: '205px',
 								freezeColumns: 1,
 								wordWrap: true,
 								allowInsertRow: false,
@@ -308,6 +424,7 @@
 								nestedHeaders: nested2,
 								tableOverflow: true,
 								tableWidth: '100%',
+								tableHeight: '205px',
 								freezeColumns: 1,
 								wordWrap: true,
 								allowInsertRow: false,
@@ -339,6 +456,7 @@
 								],
 								tableOverflow: true,
 								tableWidth: '100%',
+								tableHeight: '205px',
 								freezeColumns: 1,
 								wordWrap: true,
 								rowResize: true,
@@ -369,6 +487,7 @@
 								],
 								tableOverflow: true,
 								tableWidth: '100%',
+								tableHeight: '205px',
 								freezeColumns: 1,
 								wordWrap: true,
 								rowResize: true,

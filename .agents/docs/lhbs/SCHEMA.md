@@ -2078,6 +2078,7 @@ class tblSoGVCNBanDaiDienCMHS {
    int UpdateUser
    datetime UpdateTime
    int NhiemVuDanhMucID
+   nvarchar(max) GhiChu
 }
 class tblSoGVCNCanBoLop {
    int CanBoLopID
@@ -2147,6 +2148,53 @@ class tblSoGVCNGiaoVienBoMon {
    datetime UpdateTime
    int MonHocID
 }
+class tblSoGVCNHocSinhCanQuanTam {
+   int HsCanQuanTamID
+   int SoGVCNID
+   int HSLopID
+   int HocSinhID
+   nvarchar(max) CanHoTroDacBiet
+   nvarchar(max) Thang8
+   nvarchar(max) Thang9
+   nvarchar(max) Thang10
+   nvarchar(max) Thang11
+   nvarchar(max) Thang12
+   nvarchar(max) NhanXetHKI
+   nvarchar(500) KetQuaHKI
+   nvarchar(max) Thang1_2
+   nvarchar(max) Thang3
+   nvarchar(max) Thang4
+   nvarchar(max) Thang5
+   nvarchar(max) NhanXetCuoiNam
+   nvarchar(500) KetQuaCuoiNam
+   bit Enable
+   varchar(9) CreateUser
+   datetime CreateTime
+   varchar(9) UpdateUser
+   datetime UpdateTime
+}
+class tblSoGVCNHocSinhNhanXetThangLms {
+   int NhanXetThangLmsID
+   int SoGVCNID
+   int HSLopID
+   int HocSinhID
+   nvarchar(max) Thang8
+   nvarchar(max) Thang9
+   nvarchar(max) Thang10
+   nvarchar(max) Thang11
+   nvarchar(max) Thang12
+   nvarchar(max) NhanXetHKI
+   nvarchar(max) Thang1_2
+   nvarchar(max) Thang3
+   nvarchar(max) Thang4
+   nvarchar(max) Thang5
+   nvarchar(max) NhanXetHKII
+   bit Enable
+   datetime CreateTime
+   varchar(9) CreateUser
+   datetime UpdateTime
+   varchar(9) UpdateUser
+}
 class tblSoGVCNHuongNghiep {
    int HuongNghiepID
    int SoGVCNID
@@ -2164,6 +2212,60 @@ class tblSoGVCNHuongNghiep {
    int UpdateUser
    datetime UpdateTime
    int MonThiTNDanhMucID
+}
+class tblSoGVCNKeHoachNamHoc {
+   int KeHoachNamHocID
+   int SoGVCNID
+   nvarchar(max) JsonData
+   bit Enable
+   varchar(9) CreateUser
+   datetime CreateTime
+   varchar(9) UpdateUser
+   datetime UpdateTime
+}
+class tblSoGVCNKeHoachNamHocChiTieu {
+   int KeHoachNamHocChiTieuID
+   int SoGVCNID
+   varchar(10) LopID
+   int MonHocID
+   int Tot_SoLuong
+   decimal Tot_TiLe
+   int Dat_SoLuong
+   decimal Dat_TiLe
+   int CanCoGang_SoLuong
+   decimal CanCoGang_TiLe
+   int HoanThanhTot_SoLuong
+   decimal HoanThanhTot_TiLe
+   int HoanThanh_SoLuong
+   decimal HoanThanh_TiLe
+   int ChuaHoanThanh_SoLuong
+   decimal ChuaHoanThanh_TiLe
+   varchar(9) CreateUser
+   datetime CreateTime
+   varchar(9) UpdateUser
+   datetime UpdateTime
+}
+class tblSoGVCNKeHoachNamHocThongKeLop {
+   int KeHoachNamHocThongKeLopID
+   int SoGVCNID
+   varchar(10) LopID
+   nvarchar(100) ThoiDiem
+   varchar(20) ThoiDiemCode
+   int TongSo
+   int Nu
+   int DanToc
+   int LuuBan
+   int CanQuanTam
+   int ConThuongBinh
+   int ConLietSi
+   int HoNgheo
+   int HoCanNgheo
+   int CBCCVC
+   nvarchar(500) GhiChu
+   varchar(9) CreateUser
+   datetime CreateTime
+   varchar(9) UpdateUser
+   datetime UpdateTime
 }
 class tblSoGVCNKeHoachThang {
    int KeHoachThangID
@@ -2195,6 +2297,22 @@ class tblSoGVCNKeHoachThang_Bak_20260718 {
    varchar(20) UpdateUser
    datetime UpdateTime
 }
+class tblSoGVCNKeHoachTuan {
+   int KeHoachTuanID
+   int KeHoachThangID
+   tinyint ThangThucTe
+   tinyint TuanTrongThang
+   date TuNgay
+   date DenNgay
+   nvarchar(max) KeHoachThucHien
+   nvarchar(max) KetQua
+   nvarchar(max) NguyenNhan
+   bit Enable
+   varchar(9) CreateUser
+   datetime CreateTime
+   varchar(9) UpdateUser
+   datetime UpdateTime
+}
 class tblSoGVCNNhanXetSoLienLac {
    int NhanXetSoLienLacID
    int SoGVCNID
@@ -2221,6 +2339,22 @@ class tblSoGVCNNhanXetSoLienLac_Bak_20260718 {
    varchar(20) UpdateUser
    datetime UpdateTime
 }
+class tblSoGVCNNoiDungHopPHHS {
+   int NoiDungHopID
+   int SoGVCNID
+   int MeetingIndex
+   nvarchar(255) DotHop
+   nvarchar(255) ThoiGian
+   nvarchar(255) DiaDiem
+   nvarchar(max) NoiDungChinh
+   nvarchar(max) YKienPHHS
+   nvarchar(max) KetLuan
+   bit Enable
+   datetime CreateTime
+   varchar(9) CreateUser
+   datetime UpdateTime
+   varchar(9) UpdateUser
+}
 class tblSoGVCNSiSo {
    int SiSoID
    int SoGVCNID
@@ -2235,6 +2369,47 @@ class tblSoGVCNSiSo {
    int UpdateUser
    datetime UpdateTime
    int MocDanhMucID
+}
+class tblSoGVCNSoKetHKI {
+   int SoKetHKIID
+   int SoGVCNID
+   nvarchar(max) JsonData
+   bit Enable
+   varchar(9) CreateUser
+   datetime CreateTime
+   varchar(9) UpdateUser
+   datetime UpdateTime
+}
+class tblSoGVCNSoKetHKIDanhGia {
+   int DanhGiaID
+   int SoGVCNID
+   varchar(20) LoaiDanhGia
+   int MonHocID
+   varchar(50) TieuChiCode
+   nvarchar(255) TenTieuChi
+   varchar(50) MucXepLoaiCode
+   int SoLuong
+   decimal TiLe
+   bit Enable
+   datetime CreateTime
+   varchar(9) CreateUser
+   datetime UpdateTime
+   varchar(9) UpdateUser
+}
+class tblSoGVCNTheoDoiPhuHuynhHop {
+   int TheoDoiPHHopID
+   int SoGVCNID
+   int HSLopID
+   int HocSinhID
+   bit Lan1
+   bit Lan2
+   bit Lan3
+   nvarchar(max) GhiChu
+   bit Enable
+   datetime CreateTime
+   varchar(9) CreateUser
+   datetime UpdateTime
+   varchar(9) UpdateUser
 }
 class tblSoGVCNTheoDoiRenLuyen {
    int TheoDoiRenLuyenID
@@ -2262,6 +2437,105 @@ class tblSoGVCNTheoDoiRenLuyen_Bak_20260718 {
    varchar(20) CreateUser
    datetime CreateTime
    varchar(20) UpdateUser
+   datetime UpdateTime
+}
+class tblSoGVCNTheoDoiSiSoThang {
+   int TheoDoiSiSoID
+   int SoGVCNID
+   nvarchar(100) ThoiDiem
+   nvarchar(255) DoiVien
+   nvarchar(255) NhiDong
+   nvarchar(255) ConLietSi
+   nvarchar(255) ConThuongBinh
+   nvarchar(255) KhuyetTatCoDanhGia
+   nvarchar(255) HoNgheo
+   nvarchar(max) TangGiamLiDo
+   bit Enable
+   datetime CreateTime
+   varchar(9) CreateUser
+   datetime UpdateTime
+   varchar(9) UpdateUser
+   nvarchar(255) KhuyetTatKhongDanhGia
+   nvarchar(255) TongSo
+   nvarchar(255) Nu
+   nvarchar(max) DanTocJson
+}
+class tblSoGVCNTheoDoiThanhTichHocSinh {
+   int ThanhTichID
+   int SoGVCNID
+   int HSLopID
+   int HocSinhID
+   nvarchar(max) HKI
+   nvarchar(max) CuoiNam
+   bit Enable
+   datetime CreateTime
+   varchar(9) CreateUser
+   datetime UpdateTime
+   varchar(9) UpdateUser
+}
+class tblSoGVCNThongKeDoTuoi {
+   int ThongKeID
+   int SoGVCNID
+   nvarchar(255) AgeLabel
+   nvarchar(255) KhuyetTat
+   bit Enable
+   datetime CreateTime
+   varchar(9) CreateUser
+   datetime UpdateTime
+   varchar(9) UpdateUser
+   nvarchar(255) Nam
+   nvarchar(255) Nu
+   nvarchar(max) DanTocJson
+}
+class tblSoGVCNTongKetNamDanhGia {
+   int DanhGiaID
+   int SoGVCNID
+   varchar(20) LoaiDanhGia
+   int MonHocID
+   varchar(50) TieuChiCode
+   nvarchar(255) TenTieuChi
+   varchar(50) MucXepLoaiCode
+   int SoLuong
+   decimal TiLe
+   bit Enable
+   datetime CreateTime
+   varchar(9) CreateUser
+   datetime UpdateTime
+   varchar(9) UpdateUser
+}
+class tblSoGVCNTongKetNamHocC1 {
+   int TongKetID
+   int SoGVCNID
+   nvarchar(max) DuyTriSoLuong
+   nvarchar(max) NangLucPhamChat
+   nvarchar(max) KienThucKyNang
+   nvarchar(max) HoanThanhCT
+   nvarchar(max) PhongTraoKhac
+   nvarchar(max) JsonSheet1
+   nvarchar(max) JsonSheet2
+   nvarchar(max) JsonSheet3
+   nvarchar(max) JsonSheet4
+   bit Enable
+   datetime CreateTime
+   varchar(9) CreateUser
+   datetime UpdateTime
+   varchar(9) UpdateUser
+}
+class tblSoGVCNToNhomHocSinh {
+   int ToNhomHocSinhID
+   int SoGVCNID
+   int HSLopID
+   int HocSinhID
+   varchar(30) MaHocSinh
+   nvarchar(200) HocSinh
+   nvarchar(100) ToNhom
+   nvarchar(200) NhiemVu
+   nvarchar(200) Ban
+   int RowIndex
+   bit Enable
+   varchar(9) CreateUser
+   datetime CreateTime
+   varchar(9) UpdateUser
    datetime UpdateTime
 }
 class tblSystemConfig {
@@ -2432,25 +2706,40 @@ tblSoGVCN --|> tblGiaoVien : GiaoVienID
 tblToGiangDay_GiaoVien_MonHoc --|> tblGiaoVien : GiaoVienID
 tblGiaoVienLop --|> tblGiaoVien : GiaoVienID
 tblSoGVCNGiaoVienBoMon --|> tblGiaoVien : GiaoVienID
+tblSoGVCNSoKetHKI --|> tblSoGVCN : SoGVCNID
+tblSoGVCNToNhomHocSinh --|> tblSoGVCN : SoGVCNID
+tblSoGVCNSoKetHKIDanhGia --|> tblSoGVCN : SoGVCNID
+tblSoGVCNTongKetNamDanhGia --|> tblSoGVCN : SoGVCNID
 tblSoGVCNKeHoachThang --|> tblSoGVCN : SoGVCNID
 tblSoGVCNTheoDoiRenLuyen --|> tblSoGVCN : SoGVCNID
+tblSoGVCNKeHoachNamHoc --|> tblSoGVCN : SoGVCNID
 tblSoGVCNNhanXetSoLienLac --|> tblSoGVCN : SoGVCNID
+tblSoGVCNKeHoachNamHocChiTieu --|> tblSoGVCN : SoGVCNID
+tblSoGVCNKeHoachNamHocThongKeLop --|> tblSoGVCN : SoGVCNID
 tblSoGVCNSiSo --|> tblSoGVCN : SoGVCNID
 tblSoGVCNGiaoVienBoMon --|> tblSoGVCN : SoGVCNID
 tblSoGVCNBanDaiDienCMHS --|> tblSoGVCN : SoGVCNID
+tblSoGVCNHocSinhCanQuanTam --|> tblSoGVCN : SoGVCNID
 tblSoGVCNCanBoLop --|> tblSoGVCN : SoGVCNID
 tblSoGVCNHuongNghiep --|> tblSoGVCN : SoGVCNID
 tblSoGVCNChiTieu --|> tblSoGVCN : SoGVCNID
 tblSoGVCNHuongNghiep --|> tblHocSinhLop : HSLopID
+tblSoGVCNToNhomHocSinh --|> tblHocSinhLop : HSLopID
+tblSoGVCNHocSinhCanQuanTam --|> tblHocSinhLop : HSLopID
 tblSoGVCNTheoDoiRenLuyen --|> tblHocSinhLop : HSLopID
 tblSoGVCNNhanXetSoLienLac --|> tblHocSinhLop : HSLopID
 tblSoGVCNBanDaiDienCMHS --|> tblHocSinhLop : HSLopID
 tblSoGVCNCanBoLop --|> tblHocSinhLop : HSLopID
+tblSoGVCNKeHoachTuan --|> tblSoGVCNKeHoachThang : KeHoachThangID
 tblSoGVCNBanDaiDienCMHS --|> tblHocSinh : HocSinhID
 tblSoGVCNCanBoLop --|> tblHocSinh : HocSinhID
 tblSoGVCNHuongNghiep --|> tblHocSinh : HocSinhID
+tblSoGVCNToNhomHocSinh --|> tblHocSinh : HocSinhID
+tblSoGVCNKeHoachNamHocChiTieu --|> tblLop : LopID
+tblSoGVCNKeHoachNamHocThongKeLop --|> tblLop : LopID
 tblSoGVCN --|> tblLop : LopID
 tblLMS_LessonElements --|> tblLMS_Lessons : LessonID
+tblSoGVCNKeHoachNamHocChiTieu --|> tblMonHoc : MonHocID
 tblToGiangDay_GiaoVien_MonHoc --|> tblMonHoc : MonHocID
 tblSoGVCNGiaoVienBoMon --|> tblMonHoc : MonHocID
 tblEL_QuestionBank_Question --|> tblEL_QuestionBank_Group : GroupId

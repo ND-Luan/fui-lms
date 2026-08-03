@@ -78,7 +78,8 @@
 									view="thong-tin" :sheet-height="sheetHeight" :sheet-key="sheetKey"
 									:selected-lop-i-d="selectedLopID" ref="tabDuLieuHsRef" />
 								<so-gvcn-tab-du-lieu-hs v-else :rows="studentSheetRows" :sheet-height="sheetHeight"
-									:sheet-key="sheetKey" :nested-headers="studentNestedHeaders" ref="tabDuLieuHsRef" />
+									:sheet-key="sheetKey" :nested-headers="studentNestedHeaders" :has-nhom-av="hasNhomAV"
+									ref="tabDuLieuHsRef" />
 							</v-window-item>
 
 							<!-- Tab Tổ chức lớp (C1 only) -->
@@ -313,7 +314,7 @@
 							key: 'danh-hieu',
 							title: 'DANH HIỆU',
 							md: 12,
-							height: '65px',
+							height: '110px',
 							columns: [
 								{ title: 'Yêu cầu cần đạt', name: 'YeuCau', width: 260 },
 								{ title: 'HSXS', name: 'HSXS', width: 180, align: 'center' },
@@ -436,6 +437,7 @@
 				{ title: 'Số danh bộ', width: 110, readOnly: true },
 				{ title: 'Họ và tên học sinh', width: 220, readOnly: true, align: 'left' },
 				{ title: 'Lớp mới', width: 90, readOnly: true },
+				{ title: 'Nhóm AV', width: 100, readOnly: true },
 				{ title: 'Lớp cũ', width: 90, readOnly: true },
 				{ title: 'Toán', width: 80, readOnly: true },
 				{ title: 'Tiếng Việt/Văn', width: 120, readOnly: true },
@@ -472,7 +474,7 @@
 				{ title: 'SỐ DANH BỘ', width: 110, readOnly: true },
 				{ title: 'HỌ TÊN HỌC SINH', width: 220, readOnly: true },
 				{ title: 'HS cần hỗ trợ đặc biệt\n(ghi rõ vấn đề nếu có)', width: 240 },
-				{ title: 'BAN CÁN SỰ (ghi rõ nhiệm vụ)', width: 200 },
+				{ title: 'BAN CÁN SỰ (ghi rõ nhiệm vụ)', width: 280 },
 				{ title: 'THÁNG 8', width: 180 },
 				{ title: 'THÁNG 9', width: 180 },
 				{ title: 'THÁNG 10', width: 180 },
@@ -553,7 +555,7 @@
 			showSaveButton() {
 				const isC1OrganizationTab = this.isCap1 && this.tab === 'to-chuc-lop'
 				return this.selectedLopID !== '__ALL__' && (isC1OrganizationTab
-					|| ['chi-tieu', 'cong-tac-cn', 'ke-hoach', 'ren-luyen', 'nhan-xet-lms', 'so-ket-hk1', 'tong-ket-nam', 'theo-doi-si-so', 'thong-ke-do-tuoi', 'theo-doi-thanh-tich', 'so-lien-lac', 'huong-nghiep'].includes(this.tab))
+					|| ['chi-tieu', 'cong-tac-cn', 'ke-hoach', 'ren-luyen', 'nhan-xet-lms', 'so-ket-hk1', 'tong-ket-nam', 'theo-doi-si-so', 'thong-ke-do-tuoi', 'theo-doi-thanh-tich', 'noi-dung-hop-ph', 'so-lien-lac', 'huong-nghiep'].includes(this.tab))
 			},
 			saveButtonText() {
 				switch (this.tab) {
@@ -568,6 +570,7 @@
 					case 'theo-doi-si-so': return 'Lưu theo dõi sĩ số'
 					case 'thong-ke-do-tuoi': return 'Lưu thống kê độ tuổi'
 					case 'theo-doi-thanh-tich': return 'Lưu thành tích'
+					case 'noi-dung-hop-ph': return 'Lưu nội dung họp PH'
 					case 'so-lien-lac': return this.isCap1 ? 'Lưu theo dõi PH đi họp' : 'Lưu sổ liên lạc'
 					case 'huong-nghiep': return 'Lưu hướng nghiệp'
 					default: return 'Lưu'
@@ -581,12 +584,15 @@
 				if (this.tab === 'ke-hoach' || this.tab === 'cong-tac-cn') return this.loading.month
 				return this.loading.save
 			},
+			hasNhomAV() {
+				return (this.studentSheetRows || []).some(row => !!row[5])
+			},
 			studentNestedHeaders() {
 			var nienKhoaDiem = Number(this.currentNienKhoa || 0) - 1
 			var namHocDiem = nienKhoaDiem + '-' + this.currentNienKhoa
 			return [
 				[
-					{ title: '', colspan: 6 },
+					{ title: '', colspan: this.hasNhomAV ? 7 : 6 },
 					{ title: 'ĐTB môn cả năm ' + namHocDiem, colspan: 12 },
 					{ title: 'KQ ' + namHocDiem, colspan: 3 },
 					{ title: 'NHẬN XÉT CỦA GVCN ' + namHocDiem, colspan: 1 },
@@ -1262,6 +1268,7 @@
 				x.SoDanhBo || '',
 				x.HoTen || '',
 				x.LopMoi || x.TenLop || '',
+				x.NhomAV || '',
 				x.LopCu || '',
 				x.Toan || x['Toán'] || '',
 				x.Van || x['Văn'] || '',
@@ -1852,19 +1859,31 @@
 		},
 		serializeGiaoVienBoMonRows() {
 			const card = this.getChiTieuCard('giao-vien-bo-mon')
+			let validRowCounter = 0
 			return (card.rows || []).map((row, index) => {
 				const giaoVien = this.cleanSheetCell(row, 2, 'GiaoVien')
 				const teacher = (this.allTeachers || []).find(item => item.text === giaoVien || item.name === giaoVien) || {}
 				const hocKyValue = this.cleanSheetCell(row, 1, 'HocKy')
+				const boMon = this.cleanSheetCell(row, 0, 'BoMon')
+				const thayDoi = this.cleanSheetCell(row, 3, 'ThayDoi')
+				const isValid = !!(boMon || hocKyValue || giaoVien || thayDoi)
+				if (isValid) {
+					validRowCounter++
+				}
 				return {
-					BoMon: this.cleanSheetCell(row, 0, 'BoMon'),
+					BoMon: boMon,
 					HocKy: String(hocKyValue).includes('2') ? 2 : (hocKyValue ? 1 : null),
 					GiaoVienID: teacher.id || '',
 					GiaoVien: giaoVien,
-					ThayDoi: this.cleanSheetCell(row, 3, 'ThayDoi'),
-					RowIndex: index + 1
+					ThayDoi: thayDoi,
+					RowIndex: isValid ? validRowCounter : index + 1,
+					_isValid: isValid
 				}
-			}).filter(row => row.BoMon || row.HocKy || row.GiaoVien || row.ThayDoi)
+			}).filter(row => {
+				const isValid = row._isValid
+				delete row._isValid
+				return isValid
+			})
 		},
 		applyBanDaiDienCMHSRows() {
 			const card = this.getChiTieuCard('ban-dai-dien-cmhs')
@@ -1891,22 +1910,36 @@
 		},
 		serializeBanDaiDienCMHSRows() {
 			const card = this.getChiTieuCard('ban-dai-dien-cmhs')
+			let validCounter = 0
 			return (card.rows || []).map((row, index) => {
 				const student = this.findSelectedStudent(this.cleanSheetCell(row, 2, 'HocSinh')) || {}
+				const hocSinh = this.cleanSheetCell(row, 2, 'HocSinh')
+				const chaMe = this.cleanSheetCell(row, 3, 'ChaMe')
+				const ngheNghiep = this.cleanSheetCell(row, 4, 'NgheNghiep')
+				const dienThoai = this.cleanSheetCell(row, 5, 'DienThoai')
+				const nhiemVu = this.cleanSheetCell(row, 6, 'NhiemVu')
+				const ghiChu = this.cleanSheetCell(row, 7, 'GhiChu')
+				const isValid = !!(hocSinh || chaMe || ngheNghiep || dienThoai || nhiemVu || ghiChu)
+				if (isValid) validCounter++
 				return {
-				STT: this.cleanSheetCell(row, 0, 'STT') || index + 1,
-				HSLopID: student.HSLopID || null,
-				HocSinhID: student.HocSinhID || null,
-				MaHocSinh: this.cleanSheetCell(row, 1, 'HocSinhID') || student.MaHocSinh || student.HocSinhID || '',
-				HocSinh: this.cleanSheetCell(row, 2, 'HocSinh'),
-				ChaMe: this.cleanSheetCell(row, 3, 'ChaMe'),
-				NgheNghiep: this.cleanSheetCell(row, 4, 'NgheNghiep'),
-				DienThoai: this.cleanSheetCell(row, 5, 'DienThoai'),
-				NhiemVu: this.cleanSheetCell(row, 6, 'NhiemVu'),
-				GhiChu: this.cleanSheetCell(row, 7, 'GhiChu'),
-				RowIndex: index + 1
+					STT: this.cleanSheetCell(row, 0, 'STT') || index + 1,
+					HSLopID: student.HSLopID || null,
+					HocSinhID: student.HocSinhID || null,
+					MaHocSinh: this.cleanSheetCell(row, 1, 'HocSinhID') || student.MaHocSinh || student.HocSinhID || '',
+					HocSinh: hocSinh,
+					ChaMe: chaMe,
+					NgheNghiep: ngheNghiep,
+					DienThoai: dienThoai,
+					NhiemVu: nhiemVu,
+					GhiChu: ghiChu,
+					RowIndex: isValid ? validCounter : index + 1,
+					_isValid: isValid
 				}
-			}).filter(row => row.HocSinh || row.ChaMe || row.NgheNghiep || row.DienThoai || row.NhiemVu || row.GhiChu)
+			}).filter(row => {
+				const valid = row._isValid
+				delete row._isValid
+				return valid
+			})
 		},
 		applyCanBoLopRows() {
 			const card = this.getChiTieuCard('can-bo-lop')
@@ -1930,19 +1963,30 @@
 		},
 		serializeCanBoLopRows() {
 			const card = this.getChiTieuCard('can-bo-lop')
+			let validCounter = 0
 			return (card.rows || []).map((row, index) => {
 				const student = this.findSelectedStudent(this.cleanSheetCell(row, 2, 'HocSinh')) || {}
+				const hocSinh = this.cleanSheetCell(row, 2, 'HocSinh')
+				const chucVu = this.cleanSheetCell(row, 3, 'ChucVu')
+				const ghiChu = this.cleanSheetCell(row, 4, 'GhiChu')
+				const isValid = !!(hocSinh || chucVu || ghiChu)
+				if (isValid) validCounter++
 				return {
-				STT: this.cleanSheetCell(row, 0, 'STT') || index + 1,
-				HSLopID: student.HSLopID || null,
-				HocSinhID: student.HocSinhID || null,
-				MaHocSinh: this.cleanSheetCell(row, 1, 'HocSinhID') || student.MaHocSinh || '',
-				HocSinh: this.cleanSheetCell(row, 2, 'HocSinh'),
-				ChucVu: this.cleanSheetCell(row, 3, 'ChucVu'),
-				GhiChu: this.cleanSheetCell(row, 4, 'GhiChu'),
-				RowIndex: index + 1
+					STT: this.cleanSheetCell(row, 0, 'STT') || index + 1,
+					HSLopID: student.HSLopID || null,
+					HocSinhID: student.HocSinhID || null,
+					MaHocSinh: this.cleanSheetCell(row, 1, 'HocSinhID') || student.MaHocSinh || '',
+					HocSinh: hocSinh,
+					ChucVu: chucVu,
+					GhiChu: ghiChu,
+					RowIndex: isValid ? validCounter : index + 1,
+					_isValid: isValid
 				}
-			}).filter(row => row.HocSinh || row.ChucVu || row.GhiChu)
+			}).filter(row => {
+				const valid = row._isValid
+				delete row._isValid
+				return valid
+			})
 		},
 		parseSheetSavedRows(value) {
 			if (!value) return []
@@ -1959,6 +2003,70 @@
 			this.loading.export = true
 			try {
 				if (this.form.SoGVCNID && this.selectedLopID !== '__ALL__') {
+					if (this.isCap1) {
+						this.exportXlsx([
+							{
+								name: 'THÔNG TIN HS LỚP...',
+								aoa: this.buildStudentSheetExportAoA(),
+								merges: this.buildStudentSheetExportMerges()
+							},
+							{
+								name: 'TỔ CHỨC LỚP',
+								aoa: this.buildToChucLopExportAoA()
+							},
+							{
+								name: 'KH CHỦ NHIỆM NĂM HỌC',
+								aoa: this.buildChiTieuExportAoA(),
+								merges: this.buildChiTieuExportMerges()
+							},
+							{
+								name: 'CÔNG TÁC CN T8-T5',
+								aoa: this.buildCongTacThangExportAoA()
+							},
+							{
+								name: 'HỒ SƠ THEO DÕI HS CẦN QUAN TÂM',
+								aoa: this.buildHsCanQuanTamExportAoA()
+							},
+							{
+								name: 'NHẬN XÉT THÁNG HỌC SINH (LMS)',
+								aoa: this.buildNhanXetLmsExportAoA()
+							},
+							{
+								name: 'SƠ KẾT HKI',
+								aoa: this.buildSoKetHk1ExportAoA()
+							},
+							{
+								name: 'TỔNG KẾT NĂM HỌC',
+								aoa: this.buildTongKetNamExportAoA()
+							},
+							{
+								name: 'THEO DÕI SĨ SỐ HS THEO THÁNG',
+								aoa: this.buildTheoDoiSiSoExportAoA()
+							},
+							{
+								name: 'THỐNG KÊ ĐỘ TUỔI HS',
+								aoa: this.buildThongKeDoTuoiExportAoA()
+							},
+							{
+								name: 'THEO DÕI THÀNH TÍCH HS',
+								aoa: this.buildTheoDoiThanhTichExportAoA()
+							},
+							{
+								name: 'THEO DÕI PH ĐI HỌP',
+								aoa: this.buildTheoDoiPhHopExportAoA()
+							},
+							{
+								name: 'NỘI DUNG HỌP PHHS',
+								aoa: this.buildNoiDungHopPhExportAoA()
+							},
+							{
+								name: 'THEO DÕI BHYT, BHTN CỦA HS',
+								aoa: this.buildTheoDoiBhytExportAoA()
+							}
+						], 'SoGVCN_TieuHoc_' + (this.selectedClass?.TenLop || this.selectedLopID) + '.xlsx')
+						return
+					}
+
 					this.exportXlsx([
 						{
 							name: 'Dữ liệu HS lớp',
@@ -2534,6 +2642,105 @@
 		safeSheetName(name) {
 			return this.replaceInvalidExcelChars(String(name || 'Sheet1'), ' ').substring(0, 31)
 		},
+		buildToChucLopExportAoA() {
+			const rows = [['TỔ CHỨC LỚP NĂM HỌC ' + this.getCurrentSchoolYearText()], []]
+			rows.push(['I. BAN CÁN BỘ LỚP & ĐỘI'])
+			rows.push(['STT', 'Chức vụ', 'Mã học sinh', 'Họ và tên học sinh', 'Ghi chú'])
+			const toChucRows = this.$refs.tabToChucLopRef?.getSerializableRows?.() || []
+			toChucRows.forEach((r, idx) => {
+				rows.push([idx + 1, r.ChucVu || '', r.MaHocSinh || r.HocSinhID || '', r.HoTen || '', r.GhiChu || ''])
+			})
+			return rows
+		},
+		buildCongTacThangExportAoA() {
+			const rows = [['CÔNG TÁC CHỦ NHIỆM THÁNG'], ['Tháng', 'Nội dung kế hoạch / công tác chủ nhiệm']]
+			const data = this.$refs.tabCongTacChuNhiemRef?.getSaveRows?.(this.form.SoGVCNID) || []
+			data.forEach(r => {
+				rows.push(['Tháng ' + r.ThangIndex, r.NoiDung || ''])
+			})
+			return rows
+		},
+		buildHsCanQuanTamExportAoA() {
+			const rows = [['HỒ SƠ THEO DÕI HỌC SINH CẦN QUAN TÂM'], ['STT', 'Mã học sinh', 'Số danh bộ', 'Họ và tên', 'Đối tượng', 'Khả năng, nhu cầu', 'Biện pháp giáo dục', 'Kết quả']]
+			const data = this.$refs.tabKeHoachRef?.getRows?.() || []
+			data.forEach((r, idx) => {
+				rows.push([idx + 1, r[1] || '', r[2] || '', r[3] || '', r[4] || '', r[5] || '', r[6] || '', r[7] || ''])
+			})
+			return rows
+		},
+		buildNhanXetLmsExportAoA() {
+			const rows = [['NHẬN XÉT THÁNG HỌC SINH (LMS)'], ['STT', 'Mã học sinh', 'Số danh bộ', 'Họ và tên', 'Tháng 8', 'Tháng 9', 'Tháng 10', 'Tháng 11', 'Tháng 12', 'Tháng 1-2', 'Tháng 3', 'Tháng 4', 'Tháng 5']]
+			const data = this.$refs.tabRenLuyenRef?.getRows?.() || []
+			data.forEach((r, idx) => {
+				rows.push([idx + 1, r[1] || '', r[2] || '', r[3] || '', r[4] || '', r[5] || '', r[6] || '', r[7] || '', r[8] || '', r[9] || '', r[10] || '', r[11] || '', r[12] || ''])
+			})
+			return rows
+		},
+		buildSoKetHk1ExportAoA() {
+			const data = this.$refs.tabSoKetHk1Ref?.getData?.() || {}
+			const rows = [['SƠ KẾT HỌC KÌ I'], ['1. Duy trì số lượng:', data.notes?.['duy-tri-si-so'] || ''], ['2. Về năng lực, phẩm chất:', data.notes?.['danh-gia-nl-pc'] || ''], ['3. Về kiến thức, kĩ năng:', data.notes?.['danh-gia-kien-thuc'] || ''], ['4. Phương hướng HKI:', data.notes?.['phuong-huong-hk2'] || '']]
+			return rows
+		},
+		buildTongKetNamExportAoA() {
+			const data = this.$refs.tabTongKetNamRef?.getData?.() || {}
+			const form = data.Form || {}
+			return [
+				['TỔNG KẾT NĂM HỌC'],
+				['1. Duy trì số lượng:', form.DuyTriSoLuong || ''],
+				['2. Năng lực, phẩm chất:', form.NangLucPhamChat || ''],
+				['3. Kiến thức, kĩ năng:', form.KienThucKyNang || ''],
+				['5. Hoàn thành CT:', form.HoanThanhCT || ''],
+				['6. Phong trào khác:', form.PhongTraoKhac || '']
+			]
+		},
+		buildTheoDoiSiSoExportAoA() {
+			const rows = [['THEO DÕI SĨ SỐ HỌC SINH THEO THÁNG'], ['STT', 'Thời điểm', 'Sĩ số đầu tháng', 'Học sinh sinh khác', 'Học sinh trường khác', 'Lý do chuyển']]
+			const data = this.$refs.tabTheoDoiSiSoRef?.getRows?.() || []
+			data.forEach((r, idx) => {
+				rows.push([idx + 1, r[0] || '', r[1] || '', r[2] || '', r[3] || '', r[4] || ''])
+			})
+			return rows
+		},
+		buildThongKeDoTuoiExportAoA() {
+			const rows = [['THỐNG KÊ ĐỘ TUỔI HỌC SINH'], ['Năm sinh', 'Nam', 'Nữ', 'Khuyết tật']]
+			const data = this.$refs.tabThongKeDoTuoiRef?.getSerializableRows?.() || []
+			data.forEach(r => {
+				rows.push([r.AgeLabel || '', r.Nam || '', r.Nu || '', r.KhuyetTat || ''])
+			})
+			return rows
+		},
+		buildTheoDoiThanhTichExportAoA() {
+			const rows = [['THEO DÕI THÀNH TÍCH HỌC SINH'], ['STT', 'Mã học sinh', 'Số danh bộ', 'Họ và tên', 'HKI', 'Cuối năm']]
+			const data = this.$refs.tabTheoDoiThanhTichRef?.getRows?.() || []
+			data.forEach((r, idx) => {
+				rows.push([idx + 1, r[1] || '', r[2] || '', r[3] || '', r[4] || '', r[5] || ''])
+			})
+			return rows
+		},
+		buildTheoDoiPhHopExportAoA() {
+			const rows = [['THEO DÕI PHỤ HUYNH ĐI HỌP'], ['STT', 'Mã học sinh', 'Số danh bộ', 'Họ và tên', 'Lần 1', 'Lần 2', 'Lần 3', 'Ghi chú']]
+			const data = this.$refs.tabSoLienLacRef?.getRows?.() || []
+			data.forEach((r, idx) => {
+				rows.push([idx + 1, r[1] || '', r[2] || '', r[3] || '', r[4] ? 'X' : '', r[5] ? 'X' : '', r[6] ? 'X' : '', r[7] || ''])
+			})
+			return rows
+		},
+		buildNoiDungHopPhExportAoA() {
+			const rows = [['NỘI DUNG HỌP PHỤ HUYNH HỌC SINH'], ['Đợt họp', 'Nội dung họp']]
+			const data = this.$refs.tabNoiDungHopPhRef?.getRows?.() || []
+			data.forEach(r => {
+				rows.push([r.DotHop || '', r.NoiDungChinh || ''])
+			})
+			return rows
+		},
+		buildTheoDoiBhytExportAoA() {
+			const rows = [['THEO DÕI BHYT VÀ BHTN'], ['STT', 'Mã học sinh', 'Số danh bộ', 'Họ và tên', 'BHYT', 'BHTN', 'Ghi chú']]
+			const data = this.$refs.tabTheoDoiBhytRef?.getRows?.() || []
+			data.forEach((r, idx) => {
+				rows.push([idx + 1, r[1] || '', r[2] || '', r[3] || '', r[4] ? 'X' : '', r[5] ? 'X' : '', r[6] || ''])
+			})
+			return rows
+		},
 		normalizeFileName(fileName) {
 			return this.replaceInvalidExcelChars(String(fileName || 'SoGVCN.xlsx'), '_').split(' ').join('_')
 		},
@@ -2693,9 +2900,11 @@
 				} else if (this.tab === 'so-ket-hk1' && this.isCap1) {
 					if (this.form.SoGVCNID && this.selectedLopID !== '__ALL__') {
 						const payload = this.$refs.tabSoKetHk1Ref?.getData?.() || {}
+						const structuredRatings = this.$refs.tabSoKetHk1Ref?.getStructuredRatings?.(this.monHocList) || []
 						await ajaxCALLPromise('lms/SoGVCNSoKetHKISave', {
 							SoGVCNID: this.form.SoGVCNID,
-							JsonData: JSON.stringify(payload)
+							JsonData: JSON.stringify(payload),
+							JsonDanhGia: JSON.stringify(structuredRatings)
 						})
 						await this.getSoKetHk1()
 					}
@@ -2706,7 +2915,7 @@
 							SoGVCNID: this.form.SoGVCNID,
 							JsonRows: JSON.stringify(rowsToSave)
 						})
-						this.noiDungHopPhSavedRows = rowsToSave
+						await this.getNoiDungHopPh()
 					}
 				} else if (this.tab === 'theo-doi-thanh-tich' && this.isCap1) {
 					if (this.form.SoGVCNID && this.selectedLopID !== '__ALL__') {
@@ -2715,7 +2924,7 @@
 							SoGVCNID: this.form.SoGVCNID,
 							JsonRows: JSON.stringify(rowsToSave)
 						})
-						this.thanhTichSavedRows = rowsToSave
+						await this.getTheoDoiThanhTich()
 					}
 				} else if (this.tab === 'thong-ke-do-tuoi' && this.isCap1) {
 					if (this.form.SoGVCNID && this.selectedLopID !== '__ALL__') {
@@ -2738,6 +2947,7 @@
 				} else if (this.tab === 'tong-ket-nam' && this.isCap1) {
 					if (this.form.SoGVCNID && this.selectedLopID !== '__ALL__') {
 						const payload = this.$refs.tabTongKetNamRef?.getData() || {}
+						const structuredRatings = this.$refs.tabTongKetNamRef?.getStructuredRatings?.(this.monHocList) || []
 						await ajaxCALLPromise('lms/SoGVCNTongKetNamC1Save', {
 							SoGVCNID: this.form.SoGVCNID,
 							DuyTriSoLuong: payload.Form?.DuyTriSoLuong || '',
@@ -2748,15 +2958,10 @@
 							JsonSheet1: JSON.stringify(payload.Sheet1 || []),
 							JsonSheet2: JSON.stringify(payload.Sheet2 || []),
 							JsonSheet3: JSON.stringify(payload.Sheet3 || []),
-							JsonSheet4: JSON.stringify(payload.Sheet4 || [])
+							JsonSheet4: JSON.stringify(payload.Sheet4 || []),
+							JsonDanhGia: JSON.stringify(structuredRatings)
 						})
-						this.tongKetNamC1SavedData = {
-							...payload.Form,
-							Sheet1: payload.Sheet1,
-							Sheet2: payload.Sheet2,
-							Sheet3: payload.Sheet3,
-							Sheet4: payload.Sheet4
-						}
+						await this.getTongKetNamC1()
 					}
 				}
 				if (this.detail) this.detail.TrangThai = this.detail.TrangThai === 'NEW' ? 'DRAFT' : this.detail.TrangThai
@@ -2841,21 +3046,7 @@
 		},
 
 		serializeNoiDungHopPhRows() {
-			const sheet = this.$refs.tabNoiDungHopPhRef?.getInstance()
-			const sourceRows = sheet && typeof sheet.getData === 'function' ? sheet.getData() : []
-			const rows = []
-			sourceRows.forEach((row, idx) => {
-				rows.push({
-					MeetingIndex: idx,
-					DotHop: this.cleanSheetValue(row[2]),
-					ThoiGian: this.cleanSheetValue(row[3]),
-					DiaDiem: this.cleanSheetValue(row[4]),
-					NoiDungChinh: this.cleanSheetValue(row[5]),
-					YKienPHHS: this.cleanSheetValue(row[6]),
-					KetLuan: this.cleanSheetValue(row[7])
-				})
-			})
-			return rows
+			return this.$refs.tabNoiDungHopPhRef?.getRows?.() || []
 		},
 
 		serializeTheoDoiPhHopRows() {
@@ -2879,8 +3070,7 @@
 		},
 
 		serializeTheoDoiThanhTichRows() {
-			const sheet = this.$refs.tabTheoDoiThanhTichRef?.getInstance()
-			const sourceRows = sheet && typeof sheet.getData === 'function' ? sheet.getData() : []
+			const sourceRows = this.$refs.tabTheoDoiThanhTichRef?.getRows?.() || []
 			const students = this.getSelectedClassStudents()
 			const rows = []
 			sourceRows.forEach((row, rowIndex) => {

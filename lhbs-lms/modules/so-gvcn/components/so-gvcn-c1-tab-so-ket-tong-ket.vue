@@ -39,7 +39,8 @@
 				</v-list>
 			</div>
 
-			<div ref="scrollContainer" class="flex-grow-1 h-100 overflow-y-auto pr-1">
+			<div ref="scrollContainer"
+				class="flex-grow-1 h-100 overflow-y-auto pr-1 so-gvcn-so-ket-content">
 				<div class="text-h6 text-center font-weight-bold pt-3 mb-1">SƠ KẾT HỌC KÌ I</div>
 				<div class="text-body-2 text-center mb-4">
 					Đánh giá nội dung hoạt động của lớp theo kế hoạch đã xây dựng đầu năm
@@ -216,6 +217,98 @@
 					subjectResults: readSheet('ket-qua-mon-hoc')
 				}
 			},
+			getStructuredRatings(allMonHoc = []) {
+				const readSheet = key => {
+					const instance = this.instances[key]
+					const sheet = Array.isArray(instance) ? instance[0] : instance
+					if (sheet && typeof sheet.closeEditor === 'function') {
+						try { sheet.closeEditor(true) } catch (error) {}
+					}
+					return sheet && typeof sheet.getData === 'function' ? sheet.getData() : []
+				}
+
+				const ratings = []
+				const qualityRows = readSheet('ket-qua-nl-pc')
+				const qualityCategories = [
+					{
+						title: 'Phẩm chất',
+						type: 'QUALITY',
+						items: [
+							{ name: 'Yêu nước', code: 'PC_YEU_NUOC' },
+							{ name: 'Nhân ái', code: 'PC_NHAN_AI' },
+							{ name: 'Chăm chỉ', code: 'PC_CHAM_CHI' },
+							{ name: 'Trung thực', code: 'PC_TRUNG_THUC' },
+							{ name: 'Trách nhiệm', code: 'PC_TRACH_NHIEM' }
+						]
+					},
+					{
+						title: 'Năng lực',
+						type: 'QUALITY',
+						items: [
+							{ name: 'Tự chủ và tự học', code: 'NL_TU_CHU' },
+							{ name: 'Giao tiếp và hợp tác', code: 'NL_GIAO_TIEP' },
+							{ name: 'GQVĐ và sáng tạo', code: 'NL_GQVD' },
+							{ name: 'Ngôn ngữ', code: 'NL_NGON_NGU' },
+							{ name: 'Tính toán', code: 'NL_TINH_TOAN' },
+							{ name: 'Khoa học', code: 'NL_KHOA_HOC' },
+							{ name: 'Công nghệ', code: 'NL_CONG_NGHE' },
+							{ name: 'Tin học', code: 'NL_TIN_HOC' },
+							{ name: 'Thẩm mĩ', code: 'NL_THAM_MI' },
+							{ name: 'Thể chất', code: 'NL_THE_CHAT' }
+						]
+					}
+				]
+
+				const qualityRatingCodes = ['TOT', 'DAT', 'CAN_CO_GANG']
+				qualityRows.forEach((row, ratingIdx) => {
+					const ratingCode = qualityRatingCodes[ratingIdx] || 'TOT'
+					let colIdx = 1
+					qualityCategories.forEach(cat => {
+						cat.items.forEach(item => {
+							const qty = parseInt(row[colIdx]) || 0
+							const rate = parseFloat(row[colIdx + 1]) || 0
+							ratings.push({
+								LoaiDanhGia: 'QUALITY',
+								MonHocID: null,
+								TieuChiCode: item.code,
+								TenTieuChi: item.name,
+								MucXepLoaiCode: ratingCode,
+								SoLuong: qty,
+								TiLe: rate
+							})
+							colIdx += 2
+						})
+					})
+				})
+
+				const subjectRows = readSheet('ket-qua-mon-hoc')
+				const subjectItems = [
+					'Tiếng Việt', 'Toán', 'Tiếng Anh', 'Lịch sử & Địa lí', 'Khoa học',
+					'Tin học - Công nghệ', 'Đạo đức', 'Giáo dục thể chất',
+					'Âm nhạc', 'Mĩ thuật', 'Hoạt động trải nghiệm'
+				]
+				const subjectRatingCodes = ['HT_TOT', 'HOAN_THANH', 'CHUA_HT']
+				subjectRows.forEach((row, ratingIdx) => {
+					const ratingCode = subjectRatingCodes[ratingIdx] || 'HT_TOT'
+					subjectItems.forEach((subName, subIdx) => {
+						const colIdx = 1 + (subIdx * 2)
+						const qty = parseInt(row[colIdx]) || 0
+						const rate = parseFloat(row[colIdx + 1]) || 0
+						const foundMon = (allMonHoc || []).find(m => m.TenMonHoc_HienThi === subName || m.TenMonHoc === subName)
+						ratings.push({
+							LoaiDanhGia: 'SUBJECT',
+							MonHocID: foundMon ? foundMon.MonHocID : null,
+							TieuChiCode: foundMon ? null : subName,
+							TenTieuChi: subName,
+							MucXepLoaiCode: ratingCode,
+							SoLuong: qty,
+							TiLe: rate
+						})
+					})
+				})
+
+				return ratings
+			},
 			getSheet(card) {
 				let target = this.$refs[card.sheetRef]
 				if (Array.isArray(target)) target = target[0]
@@ -350,12 +443,3 @@
 		}
 	}
 </script>
-
-<style scoped>
-	:deep(.so-gvcn-so-ket-result-sheet .jss_content) {
-		height: 205px !important;
-		max-height: 205px !important;
-		overflow-x: auto !important;
-		overflow-y: hidden !important;
-	}
-</style>

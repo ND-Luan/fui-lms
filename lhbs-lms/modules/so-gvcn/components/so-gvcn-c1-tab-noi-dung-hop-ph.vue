@@ -1,10 +1,26 @@
 <template>
-	<v-card-text class="pa-0 so-gvcn-sheet-wrap" :style="{ height: sheetHeight, 'overflow-y': 'auto' }">
+	<v-card-text class="pa-2 so-gvcn-sheet-wrap" :style="{ height: sheetHeight, 'overflow-y': 'auto' }">
 		<v-alert v-if="selectedLopID === '__ALL__'" type="info" variant="tonal" density="compact" class="ma-2">
 			Chọn một lớp ở thanh trên để xem và biên soạn nội dung các buổi họp Phụ huynh học sinh.
 		</v-alert>
-		<div v-else class="so-gvcn-sheet-wrap">
-			<div ref="sheetRef" class="w-100 so-gvcn-sheet so-gvcn-noi-dung-hop-ph-sheet"></div>
+		<div v-else class="d-flex flex-column ga-4 pa-2">
+			<v-card v-for="(meetingTitle, idx) in defaultMeetings" :key="idx" variant="outlined" class="rounded-lg">
+				<v-card-title class="bg-lightprimary text-subtitle-1 font-weight-bold d-flex align-center justify-space-between py-2">
+					<span>Hội PHHS • {{ meetingTitle }}</span>
+				</v-card-title>
+				<v-divider />
+				<v-card-text class="pa-3">
+					<v-textarea
+						v-model="notes[idx]"
+						label="Nội dung họp Phụ huynh"
+						variant="outlined"
+						rows="6"
+						auto-grow
+						hide-details
+						placeholder="Nhập nội dung biên bản cuộc họp Phụ huynh..."
+					/>
+				</v-card-text>
+			</v-card>
 		</div>
 	</v-card-text>
 </template>
@@ -19,17 +35,7 @@
 		},
 		data() {
 			return {
-				instance: null,
-				columns: [
-					{ title: 'STT', width: 60, readOnly: true, align: 'center' },
-					{ title: 'Hội PHHS', width: 140, readOnly: true },
-					{ title: 'NỘI DUNG HỌP PHỤ HUYNH', width: 280, readOnly: true },
-					{ title: 'THỜI GIAN / NGÀY HỌP', width: 160 },
-					{ title: 'ĐỊA ĐIỂM / HÌNH THỨC', width: 180 },
-					{ title: 'NỘI DUNG CHÍNH CUỘC HỌP', width: 420 },
-					{ title: 'Ý KIẾN NGHỊ / THỎA THUẬN CỦA PHHS', width: 400 },
-					{ title: 'KẾT LUẬN / THÔNG QUA BIÊN BẢN', width: 320 }
-				],
+				notes: ['', '', ''],
 				defaultMeetings: [
 					'NỘI DUNG HỌP PHỤ HUYNH LẦN 1',
 					'NỘI DUNG HỌP PHỤ HUYNH LẦN 2',
@@ -38,103 +44,29 @@
 			}
 		},
 		watch: {
-			selectedLopID() {
-				this.initSheet()
-			},
 			savedRows: {
-				deep: false,
+				immediate: true,
+				deep: true,
 				handler() {
-					this.initSheet()
+					this.syncSavedData()
 				}
-			}
-		},
-		mounted() {
-			this.initSheet()
-		},
-		beforeUnmount() {
-			this.destroySheet()
-		},
-		computed: {
-			nestedHeaders() {
-				return [
-					[
-						{ title: '', colspan: 3 },
-						{ title: 'THÔNG TIN VÀ NỘI DUNG BIÊN BẢN HỌP PHỤ HUYNH HỌC SINH', colspan: 5 }
-					]
-				]
 			}
 		},
 		methods: {
-			getInstance() {
-				return this.instance
+			syncSavedData() {
+				const nextNotes = ['', '', '']
+				this.defaultMeetings.forEach((title, idx) => {
+					const saved = (this.savedRows || []).find(r => r.MeetingIndex === idx || r.DotHop === title) || {}
+					nextNotes[idx] = saved.NoiDungChinh || saved.NoiDung || saved.Content || ''
+				})
+				this.notes = nextNotes
 			},
 			getRows() {
-				const sheet = Array.isArray(this.instance) ? this.instance[0] : this.instance
-				return sheet && typeof sheet.getData === 'function' ? sheet.getData() : []
-			},
-			buildRows() {
-				const findSaved = (meetingIndex, meetingTitle) => {
-					return (this.savedRows || []).find(r => r.MeetingIndex === meetingIndex || r.DotHop === meetingTitle) || {}
-				}
-
-				return this.defaultMeetings.map((meetingTitle, idx) => {
-					const saved = findSaved(idx, meetingTitle)
-					return [
-						idx + 1,
-						'Hội PHHS',
-						meetingTitle,
-						saved.ThoiGian || '',
-						saved.DiaDiem || '',
-						saved.NoiDungChinh || '',
-						saved.YKienPHHS || '',
-						saved.KetLuan || ''
-					]
-				})
-			},
-			destroySheet() {
-				if (!this.instance) return
-				try {
-					const sheet = Array.isArray(this.instance) ? this.instance[0] : this.instance
-					if (sheet && typeof sheet.destroy === 'function') sheet.destroy()
-					else if (this.$refs.sheetRef && typeof jspreadsheet !== 'undefined'
-						&& typeof jspreadsheet.destroy === 'function') {
-						jspreadsheet.destroy(this.$refs.sheetRef)
-					}
-				} catch (error) {}
-				this.instance = null
-			},
-			initSheet() {
-				if (this.selectedLopID === '__ALL__') {
-					this.destroySheet()
-					return
-				}
-				this.$nextTick(() => {
-					const container = this.$refs.sheetRef
-					if (!container) return
-					this.destroySheet()
-					container.innerHTML = ''
-					if (typeof jspreadsheet === 'function') {
-						this.instance = soGvcnJspreadsheet.create(container, {
-							worksheets: [{
-								data: this.buildRows(),
-								columns: this.columns,
-								nestedHeaders: this.nestedHeaders,
-								rowResize: true,
-								columnDrag: false,
-								tableWidth: '100%',
-								tableOverflow: true,
-								tableHeight: this.sheetHeight,
-								lazyLoading: false,
-								freezeColumns: 3,
-								wordWrap: true,
-								allowInsertColumn: false,
-								allowInsertRow: false,
-								showHeader: true
-							}],
-							contextMenu: () => false
-						})
-					}
-				})
+				return this.defaultMeetings.map((title, idx) => ({
+					MeetingIndex: idx,
+					DotHop: title,
+					NoiDungChinh: this.notes[idx] || ''
+				}))
 			}
 		}
 	}

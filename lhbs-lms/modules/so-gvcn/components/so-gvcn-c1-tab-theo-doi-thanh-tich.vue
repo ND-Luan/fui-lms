@@ -70,10 +70,13 @@
 			},
 			getRows() {
 				const sheet = Array.isArray(this.instance) ? this.instance[0] : this.instance
+				if (sheet && typeof sheet.closeEditor === 'function') {
+					try { sheet.closeEditor(true) } catch (error) {}
+				}
 				return sheet && typeof sheet.getData === 'function' ? sheet.getData() : []
 			},
 			buildRows() {
-				const findSaved = (hslopID) => (this.savedRows || []).find(r => r.HSLopID === hslopID) || {}
+				const findSaved = (hslopID) => (this.savedRows || []).find(r => Number(r.HSLopID) === Number(hslopID)) || {}
 				return (this.students || []).map((student, idx) => {
 					const saved = findSaved(student.HSLopID)
 					return [

@@ -14,7 +14,8 @@
 		rows: { type: Array, default: () => [] },
 		sheetHeight: { type: String, default: 'calc(100vh - 230px)' },
 		sheetKey: { type: [Number, String], default: 0 },
-		nestedHeaders: { type: Array, default: () => [] }
+		nestedHeaders: { type: Array, default: () => [] },
+		hasNhomAv: { type: Boolean, default: true }
 	},
 	data() {
 		return {
@@ -25,6 +26,7 @@
 				{ title: 'Số danh bộ', width: 110, readOnly: true },
 				{ title: 'Họ và tên học sinh', width: 220, readOnly: true, align: 'left' },
 				{ title: 'Lớp mới', width: 70, readOnly: true },
+				{ title: 'Nhóm AV', width: 80, readOnly: true, key: 'NhomAV' },
 				{ title: 'Lớp cũ', width: 70, readOnly: true },
 				{ title: 'Toán', isScoreCol: true, readOnly: true },
 				{ title: 'Tiếng Việt/Văn', isScoreCol: true, readOnly: true },
@@ -58,13 +60,22 @@
 		}
 	},
 	computed: {
+		activeColumns() {
+			return this.hasNhomAv ? this.baseColumns : this.baseColumns.filter(col => col.key !== 'NhomAV')
+		},
+		activeRows() {
+			if (this.hasNhomAv) return this.rows
+			const hideIdx = this.baseColumns.findIndex(col => col.key === 'NhomAV')
+			if (hideIdx < 0) return this.rows
+			return (this.rows || []).map(row => row.filter((_, i) => i !== hideIdx))
+		},
 		computedColumns() {
-			if (!this.rows || !this.rows.length) return this.baseColumns
+			if (!this.activeRows || !this.activeRows.length) return this.activeColumns
 
-			return this.baseColumns.map((col, colIdx) => {
+			return this.activeColumns.map((col, colIdx) => {
 				let maxLen = (col.title || '').length
-				for (let i = 0; i < Math.min(this.rows.length, 50); i++) {
-					const val = this.rows[i][colIdx]
+				for (let i = 0; i < Math.min(this.activeRows.length, 50); i++) {
+					const val = this.activeRows[i][colIdx]
 					if (val != null) {
 						const strLen = String(val).trim().length
 						if (strLen > maxLen) maxLen = strLen
@@ -99,7 +110,7 @@
 		initSheet() {
 			this.$nextTick(() => {
 				const container = this.$refs.sheetRef
-				if (!container || !this.rows || !this.rows.length) {
+				if (!container || !this.activeRows || !this.activeRows.length) {
 					this.destroySheet()
 					return
 				}
@@ -110,7 +121,7 @@
 				if (typeof jspreadsheet === 'function') {
 					this.sheetInstance = soGvcnJspreadsheet.create(container, {
 						worksheets: [{
-							data: this.rows,
+							data: this.activeRows,
 							columns: this.computedColumns,
 							nestedHeaders: this.nestedHeaders,
 							rowResize: true,
@@ -145,6 +156,9 @@
 			}
 		},
 		sheetKey() {
+			this.initSheet()
+		},
+		hasNhomAv() {
 			this.initSheet()
 		}
 	},
