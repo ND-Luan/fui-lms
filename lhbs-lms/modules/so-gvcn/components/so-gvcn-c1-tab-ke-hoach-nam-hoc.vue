@@ -195,6 +195,7 @@
 		props: {
 			selectedLopID: { type: [String, Number], default: '__ALL__' },
 			selectedClass: { type: Object, default: null },
+			classSize: { type: Number, default: 0 },
 			schoolYearText: { type: String, default: '' },
 			sheetHeight: { type: String, default: 'calc(100vh - 230px)' },
 			annualPlan: { type: [String, Object], default: '' }
@@ -203,6 +204,7 @@
 			return {
 				activeCardKey: 'dac-diem',
 				sheetInstances: {},
+				syncingTargetPercentages: false,
 				qualityCompetencySubjects: this.getDefaultQualityCompetencySubjects(),
 				academicSubjects: this.getDefaultAcademicSubjects(),
 				planText: this.buildPlanText(this.annualPlan),
@@ -218,6 +220,9 @@
 			annualPlan(value) {
 				this.planText = this.buildPlanText(value)
 				this.planCards = this.buildPlanCards(value)
+				this.initAllSheets()
+			},
+			classSize() {
 				this.initAllSheets()
 			}
 		},
@@ -551,6 +556,7 @@
 					if (!container || typeof jspreadsheet !== 'function') return
 					this.destroySheet(card.key)
 					container.innerHTML = ''
+					this.syncTargetPercentages(card, card.rows)
 					this.sheetInstances[card.key] = soGvcnJspreadsheet.create(container, {
 						worksheets: [{
 							data: card.rows,
@@ -569,8 +575,19 @@
 							showHeader: true
 						}],
 						contextMenu: () => false,
-						onchange: worksheet => {
-							card.rows = worksheet.getData()
+						onchange: (worksheet, cell, x, y) => {
+							if (this.syncingTargetPercentages) {
+								card.rows = worksheet.getData()
+								return
+							}
+							const rows = worksheet.getData()
+							this.syncingTargetPercentages = true
+							try {
+								this.syncTargetPercentages(card, rows, worksheet, x, y)
+								card.rows = rows
+							} finally {
+								this.syncingTargetPercentages = false
+							}
 						}
 					})
 				})
@@ -586,6 +603,42 @@
 				if (value === '' || value === null || value === undefined) return null
 				const number = Number(value)
 				return Number.isFinite(number) ? number : null
+			},
+			getTargetClassSize() {
+				if (this.classSize > 0) return this.classSize
+				const situationRows = this.planCards.find(card => card.key === 'dac-diem')?.rows || []
+				return this.toNullableNumber(situationRows[0]?.[1]) || 0
+			},
+			syncTargetPercentages(card, rows, worksheet = null, changedX = null, changedY = null) {
+				if (!['pham-chat-nang-luc', 'mon-hoc-hoat-dong'].includes(card?.key)) return
+				const subjects = card.key === 'pham-chat-nang-luc'
+					? (this.qualityCompetencySubjects || [])
+					: (this.academicSubjects || [])
+				const classSize = this.getTargetClassSize()
+				const changedColumn = Number.isFinite(Number(changedX)) ? Number(changedX) : null
+				const changedRow = Number.isFinite(Number(changedY)) ? Number(changedY) : null
+				const subjectIndexes = changedColumn !== null && changedColumn >= 1
+					? [Math.floor((changedColumn - 1) / 2)]
+					: subjects.map((subject, index) => index)
+				subjectIndexes.forEach(subjectIndex => {
+					if (!subjects[subjectIndex]) return
+					const quantityColumn = 1 + subjectIndex * 2
+					const percentageColumn = quantityColumn + 1
+					const rowIndexes = changedRow !== null ? [changedRow] : rows.map((row, index) => index)
+					rowIndexes.forEach(rowIndex => {
+						const row = rows[rowIndex]
+						if (!Array.isArray(row)) return
+						const quantity = this.toNullableNumber(row?.[quantityColumn])
+						const percentage = quantity === null || classSize <= 0
+							? ''
+							: Math.round((quantity / classSize) * 10000) / 100
+						const changed = row[percentageColumn] !== percentage
+						row[percentageColumn] = percentage
+						if (changed && worksheet && typeof worksheet.setValueFromCoords === 'function') {
+							worksheet.setValueFromCoords(percentageColumn, rowIndex, percentage, true)
+						}
+					})
+				})
 			},
 			throwTargetValidationError(message) {
 				if (window.Vue && Vue.$toast) {

@@ -26,7 +26,7 @@
 			<div class="flex-grow-1 h-100 overflow-y-auto pr-1">
 				<div class="text-h6 text-center font-weight-bold py-3">
 					KẾT QUẢ THỰC HIỆN THÁNG {{ activeMonthLabel }}/{{ activeYearLabel }}
-					VÀ KẾ HOẠCH THÁNG {{ activeMonthLabel }}/{{ activeYearLabel }}
+					VÀ KẾ HOẠCH THÁNG {{ planMonthLabel }}/{{ planYearLabel }}
 				</div>
 
 				<v-row dense class="mb-3">
@@ -45,7 +45,7 @@
 					<v-col cols="12" md="6">
 						<v-card variant="outlined" height="100%">
 							<v-card-title class="text-subtitle-2 font-weight-bold text-primary">
-								II. KẾ HOẠCH THÁNG {{ activeMonthLabel }}
+								II. KẾ HOẠCH THÁNG {{ planMonthLabel }}
 							</v-card-title>
 							<v-card-text>
 								<v-textarea v-if="currentPlan" v-model="currentPlan.MucTieu" rows="6" auto-grow
@@ -58,7 +58,7 @@
 
 				<v-card variant="outlined" class="mb-8">
 					<v-card-title class="text-subtitle-2 font-weight-bold text-primary">
-						III. KẾ HOẠCH HÀNG TUẦN CỦA THÁNG {{ activeMonthLabel }}/{{ activeYearLabel }}
+						III. KẾ HOẠCH HÀNG TUẦN CỦA THÁNG {{ planMonthLabel }}/{{ planYearLabel }}
 					</v-card-title>
 					<v-divider />
 					<v-card-text class="pa-2">
@@ -112,7 +112,15 @@
 			},
 			activeYearLabel() {
 				const schoolYear = Number(this.nienKhoa) || new Date().getFullYear()
-				return Number(this.activeMonth) >= 8 ? schoolYear - 1 : schoolYear
+				return Number(this.activeMonth) >= 8 ? schoolYear : schoolYear + 1
+			},
+			planMonthLabel() {
+				if (Number(this.activeMonth) === 1) return '1,2'
+				const nextMonth = Number(this.activeMonth) + 1
+				return nextMonth === 13 ? '1,2' : nextMonth
+			},
+			planYearLabel() {
+				return Number(this.activeMonth) === 12 ? this.activeYearLabel + 1 : this.activeYearLabel
 			},
 			weeklySheetHeight() {
 				return '360px'

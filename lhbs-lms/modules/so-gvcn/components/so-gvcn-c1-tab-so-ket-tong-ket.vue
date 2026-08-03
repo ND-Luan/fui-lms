@@ -89,12 +89,14 @@
 		props: {
 			selectedLopID: { type: [String, Number], default: '__ALL__' },
 			students: { type: Array, default: () => [] },
+			classSize: { type: Number, default: 0 },
 			savedRows: { type: Array, default: () => [] },
 			sheetHeight: { type: String, default: 'calc(100vh - 230px)' }
 		},
 		data() {
 			return {
 				instances: {},
+				syncingTargetPercentages: false,
 				noteValues: {},
 				activeCardKey: 'duy-tri-si-so',
 				cards: [
@@ -421,6 +423,7 @@
 						if (!container) return
 						container.innerHTML = ''
 						const config = this.buildCardConfig(card)
+						this.syncTargetPercentages(card, config.data)
 						this.instances[card.key] = soGvcnJspreadsheet.create(container, {
 							worksheets: [{
 								...config,
@@ -435,11 +438,52 @@
 								allowInsertRow: false,
 								showHeader: true
 							}],
-							contextMenu: () => false
+							contextMenu: () => false,
+							onchange: (worksheet, cell, x, y) => {
+								if (this.syncingTargetPercentages) return
+								this.syncingTargetPercentages = true
+								try {
+									this.syncTargetPercentages(card, worksheet.getData(), worksheet, x, y)
+								} finally {
+									this.syncingTargetPercentages = false
+								}
+							}
 						})
 					})
 				})
-			}
+			},
+			getTargetClassSize() {
+				return this.classSize > 0 ? this.classSize : (this.students || []).length
+			},
+			syncTargetPercentages(card, rows, worksheet = null, changedX = null, changedY = null) {
+				if (!['quality', 'subject'].includes(card?.type)) return
+				const classSize = this.getTargetClassSize()
+				const changedColumn = Number.isFinite(Number(changedX)) ? Number(changedX) : null
+				const changedRow = Number.isFinite(Number(changedY)) ? Number(changedY) : null
+				const subjectCount = Math.floor(((card.type === 'quality' ? 30 : 22)) / 2)
+				const subjectIndexes = changedColumn !== null && changedColumn >= 1
+					? [Math.floor((changedColumn - 1) / 2)]
+					: Array.from({ length: subjectCount }, (_, index) => index)
+				subjectIndexes.forEach(subjectIndex => {
+					if (subjectIndex >= subjectCount) return
+					const quantityColumn = 1 + subjectIndex * 2
+					const percentageColumn = quantityColumn + 1
+					const rowIndexes = changedRow !== null ? [changedRow] : rows.map((row, index) => index)
+					rowIndexes.forEach(rowIndex => {
+						const row = rows[rowIndex]
+						if (!Array.isArray(row)) return
+						const quantity = row[quantityColumn] === '' || row[quantityColumn] == null
+							? null : Number(row[quantityColumn])
+						const percentage = quantity === null || !Number.isFinite(quantity) || classSize <= 0
+							? '' : Math.round((quantity / classSize) * 10000) / 100
+						const changed = row[percentageColumn] !== percentage
+						row[percentageColumn] = percentage
+						if (changed && worksheet && typeof worksheet.setValueFromCoords === 'function') {
+							worksheet.setValueFromCoords(percentageColumn, rowIndex, percentage, true)
+						}
+					})
+				})
+			},
 		}
 	}
 </script>

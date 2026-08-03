@@ -113,7 +113,7 @@
 							data: card.rows,
 							columns: (card.columns || []).map(column => (
 								!column.readOnly && column.type !== 'numeric' && column.align !== 'center'
-									? { ...column, align: 'justify' }
+									? { ...column, align: column.align || 'justify' }
 									: column
 							)),
 							rowResize: true,

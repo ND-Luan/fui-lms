@@ -99,11 +99,14 @@
 		name: 'so-gvcn-c1-tab-tong-ket-nam-hoc',
 		props: {
 			selectedLopID: { type: [String, Number], default: '__ALL__' },
+			students: { type: Array, default: () => [] },
+			classSize: { type: Number, default: 0 },
 			savedData: { type: Object, default: () => ({}) },
 			sheetHeight: { type: String, default: 'calc(100vh - 230px)' }
 		},
 		data() {
 			return {
+				syncingTargetPercentages: false,
 				sheet1Instance: null,
 				sheet2Instance: null,
 				sheet3Instance: null,
@@ -145,6 +148,9 @@
 					}
 					this.initAllSheets()
 				}
+			},
+			classSize() {
+				this.initAllSheets()
 			}
 		},
 		mounted() {
@@ -302,6 +308,50 @@
 				return ratings
 			},
 
+			getTargetClassSize() {
+				return this.classSize > 0 ? this.classSize : (this.students || []).length
+			},
+			handleSheetChange(sheetKey, worksheet, changedX, changedY) {
+				if (this.syncingTargetPercentages) return
+				this.syncingTargetPercentages = true
+				try {
+					this.syncTargetPercentages(sheetKey, worksheet.getData(), worksheet, changedX, changedY)
+				} finally {
+					this.syncingTargetPercentages = false
+				}
+			},
+				syncTargetPercentages(sheetKey, rows, worksheet = null, changedX = null, changedY = null) {
+				const subjectCount = { sheet1: 15, sheet2: 11, sheet3: 1, sheet4: 1 }[sheetKey]
+				if (!subjectCount) return
+				const classSize = this.getTargetClassSize()
+				const changedColumn = Number.isFinite(Number(changedX)) ? Number(changedX) : null
+				const changedRow = Number.isFinite(Number(changedY)) ? Number(changedY) : null
+				const subjectIndexes = changedColumn !== null && changedColumn >= 1
+					? [Math.floor((changedColumn - 1) / 2)]
+					: Array.from({ length: subjectCount }, (_, index) => index)
+				subjectIndexes.forEach(subjectIndex => {
+					if (subjectIndex >= subjectCount) return
+					const quantityColumn = 1 + subjectIndex * 2
+					const percentageColumn = quantityColumn + 1
+					const rowIndexes = changedRow !== null && rows[changedRow]
+						? [changedRow]
+						: rows.map((row, index) => index)
+					rowIndexes.forEach(rowIndex => {
+						const row = rows[rowIndex]
+						if (!Array.isArray(row)) return
+						const quantity = row[quantityColumn] === '' || row[quantityColumn] == null
+							? null : Number(row[quantityColumn])
+						const percentage = quantity === null || !Number.isFinite(quantity) || classSize <= 0
+							? '' : Math.round((quantity / classSize) * 10000) / 100
+						const changed = row[percentageColumn] !== percentage
+						row[percentageColumn] = percentage
+						if (changed && worksheet && typeof worksheet.setValueFromCoords === 'function') {
+							worksheet.setValueFromCoords(percentageColumn, rowIndex, percentage, true)
+						}
+					})
+				})
+			},
+
 			destroyAllSheets() {
 				[this.sheet1Instance, this.sheet2Instance, this.sheet3Instance, this.sheet4Instance].forEach(inst => {
 					if (!inst) return
@@ -367,6 +417,7 @@
 								...fields1.map(f => ({ title: f, colspan: 2 }))
 							]
 						]
+						this.syncTargetPercentages('sheet1', defaultSheet1Data)
 
 						this.sheet1Instance = soGvcnJspreadsheet.create(this.$refs.sheetRef1, {
 							worksheets: [{
@@ -383,7 +434,8 @@
 								allowInsertColumn: false,
 								allowDeleteColumn: false
 							}],
-							contextMenu: () => false
+							contextMenu: () => false,
+							onchange: (worksheet, cell, x, y) => this.handleSheetChange('sheet1', worksheet, x, y)
 						})
 					}
 
@@ -416,6 +468,7 @@
 								...fields2.map(f => ({ title: f, colspan: 2 }))
 							]
 						]
+						this.syncTargetPercentages('sheet2', defaultSheet2Data)
 
 						this.sheet2Instance = soGvcnJspreadsheet.create(this.$refs.sheetRef2, {
 							worksheets: [{
@@ -432,7 +485,8 @@
 								allowInsertColumn: false,
 								allowDeleteColumn: false
 							}],
-							contextMenu: () => false
+							contextMenu: () => false,
+							onchange: (worksheet, cell, x, y) => this.handleSheetChange('sheet2', worksheet, x, y)
 						})
 					}
 
@@ -445,6 +499,7 @@
 							['Hoàn thành', savedSheet3[2]?.[1]||'', savedSheet3[2]?.[2]||''],
 							['Chưa hoàn thành', savedSheet3[3]?.[1]||'', savedSheet3[3]?.[2]||'']
 						]
+						this.syncTargetPercentages('sheet3', defaultSheet3Data)
 
 						this.sheet3Instance = soGvcnJspreadsheet.create(this.$refs.sheetRef3, {
 							worksheets: [{
@@ -465,7 +520,8 @@
 								allowInsertColumn: false,
 								allowDeleteColumn: false
 							}],
-							contextMenu: () => false
+							contextMenu: () => false,
+							onchange: (worksheet, cell, x, y) => this.handleSheetChange('sheet3', worksheet, x, y)
 						})
 					}
 
@@ -476,6 +532,7 @@
 							['Học sinh Xuất sắc', savedSheet4[0]?.[1]||'', savedSheet4[0]?.[2]||''],
 							['Học sinh tiêu biểu hoàn thành tốt trong học tập và rèn luyện', savedSheet4[1]?.[1]||'', savedSheet4[1]?.[2]||'']
 						]
+						this.syncTargetPercentages('sheet4', defaultSheet4Data)
 
 						this.sheet4Instance = soGvcnJspreadsheet.create(this.$refs.sheetRef4, {
 							worksheets: [{
@@ -496,7 +553,8 @@
 								allowInsertColumn: false,
 								allowDeleteColumn: false
 							}],
-							contextMenu: () => false
+							contextMenu: () => false,
+							onchange: (worksheet, cell, x, y) => this.handleSheetChange('sheet4', worksheet, x, y)
 						})
 					}
 				})

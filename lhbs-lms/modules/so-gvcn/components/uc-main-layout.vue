@@ -93,10 +93,11 @@
 
 							<!-- Tab 3: KH chủ nhiệm năm học (C1) / Chỉ tiêu (C2, C3) -->
 							<v-window-item value="chi-tieu" eager>
-								<so-gvcn-c1-tab-ke-hoach-nam-hoc v-if="isCap1" ref="tabKeHoachNamHocRef"
-									:selected-lop-i-d="selectedLopID" :selected-class="selectedClass"
-									:school-year-text="getCurrentSchoolYearText()" :sheet-height="sheetHeight"
-									:annual-plan="keHoachNamHocData" />
+						<so-gvcn-c1-tab-ke-hoach-nam-hoc v-if="isCap1" ref="tabKeHoachNamHocRef"
+							:selected-lop-i-d="selectedLopID" :selected-class="selectedClass"
+							:class-size="getSelectedClassStudents().length"
+							:school-year-text="getCurrentSchoolYearText()" :sheet-height="sheetHeight"
+							:annual-plan="keHoachNamHocData" />
 								<so-gvcn-tab-chi-tieu v-else ref="tabChiTieuRef" :selected-lop-i-d="selectedLopID"
 									:chi-tieu-cards="chiTieuCards" :chi-tieu-giao-duc-title="chiTieuGiaoDucTitle"
 									:sheet-height="sheetHeight" :sheet-key="sheetKey"
@@ -142,16 +143,17 @@
 
 							<!-- Tab Sơ kết HKI (C1 only) -->
 							<v-window-item v-if="isCap1" value="so-ket-hk1" eager>
-								<so-gvcn-c1-tab-so-ket-tong-ket ref="tabSoKetHk1Ref" :selected-lop-i-d="selectedLopID"
-									:students="getSelectedClassStudents()" :saved-rows="soKetHk1SavedRows"
-									:sheet-height="sheetHeight" />
+						<so-gvcn-c1-tab-so-ket-tong-ket ref="tabSoKetHk1Ref" :selected-lop-i-d="selectedLopID"
+							:students="getSelectedClassStudents()" :class-size="getSelectedClassStudents().length"
+							:saved-rows="soKetHk1SavedRows" :sheet-height="sheetHeight" />
 							</v-window-item>
 
 							<!-- Tab Tổng kết năm học (C1 only) -->
 							<v-window-item v-if="isCap1" value="tong-ket-nam" eager>
-								<so-gvcn-c1-tab-tong-ket-nam-hoc ref="tabTongKetNamRef"
-									:selected-lop-i-d="selectedLopID" :saved-data="tongKetNamC1SavedData"
-									:sheet-height="sheetHeight" />
+						<so-gvcn-c1-tab-tong-ket-nam-hoc ref="tabTongKetNamRef"
+							:selected-lop-i-d="selectedLopID" :students="getSelectedClassStudents()"
+							:class-size="getSelectedClassStudents().length" :saved-data="tongKetNamC1SavedData"
+							:sheet-height="sheetHeight" />
 							</v-window-item>
 
 							<!-- Tab Theo dõi sĩ số tháng (C1 only) -->
@@ -363,7 +365,7 @@
 							columns: [
 								{ title: 'Bộ môn', name: 'BoMon', width: 100 },
 								{ title: 'Học kì', name: 'HocKy', width: 100, type: 'dropdown', source: ['Học kì 1', 'Học kì 2'] },
-								{ title: 'Họ tên - Số điện thoại', name: 'GiaoVien', width: 330, type: 'dropdown', source: [], autocomplete: true },
+								{ title: 'Họ tên - Số điện thoại', name: 'GiaoVien', width: 330, type: 'dropdown', source: [], autocomplete: true, align: 'left' },
 								{ title: 'Những thay đổi', name: 'ThayDoi', width: 220 }
 							],
 							rows: Array.from({ length: 20 }, function () { return ['', '', '', ''] })
@@ -376,8 +378,8 @@
 							columns: [
 								{ title: 'STT', name: 'STT', width: 60, align: 'center' },
 								{ title: 'Mã học sinh', name: 'HocSinhID', width: 95, readOnly: true },
-								{ title: 'Họ và tên học sinh', name: 'HocSinh', width: 230, type: 'dropdown', source: [], autocomplete: true },
-								{ title: 'Họ và tên cha mẹ', name: 'ChaMe', width: 230 },
+								{ title: 'Họ và tên học sinh', name: 'HocSinh', width: 230, type: 'dropdown', source: [], autocomplete: true, align: 'left' },
+								{ title: 'Họ và tên cha mẹ', name: 'ChaMe', width: 230, align: 'left' },
 								{ title: 'Nghề nghiệp', name: 'NgheNghiep', width: 170 },
 								{ title: 'Điện thoại', name: 'DienThoai', width: 190, align: 'center' },
 								{
@@ -395,7 +397,7 @@
 							columns: [
 								{ title: 'STT', name: 'STT', width: 70, align: 'center' },
 								{ title: 'Mã học sinh', name: 'HocSinhID', width: 95, readOnly: true },
-								{ title: 'Họ và tên học sinh', name: 'HocSinh', width: 230, type: 'dropdown', source: [], autocomplete: true },
+								{ title: 'Họ và tên học sinh', name: 'HocSinh', width: 230, type: 'dropdown', source: [], autocomplete: true, align: 'left' },
 								{
 									title: 'Chức vụ', name: 'ChucVu', width: 180,
 									type: 'dropdown', source: ['Lớp trưởng', 'Lớp phó học tập', 'Lớp phó văn thể mỹ', 'Bí thư', 'Phó bí thư', 'Tổ trưởng', 'Tổ phó', 'Thủ quỹ']
@@ -525,15 +527,33 @@
 				return vueData.NienKhoa || new Date().getFullYear()
 			},
 			classOptions() {
-				return this.isTeacherOrLead
-					? this.classList
+				const visibleClasses = this.isCap1GradeManager
+					? this.classList.filter(item => this.cap1ManagedKhoiIDs.includes(Number(item.KhoiID)))
+					: this.classList
+				return this.isTeacherOrLead && !this.isCap1GradeManager
+					? visibleClasses
 					: [
 						{ LopID: '__ALL__', TenLop: 'Tất cả lớp' },
-						...this.classList
+						...visibleClasses
 					]
 			},
 			userSystemRight() {
 				return Number(vueData?.user?.SystemRight || vueData?.SystemRight || vueData?.sys_SystemRight || 0)
+			},
+			userFunctionRights() {
+				const value = vueData?.user?.FunctionRight ?? vueData?.user?.functionRight ?? ''
+				return (Array.isArray(value) ? value : String(value).split(/[;,|\s]+/))
+					.map(item => String(item).trim())
+					.filter(Boolean)
+			},
+			cap1ManagedKhoiIDs() {
+				return this.userFunctionRights
+					.map(right => Number(right) - 10)
+					.filter(khoiID => khoiID >= 1 && khoiID <= 5)
+					.filter((khoiID, index, values) => values.indexOf(khoiID) === index)
+			},
+			isCap1GradeManager() {
+				return this.isCap1 && this.cap1ManagedKhoiIDs.length > 0
 			},
 			isTeacherOrLead() {
 				return [1, 5].includes(this.userSystemRight)
@@ -754,8 +774,13 @@
 						CapID: this.filter.CapID,
 						LopID: ''
 					})
+					if (this.isCap1GradeManager) {
+						this.allStudentRows = (this.allStudentRows || []).filter(row =>
+							this.cap1ManagedKhoiIDs.includes(Number(row.KhoiID)))
+					}
 					// Giáo viên và tổ trưởng chỉ thấy lớp đang chủ nhiệm trong niên khóa hiện tại.
-					if (this.isTeacherOrLead) {
+					// Khối trưởng/khối phó cấp 1 (FunctionRight 11-15) được xem toàn bộ lớp.
+					if (this.isTeacherOrLead && !this.isCap1GradeManager) {
 						const teacherClassIds = await this.getTeacherHomeroomClassIds()
 						const teacherRows = (this.allStudentRows || []).filter(row => teacherClassIds.has(String(row.LopID)))
 						// SoGVCNDanhSachHocSinhLop đã giới hạn dữ liệu theo quyền người dùng.
@@ -818,6 +843,7 @@
 					.some(item => item === userID)
 			},
 			async ensureSpecificClassForClassTabs() {
+				if (this.isCap1GradeManager) return
 				if (this.selectedLopID !== '__ALL__') return
 				if (this.tab === 'du-lieu-hs' && !this.isTeacherOrLead) return
 				const firstClass = this.classList[0]
@@ -1055,7 +1081,7 @@
 			try {
 				const created = await ajaxCALLPromise('lms/SoGVCNEnsure', { NienKhoa: item.NienKhoa, LopID: item.LopID })
 				this.form.SoGVCNID = created.SoGVCNID
-				await Promise.all([this.getStudents(), this.getGiaoVienBoMon()])
+				await this.getStudents()
 				await this.getDetail()
 			} finally {
 				this.loading.detail = false
@@ -1175,6 +1201,7 @@
 			this.applyBanDaiDienCMHSRows()
 			this.applyCanBoLopRows()
 			this.huongNghiepRows = this.buildHuongNghiepRows()
+			if (!this.isCap1) await this.getGiaoVienBoMon()
 
 			const students = this.getSelectedClassStudents()
 			if (students.length > 0) {
@@ -1774,12 +1801,12 @@
 			let rows = savedRows.length
 				? savedRows.map(row => [
 					row.BoMon || '',
-					row.HocKy || '',
+					this.formatGiaoVienBoMonHocKy(row.HocKy),
 					row.GiaoVien || '',
 					row.ThayDoi || ''
 				])
 				: []
-			while (rows.length < 20) {
+			while (rows.length < 50) {
 				rows.push(['', '', '', ''])
 			}
 			card.rows = rows
@@ -1803,22 +1830,24 @@
 					&& this.cleanSheetValue(item.HocKy) === row.HocKy
 					&& this.cleanSheetValue(item.GiaoVien) === row.GiaoVien
 				) || {}
-				return [row.BoMon, row.HocKy, row.GiaoVien, saved.ThayDoi || '']
+				return [row.BoMon, this.formatGiaoVienBoMonHocKy(row.HocKy), row.GiaoVien, saved.ThayDoi || '']
 			})
-			while (rows.length < 20) {
+			while (rows.length < 50) {
 				rows.push(['', '', '', ''])
 			}
 			card.rows = rows
 			this.applyTeacherDropdownOptions()
 			this.form.GiaoVienBoMon = JSON.stringify({ version: 1, rows: this.serializeGiaoVienBoMonRows() })
 		},
+		formatGiaoVienBoMonHocKy(value) {
+			if (value === '' || value === null || value === undefined) return ''
+			const hocKy = Number(String(value).replace(/[^0-9]/g, ''))
+			return hocKy === 2 ? 'Học kì 2' : 'Học kì 1'
+		},
 		async fetchGiaoVienBoMonRows() {
 			const baseParams = {
 				LopID: this.selectedClass.LopID,
-				NienKhoa: Number(this.currentNienKhoa || this.filter.NienKhoa || new Date().getFullYear()),
-				ToGiangDayID: 0,
-				GiaoVienID: '',
-				VaiTro: 2
+				NienKhoa: Number(this.currentNienKhoa || this.filter.NienKhoa || new Date().getFullYear())
 			}
 			const chunks = await Promise.all([1, 2].map(hocKy => ajaxCALLPromise('lms/GiaoVienLop_Get_ByLopID', {
 				...baseParams,
@@ -2430,7 +2459,7 @@
 				{ label: '10', value: 10 },
 				{ label: '11', value: 11 },
 				{ label: '12', value: 12 },
-				{ label: '1,2/' + this.currentNienKhoa, value: 1 },
+				{ label: '1,2', value: 1 },
 				{ label: '3', value: 3 },
 				{ label: '4', value: 4 },
 				{ label: '5', value: 5 }
