@@ -1,5 +1,5 @@
 <template>
-	<v-card-text class="pa-2" :style="{ height: sheetHeight, 'overflow': 'hidden' }">
+	<v-card-text class="pa-2 so-gvcn-tab-chi-tieu" :style="{ height: sheetHeight, 'overflow': 'hidden' }">
 		<v-alert v-if="selectedLopID === '__ALL__'" type="info" variant="tonal" density="compact" class="mb-0">
 			Chọn một lớp ở thanh trên để nhập chỉ tiêu và giải pháp giáo dục của lớp đó.
 		</v-alert>

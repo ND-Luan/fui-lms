@@ -11,9 +11,8 @@
 					<v-list-subheader class="text-caption font-weight-bold text-primary px-3">
 						ĐÁNH GIÁ TỔNG QUAN
 					</v-list-subheader>
-					<v-list-item v-for="item in navItems.slice(0, 3)" :key="item.key"
-						:value="item.key" :active="activeSection === item.key" class="mb-1 rounded"
-						@click="scrollToSection(item)">
+					<v-list-item v-for="item in navItems.slice(0, 3)" :key="item.key" :value="item.key"
+						:active="activeSection === item.key" class="mb-1 rounded" @click="scrollToSection(item)">
 						<v-list-item-title class="text-caption font-weight-bold text-wrap">
 							{{ item.title }}
 						</v-list-item-title>
@@ -21,9 +20,8 @@
 					<v-list-subheader class="text-caption font-weight-bold text-primary px-3 mt-2">
 						KẾT QUẢ CUỐI NĂM
 					</v-list-subheader>
-					<v-list-item v-for="item in navItems.slice(3)" :key="item.key"
-						:value="item.key" :active="activeSection === item.key" class="mb-1 rounded"
-						@click="scrollToSection(item)">
+					<v-list-item v-for="item in navItems.slice(3)" :key="item.key" :value="item.key"
+						:active="activeSection === item.key" class="mb-1 rounded" @click="scrollToSection(item)">
 						<v-list-item-title class="text-caption font-weight-bold text-wrap">
 							{{ item.title }}
 						</v-list-item-title>
@@ -35,15 +33,24 @@
 				<div class="text-h6 text-center font-weight-bold py-3">TỔNG KẾT NĂM HỌC</div>
 				<v-card ref="sectionDuyTri" class="mb-4" variant="outlined">
 					<v-card-title class="text-subtitle-1 font-weight-bold">1. Công tác duy trì số lượng</v-card-title>
-					<v-card-text><v-textarea v-model="localForm.DuyTriSoLuong" rows="4" variant="outlined" density="compact" hide-details /></v-card-text>
+					<v-card-text>
+						<v-textarea v-model="localForm.DuyTriSoLuong" rows="4" variant="outlined" density="compact"
+							hide-details />
+					</v-card-text>
 				</v-card>
 				<v-card ref="sectionNlPc" class="mb-4" variant="outlined">
 					<v-card-title class="text-subtitle-1 font-weight-bold">2. Về năng lực, phẩm chất</v-card-title>
-					<v-card-text><v-textarea v-model="localForm.NangLucPhamChat" rows="4" variant="outlined" density="compact" hide-details /></v-card-text>
+					<v-card-text>
+						<v-textarea v-model="localForm.NangLucPhamChat" rows="4" variant="outlined" density="compact"
+							hide-details />
+					</v-card-text>
 				</v-card>
 				<v-card ref="sectionKienThuc" class="mb-4" variant="outlined">
 					<v-card-title class="text-subtitle-1 font-weight-bold">3. Về kiến thức, kĩ năng</v-card-title>
-					<v-card-text><v-textarea v-model="localForm.KienThucKyNang" rows="4" variant="outlined" density="compact" hide-details /></v-card-text>
+					<v-card-text>
+						<v-textarea v-model="localForm.KienThucKyNang" rows="4" variant="outlined" density="compact"
+							hide-details />
+					</v-card-text>
 				</v-card>
 				<v-card class="mb-4" variant="outlined">
 					<v-card-title class="text-subtitle-1 font-weight-bold text-primary">
@@ -55,39 +62,43 @@
 							<div class="text-subtitle-2 font-weight-bold text-primary mb-3">
 								1. Về năng lực, phẩm chất
 							</div>
-							<div ref="sheetRef1"
-								class="w-100 so-gvcn-sheet so-gvcn-summary-result-sheet"></div>
+							<div ref="sheetRef1" class="w-100 so-gvcn-sheet so-gvcn-summary-result-sheet"></div>
 						</section>
 						<section ref="sectionMonHoc" class="pa-3 border-t">
 							<div class="text-subtitle-2 font-weight-bold text-primary mb-3">
 								2. Về môn học và hoạt động giáo dục
 							</div>
-							<div ref="sheetRef2"
-								class="w-100 so-gvcn-sheet so-gvcn-summary-result-sheet"></div>
+							<div ref="sheetRef2" class="w-100 so-gvcn-sheet so-gvcn-summary-result-sheet"></div>
 						</section>
 						<section ref="sectionKetQuaGd" class="pa-3 border-t">
 							<div class="text-subtitle-2 font-weight-bold text-primary mb-3">
 								3. Về đánh giá kết quả giáo dục
 							</div>
-							<div ref="sheetRef3"
-								class="w-100 so-gvcn-sheet so-gvcn-summary-result-sheet"></div>
+							<div ref="sheetRef3" class="w-100 so-gvcn-sheet so-gvcn-summary-result-sheet"></div>
 						</section>
 						<section ref="sectionKhenThuong" class="pa-3 border-t">
 							<div class="text-subtitle-2 font-weight-bold text-primary mb-3">
 								4. Khen thưởng
 							</div>
-							<div ref="sheetRef4"
-								class="w-100 so-gvcn-sheet so-gvcn-summary-result-sheet"></div>
+							<div ref="sheetRef4" class="w-100 so-gvcn-sheet so-gvcn-summary-result-sheet"></div>
 						</section>
 					</v-card-text>
 				</v-card>
 				<v-card ref="sectionHoanThanh" class="mb-4" variant="outlined">
-					<v-card-title class="text-subtitle-1 font-weight-bold">5. Hoàn thành chương trình lớp học</v-card-title>
-					<v-card-text><v-textarea v-model="localForm.HoanThanhCT" rows="4" variant="outlined" density="compact" hide-details /></v-card-text>
+					<v-card-title class="text-subtitle-1 font-weight-bold">5. Hoàn thành chương trình lớp học
+					</v-card-title>
+					<v-card-text>
+						<v-textarea v-model="localForm.HoanThanhCT" rows="4" variant="outlined" density="compact"
+							hide-details />
+					</v-card-text>
 				</v-card>
 				<v-card ref="sectionPhongTrao" variant="outlined">
-					<v-card-title class="text-subtitle-1 font-weight-bold">6. Các hoạt động, phong trào khác</v-card-title>
-					<v-card-text><v-textarea v-model="localForm.PhongTraoKhac" rows="4" variant="outlined" density="compact" hide-details /></v-card-text>
+					<v-card-title class="text-subtitle-1 font-weight-bold">6. Các hoạt động, phong trào khác
+					</v-card-title>
+					<v-card-text>
+						<v-textarea v-model="localForm.PhongTraoKhac" rows="4" variant="outlined" density="compact"
+							hide-details />
+					</v-card-text>
 				</v-card>
 			</div>
 		</div>

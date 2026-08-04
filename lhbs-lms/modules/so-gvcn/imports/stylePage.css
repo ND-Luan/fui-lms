@@ -24,6 +24,19 @@
     border-left: 3px solid rgb(var(--v-theme-primary)) !important;
 }
 
+/* Tab 2 C2/C3: keep the sheet viewport aligned with its columns while scrolling horizontally. */
+.so-gvcn-tab-chi-tieu > .d-flex,
+.so-gvcn-tab-chi-tieu > .d-flex > .flex-grow-1 {
+    min-width: 0;
+}
+
+.so-gvcn-card-sheet-wrap .jss_container,
+.so-gvcn-card-sheet-wrap .jss_content {
+    max-width: 100% !important;
+    min-width: 0 !important;
+    overflow-x: auto !important;
+}
+
 /* Full Sheet Layout Wrap (Tabs 1, 3, 4, 5, 6) */
 .so-gvcn-sheet-wrap {
     display: flex;

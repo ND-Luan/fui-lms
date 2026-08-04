@@ -78,8 +78,8 @@
 									view="thong-tin" :sheet-height="sheetHeight" :sheet-key="sheetKey"
 									:selected-lop-i-d="selectedLopID" ref="tabDuLieuHsRef" />
 								<so-gvcn-tab-du-lieu-hs v-else :rows="studentSheetRows" :sheet-height="sheetHeight"
-									:sheet-key="sheetKey" :nested-headers="studentNestedHeaders" :has-nhom-av="hasNhomAV"
-									ref="tabDuLieuHsRef" />
+									:sheet-key="sheetKey" :nested-headers="studentNestedHeaders"
+									:has-nhom-av="hasNhomAV" ref="tabDuLieuHsRef" />
 							</v-window-item>
 
 							<!-- Tab Tổ chức lớp (C1 only) -->
@@ -93,11 +93,11 @@
 
 							<!-- Tab 3: KH chủ nhiệm năm học (C1) / Chỉ tiêu (C2, C3) -->
 							<v-window-item value="chi-tieu" eager>
-						<so-gvcn-c1-tab-ke-hoach-nam-hoc v-if="isCap1" ref="tabKeHoachNamHocRef"
-							:selected-lop-i-d="selectedLopID" :selected-class="selectedClass"
-							:class-size="getSelectedClassStudents().length"
-							:school-year-text="getCurrentSchoolYearText()" :sheet-height="sheetHeight"
-							:annual-plan="keHoachNamHocData" />
+								<so-gvcn-c1-tab-ke-hoach-nam-hoc v-if="isCap1" ref="tabKeHoachNamHocRef"
+									:selected-lop-i-d="selectedLopID" :selected-class="selectedClass"
+									:class-size="getSelectedClassStudents().length"
+									:school-year-text="getCurrentSchoolYearText()" :sheet-height="sheetHeight"
+									:annual-plan="keHoachNamHocData" />
 								<so-gvcn-tab-chi-tieu v-else ref="tabChiTieuRef" :selected-lop-i-d="selectedLopID"
 									:chi-tieu-cards="chiTieuCards" :chi-tieu-giao-duc-title="chiTieuGiaoDucTitle"
 									:sheet-height="sheetHeight" :sheet-key="sheetKey"
@@ -143,17 +143,18 @@
 
 							<!-- Tab Sơ kết HKI (C1 only) -->
 							<v-window-item v-if="isCap1" value="so-ket-hk1" eager>
-						<so-gvcn-c1-tab-so-ket-tong-ket ref="tabSoKetHk1Ref" :selected-lop-i-d="selectedLopID"
-							:students="getSelectedClassStudents()" :class-size="getSelectedClassStudents().length"
-							:saved-rows="soKetHk1SavedRows" :sheet-height="sheetHeight" />
+								<so-gvcn-c1-tab-so-ket-tong-ket ref="tabSoKetHk1Ref" :selected-lop-i-d="selectedLopID"
+									:students="getSelectedClassStudents()"
+									:class-size="getSelectedClassStudents().length" :saved-rows="soKetHk1SavedRows"
+									:sheet-height="sheetHeight" />
 							</v-window-item>
 
 							<!-- Tab Tổng kết năm học (C1 only) -->
 							<v-window-item v-if="isCap1" value="tong-ket-nam" eager>
-						<so-gvcn-c1-tab-tong-ket-nam-hoc ref="tabTongKetNamRef"
-							:selected-lop-i-d="selectedLopID" :students="getSelectedClassStudents()"
-							:class-size="getSelectedClassStudents().length" :saved-data="tongKetNamC1SavedData"
-							:sheet-height="sheetHeight" />
+								<so-gvcn-c1-tab-tong-ket-nam-hoc ref="tabTongKetNamRef"
+									:selected-lop-i-d="selectedLopID" :students="getSelectedClassStudents()"
+									:class-size="getSelectedClassStudents().length" :saved-data="tongKetNamC1SavedData"
+									:sheet-height="sheetHeight" />
 							</v-window-item>
 
 							<!-- Tab Theo dõi sĩ số tháng (C1 only) -->
@@ -393,7 +394,7 @@
 							key: 'can-bo-lop',
 							title: 'V. DANH SÁCH CÁN BỘ LỚP',
 							md: 12,
-							height: '320px',
+							height: '620px',
 							columns: [
 								{ title: 'STT', name: 'STT', width: 70, align: 'center' },
 								{ title: 'Mã học sinh', name: 'HocSinhID', width: 95, readOnly: true },
@@ -404,7 +405,7 @@
 								},
 								{ title: 'Ghi chú', name: 'GhiChu', width: 180 }
 							],
-							rows: Array.from({ length: 10 }, function (_, index) { return [index + 1, '', '', '', ''] })
+							rows: Array.from({ length: 20 }, function (_, index) { return [index + 1, '', '', '', ''] })
 						}
 			],
 			monthList: [],
@@ -1976,7 +1977,7 @@
 			const savedRows = this.canBoLopSavedRows && this.canBoLopSavedRows.length
 				? this.canBoLopSavedRows
 				: this.parseSheetSavedRows(this.form.CanBoLop)
-			const len = Math.max(10, savedRows.length)
+			const len = Math.max(20, savedRows.length)
 			card.rows = Array.from({ length: len }, (_, index) => {
 				const saved = savedRows[index] || {}
 				const student = this.findSelectedStudent(saved.HocSinh) || {}

@@ -10,9 +10,8 @@
 					<v-list-subheader class="text-caption font-weight-bold text-primary px-3">
 						ĐÁNH GIÁ HOẠT ĐỘNG LỚP
 					</v-list-subheader>
-					<v-list-item v-for="card in cards.slice(0, 3)" :key="card.key"
-						:value="card.key" :active="activeCardKey === card.key" class="mb-1 rounded"
-						@click="scrollToCard(card)">
+					<v-list-item v-for="card in cards.slice(0, 3)" :key="card.key" :value="card.key"
+						:active="activeCardKey === card.key" class="mb-1 rounded" @click="scrollToCard(card)">
 						<v-list-item-title class="text-caption font-weight-bold text-wrap">
 							{{ card.navTitle }}
 						</v-list-item-title>
@@ -20,9 +19,8 @@
 					<v-list-subheader class="text-caption font-weight-bold text-primary px-3 mt-2">
 						KẾT QUẢ HỌC KÌ I
 					</v-list-subheader>
-					<v-list-item v-for="card in cards.slice(3, 5)" :key="card.key"
-						:value="card.key" :active="activeCardKey === card.key" class="mb-1 rounded"
-						@click="scrollToCard(card)">
+					<v-list-item v-for="card in cards.slice(3, 5)" :key="card.key" :value="card.key"
+						:active="activeCardKey === card.key" class="mb-1 rounded" @click="scrollToCard(card)">
 						<v-list-item-title class="text-caption font-weight-bold text-wrap">
 							{{ card.navTitle }}
 						</v-list-item-title>
@@ -30,8 +28,8 @@
 					<v-list-subheader class="text-caption font-weight-bold text-primary px-3 mt-2">
 						PHƯƠNG HƯỚNG HỌC KÌ II
 					</v-list-subheader>
-					<v-list-item :value="cards[5].key" :active="activeCardKey === cards[5].key"
-						class="mb-1 rounded" @click="scrollToCard(cards[5])">
+					<v-list-item :value="cards[5].key" :active="activeCardKey === cards[5].key" class="mb-1 rounded"
+						@click="scrollToCard(cards[5])">
 						<v-list-item-title class="text-caption font-weight-bold text-wrap">
 							{{ cards[5].navTitle }}
 						</v-list-item-title>
@@ -39,18 +37,17 @@
 				</v-list>
 			</div>
 
-			<div ref="scrollContainer"
-				class="flex-grow-1 h-100 overflow-y-auto pr-1 so-gvcn-so-ket-content">
+			<div ref="scrollContainer" class="flex-grow-1 h-100 overflow-y-auto pr-1 so-gvcn-so-ket-content">
 				<div class="text-h6 text-center font-weight-bold pt-3 mb-1">SƠ KẾT HỌC KÌ I</div>
 				<div class="text-body-2 text-center mb-4">
 					Đánh giá nội dung hoạt động của lớp theo kế hoạch đã xây dựng đầu năm
 				</div>
-				<v-card v-for="card in cards.slice(0, 3)" :key="card.key" :ref="card.cardRef"
-					variant="outlined" class="mb-4">
+				<v-card v-for="card in cards.slice(0, 3)" :key="card.key" :ref="card.cardRef" variant="outlined"
+					class="mb-4">
 					<v-card-title class="text-subtitle-1 font-weight-bold">{{ card.title }}</v-card-title>
 					<v-card-text class="pa-2">
-						<v-textarea v-model="noteValues[card.key]"
-							label="Nội dung nhận xét" variant="outlined" rows="8" auto-grow hide-details />
+						<v-textarea v-model="noteValues[card.key]" label="Nội dung nhận xét" variant="outlined" rows="8"
+							auto-grow hide-details />
 					</v-card-text>
 				</v-card>
 
@@ -60,13 +57,12 @@
 					</v-card-title>
 					<v-divider />
 					<v-card-text class="pa-0">
-						<section v-for="(card, index) in cards.slice(3, 5)" :key="card.key"
-							:ref="card.cardRef" class="pa-3" :class="{ 'border-t': index > 0 }">
+						<section v-for="(card, index) in cards.slice(3, 5)" :key="card.key" :ref="card.cardRef"
+							class="pa-3" :class="{ 'border-t': index > 0 }">
 							<div class="text-subtitle-2 font-weight-bold text-primary mb-3">
 								{{ card.title }}
 							</div>
-							<div :ref="card.sheetRef"
-								class="w-100 so-gvcn-sheet so-gvcn-so-ket-result-sheet"></div>
+							<div :ref="card.sheetRef" class="w-100 so-gvcn-sheet so-gvcn-so-ket-result-sheet"></div>
 						</section>
 					</v-card-text>
 				</v-card>
@@ -74,8 +70,8 @@
 				<v-card :ref="cards[5].cardRef" variant="outlined" class="mb-4">
 					<v-card-title class="text-subtitle-1 font-weight-bold">{{ cards[5].title }}</v-card-title>
 					<v-card-text class="pa-2">
-						<v-textarea v-model="noteValues[cards[5].key]" label="Nội dung phương hướng"
-							variant="outlined" rows="8" auto-grow hide-details />
+						<v-textarea v-model="noteValues[cards[5].key]" label="Nội dung phương hướng" variant="outlined"
+							rows="8" auto-grow hide-details />
 					</v-card-text>
 				</v-card>
 			</div>
