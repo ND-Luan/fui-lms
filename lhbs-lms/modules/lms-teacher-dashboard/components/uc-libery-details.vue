@@ -33,7 +33,7 @@
 						<v-col cols="12" md="5" class="ps-md-4">
 							<uc-hoclieu-resource-selector v-model="hocLieuLink"
 								:khoi-id="formData.KhoiID" :mon-hoc-id="formData.MonHocID"
-								:resource-type="formData.ResourceType" :resource-id="formData.ResourceID" />
+								:resource-type="formData.ResourceType" :resource-id="resourceIdForMapping" />
 						</v-col>
 					</v-row>
 				</v-form>
@@ -164,6 +164,9 @@
 		}
 	},
 	computed: {
+		resourceIdForMapping() {
+			return this.formData.ResourceID || this.formData.AssignmentID || this.formData.LessonID
+		},
 		title: function () {
 			return this.selectedLibery.Title
 		},
@@ -247,7 +250,7 @@
 				const link = this.hocLieuLink || {}
 				ajaxCALL('lms/EL_HocLieuResource_Save', {
 					ResourceType: this.formData.ResourceType,
-					ResourceID: this.formData.ResourceID,
+					ResourceID: this.resourceIdForMapping,
 					HocLieuID: link.HocLieuID || null,
 					NoiDungID: link.NoiDungID || null,
 				}, () => done())
@@ -266,7 +269,7 @@
 					ajaxCALL('lms/EL_Lesson_Save', {
 						...this.formData,
 						Description: this.formData.Instructions,
-						LessonID: this.formData.ResourceID,
+						LessonID: this.resourceIdForMapping,
 						NienKhoa: vueData.NienKhoa,
 						IsPublic: this.formData.IsPublic ? 1 : 0,
 					}, res => {
@@ -279,7 +282,7 @@
 				} else {
 					ajaxCALL('lms/EL_Assignment_Upd', {
 						Title: this.formData.Title,
-						AssignmentID: this.formData.ResourceID,
+						AssignmentID: this.resourceIdForMapping,
 						Instructions: this.formData.Instructions,
 						IsPublic: this.formData.IsPublic ? 1 : 0,
 						NienKhoa: vueData.NienKhoa,

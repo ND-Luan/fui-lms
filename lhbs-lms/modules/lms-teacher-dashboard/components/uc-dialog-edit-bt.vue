@@ -16,7 +16,7 @@
 						<v-col cols="12" md="5" class="ps-md-4">
 							<uc-hoclieu-resource-selector v-model="hocLieuLink"
 								:khoi-id="form.KhoiID" :mon-hoc-id="form.MonHocID"
-								:resource-type="form.ResourceType" :resource-id="form.ResourceID" />
+								:resource-type="form.ResourceType" :resource-id="resourceIdForMapping" />
 						</v-col>
 					</v-row>
 				</v-form>
@@ -51,7 +51,11 @@
 			}
 		},
 		mounted() { },
-		computed: {},
+		computed: {
+			resourceIdForMapping() {
+				return this.form.ResourceID || this.form.AssignmentID || this.form.LessonID
+			}
+		},
 		watch: {
 			modelValue: function (val) {
 				if (val) {
@@ -65,7 +69,7 @@
 				const link = this.hocLieuLink || {}
 				ajaxCALL('lms/EL_HocLieuResource_Save', {
 					ResourceType: this.form.ResourceType,
-					ResourceID: this.form.ResourceID,
+					ResourceID: this.resourceIdForMapping,
 					HocLieuID: link.HocLieuID || null,
 					NoiDungID: link.NoiDungID || null,
 				}, () => done())
@@ -77,7 +81,7 @@
 						ajaxCALL('lms/EL_Lesson_Save', {
 							...this.form,
 							Description: this.form.Instructions,
-							LessonID: this.form.ResourceID,
+							LessonID: this.resourceIdForMapping,
 							NienKhoa: vueData.NienKhoa
 						}, res => {
 							this.saveHocLieuLink(() => {
@@ -89,7 +93,7 @@
 					} else {
 						ajaxCALL('lms/EL_Assignment_Upd', {
 							...this.form,
-							AssignmentID: this.form.ResourceID,
+							AssignmentID: this.resourceIdForMapping,
 							Instructions: this.form.Instructions,
 							NienKhoa: vueData.NienKhoa
 						}, res => {
