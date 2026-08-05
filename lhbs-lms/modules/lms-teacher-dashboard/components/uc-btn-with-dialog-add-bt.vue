@@ -1,5 +1,5 @@
 <template>
-	<v-dialog :model-value="isOpen" @update:model-value="val => { if (!val) CloseModal() }" max-width="500">
+		<v-dialog :model-value="isOpen" @update:model-value="val => { if (!val) CloseModal() }" max-width="900">
 		<v-card>
 			<v-card-title class="d-flex align-center">
 				{{ $t('message.CreateContent') }} - {{ $t('message.Grade') }} {{ khoiItem?.KhoiID
@@ -25,29 +25,25 @@
 							</div>
 						</v-col>
 						<v-col cols="12">
-							<v-select :items="typeItems" item-title='text' item-value='value' v-model="form.type"
-								:label="$t('message.ChooseContent')" />
-						</v-col>
-						<v-col cols="12">
-							<v-select :items="DSTuan" item-title='Tuan_HienThi' item-value='TuanHocID'
-								v-model="form.TuanHocID" :label="$t('message.ChooseWeek')" />
-						</v-col>
-						<v-col cols="12">
-							<uc-hoclieu-resource-selector v-model="hocLieuLink"
-								:khoi-id="khoiItem?.KhoiID" :mon-hoc-id="khoiItem?.MonHocID"
-								:resource-type="form.type == 1 ? 'LESSON' : 'ASSIGNMENT'" />
-						</v-col>
-						<v-col cols="12">
-							<v-text-field v-model="form.Chuong" :label="$t('message.Chapter')" />
-						</v-col>
-						<v-col cols="12">
-							<v-text-field v-model="form.Title" :label="$t('message.Title')" required
-								:rules="[v => !!v || 'Vui lòng nhập tiêu đề']" />
-						</v-col>
-						<v-col cols="12">
-							<v-text-field v-if="form.type == 1" v-model="form.Description"
-								:label="$t('message.Decriptions')" />
-							<v-text-field v-else v-model="form.Instructions" :label="$t('message.Instructions')" />
+							<v-row dense>
+								<v-col cols="12" md="7">
+									<v-select :items="typeItems" item-title='text' item-value='value' v-model="form.type"
+										:label="$t('message.ChooseContent')" />
+									<v-select :items="DSTuan" item-title='Tuan_HienThi' item-value='TuanHocID'
+										v-model="form.TuanHocID" :label="$t('message.ChooseWeek')" />
+									<v-text-field v-model="form.Chuong" :label="$t('message.Chapter')" />
+									<v-text-field v-model="form.Title" :label="$t('message.Title')" required
+										:rules="[v => !!v || 'Vui lòng nhập tiêu đề']" />
+									<v-text-field v-if="form.type == 1" v-model="form.Description"
+										:label="$t('message.Decriptions')" />
+									<v-text-field v-else v-model="form.Instructions" :label="$t('message.Instructions')" />
+								</v-col>
+								<v-col cols="12" md="5">
+									<uc-hoclieu-resource-selector v-model="hocLieuLink"
+										:khoi-id="khoiItem?.KhoiID" :mon-hoc-id="khoiItem?.MonHocID"
+										:resource-type="form.type == 1 ? 'LESSON' : 'ASSIGNMENT'" />
+								</v-col>
+							</v-row>
 						</v-col>
 
 					</v-row>

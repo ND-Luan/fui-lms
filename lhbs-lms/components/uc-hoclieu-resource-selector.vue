@@ -1,41 +1,51 @@
 <template>
-	<v-card variant="tonal" color="primary" class="pa-3 mb-3">
-		<div class="d-flex align-center ga-2 mb-2">
-			<v-icon size="small">mdi-file-tree-outline</v-icon>
-			<span class="text-subtitle-2 font-weight-medium">Gắn vào học liệu số</span>
-			<v-spacer />
-			<v-chip v-if="isLinked" size="x-small" color="success" variant="flat">Đã gắn</v-chip>
-		</div>
-		<div class="text-caption text-medium-emphasis mb-2">
-			Tùy chọn. Chỉ hiển thị học liệu số loại HOC_LIEU.
-		</div>
-		<v-select v-model="selectedHocLieuID" :items="hocLieuItems" item-title="TenHocLieu"
-			item-value="HocLieuID" label="Chọn học liệu số" clearable density="compact" variant="outlined"
-			:loading="isLoadingHocLieu" :disabled="!khoiId || !monHocId" hide-details="auto" />
-		<div v-if="selectedHocLieuID" class="mt-2">
-			<div class="text-caption font-weight-medium mb-1">Chọn bài trong cấu trúc học liệu</div>
-			<v-treeview v-if="!isLoadingTree && treeNodes.length" v-model:opened="openedTreeNodeIDs"
-				v-model:selected="selectedTreeNodeIDs" :items="treeNodes" item-title="TenNoiDung"
-				item-value="NoiDungID" item-children="children" item-selectable="selectable"
-				select-strategy="independent" selectable open-all density="compact" color="primary"
-				class="border rounded" @update:selected="onTreeSelection">
-				<template #prepend="{ item }">
-					<v-icon size="small">{{ item.raw?.LoaiNoiDung === 'BAI' ? 'mdi-book-open-page-variant-outline' : 'mdi-folder-outline' }}</v-icon>
-				</template>
-				<template #append="{ item }">
-					<v-chip size="x-small" variant="text" :color="item.raw?.LoaiNoiDung === 'BAI' ? 'primary' : 'grey'">
-						{{ item.raw?.LoaiNoiDung }}
-					</v-chip>
-				</template>
-			</v-treeview>
-			<div v-else-if="isLoadingTree" class="text-caption text-medium-emphasis pa-2">
-				Đang tải cấu trúc học liệu...
+	<div>
+		<v-btn v-if="!isPanelOpen" block variant="tonal" color="primary" class="mb-3"
+			@click="isPanelOpen = true">
+			<v-icon start>mdi-file-tree-outline</v-icon>
+			Gắn vào học liệu số
+			<v-chip v-if="isLinked" size="x-small" color="success" variant="flat" class="ms-2">Đã gắn</v-chip>
+		</v-btn>
+		<v-card v-else variant="tonal" color="primary" class="pa-3 mb-3">
+			<div class="d-flex align-center ga-2 mb-2">
+				<v-icon size="small">mdi-file-tree-outline</v-icon>
+				<span class="text-subtitle-2 font-weight-medium">Gắn vào học liệu số</span>
+				<v-spacer />
+				<v-chip v-if="isLinked" size="x-small" color="success" variant="flat">Đã gắn</v-chip>
+				<v-btn icon="mdi-close" size="x-small" variant="text" aria-label="Đóng học liệu số"
+					@click="isPanelOpen = false" />
 			</div>
-		</div>
-		<div v-if="selectedHocLieuID && !nodeItems.length && !isLoadingTree" class="text-caption text-warning mt-1">
-			Học liệu này chưa có node loại BAI để liên kết.
-		</div>
-	</v-card>
+			<div class="text-caption text-medium-emphasis mb-2">
+				Tùy chọn. Chỉ hiển thị học liệu số loại HOC_LIEU.
+			</div>
+			<v-select v-model="selectedHocLieuID" :items="hocLieuItems" item-title="TenHocLieu"
+				item-value="HocLieuID" label="Chọn học liệu số" clearable density="compact" variant="outlined"
+				:loading="isLoadingHocLieu" :disabled="!khoiId || !monHocId" hide-details="auto" />
+			<div v-if="selectedHocLieuID" class="mt-2">
+				<div class="text-caption font-weight-medium mb-1">Chọn bài trong cấu trúc học liệu</div>
+				<v-treeview v-if="!isLoadingTree && treeNodes.length" v-model:opened="openedTreeNodeIDs"
+					v-model:selected="selectedTreeNodeIDs" :items="treeNodes" item-title="TenNoiDung"
+					item-value="NoiDungID" item-children="children" item-selectable="selectable"
+					select-strategy="independent" selectable open-all density="compact" color="primary"
+					class="border rounded" @update:selected="onTreeSelection">
+					<template #prepend="{ item }">
+						<v-icon v-if="nodeIcon(item.raw)" size="small">{{ nodeIcon(item.raw) }}</v-icon>
+					</template>
+					<template #append="{ item }">
+						<v-chip size="x-small" variant="text" :color="item.raw?.LoaiNoiDung === 'BAI' ? 'primary' : 'grey'">
+							{{ item.raw?.LoaiNoiDung }}
+						</v-chip>
+					</template>
+				</v-treeview>
+				<div v-else-if="isLoadingTree" class="text-caption text-medium-emphasis pa-2">
+					Đang tải cấu trúc học liệu...
+				</div>
+			</div>
+			<div v-if="selectedHocLieuID && !nodeItems.length && !isLoadingTree" class="text-caption text-warning mt-1">
+				Học liệu này chưa có node loại BAI để liên kết.
+			</div>
+		</v-card>
+	</div>
 </template>
 
 <script>
@@ -58,6 +68,7 @@ export default {
 			selectedTreeNodeIDs: [],
 			selectedHocLieuID: null,
 			selectedNoiDungID: null,
+			isPanelOpen: false,
 			isLoadingHocLieu: false,
 			isLoadingTree: false,
 			initialized: false,
@@ -154,6 +165,11 @@ export default {
 			const selectedID = (values || []).find(id => this.nodeItems.some(node => String(node.NoiDungID) === String(id)))
 			this.selectedNoiDungID = selectedID || null
 		},
+		nodeIcon(node) {
+			if (node?.LoaiNoiDung === 'BAI') return 'mdi-book-open-page-variant-outline'
+			if (['CHUONG', 'MUC', 'NHOM'].includes(node?.LoaiNoiDung)) return 'mdi-folder-outline'
+			return ''
+		},
 		flattenBaiNodes(nodes) {
 			const byId = Object.fromEntries((nodes || []).map(node => [node.NoiDungID, node]))
 			return (nodes || []).filter(node => node.LoaiNoiDung === 'BAI').map(node => {
@@ -176,6 +192,7 @@ export default {
 				if (!item) return
 				this.selectedHocLieuID = item.HocLieuID
 				this.selectedNoiDungID = item.NoiDungID
+				this.isPanelOpen = true
 				if (item.HocLieuID) this.loadTree(item.HocLieuID)
 			})
 		},
