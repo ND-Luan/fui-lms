@@ -38,7 +38,7 @@
 										:label="$t('message.Decriptions')" />
 									<v-text-field v-else v-model="form.Instructions" :label="$t('message.Instructions')" />
 								</v-col>
-								<v-col cols="12" md="5">
+								<v-col cols="12" md="5" class="ps-md-4">
 									<uc-hoclieu-resource-selector v-model="hocLieuLink"
 										:khoi-id="khoiItem?.KhoiID" :mon-hoc-id="khoiItem?.MonHocID"
 										:resource-type="form.type == 1 ? 'LESSON' : 'ASSIGNMENT'" />

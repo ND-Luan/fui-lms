@@ -24,11 +24,14 @@
 			<div v-if="selectedHocLieuID" class="mt-2">
 				<div class="text-caption font-weight-medium mb-1">Chọn bài trong cấu trúc học liệu</div>
 				<v-treeview v-if="!isLoadingTree && treeNodes.length" v-model:opened="openedTreeNodeIDs"
-					v-model:selected="selectedTreeNodeIDs" :items="treeNodes" item-title="TenNoiDung"
-					item-value="NoiDungID" item-children="children" item-selectable="selectable"
-					select-strategy="independent" selectable open-all density="compact" color="primary"
-					class="border rounded" @update:selected="onTreeSelection">
+					:items="treeNodes" item-title="TenNoiDung" item-value="NoiDungID"
+					item-children="children" open-all density="compact" color="primary"
+					class="border rounded pa-2">
 					<template #prepend="{ item }">
+						<v-checkbox-btn v-if="isLinkableNode(item.raw)" density="compact"
+							:model-value="isSelectedNode(item.raw)"
+							@update:model-value="toggleTreeSelection(item.raw, $event)" @click.stop />
+						<span v-else class="tree-prepend-spacer" style="width: 40px" />
 						<v-icon v-if="nodeIcon(item.raw)" size="small">{{ nodeIcon(item.raw) }}</v-icon>
 					</template>
 					<template #append="{ item }">
@@ -136,7 +139,6 @@ export default {
 			const byId = Object.fromEntries((nodes || []).map(node => [node.NoiDungID, {
 				...node,
 				children: [],
-					selectable: this.isLinkableNode(node),
 			}]))
 			const roots = []
 			Object.values(byId).forEach(node => {
@@ -161,9 +163,13 @@ export default {
 			walk(nodes)
 			return ids
 		},
-		onTreeSelection(values) {
-			const selectedID = (values || []).find(id => this.nodeItems.some(node => String(node.NoiDungID) === String(id)))
-			this.selectedNoiDungID = selectedID || null
+		isSelectedNode(node) {
+			return String(this.selectedNoiDungID) === String(node?.NoiDungID)
+		},
+		toggleTreeSelection(node, selected) {
+			if (!this.isLinkableNode(node)) return
+			this.selectedNoiDungID = selected ? node.NoiDungID : null
+			this.selectedTreeNodeIDs = selected ? [node.NoiDungID] : []
 		},
 		nodeIcon(node) {
 			if (node?.LoaiNoiDung === 'BAI') return 'mdi-book-open-page-variant-outline'
