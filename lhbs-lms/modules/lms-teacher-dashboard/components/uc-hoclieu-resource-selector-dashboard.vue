@@ -22,7 +22,7 @@
 				<v-treeview v-if="!isLoadingTree && treeNodes.length" v-model:opened="openedTreeNodeIDs" :items="treeNodes"
 					item-title="TenNoiDung" item-value="NoiDungID" item-children="children" open-all density="compact"
 					color="primary" class="border rounded pa-2" style="max-height: 360px; overflow-y: auto">
-					<template v-slot:label="{ item }">
+					<template v-slot:title="{ item }">
 						<div class="d-flex align-center ga-2" @click.stop="toggleNodeSelection(item)">
 							<v-checkbox-btn :model-value="isNodeSelected(item)" @update:model-value="toggleNodeSelection(item)"
 								@click.stop color="primary" />
