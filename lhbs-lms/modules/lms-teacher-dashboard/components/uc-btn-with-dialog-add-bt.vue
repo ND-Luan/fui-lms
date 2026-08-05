@@ -87,6 +87,7 @@
 				Instructions: "",
 				Description: "",
 				TuanHocID: null,
+				Tuan: '',
 				Chuong: "",
 								type: this.defaultType ?? 0
 							},
@@ -123,6 +124,7 @@
 			this.form.Instructions = ""
 			this.form.Description = ""
 			this.form.TuanHocID = null
+			this.form.Tuan = ''
 			this.form.Chuong = ""
 			this.hocLieuLink = {}
 		},
@@ -138,8 +140,11 @@
 
 			if (valid) {
 				if (this.form.type == 0) {
+					const selectedWeek = vueData.DSTuanHoc.find(week =>
+						String(week.TuanHocID) === String(this.form.TuanHocID))
 					ajaxCALL('lms/EL_Assignment_Ins', {
 						...this.form,
+						Tuan: selectedWeek?.Tuan ?? '',
 						MonHocID: this.khoiItem.MonHocID,
 						KhoiID: this.khoiItem.KhoiID,
 						NienKhoa: vueData.NienKhoa,
