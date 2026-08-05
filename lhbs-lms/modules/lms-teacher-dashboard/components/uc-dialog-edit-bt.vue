@@ -9,13 +9,11 @@
 			<v-card-text>
 				<v-form ref="form">
 					<v-row>
-						<v-col cols="12">
+						<v-col cols="12" md="7" class="d-flex flex-column" style="gap: 8px; align-self: flex-start">
 							<v-text-field v-model="form.Title" label="Tiêu đề" />
-						</v-col>
-						<v-col cols="12">
 							<v-text-field v-model="form.Instructions" label="Hướng dẫn" />
 						</v-col>
-						<v-col cols="12">
+						<v-col cols="12" md="5" class="ps-md-4">
 							<uc-hoclieu-resource-selector v-model="hocLieuLink"
 								:khoi-id="form.KhoiID" :mon-hoc-id="form.MonHocID"
 								:resource-type="form.ResourceType" :resource-id="form.ResourceID" />

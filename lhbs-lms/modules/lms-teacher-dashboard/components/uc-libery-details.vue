@@ -16,31 +16,24 @@
 
 				<v-form ref="formData">
 					<v-row dense>
-						<v-col cols="12" md="12">
-							<v-text-field :label="$t('message.Title')" v-model="formData.Title" hide-details="auto"
-								dense></v-text-field>
-						</v-col>
-						<v-col cols="12" md="12">
+						<v-col cols="12" md="7" class="d-flex flex-column" style="gap: 8px; align-self: flex-start">
+							<v-text-field density="compact" :label="$t('message.Title')" v-model="formData.Title"
+								hide-details="auto" />
 							<v-textarea v-if="$i18n.locale == 'en'"
 								:label="formData.ResourceType == 'LESSON' ? 'Decriptions' : 'Instructions'"
 								variant="outlined" density="compact" v-model="formData.Instructions" hide-details="auto"
-								:rows="2"></v-textarea>
+								:rows="2" />
 							<v-textarea v-else :label="formData.ResourceType == 'LESSON' ? 'Mô tả' : 'Hướng dẫn'"
 								variant="outlined" density="compact" v-model="formData.Instructions" hide-details="auto"
-								:rows="2"></v-textarea>
+								:rows="2" />
+							<v-text-field density="compact" v-model="formData.Chuong" :label="$t('message.Chapter')" />
+							<v-checkbox v-model="formData.IsPublic"
+								:label="$i18n.locale == 'en' ? 'Public' : 'Chia sẻ bài tập'" hide-details="auto" density="compact" />
 						</v-col>
-						<v-col cols="12" md="12">
-							<v-text-field v-model="formData.Chuong" :label="$t('message.Chapter')" />
-						</v-col>
-						<v-col cols="12" md="12">
+						<v-col cols="12" md="5" class="ps-md-4">
 							<uc-hoclieu-resource-selector v-model="hocLieuLink"
 								:khoi-id="formData.KhoiID" :mon-hoc-id="formData.MonHocID"
 								:resource-type="formData.ResourceType" :resource-id="formData.ResourceID" />
-						</v-col>
-						<v-col cols="12" md="12">
-							<v-checkbox v-model="formData.IsPublic"
-								:label="$i18n.locale == 'en' ? 'Public' : 'Chia sẻ bài tập'" hide-details="auto"
-								dense />
 						</v-col>
 					</v-row>
 				</v-form>
