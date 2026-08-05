@@ -24,8 +24,8 @@
 					color="primary" class="border rounded pa-2" style="max-height: 360px; overflow-y: auto">
 					<template v-slot:title="{ item }">
 						<div class="d-flex align-center ga-2" @click.stop="toggleNodeSelection(item)">
-							<v-checkbox-btn :model-value="isNodeSelected(item)" @update:model-value="toggleNodeSelection(item)"
-								@click.stop color="primary" />
+							<v-checkbox-btn :model-value="isNodeSelected(item)"
+								@click.stop="toggleNodeSelection(item)" color="primary" />
 							<span>{{ item.TenNoiDung }}</span>
 						</div>
 					</template>
@@ -107,9 +107,12 @@ export default {
 			ajaxCALL('lms/EL_HocLieuResource_Get', { ResourceType: this.resourceType, ResourceID: this.resourceId }, response => {
 				const item = this.rows(response)[0]
 				if (!item) return
+				const mappedNodeID = item.NoiDungID
 				this.selectedHocLieuID = item.HocLieuID
-				this.selectedNoiDungID = item.NoiDungID
 				this.isPanelOpen = true
+				this.$nextTick(() => {
+					this.selectedNoiDungID = mappedNodeID
+				})
 			})
 		},
 		loadTree(hocLieuID) {
