@@ -64,6 +64,7 @@ export default {
 			isPanelOpen: false,
 			isLoadingHocLieu: false,
 			isLoadingTree: false,
+			restoringSelection: false,
 			initialized: false,
 		}
 	},
@@ -124,7 +125,10 @@ export default {
 				const selectedNode = this.nodeItems.find(node =>
 					String(node.NoiDungID) === String(this.selectedNoiDungID)
 				)
+				this.restoringSelection = true
+				this.selectedTreeNodeIDs = selectedNode ? [selectedNode.NoiDungID] : []
 				this.$nextTick(() => {
+					this.restoringSelection = false
 					this.selectedTreeNodeIDs = selectedNode ? [selectedNode.NoiDungID] : []
 				})
 				this.isLoadingTree = false
@@ -159,6 +163,7 @@ export default {
 			return ids
 		},
 		onTreeSelection(values) {
+			if (this.restoringSelection) return
 			const selectedID = (values || []).find(id => this.nodeItems.some(node => String(node.NoiDungID) === String(id)))
 			this.selectedNoiDungID = selectedID || null
 		},
