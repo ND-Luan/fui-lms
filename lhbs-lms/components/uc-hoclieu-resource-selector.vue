@@ -34,11 +34,6 @@
 						<span v-else class="tree-prepend-spacer" style="width: 40px" />
 						<v-icon v-if="nodeIcon(item.raw)" size="small">{{ nodeIcon(item.raw) }}</v-icon>
 					</template>
-					<template #title="{ item }">
-						<span class="cursor-pointer" @click.stop="selectTreeNode(item.raw)">
-							{{ item.raw?.TenNoiDung || item.title }}
-						</span>
-					</template>
 					<template #append="{ item }">
 						<v-chip size="x-small" variant="text" :color="isLinkableNode(item.raw) ? 'primary' : 'grey'">
 							{{ item.raw?.LoaiNoiDung }}
