@@ -24,28 +24,18 @@
 			<div v-if="selectedHocLieuID" class="mt-2">
 				<div class="text-caption font-weight-medium mb-1">Chọn bài trong cấu trúc học liệu</div>
 				<v-treeview v-if="!isLoadingTree && treeNodes.length" v-model:opened="openedTreeNodeIDs"
-					:items="treeNodes" item-title="TenNoiDung" item-value="NoiDungID"
-					item-children="children" open-all density="compact" color="primary"
-					class="border rounded pa-2" style="max-height: 360px; overflow-y: auto">
-					<template #prepend="{ item }">
-						<v-checkbox-btn v-if="isLinkableNode(item.raw)" density="compact"
-							:model-value="isSelectedNode(item.raw)"
-							@update:model-value="toggleTreeSelection(item.raw, $event)" @click.stop />
-						<span v-else class="tree-prepend-spacer" style="width: 40px" />
-						<v-icon v-if="nodeIcon(item.raw)" size="small">{{ nodeIcon(item.raw) }}</v-icon>
-					</template>
-					<template #append="{ item }">
-						<v-chip size="x-small" variant="text" :color="isLinkableNode(item.raw) ? 'primary' : 'grey'">
-							{{ item.raw?.LoaiNoiDung }}
-						</v-chip>
-					</template>
+					v-model:selected="selectedTreeNodeIDs" :items="treeNodes" item-title="TenNoiDung"
+					item-value="NoiDungID" item-children="children" selectable
+					select-strategy="independent" open-all density="compact" color="primary"
+					class="border rounded pa-2" style="max-height: 360px; overflow-y: auto"
+					@update:selected="onTreeSelection">
 				</v-treeview>
 				<div v-else-if="isLoadingTree" class="text-caption text-medium-emphasis pa-2">
 					Đang tải cấu trúc học liệu...
 				</div>
 			</div>
 			<div v-if="selectedHocLieuID && !nodeItems.length && !isLoadingTree" class="text-caption text-warning mt-1">
-						Học liệu này chưa có node CHUONG, BAI hoặc NHOM_KY_NANG để liên kết.
+				Học liệu này chưa có node CHUONG, BAI hoặc NHOM_KY_NANG để liên kết.
 			</div>
 		</v-card>
 	</div>
@@ -163,21 +153,9 @@ export default {
 			walk(nodes)
 			return ids
 		},
-		isSelectedNode(node) {
-			return String(this.selectedNoiDungID) === String(node?.NoiDungID)
-		},
-		selectTreeNode(node) {
-			if (!this.isLinkableNode(node)) return
-			this.selectedNoiDungID = node.NoiDungID
-			this.selectedTreeNodeIDs = [node.NoiDungID]
-		},
-		toggleTreeSelection(node, selected) {
-			if (!this.isLinkableNode(node)) return
-			if (selected) this.selectTreeNode(node)
-			else {
-				this.selectedNoiDungID = null
-				this.selectedTreeNodeIDs = []
-			}
+		onTreeSelection(values) {
+			const selectedID = (values || []).find(id => this.nodeItems.some(node => String(node.NoiDungID) === String(id)))
+			this.selectedNoiDungID = selectedID || null
 		},
 		nodeIcon(node) {
 			if (node?.LoaiNoiDung === 'BAI') return 'mdi-book-open-page-variant-outline'
