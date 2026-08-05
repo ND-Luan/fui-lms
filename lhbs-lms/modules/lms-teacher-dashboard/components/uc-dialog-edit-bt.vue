@@ -14,7 +14,7 @@
 							<v-text-field v-model="form.Instructions" label="Hướng dẫn" />
 						</v-col>
 						<v-col cols="12" md="5" class="ps-md-4">
-							<uc-hoclieu-resource-selector v-model="hocLieuLink"
+							<uc-hoclieu-resource-selector-dashboard v-model="hocLieuLink"
 								:khoi-id="form.KhoiID" :mon-hoc-id="form.MonHocID"
 								:resource-type="form.ResourceType" :resource-id="resourceIdForMapping" />
 						</v-col>

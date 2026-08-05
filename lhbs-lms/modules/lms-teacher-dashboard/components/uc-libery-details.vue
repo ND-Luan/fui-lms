@@ -31,7 +31,7 @@
 								:label="$i18n.locale == 'en' ? 'Public' : 'Chia sẻ bài tập'" hide-details="auto" density="compact" />
 						</v-col>
 						<v-col cols="12" md="5" class="ps-md-4">
-							<uc-hoclieu-resource-selector v-model="hocLieuLink"
+							<uc-hoclieu-resource-selector-dashboard v-model="hocLieuLink"
 								:khoi-id="formData.KhoiID" :mon-hoc-id="formData.MonHocID"
 								:resource-type="formData.ResourceType" :resource-id="resourceIdForMapping" />
 						</v-col>
