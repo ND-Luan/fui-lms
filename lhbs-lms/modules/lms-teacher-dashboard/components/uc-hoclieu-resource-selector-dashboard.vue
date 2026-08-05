@@ -19,11 +19,12 @@
 				:disabled="!khoiId || !monHocId" hide-details="auto" />
 			<div v-if="selectedHocLieuID" class="mt-2">
 				<div class="text-caption font-weight-medium mb-1">Chọn bài trong cấu trúc học liệu</div>
-				<v-treeview v-if="!isLoadingTree && treeNodes.length" v-model:opened="openedTreeNodeIDs" :items="treeNodes"
+				<v-treeview v-if="!isLoadingTree && treeNodes.length" v-model:activated="activeTreeNodeIDs"
+					v-model:opened="openedTreeNodeIDs" :items="treeNodes"
 					item-title="TenNoiDung" item-value="NoiDungID" item-children="children" open-all density="compact"
-					color="primary" class="border rounded pa-2" style="max-height: 360px; overflow-y: auto">
+					activatable open-on-click color="primary" class="border rounded pa-2" style="max-height: 360px; overflow-y: auto">
 					<template v-slot:title="{ item }">
-						<div class="d-flex align-center ga-2" @click.stop="toggleNodeSelection(item)">
+						<div class="d-flex align-center ga-2">
 							<v-checkbox-btn :model-value="isNodeSelected(item)"
 								@click.stop="toggleNodeSelection(item)" color="primary" />
 							<span>{{ item.TenNoiDung }}</span>
@@ -55,6 +56,7 @@ export default {
 			nodeItems: [],
 			treeNodes: [],
 			openedTreeNodeIDs: [],
+			activeTreeNodeIDs: [],
 			selectedHocLieuID: null,
 			selectedNoiDungID: null,
 			isPanelOpen: false,
@@ -71,8 +73,15 @@ export default {
 		khoiId() { this.loadHocLieu() },
 		monHocId() { this.loadHocLieu() },
 		resourceId() { this.loadMapping() },
+		activeTreeNodeIDs(values) {
+			const selectedID = values?.[0] || null
+			if (selectedID && this.isLinkableNode(this.nodeItems.find(node => String(node.NoiDungID) === String(selectedID)))) {
+				this.selectedNoiDungID = selectedID
+			}
+		},
 		selectedHocLieuID(newValue) {
 			this.selectedNoiDungID = null
+			this.activeTreeNodeIDs = []
 			this.nodeItems = []
 			this.treeNodes = []
 			this.openedTreeNodeIDs = []
@@ -111,6 +120,7 @@ export default {
 				this.selectedHocLieuID = item.HocLieuID
 				this.isPanelOpen = true
 				this.$nextTick(() => {
+					this.activeTreeNodeIDs = [mappedNodeID]
 					this.selectedNoiDungID = mappedNodeID
 				})
 			})
@@ -156,9 +166,11 @@ export default {
 		isNodeSelected(node) {
 			return String(node?.NoiDungID) === String(this.selectedNoiDungID)
 		},
-		toggleNodeSelection(node) {
+		 toggleNodeSelection(node) {
 			if (!node || !this.isLinkableNode(node)) return
-			this.selectedNoiDungID = this.isNodeSelected(node) ? null : node.NoiDungID
+			const nextID = this.isNodeSelected(node) ? null : node.NoiDungID
+			this.activeTreeNodeIDs = nextID ? [nextID] : []
+			this.selectedNoiDungID = nextID
 		},
 		emitValue() {
 			const hocLieu = this.hocLieuItems.find(item => String(item.HocLieuID) === String(this.selectedHocLieuID))
