@@ -23,12 +23,9 @@
 					v-model:opened="openedTreeNodeIDs" :items="treeNodes"
 					item-title="TenNoiDung" item-value="NoiDungID" item-children="children" open-all density="compact"
 					activatable open-on-click color="primary" class="border rounded pa-2" style="max-height: 360px; overflow-y: auto">
-					<template v-slot:title="{ item }">
-						<div class="d-flex align-center ga-2">
-							<v-checkbox-btn :model-value="isNodeSelected(item)"
-								@click.stop="toggleNodeSelection(item)" color="primary" />
-							<span>{{ item.TenNoiDung }}</span>
-						</div>
+					<template v-slot:prepend="{ item }">
+						<v-checkbox-btn :model-value="isNodeSelected(item)"
+							@click.stop="toggleNodeSelection(item)" color="primary" />
 					</template>
 				</v-treeview>
 				<div v-else-if="isLoadingTree" class="text-caption text-medium-emphasis pa-2">Đang tải cấu trúc học liệu...</div>
