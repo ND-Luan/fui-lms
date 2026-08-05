@@ -12,9 +12,34 @@
 		<v-select v-model="selectedHocLieuID" :items="hocLieuItems" item-title="TenHocLieu"
 			item-value="HocLieuID" label="Chọn học liệu số" clearable density="compact" variant="outlined"
 			:loading="isLoadingHocLieu" :disabled="!khoiId || !monHocId" hide-details="auto" />
-		<v-select v-if="selectedHocLieuID" v-model="selectedNoiDungID" :items="nodeItems"
-			item-title="displayName" item-value="NoiDungID" label="Chọn bài trong học liệu" clearable
-			density="compact" variant="outlined" :loading="isLoadingTree" hide-details="auto" />
+		<div v-if="selectedHocLieuID" class="mt-2">
+			<div class="text-caption font-weight-medium mb-1">Chọn bài trong cấu trúc học liệu</div>
+			<v-list v-if="!isLoadingTree && treeNodes.length" density="compact" class="border rounded">
+				<v-list-item v-for="node in visibleTreeItems" :key="node.NoiDungID"
+					:class="{ 'bg-primary-lighten-5': String(selectedNoiDungID) === String(node.NoiDungID) }"
+					:style="{ paddingLeft: (node.level * 16 + 8) + 'px' }" class="px-2">
+					<template #prepend>
+						<v-btn v-if="node.children.length" icon size="x-small" variant="text"
+							@click.stop="toggleNode(node)">
+							<v-icon>{{ isExpanded(node) ? 'mdi-chevron-down' : 'mdi-chevron-right' }}</v-icon>
+						</v-btn>
+						<span v-else class="tree-indent" />
+					</template>
+					<v-list-item-title class="text-body-2">{{ node.TenNoiDung }}</v-list-item-title>
+					<template #append>
+						<v-btn v-if="node.LoaiNoiDung === 'BAI'" size="x-small"
+							:variant="String(selectedNoiDungID) === String(node.NoiDungID) ? 'flat' : 'outlined'"
+							color="primary" @click.stop="selectNode(node)">
+							{{ String(selectedNoiDungID) === String(node.NoiDungID) ? 'Đã chọn' : 'Chọn' }}
+						</v-btn>
+						<v-chip v-else size="x-small" variant="text" color="grey">{{ node.LoaiNoiDung }}</v-chip>
+					</template>
+				</v-list-item>
+			</v-list>
+			<div v-else-if="isLoadingTree" class="text-caption text-medium-emphasis pa-2">
+				Đang tải cấu trúc học liệu...
+			</div>
+		</div>
 		<div v-if="selectedHocLieuID && !nodeItems.length && !isLoadingTree" class="text-caption text-warning mt-1">
 			Học liệu này chưa có node loại BAI để liên kết.
 		</div>
@@ -36,6 +61,8 @@ export default {
 		return {
 			hocLieuItems: [],
 			nodeItems: [],
+			treeNodes: [],
+			expandedNodeIDs: [],
 			selectedHocLieuID: null,
 			selectedNoiDungID: null,
 			isLoadingHocLieu: false,
@@ -46,6 +73,17 @@ export default {
 	computed: {
 		isLinked() {
 			return !!(this.selectedHocLieuID && this.selectedNoiDungID)
+		},
+		visibleTreeItems() {
+			const result = []
+			const walk = (nodes, level) => {
+				(nodes || []).forEach(node => {
+					result.push({ ...node, level })
+					if (node.children.length && this.isExpanded(node)) walk(node.children, level + 1)
+				})
+			}
+			walk(this.treeNodes, 0)
+			return result
 		},
 	},
 	watch: {
@@ -58,6 +96,8 @@ export default {
 		selectedHocLieuID(newValue) {
 			this.selectedNoiDungID = null
 			this.nodeItems = []
+			this.treeNodes = []
+			this.expandedNodeIDs = []
 			if (newValue) this.loadTree(newValue)
 			this.emitValue()
 		},
@@ -90,9 +130,50 @@ export default {
 		loadTree(hocLieuID) {
 			this.isLoadingTree = true
 			ajaxCALL('lms/FP_NoiDung_GetTreeByHocLieu', { HocLieuID: hocLieuID }, response => {
-				this.nodeItems = this.flattenBaiNodes(this.rows(response))
+				const nodes = this.rows(response)
+				this.nodeItems = this.flattenBaiNodes(nodes)
+				this.treeNodes = this.buildTree(nodes)
+				this.expandedNodeIDs = this.getExpandableIDs(this.treeNodes)
 				this.isLoadingTree = false
 			})
+		},
+		buildTree(nodes) {
+			const byId = Object.fromEntries((nodes || []).map(node => [node.NoiDungID, { ...node, children: [] }]))
+			const roots = []
+			Object.values(byId).forEach(node => {
+				if (node.ParentID && byId[node.ParentID]) byId[node.ParentID].children.push(node)
+				else roots.push(node)
+			})
+			const sortNodes = list => {
+				list.sort((a, b) => (a.ThuTu || 0) - (b.ThuTu || 0))
+				list.forEach(node => sortNodes(node.children))
+			}
+			sortNodes(roots)
+			return roots
+		},
+		getExpandableIDs(nodes) {
+			const ids = []
+			const walk = list => (list || []).forEach(node => {
+				if (node.children.length) {
+					ids.push(node.NoiDungID)
+					walk(node.children)
+				}
+			})
+			walk(nodes)
+			return ids
+		},
+		isExpanded(node) {
+			return this.expandedNodeIDs.some(id => String(id) === String(node.NoiDungID))
+		},
+		toggleNode(node) {
+			const id = node.NoiDungID
+			this.expandedNodeIDs = this.isExpanded(node)
+				? this.expandedNodeIDs.filter(item => String(item) !== String(id))
+				: [...this.expandedNodeIDs, id]
+		},
+		selectNode(node) {
+			if (node.LoaiNoiDung !== 'BAI') return
+			this.selectedNoiDungID = node.NoiDungID
 		},
 		flattenBaiNodes(nodes) {
 			const byId = Object.fromEntries((nodes || []).map(node => [node.NoiDungID, node]))
@@ -120,8 +201,8 @@ export default {
 			})
 		},
 		emitValue() {
-			const hocLieu = this.hocLieuItems.find(item => item.HocLieuID === this.selectedHocLieuID)
-			const node = this.nodeItems.find(item => item.NoiDungID === this.selectedNoiDungID)
+			const hocLieu = this.hocLieuItems.find(item => String(item.HocLieuID) === String(this.selectedHocLieuID))
+			const node = this.nodeItems.find(item => String(item.NoiDungID) === String(this.selectedNoiDungID))
 			this.$emit('update:modelValue', {
 				HocLieuID: this.selectedHocLieuID || null,
 				NoiDungID: this.selectedNoiDungID || null,
