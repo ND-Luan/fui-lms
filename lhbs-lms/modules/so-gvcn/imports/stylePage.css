@@ -25,8 +25,8 @@
 }
 
 /* Tab 2 C2/C3: keep the sheet viewport aligned with its columns while scrolling horizontally. */
-.so-gvcn-tab-chi-tieu > .d-flex,
-.so-gvcn-tab-chi-tieu > .d-flex > .flex-grow-1 {
+.so-gvcn-tab-chi-tieu>.d-flex,
+.so-gvcn-tab-chi-tieu>.d-flex>.flex-grow-1 {
     min-width: 0;
 }
 
