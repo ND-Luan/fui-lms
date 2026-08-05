@@ -26,13 +26,18 @@
 				<v-treeview v-if="!isLoadingTree && treeNodes.length" v-model:opened="openedTreeNodeIDs"
 					:items="treeNodes" item-title="TenNoiDung" item-value="NoiDungID"
 					item-children="children" open-all density="compact" color="primary"
-					class="border rounded pa-2">
+					class="border rounded pa-2" style="max-height: 360px; overflow-y: auto">
 					<template #prepend="{ item }">
 						<v-checkbox-btn v-if="isLinkableNode(item.raw)" density="compact"
 							:model-value="isSelectedNode(item.raw)"
 							@update:model-value="toggleTreeSelection(item.raw, $event)" @click.stop />
 						<span v-else class="tree-prepend-spacer" style="width: 40px" />
 						<v-icon v-if="nodeIcon(item.raw)" size="small">{{ nodeIcon(item.raw) }}</v-icon>
+					</template>
+					<template #title="{ item }">
+						<span class="cursor-pointer" @click.stop="selectTreeNode(item.raw)">
+							{{ item.raw?.TenNoiDung || item.title }}
+						</span>
 					</template>
 					<template #append="{ item }">
 						<v-chip size="x-small" variant="text" :color="isLinkableNode(item.raw) ? 'primary' : 'grey'">
@@ -127,7 +132,7 @@ export default {
 		loadTree(hocLieuID) {
 			this.isLoadingTree = true
 			ajaxCALL('lms/FP_NoiDung_GetTreeByHocLieu', { HocLieuID: hocLieuID }, response => {
-				const nodes = this.rows(response)
+				const nodes = this.rows(response).filter(node => this.isLinkableNode(node))
 				this.nodeItems = this.flattenBaiNodes(nodes)
 				this.treeNodes = this.buildTree(nodes)
 				this.openedTreeNodeIDs = this.getExpandableIDs(this.treeNodes)
@@ -166,10 +171,18 @@ export default {
 		isSelectedNode(node) {
 			return String(this.selectedNoiDungID) === String(node?.NoiDungID)
 		},
+		selectTreeNode(node) {
+			if (!this.isLinkableNode(node)) return
+			this.selectedNoiDungID = node.NoiDungID
+			this.selectedTreeNodeIDs = [node.NoiDungID]
+		},
 		toggleTreeSelection(node, selected) {
 			if (!this.isLinkableNode(node)) return
-			this.selectedNoiDungID = selected ? node.NoiDungID : null
-			this.selectedTreeNodeIDs = selected ? [node.NoiDungID] : []
+			if (selected) this.selectTreeNode(node)
+			else {
+				this.selectedNoiDungID = null
+				this.selectedTreeNodeIDs = []
+			}
 		},
 		nodeIcon(node) {
 			if (node?.LoaiNoiDung === 'BAI') return 'mdi-book-open-page-variant-outline'

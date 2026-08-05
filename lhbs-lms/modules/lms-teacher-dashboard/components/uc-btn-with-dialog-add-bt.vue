@@ -26,7 +26,7 @@
 						</v-col>
 						<v-col cols="12">
 							<v-row dense>
-								<v-col cols="12" md="7">
+								<v-col cols="12" md="7" class="d-flex flex-column ga-3">
 									<v-select :items="typeItems" item-title='text' item-value='value' v-model="form.type"
 										:label="$t('message.ChooseContent')" />
 									<v-select :items="DSTuan" item-title='Tuan_HienThi' item-value='TuanHocID'
