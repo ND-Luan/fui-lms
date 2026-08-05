@@ -8,7 +8,7 @@
 		</div>
 		<div class="d-flex align-center text-subtitle-1 font-weight-medium flex-wrap ga-2 px-3 pt-2">
 			{{ $t('message.Attribute') }}
-			<div class="ml-2" v-if="item.type === 'question' && globalQuestionNumber !== 0">
+			<div class="ml-2" v-if="item?.type === 'question' && globalQuestionNumber !== 0">
 				<v-chip v-if="isQuestionTextField === false" label variant="outlined" color="primary"
 					@click="isQuestionTextField = true; $nextTick(() => { $refs.questionInput.focus() });">
 					{{ $t('message.Question') }} {{ selectedQuestionData.ordinalNumber }} <v-icon end>mdi-pencil-circle
@@ -17,23 +17,23 @@
 				<v-text-field v-else ref="questionInput" v-model="selectedQuestionData.ordinalNumber"
 					hide-details="auto" @blur="isQuestionTextField = false" />
 			</div>
-			<v-chip v-else-if="item.type === 'group'" class="ml-2" label color="primary">
+			<v-chip v-else-if="item?.type === 'group'" class="ml-2" label color="primary">
 				{{ selectedGroupData.title }}
 			</v-chip>
 			<v-spacer></v-spacer>
 			<div class="d-flex">
 				<v-spacer></v-spacer>
-				<v-btn v-if="item.type === 'group'" variant="outlined" color="primary" class="me-2"
+				<v-btn v-if="item?.type === 'group'" variant="outlined" color="primary" class="me-2"
 					@click="onOpenModalImportFromHocLieu()">
 					<v-icon start class="me-1">mdi-download</v-icon> Import từ
 					kho học liệu
 				</v-btn>
-				<v-btn v-if="item.type === 'group'" variant="outlined" color="secondary"
+				<v-btn v-if="item?.type === 'group'" variant="outlined" color="secondary"
 					@click="onOpenModalImportFromBank()">
 					<v-icon start class="me-1">mdi-database-search</v-icon> Import từ
 					ngân hàng câu hỏi
 				</v-btn>
-				<v-btn v-else-if="item.type === 'question'" icon variant="text" @click="onOpenModalKiNang()">
+				<v-btn v-else-if="item?.type === 'question'" icon variant="text" @click="onOpenModalKiNang()">
 					<v-icon>mdi-cog-outline</v-icon>
 				</v-btn>
 			</div>
@@ -49,7 +49,7 @@
 		</div>
 
 		<div v-else class="px-3 pb-3">
-			<div v-if="item.type === 'group'" class="d-flex flex-column ga-2">
+			<div v-if="item?.type === 'group'" class="d-flex flex-column ga-2">
 				<v-text-field class="mt-2" :model-value="selectedGroupData.title"
 					@update:model-value="updateItem('title', $event)" :label="$t('message.SectionGroupName')"
 					variant="outlined" density="compact" />
@@ -75,7 +75,7 @@
 					:label="$t('message.ShowAllQuestionsInGroup')" />
 			</div>
 
-			<div v-else-if="item.type === 'question' && selectedQuestionData">
+			<div v-else-if="item?.type === 'question' && selectedQuestionData">
 				<v-row dense>
 					<v-col cols="12">
 						<div class="d-flex flex-wrap ga-2">

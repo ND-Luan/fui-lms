@@ -8,10 +8,6 @@
         <!-- Mobile: Properties Drawer (right) -->
         <v-navigation-drawer v-if="isMobile" v-model="isPropertiesDrawerOpen" location="right" temporary width="320">
             <uc-assignment-properties :assignment="assignment" :groups="assignment.AssignmentConfig?.groups" :item="selectedItem" @update:groups="updateGroups" @update:assignment="assignment = $event" :in-drawer="true" @close="isPropertiesDrawerOpen = false" />
-            <div v-else class="pa-6 text-center text-medium-emphasis">
-                <v-icon size="48" class="mb-2">mdi-cursor-default-click-outline</v-icon>
-                <p class="text-body-2 mt-2">Chọn câu hỏi để chỉnh sửa</p>
-            </div>
         </v-navigation-drawer>
 
         <!-- Mobile: Top Bar -->
