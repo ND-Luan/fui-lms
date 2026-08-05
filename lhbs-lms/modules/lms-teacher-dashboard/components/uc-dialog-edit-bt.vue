@@ -1,5 +1,5 @@
 <template>
-	<v-dialog v-model="modelValue" max-width="340">
+	<v-dialog v-model="modelValue" max-width="700">
 		<v-card>
 			<v-card-title class="d-flex align-center">
 				Sửa bài tập
@@ -14,6 +14,11 @@
 						</v-col>
 						<v-col cols="12">
 							<v-text-field v-model="form.Instructions" label="Hướng dẫn" />
+						</v-col>
+						<v-col cols="12">
+							<uc-hoclieu-resource-selector v-model="hocLieuLink"
+								:khoi-id="form.KhoiID" :mon-hoc-id="form.MonHocID"
+								:resource-type="form.ResourceType" :resource-id="form.ResourceID" />
 						</v-col>
 					</v-row>
 				</v-form>
@@ -43,6 +48,7 @@
 					Title: "",
 					Instructions: "",
 				},
+				hocLieuLink: {},
 				vueData
 			}
 		},
@@ -51,12 +57,21 @@
 		watch: {
 			modelValue: function (val) {
 				if (val) {
-	
 					this.form = { ...this.item }
+					this.hocLieuLink = {}
 				}
 			}
 		},
 		methods: {
+			saveHocLieuLink(done) {
+				const link = this.hocLieuLink || {}
+				ajaxCALL('lms/EL_HocLieuResource_Save', {
+					ResourceType: this.form.ResourceType,
+					ResourceID: this.form.ResourceID,
+					HocLieuID: link.HocLieuID || null,
+					NoiDungID: link.NoiDungID || null,
+				}, () => done())
+			},
 			async handleSubmit(isActive) {
 				const { valid } = await this.$refs.form.validate()
 				if (valid) {
@@ -67,9 +82,11 @@
 							LessonID: this.form.ResourceID,
 							NienKhoa: vueData.NienKhoa
 						}, res => {
-							this.snackbarRef.value.showSnackbar({ message: 'Cập nhật bài học thành công', color: 'success' })
-							vueData.apiCall3()
-							this.$emit('update:modelValue', false)
+							this.saveHocLieuLink(() => {
+								this.snackbarRef.value.showSnackbar({ message: 'Cập nhật bài học thành công', color: 'success' })
+								vueData.apiCall3()
+								this.$emit('update:modelValue', false)
+							})
 						})
 					} else {
 						ajaxCALL('lms/EL_Assignment_Upd', {
@@ -78,9 +95,11 @@
 							Instructions: this.form.Instructions,
 							NienKhoa: vueData.NienKhoa
 						}, res => {
-							this.snackbarRef.value.showSnackbar({ message: 'Cập nhật bài tập thành công', color: 'success' })
-							vueData.apiCall3()
-							this.$emit('update:modelValue', false)
+							this.saveHocLieuLink(() => {
+								this.snackbarRef.value.showSnackbar({ message: 'Cập nhật bài tập thành công', color: 'success' })
+								vueData.apiCall3()
+								this.$emit('update:modelValue', false)
+							})
 						})
 					}
 				}

@@ -33,6 +33,11 @@
 							<v-text-field v-model="formData.Chuong" :label="$t('message.Chapter')" />
 						</v-col>
 						<v-col cols="12" md="12">
+							<uc-hoclieu-resource-selector v-model="hocLieuLink"
+								:khoi-id="formData.KhoiID" :mon-hoc-id="formData.MonHocID"
+								:resource-type="formData.ResourceType" :resource-id="formData.ResourceID" />
+						</v-col>
+						<v-col cols="12" md="12">
 							<v-checkbox v-model="formData.IsPublic"
 								:label="$i18n.locale == 'en' ? 'Public' : 'Chia sẻ bài tập'" hide-details="auto"
 								dense />
@@ -144,9 +149,10 @@
 		inject: ['snackbarRef', 'iframeRef', 'confirmRef'],
 	props: ["selectedLibery", "isOpen"],
 	emits: ["update:isOpen", 'update:selectedLibery'],
-	data() {
-		return {
-			formData: {},
+		data() {
+			return {
+				formData: {},
+				hocLieuLink: {},
 			editDialog: [],
 			editDataLimitAssigned: [],
 			editData: [],
@@ -232,6 +238,7 @@
 
 		this.$nextTick(() => {
 			this.formData = { ...this.selectedLibery, IsPublic: !this.selectedLibery?.IsPublic ? false : true }
+				this.hocLieuLink = {}
 			console.log('assignedClassList', this.assignedClassList)
 			console.log('this.formData', this.formData)
 		})
@@ -242,7 +249,16 @@
 			console.log('newVal', newVal)
 		}
 	},
-	methods: {
+		methods: {
+			saveHocLieuLink(done) {
+				const link = this.hocLieuLink || {}
+				ajaxCALL('lms/EL_HocLieuResource_Save', {
+					ResourceType: this.formData.ResourceType,
+					ResourceID: this.formData.ResourceID,
+					HocLieuID: link.HocLieuID || null,
+					NoiDungID: link.NoiDungID || null,
+				}, () => done())
+			},
 		getNow() {
 			let date = dayjs().add(1, "minute").format("YYYY-MM-DDTHH:mm");
 			return date
@@ -261,9 +277,11 @@
 						NienKhoa: vueData.NienKhoa,
 						IsPublic: this.formData.IsPublic ? 1 : 0,
 					}, res => {
-						this.$emit('update:selectedLibery', { ...this.formData })
-						Vue.$toast.success('Cập nhật bài học thành công', { position: "top" })
-						this.CloseModal()
+						this.saveHocLieuLink(() => {
+							this.$emit('update:selectedLibery', { ...this.formData })
+							Vue.$toast.success('Cập nhật bài học thành công', { position: "top" })
+							this.CloseModal()
+						})
 					})
 				} else {
 					ajaxCALL('lms/EL_Assignment_Upd', {
@@ -274,9 +292,11 @@
 						NienKhoa: vueData.NienKhoa,
 						LimitAssigned: this.formData.LimitAssigned ?? 1,
 					}, res => {
-						this.$emit('update:selectedLibery', { ...this.formData })
-						Vue.$toast.success('Cập nhật bài tập thành công', { position: "top" })
-						this.CloseModal()
+						this.saveHocLieuLink(() => {
+							this.$emit('update:selectedLibery', { ...this.formData })
+							Vue.$toast.success('Cập nhật bài tập thành công', { position: "top" })
+							this.CloseModal()
+						})
 					})
 				}
 			}
