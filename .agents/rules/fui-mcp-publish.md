@@ -1,6 +1,6 @@
 # Quy tắc publish giao diện lên FUI-MCP
 
-Áp dụng khi người dùng yêu cầu “đẩy component lên FUI”, “publish UI lên FUI” hoặc tương đương.
+Áp dụng mặc định cho mọi thay đổi giao diện trong repo: khi sửa hoặc tạo component `.vue`, `script.js`, `style.css` hay file UI tương ứng thì phải publish lên FUI-MCP trong cùng task. Không cần chờ người dùng nhắc riêng “đẩy lên FUI”. Chỉ bỏ qua khi người dùng nói rõ chỉ muốn thay đổi local/chưa publish.
 
 ## Quy trình bắt buộc
 
@@ -29,4 +29,3 @@ Phải liệt kê:
 - Các `script.js`/`style.css` đã publish nếu có.
 - Kết quả kiểm tra từng nhóm publish.
 - Nếu preview không chạy được, nêu nguyên nhân cụ thể.
-
