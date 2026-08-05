@@ -3,7 +3,9 @@ GO
 
 /*
     Liên kết bài học/bài tập với cây học liệu số.
-    Chỉ cho phép gắn vào node loại BAI thuộc học liệu loại HOC_LIEU.
+    Chỉ cho phép gắn vào node cấu trúc CHUONG, BAI hoặc NHOM_KY_NANG
+    thuộc học liệu loại HOC_LIEU; không gắn trực tiếp vào hoạt động QUIZ,
+    HTML, AUDIO, VIDEO...
 */
 IF OBJECT_ID(N'dbo.tblEL_HocLieuResourceMapping', N'U') IS NULL
 BEGIN
@@ -61,7 +63,9 @@ BEGIN
     INNER JOIN dbo.tblHocLieu_FP hl ON hl.HocLieuID = m.HocLieuID
         AND hl.Loai = 'HOC_LIEU' AND hl.Is_Xoa = 0
     INNER JOIN dbo.tblNoiDungHocLieu_FP nd ON nd.NoiDungID = m.NoiDungID
-        AND nd.HocLieuID = m.HocLieuID AND nd.LoaiNoiDung = 'BAI' AND nd.Is_Xoa = 0
+        AND nd.HocLieuID = m.HocLieuID
+        AND nd.LoaiNoiDung IN ('CHUONG', 'BAI', 'NHOM_KY_NANG')
+        AND nd.Is_Xoa = 0
     WHERE m.ResourceType = UPPER(@ResourceType)
       AND m.ResourceID = @ResourceID
       AND m.IsDeleted = 0;
@@ -104,9 +108,9 @@ BEGIN
     IF NOT EXISTS (
         SELECT 1 FROM dbo.tblNoiDungHocLieu_FP
         WHERE NoiDungID = @NoiDungID AND HocLieuID = @HocLieuID
-          AND LoaiNoiDung = 'BAI' AND Is_Xoa = 0
+          AND LoaiNoiDung IN ('CHUONG', 'BAI', 'NHOM_KY_NANG') AND Is_Xoa = 0
     )
-        THROW 51003, N'Vị trí học liệu không hợp lệ; hãy chọn một node BAI.', 1;
+        THROW 51003, N'Vị trí học liệu không hợp lệ; hãy chọn node CHUONG, BAI hoặc NHOM_KY_NANG.', 1;
 
     BEGIN TRANSACTION;
         IF EXISTS (

@@ -32,7 +32,7 @@
 						<v-icon v-if="nodeIcon(item.raw)" size="small">{{ nodeIcon(item.raw) }}</v-icon>
 					</template>
 					<template #append="{ item }">
-						<v-chip size="x-small" variant="text" :color="item.raw?.LoaiNoiDung === 'BAI' ? 'primary' : 'grey'">
+						<v-chip size="x-small" variant="text" :color="isLinkableNode(item.raw) ? 'primary' : 'grey'">
 							{{ item.raw?.LoaiNoiDung }}
 						</v-chip>
 					</template>
@@ -42,7 +42,7 @@
 				</div>
 			</div>
 			<div v-if="selectedHocLieuID && !nodeItems.length && !isLoadingTree" class="text-caption text-warning mt-1">
-				Học liệu này chưa có node loại BAI để liên kết.
+						Học liệu này chưa có node CHUONG, BAI hoặc NHOM_KY_NANG để liên kết.
 			</div>
 		</v-card>
 	</div>
@@ -136,7 +136,7 @@ export default {
 			const byId = Object.fromEntries((nodes || []).map(node => [node.NoiDungID, {
 				...node,
 				children: [],
-				selectable: node.LoaiNoiDung === 'BAI',
+					selectable: this.isLinkableNode(node),
 			}]))
 			const roots = []
 			Object.values(byId).forEach(node => {
@@ -167,12 +167,15 @@ export default {
 		},
 		nodeIcon(node) {
 			if (node?.LoaiNoiDung === 'BAI') return 'mdi-book-open-page-variant-outline'
-			if (['CHUONG', 'MUC', 'NHOM'].includes(node?.LoaiNoiDung)) return 'mdi-folder-outline'
+			if (['CHUONG', 'NHOM_KY_NANG'].includes(node?.LoaiNoiDung)) return 'mdi-folder-outline'
 			return ''
+		},
+		isLinkableNode(node) {
+			return ['CHUONG', 'BAI', 'NHOM_KY_NANG'].includes(node?.LoaiNoiDung)
 		},
 		flattenBaiNodes(nodes) {
 			const byId = Object.fromEntries((nodes || []).map(node => [node.NoiDungID, node]))
-			return (nodes || []).filter(node => node.LoaiNoiDung === 'BAI').map(node => {
+			return (nodes || []).filter(node => this.isLinkableNode(node)).map(node => {
 				const path = []
 				let current = node
 				while (current) {
