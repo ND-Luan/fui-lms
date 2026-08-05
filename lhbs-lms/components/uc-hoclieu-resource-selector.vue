@@ -14,28 +14,20 @@
 			:loading="isLoadingHocLieu" :disabled="!khoiId || !monHocId" hide-details="auto" />
 		<div v-if="selectedHocLieuID" class="mt-2">
 			<div class="text-caption font-weight-medium mb-1">Chọn bài trong cấu trúc học liệu</div>
-			<v-list v-if="!isLoadingTree && treeNodes.length" density="compact" class="border rounded">
-				<v-list-item v-for="node in visibleTreeItems" :key="node.NoiDungID"
-					:class="{ 'bg-primary-lighten-5': String(selectedNoiDungID) === String(node.NoiDungID) }"
-					:style="{ paddingLeft: (node.level * 16 + 8) + 'px' }" class="px-2">
-					<template #prepend>
-						<v-btn v-if="node.children.length" icon size="x-small" variant="text"
-							@click.stop="toggleNode(node)">
-							<v-icon>{{ isExpanded(node) ? 'mdi-chevron-down' : 'mdi-chevron-right' }}</v-icon>
-						</v-btn>
-						<span v-else class="tree-indent" />
-					</template>
-					<v-list-item-title class="text-body-2">{{ node.TenNoiDung }}</v-list-item-title>
-					<template #append>
-						<v-btn v-if="node.LoaiNoiDung === 'BAI'" size="x-small"
-							:variant="String(selectedNoiDungID) === String(node.NoiDungID) ? 'flat' : 'outlined'"
-							color="primary" @click.stop="selectNode(node)">
-							{{ String(selectedNoiDungID) === String(node.NoiDungID) ? 'Đã chọn' : 'Chọn' }}
-						</v-btn>
-						<v-chip v-else size="x-small" variant="text" color="grey">{{ node.LoaiNoiDung }}</v-chip>
-					</template>
-				</v-list-item>
-			</v-list>
+			<v-treeview v-if="!isLoadingTree && treeNodes.length" v-model:opened="openedTreeNodeIDs"
+				v-model:selected="selectedTreeNodeIDs" :items="treeNodes" item-title="TenNoiDung"
+				item-value="NoiDungID" item-children="children" item-selectable="selectable"
+				select-strategy="independent" selectable open-all density="compact" color="primary"
+				class="border rounded" @update:selected="onTreeSelection">
+				<template #prepend="{ item }">
+					<v-icon size="small">{{ item.raw?.LoaiNoiDung === 'BAI' ? 'mdi-book-open-page-variant-outline' : 'mdi-folder-outline' }}</v-icon>
+				</template>
+				<template #append="{ item }">
+					<v-chip size="x-small" variant="text" :color="item.raw?.LoaiNoiDung === 'BAI' ? 'primary' : 'grey'">
+						{{ item.raw?.LoaiNoiDung }}
+					</v-chip>
+				</template>
+			</v-treeview>
 			<div v-else-if="isLoadingTree" class="text-caption text-medium-emphasis pa-2">
 				Đang tải cấu trúc học liệu...
 			</div>
@@ -62,7 +54,8 @@ export default {
 			hocLieuItems: [],
 			nodeItems: [],
 			treeNodes: [],
-			expandedNodeIDs: [],
+			openedTreeNodeIDs: [],
+			selectedTreeNodeIDs: [],
 			selectedHocLieuID: null,
 			selectedNoiDungID: null,
 			isLoadingHocLieu: false,
@@ -73,17 +66,6 @@ export default {
 	computed: {
 		isLinked() {
 			return !!(this.selectedHocLieuID && this.selectedNoiDungID)
-		},
-		visibleTreeItems() {
-			const result = []
-			const walk = (nodes, level) => {
-				(nodes || []).forEach(node => {
-					result.push({ ...node, level })
-					if (node.children.length && this.isExpanded(node)) walk(node.children, level + 1)
-				})
-			}
-			walk(this.treeNodes, 0)
-			return result
 		},
 	},
 	watch: {
@@ -97,7 +79,8 @@ export default {
 			this.selectedNoiDungID = null
 			this.nodeItems = []
 			this.treeNodes = []
-			this.expandedNodeIDs = []
+			this.openedTreeNodeIDs = []
+			this.selectedTreeNodeIDs = []
 			if (newValue) this.loadTree(newValue)
 			this.emitValue()
 		},
@@ -133,12 +116,17 @@ export default {
 				const nodes = this.rows(response)
 				this.nodeItems = this.flattenBaiNodes(nodes)
 				this.treeNodes = this.buildTree(nodes)
-				this.expandedNodeIDs = this.getExpandableIDs(this.treeNodes)
+				this.openedTreeNodeIDs = this.getExpandableIDs(this.treeNodes)
+				this.selectedTreeNodeIDs = this.selectedNoiDungID ? [this.selectedNoiDungID] : []
 				this.isLoadingTree = false
 			})
 		},
 		buildTree(nodes) {
-			const byId = Object.fromEntries((nodes || []).map(node => [node.NoiDungID, { ...node, children: [] }]))
+			const byId = Object.fromEntries((nodes || []).map(node => [node.NoiDungID, {
+				...node,
+				children: [],
+				selectable: node.LoaiNoiDung === 'BAI',
+			}]))
 			const roots = []
 			Object.values(byId).forEach(node => {
 				if (node.ParentID && byId[node.ParentID]) byId[node.ParentID].children.push(node)
@@ -162,18 +150,9 @@ export default {
 			walk(nodes)
 			return ids
 		},
-		isExpanded(node) {
-			return this.expandedNodeIDs.some(id => String(id) === String(node.NoiDungID))
-		},
-		toggleNode(node) {
-			const id = node.NoiDungID
-			this.expandedNodeIDs = this.isExpanded(node)
-				? this.expandedNodeIDs.filter(item => String(item) !== String(id))
-				: [...this.expandedNodeIDs, id]
-		},
-		selectNode(node) {
-			if (node.LoaiNoiDung !== 'BAI') return
-			this.selectedNoiDungID = node.NoiDungID
+		onTreeSelection(values) {
+			const selectedID = (values || []).find(id => this.nodeItems.some(node => String(node.NoiDungID) === String(id)))
+			this.selectedNoiDungID = selectedID || null
 		},
 		flattenBaiNodes(nodes) {
 			const byId = Object.fromEntries((nodes || []).map(node => [node.NoiDungID, node]))
