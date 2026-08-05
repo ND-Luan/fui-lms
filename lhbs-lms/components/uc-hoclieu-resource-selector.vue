@@ -121,7 +121,12 @@ export default {
 				this.nodeItems = this.flattenBaiNodes(nodes)
 				this.treeNodes = this.buildTree(nodes)
 				this.openedTreeNodeIDs = this.getExpandableIDs(this.treeNodes)
-				this.selectedTreeNodeIDs = this.selectedNoiDungID ? [this.selectedNoiDungID] : []
+				const selectedNode = this.nodeItems.find(node =>
+					String(node.NoiDungID) === String(this.selectedNoiDungID)
+				)
+				this.$nextTick(() => {
+					this.selectedTreeNodeIDs = selectedNode ? [selectedNode.NoiDungID] : []
+				})
 				this.isLoadingTree = false
 			})
 		},
