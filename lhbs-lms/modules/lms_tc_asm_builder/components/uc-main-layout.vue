@@ -190,14 +190,6 @@
       const res = await fetchPromise('lms/EL_Teacher_SaveAssignment', dataToSend, { cache: false })
       if (!res) return null
 
-      const resourceID = vueData.AssignmentID || res?.[0]?.AssignmentID
-      await fetchPromise('lms/EL_HocLieuResource_Save', {
-        ResourceType: 'ASSIGNMENT',
-        ResourceID: resourceID,
-        HocLieuID: payload.assignment.HocLieuID || null,
-        NoiDungID: payload.assignment.NoiDungID || null,
-      }, { cache: false, silent: true })
-
       this.snackbarRef.value.showSnackbar({ message: 'Lưu bài tập thành công', color: 'success' })
       const urlParams = new URLSearchParams(window.location.search)
       
@@ -217,15 +209,6 @@
     async autoSaveAssignment(payload) {
       const dataToSend = this._buildPayload({ ...payload, isPublishing: false })
       const res = await fetchPromise('lms/EL_Teacher_SaveAssignment', dataToSend, { cache: false, silent: true })
-      const resourceID = vueData.AssignmentID || res?.[0]?.AssignmentID
-      if (resourceID) {
-        await fetchPromise('lms/EL_HocLieuResource_Save', {
-          ResourceType: 'ASSIGNMENT',
-          ResourceID: resourceID,
-          HocLieuID: payload.assignment.HocLieuID || null,
-          NoiDungID: payload.assignment.NoiDungID || null,
-        }, { cache: false, silent: true })
-      }
     },
   },
 	}

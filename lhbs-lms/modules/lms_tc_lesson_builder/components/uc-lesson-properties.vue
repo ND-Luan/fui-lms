@@ -15,10 +15,6 @@
 				<v-text-field :label="$t('message.Week')" :model-value="lessonHeader.Tuan"
 					@update:modelValue="$emit('update:lessonHeader', { ...lessonHeader, Tuan: $event })"
 					variant="outlined" density="compact" :placeholder="$t('message.WeekExample')" />
-				<uc-hoclieu-resource-selector :model-value="lessonHeader.hocLieuLink || lessonHeader"
-					:khoi-id="lessonHeader.KhoiID" :mon-hoc-id="lessonHeader.MonHocID"
-					resource-type="LESSON" :resource-id="lessonHeader.LessonID"
-					@update:model-value="$emit('update:lessonHeader', { ...lessonHeader, ...$event, hocLieuLink: $event })" />
 				<v-text-field :label="$t('message.ChapterTopic')" :model-value="lessonHeader.Chuong"
 					@update:modelValue="$emit('update:lessonHeader', { ...lessonHeader, Chuong: $event })"
 					variant="outlined" density="compact" :placeholder="$t('message.ChapterExample')" />

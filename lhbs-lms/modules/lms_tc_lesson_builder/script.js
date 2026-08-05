@@ -61,20 +61,13 @@ function saveLesson(payload) {
                 vueData.isEditMode = true;
                 vueData.LessonID = newLessonID; // Cập nhật lại ID
             }
-            ajaxCALL('lms/EL_HocLieuResource_Save', {
-                ResourceType: 'LESSON',
-                ResourceID: newLessonID,
-                HocLieuID: dataToSend.HocLieuID || null,
-                NoiDungID: dataToSend.NoiDungID || null,
-            }, () => {
-                const Json_Elements = dataToSend.elements.map(x => ({ ...x, ElementData: JSON.stringify(x.ElementData) }))
-                ajaxCALL('lms/EL_Element_Save_Multiple', {
-                    LessonID: newLessonID,
-                    Json_Elements
-                }, res => {
-                    Vue.$toast.success('Lưu bài học thành công!', { position: 'top' });
-                    CALL('getLessonData') // Tải lại dữ liệu mới nhất
-                })
+            const Json_Elements = dataToSend.elements.map(x => ({ ...x, ElementData: JSON.stringify(x.ElementData) }))
+            ajaxCALL('lms/EL_Element_Save_Multiple', {
+                LessonID: newLessonID,
+                Json_Elements
+            }, res => {
+                Vue.$toast.success('Lưu bài học thành công!', { position: 'top' });
+                CALL('getLessonData') // Tải lại dữ liệu mới nhất
             })
             // // API 2: Lưu các elements
             // const elementSavePromises = dataToSend.elements.map((element, index) => {

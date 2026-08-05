@@ -39,10 +39,6 @@
 			</div>
 		</div>
 		<v-divider class="my-2" />
-		<uc-hoclieu-resource-selector :model-value="assignment || {}"
-			:khoi-id="assignment?.KhoiID" :mon-hoc-id="assignment?.MonHocID"
-			resource-type="ASSIGNMENT" :resource-id="assignment?.AssignmentID"
-			@update:model-value="$emit('update:assignment', { ...assignment, ...$event })" />
 		<div v-if="!item" class="text-center pa-8 text-grey">
 			<v-icon size="48" class="mb-2">mdi-cursor-default-click-outline</v-icon>
 			<div>{{ $t('message.SelectSectionOrQuestionToEdit') }}</div>
