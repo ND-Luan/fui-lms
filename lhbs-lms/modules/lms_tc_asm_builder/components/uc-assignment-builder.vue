@@ -7,7 +7,7 @@
 
         <!-- Mobile: Properties Drawer (right) -->
         <v-navigation-drawer v-if="isMobile" v-model="isPropertiesDrawerOpen" location="right" temporary width="320">
-            <uc-assignment-properties v-if="selectedItem" :assignment="assignment" :groups="assignment.AssignmentConfig?.groups" :item="selectedItem" @update:groups="updateGroups" :in-drawer="true" @close="isPropertiesDrawerOpen = false" />
+            <uc-assignment-properties :assignment="assignment" :groups="assignment.AssignmentConfig?.groups" :item="selectedItem" @update:groups="updateGroups" @update:assignment="assignment = $event" :in-drawer="true" @close="isPropertiesDrawerOpen = false" />
             <div v-else class="pa-6 text-center text-medium-emphasis">
                 <v-icon size="48" class="mb-2">mdi-cursor-default-click-outline</v-icon>
                 <p class="text-body-2 mt-2">Chọn câu hỏi để chỉnh sửa</p>
@@ -141,7 +141,7 @@
             </v-col>
             <v-col class="pa-0" cols="12" md="3">
                 <div style="height: calc(100dvh - 45px); overflow: auto" class="position-relative">
-                    <uc-assignment-properties v-if="selectedItem" :assignment="assignment" :groups="assignment.AssignmentConfig?.groups" :item="selectedItem" @update:groups="updateGroups" />
+                    <uc-assignment-properties :assignment="assignment" :groups="assignment.AssignmentConfig?.groups" :item="selectedItem" @update:groups="updateGroups" @update:assignment="assignment = $event" />
                 </div>
                 <v-divider />
                 <v-row class="ma-0" dense v-if="assignment.AssignmentConfig?.groups?.length > 0 || assignment.AssignmentType === 'INTEGRATED'">

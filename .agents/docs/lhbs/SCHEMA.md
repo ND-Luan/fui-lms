@@ -1011,6 +1011,18 @@ class tblEL_GiaoVienLop {
    varchar(20) UpdateUser
    datetime UpdateTime
 }
+class tblEL_HocLieuResourceMapping {
+   int MappingID
+   varchar(20) ResourceType
+   int ResourceID
+   int HocLieuID
+   int NoiDungID
+   bit IsDeleted
+   varchar(50) CreateUser
+   datetime CreateTime
+   varchar(50) UpdateUser
+   datetime UpdateTime
+}
 class tblEL_KyNang_MonHoc {
    int KyNang_MonHocID
    int MonHocID
@@ -1200,45 +1212,6 @@ class tblEL_Submissions {
    varchar(9) UpdateUser
    int DurationTime
    int AccessTime
-}
-class tblEL_Syllabus {
-   int SyllabusID
-   nvarchar(255) Title
-   nvarchar(1000) Description
-   int KhoiID
-   int MonHocID
-   int NienKhoa
-   tinyint HocKi
-   bit IsDeleted
-   varchar(9) CreateUser
-   datetime CreateTime
-   varchar(9) UpdateUser
-   datetime UpdateTime
-}
-class tblEL_SyllabusMapping {
-   int MappingID
-   varchar(20) ResourceType
-   int ResourceID
-   int SyllabusID
-   int NodeID
-   bit IsDeleted
-   varchar(9) CreateUser
-   datetime CreateTime
-   varchar(9) UpdateUser
-   datetime UpdateTime
-}
-class tblEL_SyllabusNode {
-   int NodeID
-   int SyllabusID
-   int ParentID
-   nvarchar(255) Title
-   varchar(20) NodeType
-   int SortOrder
-   bit IsDeleted
-   varchar(9) CreateUser
-   datetime CreateTime
-   varchar(9) UpdateUser
-   datetime UpdateTime
 }
 class tblEL_ThongBao {
    int ThongBaoID
@@ -2695,6 +2668,7 @@ class tblXetKetQuaRenLuyen {
 }
 
 tblNoiDungHocLieu_FP --|> tblHocLieu_FP : HocLieuID
+tblEL_HocLieuResourceMapping --|> tblHocLieu_FP : HocLieuID
 tblSoGVCNKeHoachThang_Bak_20260718 --|> tblSoGVCN_Bak_20260718 : SoGVCNID
 tblSoGVCNTheoDoiRenLuyen_Bak_20260718 --|> tblSoGVCN_Bak_20260718 : SoGVCNID
 tblSoGVCNNhanXetSoLienLac_Bak_20260718 --|> tblSoGVCN_Bak_20260718 : SoGVCNID
@@ -2748,5 +2722,6 @@ tblSoGVCNSiSo --|> tblSoGVCNDanhMuc : MocDanhMucID
 tblSoGVCNCanBoLop --|> tblSoGVCNDanhMuc : ChucVuDanhMucID
 tblSoGVCNBanDaiDienCMHS --|> tblSoGVCNDanhMuc : NhiemVuDanhMucID
 tblSoGVCNHuongNghiep --|> tblSoGVCNDanhMuc : MonThiTNDanhMucID
+tblEL_HocLieuResourceMapping --|> tblNoiDungHocLieu_FP : NoiDungID
 tblNoiDungHocLieu_FP --|> tblNoiDungHocLieu_FP : ParentID
 ```

@@ -30,16 +30,6 @@
 								:rows="2"></v-textarea>
 						</v-col>
 						<v-col cols="12" md="12">
-							<v-select :items="DSSyllabus" item-title="Title" item-value="SyllabusID"
-								v-model="formData.SyllabusID" :label="$i18n.locale == 'en' ? 'Curriculum (Textbook)' : 'Chương trình học (Bộ sách)'"
-								clearable />
-						</v-col>
-						<v-col cols="12" md="12" v-if="formData.SyllabusID">
-							<v-select :items="DSSyllabusNodes" item-title="displayName" item-value="NodeID"
-								v-model="formData.NodeID" :label="$i18n.locale == 'en' ? 'Chapter / Lesson' : 'Chương / Bài học'"
-								clearable />
-						</v-col>
-						<v-col cols="12" md="12">
 							<v-text-field v-model="formData.Chuong" :label="$t('message.Chapter')" />
 						</v-col>
 						<v-col cols="12" md="12">
@@ -172,8 +162,6 @@
 				{ title: this.$i18n.locale == 'en' ? 'Max score' : 'Điểm tối đa', value: 'MaxScore', align: 'center', key: 'MaxScore', sortable: false },
 				{ title: this.$i18n.locale == 'en' ? 'Action' : 'Thao tác', value: 'actions', align: 'center', sortable: false, key: 'actions', sortable: false, width: 100 },
 			],
-			DSSyllabus: [],
-			DSSyllabusNodes: [],
 		}
 	},
 	computed: {
@@ -250,30 +238,6 @@
 
 	},
 	watch: {
-		isOpen: {
-			handler(val) {
-				if (val) {
-					this.getSyllabusList();
-				}
-			},
-			immediate: true
-		},
-		'formData.SyllabusID'(newSyllabusID) {
-			this.DSSyllabusNodes = [];
-			if (newSyllabusID) {
-				this.getSyllabusTree(newSyllabusID);
-			} else {
-				this.formData.NodeID = null;
-			}
-		},
-		'formData.NodeID'(newNodeID) {
-			if (newNodeID) {
-				const node = this.DSSyllabusNodes.find(n => n.NodeID === newNodeID);
-				if (node) {
-					this.formData.Chuong = node.Title;
-				}
-			}
-		},
 		editData: function (newVal) {
 			console.log('newVal', newVal)
 		}
@@ -296,8 +260,6 @@
 						LessonID: this.formData.ResourceID,
 						NienKhoa: vueData.NienKhoa,
 						IsPublic: this.formData.IsPublic ? 1 : 0,
-						SyllabusID: this.formData.SyllabusID,
-						NodeID: this.formData.NodeID,
 					}, res => {
 						this.$emit('update:selectedLibery', { ...this.formData })
 						Vue.$toast.success('Cập nhật bài học thành công', { position: "top" })
@@ -311,8 +273,6 @@
 						IsPublic: this.formData.IsPublic ? 1 : 0,
 						NienKhoa: vueData.NienKhoa,
 						LimitAssigned: this.formData.LimitAssigned ?? 1,
-						SyllabusID: this.formData.SyllabusID,
-						NodeID: this.formData.NodeID,
 					}, res => {
 						this.$emit('update:selectedLibery', { ...this.formData })
 						Vue.$toast.success('Cập nhật bài tập thành công', { position: "top" })
@@ -320,36 +280,6 @@
 					})
 				}
 			}
-		},
-		getSyllabusList() {
-			if (!this.formData?.KhoiID || !this.formData?.MonHocID) return;
-			ajaxCALL('lms/EL_Syllabus_GetByLopMon', {
-				KhoiID: this.formData.KhoiID,
-				MonHocID: this.formData.MonHocID,
-				NienKhoa: vueData.NienKhoa
-			}, res => {
-				this.DSSyllabus = res?.data || res || [];
-			});
-		},
-		getSyllabusTree(syllabusID) {
-			ajaxCALL('lms/EL_Syllabus_GetTree', { SyllabusID: syllabusID }, res => {
-				const rawNodes = res?.data || res || [];
-				this.DSSyllabusNodes = this.flattenTree(rawNodes, null, 0);
-			});
-		},
-		flattenTree(nodes, parentId = null, depth = 0) {
-			let result = [];
-			const currentLevel = nodes.filter(n => n.ParentID === parentId);
-			for (const node of currentLevel) {
-				if (node.NodeType === 'CHAPTER' || node.NodeType === 'LESSON') {
-					result.push({
-						...node,
-						displayName: '  '.repeat(depth) + (node.NodeType === 'CHAPTER' ? '📁 ' : '📄 ') + node.Title
-					});
-					result = result.concat(this.flattenTree(nodes, node.NodeID, depth + 1));
-				}
-			}
-			return result;
 		},
 		async onToggleStatus(row) {
 			const prev = row.Status // lưu trạng thái cũ (1/0)

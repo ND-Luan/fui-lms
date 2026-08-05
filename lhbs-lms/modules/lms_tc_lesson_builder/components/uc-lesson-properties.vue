@@ -15,16 +15,10 @@
 				<v-text-field :label="$t('message.Week')" :model-value="lessonHeader.Tuan"
 					@update:modelValue="$emit('update:lessonHeader', { ...lessonHeader, Tuan: $event })"
 					variant="outlined" density="compact" :placeholder="$t('message.WeekExample')" />
-				<v-select :items="DSSyllabus" item-title="Title" item-value="SyllabusID"
-					:model-value="lessonHeader.SyllabusID"
-					@update:modelValue="onSyllabusChange"
-					:label="$i18n.locale == 'en' ? 'Curriculum (Textbook)' : 'Chương trình học (Bộ sách)'"
-					variant="outlined" density="compact" clearable />
-				<v-select v-if="lessonHeader.SyllabusID" :items="DSSyllabusNodes" item-title="displayName" item-value="NodeID"
-					:model-value="lessonHeader.NodeID"
-					@update:modelValue="onNodeChange"
-					:label="$i18n.locale == 'en' ? 'Chapter / Lesson' : 'Chương / Bài học'"
-					variant="outlined" density="compact" clearable />
+				<uc-hoclieu-resource-selector :model-value="lessonHeader.hocLieuLink || lessonHeader"
+					:khoi-id="lessonHeader.KhoiID" :mon-hoc-id="lessonHeader.MonHocID"
+					resource-type="LESSON" :resource-id="lessonHeader.LessonID"
+					@update:model-value="$emit('update:lessonHeader', { ...lessonHeader, ...$event, hocLieuLink: $event })" />
 				<v-text-field :label="$t('message.ChapterTopic')" :model-value="lessonHeader.Chuong"
 					@update:modelValue="$emit('update:lessonHeader', { ...lessonHeader, Chuong: $event })"
 					variant="outlined" density="compact" :placeholder="$t('message.ChapterExample')" />
@@ -273,28 +267,15 @@
 					text: this.$t('message.LoadingData')
 				},
 				isShowModalImportFromHocLieu: false,
-				DSSyllabus: [],
-				DSSyllabusNodes: [],
 				vueData,
 			}
 		},
-		mounted() {
-			this.getSyllabusList();
-		},
+		mounted() {},
 		watch: {
 			index(newIndex, oldIndex) {
 				if (newIndex !== null && newIndex !== oldIndex) this.tab = 'element';
 				else if (newIndex === null) this.tab = 'header';
 			},
-			'lessonHeader.SyllabusID': {
-				handler(newVal) {
-					this.DSSyllabusNodes = [];
-					if (newVal) {
-						this.getSyllabusTree(newVal);
-					}
-				},
-				immediate: true
-			}
 		},
 		methods: {
 			async saveElement() {
@@ -653,49 +634,6 @@
 			},
 			bindingImport(val) {
 				this.element.ElementData.source = val
-			},
-			getSyllabusList() {
-				if (!this.lessonHeader?.KhoiID || !this.lessonHeader?.MonHocID) return;
-				ajaxCALL('lms/EL_Syllabus_GetByLopMon', {
-					KhoiID: this.lessonHeader.KhoiID,
-					MonHocID: this.lessonHeader.MonHocID,
-					NienKhoa: vueData.NienKhoa
-				}, res => {
-					this.DSSyllabus = res?.data || res || [];
-				});
-			},
-			getSyllabusTree(syllabusID) {
-				ajaxCALL('lms/EL_Syllabus_GetTree', { SyllabusID: syllabusID }, res => {
-					const rawNodes = res?.data || res || [];
-					this.DSSyllabusNodes = this.flattenTree(rawNodes, null, 0);
-				});
-			},
-			flattenTree(nodes, parentId = null, depth = 0) {
-				let result = [];
-				const currentLevel = nodes.filter(n => n.ParentID === parentId);
-				for (const node of currentLevel) {
-					if (node.NodeType === 'CHAPTER' || node.NodeType === 'LESSON') {
-						result.push({
-							...node,
-							displayName: '  '.repeat(depth) + (node.NodeType === 'CHAPTER' ? '📁 ' : '📄 ') + node.Title
-						});
-						result = result.concat(this.flattenTree(nodes, node.NodeID, depth + 1));
-					}
-				}
-				return result;
-			},
-			onSyllabusChange(val) {
-				this.$emit('update:lessonHeader', { ...this.lessonHeader, SyllabusID: val, NodeID: null });
-			},
-			onNodeChange(val) {
-				let chuongVal = this.lessonHeader.Chuong;
-				if (val) {
-					const node = this.DSSyllabusNodes.find(n => n.NodeID === val);
-					if (node) {
-						chuongVal = node.Title;
-					}
-				}
-				this.$emit('update:lessonHeader', { ...this.lessonHeader, NodeID: val, Chuong: chuongVal });
 			},
 			renderUrlYoutube
 		}
