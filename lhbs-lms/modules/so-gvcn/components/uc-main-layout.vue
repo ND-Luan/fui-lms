@@ -23,6 +23,12 @@
 								item-value="LopID" label="Lớp" density="compact" variant="outlined" hide-details
 								:loading="loading.list" @update:model-value="onClassChange" />
 						</v-col>
+						<v-col v-if="!isCap1 && tab === 'so-lien-lac'" cols="12" sm="3">
+							<v-select v-model="selectedSoLienLacPeriodId" :items="soLienLacPeriods"
+								item-title="Thang_HienThi" item-value="Lop_NhanXetThangID"
+								label="Kỳ nhận xét" density="compact" variant="outlined" hide-details
+								:loading="loading.month" />
+						</v-col>
 						<v-col cols="12" sm="7" class="d-flex align-center justify-end ga-2">
 							<v-btn color="primary" variant="outlined" size="small" :loading="loading.list"
 								@click="onRefreshCurrentTab">
@@ -38,6 +44,12 @@
 								:disabled="saveButtonDisabled" :loading="saveButtonLoading" @click="onSaveButtonClick">
 								<v-icon start>mdi-content-save</v-icon>
 								{{ saveButtonText }}
+							</v-btn>
+							<v-btn v-if="showSendSoLienLacBgh" color="primary" variant="outlined" size="small"
+								:disabled="sendSoLienLacBghDisabled" :loading="loading.submit"
+								@click="sendSoLienLacToBgh">
+								<v-icon start>mdi-send</v-icon>
+								Gửi BGH
 							</v-btn>
 						</v-col>
 					</v-row>
@@ -186,7 +198,8 @@
 								<so-gvcn-tab-so-lien-lac v-else ref="tabSoLienLacRef" v-model:rows="soLienLacRows"
 									:selected-lop-i-d="selectedLopID" :columns="soLienLacColumns"
 									:nested-headers="soLienLacNestedHeaders" :sheet-height="sheetHeight"
-									:so-lien-lac-sheet-height="soLienLacSheetHeight" :sheet-key="sheetKey" />
+									:so-lien-lac-sheet-height="soLienLacSheetHeight" :sheet-key="sheetKey"
+									:read-only="soLienLacReadOnly" />
 							</v-window-item>
 
 							<!-- Tab Nội dung họp PHHS (C1 only) -->
@@ -250,6 +263,8 @@
 			renLuyenSheetInstance: null,
 			soLienLacRows: [],
 			soLienLacSavedRows: [],
+			soLienLacPeriods: [],
+			selectedSoLienLacPeriodId: null,
 			soLienLacSheetInstance: null,
 			keHoachSheetRows: [],
 			keHoachSheetInstance: null,
@@ -569,6 +584,19 @@
 				// Tạm mở nút Lưu cho demo/test.
 				return true
 			},
+			showSendSoLienLacBgh() {
+				return !this.isCap1 && this.tab === 'so-lien-lac' && !!this.selectedSoLienLacPeriodId
+			},
+			sendSoLienLacBghDisabled() {
+				return this.loading.save || this.loading.submit || !this.soLienLacRows.length ||
+					[2, 4].includes(Number(this.selectedSoLienLacPeriod?.TinhTrang))
+			},
+			soLienLacReadOnly() {
+				return [2, 4].includes(Number(this.selectedSoLienLacPeriod?.TinhTrang))
+			},
+			selectedSoLienLacPeriod() {
+				return this.soLienLacPeriods.find(x => Number(x.Lop_NhanXetThangID) === Number(this.selectedSoLienLacPeriodId)) || null
+			},
 			chiTieuGiaoDucTitle() {
 				const tenLop = this.selectedClass?.TenLop || ''
 				return 'I. XÂY DỰNG CHỈ TIÊU HAI MẶT GIÁO DỤC LỚP ' + tenLop + ' NĂM HỌC ' + this.getCurrentSchoolYearText()
@@ -592,14 +620,16 @@
 					case 'thong-ke-do-tuoi': return 'Lưu thống kê độ tuổi'
 					case 'theo-doi-thanh-tich': return 'Lưu thành tích'
 					case 'noi-dung-hop-ph': return 'Lưu nội dung họp PH'
-					case 'so-lien-lac': return this.isCap1 ? 'Lưu theo dõi PH đi họp' : 'Lưu sổ liên lạc'
+					case 'so-lien-lac': return this.isCap1 ? 'Lưu theo dõi PH đi họp' : 'Lưu tạm tất cả'
 					case 'huong-nghiep': return 'Lưu hướng nghiệp'
 					default: return 'Lưu'
 				}
 			},
 			saveButtonDisabled() {
 				if (this.tab === 'ke-hoach' || this.tab === 'cong-tac-cn') return !this.form.SoGVCNID
-				return !this.form.SoGVCNID || this.loading.save
+				const periodLocked = this.tab === 'so-lien-lac' && !this.isCap1 &&
+					[2, 4].includes(Number(this.selectedSoLienLacPeriod?.TinhTrang))
+				return !this.form.SoGVCNID || this.loading.save || periodLocked
 			},
 			saveButtonLoading() {
 				if (this.tab === 'ke-hoach' || this.tab === 'cong-tac-cn') return this.loading.month
@@ -650,10 +680,12 @@
 			]
 		},
 		soLienLacNestedHeaders() {
+			const period = this.selectedSoLienLacPeriod
+			const colspan = Math.max(0, (this.soLienLacColumns || []).length - 4)
 			return [
 				[
 					{ title: '', colspan: 4 },
-					{ title: 'NHẬN XÉT SỔ LIÊN LẠC HẰNG THÁNG', colspan: 11 }
+					{ title: period?.Thang_HienThi || 'NHẬN XÉT SỔ LIÊN LẠC HẰNG THÁNG', colspan }
 				]
 			]
 		}
@@ -677,6 +709,13 @@
 			this.selectedLopID = '__ALL__'
 			this.classSelectionInitialized = false
 			this.getList()
+		},
+		selectedSoLienLacPeriodId() {
+			if (!this.isCap1) {
+				this.applySoLienLacColumns()
+				this.soLienLacRows = this.toSoLienLacRows(this.getSelectedClassStudents())
+				this.sheetKey++
+			}
 		},
 		currentNienKhoa() {
 			this.filter.NienKhoa = this.currentNienKhoa
@@ -715,8 +754,9 @@
 				this.getSoKetHk1()
 			} else if (newTab === 'noi-dung-hop-ph' && this.isCap1) {
 				this.getNoiDungHopPh()
-			} else if (newTab === 'so-lien-lac' && this.isCap1) {
-				this.getTheoDoiPhHop()
+			} else if (newTab === 'so-lien-lac') {
+				if (this.isCap1) this.getTheoDoiPhHop()
+				else this.getSoLienLacPeriods()
 			} else if (newTab === 'theo-doi-thanh-tich' && this.isCap1) {
 				this.getTheoDoiThanhTich()
 			} else if (newTab === 'thong-ke-do-tuoi' && this.isCap1) {
@@ -1203,6 +1243,51 @@
 				}
 			}
 		},
+		async getSoLienLacPeriods(students = this.getSelectedClassStudents()) {
+			if (this.isCap1 || !this.selectedLopID || this.selectedLopID === '__ALL__') return
+			this.loading.month = true
+			try {
+				const response = await ajaxCALLPromise('lms/NhanXetThang_Lop_Get_GV', {
+					NienKhoa: this.currentNienKhoa,
+					LopID: this.selectedLopID
+				}).catch(() => [])
+				const periods = (Array.isArray(response) ? response : []).sort((a, b) => {
+					const finalValue = item => item.Text_Thang_VI === 'Cuối năm' ? 1 : 0
+					return (Number(a.Nam) * 10000 + Number(a.Thang) * 10 + finalValue(a)) -
+						(Number(b.Nam) * 10000 + Number(b.Thang) * 10 + finalValue(b))
+				})
+				const loaded = await Promise.all(periods.map(async period => ({
+					...period,
+					items: await ajaxCALLPromise('lms/NhanXetThang_Get', {
+						Lop_NhanXetThangID: period.Lop_NhanXetThangID,
+						LopID: this.selectedLopID
+					}).catch(() => [])
+				})))
+				loaded.forEach(period => {
+					period.fields = [12, 5].includes(Number(period.Thang))
+						? [
+							{ key: 'UuDiem', title: 'Ưu điểm' },
+							{ key: 'NhuocDiem', title: 'Nhược điểm' },
+							{ key: 'DeXuat', title: 'Đề xuất' },
+							...(Number(period.Thang) === 5 ? [{ key: 'NhanXetGVCN', title: 'Nhận xét ghi học bạ' }] : [])
+						]
+						: [
+							{ key: 'NoiDungKienThuc_HTML', title: 'Về học tập' },
+							{ key: 'NoiDungNangLuc_HTML', title: 'Về nền nếp' },
+							{ key: 'NoiDungHoatDongKhac_HTML', title: 'Mong muốn phối hợp' }
+						]
+				})
+				this.soLienLacPeriods = loaded
+				if (!loaded.some(x => Number(x.Lop_NhanXetThangID) === Number(this.selectedSoLienLacPeriodId))) {
+					this.selectedSoLienLacPeriodId = loaded[0]?.Lop_NhanXetThangID || null
+				}
+				this.applySoLienLacColumns()
+				this.soLienLacRows = this.toSoLienLacRows(students)
+				this.sheetKey++
+			} finally {
+				this.loading.month = false
+			}
+		},
 		async getDetail() {
 			if (!this.form.SoGVCNID) return
 			const data = await ajaxCALLPromise(`lms/SoGVCNGet/${this.form.SoGVCNID}`)
@@ -1255,7 +1340,8 @@
 			const students = this.getSelectedClassStudents()
 			if (students.length > 0) {
 				this.renLuyenRows = this.toRenLuyenRows(students)
-				this.soLienLacRows = this.toSoLienLacRows(students)
+				if (!this.isCap1 && this.tab === 'so-lien-lac') await this.getSoLienLacPeriods(students)
+				else this.soLienLacRows = this.toSoLienLacRows(students)
 				this.setStudentSheets(students)
 			}
 			this.sheetKey++
@@ -1412,7 +1498,17 @@
 				this.getSavedMonthlyValue(this.renLuyenSavedRows, x.HSLopID, 96, 'NoiDung')  // THÀNH TÍCH KHÁC
 			])
 		},
+		applySoLienLacColumns() {
+			this.soLienLacColumns = [
+				{ title: 'STT', width: 60, readOnly: true },
+				{ title: 'MÃ HỌC SINH', width: 110, readOnly: true },
+				{ title: 'SỐ DANH BỘ', width: 110, readOnly: true },
+				{ title: 'HỌ VÀ TÊN HỌC SINH', width: 220, readOnly: true },
+				...(this.selectedSoLienLacPeriod?.fields || []).map(field => ({ title: field.title, width: 260 }))
+			]
+		},
 		toSoLienLacRows(rows) {
+			const period = this.selectedSoLienLacPeriod
 			const uniqueRows = []
 			const seenKeys = new Set()
 			;(rows || []).forEach(x => {
@@ -1427,18 +1523,11 @@
 				x.MaHocSinh || x.HocSinhID || '',
 				x.SoDanhBo || '',
 				x.HoTen || '',
-				this.getSavedMonthlyValue(this.soLienLacSavedRows, x.HSLopID, 8, 'NhanXet'),
-				this.getSavedMonthlyValue(this.soLienLacSavedRows, x.HSLopID, 9, 'NhanXet'),
-				this.getSavedMonthlyValue(this.soLienLacSavedRows, x.HSLopID, 10, 'NhanXet'),
-				this.getSavedMonthlyValue(this.soLienLacSavedRows, x.HSLopID, 11, 'NhanXet'),
-				this.getSavedMonthlyValue(this.soLienLacSavedRows, x.HSLopID, 12, 'NhanXet'),
-				this.getSavedMonthlyValue(this.soLienLacSavedRows, x.HSLopID, 91, 'NhanXet'), // NHẬN XÉT HKI (Thang 91)
-				this.getSavedMonthlyValue(this.soLienLacSavedRows, x.HSLopID, 1, 'NhanXet'),
-				this.getSavedMonthlyValue(this.soLienLacSavedRows, x.HSLopID, 3, 'NhanXet'),
-				this.getSavedMonthlyValue(this.soLienLacSavedRows, x.HSLopID, 4, 'NhanXet'),
-				this.getSavedMonthlyValue(this.soLienLacSavedRows, x.HSLopID, 5, 'NhanXet'),
-				this.getSavedMonthlyValue(this.soLienLacSavedRows, x.HSLopID, 92, 'NhanXet')  // NHẬN XÉT HKII (Thang 92)
-			])
+					...(period?.fields || []).map(field => {
+						const item = (period.items || []).find(row => Number(row.HSLopID) === Number(x.HSLopID))
+						return item?.[field.key] || ''
+					})
+				])
 		},
 		getSavedMonthlyValue(rows, hsLopID, thang, key) {
 			const item = (rows || []).find(row => Number(row.HSLopID) === Number(hsLopID) && Number(row.Thang) === Number(thang))
@@ -2342,7 +2431,7 @@
 		},
 		initKeHoachSheet() {
 			// Dùng setTimeout thay vì $nextTick để đảm bảo container đã có kích thước thực
-			// (tương tự cách uc-jexcel gọi jspreadsheet trong mounted)
+			// Khởi tạo jspreadsheet trực tiếp cho các sheet của module.
 			const doInit = () => {
 				const container = this.$refs.keHoachSheetRef
 				if (!container) return
@@ -2969,10 +3058,7 @@
 							})
 							this.theoDoiPhHopSavedRows = rowsToSave
 						} else {
-							await ajaxCALLPromise('lms/SoGVCNNhanXetSoLienLacSave', {
-								SoGVCNID: this.form.SoGVCNID,
-								JsonRows: JSON.stringify(this.serializeSoLienLacMonthlyRows())
-							})
+							await this.saveSelectedSoLienLacPeriod()
 						}
 					}
 				} else if (this.tab === 'so-ket-hk1' && this.isCap1) {
@@ -3247,29 +3333,65 @@
 			})
 			return rows
 		},
-		serializeSoLienLacMonthlyRows() {
-			const sheet = Array.isArray(this.soLienLacSheetInstance) ? this.soLienLacSheetInstance[0] : this.soLienLacSheetInstance
+		serializeSelectedSoLienLacPayload() {
+			const period = this.selectedSoLienLacPeriod
+			if (!period) return []
+			const sheet = this.$refs.tabSoLienLacRef?.getInstance?.()
 			const sourceRows = sheet && typeof sheet.getData === 'function' ? sheet.getData() : (this.soLienLacRows || [])
 			const students = this.getSelectedClassStudents()
-			const months = this.getSoLienLacMonths()
-			const rows = []
-			sourceRows.forEach((row, rowIndex) => {
+			return sourceRows.map((row, rowIndex) => {
 				const student = students[rowIndex] || {}
-				if (!student.HSLopID) return
-				// Lưu nhận xét các tháng 8..12, 1, 3..5
-				months.forEach(month => {
-					rows.push({
-						HSLopID: student.HSLopID,
-						Thang: month.thang,
-						NhanXet: this.cleanSheetValue(row[month.index])
-					})
+				const existing = (period.items || []).find(item => Number(item.HSLopID) === Number(student.HSLopID)) || {}
+				const payload = {
+					...existing,
+					LopID: this.selectedLopID,
+					Lop_NhanXetThangID: period.Lop_NhanXetThangID,
+					HocSinhID: student.HocSinhID,
+					HSLopID: student.HSLopID
+				}
+				;(period.fields || []).forEach((field, index) => {
+					payload[field.key] = this.cleanSheetValue(row[index + 4])
 				})
-				// Cột 9: NHẬN XÉT HKI (Thang = 91)
-				rows.push({ HSLopID: student.HSLopID, Thang: 91, NhanXet: this.cleanSheetValue(row[9]) })
-				// Cột 14: NHẬN XÉT HKII (Thang = 92)
-				rows.push({ HSLopID: student.HSLopID, Thang: 92, NhanXet: this.cleanSheetValue(row[14]) })
+				return payload
+			}).filter(row => row.HSLopID)
+		},
+		async saveSelectedSoLienLacPeriod() {
+			const period = this.selectedSoLienLacPeriod
+			if (!period) throw new Error('Vui lòng chọn kỳ nhận xét.')
+			const payload = this.serializeSelectedSoLienLacPayload()
+			if (!payload.length) throw new Error('Không có học sinh để lưu nhận xét.')
+			await ajaxCALLPromise('lms/NhanXetThang_Ins', { JSON_NhanXetThang: payload })
+			await ajaxCALLPromise('lms/NhanXetThang_Upd_TinhTrang', {
+				TinhTrang: 1,
+				Lop_NhanXetThangID: period.Lop_NhanXetThangID,
+				ReasonReject: ''
 			})
-			return rows
+			await this.getSoLienLacPeriods(this.getSelectedClassStudents())
+		},
+		async sendSoLienLacToBgh() {
+			const period = this.selectedSoLienLacPeriod
+			if (!period || !this.soLienLacRows.length) return
+			if ([2, 4].includes(Number(period.TinhTrang))) return
+			const confirmed = await this.confirmRef?.value?.show?.({ title: 'Xác nhận gửi nhận xét tháng lên BGH?' })
+			if (!confirmed) return
+			this.loading.submit = true
+			try {
+				const payload = this.serializeSelectedSoLienLacPayload()
+				if (payload.some(row => Number(row.NhanXetThangID) <= 0)) {
+					this.notify('Vui lòng nhập đủ nhận xét cho tất cả học sinh trước khi gửi BGH')
+					return
+				}
+				await ajaxCALLPromise('lms/NhanXetThang_Ins', { JSON_NhanXetThang: payload })
+				await ajaxCALLPromise('lms/NhanXetThang_Upd_TinhTrang', {
+					TinhTrang: 2,
+					Lop_NhanXetThangID: period.Lop_NhanXetThangID,
+					ReasonReject: ''
+				})
+				await this.getSoLienLacPeriods(this.getSelectedClassStudents())
+				this.notify('Đã gửi nhận xét lên BGH')
+			} finally {
+				this.loading.submit = false
+			}
 		},
 
 		async saveKeHoachSheet() {

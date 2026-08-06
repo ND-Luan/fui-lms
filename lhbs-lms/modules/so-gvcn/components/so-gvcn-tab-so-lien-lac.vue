@@ -46,7 +46,8 @@
 			nestedHeaders: { type: Array, default: () => [] },
 			sheetHeight: { type: String, default: 'calc(100vh - 230px)' },
 			soLienLacSheetHeight: { type: String, default: 'calc(100vh - 385px)' },
-			sheetKey: { type: [Number, String], default: 0 }
+			sheetKey: { type: [Number, String], default: 0 },
+			readOnly: { type: Boolean, default: false }
 		},
 		emits: ['update:rows'],
 		data() {
@@ -86,11 +87,12 @@
 					this.sheetInstance = soGvcnJspreadsheet.create(container, {
 						worksheets: [{
 							data: this.rows || [],
-							columns: (this.columns || []).map(column => (
-								!column.readOnly && column.type !== 'numeric' && column.align !== 'center'
+							columns: (this.columns || []).map(column => {
+								const normalized = !column.readOnly && column.type !== 'numeric' && column.align !== 'center'
 									? { ...column, align: 'justify' }
-									: column
-							)),
+									: { ...column }
+								return this.readOnly ? { ...normalized, readOnly: true } : normalized
+							}),
 							nestedHeaders: this.nestedHeaders || [],
 							rowResize: true,
 							columnDrag: false,
@@ -120,6 +122,9 @@
 				this.scheduleInit()
 			},
 			sheetKey() {
+				this.scheduleInit()
+			},
+			readOnly() {
 				this.scheduleInit()
 			}
 		},
