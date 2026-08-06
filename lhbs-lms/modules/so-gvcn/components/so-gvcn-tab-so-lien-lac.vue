@@ -5,14 +5,15 @@
 		</v-alert>
 		<template v-else>
 			<div class="pa-2 pb-0">
-				<v-expansion-panels class="mb-2">
-					<v-expansion-panel>
-						<v-expansion-panel-title class="text-subtitle-1 font-weight-bold py-2 px-3 text-primary"
-							style="min-height: 48px;">
-							<v-icon start color="primary" class="mr-2">mdi-information-outline</v-icon>
-							NHẬN XÉT SỔ LIÊN LẠC HẰNG THÁNG
-						</v-expansion-panel-title>
-						<v-expansion-panel-text class="text-caption text-medium-emphasis">
+				<v-alert v-if="reasonReject" class="mb-2" type="error" variant="tonal" density="compact">
+					Lý do BGH từ chối: {{ reasonReject }}
+				</v-alert>
+				<v-btn size="small" variant="outlined" color="primary" class="mb-2"
+					@click="showGuide = !showGuide">
+					<v-icon start>{{ showGuide ? 'mdi-chevron-up' : 'mdi-information-outline' }}</v-icon>
+					{{ showGuide ? 'Ẩn hướng dẫn' : 'Hướng dẫn' }}
+				</v-btn>
+				<v-alert v-if="showGuide" variant="tonal" type="info" density="compact" class="mb-2 text-caption">
 							<div class="font-weight-bold mb-1">Hướng dẫn:</div>
 							<div class="mb-1">
 								Căn cứ sheet HỒ SƠ THEO DÕI QTRL, GVCN soạn nhận xét để cập nhật MLS cho PHHS. Nhận xét
@@ -25,9 +26,7 @@
 								<li>Việc tuân thủ nội quy, nền nếp, chuyên cần trong tháng</li>
 								<li>Đề xuất PHHS phối hợp giáo dục</li>
 							</ul>
-						</v-expansion-panel-text>
-					</v-expansion-panel>
-				</v-expansion-panels>
+				</v-alert>
 			</div>
 			<div class="so-gvcn-sheet-wrap pa-2 pt-0">
 				<div ref="sheetRef" class="so-gvcn-sheet w-100"></div>
@@ -47,13 +46,15 @@
 			sheetHeight: { type: String, default: 'calc(100vh - 230px)' },
 			soLienLacSheetHeight: { type: String, default: 'calc(100vh - 385px)' },
 			sheetKey: { type: [Number, String], default: 0 },
-			readOnly: { type: Boolean, default: false }
+			readOnly: { type: Boolean, default: false },
+			reasonReject: { type: String, default: '' }
 		},
 		emits: ['update:rows'],
 		data() {
 			return {
 				sheetInstance: null,
-				timer: null
+				timer: null,
+				showGuide: false
 			}
 		},
 		methods: {

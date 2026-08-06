@@ -1,0 +1,23 @@
+{
+  "ModuleName": "preview: uc-main-layout — default",
+  "data": [],
+  "watch": {},
+  "controls": [
+    {
+      "prop": "fluid pa-0",
+      "rows": [
+        {
+          "prop": "",
+          "cols": [
+            {
+              "w": "12",
+              "el": "uc-main-layout",
+              "attr": {}
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "set": {}
+}

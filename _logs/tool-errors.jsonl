@@ -1,0 +1,9 @@
+{"ts":"2026-08-06T04:27:40.498Z","pid":90867,"tool":"session_set","message":"❌ Failed to set active module target: Module \"xep-hoc-sinh-nhom-av\" không có trong cache local (lhbs-lms/modules/_modules.json). Chạy module_list({ projectId: \"lhbs-lms\" }) để refresh danh sách module rồi gọi lại."}
+{"ts":"2026-08-06T04:27:40.844Z","pid":90867,"tool":"component_preview","message":"❌ renderUI cần Playwright (chưa cài). Cài một lần:\n  npm i -D playwright\n  npx playwright install chromium\nrồi restart MCP server. (Engine vm của module_simulate vẫn dùng được không cần Playwright.)"}
+{"ts":"2026-08-06T04:27:40.981Z","pid":90867,"tool":"component_preview","message":"❌ renderUI cần Playwright (chưa cài). Cài một lần:\n  npm i -D playwright\n  npx playwright install chromium\nrồi restart MCP server. (Engine vm của module_simulate vẫn dùng được không cần Playwright.)"}
+{"ts":"2026-08-06T04:27:41.002Z","pid":90867,"tool":"component_update","message":"❌ FUI API Error: 400 Bad Request"}
+{"ts":"2026-08-06T04:27:41.036Z","pid":90867,"tool":"component_update","message":"❌ FUI API Error: 400 Bad Request"}
+{"ts":"2026-08-06T04:28:10.792Z","pid":91358,"tool":"component_update","message":"❌ FUI API Error: 400 Bad Request"}
+{"ts":"2026-08-06T04:28:10.817Z","pid":91358,"tool":"component_update","message":"❌ FUI API Error: 400 Bad Request"}
+{"ts":"2026-08-06T07:52:17.454Z","pid":182733,"tool":"component_update","message":"❌ FUI API Error: 401 Unauthorized"}
+{"ts":"2026-08-06T07:52:17.468Z","pid":182733,"tool":"component_update","message":"❌ FUI API Error: 401 Unauthorized"}
