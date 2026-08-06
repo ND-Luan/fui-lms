@@ -42,8 +42,8 @@
 </template>
 
 <script>
-export default {
-	name: 'uc-hoclieu-resource-selector',
+	export default {
+		name: 'uc-hoclieu-resource-selector',
 	props: {
 		modelValue: { type: Object, default: () => ({}) },
 		khoiId: { type: [Number, String], default: null },
@@ -202,5 +202,5 @@ export default {
 			})
 		},
 	},
-}
+	}
 </script>

@@ -17,6 +17,7 @@
 						rows="6"
 						auto-grow
 						hide-details
+						class="text-body-2"
 						placeholder="Nhập nội dung biên bản cuộc họp Phụ huynh..."
 					/>
 				</v-card-text>

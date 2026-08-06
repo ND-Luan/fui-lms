@@ -35,21 +35,21 @@
 					<v-card-title class="text-subtitle-1 font-weight-bold">1. Công tác duy trì số lượng</v-card-title>
 					<v-card-text>
 						<v-textarea v-model="localForm.DuyTriSoLuong" rows="4" variant="outlined" density="compact"
-							hide-details />
+							hide-details class="text-body-2" />
 					</v-card-text>
 				</v-card>
 				<v-card ref="sectionNlPc" class="mb-4" variant="outlined">
 					<v-card-title class="text-subtitle-1 font-weight-bold">2. Về năng lực, phẩm chất</v-card-title>
 					<v-card-text>
 						<v-textarea v-model="localForm.NangLucPhamChat" rows="4" variant="outlined" density="compact"
-							hide-details />
+							hide-details class="text-body-2" />
 					</v-card-text>
 				</v-card>
 				<v-card ref="sectionKienThuc" class="mb-4" variant="outlined">
 					<v-card-title class="text-subtitle-1 font-weight-bold">3. Về kiến thức, kĩ năng</v-card-title>
 					<v-card-text>
 						<v-textarea v-model="localForm.KienThucKyNang" rows="4" variant="outlined" density="compact"
-							hide-details />
+							hide-details class="text-body-2" />
 					</v-card-text>
 				</v-card>
 				<v-card class="mb-4" variant="outlined">
@@ -89,7 +89,7 @@
 					</v-card-title>
 					<v-card-text>
 						<v-textarea v-model="localForm.HoanThanhCT" rows="4" variant="outlined" density="compact"
-							hide-details />
+							hide-details class="text-body-2" />
 					</v-card-text>
 				</v-card>
 				<v-card ref="sectionPhongTrao" variant="outlined">
@@ -97,7 +97,7 @@
 					</v-card-title>
 					<v-card-text>
 						<v-textarea v-model="localForm.PhongTraoKhac" rows="4" variant="outlined" density="compact"
-							hide-details />
+							hide-details class="text-body-2" />
 					</v-card-text>
 				</v-card>
 			</div>

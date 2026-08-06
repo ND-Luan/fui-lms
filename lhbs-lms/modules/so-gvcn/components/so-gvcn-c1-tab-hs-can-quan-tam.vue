@@ -1,5 +1,5 @@
 <template>
-	<v-card-text class="pa-0 so-gvcn-sheet-wrap" :style="{ height: sheetHeight, 'overflow-y': 'auto' }">
+	<v-card-text class="pa-0 so-gvcn-sheet-wrap" :style="{ height: sheetHeight, overflow: 'hidden' }">
 		<v-alert v-if="selectedLopID === '__ALL__'" type="info" variant="tonal" density="compact" class="ma-2">
 			Chọn một lớp ở thanh trên để theo dõi học sinh cần quan tâm.
 		</v-alert>
@@ -158,7 +158,7 @@
 				container.innerHTML = ''
 				if (typeof jspreadsheet !== 'function') return
 
-				this.instance = soGvcnJspreadsheet.create(container, {
+					this.instance = soGvcnJspreadsheet.create(container, {
 					worksheets: [{
 						data: this.buildRows(),
 						columns: this.columns,
@@ -169,14 +169,20 @@
 						tableOverflow: true,
 						tableHeight: this.sheetHeight,
 						lazyLoading: false,
-						freezeColumns: 3,
+						freezeColumns: 2,
+						freezeColumnIndexes: [0, 2],
 						wordWrap: true,
 						allowInsertColumn: false,
 						allowInsertRow: false,
 						showHeader: true
 					}],
 					contextMenu: () => false
-				})
+					})
+					const worksheet = Array.isArray(this.instance) ? this.instance[0] : this.instance
+					if (worksheet && typeof worksheet.hideColumn === 'function') {
+						worksheet.hideColumn(1)
+						window.requestAnimationFrame(() => soGvcnJspreadsheet.syncNestedHeaders(container, [2], [[0, 2]]))
+					}
 			}
 		}
 	}

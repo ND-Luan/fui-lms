@@ -1,5 +1,5 @@
 <template>
-		<v-dialog :model-value="isOpen" @update:model-value="val => { if (!val) CloseModal() }" max-width="900">
+	<v-dialog :model-value="isOpen" @update:model-value="val => { if (!val) CloseModal() }" max-width="900">
 		<v-card>
 			<v-card-title class="d-flex align-center">
 				{{ $t('message.CreateContent') }} - {{ $t('message.Grade') }} {{ khoiItem?.KhoiID

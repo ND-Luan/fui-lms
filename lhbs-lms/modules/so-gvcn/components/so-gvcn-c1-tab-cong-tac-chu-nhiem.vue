@@ -25,31 +25,30 @@
 
 			<div class="flex-grow-1 h-100 overflow-y-auto pr-1">
 				<div class="text-h6 text-center font-weight-bold py-3">
-					KẾT QUẢ THỰC HIỆN THÁNG {{ activeMonthLabel }}/{{ activeYearLabel }}
-					VÀ KẾ HOẠCH THÁNG {{ planMonthLabel }}/{{ planYearLabel }}
+					{{ pageTitle }}
 				</div>
 
 				<v-row dense class="mb-3">
-					<v-col cols="12" md="6">
+					<v-col v-if="Number(activeMonth) !== 8" cols="12">
 						<v-card variant="outlined" height="100%">
 							<v-card-title class="text-subtitle-2 font-weight-bold text-primary">
-								I. ĐÁNH GIÁ CÔNG TÁC THÁNG {{ activeMonthLabel }}
+								I. ĐÁNH GIÁ CÔNG TÁC THÁNG {{ resultMonthLabel }}
 							</v-card-title>
 							<v-card-text>
 								<v-textarea v-if="currentPlan" v-model="currentPlan.DanhGia" rows="6" auto-grow
-									variant="outlined" density="compact" hide-details
+									variant="outlined" density="compact" hide-details class="text-body-2"
 									placeholder="Nhập nội dung đánh giá kết quả thực hiện trong tháng..." />
 							</v-card-text>
 						</v-card>
 					</v-col>
-					<v-col cols="12" md="6">
+					<v-col v-if="Number(activeMonth) !== 5" cols="12">
 						<v-card variant="outlined" height="100%">
 							<v-card-title class="text-subtitle-2 font-weight-bold text-primary">
-								II. KẾ HOẠCH THÁNG {{ planMonthLabel }}
+								II. KẾ HOẠCH THÁNG {{ activeMonthLabel }}
 							</v-card-title>
 							<v-card-text>
 								<v-textarea v-if="currentPlan" v-model="currentPlan.MucTieu" rows="6" auto-grow
-									variant="outlined" density="compact" hide-details
+									variant="outlined" density="compact" hide-details class="text-body-2"
 									placeholder="Nhập nội dung và nhiệm vụ trọng tâm của tháng..." />
 							</v-card-text>
 						</v-card>
@@ -58,7 +57,7 @@
 
 				<v-card variant="outlined" class="mb-8">
 					<v-card-title class="text-subtitle-2 font-weight-bold text-primary">
-						III. KẾ HOẠCH HÀNG TUẦN CỦA THÁNG {{ planMonthLabel }}/{{ planYearLabel }}
+						III. KẾ HOẠCH HÀNG TUẦN CỦA THÁNG {{ activeMonthLabel }}/{{ activeYearLabel }}
 					</v-card-title>
 					<v-divider />
 					<v-card-text class="pa-2">
@@ -95,7 +94,7 @@
 				weeklyColumns: [
 					{ title: 'THÁNG', width: 80, readOnly: true, align: 'center' },
 					{ title: 'TUẦN', width: 90, readOnly: true, align: 'center' },
-					{ title: 'THỜI GIAN', width: 150, readOnly: true, align: 'center' },
+					{ title: 'THỜI GIAN', width: 150, align: 'center' },
 					{ title: 'KẾ HOẠCH THỰC HIỆN', width: 390, align: 'justify' },
 					{ title: 'KẾT QUẢ', width: 330, align: 'justify' },
 					{ title: 'NGUYÊN NHÂN ĐẠT ĐƯỢC KẾT QUẢ', width: 390, align: 'justify' }
@@ -103,6 +102,26 @@
 			}
 		},
 		computed: {
+			pageTitle() {
+				const activeMonth = Number(this.activeMonth)
+				if (activeMonth === 8) {
+					return 'KẾ HOẠCH THÁNG ' + this.activeMonthLabel + '/' + this.activeYearLabel
+				}
+				const activeIndex = this.months.findIndex(month => Number(month.value) === activeMonth)
+				const previousMonth = this.months[activeIndex - 1]
+				const resultLabel = previousMonth?.label || activeMonth - 1
+				const resultYear = activeMonth === 1 ? this.activeYearLabel - 1 : this.activeYearLabel
+				const resultTitle = 'KẾT QUẢ ĐÁNH GIÁ CÔNG TÁC THÁNG ' + resultLabel + '/' + resultYear
+				if (activeMonth === 5) return resultTitle
+				return resultTitle + ' VÀ KẾ HOẠCH THÁNG ' + this.activeMonthLabel + '/' + this.activeYearLabel
+			},
+			resultMonthLabel() {
+				const activeIndex = this.months.findIndex(month => Number(month.value) === Number(this.activeMonth))
+				return this.months[activeIndex - 1]?.label || Number(this.activeMonth) - 1
+			},
+			resultYearLabel() {
+				return Number(this.activeMonth) === 1 ? this.activeYearLabel - 1 : this.activeYearLabel
+			},
 			activeMonthLabel() {
 				return this.months.find(month => Number(month.value) === Number(this.activeMonth))?.label
 					|| this.activeMonth
@@ -121,6 +140,12 @@
 			},
 			planYearLabel() {
 				return Number(this.activeMonth) === 12 ? this.activeYearLabel + 1 : this.activeYearLabel
+			},
+			weeklyPlanMonthLabel() {
+				return Number(this.activeMonth) === 5 ? this.activeMonthLabel : this.planMonthLabel
+			},
+			weeklyPlanYearLabel() {
+				return Number(this.activeMonth) === 5 ? this.activeYearLabel : this.planYearLabel
 			},
 			weeklySheetHeight() {
 				return '360px'
@@ -205,17 +230,18 @@
 						return [
 							calendarRow[0],
 							calendarRow[1],
-							calendarRow[2],
+							source.ThoiGian || this.formatSavedWeekTime(source, calendarRow[2]),
 							source.KeHoachThucHien || '',
 							source.KetQua || '',
 							source.NguyenNhan || ''
 						]
 					}
-					const contentStart = source.length >= 6 ? 3 : (source.length >= 5 ? 2 : 1)
+					const hasSavedTime = source.length >= 6
+					const contentStart = hasSavedTime ? 3 : (source.length >= 5 ? 2 : 1)
 					return [
 						calendarRow[0],
 						calendarRow[1],
-						calendarRow[2],
+						hasSavedTime ? (source[2] || calendarRow[2]) : calendarRow[2],
 						source[contentStart] || '',
 						source[contentStart + 1] || '',
 						source[contentStart + 2] || ''
@@ -239,6 +265,33 @@
 				const month = String(value.getMonth() + 1).padStart(2, '0')
 				const day = String(value.getDate()).padStart(2, '0')
 				return year + '-' + month + '-' + day
+			},
+			formatSavedWeekTime(source, fallback) {
+				if (!source) return fallback
+				if (source.ThoiGian) return source.ThoiGian
+				const from = source.TuNgay ? this.formatDisplayDate(source.TuNgay) : ''
+				const to = source.DenNgay ? this.formatDisplayDate(source.DenNgay) : ''
+				return from && to ? `${from} – ${to}` : fallback
+			},
+			formatDisplayDate(value) {
+				const date = new Date(value)
+				if (Number.isNaN(date.getTime())) return ''
+				return `${String(date.getDate()).padStart(2, '0')}/${String(date.getMonth() + 1).padStart(2, '0')}`
+			},
+			getEditableWeekDates(value, fallbackPeriod) {
+				const text = String(value || '')
+				const matches = [...text.matchAll(/(\d{1,2})[\/-](\d{1,2})(?:[\/-](\d{4}))?/g)]
+				if (matches.length < 2) return fallbackPeriod
+				const schoolYear = Number(this.nienKhoa) || new Date().getFullYear()
+				const toDate = (match, fallbackDate) => {
+					const month = Number(match[2])
+					const year = Number(match[3]) || (month >= 8 ? schoolYear - 1 : schoolYear)
+					return new Date(year, month - 1, Number(match[1]))
+				}
+				const fromDate = toDate(matches[0], fallbackPeriod.fromDate)
+				const endDate = toDate(matches[1], fallbackPeriod.toDate)
+				if (endDate < fromDate) endDate.setFullYear(endDate.getFullYear() + 1)
+				return { fromDate, toDate: endDate }
 			},
 			getCalendarWeekPeriods(month) {
 				if (!month) return []
@@ -356,8 +409,13 @@
 							Thang: month.value,
 							ThangThucTe: periods[index].actualMonth,
 							TuanTrongThang: periods[index].week,
-							TuNgay: this.formatSqlDate(periods[index].fromDate),
-							DenNgay: this.formatSqlDate(periods[index].toDate),
+							...(() => {
+								const period = this.getEditableWeekDates(week[2], periods[index])
+								return {
+									TuNgay: this.formatSqlDate(period.fromDate),
+									DenNgay: this.formatSqlDate(period.toDate)
+								}
+							})(),
 							KeHoachThucHien: week[3] || '',
 							KetQua: week[4] || '',
 							NguyenNhan: week[5] || ''

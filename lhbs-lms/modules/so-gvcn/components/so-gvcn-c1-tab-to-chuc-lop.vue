@@ -6,8 +6,9 @@
     <div v-else class="d-flex h-100 ga-3">
       <div class="flex-shrink-0 overflow-y-auto" style="width: 260px; border-right: 1px solid rgba(0, 0, 0, 0.12);">
         <v-list density="compact" nav color="primary" class="pa-0">
-          <v-list-item v-for="card in organizationCards" :key="card.key" :value="card.key"
-            :active="activeCardKey === card.key" class="mb-1 rounded" @click="scrollToCard(card)">
+						<template v-for="card in organizationCards" :key="card.key">
+						<v-list-item v-if="card.key !== 'to-nhom-hoc-sinh'" :value="card.key"
+							:active="activeCardKey === card.key" class="mb-1 rounded" @click="scrollToCard(card)">
             <template #prepend>
               <v-icon size="small" class="mr-2" :color="activeCardKey === card.key ? 'primary' : ''">
                 {{ card.icon }}
@@ -15,14 +16,16 @@
             </template>
             <v-list-item-title class="text-caption font-weight-bold text-wrap" style="line-height: 1.3;">
               {{ card.navTitle }}
-            </v-list-item-title>
-          </v-list-item>
+							</v-list-item-title>
+						</v-list-item>
+						</template>
         </v-list>
       </div>
 
       <div ref="scrollContainer" class="flex-grow-1 h-100 overflow-y-auto pr-1">
         <v-row dense class="pb-16">
-          <v-col v-for="card in organizationCards" :key="card.key" cols="12" class="py-1 mb-16">
+						<template v-for="card in organizationCards" :key="card.key">
+						<v-col v-if="card.key !== 'to-nhom-hoc-sinh'" cols="12" class="py-1 mb-16">
             <v-card :id="card.domId" outlined elevation="0" style="margin-bottom: 120px;">
               <v-card-title class="px-3 py-2 text-subtitle-2 font-weight-bold text-primary d-flex align-center">
                 <v-icon start color="primary" class="mr-2" size="small">{{ card.icon }}</v-icon>
@@ -32,8 +35,9 @@
               <v-card-text class="pa-0 so-gvcn-card-sheet-wrap">
                 <div :ref="card.refName" class="w-100 so-gvcn-sheet"></div>
               </v-card-text>
-            </v-card>
-          </v-col>
+							</v-card>
+						</v-col>
+						</template>
         </v-row>
       </div>
     </div>
@@ -293,6 +297,10 @@
 								card.rows = worksheet.getData()
 							}
 						})
+						const worksheet = Array.isArray(this.sheetInstances[card.key])
+							? this.sheetInstances[card.key][0]
+							: this.sheetInstances[card.key]
+						if (worksheet && typeof worksheet.hideColumn === 'function') worksheet.hideColumn(2)
 					} catch (error) {
 						console.error('Không thể khởi tạo bảng tổ chức lớp:', card.key, error)
 					}

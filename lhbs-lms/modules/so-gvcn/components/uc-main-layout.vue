@@ -92,7 +92,7 @@
 							</v-window-item>
 
 							<!-- Tab 3: KH chủ nhiệm năm học (C1) / Chỉ tiêu (C2, C3) -->
-							<v-window-item value="chi-tieu" eager>
+			<v-window-item value="chi-tieu" :eager="!isCap1">
 								<so-gvcn-c1-tab-ke-hoach-nam-hoc v-if="isCap1" ref="tabKeHoachNamHocRef"
 									:selected-lop-i-d="selectedLopID" :selected-class="selectedClass"
 									:class-size="getSelectedClassStudents().length"
@@ -106,7 +106,7 @@
 							</v-window-item>
 
 							<!-- Công tác chủ nhiệm tháng (C1 only) -->
-							<v-window-item v-if="isCap1" value="cong-tac-cn" eager>
+			<v-window-item v-if="isCap1" value="cong-tac-cn">
 								<so-gvcn-c1-tab-cong-tac-chu-nhiem ref="tabCongTacChuNhiemRef"
 									:selected-lop-i-d="selectedLopID" :sheet-height="sheetHeight"
 									:month-sheet-height="keHoachSheetHeight" :month-list="monthList"
@@ -130,7 +130,7 @@
 							</v-window-item>
 
 							<!-- Tab 4 -->
-							<v-window-item value="ren-luyen" eager>
+			<v-window-item value="ren-luyen" :eager="!isCap1">
 								<so-gvcn-c1-tab-nhan-xet-thang-lms v-if="isCap1" ref="tabNhanXetThangLmsRef"
 									:selected-lop-i-d="selectedLopID" :students="getSelectedClassStudents()"
 									:saved-rows="nhanXetThangLmsSavedRows" :sheet-height="sheetHeight" />
@@ -142,7 +142,7 @@
 							</v-window-item>
 
 							<!-- Tab Sơ kết HKI (C1 only) -->
-							<v-window-item v-if="isCap1" value="so-ket-hk1" eager>
+			<v-window-item v-if="isCap1" value="so-ket-hk1">
 								<so-gvcn-c1-tab-so-ket-tong-ket ref="tabSoKetHk1Ref" :selected-lop-i-d="selectedLopID"
 									:students="getSelectedClassStudents()"
 									:class-size="getSelectedClassStudents().length" :saved-rows="soKetHk1SavedRows"
@@ -150,7 +150,7 @@
 							</v-window-item>
 
 							<!-- Tab Tổng kết năm học (C1 only) -->
-							<v-window-item v-if="isCap1" value="tong-ket-nam" eager>
+			<v-window-item v-if="isCap1" value="tong-ket-nam">
 								<so-gvcn-c1-tab-tong-ket-nam-hoc ref="tabTongKetNamRef"
 									:selected-lop-i-d="selectedLopID" :students="getSelectedClassStudents()"
 									:class-size="getSelectedClassStudents().length" :saved-data="tongKetNamC1SavedData"
@@ -158,21 +158,21 @@
 							</v-window-item>
 
 							<!-- Tab Theo dõi sĩ số tháng (C1 only) -->
-							<v-window-item v-if="isCap1" value="theo-doi-si-so" eager>
+			<v-window-item v-if="isCap1" value="theo-doi-si-so">
 								<so-gvcn-c1-tab-theo-doi-si-so ref="tabTheoDoiSiSoRef" :selected-lop-i-d="selectedLopID"
 									:students="getSelectedClassStudents()" :saved-rows="siSoSavedRows"
 									:sheet-height="sheetHeight" />
 							</v-window-item>
 
 							<!-- Tab Thống kê độ tuổi HS (C1 only) -->
-							<v-window-item v-if="isCap1" value="thong-ke-do-tuoi" eager>
+			<v-window-item v-if="isCap1" value="thong-ke-do-tuoi">
 								<so-gvcn-c1-tab-thong-ke-do-tuoi ref="tabThongKeDoTuoiRef"
 									:selected-lop-i-d="selectedLopID" :students="getSelectedClassStudents()"
 									:saved-rows="thongKeDoTuoiSavedRows" :sheet-height="sheetHeight" />
 							</v-window-item>
 
 							<!-- Tab Theo dõi thành tích HS (C1 only) -->
-							<v-window-item v-if="isCap1" value="theo-doi-thanh-tich" eager>
+			<v-window-item v-if="isCap1" value="theo-doi-thanh-tich">
 								<so-gvcn-c1-tab-theo-doi-thanh-tich ref="tabTheoDoiThanhTichRef"
 									:selected-lop-i-d="selectedLopID" :students="getSelectedClassStudents()"
 									:saved-rows="thanhTichSavedRows" :sheet-height="sheetHeight" />
@@ -190,14 +190,14 @@
 							</v-window-item>
 
 							<!-- Tab Nội dung họp PHHS (C1 only) -->
-							<v-window-item v-if="isCap1" value="noi-dung-hop-ph" eager>
+			<v-window-item v-if="isCap1" value="noi-dung-hop-ph">
 								<so-gvcn-c1-tab-noi-dung-hop-ph ref="tabNoiDungHopPhRef"
 									:selected-lop-i-d="selectedLopID" :saved-rows="noiDungHopPhSavedRows"
 									:sheet-height="sheetHeight" />
 							</v-window-item>
 
 							<!-- Tab Theo dõi BHYT, BHTN của HS (C1 only) -->
-							<v-window-item v-if="isCap1" value="theo-doi-bhyt" eager>
+			<v-window-item v-if="isCap1" value="theo-doi-bhyt">
 								<so-gvcn-c1-tab-theo-doi-bhyt-bhtn ref="tabTheoDoiBhytRef"
 									:selected-lop-i-d="selectedLopID" :students="getSelectedClassStudents()"
 									:saved-rows="theoDoiBhytSavedRows" :sheet-height="sheetHeight" />
@@ -659,6 +659,11 @@
 		}
 	},
 	mounted() {
+		const defaultCapID = this.getDefaultCapID()
+		this.capOptions = this.getCapOptions()
+		if (!this.capOptions.some(item => String(item.value) === String(this.filter.CapID))) {
+			this.filter.CapID = defaultCapID
+		}
 		this.getList()
 		this.getTeachersList()
 		window.addEventListener('resize', this.onResize)
@@ -684,7 +689,16 @@
 			if (newTab === 'to-chuc-lop') {
 				setTimeout(() => this.$refs.tabToChucLopRef?.initAllSheets(), 50)
 			} else if (newTab === 'chi-tieu') {
-				setTimeout(() => this.$refs.tabChiTieuRef?.initAllSheets(), 50)
+				if (this.isCap1) {
+					this.getKeHoachNamHoc()
+					setTimeout(() => this.$refs.tabKeHoachNamHocRef?.initAllSheets(), 50)
+				} else {
+					setTimeout(() => this.$refs.tabChiTieuRef?.initAllSheets(), 50)
+				}
+			} else if (newTab === 'cong-tac-cn' && this.isCap1) {
+				this.getCongTacChuNhiemData().then(() => {
+					setTimeout(() => this.$refs.tabCongTacChuNhiemRef?.initSheet(), 50)
+				})
 			} else if (newTab === 'ke-hoach') {
 				if (this.isCap1) {
 					this.getHsCanQuanTam()
@@ -715,10 +729,31 @@
 		}
 	},
 	methods: {
+		getFunctionRightCapIDs() {
+			const value = vueData?.user?.FunctionRight ?? vueData?.user?.functionRight ?? ''
+			const rights = (Array.isArray(value) ? value : String(value).split(/[;,|\s]+/))
+				.map(item => Number(String(item).trim()))
+				.filter(item => [10, 20, 30].includes(item))
+			return [...new Set(rights.map(right => right / 10))]
+		},
+		getCapOptions() {
+			const options = [
+				{ text: 'Tiểu học', value: 1, right: 10 },
+				{ text: 'Trung học cơ sở', value: 2, right: 20 },
+				{ text: 'Trung học phổ thông', value: 3, right: 30 }
+			]
+			const allowed = this.getFunctionRightCapIDs()
+			return allowed.length ? options.filter(item => allowed.includes(item.value)) : options
+		},
+		getDefaultCapID() {
+			const options = this.getCapOptions()
+			const urlCapID = Number(vueData?.CapID || vueData?.capid)
+			return options.some(item => item.value === urlCapID) ? urlCapID : options[0]?.value || 1
+		},
 		getDefaultFilter() {
 			return {
 				NienKhoa: vueData.NienKhoa || new Date().getFullYear(),
-				CapID: '2,3',
+				CapID: this.getDefaultCapID(),
 				KhoiID: 0,
 				LopID: '',
 				Keyword: ''
@@ -726,7 +761,7 @@
 		},
 		onResize() {
 			const vh = window.innerHeight
-			this.sheetHeight = Math.max(320, vh - 190) + 'px'
+			this.sheetHeight = Math.max(320, vh - 126) + 'px'
 			this.keHoachSheetHeight = Math.max(280, vh - 290) + 'px'
 			this.renLuyenSheetHeight = Math.max(280, vh - 260) + 'px'
 			this.soLienLacSheetHeight = Math.max(280, vh - 260) + 'px'
@@ -1103,6 +1138,15 @@
 			const res = await ajaxCALLPromise('lms/SoGVCNHsNhanXetThangLmsGet', { SoGVCNID: this.form.SoGVCNID }).catch(() => [])
 			this.nhanXetThangLmsSavedRows = Array.isArray(res) ? res : (Array.isArray(res?.[0]) ? res[0] : [])
 		},
+		async getCongTacChuNhiemData() {
+			if (!this.form.SoGVCNID || !this.isCap1) return
+			const response = await ajaxCALLPromise('lms/SoGVCNKeHoachTuanGet', {
+				SoGVCNID: this.form.SoGVCNID
+			}).catch(() => [])
+			this.weeklyPlanList = Array.isArray(response?.[0])
+				? response[0]
+				: (Array.isArray(response) ? response : [])
+		},
 		async getSoKetHk1() {
 			if (!this.form.SoGVCNID || !this.isCap1) return
 			const res = await ajaxCALLPromise('lms/SoGVCNSoKetHKIGet', { SoGVCNID: this.form.SoGVCNID })
@@ -1164,8 +1208,10 @@
 			const data = await ajaxCALLPromise(`lms/SoGVCNGet/${this.form.SoGVCNID}`)
 			this.detail = Array.isArray(data) ? (data[0]?.[0] || {}) : data
 			this.monthList = Array.isArray(data?.[1]) ? data[1] : []
-			const weeklyResponse = await ajaxCALLPromise('lms/SoGVCNKeHoachTuanGet', { SoGVCNID: this.form.SoGVCNID })
-				.catch(() => [])
+			const shouldLoadWeeklyPlan = !this.isCap1 || this.tab === 'cong-tac-cn'
+			const weeklyResponse = shouldLoadWeeklyPlan
+				? await ajaxCALLPromise('lms/SoGVCNKeHoachTuanGet', { SoGVCNID: this.form.SoGVCNID }).catch(() => [])
+				: []
 			this.weeklyPlanList = Array.isArray(weeklyResponse?.[0])
 				? weeklyResponse[0]
 				: (Array.isArray(weeklyResponse) ? weeklyResponse : [])
@@ -1179,7 +1225,7 @@
 			this.huongNghiepSavedRows = Array.isArray(data?.[9]) ? data[9] : []
 			this.toNhomHocSinhSavedRows = Array.isArray(data?.[10]) ? data[10] : []
 			if (this.isCap1) {
-				await this.getKeHoachNamHoc()
+				if (this.tab === 'chi-tieu') await this.getKeHoachNamHoc()
 				if (this.tab === 'ke-hoach') await this.getHsCanQuanTam()
 				if (this.tab === 'ren-luyen') await this.getHsNhanXetThangLms()
 				if (this.tab === 'so-ket-hk1') await this.getSoKetHk1()
@@ -1190,9 +1236,11 @@
 				if (this.tab === 'theo-doi-si-so') await this.getTheoDoiSiSoThang()
 				if (this.tab === 'tong-ket-nam') await this.getTongKetNamC1()
 			}
-			this.keHoachSheetRows = this.buildKeHoachThangTuanExportAoA(false, true)
-			this.keHoachSheetStyle = this.buildKeHoachSheetStyle(false)
-			this.initKeHoachSheet()
+			if (!this.isCap1 || this.tab === 'cong-tac-cn') {
+				this.keHoachSheetRows = this.buildKeHoachThangTuanExportAoA(false, true)
+				this.keHoachSheetStyle = this.buildKeHoachSheetStyle(false)
+				this.initKeHoachSheet()
+			}
 			Object.keys(this.form).forEach(key => {
 				if (key !== 'SoGVCNID') this.form[key] = this.detail[key] || ''
 			})

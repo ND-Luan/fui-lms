@@ -38,8 +38,8 @@
 </template>
 
 <script>
-export default {
-	props: {
+	export default {
+		props: {
 		modelValue: { type: Object, default: function () { return {} } },
 		khoiId: { type: [Number, String], default: null },
 		monHocId: { type: [Number, String], default: null },
@@ -180,5 +180,5 @@ export default {
 			})
 		},
 	},
-}
+	}
 </script>

@@ -1,5 +1,5 @@
 <template>
-	<v-card-text class="pa-0 so-gvcn-sheet-wrap" :style="{ height: sheetHeight, 'overflow-y': 'auto' }">
+	<v-card-text class="pa-0 so-gvcn-sheet-wrap" :style="{ height: sheetHeight, overflow: 'hidden' }">
 		<v-alert v-if="selectedLopID === '__ALL__'" type="info" variant="tonal" density="compact" class="ma-2">
 			Chọn một lớp ở thanh trên để theo dõi tình hình Phụ huynh tham dự họp.
 		</v-alert>
@@ -134,6 +134,11 @@
 							}],
 							contextMenu: () => false
 						})
+						const worksheet = Array.isArray(this.instance) ? this.instance[0] : this.instance
+						if (worksheet && typeof worksheet.hideColumn === 'function') {
+							worksheet.hideColumn(2)
+							window.requestAnimationFrame(() => soGvcnJspreadsheet.syncNestedHeaders(container, [4]))
+						}
 					}
 				})
 			}

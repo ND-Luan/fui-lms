@@ -47,7 +47,7 @@
 					<v-card-title class="text-subtitle-1 font-weight-bold">{{ card.title }}</v-card-title>
 					<v-card-text class="pa-2">
 						<v-textarea v-model="noteValues[card.key]" label="Nội dung nhận xét" variant="outlined" rows="8"
-							auto-grow hide-details />
+							auto-grow hide-details class="text-body-2" />
 					</v-card-text>
 				</v-card>
 
@@ -71,7 +71,7 @@
 					<v-card-title class="text-subtitle-1 font-weight-bold">{{ cards[5].title }}</v-card-title>
 					<v-card-text class="pa-2">
 						<v-textarea v-model="noteValues[cards[5].key]" label="Nội dung phương hướng" variant="outlined"
-							rows="8" auto-grow hide-details />
+							rows="8" auto-grow hide-details class="text-body-2" />
 					</v-card-text>
 				</v-card>
 			</div>

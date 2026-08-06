@@ -24,6 +24,16 @@ BEGIN
 
 	BEGIN TRANSACTION;
 
+	-- Các dòng bị xóa trên giao diện không còn nằm trong JsonRows.
+	-- Vô hiệu hóa dữ liệu cũ trước khi MERGE để khi tải lại không hiện lại.
+	UPDATE dbo.tblSoGVCNThongKeDoTuoi
+	SET
+		Enable = 0,
+		UpdateUser = @UserID,
+		UpdateTime = GETDATE()
+	WHERE SoGVCNID = @ID
+	  AND Enable = 1;
+
 	MERGE dbo.tblSoGVCNThongKeDoTuoi AS target
 	USING (
 		SELECT

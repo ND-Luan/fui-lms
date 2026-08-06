@@ -1,7 +1,7 @@
 <template>
 	<div>
 		<template v-if="view === 'thong-tin'">
-			<v-card-text class="pa-0 so-gvcn-sheet-wrap" :style="{ height: sheetHeight, 'overflow-y': 'auto' }">
+			<v-card-text class="pa-0 so-gvcn-sheet-wrap" :style="{ height: sheetHeight, overflow: 'hidden' }">
 				<template v-if="rows && rows.length">
 					<div ref="sheetRef" class="w-100 so-gvcn-sheet so-gvcn-student-sheet"></div>
 				</template>

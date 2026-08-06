@@ -27,7 +27,7 @@ var soGvcnJspreadsheet = window.soGvcnJspreadsheet = {
             return normalizedRow
         })
     },
-    syncNestedHeaders(container, freezeCounts) {
+    syncNestedHeaders(container, freezeCounts, freezeIndexes) {
         if (!container) return
         const tables = container.querySelectorAll('table.jss_worksheet')
         tables.forEach((table, tableIndex) => {
@@ -46,20 +46,38 @@ var soGvcnJspreadsheet = window.soGvcnJspreadsheet = {
             })
             const freezeCount = Number(freezeCounts[tableIndex] || freezeCounts[0]) || 0
             if (!freezeCount) return
+            const frozenColumnIndexes = Array.isArray(freezeIndexes?.[tableIndex])
+                ? freezeIndexes[tableIndex]
+                : Array.from({ length: freezeCount }, (_, index) => index)
+            const frozenColumnSet = new Set(frozenColumnIndexes)
             table.classList.add('so-gvcn-manual-freeze')
             const tableColumns = Array.from(table.querySelectorAll('colgroup col'))
             const dataColumnWidths = tableColumns
                 .slice(1)
-                .map(column => Number(column.getAttribute('width')) || column.getBoundingClientRect().width || 0)
+                .map((column, columnIndex) => {
+                    const cells = Array.from(table.querySelectorAll(`[data-x="${columnIndex}"]`))
+                    const visibleCell = cells.find(cell => {
+                        const style = window.getComputedStyle(cell)
+                        return style.display !== 'none' && style.visibility !== 'hidden'
+                            && cell.getBoundingClientRect().width > 0
+                    })
+                    const isHidden = (column.style.display === 'none' || column.hidden
+                        || (cells.length > 0 && cells.every(cell => {
+                            const style = window.getComputedStyle(cell)
+                            return style.display === 'none' || style.visibility === 'hidden' || cell.offsetWidth === 0
+                        })))
+                    return isHidden ? 0 : visibleCell?.getBoundingClientRect().width
+                        || Number(column.getAttribute('width')) || column.getBoundingClientRect().width || 0
+                })
             const frozenLeftByColumn = new Map()
             let frozenWidth = 0
-            for (let columnIndex = 0; columnIndex < freezeCount; columnIndex += 1) {
+            frozenColumnIndexes.forEach(columnIndex => {
                 frozenLeftByColumn.set(columnIndex, frozenWidth)
                 frozenWidth += dataColumnWidths[columnIndex] || 0
-            }
+            })
             table.querySelectorAll('thead [data-x], tbody [data-x]').forEach((cell) => {
                 const columnIndex = Number(cell.dataset.x)
-                if (!Number.isFinite(columnIndex) || columnIndex >= freezeCount) return
+                if (!Number.isFinite(columnIndex) || !frozenColumnSet.has(columnIndex)) return
                 cell.classList.add('jss_freezed')
                 cell.style.setProperty('--so-gvcn-freeze-left', `${frozenLeftByColumn.get(columnIndex) || 0}px`)
                 cell.style.setProperty('position', 'sticky', 'important')
@@ -72,7 +90,7 @@ var soGvcnJspreadsheet = window.soGvcnJspreadsheet = {
                         .split(',')
                         .map(Number)
                         .filter(Number.isFinite)
-                    if (!columns.length || columns.some(columnIndex => columnIndex >= freezeCount)) return
+                    if (!columns.length || columns.some(columnIndex => !frozenColumnSet.has(columnIndex))) return
                     cell.classList.add('jss_freezed')
                     cell.style.setProperty('--so-gvcn-freeze-left', `${frozenLeftByColumn.get(columns[0]) || 0}px`)
                     cell.style.setProperty('position', 'sticky', 'important')
@@ -91,12 +109,13 @@ var soGvcnJspreadsheet = window.soGvcnJspreadsheet = {
         })
         const originalOnload = options.onload
         const freezeCounts = worksheets.map(worksheet => Number(worksheet.freezeColumns) || 0)
+        const freezeIndexes = worksheets.map(worksheet => worksheet.freezeColumnIndexes)
         return jspreadsheet(container, {
             ...options,
             worksheets,
             onload: (...args) => {
-                this.syncNestedHeaders(container, freezeCounts)
-                window.requestAnimationFrame(() => this.syncNestedHeaders(container, freezeCounts))
+                this.syncNestedHeaders(container, freezeCounts, freezeIndexes)
+                window.requestAnimationFrame(() => this.syncNestedHeaders(container, freezeCounts, freezeIndexes))
                 if (typeof originalOnload === 'function') originalOnload(...args)
             }
         })
