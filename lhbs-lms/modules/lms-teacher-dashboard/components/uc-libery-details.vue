@@ -128,6 +128,7 @@
 			</div>
 			<v-card-actions class="border-t">
 				<v-spacer></v-spacer>
+				<v-btn @click="CloseModal" variant="text">Đóng</v-btn>
 				<v-btn @click="onSave()" variant="outlined" color="primary">
 					<v-icon class="me-1">mdi-content-save-outline</v-icon>{{
 					$t('message.Update') }}
@@ -265,6 +266,18 @@
 		async onSave() {
 			const { valid } = await this.$refs.formData.validate()
 			if (valid) {
+				const link = this.hocLieuLink || {}
+				if (!link.HocLieuID || !link.NoiDungID) {
+					const ok = await this.confirmRef.value.show({
+						title: 'Bài chưa gắn mục lục học liệu số',
+						text: 'Bạn vẫn có thể cập nhật bài, nhưng nên gắn vào mục lục học liệu số để thuận tiện truy xuất ngược và tái sử dụng bài này ở các niên khóa sau.',
+						type: 'warning',
+						confirmText: 'Vẫn cập nhật',
+						cancelText: 'Quay lại gắn học liệu',
+						maxWidth: 520
+					})
+					if (!ok) return
+				}
 				if (this.formData.ResourceType === 'LESSON') {
 					ajaxCALL('lms/EL_Lesson_Save', {
 						...this.formData,

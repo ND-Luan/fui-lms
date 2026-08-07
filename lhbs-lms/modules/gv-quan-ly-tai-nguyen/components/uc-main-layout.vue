@@ -24,46 +24,72 @@
 							{{ selectedLibrary?.TenHocLieu || selectedTreeNode?.label || 'Chưa chọn bộ tài liệu' }}
 						</div>
 					</div>
-					<div class="d-flex align-center ga-1">
-						<v-btn v-if="selectedLibrary" icon size="small" variant="text" color="primary"
-							@click="openLibraryDialog(selectedLibrary)">
-							<v-icon>mdi-pencil</v-icon>
-							<v-tooltip activator="parent" location="top">Sửa bộ tài liệu</v-tooltip>
-						</v-btn>
-						<v-btn v-if="selectedLibrary" icon size="small" variant="text" color="error"
-							@click="deleteLibrary">
-							<v-icon>mdi-delete-outline</v-icon>
-							<v-tooltip activator="parent" location="top">Xóa bộ tài liệu</v-tooltip>
-						</v-btn>
-					</div>
 				</div>
 
 				<div class="pa-2">
 					<v-text-field v-model="treeSearch" label="Tìm trong cây" prepend-inner-icon="mdi-magnify"
 						clearable density="compact" hide-details class="mb-2" />
+					<!-- Tạm ẩn chức năng tạo thư mục.
 					<v-btn block color="primary" variant="tonal" prepend-icon="mdi-folder-plus"
 						:disabled="!selectedLibrary" @click="openFolderDialog()">Tạo thư mục</v-btn>
+					-->
 				</div>
 
-				<v-list density="compact" nav active-color="primary" class="resource-tree-list">
-					<v-list-item :active="selectedTreeNode?.kind === 'innovation-root'" prepend-icon="mdi-lightbulb-on-outline" title="Sáng kiến"
-						@click="selectInnovationRoot()" />
+				<v-list v-model:opened="openGradeGroups" density="compact" nav color="primary" class="resource-tree-list">
+					<v-list-item :active="selectedTreeNode?.kind === 'innovation-root' || (selectedLibrary?.TaiNguyenLoaiCode === 'SANG_KIEN' && selectedLibrary?.TenHocLieu === 'Sáng kiến')" prepend-icon="mdi-lightbulb-on-outline" title="Sáng kiến"
+						@click="selectInnovationRoot()">
+						<template #append>
+							<div v-if="selectedLibrary?.TaiNguyenLoaiCode === 'SANG_KIEN' && selectedLibrary?.TenHocLieu === 'Sáng kiến'" class="d-flex align-center">
+								<v-btn icon size="small" variant="text" color="primary" @click.stop="openLibraryDialog(selectedLibrary)">
+									<v-icon size="18">mdi-pencil</v-icon>
+									<v-tooltip activator="parent" location="top">Sửa bộ tài liệu</v-tooltip>
+								</v-btn>
+								<v-btn icon size="small" variant="text" color="error" @click.stop="deleteLibrary(selectedLibrary)">
+									<v-icon size="18">mdi-delete-outline</v-icon>
+									<v-tooltip activator="parent" location="top">Xóa bộ tài liệu</v-tooltip>
+								</v-btn>
+							</div>
+						</template>
+					</v-list-item>
 					<v-list-item v-for="item in filteredInnovationLibraries" :key="'sk-' + item.HocLieuID"
 						:active="selectedLibraryId === item.HocLieuID" class="pl-8" prepend-icon="mdi-file-document-outline" :title="item.TenHocLieu"
-						@click="selectLibraryTreeNode(item)" />
+						@click="selectLibraryTreeNode(item)">
+						<template #append>
+							<div class="d-flex align-center">
+								<v-btn icon size="small" variant="text" color="primary" @click.stop="openLibraryDialog(item)">
+									<v-icon size="18">mdi-pencil</v-icon>
+									<v-tooltip activator="parent" location="top">Sửa bộ tài liệu</v-tooltip>
+								</v-btn>
+								<v-btn icon size="small" variant="text" color="error" @click.stop="deleteLibrary(item)">
+									<v-icon size="18">mdi-delete-outline</v-icon>
+									<v-tooltip activator="parent" location="top">Xóa bộ tài liệu</v-tooltip>
+								</v-btn>
+							</div>
+						</template>
+					</v-list-item>
 					<v-list-item :active="['subject-root', 'subject', 'shared'].includes(selectedTreeNode?.kind)" prepend-icon="mdi-format-list-group" title="Khối môn"
 						@click="selectTreeNode({ kind: 'subject-root' })" />
-					<template v-for="grade in filteredGradeTree" :key="'grade-' + grade.KhoiID">
-						<v-list-subheader class="pl-8">{{ grade.TenKhoi }}</v-list-subheader>
-						<template v-for="subject in grade.subjects">
-							<v-list-item :key="'subject-' + grade.KhoiID + '-' + subject.MonHocID"
+					<v-list-group v-for="grade in filteredGradeTree" :key="'grade-' + grade.KhoiID" :value="'grade-' + grade.KhoiID">
+						<template #activator="{ props }">
+							<v-list-item v-bind="props" class="pl-8" :title="grade.TenKhoi" />
+						</template>
+						<template v-for="subject in grade.subjects" :key="'subject-group-' + grade.KhoiID + '-' + subject.MonHocID">
+							<v-list-item
 								:active="isSubjectActive(grade, subject)" class="pl-8" prepend-icon="mdi-book-open-variant" :title="subject.MonHocName"
 								@click="selectSubjectNode(grade, subject)" />
-							<v-list-item :key="'shared-' + grade.KhoiID + '-' + subject.MonHocID" class="pl-12" prepend-icon="mdi-folder-multiple-outline"
+							<v-list-item class="resource-shared-item" prepend-icon="mdi-folder-multiple-outline"
 								:active="isSharedActive(grade, subject)" title="Tài liệu chia sẻ/tham khảo"
-								@click.stop="selectSharedFolder(grade, subject)" />
+								@click.stop="selectSharedFolder(grade, subject)">
+								<template #append>
+									<v-btn v-if="subject.shared" icon size="small" variant="text" color="primary"
+										@click.stop="openLibraryDialog(subject.shared)">
+										<v-icon size="18">mdi-pencil</v-icon>
+										<v-tooltip activator="parent" location="top">Sửa bộ tài liệu</v-tooltip>
+									</v-btn>
+								</template>
+							</v-list-item>
 						</template>
-					</template>
+					</v-list-group>
 				</v-list>
 			</aside>
 
@@ -84,7 +110,7 @@
 
 				<GlobalDataTable :headers="headers" :items="visibleFiles" item-value="NoiDungID"
 					items-per-page="-1" hide-default-footer hover
-					v-data-table-height="'calc(100dvh - 158px)'">
+					:vDataTableHeight="'calc(100dvh - 158px)'">
 					<template #item.TenNoiDung="{ item }">
 						<div class="d-flex align-center ga-2">
 							<v-icon :color="getFileColor(item)">{{ getFileIcon(item) }}</v-icon>
@@ -105,10 +131,6 @@
 							<v-btn icon size="small" variant="text" color="primary" @click="openFile(item)">
 								<v-icon>mdi-open-in-new</v-icon>
 								<v-tooltip activator="parent" location="top">Mở file</v-tooltip>
-							</v-btn>
-							<v-btn v-if="!isExternalResource(item)" icon size="small" variant="text" color="secondary" @click="openFileDialog(item)">
-								<v-icon>mdi-pencil</v-icon>
-								<v-tooltip activator="parent" location="top">Sửa metadata</v-tooltip>
 							</v-btn>
 							<v-btn v-if="!isExternalResource(item)" icon size="small" variant="text" color="error" @click="deleteNode(item)">
 								<v-icon>mdi-delete-outline</v-icon>
@@ -192,6 +214,7 @@
 				teacherSubjectScopeReady: false,
 				isRefreshing: false,
 				selectedTreeNode: { kind: 'subject-root' },
+				openGradeGroups: [],
 				treeSearch: '',
 				libraryDialog: false,
 				folderDialog: false,
@@ -243,13 +266,6 @@
 				const subjectInScope = (khoiID, monHocID) => this.isManager
 					|| this.teacherSubjectScope.some(item => Number(item.KhoiID) === Number(khoiID)
 						&& Number(item.MonHocID) === Number(monHocID))
-				const subjectHasFiles = (khoiID, monHocID) =>
-					this.sourceFiles.some(item => Number(item.KhoiID) === Number(khoiID)
-						&& Number(item.MonHocID) === Number(monHocID))
-					|| this.libraries.some(item => item.TaiNguyenLoaiCode === 'TAI_LIEU_THAM_KHAO'
-						&& Number(item.KhoiID) === Number(khoiID)
-						&& Number(item.MonHocID) === Number(monHocID)
-						&& Number(item.SoLuongFile || 0) > 0)
 				const ensureSubject = (khoiID, monHocID, monHocName) => {
 					if (khoiID === null || khoiID === undefined || monHocID === null || monHocID === undefined) return null
 					const grade = groups.get(Number(khoiID)) || {
@@ -269,7 +285,6 @@
 				}
 				this.subjectCatalog
 					.filter(item => subjectInScope(item.KhoiID, item.MonHocID))
-					.filter(item => subjectHasFiles(item.KhoiID, item.MonHocID))
 					.forEach(item => ensureSubject(item.KhoiID, item.MonHocID, item.MonHocName))
 				this.sourceFiles
 					.filter(item => subjectInScope(item.KhoiID, item.MonHocID))
@@ -350,6 +365,14 @@
 							&& Number(item.MonHocID) === Number(this.selectedTreeNode.MonHocID))
 						.map(item => this.normalizeSourceFile(item))
 				}
+				if (this.selectedTreeNode?.kind === 'shared') {
+					return this.nodes.filter(item =>
+						item.LoaiNoiDung !== 'THU_MUC'
+						&& (item.ParentID || null) === this.selectedFolderId
+						&& (item.NguonTaiNguyenCode === 'QUAN_LY_TAI_NGUYEN'
+							|| this.getMeta(item).origin === 'QUAN_LY_TAI_NGUYEN')
+					)
+				}
 				return this.nodes.filter(item =>
 					item.LoaiNoiDung !== 'THU_MUC'
 					&& (item.ParentID || null) === this.selectedFolderId
@@ -357,6 +380,7 @@
 			},
 			currentFolderName() {
 				if (this.selectedTreeNode?.kind === 'subject') return this.selectedTreeNode.label
+				if (this.selectedTreeNode?.kind === 'shared') return this.selectedTreeNode.label
 				if (this.selectedTreeNode?.kind === 'innovation-root') return 'Sáng kiến'
 				if (this.selectedTreeNode?.kind === 'subject-root') return 'Khối môn'
 				if (!this.selectedLibrary) return 'Danh sách file'
@@ -516,7 +540,7 @@
 					&& (typeCode === 'SANG_KIEN'
 						|| (Number(item.KhoiID) === Number(grade.KhoiID) && Number(item.MonHocID) === Number(subject.MonHocID))))
 				if (!library) {
-					const type = this.resourceTypes.find(item => item.TaiNguyenLoaiCode === typeCode)
+					const type = this.resourceTypes.find(item => (item.TaiNguyenLoaiCode || item.Code) === typeCode)
 					if (typeCode === 'SANG_KIEN' && type) await this.loadResourceLevels(type.TaiNguyenLoaiID)
 					const result = await fetchPromise('lms/FP_TaiNguyen_Save', {
 						HocLieuID: 0,
@@ -562,8 +586,8 @@
 			async openLibraryDialog(item = null) {
 				const selectedSubject = this.selectedTreeNode?.kind === 'subject' ? this.selectedTreeNode : null
 				const defaultType = selectedSubject
-					? this.resourceTypes.find(type => type.TaiNguyenLoaiCode === 'TAI_LIEU_THAM_KHAO')
-					: this.resourceTypes.find(type => type.TaiNguyenLoaiCode === 'SANG_KIEN')
+					? this.resourceTypes.find(type => (type.TaiNguyenLoaiCode || type.Code) === 'TAI_LIEU_THAM_KHAO')
+					: this.resourceTypes.find(type => (type.TaiNguyenLoaiCode || type.Code) === 'SANG_KIEN')
 				this.libraryForm = item
 					? { ...item }
 					: {
@@ -618,15 +642,16 @@
 				if (saved?.HocLieuID) this.selectedLibraryId = saved.HocLieuID
 				this.notify('Đã lưu bộ tài liệu.')
 			},
-			async deleteLibrary() {
+			async deleteLibrary(item = this.selectedLibrary) {
+				if (!item?.HocLieuID) return
 				const ok = await this.confirmRef.value.show({
-					title: `Xóa bộ tài liệu “${this.selectedLibrary.TenHocLieu}”? File vật lý sẽ không bị xóa.`,
+					title: `Xóa bộ tài liệu “${item.TenHocLieu}”? File vật lý sẽ không bị xóa.`,
 				})
 				if (!ok) return
 				await fetchPromise('lms/FP_TaiNguyen_Delete', {
-					HocLieuID: this.selectedLibraryId,
+					HocLieuID: item.HocLieuID,
 				}, { cache: false })
-				this.selectedLibraryId = null
+				if (this.selectedLibraryId === item.HocLieuID) this.selectedLibraryId = null
 				await this.loadLibraries()
 				this.notify('Đã xóa bộ tài liệu.')
 			},

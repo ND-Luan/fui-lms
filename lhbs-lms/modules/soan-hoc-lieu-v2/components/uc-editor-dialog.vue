@@ -15,8 +15,7 @@
 		<template v-slot:default="{ isActive }">
 			<v-card title="Chỉnh sửa đáp án">
 				<v-card-text>
-					<f-editor v-model="textEditor" variant="outlined" rows="2" auto-grow>
-					</f-editor>
+					<uc-rich-text-editor :plugins="['ggb']" v-model="textEditor" :imageapi="vueData.v_Set.apiFile" variant="outlined" rows="2" auto-grow />
 				</v-card-text>
 				<v-card-actions>
 					<v-spacer></v-spacer>

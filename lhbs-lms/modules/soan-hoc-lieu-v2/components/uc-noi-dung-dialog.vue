@@ -86,7 +86,7 @@
 							<v-tabs-window v-model="activeTab" class="editor-content">
 								<!-- Tab 1: F-Editor (Rich Text) với tích hợp GeoGebra -->
 								<v-tabs-window-item value="rich" class="tab-content">
-									<uc-ggb-editor :imageapi="vueData.v_Set.apiImageAdapter" v-model="textContent"
+									<uc-rich-text-editor :plugins="['ggb']" :imageapi="vueData.v_Set.apiFile" v-model="textContent"
 										label="Nội dung văn bản" variant="outlined" :height="400" />
 								</v-tabs-window-item>
 

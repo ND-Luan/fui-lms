@@ -77,7 +77,23 @@
 			async handleSubmit(isActive) {
 				const { valid } = await this.$refs.form.validate()
 				if (valid) {
-					if (this.form.ResourceType === 'LESSON') {
+					this.confirmMissingHocLieu(() => this.submitContent())
+				}
+			},
+			confirmMissingHocLieu(onConfirmed) {
+				const link = this.hocLieuLink || {}
+				if (link.HocLieuID && link.NoiDungID) return onConfirmed()
+				this.confirmRef.value.show({
+					title: 'Bài chưa gắn mục lục học liệu số',
+					text: 'Bạn vẫn có thể lưu bài, nhưng nên gắn vào mục lục học liệu số để thuận tiện truy xuất ngược và tái sử dụng bài này ở các niên khóa sau.',
+					type: 'warning',
+					confirmText: 'Vẫn lưu bài',
+					cancelText: 'Quay lại gắn học liệu',
+					maxWidth: 520
+				}).then(ok => { if (ok) onConfirmed() })
+			},
+			submitContent() {
+				if (this.form.ResourceType === 'LESSON') {
 						ajaxCALL('lms/EL_Lesson_Save', {
 							...this.form,
 							Description: this.form.Instructions,
@@ -103,7 +119,6 @@
 								this.$emit('update:modelValue', false)
 							})
 						})
-					}
 				}
 			}
 		},

@@ -21,7 +21,7 @@
                         @click="current.fullscreen = !current.fullscreen" />
                     <v-btn color="white" icon="mdi-refresh" size="small" variant="text" :loading="current.loading"
                         @click="reloadIframe" />
-                    <v-btn color="white" icon="mdi-close" size="small" variant="text" @click="closeWindow" />
+                    <v-btn v-if="!current.hideClose" color="white" icon="mdi-close" size="small" variant="text" @click="closeWindow" />
                 </v-toolbar>
 
                 <v-progress-linear v-if="current.loading" indeterminate color="primary" height="2" />
@@ -68,6 +68,7 @@ export default {
     data() {
         return {
             stack: [],
+            pendingHideClose: false,
         };
     },
 
@@ -95,6 +96,18 @@ export default {
                 if (this.current) this.current.hideToolbar = false
                 return
             }
+            if (e.data?.type === 'iframeRef_hideClose') {
+                this.pendingHideClose = true
+                if (window !== window.top) window.parent.postMessage(e.data, '*')
+                else if (this.current) this.current.hideClose = true
+                return
+            }
+            if (e.data?.type === 'iframeRef_showClose') {
+                this.pendingHideClose = false
+                if (window !== window.top) window.parent.postMessage(e.data, '*')
+                else if (this.current) this.current.hideClose = false
+                return
+            }
             if (e.data?.type !== 'iframeRef_openWindow') return
             // Nếu mình cũng đang trong iframe → bubble lên tiếp
             if (window !== window.top) {
@@ -112,6 +125,7 @@ export default {
                 loading: true,
                 hasError: false,
                 hideToolbar: false,
+                hideClose: this.pendingHideClose,
                 onclose: reloadOnClose ? () => {
                     // Gửi iframeRef_closed vào iframe bên dưới (index stack.length - 1 sau khi pop)
                     this.$nextTick(() => {
@@ -161,6 +175,7 @@ export default {
                 loading: true,
                 hasError: false,
                 hideToolbar: false,
+                hideClose: this.pendingHideClose,
                 onclose,
             });
         },
@@ -174,6 +189,11 @@ export default {
                 try { eval(win.onclose.EXE); } catch (e) { console.warn('[IframeWindow] onclose EXE lỗi:', e); }
             }
             this.$emit('closed');
+        },
+
+        setCloseVisible(visible) {
+            this.pendingHideClose = !visible
+            if (this.current) this.current.hideClose = !visible
         },
 
         reloadIframe() {

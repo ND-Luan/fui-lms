@@ -137,7 +137,23 @@
 			}
 
 			if (valid) {
-				if (this.form.type == 0) {
+				this.confirmMissingHocLieu(() => this.submitContent())
+			}
+		},
+		confirmMissingHocLieu(onConfirmed) {
+			const link = this.hocLieuLink || {}
+			if (link.HocLieuID && link.NoiDungID) return onConfirmed()
+			this.confirmRef.value.show({
+				title: 'Bài chưa gắn mục lục học liệu số',
+				text: 'Bạn vẫn có thể lưu bài, nhưng nên gắn vào mục lục học liệu số để thuận tiện truy xuất ngược và tái sử dụng bài này ở các niên khóa sau.',
+				type: 'warning',
+				confirmText: 'Vẫn lưu bài',
+				cancelText: 'Quay lại gắn học liệu',
+				maxWidth: 520
+			}).then(ok => { if (ok) onConfirmed() })
+		},
+		submitContent() {
+			if (this.form.type == 0) {
 					ajaxCALL('lms/EL_Assignment_Ins', {
 						...this.form,
 						MonHocID: this.khoiItem.MonHocID,
@@ -191,7 +207,6 @@
 							// xử lý khi lỗi
 							Vue.$toast.error(err?.response?.data?.Message || 'Có lỗi xảy ra, vui lòng kiểm tra lại dữ liệu nhập vào!', { position: "top" });
 						})
-				}
 			}
 		},
 		getSubjectIcon(subjectName) {

@@ -1,7 +1,7 @@
 	.resource-layout {
 	    display: grid;
 	    grid-template-columns: minmax(280px, 32%) 1fr;
-	    height: calc(100dvh - 137px);
+	    height: calc(100dvh - 37px);
 	    min-height: 520px;
 	}
 
@@ -9,6 +9,13 @@
 	.resource-file-panel {
 	    min-width: 0;
 	    overflow: auto;
+	}
+
+	.resource-tree-panel {
+	    display: flex;
+	    flex-direction: column;
+	    min-height: 0;
+	    overflow: hidden;
 	}
 
 	.resource-tree-panel {
@@ -26,7 +33,18 @@
 	}
 
 	.resource-tree-list {
+	    flex: 1 1 auto;
+	    min-height: 0;
 	    overflow-y: auto;
+	}
+
+	.resource-shared-item {
+	    padding-inline-start: 72px !important;
+	    padding-left: 72px !important;
+	}
+
+	.resource-shared-item .v-list-item__prepend {
+	    padding-left: 20px !important;
 	}
 
 	.empty-panel {

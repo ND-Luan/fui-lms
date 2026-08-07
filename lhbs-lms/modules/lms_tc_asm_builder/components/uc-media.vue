@@ -1,7 +1,7 @@
 <template>
 	<v-expansion-panels v-model="mediaPanelOpen">
         <v-expansion-panel>
-            <v-expansion-panel-title class="pa-2 font-weight-medium">
+            <v-expansion-panel-title v-if="!hasMedia" class="pa-2 font-weight-medium">
                 <div class="d-flex align-center ga-2 w-100">
                     <span>Media</span>
                     <div v-if="hasMedia" class="d-flex align-center ga-1 flex-wrap">
@@ -18,23 +18,27 @@
                 </div>
             </v-expansion-panel-title>
             <v-expansion-panel-text>
-                <v-btn-toggle v-model="selectedData.media.type" divided mandatory class="mt-2 media-type-toggle">
-                    <v-btn value="YOUTUBE">
-                        <v-badge v-if="hasYoutube" dot inline color="success">VIDEO</v-badge>
-                        <span v-else>VIDEO</span>
+                <div class="media-type-tabs mt-2" role="tablist">
+                    <v-btn class="media-type-tab" :class="{ 'media-type-tab--active': selectedData.media.type === 'YOUTUBE' }"
+                        variant="text" @click="selectedData.media.type = 'YOUTUBE'">
+                        <v-icon size="16">mdi-video-outline</v-icon><span>Video</span><i v-if="hasYoutube" class="media-type-dot" />
                     </v-btn>
-                    <v-btn value="RECORD_AUDIO">
-                        <v-badge v-if="hasAudio" dot inline color="success">AUDIO</v-badge>
-                        <span v-else>AUDIO</span>
+                    <v-btn class="media-type-tab" :class="{ 'media-type-tab--active': selectedData.media.type === 'RECORD_AUDIO' }"
+                        variant="text" @click="selectedData.media.type = 'RECORD_AUDIO'">
+                        <v-icon size="16">mdi-music-note-outline</v-icon><span>Audio</span><i v-if="hasAudio" class="media-type-dot" />
                     </v-btn>
-                    <v-btn value="FILE">
-                        <v-badge v-if="hasFiles" dot inline color="success">FILE</v-badge>
-                        <span v-else>FILE</span>
+                    <v-btn class="media-type-tab" :class="{ 'media-type-tab--active': selectedData.media.type === 'FILE' }"
+                        variant="text" @click="selectedData.media.type = 'FILE'">
+                        <v-icon size="16">mdi-file-outline</v-icon><span>File</span><i v-if="hasFiles" class="media-type-dot" />
                     </v-btn>
-                </v-btn-toggle>
+                </div>
+                <v-alert class="mt-3" density="compact" variant="tonal" color="info"
+                    icon="mdi-information-outline">
+                    Media tải lên bài tập sẽ được bổ sung vào Tài nguyên nhà trường.
+                </v-alert>
 
                 <div v-if="selectedData.media.type === 'YOUTUBE'" class="d-flex flex-column ga-2 mt-3">
-                    <div class="d-flex flex-wrap ga-2 pb-2">
+                    <div class="media-input-row pb-2">
                         <v-text-field v-model="selectedData.media.sourceYT.source"
                             :placeholder="IsEngLish ? 'Paste video link' : 'Dán link video...'"
                             :hint="IsEngLish ? '*Paste a YouTube or other video link.' : '*Dán đường link YouTube hoặc video khác'"
@@ -42,21 +46,27 @@
                         <v-btn @click="$refs.fileInput.click()" color="primary" variant="outlined">Tải video</v-btn>
                         <input ref="fileInput" type="file" accept="video/*" @change="handleInputChange($event, 'YOUTUBE')" hidden />
                     </div>
-                    <iframe v-if="hasYoutube" class="assignment-media-video"
-                        :src="renderUrlYoutube(selectedData.media.sourceYT.source)" title="YouTube video player"
-                        frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                        allowfullscreen />
+                    <div v-if="hasYoutube" class="assignment-media-video-card">
+                        <iframe class="assignment-media-video"
+                            :src="renderUrlYoutube(selectedData.media.sourceYT.source)" title="YouTube video player"
+                            frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                            allowfullscreen />
+                        <div class="media-card-footer">
+                            <span class="text-caption text-truncate">{{ selectedData.media.sourceYT.name || 'Video YouTube' }}</span>
+                            <v-btn class="media-card-delete" size="small" variant="text" color="error"
+                                @click="removeYoutube" aria-label="Xóa video">
+                                <v-icon size="17">mdi-close</v-icon>
+                            </v-btn>
+                        </div>
+                    </div>
                     <div v-else class="assignment-media-empty">
                         <v-icon size="30">mdi-video-off-outline</v-icon>
                         <span>Chưa có video</span>
                     </div>
-                    <v-btn v-if="hasYoutube" size="small" variant="text" color="error" class="align-self-start" @click="removeYoutube">
-                        <v-icon start>mdi-delete-outline</v-icon>Xóa video
-                    </v-btn>
                 </div>
 
                 <div v-else-if="selectedData.media.type === 'RECORD_AUDIO'" class="d-flex flex-column ga-2 mt-3">
-                    <div class="d-flex flex-wrap ga-2 mb-2">
+                    <div class="media-input-row mb-2">
                         <v-text-field v-model="selectedData.media.sourceRecord.source"
                             :placeholder="IsEngLish ? 'Paste audio link' : 'Dán link audio...'" :clearable="false" @change="emitUpdate" />
                         <v-btn @click="$refs.inputUploadRecordAudio.click()" variant="outlined" color="primary">Tải audio</v-btn>
@@ -83,8 +93,13 @@
                             <v-img :src="imageSource(file)" cover class="assignment-media-image-preview">
                                 <template #placeholder><div class="d-flex align-center justify-center fill-height"><v-progress-circular indeterminate color="primary" /></div></template>
                             </v-img>
-                            <v-btn icon="mdi-close" size="x-small" color="error" variant="tonal" class="assignment-media-remove" @click="removeFile('image', index)" />
-                            <div class="text-caption text-truncate pa-1">{{ file.name }}</div>
+                            <div class="media-card-footer">
+                                <span class="text-caption text-truncate">{{ file.name }} <small class="text-medium-emphasis">({{ formatFileSize(file.fileSize) }})</small></span>
+                                <v-btn class="media-card-delete" size="small" variant="text" color="error"
+                                    @click="removeFile('image', index)" aria-label="Xóa ảnh">
+                                    <v-icon size="17">mdi-close</v-icon>
+                                </v-btn>
+                            </div>
                         </div>
                     </div>
                     <div v-else class="assignment-media-empty"><v-icon size="30">mdi-image-off-outline</v-icon><span>Chưa có hình ảnh</span></div>
@@ -94,9 +109,12 @@
                         <div v-for="(file, index) in files" :key="file.id || file.resourceFileId || index" class="assignment-media-file-card">
                             <iframe v-if="isPreviewable(file)" :src="file.source" class="assignment-media-file-preview" frameborder="0" />
                             <div v-else class="assignment-media-file-fallback"><v-icon>mdi-file-outline</v-icon><span>{{ file.name }}</span></div>
-                            <div class="d-flex align-center justify-space-between pa-2">
+                            <div class="media-card-footer">
                                 <span class="text-caption text-truncate">{{ file.name }} <small class="text-medium-emphasis">({{ formatFileSize(file.fileSize) }})</small></span>
-                                <v-btn icon="mdi-delete-outline" size="x-small" variant="text" color="error" @click="removeFile('file', index)" />
+                                <v-btn class="media-card-delete" size="small" variant="text" color="error"
+                                    @click="removeFile('file', index)" aria-label="Xóa file">
+                                    <v-icon size="17">mdi-close</v-icon>
+                                </v-btn>
                             </div>
                         </div>
                     </div>
@@ -242,7 +260,7 @@
                 if (source?.id && source.mediaSource === 'db') {
                     await manager.deleteLmsFile(source.id)
                 } else if (source?.id && (source.mediaSource === 'upload' || source.source?.includes('drive.google.com'))) {
-                    const token = await fetchPromise('lms/FP_Youtube_Token_Get')
+                    const token = await fetchPromise('lms/FP_Youtube_Token_Get', {}, { forceRefresh: true, cache: false })
                     await manager.deleteFromGoogleDrive(source.id, { accessToken: token?.access_token })
                 }
                 if (source?.resourceNodeId) {

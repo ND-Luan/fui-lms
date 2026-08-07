@@ -6,12 +6,12 @@
         </v-navigation-drawer>
 
         <!-- Mobile: Properties Drawer (right) -->
-        <v-navigation-drawer v-if="isMobile" v-model="isPropertiesDrawerOpen" location="right" temporary width="320">
+        <v-navigation-drawer v-if="isMobile" v-model="isPropertiesDrawerOpen" location="right" temporary width="400">
             <uc-assignment-properties :assignment="assignment" :groups="assignment.AssignmentConfig?.groups" :item="selectedItem" :open-import-type="groupImportType" @update:groups="updateGroups" @update:assignment="assignment = $event" :in-drawer="true" @close="isPropertiesDrawerOpen = false" />
         </v-navigation-drawer>
 
         <!-- Desktop: Properties navigation drawer -->
-        <v-navigation-drawer v-if="!isMobile" v-model="isPropertiesDrawerOpen" location="right" temporary width="360" scrim @click:outside="isPropertiesDrawerOpen = false" class="assignment-properties-drawer">
+        <v-navigation-drawer v-if="!isMobile" v-model="isPropertiesDrawerOpen" location="right" temporary width="480" scrim @click:outside="isPropertiesDrawerOpen = false" class="assignment-properties-drawer">
             <uc-assignment-properties :assignment="assignment" :groups="assignment.AssignmentConfig?.groups" :item="selectedItem" :open-import-type="groupImportType" @update:groups="updateGroups" @update:assignment="assignment = $event" :in-drawer="true" @close="isPropertiesDrawerOpen = false" />
         </v-navigation-drawer>
 
@@ -79,6 +79,11 @@
                             <v-col cols="12">
                                 <v-btn @click="isOpenDialogSource = true" variant="flat" color="primary" block size="small"> <v-icon start class="me-1">mdi-cog-outline</v-icon>Thiết lập nguồn </v-btn>
                             </v-col>
+                            <v-col v-if="!assignment.ExternalLink" cols="12">
+                                <v-btn @click="onOpenPreview" variant="outlined" color="teal" block size="small">
+                                    <v-icon start class="me-1">mdi-file-eye-outline</v-icon>{{ $t('message.Preview') }}
+                                </v-btn>
+                            </v-col>
                         </v-row>
                     </div>
                 </div>
@@ -100,9 +105,6 @@
                             <v-icon v-else start size="12">mdi-check-circle-outline</v-icon>
                             {{ autoSaveStatus === 'saving' ? 'Đang lưu...' : 'Đã lưu' }}
                         </v-chip>
-                        <v-btn v-if="!assignment.ExternalLink" @click="onOpenPreview" variant="outlined" color="teal" size="small">
-                            <v-icon start>mdi-file-eye-outline</v-icon>{{ $t('message.Preview') }}
-                        </v-btn>
                         <v-btn @click="handleSave(true)" variant="outlined" color="info" size="small">
                             <v-icon start>mdi-content-save-outline</v-icon>{{ $t('message.SaveAssignment') }}
                         </v-btn>
@@ -345,7 +347,7 @@
 <script>
 	export default {
 		name: 'uc-assignment-builder',
-    inject: ['confirmRef'],
+    inject: ['confirmRef', 'iframeRef'],
     props: {
         initialAssignment: undefined,
         isEditMode: Boolean,
@@ -418,6 +420,7 @@
         )
     },
     beforeUnmount() {
+        this.setIframeCloseHidden(false)
         clearTimeout(this.autoSaveTimer)
         clearInterval(this.relativeTimeTimer)
     },
@@ -466,6 +469,11 @@
         },
     },
     methods: {
+        setIframeCloseHidden(hidden) {
+            const message = { type: hidden ? 'iframeRef_hideClose' : 'iframeRef_showClose' }
+            if (window !== window.top) window.parent.postMessage(message, '*')
+            else if (this.iframeRef?.value?.setCloseVisible) this.iframeRef.value.setCloseVisible(!hidden)
+        },
         onConfirmSource() {
             const maxScore = Number(this.assignment.MaxScore)
             if (!this.assignment.MaxScore || isNaN(maxScore) || maxScore <= 0) {
@@ -984,6 +992,10 @@
         },
     },
     watch: {
+        isPropertiesDrawerOpen: {
+            handler(value) { this.setIframeCloseHidden(value) },
+            immediate: true,
+        },
         'assignment.ExternalLink'(v) {
             if (v && v.trim() !== '') {
                 this.assignment.AssignmentType = 'INTEGRATED'

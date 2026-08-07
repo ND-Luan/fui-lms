@@ -103,6 +103,11 @@
 							<div class="lib-bt-footer">
 								<span class="lib-pill-status" :style="getStatusStyle(item._status.color)">{{
 									item._status.text }}</span>
+								<v-chip v-if="isHocLieuMappingLoaded(item) && !isHocLieuLinked(item)" size="x-small"
+									color="warning" variant="tonal" prepend-icon="mdi-file-tree-outline"
+									v-tooltip="'Bài này chưa gán mục lục học liệu số'">
+									Chưa gán mục lục học liệu số
+								</v-chip>
 							</div>
 						</div>
 						<v-menu transition="slide-y-transition">
@@ -229,12 +234,11 @@
 			})
 		},
 		contentLibrary: function (newVal) {
-			if (newVal && this.isShowModalLiberyDetails) {
-
-			}
+			this.$nextTick(() => this.loadHocLieuMappings(this.flatLibraryItems))
 		},
 		selected() {
 			this.selectedKhoi = null
+			this.$nextTick(() => this.loadHocLieuMappings(this.flatLibraryItems))
 		},
 	},
 	data() {
@@ -253,10 +257,41 @@
 			librarySearch: '',
 			selectedLibery: {},
 			vueData,
-			DSAssignedClass: []
+			DSAssignedClass: [],
+			hocLieuMappings: {}
 		}
 	},
 	methods: {
+		getHocLieuMappingKey(item) {
+			return (item?.ResourceType || '') + ':' + (item?.ResourceID || '')
+		},
+		isHocLieuMappingLoaded(item) {
+			return Object.prototype.hasOwnProperty.call(this.hocLieuMappings, this.getHocLieuMappingKey(item))
+		},
+		isHocLieuLinked(item) {
+			return this.hocLieuMappings[this.getHocLieuMappingKey(item)] === true
+		},
+		loadHocLieuMappings(items) {
+			(items || []).forEach(item => {
+				const key = this.getHocLieuMappingKey(item)
+				if (!item?.ResourceType || !item?.ResourceID || this.isHocLieuMappingLoaded(item)) return
+				if (item.HocLieuID && item.NoiDungID) {
+					this.hocLieuMappings = { ...this.hocLieuMappings, [key]: true }
+					return
+				}
+				ajaxCALL('lms/EL_HocLieuResource_Get', {
+					ResourceType: item.ResourceType,
+					ResourceID: item.ResourceID
+				}, response => {
+					const rows = response?.data ?? response ?? []
+					const mapping = Array.isArray(rows?.[0]) ? rows[0][0] : (Array.isArray(rows) ? rows[0] : rows)
+					this.hocLieuMappings = {
+						...this.hocLieuMappings,
+						[key]: !!(mapping?.HocLieuID && mapping?.NoiDungID)
+					}
+				})
+			})
+		},
 		isDeletedItemInSelectedWeek(item) {
 			const selectedWeekId = vueData.cascadeTuanID
 			if (selectedWeekId != null && item?.TuanHocID != null) {

@@ -50,9 +50,9 @@
 							📝 Bước 2: Dán nội dung câu hỏi
 						</v-card-title>
 						<v-card-text>
-							<f-editor v-model="textEditor" variant="outlined" :height="300"
-								:imageapi="vueData.v_Set.apiImageAdapter" placeholder="Dán nội dung câu hỏi vào đây...">
-							</f-editor>
+							<uc-rich-text-editor :plugins="['ggb']" v-model="textEditor" variant="outlined" :height="300"
+								:imageapi="vueData.v_Set.apiFile" placeholder="Dán nội dung câu hỏi vào đây...">
+							</uc-rich-text-editor>
 						</v-card-text>
 					</v-card>
 

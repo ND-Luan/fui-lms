@@ -142,6 +142,13 @@ AS
 BEGIN
     SET NOCOUNT ON;
 
+    DECLARE @BoSachID INT;
+    SET @MonHocID = ISNULL(@MonHocID, 0);
+    SET @KhoiID = ISNULL(@KhoiID, 0);
+    SET XACT_ABORT ON;
+
+    BEGIN TRANSACTION;
+
     SELECT TaiNguyenLoaiID, Code, TenLoai, KieuLoc, IsActive, ThuTu
     FROM dbo.tblFP_TaiNguyenLoai
     WHERE IsActive = 1
@@ -250,11 +257,19 @@ BEGIN
     END
     ELSE
     BEGIN
+        SELECT TOP (1) @BoSachID = BoSachID
+        FROM dbo.tblBoSach_FP
+        WHERE Is_Xoa = 0
+        ORDER BY BoSachID;
+
+        IF @BoSachID IS NULL
+            THROW 50104, N'Không tìm thấy bộ sách đang hoạt động để tạo bộ tài nguyên.', 1;
+
         INSERT INTO dbo.tblHocLieu_FP
             (TenHocLieu, BoSachID, MonHocID, KhoiID, TaiNguyenLoaiID, TaiNguyenMucID,
              HocKy, ThumbnailURL, TinhTrang, Loai, Is_Xoa, CreateUser, CreateTime)
         VALUES
-            (@TenHocLieu, NULL, @MonHocID, @KhoiID, @TaiNguyenLoaiID, @TaiNguyenMucID,
+            (@TenHocLieu, @BoSachID, @MonHocID, @KhoiID, @TaiNguyenLoaiID, @TaiNguyenMucID,
              @HocKy, @ThumbnailURL, ISNULL(NULLIF(@TinhTrang, ''), 'Private'),
              'TAI_NGUYEN', 0, @sys_UserID, GETDATE());
         SET @HocLieuID = SCOPE_IDENTITY();
@@ -501,6 +516,9 @@ BEGIN
     IF @HocLieuID IS NULL
         THROW 50110, N'Không tìm thấy mục tài nguyên hoặc bạn không có quyền xóa.', 1;
 
+    DECLARE @NodesToDelete TABLE (NoiDungID INT PRIMARY KEY);
+    DECLARE @FileIDs TABLE (FileID VARCHAR(100) PRIMARY KEY);
+
     ;WITH NodesToDelete AS (
         SELECT NoiDungID
         FROM dbo.tblNoiDungHocLieu_FP
@@ -511,9 +529,44 @@ BEGIN
         INNER JOIN NodesToDelete parent ON child.ParentID = parent.NoiDungID
         WHERE child.HocLieuID = @HocLieuID AND child.Is_Xoa = 0
     )
+    INSERT INTO @NodesToDelete (NoiDungID)
+    SELECT NoiDungID FROM NodesToDelete;
+
+    INSERT INTO @FileIDs (FileID)
+    SELECT DISTINCT CASE WHEN ISJSON(nd.DataJson) = 1 THEN JSON_VALUE(nd.DataJson, '$.fileId') END
+    FROM dbo.tblNoiDungHocLieu_FP nd
+    INNER JOIN @NodesToDelete deletedNode ON deletedNode.NoiDungID = nd.NoiDungID
+    WHERE nd.NguonTaiNguyenCode = 'QUAN_LY_TAI_NGUYEN'
+      AND NULLIF(CASE WHEN ISJSON(nd.DataJson) = 1 THEN JSON_VALUE(nd.DataJson, '$.fileId') END, '') IS NOT NULL;
+
     UPDATE dbo.tblNoiDungHocLieu_FP
     SET Is_Xoa = 1, UpdateUser = @sys_UserID, UpdateTime = GETDATE()
-    WHERE NoiDungID IN (SELECT NoiDungID FROM NodesToDelete);
+    WHERE NoiDungID IN (SELECT NoiDungID FROM @NodesToDelete);
+
+    DELETE fd
+    FROM dbo.FileData fd
+    INNER JOIN @FileIDs fileItem ON fileItem.FileID = fd.FileID
+    WHERE NOT EXISTS (
+        SELECT 1
+        FROM dbo.tblNoiDungHocLieu_FP nd
+        WHERE nd.Is_Xoa = 0
+          AND CASE WHEN ISJSON(nd.DataJson) = 1 THEN JSON_VALUE(nd.DataJson, '$.fileId') END = fileItem.FileID
+    )
+      AND NOT EXISTS (
+        SELECT 1
+        FROM dbo.tblEL_Lessons l
+        INNER JOIN dbo.tblEL_Elements e ON e.LessonID = l.LessonID AND e.IsDeleted = 0
+        WHERE l.IsDeleted = 0
+          AND CHARINDEX('"' + fileItem.FileID + '"', CONVERT(NVARCHAR(MAX), e.ElementData)) > 0
+    )
+      AND NOT EXISTS (
+        SELECT 1
+        FROM dbo.tblEL_Assignments a
+        WHERE a.IsDeleted = 0
+          AND CHARINDEX('"' + fileItem.FileID + '"', CONVERT(NVARCHAR(MAX), a.AssignmentConfig)) > 0
+    );
+
+    COMMIT TRANSACTION;
 
     SELECT Success = 1;
 END;
