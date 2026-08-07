@@ -1,0 +1,238 @@
+{
+  "data": [
+    {
+      "EXE": "IsCheck_NotRoleParent(vueData.user)"
+    },
+    {
+      "CALL": "getDSTuan"
+    },
+    {
+      "CALL": "getDSThongBao"
+    },
+    {
+      "DSTuan": [],
+      "TuanItem": null,
+      "DSDangKy": [],
+      "DSThongBao": [],
+      "IsShowDialogChiTiet": false,
+      "DangKyDangXem": null,
+      "DSHocSinhChiTiet": [],
+      "isLoadingChiTiet": false,
+      "headersDangKy": [
+        { "text": "Lớp", "value": "TenLop", "width": "80px" },
+        { "text": "Loại TB", "value": "LoaiThietBi", "width": "90px" },
+        { "text": "Môn", "value": "TenMonHoc", "width": "120px" },
+        { "text": "GVBM đăng ký", "value": "TenGiaoVienDangKy", "width": "160px" },
+        { "text": "Ngày áp dụng", "value": "NgayApDung", "el": "t-time", "attr": { "format": "DD/MM/YYYY" }, "width": "120px" },
+        { "text": "Thứ", "value": "ThuHienThi", "width": "70px", "align": "center" },
+        { "text": "Tiết", "value": "TietHienThi", "width": "80px", "align": "center" },
+        { "text": "Số HS", "value": "SoHocSinh", "el": "t-num", "width": "70px" },
+        { "text": "Vi phạm", "value": "SoViPham", "el": "t-num", "width": "70px" },
+        { "text": "Trễ hạn", "value": "IsTreHan", "el": "t-boolean", "align": "center", "width": "80px" },
+        { "text": "Ghi chú", "value": "GhiChu" },
+        { "text": "", "value": "ctrl-xem", "el": "t-button", "width": "60px", "attr": { "icon-text": "mdi-eye", "color": "primary", ":action": { "CALL": "xemChiTiet" } } }
+      ]
+    },
+    {
+      "getDSTuan": {
+        "API": "lms/TuanHocTap_Get",
+        "IN": { "NienKhoa": "vueData.NienKhoa" },
+        "OUT": "DSTuan",
+        "CALLBACK": { "EXE": "chonTuanHienTai()" }
+      },
+      "getDSDangKy": {
+        "API": "lms/DangKyMangLaptop_Get",
+        "IN": {
+          "NienKhoa": "vueData.NienKhoa",
+          "TuanHocID": "vueData.TuanItem?.TuanHocID || 0",
+          "LopID": 0,
+          "KhoiID": 0,
+          "ViewMode": "`GVCN"
+        },
+        "OUT": "DSDangKy",
+        "CALLBACK": { "EXE": "renderDSDangKy()" }
+      },
+      "getDSThongBao": {
+        "API": "lms/DangKyMangLaptop_ThongBao_Get",
+        "OUT": "DSThongBao"
+      },
+      "xemChiTiet": {
+        "EXE": "onXemChiTiet(item)"
+      }
+    }
+  ],
+  "watch": {
+    "TuanItem": { "CALL": "getDSDangKy" }
+  },
+  "controls": [
+    {
+      "prop": "fluid grid-list-md",
+      "rows": [
+        {
+          "prop": "",
+          "cols": [
+            {
+              "el": "v-card",
+              "attr": { "class": "pa-4 mb-4" },
+              "innerHTML": [
+                {
+                  "el": "v-card-title",
+                  "attr": { "class": "text-primary px-0 pt-0 d-flex align-center ga-2" },
+                  "innerHTML": [
+                    { "el": "v-icon", "innerHTML": "mdi-laptop" },
+                    { "el": "span", "innerHTML": "Theo dõi HS mang Laptop - Lớp chủ nhiệm" },
+                    { "el": "v-spacer" },
+                    {
+                      "el": "v-badge",
+                      "attr": {
+                        ":content": "DSThongBao.filter(x=>!x.IsRead).length",
+                        ":model-value": "DSThongBao.filter(x=>!x.IsRead).length > 0",
+                        "color": "error"
+                      },
+                      "innerHTML": [
+                        { "el": "v-icon", "innerHTML": "mdi-bell-outline" }
+                      ]
+                    }
+                  ]
+                },
+                { "el": "v-divider", "attr": { "class": "mb-4" } },
+                {
+                  "el": "v-row",
+                  "innerHTML": [
+                    {
+                      "el": "v-col",
+                      "attr": { ":cols": 12, ":sm": 6 },
+                      "innerHTML": [
+                        {
+                          "el": "v-select",
+                          "attr": {
+                            "v-model": "TuanItem",
+                            "label": "Chọn tuần",
+                            ":items": "DSTuan",
+                            "item-title": "Tuan_HienThi",
+                            ":return-object": true,
+                            "hide-details": "auto"
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ],
+              "w": 12
+            },
+            {
+              "el": "v-card",
+              "attr": { "class": "pa-4 mb-4" },
+              "innerHTML": [
+                {
+                  "el": "v-card-title",
+                  "attr": { "class": "text-primary px-0 pt-0 d-flex align-center ga-2" },
+                  "innerHTML": [
+                    { "el": "v-icon", "innerHTML": "mdi-format-list-bulleted" },
+                    { "el": "span", "innerHTML": "Danh sách đăng ký trong tuần" }
+                  ]
+                },
+                { "el": "v-divider", "attr": { "class": "mb-2" } },
+                {
+                  "el": "f-table",
+                  "attr": {
+                    "label": "",
+                    ":headers": "headersDangKy",
+                    ":items": "DSDangKy",
+                    "show-search": true,
+                    ":fixed-header": true,
+                    "height": "500"
+                  }
+                }
+              ],
+              "w": 12
+            },
+            {
+              "el": "v-card",
+              "attr": { "class": "pa-4" },
+              "innerHTML": [
+                {
+                  "el": "v-card-title",
+                  "attr": { "class": "text-primary px-0 pt-0 d-flex align-center ga-2" },
+                  "innerHTML": [
+                    { "el": "v-icon", "innerHTML": "mdi-bell-outline" },
+                    { "el": "span", "innerHTML": "Thông báo" }
+                  ]
+                },
+                { "el": "v-divider", "attr": { "class": "mb-2" } },
+                {
+                  "el": "v-list",
+                  "innerHTML": [
+                    {
+                      "el": "v-list-item",
+                      "attr": {
+                        "v-for": "tb in vueData.DSThongBao",
+                        ":key": "tb.ThongBaoID",
+                        ":title": "tb.NoiDung",
+                        ":class": "!tb.IsRead ? 'bg-blue-lighten-5' : ''",
+                        "v-on:click": "vueData.markReadThongBao(tb)"
+                      }
+                    }
+                  ]
+                }
+              ],
+              "w": 12
+            },
+            {
+              "el": "f-dialog",
+              "attr": {
+                "v-model": "IsShowDialogChiTiet",
+                "title": "Chi tiết đăng ký - {{DangKyDangXem?.TenLop}}",
+                ":width": 650,
+                ":controls": [
+                  {
+                    "el": "v-row",
+                    "attr": {
+                      "v-for": "hs in vueData.DSHocSinhChiTiet",
+                      ":key": "hs.DangKyHocSinhID",
+                      "dense": true,
+                      "class": "align-center"
+                    },
+                    "innerHTML": [
+                      {
+                        "el": "v-col",
+                        "attr": { ":cols": 8 },
+                        "innerHTML": "{{hs.HoTen}}"
+                      },
+                      {
+                        "el": "v-col",
+                        "attr": { ":cols": 4 },
+                        "innerHTML": [
+                          {
+                            "el": "v-checkbox",
+                            "attr": {
+                              ":model-value": "hs.IsViPham",
+                              "label": "Vi phạm",
+                              "color": "warning",
+                              "density": "compact",
+                              "hide-details": "auto",
+                              "v-on:update:model-value": "vueData.danhDauViPham(hs)"
+                            }
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ],
+                ":button": [
+                  {
+                    "label": "Đóng",
+                    "action": { "IsShowDialogChiTiet": false }
+                  }
+                ]
+              },
+              "w": 12
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "set": {}
+}
