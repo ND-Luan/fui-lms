@@ -161,5 +161,5 @@ END
 GO
 
 -- Cấp quyền thực thi cho Stored Procedure
-GRANT EXECUTE ON [dbo].[spAPI_FileData_Delete] TO [public];
+GRANT EXECUTE ON [dbo].[spAPI_FileData_Delete] TO [lmslhbs];
 GO

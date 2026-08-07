@@ -59,7 +59,12 @@
 							</v-select>
 						</v-col>
 						<v-col cols="12" sm="5" class="d-flex align-center justify-end ga-2 flex-nowrap">
-							<v-btn color="primary" variant="outlined" size="small" :loading="loading.list"
+							<v-btn v-if="isCap1 && tab === 'ren-luyen'" color="primary" variant="flat" size="small"
+								:disabled="saveButtonDisabled" :loading="loading.save" @click="onWorkflowSave">
+								<v-icon start>mdi-content-save</v-icon>
+								Lưu tạm tất cả
+							</v-btn>
+							<v-btn v-else color="primary" variant="outlined" size="small" :loading="loading.list"
 								@click="onRefreshCurrentTab">
 								<v-icon start>mdi-refresh</v-icon>
 								Làm mới
@@ -69,7 +74,27 @@
 								<v-icon start>mdi-file-excel</v-icon>
 								Xuất Excel
 							</v-btn>
-			<v-menu v-if="workflowActionMenuVisible" location="bottom end">
+							<v-menu v-if="workflowActionMenuVisible && isCap1 && tab === 'ren-luyen'" location="bottom end">
+								<template #activator="{ props }">
+									<v-btn v-bind="props" color="primary" variant="flat" size="small"
+										:loading="loading.save || loading.submit">
+										<v-icon start>mdi-content-save-cog</v-icon>
+										Thao tác
+										<v-icon end>mdi-chevron-down</v-icon>
+									</v-btn>
+								</template>
+								<v-list density="compact">
+									<v-list-item :disabled="loading.list" @click="onRefreshCurrentTab">
+										<template #prepend><v-icon>mdi-refresh</v-icon></template>
+										<v-list-item-title>Làm mới</v-list-item-title>
+									</v-list-item>
+									<v-list-item :disabled="workflowSendDisabled" @click="onWorkflowSend">
+										<template #prepend><v-icon>mdi-send</v-icon></template>
+										<v-list-item-title>{{ workflowSendLabel }}</v-list-item-title>
+									</v-list-item>
+								</v-list>
+							</v-menu>
+			<v-menu v-if="workflowActionMenuVisible && !(isCap1 && tab === 'ren-luyen')" location="bottom end">
 				<template #activator="{ props }">
 					<v-btn v-bind="props" color="primary" variant="flat" size="small"
 						:loading="loading.save || loading.submit">

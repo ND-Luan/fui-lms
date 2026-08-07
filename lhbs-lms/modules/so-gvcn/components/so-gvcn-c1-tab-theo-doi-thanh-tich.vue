@@ -134,6 +134,13 @@
 						const worksheet = Array.isArray(this.instance) ? this.instance[0] : this.instance
 						if (worksheet && typeof worksheet.hideColumn === 'function') {
 							worksheet.hideColumn(2)
+							// Ẩn HKI trên giao diện nhưng không ẩn nested header chứa HKI và Cuối năm học.
+							const hkiCells = container.querySelectorAll('[data-x="4"]')
+							hkiCells.forEach(cell => {
+								cell.style.display = 'none'
+							})
+							const hkiColumn = container.querySelectorAll('colgroup col')[5]
+							if (hkiColumn) hkiColumn.style.display = 'none'
 							window.requestAnimationFrame(() => soGvcnJspreadsheet.syncNestedHeaders(container, [4]))
 						}
 					}

@@ -11,9 +11,12 @@ Tài liệu này trình bày kế hoạch chi tiết để tái sử dụng hai 
 
 Các bước thay đổi bao gồm:
 1. **Bổ sung cột phân loại (`Loai`)**: Thêm cột `Loai` với giá trị mặc định là `'HOC_LIEU'` vào bảng `dbo.tblHocLieu_FP`.
-2. **Cập nhật Stored Procedures**:
+2. **Phân loại nghiệp vụ tài nguyên**: Dùng `tblFP_TaiNguyenLoai` và `tblFP_TaiNguyenMuc` để cấu hình loại tài nguyên (`KHOI_MON` hoặc `MUC_RIENG`), tránh hardcode theo tên nghiệp vụ. Các bộ tài liệu được liên kết bằng `TaiNguyenLoaiID`, `TaiNguyenMucID`.
+3. **Theo dõi nguồn file**: Bổ sung `NguonTaiNguyenCode`, `NguonResourceType`, `NguonResourceID` trên `tblNoiDungHocLieu_FP`. Các nguồn chuẩn gồm `HOC_LIEU`, `GIAO_BAI`, `QUAN_LY_TAI_NGUYEN`.
+4. **Cập nhật Stored Procedures**:
    * Cập nhật `spAPI_FP_HocLieu_GetAll` nhận `@Loai VARCHAR(50) = 'HOC_LIEU'`.
    * Cập nhật `spAPI_FP_HocLieu_Save` nhận `@Loai VARCHAR(50) = 'HOC_LIEU'`.
+   * Thêm API lấy loại/mức tài nguyên và mở rộng API kho tài nguyên với bộ lọc động.
 
 ---
 
@@ -57,7 +60,9 @@ lhbs-lms/modules/gv-quan-ly-tai-nguyen/
 
 #### `components/uc-main-layout.vue`
 Giao diện quản lý tài nguyên kế thừa từ module học liệu, nhưng sẽ được tùy biến:
-1. **API Call**: Truyền tham số `Loai: 'TAI_NGUYEN'` cho các hàm `lms/FP_HocLieu_GetAll` và `lms/FP_HocLieu_Save`.
+1. **Bộ lọc động**: Loại `KHOI_MON` hiển thị Khối/Môn; loại `MUC_RIENG` hiển thị mức cấu hình riêng.
+2. **Nguồn file**: Bảng file hiển thị nguồn Học liệu, Giao bài hoặc Quản lý tài nguyên.
+3. **API Call**: Truyền tham số `Loai: 'TAI_NGUYEN'` cho các hàm `lms/FP_HocLieu_GetAll` và `lms/FP_HocLieu_Save`.
 2. **Done/Mutations**: Tận dụng `confirmRef` để hiển thị xác nhận trước khi lưu/xóa.
 3. **Soạn thảo tài nguyên**: Điều hướng sang trang soạn thảo tài nguyên/file đính kèm tương ứng.
 

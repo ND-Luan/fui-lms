@@ -103,7 +103,16 @@
 						allowInsertRow: false,
 						showHeader: true
 					}],
-					contextMenu: () => false
+					contextMenu: () => false,
+					onload: () => {
+						this.$nextTick(() => {
+							setTimeout(() => {
+								const sheet = this.getInstance()
+								if (!sheet || typeof sheet.setHeight !== 'function') return
+								;(this.rows || []).forEach((_, rowIndex) => sheet.setHeight(rowIndex, 96))
+							}, 100)
+						})
+					}
 				})
 			}
 		}

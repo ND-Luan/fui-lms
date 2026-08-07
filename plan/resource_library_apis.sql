@@ -443,13 +443,13 @@ GO
     Quyền dữ liệu vẫn được khóa trong từng store bằng @sys_UserID; riêng vùng
     Audit kiểm tra thêm @sys_SystemRight IN (3, 5, 9).
 */
-GRANT EXECUTE ON [dbo].[spAPI_FP_TaiNguyen_GetAll] TO [public];
-GRANT EXECUTE ON [dbo].[spAPI_FP_TaiNguyen_Save] TO [public];
-GRANT EXECUTE ON [dbo].[spAPI_FP_TaiNguyen_Delete] TO [public];
-GRANT EXECUTE ON [dbo].[spAPI_FP_TaiNguyen_GetTree] TO [public];
-GRANT EXECUTE ON [dbo].[spAPI_FP_TaiNguyen_Node_Save] TO [public];
-GRANT EXECUTE ON [dbo].[spAPI_FP_TaiNguyen_Node_Delete] TO [public];
-GRANT EXECUTE ON [dbo].[spAPI_FP_TaiNguyen_File_Register] TO [public];
-GRANT EXECUTE ON [dbo].[spAPI_FP_TaiNguyen_Audit_GetAll] TO [public];
-GRANT EXECUTE ON [dbo].[spAPI_FP_TaiNguyen_Audit_GetTree] TO [public];
+GRANT EXECUTE ON [dbo].[spAPI_FP_TaiNguyen_GetAll] TO [lmslhbs];
+GRANT EXECUTE ON [dbo].[spAPI_FP_TaiNguyen_Save] TO [lmslhbs];
+GRANT EXECUTE ON [dbo].[spAPI_FP_TaiNguyen_Delete] TO [lmslhbs];
+GRANT EXECUTE ON [dbo].[spAPI_FP_TaiNguyen_GetTree] TO [lmslhbs];
+GRANT EXECUTE ON [dbo].[spAPI_FP_TaiNguyen_Node_Save] TO [lmslhbs];
+GRANT EXECUTE ON [dbo].[spAPI_FP_TaiNguyen_Node_Delete] TO [lmslhbs];
+GRANT EXECUTE ON [dbo].[spAPI_FP_TaiNguyen_File_Register] TO [lmslhbs];
+GRANT EXECUTE ON [dbo].[spAPI_FP_TaiNguyen_Audit_GetAll] TO [lmslhbs];
+GRANT EXECUTE ON [dbo].[spAPI_FP_TaiNguyen_Audit_GetTree] TO [lmslhbs];
 GO

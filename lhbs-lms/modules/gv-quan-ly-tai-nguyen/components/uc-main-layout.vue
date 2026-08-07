@@ -6,15 +6,23 @@
 				<v-card-text>
 					<v-row align="center">
 						<v-col cols="12" sm="3">
+							<v-select v-model="selectedResourceTypeId" label="Loại tài nguyên" :items="resourceTypes"
+								item-title="TenLoai" item-value="TaiNguyenLoaiID" clearable hide-details />
+						</v-col>
+						<v-col v-if="usesKhoiMon" cols="12" sm="2">
 							<v-select v-model="selectedKhoi" label="Lọc theo Khối" :items="DSKhoi"
 								item-title="name" item-value="id" clearable hide-details />
 						</v-col>
-						<v-col cols="12" sm="3">
+						<v-col v-if="usesKhoiMon" cols="12" sm="2">
 							<v-select v-model="selectedMon" label="Lọc theo Môn" :items="DSMonHoc"
 								item-title="MonHocName" item-value="MonHocID" clearable
 								:disabled="selectedKhoi === null || selectedKhoi === undefined" hide-details />
 						</v-col>
-						<v-col cols="12" sm="4">
+						<v-col v-if="usesMucRieng" cols="12" sm="3">
+							<v-select v-model="selectedResourceLevelId" label="Mức phân loại" :items="resourceLevels"
+								item-title="TenMuc" item-value="TaiNguyenMucID" clearable hide-details />
+						</v-col>
+						<v-col cols="12" sm="3">
 							<v-select v-model="selectedLibraryId" label="Bộ tài liệu" :items="libraries"
 								item-title="TenHocLieu" item-value="HocLieuID" clearable hide-details />
 						</v-col>
@@ -114,6 +122,9 @@
 							</div>
 						</div>
 					</template>
+					<template #item.NguonTaiNguyenCode="{ item }">
+						<v-chip size="small" variant="tonal">{{ getSourceLabel(item.NguonTaiNguyenCode) }}</v-chip>
+					</template>
 					<template #item.fileSize="{ item }">{{ formatFileSize(getMeta(item).fileSize) }}</template>
 					<template #item.CreateTime="{ item }">{{ formatDate(item.CreateTime) }}</template>
 					<template #item.actions="{ item }">
@@ -144,19 +155,26 @@
 
 		<uc-dialog v-model="libraryDialog" :title="libraryForm.HocLieuID ? 'Sửa bộ tài liệu' : 'Tạo bộ tài liệu'"
 			done-text="Lưu" :width="560" @onSubmit="saveLibrary">
-			<v-text-field v-model="libraryForm.TenHocLieu" label="Tên bộ tài liệu*" />
-			<v-row>
-				<v-col cols="6">
+			<div class="resource-library-form">
+				<v-text-field v-model="libraryForm.TenHocLieu" label="Tên bộ tài liệu*" />
+				<v-select v-model="libraryForm.TaiNguyenLoaiID" label="Loại tài nguyên*" :items="resourceTypes"
+					item-title="TenLoai" item-value="TaiNguyenLoaiID"
+					:disabled="Boolean(libraryForm.HocLieuID)" @update:model-value="onLibraryTypeChange" />
+				<v-select v-if="libraryUsesMucRieng" v-model="libraryForm.TaiNguyenMucID" label="Mức phân loại*"
+					:items="resourceLevels" item-title="TenMuc" item-value="TaiNguyenMucID" />
+				<v-row class="resource-library-form-row">
+				<v-col v-if="libraryUsesKhoiMon" cols="6">
 					<v-select v-model="libraryForm.KhoiID" label="Khối" :items="DSKhoi"
 						item-title="name" item-value="id" @update:model-value="onLibraryKhoiChange" />
 				</v-col>
-				<v-col cols="6">
+				<v-col v-if="libraryUsesKhoiMon" cols="6">
 					<v-select v-model="libraryForm.MonHocID" label="Môn học" :items="librarySubjects"
 						item-title="MonHocName" item-value="MonHocID" />
 				</v-col>
-			</v-row>
-			<v-select v-model="libraryForm.TinhTrang" label="Trạng thái"
-				:items="['Private', 'Public']" />
+				</v-row>
+				<v-select v-model="libraryForm.TinhTrang" label="Trạng thái"
+					:items="['Private', 'Public']" />
+			</div>
 		</uc-dialog>
 
 		<uc-dialog v-model="folderDialog" :title="folderForm.NoiDungID ? 'Sửa thư mục' : 'Tạo thư mục'"
@@ -183,11 +201,15 @@
 		data() {
 			return {
 				vueData,
+				selectedResourceTypeId: null,
+				selectedResourceLevelId: null,
 				selectedKhoi: null,
 				selectedMon: null,
 				selectedLibraryId: null,
 				selectedFolderId: null,
 				DSMonHoc: [],
+				resourceTypes: [],
+				resourceLevels: [],
 				librarySubjects: [],
 				libraries: [],
 				nodes: [],
@@ -208,6 +230,7 @@
 				],
 				headers: [
 					{ title: 'Tên file', value: 'TenNoiDung' },
+					{ title: 'Nguồn', value: 'NguonTaiNguyenCode', width: 170 },
 					{ title: 'Dung lượng', value: 'fileSize', width: 130 },
 					{ title: 'Ngày tải lên', value: 'CreateTime', width: 170 },
 					{ title: 'Thao tác', value: 'actions', sortable: false, width: 150 },
@@ -220,6 +243,24 @@
 			},
 			selectedLibrary() {
 				return this.libraries.find(item => item.HocLieuID === this.selectedLibraryId) || null
+			},
+			selectedResourceType() {
+				return this.resourceTypes.find(item => item.TaiNguyenLoaiID === this.selectedResourceTypeId) || null
+			},
+			usesKhoiMon() {
+				return !this.selectedResourceType || this.selectedResourceType.KieuLoc === 'KHOI_MON'
+			},
+			usesMucRieng() {
+				return this.selectedResourceType?.KieuLoc === 'MUC_RIENG'
+			},
+			libraryResourceType() {
+				return this.resourceTypes.find(item => item.TaiNguyenLoaiID === this.libraryForm.TaiNguyenLoaiID) || null
+			},
+			libraryUsesKhoiMon() {
+				return !this.libraryResourceType || this.libraryResourceType.KieuLoc === 'KHOI_MON'
+			},
+			libraryUsesMucRieng() {
+				return this.libraryResourceType?.KieuLoc === 'MUC_RIENG'
 			},
 			folders() {
 				return this.nodes.filter(item => item.LoaiNoiDung === 'THU_MUC')
@@ -260,6 +301,19 @@
 			},
 		},
 		watch: {
+			selectedResourceTypeId(value) {
+				this.selectedResourceLevelId = null
+				this.selectedKhoi = null
+				this.selectedMon = null
+				this.DSMonHoc = []
+				this.loadResourceLevels(value)
+				this.loadLibraries()
+			},
+			selectedResourceLevelId() {
+				this.selectedLibraryId = null
+				this.nodes = []
+				this.loadLibraries()
+			},
 			selectedKhoi(value) {
 				this.selectedMon = null
 				this.DSMonHoc = []
@@ -280,7 +334,7 @@
 			},
 		},
 		mounted() {
-			this.loadLibraries()
+			this.initializeResourceTypes()
 		},
 		methods: {
 			notify(message, color = 'success') {
@@ -292,10 +346,29 @@
 				if (target === 'dialog') this.librarySubjects = result ?? []
 				else this.DSMonHoc = result ?? []
 			},
+			async initializeResourceTypes() {
+				const result = await fetchPromise('lms/FP_TaiNguyenLoai_GetAll', {}, { cache: false })
+				this.resourceTypes = result ?? []
+				if (!this.selectedResourceTypeId && this.resourceTypes.length) {
+					this.selectedResourceTypeId = this.resourceTypes[0].TaiNguyenLoaiID
+				} else {
+					await this.loadLibraries()
+				}
+			},
+			async loadResourceLevels(typeId) {
+				this.resourceLevels = []
+				if (!typeId) return
+				const type = this.resourceTypes.find(item => item.TaiNguyenLoaiID === typeId)
+				if (type?.KieuLoc !== 'MUC_RIENG') return
+				const result = await fetchPromise('lms/FP_TaiNguyenMuc_GetAll', { TaiNguyenLoaiID: typeId }, { cache: false })
+				this.resourceLevels = result ?? []
+			},
 			async loadLibraries() {
 				const result = await fetchPromise('lms/FP_TaiNguyen_GetAll', {
-					KhoiID: this.selectedKhoi ?? 0,
-					MonHocID: this.selectedMon ?? 0,
+					KhoiID: this.usesKhoiMon ? (this.selectedKhoi ?? 0) : 0,
+					MonHocID: this.usesKhoiMon ? (this.selectedMon ?? 0) : 0,
+					TaiNguyenLoaiID: this.selectedResourceTypeId ?? 0,
+					TaiNguyenMucID: this.usesMucRieng ? (this.selectedResourceLevelId ?? 0) : 0,
 				}, { cache: false })
 				this.libraries = result ?? []
 			},
@@ -314,15 +387,25 @@
 					: {
 						HocLieuID: 0,
 						TenHocLieu: '',
+						TaiNguyenLoaiID: this.selectedResourceTypeId,
+						TaiNguyenMucID: this.selectedResourceLevelId,
 						KhoiID: this.selectedKhoi,
 						MonHocID: this.selectedMon,
 						TinhTrang: 'Private',
 					}
 				this.librarySubjects = []
-				if (this.libraryForm.KhoiID !== null) {
+				await this.loadResourceLevels(this.libraryForm.TaiNguyenLoaiID)
+				if (this.libraryUsesKhoiMon && this.libraryForm.KhoiID !== null) {
 					await this.loadSubjects(this.libraryForm.KhoiID, 'dialog')
 				}
 				this.libraryDialog = true
+			},
+			async onLibraryTypeChange(typeId) {
+				this.libraryForm.TaiNguyenMucID = null
+				this.libraryForm.KhoiID = null
+				this.libraryForm.MonHocID = null
+				this.librarySubjects = []
+				await this.loadResourceLevels(typeId)
 			},
 			async onLibraryKhoiChange(khoiID) {
 				this.libraryForm.MonHocID = null
@@ -334,6 +417,14 @@
 			async saveLibrary() {
 				if (!String(this.libraryForm.TenHocLieu || '').trim()) {
 					this.notify('Vui lòng nhập tên bộ tài liệu.', 'warning')
+					return
+				}
+				if (!this.libraryForm.TaiNguyenLoaiID) {
+					this.notify('Vui lòng chọn loại tài nguyên.', 'warning')
+					return
+				}
+				if (this.libraryUsesMucRieng && !this.libraryForm.TaiNguyenMucID) {
+					this.notify('Vui lòng chọn mức phân loại.', 'warning')
 					return
 				}
 				const ok = await this.confirmRef.value.show({ title: 'Xác nhận lưu bộ tài liệu?' })
@@ -410,15 +501,16 @@
 									contentType: uploaded.FILE_CONTENTTYPE || file.type,
 									fileSize: Number(uploaded.FILE_SIZE || file.size || 0),
 									url: uploaded.FILE_URL || `/FileData/${uploaded.FILE_ID}`,
-									origin: 'RESOURCE_LIBRARY',
+									origin: 'QUAN_LY_TAI_NGUYEN',
 								}
 								await fetchPromise('lms/FP_TaiNguyen_Node_Save', {
 									NoiDungID: 0,
 									HocLieuID: this.selectedLibraryId,
 									ParentID: this.selectedFolderId,
 									TenNoiDung: metadata.fileName,
-									LoaiNoiDung: this.getResourceType(metadata.contentType),
-									ThuTu: this.nodes.length,
+					LoaiNoiDung: this.getResourceType(metadata.contentType),
+					NguonTaiNguyenCode: 'QUAN_LY_TAI_NGUYEN',
+					ThuTu: this.nodes.length,
 									DataJson: JSON.stringify(metadata),
 								}, { cache: false })
 								await this.loadTree()
@@ -479,6 +571,9 @@
 					ParentID: this.fileForm.ParentID,
 					TenNoiDung: this.fileForm.TenNoiDung,
 					LoaiNoiDung: this.fileForm.LoaiNoiDung,
+					NguonTaiNguyenCode: this.fileForm.NguonTaiNguyenCode || 'QUAN_LY_TAI_NGUYEN',
+					NguonResourceType: this.fileForm.NguonResourceType,
+					NguonResourceID: this.fileForm.NguonResourceID,
 					ThuTu: this.fileForm.ThuTu || 0,
 					DataJson: JSON.stringify(metadata),
 				}, { cache: false })
@@ -516,6 +611,13 @@
 				if (type.startsWith('audio/')) return 'indigo'
 				if (type.startsWith('image/')) return 'green'
 				return 'primary'
+			},
+			getSourceLabel(code) {
+				return {
+					HOC_LIEU: 'Học liệu',
+					GIAO_BAI: 'Giao bài',
+					QUAN_LY_TAI_NGUYEN: 'Quản lý tài nguyên',
+				}[code] || 'Khác'
 			},
 			formatFileSize(value) {
 				const size = Number(value || 0)

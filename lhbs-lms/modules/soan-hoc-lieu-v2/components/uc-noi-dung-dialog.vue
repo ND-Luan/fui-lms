@@ -430,6 +430,9 @@
 					MonHocID: this.resourceContext?.MonHocID ?? null,
 					TenNoiDung: metadata.fileName,
 					LoaiNoiDung: targetItem.LoaiNoiDung,
+					NguonTaiNguyenCode: metadata.origin || 'HOC_LIEU',
+					NguonResourceType: 'HOC_LIEU',
+					NguonResourceID: targetItem.HocLieuID,
 					DataJson: JSON.stringify(metadata),
 				}, { cache: false });
 			},
