@@ -6,8 +6,8 @@
 				<v-icon>mdi-close</v-icon>
 			</v-btn>
 		</div>
-		<div class="d-flex align-center text-subtitle-1 font-weight-medium flex-wrap ga-2 px-3 pt-2">
-			{{ $t('message.Attribute') }}
+		<div class="properties-context-header d-flex align-center text-subtitle-1 font-weight-medium flex-wrap ga-2 px-3 pt-2">
+			<span v-if="!inDrawer">{{ $t('message.Attribute') }}</span>
 			<div class="ml-2" v-if="item?.type === 'question' && globalQuestionNumber !== 0">
 				<v-chip v-if="isQuestionTextField === false" label variant="outlined" color="primary"
 					@click="isQuestionTextField = true; $nextTick(() => { $refs.questionInput.focus() });">
@@ -21,19 +21,20 @@
 				{{ selectedGroupData.title }}
 			</v-chip>
 			<v-spacer></v-spacer>
-			<div class="d-flex">
-				<v-spacer></v-spacer>
-				<v-btn v-if="item?.type === 'group'" variant="outlined" color="primary" class="me-2"
+			<div class="properties-import-actions" v-if="item?.type === 'group'">
+				<v-btn variant="outlined" color="primary" class="me-2"
 					@click="onOpenModalImportFromHocLieu()">
 					<v-icon start class="me-1">mdi-download</v-icon> Import từ
 					kho học liệu
 				</v-btn>
-				<v-btn v-if="item?.type === 'group'" variant="outlined" color="secondary"
+				<v-btn variant="outlined" color="secondary"
 					@click="onOpenModalImportFromBank()">
 					<v-icon start class="me-1">mdi-database-search</v-icon> Import từ
 					ngân hàng câu hỏi
 				</v-btn>
-				<v-btn v-else-if="item?.type === 'question'" icon variant="text" @click="onOpenModalKiNang()">
+			</div>
+			<div v-if="item?.type === 'question'" class="ms-auto">
+				<v-btn icon variant="text" @click="onOpenModalKiNang()">
 					<v-icon>mdi-cog-outline</v-icon>
 				</v-btn>
 			</div>
@@ -357,7 +358,7 @@
 <script>
 	export default {
 		name: 'uc-assignment-properties', 
-		props: { groups: { type: Array, default: () => [] }, item: Object, assignment: Object, inDrawer: { type: Boolean, default: false } },
+		props: { groups: { type: Array, default: () => [] }, item: Object, assignment: Object, inDrawer: { type: Boolean, default: false }, openImportType: { type: String, default: '' } },
 		emits: ['update:groups', 'update:item', 'update:assignment', 'close'],
 		data() {
 			this.$i18n.locale = (localStorage.getItem('IsLanguage') && localStorage.getItem('IsLanguage') == 'true') ? 'en' : 'vi'
@@ -379,6 +380,10 @@
 			}
 		},
 		watch: {
+			openImportType(value) {
+				if (value === 'hocLieu') this.onOpenModalImportFromHocLieu()
+				if (value === 'bank') this.onOpenModalImportFromBank()
+			},
 			item() {
 				this.editingBlankState = {}
 				this.isQuestionTextField = false
@@ -461,11 +466,12 @@
 					...ng[this.item.groupIndex],
 					media: {
 						...ng[this.item.groupIndex].media,
+						type: media.type,
 						sourceYT: media.sourceYT,
 						sourceRecord: media.sourceRecord,
 						sourceFiles: {
-							file: media.sourceFiles.file ?? [],
-							image: media.sourceFiles.image ?? [],
+							file: media.sourceFiles?.file ?? [],
+							image: media.sourceFiles?.image ?? [],
 						}
 					}
 				};
@@ -477,23 +483,19 @@
 				const ng = this.groups;
 				const media = updatedData.media
 	
-				const keysToRemove = ["sourceYT", "sourceRecord", "sourceFiles"]; //Này bị thêm do phần cấu trúc uc-media, xóa đi cho gọn json, media đã thêm vào config, phần này bị dư ra
-	
-				keysToRemove.forEach(key => {
-					if (ng[this.item.groupIndex].questions[this.item.qIndex].config.hasOwnProperty(key)) {
-						delete ng[this.item.groupIndex].questions[this.item.qIndex].config[key];
-					}
-				});
-	
 				ng[this.item.groupIndex].questions[this.item.qIndex] = {
 					...ng[this.item.groupIndex].questions[this.item.qIndex],
 					config: {
 						...ng[this.item.groupIndex].questions[this.item.qIndex].config,
-						sourceYT: media.sourceYT,
-						sourceRecord: media.sourceRecord,
-						sourceFiles: {
-							file: media.sourceFiles.file,
-							image: media.sourceFiles.image,
+						media: {
+							...ng[this.item.groupIndex].questions[this.item.qIndex].config.media,
+							type: media.type,
+							sourceYT: media.sourceYT,
+							sourceRecord: media.sourceRecord,
+							sourceFiles: {
+								file: media.sourceFiles?.file ?? [],
+								image: media.sourceFiles?.image ?? [],
+							}
 						}
 					}
 				};

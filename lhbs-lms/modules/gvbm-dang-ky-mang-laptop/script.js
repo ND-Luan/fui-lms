@@ -65,10 +65,91 @@ function canhBaoTreHan() {
 	const deadline = computeDeadline(vueData.NgayApDung, thu)
 	return new Date() > deadline
 }
+function tenBuoi(b) {
+	return { 1: 'Sáng', 2: 'Chiều', 3: 'Tối' }[b] || ''
+}
+function chonTuanTKBHienTai() {
+	const active = (vueData.DSTuan || []).find(x => x.Is_Active === 1)
+	vueData.TuanXemTKB = active || vueData.DSTuan?.[0] || null
+}
+function tinhNgayDauTuanTKB() {
+	const ngayBatDau = vueData.TuanXemTKB?.NgayBatDau
+	if (!ngayBatDau) return ''
+	// NgayBatDau dạng "2026-08-03T00:00:00" hoặc "2026-08-03"
+	return String(ngayBatDau).slice(0, 10)
+}
+function parseTKBCell(html) {
+	if (!html) return null
+	const match = html.match(/<b>\s*([^<]+)<\/b>/)
+	const tenLop = match ? match[1].trim() : ''
+	const withoutBold = html.replace(/<b>[\s\S]*?<\/b>/, '')
+	const parts = withoutBold.split('<br>').map(s => s.replace(/<[^>]+>/g, '').trim()).filter(Boolean)
+	const tenMon = parts[0] || ''
+	return { TenLop: tenLop, TenMon: tenMon }
+}
+function renderTKB() {
+	const raw = vueData.TKBRaw || []
+	vueData.TKBTuanInfo = (raw[0] && raw[0][0]) || null
+	const lich = raw[1] || []
+	const thuKeys = ['2', '3', '4', '5', '6', '7', '1']
+	vueData.DSTKB = lich.map(row => {
+		const cells = thuKeys.map(k => {
+			const parsed = parseTKBCell(row[k])
+			return { ThuKey: k, TenLop: parsed?.TenLop || '', TenMon: parsed?.TenMon || '', CoTiet: !!parsed }
+		})
+		return { Buoi: row.Buoi, Tiet: row.Tiet, TenBuoi: tenBuoi(row.Buoi), Cells: cells }
+	})
+}
+function onChonTietTKB(row, cell) {
+	if (!cell.CoTiet) return
+	const found = (vueData.DSLop_HienThi || []).find(x => x.TenLop === cell.TenLop && x.TenMonHoc === cell.TenMon)
+		|| (vueData.DSLop_HienThi || []).find(x => x.TenLop === cell.TenLop)
+	if (found) {
+		vueData.LopItem = found
+	} else {
+		showModuleSnackbarDKLT(`Không tìm thấy lớp "${cell.TenLop}" trong danh sách lớp bạn dạy — vui lòng chọn tay`, 'warning')
+	}
+	vueData.Buoi = row.Buoi
+	vueData.TietBatDau = row.Tiet
+	vueData.TietKetThuc = row.Tiet
+	const tuNgay = vueData.TKBTuanInfo?.TuNgay // "dd/mm/yyyy", là Thứ 2 của tuần
+	if (tuNgay) {
+		const [d, m, y] = tuNgay.split('/').map(Number)
+		const base = new Date(y, m - 1, d)
+		const offsetMap = { '2': 0, '3': 1, '4': 2, '5': 3, '6': 4, '7': 5, '1': 6 }
+		base.setDate(base.getDate() + (offsetMap[cell.ThuKey] ?? 0))
+		const pad = n => String(n).padStart(2, '0')
+		vueData.NgayApDung = `${base.getFullYear()}-${pad(base.getMonth() + 1)}-${pad(base.getDate())}`
+	}
+	showModuleSnackbarDKLT(`Đã điền: Lớp ${cell.TenLop}${cell.TenMon ? ' - ' + cell.TenMon : ''}, ${tenBuoi(row.Buoi)} tiết ${row.Tiet}`, 'success')
+}
+function initHocSinhThietBi() {
+	vueData.HocSinhThietBi = (vueData.DSHocSinhLop || []).map(hs => ({
+		HocSinhID: hs.HocSinhID,
+		HoTen: hs.HoTen,
+		IsChon: true,
+		ThietBiChon: ['Laptop']
+	}))
+}
+function chonTatCaHocSinh() {
+	(vueData.HocSinhThietBi || []).forEach(x => { x.IsChon = true })
+}
+function boChonTatCaHocSinh() {
+	(vueData.HocSinhThietBi || []).forEach(x => { x.IsChon = false })
+}
+function toggleChonHocSinh(hs) {
+	hs.IsChon = !hs.IsChon
+}
+function toggleThietBi(hs, loai) {
+	const idx = hs.ThietBiChon.indexOf(loai)
+	if (idx > -1) hs.ThietBiChon.splice(idx, 1)
+	else hs.ThietBiChon.push(loai)
+}
 function renderDSDangKy() {
 	vueData.DSDangKy = (vueData.DSDangKy || []).map(x => ({
 		...x,
 		ThuHienThi: tenThu(x.Thu),
+		BuoiHienThi: tenBuoi(x.Buoi),
 		TietHienThi: x.TietBatDau + '-' + x.TietKetThuc
 	}))
 }
@@ -81,8 +162,14 @@ async function onSubmitDangKy() {
 		showModuleSnackbarDKLT('Vui lòng chọn ngày áp dụng', 'warning')
 		return
 	}
-	if (!vueData.HocSinhSelected || !vueData.HocSinhSelected.length) {
+	const dsChon = (vueData.HocSinhThietBi || []).filter(x => x.IsChon)
+	if (!dsChon.length) {
 		showModuleSnackbarDKLT('Vui lòng chọn ít nhất 1 học sinh', 'warning')
+		return
+	}
+	const chuaChonThietBi = dsChon.find(x => !x.ThietBiChon || !x.ThietBiChon.length)
+	if (chuaChonThietBi) {
+		showModuleSnackbarDKLT(`Học sinh "${chuaChonThietBi.HoTen}" chưa chọn thiết bị nào`, 'warning')
 		return
 	}
 	if (Number(vueData.TietKetThuc) < Number(vueData.TietBatDau)) {
@@ -93,15 +180,15 @@ async function onSubmitDangKy() {
 	try {
 		const thu = getThu(vueData.NgayApDung)
 		const isTreHan = canhBaoTreHan()
-		const jsonHocSinh = vueData.HocSinhSelected.map(x => ({ HocSinhID: x.HocSinhID, HoTen: x.HoTen }))
+		const jsonHocSinh = dsChon.map(x => ({ HocSinhID: x.HocSinhID, HoTen: x.HoTen, LoaiThietBi: x.ThietBiChon.join(',') }))
 		await ajaxCALLPromise('lms/DangKyMangLaptop_Ins_JSON', {
 			LopID: vueData.LopItem.LopID,
 			TenLop: vueData.LopItem.TenLop,
 			KhoiID: vueData.LopItem.KhoiID,
 			MonHocID: vueData.LopItem.MonHocID,
 			TenMonHoc: vueData.LopItem.TenMonHoc,
-			LoaiThietBi: vueData.LoaiThietBi || 'Laptop',
 			Thu: thu,
+			Buoi: Number(vueData.Buoi),
 			TietBatDau: Number(vueData.TietBatDau),
 			TietKetThuc: Number(vueData.TietKetThuc),
 			NgayApDung: vueData.NgayApDung,
@@ -114,7 +201,7 @@ async function onSubmitDangKy() {
 			TenGiaoVienDangKy: vueData.user?.HoTen || vueData.user?.UserName || ''
 		})
 		showModuleSnackbarDKLT('Đăng ký thành công' + (isTreHan ? ' (đã trễ hạn quy định)' : ''), 'success')
-		vueData.HocSinhSelected = []
+		initHocSinhThietBi()
 		vueData.GhiChu = ''
 		vueData.NgayApDung = null
 		await ajaxCALLPromise('lms/DangKyMangLaptop_Get', {
@@ -134,3 +221,12 @@ vueData.renderDSDangKy = renderDSDangKy
 vueData.canhBaoTreHan = canhBaoTreHan
 vueData.onSubmitDangKy = onSubmitDangKy
 vueData.submitDangKy = onSubmitDangKy
+vueData.initHocSinhThietBi = initHocSinhThietBi
+vueData.toggleThietBi = toggleThietBi
+vueData.chonTuanTKBHienTai = chonTuanTKBHienTai
+vueData.tinhNgayDauTuanTKB = tinhNgayDauTuanTKB
+vueData.renderTKB = renderTKB
+vueData.onChonTietTKB = onChonTietTKB
+vueData.chonTatCaHocSinh = chonTatCaHocSinh
+vueData.boChonTatCaHocSinh = boChonTatCaHocSinh
+vueData.toggleChonHocSinh = toggleChonHocSinh

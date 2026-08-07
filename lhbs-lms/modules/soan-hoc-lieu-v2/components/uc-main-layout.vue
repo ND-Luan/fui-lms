@@ -54,7 +54,7 @@
 							item-title="MonHocName" item-value="MonHocID" variant="outlined" density="compact" />
 					</div>
 
-					<div class="book-list-container">
+					<div class="book-list-container" v-if="DSHocLieu.length >= 2 || DSHocLieu.length === 0">
 						<div class="book-list-header">
 							<span class="list-title">Sách trong bộ</span>
 						</div>
@@ -165,8 +165,9 @@
 			</div>
 		</div>
 		<!-- THÊM: Tích hợp Dialog vào đây -->
-		<uc-noi-dung-dialog v-model:is-open="isDialogOpen" :item="editingItem" @save="onSaveItem"
-			@refresh-tree="fetchTreeNoiDung" @update-item="editingItem = $event" />
+		<uc-noi-dung-dialog v-model:is-open="isDialogOpen" :item="editingItem"
+			:resource-context="{ KhoiID: selectedKhoi, MonHocID: selectedMon, BoSachID: selectedBoSach }"
+			@save="onSaveItem" @refresh-tree="fetchTreeNoiDung" @update-item="editingItem = $event" />
 	</Global>
 </template>
 
@@ -260,6 +261,9 @@
 					MonHocID: this.selectedMon
 				});
 				this.DSHocLieu = res ?? [];
+				if (this.DSHocLieu.length === 1) {
+					this.selectHocLieu(this.DSHocLieu[0]);
+				}
 			},
 		async selectHocLieu(sach) {
 

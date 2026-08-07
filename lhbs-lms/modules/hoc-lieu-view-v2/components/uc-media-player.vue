@@ -158,8 +158,9 @@
 		}
 	}
 </script>
+
 <style scoped>
-	.media-player-container {
+.media-player-container {
 		width: 100%;
 		position: relative;
 	}

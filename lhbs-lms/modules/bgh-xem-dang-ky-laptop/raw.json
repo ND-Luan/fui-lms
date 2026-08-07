@@ -4,13 +4,7 @@
       "EXE": "IsCheck_NotRoleParent(vueData.user)"
     },
     {
-      "CALL": "getDSLop"
-    },
-    {
-      "CALL": "getDSTuan"
-    },
-    {
-      "CALL": "getDSDangKy"
+      "EXE": "setTimeout(()=>runAction(vueData.getDSLop), 300)"
     },
     {
       "DSLop": [],
@@ -49,12 +43,14 @@
       "getDSLop": {
         "API": "lms/Lop_Get_ByNienKhoa",
         "IN": { "NienKhoa": "vueData.NienKhoa" },
-        "OUT": "DSLop"
+        "OUT": "DSLop",
+        "CALLBACK": { "CALL": "getDSTuan" }
       },
       "getDSTuan": {
         "API": "lms/TuanHocTap_Get",
         "IN": { "NienKhoa": "vueData.NienKhoa" },
-        "OUT": "DSTuan"
+        "OUT": "DSTuan",
+        "CALLBACK": { "CALL": "getDSDangKy" }
       },
       "getDSDangKy": {
         "API": "lms/DangKyMangLaptop_Get",

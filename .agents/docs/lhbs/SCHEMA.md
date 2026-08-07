@@ -823,6 +823,7 @@ class tblDangKyMangLaptop {
    varchar(20) UpdateUser
    datetime UpdateTime
    nvarchar(50) LoaiThietBi
+   tinyint Buoi
 }
 class tblDangKyMangLaptop_HocSinh {
    int DangKyHocSinhID

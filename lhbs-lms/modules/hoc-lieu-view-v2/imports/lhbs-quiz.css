@@ -1464,21 +1464,7 @@
     border-width: 3px !important;
   }
 }
-
-@media (prefers-color-scheme: dark) {
-  .lh-question-prompt,
-  .lh-option-text,
-  .lh-explanation-content {
-    background: rgba(0, 0, 0, 0.8);
-    color: var(--lh-white);
-  }
-  
-  .lh-option-card {
-    background: var(--lh-gray-800) !important;
-    border-color: var(--lh-gray-600);
-    color: var(--lh-white);
-  }
-}
+/* Dark mode styles disabled for options to maintain theme consistency and legibility */
 
 /* === PRINT STYLES === */
 

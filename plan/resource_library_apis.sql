@@ -285,6 +285,7 @@ GO
 CREATE OR ALTER PROCEDURE [dbo].[spAPI_FP_TaiNguyen_File_Register]
     @KhoiID INT = NULL,
     @MonHocID INT = NULL,
+    @BoSachID INT = NULL,
     @TenNoiDung NVARCHAR(500),
     @LoaiNoiDung VARCHAR(50),
     @DataJson NVARCHAR(MAX),
@@ -299,6 +300,20 @@ BEGIN
 
     DECLARE @HocLieuID INT;
     DECLARE @TenKho NVARCHAR(255) = N'Tài nguyên đã tải lên';
+
+    /* BoSachID là bắt buộc ở tblHocLieu_FP; 0/null được quy về bộ sách đang hoạt động. */
+    SET @BoSachID = NULLIF(@BoSachID, 0);
+    IF @BoSachID IS NULL
+        SELECT TOP (1) @BoSachID = BoSachID
+        FROM dbo.tblBoSach_FP
+        WHERE Is_Xoa = 0
+        ORDER BY BoSachID;
+
+    IF @BoSachID IS NULL
+        THROW 50010, N'Không tìm thấy bộ sách đang hoạt động để tạo kho tài nguyên.', 1;
+
+    IF NOT EXISTS (SELECT 1 FROM dbo.tblBoSach_FP WHERE BoSachID = @BoSachID AND Is_Xoa = 0)
+        THROW 50011, N'Bộ sách không hợp lệ hoặc đã bị xóa.', 1;
 
     BEGIN TRANSACTION;
 
@@ -315,9 +330,9 @@ BEGIN
     IF @HocLieuID IS NULL
     BEGIN
         INSERT INTO dbo.tblHocLieu_FP
-            (TenHocLieu, MonHocID, KhoiID, TinhTrang, Loai, Is_Xoa, CreateUser, CreateTime)
+            (TenHocLieu, BoSachID, MonHocID, KhoiID, TinhTrang, Loai, Is_Xoa, CreateUser, CreateTime)
         VALUES
-            (@TenKho, @MonHocID, @KhoiID, 'Private', 'TAI_NGUYEN', 0, @sys_UserID, GETDATE());
+            (@TenKho, @BoSachID, @MonHocID, @KhoiID, 'Private', 'TAI_NGUYEN', 0, @sys_UserID, GETDATE());
         SET @HocLieuID = SCOPE_IDENTITY();
     END;
 
@@ -374,7 +389,7 @@ AS
 BEGIN
     SET NOCOUNT ON;
 
-    IF ISNULL(@sys_UserID, '') = '' OR ISNULL(@sys_SystemRight, 0) NOT IN (3, 5, 9)
+    IF ISNULL(@sys_UserID, '') = '' OR ISNULL(@sys_SystemRight, 0) NOT IN (3, 9)
         THROW 50010, N'Bạn không có quyền kiểm tra kho tài nguyên giáo viên.', 1;
 
     SELECT
@@ -411,7 +426,7 @@ AS
 BEGIN
     SET NOCOUNT ON;
 
-    IF ISNULL(@sys_UserID, '') = '' OR ISNULL(@sys_SystemRight, 0) NOT IN (3, 5, 9)
+    IF ISNULL(@sys_UserID, '') = '' OR ISNULL(@sys_SystemRight, 0) NOT IN (3, 9)
         THROW 50011, N'Bạn không có quyền xem chi tiết kho tài nguyên giáo viên.', 1;
 
     SELECT
@@ -441,7 +456,7 @@ GO
 /*
     Quyền thực thi cho API gateway.
     Quyền dữ liệu vẫn được khóa trong từng store bằng @sys_UserID; riêng vùng
-    Audit kiểm tra thêm @sys_SystemRight IN (3, 5, 9).
+    Audit kiểm tra thêm @sys_SystemRight IN (3, 9).
 */
 GRANT EXECUTE ON [dbo].[spAPI_FP_TaiNguyen_GetAll] TO [lmslhbs];
 GRANT EXECUTE ON [dbo].[spAPI_FP_TaiNguyen_Save] TO [lmslhbs];

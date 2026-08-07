@@ -102,12 +102,29 @@
 							</v-tabs-window>
 						</div>
 						<div v-else-if="isSlide">
-							<v-file-input accept=".doc,.docx,.ppt,.pptx,.pdf" label="Tải tài liệu"
-								@update:modelValue="uploadFileGGDrive" />
-							<!-- <f-file-upload :url="vueData.v_Set.apiFile" label="Tải tập tin lên" :filters="filters"
-								@update:modelValue="(file) => onUploadFile(file)" color="primary" variant="tonal" /> -->
-							<v-chip v-if="Object.keys(editableItem.DataJson).length > 0">
-								{{editableItem.DataJson.fileName}} <v-icon @click.stop="onCloseFile"> mdi-close</v-icon>
+							<v-tabs v-model="slideUploadTab" density="compact" color="primary" class="mb-4">
+								<v-tab value="upload">📁 Tải file lên</v-tab>
+								<v-tab value="link">🔗 Dán link Google Slides / Canva</v-tab>
+							</v-tabs>
+
+							<v-tabs-window v-model="slideUploadTab">
+								<v-tabs-window-item value="upload">
+									<v-file-input accept=".doc,.docx,.ppt,.pptx,.pdf" label="Tải tài liệu"
+										@update:modelValue="uploadFileGGDrive" />
+								</v-tabs-window-item>
+								<v-tabs-window-item value="link">
+									<div class="d-flex ga-2 align-center">
+										<v-text-field v-model="inputSlideLink" label="Dán link Google Slides / Canva tại đây"
+											placeholder="https://docs.google.com/presentation/... hoặc https://www.canva.com/design/..."
+											variant="outlined" density="compact" hide-details append-inner-icon="mdi-link"
+											@click:append-inner="saveSlideLink" @keydown.enter="saveSlideLink" />
+										<v-btn color="primary" variant="flat" height="40" @click="saveSlideLink">Xác nhận</v-btn>
+									</div>
+								</v-tabs-window-item>
+							</v-tabs-window>
+
+							<v-chip v-if="editableItem.DataJson && Object.keys(editableItem.DataJson).length > 0" class="mt-4">
+								{{editableItem.DataJson.fileName || 'Đã liên kết link'}} <v-icon @click.stop="onCloseFile"> mdi-close</v-icon>
 							</v-chip>
 						</div>
 
@@ -241,7 +258,9 @@
 				loadingPage: {
 					text: "Đang tải dữ liệu...",
 					isLoading: false
-				}
+				},
+				slideUploadTab: 'upload',
+				inputSlideLink: ''
 			};
 		},
 		computed: {
@@ -369,6 +388,7 @@
 				) return 'DOCX';
 				if (fileType === 'application/vnd.ms-powerpoint'
 					|| fileType === "application/vnd.openxmlformats-officedocument.presentationml.presentation"
+					|| fileType === "application/vnd.google-apps.presentation"
 				) return 'PPT';
 				return '';
 			},
@@ -428,11 +448,9 @@
 				await fetchPromise('lms/FP_TaiNguyen_File_Register', {
 					KhoiID: this.resourceContext?.KhoiID ?? null,
 					MonHocID: this.resourceContext?.MonHocID ?? null,
+					BoSachID: this.resourceContext?.BoSachID ?? null,
 					TenNoiDung: metadata.fileName,
 					LoaiNoiDung: targetItem.LoaiNoiDung,
-					NguonTaiNguyenCode: metadata.origin || 'HOC_LIEU',
-					NguonResourceType: 'HOC_LIEU',
-					NguonResourceID: targetItem.HocLieuID,
 					DataJson: JSON.stringify(metadata),
 				}, { cache: false });
 			},
@@ -482,6 +500,20 @@
 				if (!uploadManager) return;
 				const targetItem = this.editableItem;
 
+				// Redefine selectedFile.type so Google Drive API automatically converts PPTX/PPT files to native Google Slides format
+				const isPPT = selectedFile.name.endsWith('.ppt') || selectedFile.name.endsWith('.pptx');
+				if (isPPT) {
+					try {
+						Object.defineProperty(selectedFile, 'type', {
+							value: 'application/vnd.google-apps.presentation',
+							writable: true,
+							configurable: true
+						});
+					} catch (e) {
+						console.warn("Could not override file type:", e);
+					}
+				}
+
 				if (!await this.ensureDraftNode(selectedFile)) return;
 				this.archiveFileToLmsInBackground(selectedFile, targetItem);
 				this.notify(`Đang phát hành ${selectedFile.name} lên Google Drive...`, 'info');
@@ -497,7 +529,7 @@
 								fileSize: Number(selectedFile.size || 0),
 								uploadSource: 'ggdrive',
 								driveFileId: fileDrive.id,
-								url: `https://drive.google.com/file/d/${fileDrive.id}/preview`,
+								url: `https://docs.google.com/presentation/d/${fileDrive.id}/preview`,
 								slideType: this.getSlideContentType(selectedFile.type),
 								mediaType: targetItem.LoaiNoiDung === 'AUDIO' ? 'audio' : undefined,
 							};
@@ -577,6 +609,78 @@
 				this.editableItem.DataJson.uploadSource = 'db'
 				this.editableItem.DataJson.fileId = _file.FILE_ID
 				this.editableItem.DataJson.url = _file.FILE_URL
+			},
+			async saveSlideLink() {
+				if (!this.inputSlideLink) return;
+				const link = this.inputSlideLink.trim();
+				
+				let metadata = null;
+
+				// Case 1: Canva Link
+				if (link.includes('canva.com')) {
+					const designIdMatch = link.match(/\/design\/([^\/]+)/);
+					if (designIdMatch) {
+						const designId = designIdMatch[1];
+						// Ensure format is: https://www.canva.com/design/DESIGN_ID/view?embed
+						const embedUrl = `https://www.canva.com/design/${designId}/view?embed`;
+						metadata = {
+							title: 'Canva Presentation',
+							fileName: 'Canva Presentation',
+							contentType: 'text/html',
+							fileSize: 0,
+							uploadSource: 'canva',
+							driveFileId: designId,
+							url: embedUrl,
+							slideType: 'PPT',
+						};
+					} else {
+						this.notify("Đường link Canva không hợp lệ. Vui lòng kiểm tra lại.", "error");
+						return;
+					}
+				} else {
+					// Case 2: Google Drive / Slides Link
+					const reg = /\/d\/([^\/]+)/;
+					const match = link.match(reg);
+					if (!match) {
+						this.notify("Đường link Google Slides / Drive không hợp lệ. Vui lòng kiểm tra lại.", "error");
+						return;
+					}
+					
+					const fileId = match[1];
+					const isPresentation = link.includes('presentation');
+					
+					metadata = {
+						title: isPresentation ? 'Google Slides Presentation' : 'Google Drive File',
+						fileName: isPresentation ? 'Google Slides' : 'Google Drive File',
+						contentType: isPresentation ? 'application/vnd.google-apps.presentation' : '',
+						fileSize: 0,
+						uploadSource: 'ggdrive',
+						driveFileId: fileId,
+						url: isPresentation 
+							? `https://docs.google.com/presentation/d/${fileId}/preview`
+							: `https://drive.google.com/file/d/${fileId}/preview`,
+						slideType: 'PPT',
+					};
+				}
+				
+				const targetItem = this.editableItem;
+				if (!targetItem.NoiDungID) {
+					// Ensure draft node exists if it's a new node
+					if (!await this.ensureDraftNode({ name: metadata.title, size: 0, type: metadata.contentType })) return;
+				}
+				
+				// Save metadata to database
+				await this.savePublishedMetadata(targetItem, metadata);
+				
+				// Register in resource library
+				try {
+					await this.registerUploadedFileInResourceLibrary(targetItem, metadata);
+				} catch (e) {
+					console.error("Resource library registration failed:", e);
+				}
+				
+				this.inputSlideLink = '';
+				this.notify(link.includes('canva.com') ? "Đã liên kết link Canva thành công!" : "Đã liên kết link Google Slides thành công!");
 			},
 			async onCloseFile(e) {
 				const currentFile = typeof this.editableItem.DataJson === 'object' && this.editableItem.DataJson !== null
@@ -960,7 +1064,10 @@
 					this.notify("Đã xóa iSpring content.");
 				} catch (error) {
 					console.error('Delete iSpring content failed:', error);
-					this.notify("Không thể xóa iSpring content gốc. Vui lòng thử lại.", "error");
+					// Clear local state anyway so that user can upload a new one
+					this.editableItem.DataJson = {};
+					if (this.$refs.iSpringInput) this.$refs.iSpringInput.value = '';
+					this.notify("Đã gỡ liên kết iSpring content thành công. Bạn có thể tải lên nội dung mới.", "warning");
 				} finally {
 					this.loadingPage.isLoading = false;
 				}

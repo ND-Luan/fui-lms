@@ -110,15 +110,31 @@ GO
 /* Backfill nguồn file cũ; JSON vẫn được giữ nguyên để tương thích các màn hình cũ. */
 UPDATE nd
 SET NguonTaiNguyenCode = CASE
+        WHEN JSON_VALUE(nd.DataJson, '$.origin') IN ('HOC_LIEU', 'LESSON') THEN 'HOC_LIEU'
         WHEN JSON_VALUE(nd.DataJson, '$.origin') IN ('GIAO_BAI', 'ASSIGNMENT') THEN 'GIAO_BAI'
         WHEN JSON_VALUE(nd.DataJson, '$.origin') IN ('RESOURCE_LIBRARY', 'QUAN_LY_TAI_NGUYEN') THEN 'QUAN_LY_TAI_NGUYEN'
-        ELSE 'HOC_LIEU'
+        WHEN hl.TenHocLieu = N'Tài nguyên đã tải lên' THEN 'HOC_LIEU'
+        ELSE 'QUAN_LY_TAI_NGUYEN'
     END
 FROM dbo.tblNoiDungHocLieu_FP nd
 INNER JOIN dbo.tblHocLieu_FP hl ON hl.HocLieuID = nd.HocLieuID
 WHERE hl.Loai = 'TAI_NGUYEN'
   AND nd.LoaiNoiDung <> 'THU_MUC'
   AND nd.NguonTaiNguyenCode IS NULL;
+GO
+
+/* Sửa lại các file cũ đã bị gán mặc định Học liệu nhưng không có nguồn rõ ràng. */
+UPDATE nd
+SET NguonTaiNguyenCode = CASE
+        WHEN hl.TenHocLieu = N'Tài nguyên đã tải lên' THEN 'HOC_LIEU'
+        ELSE 'QUAN_LY_TAI_NGUYEN'
+    END
+FROM dbo.tblNoiDungHocLieu_FP nd
+INNER JOIN dbo.tblHocLieu_FP hl ON hl.HocLieuID = nd.HocLieuID
+WHERE hl.Loai = 'TAI_NGUYEN'
+  AND nd.LoaiNoiDung <> 'THU_MUC'
+  AND ISNULL(JSON_VALUE(nd.DataJson, '$.origin'), '') NOT IN ('HOC_LIEU', 'LESSON', 'GIAO_BAI', 'ASSIGNMENT', 'RESOURCE_LIBRARY', 'QUAN_LY_TAI_NGUYEN')
+  AND nd.NguonTaiNguyenCode = 'HOC_LIEU';
 GO
 
 CREATE OR ALTER PROCEDURE [dbo].[spAPI_FP_TaiNguyenLoai_GetAll]
@@ -155,7 +171,8 @@ CREATE OR ALTER PROCEDURE [dbo].[spAPI_FP_TaiNguyen_GetAll]
     @MonHocID INT = 0,
     @TaiNguyenLoaiID INT = 0,
     @TaiNguyenMucID INT = 0,
-    @sys_UserID VARCHAR(50)
+    @sys_UserID VARCHAR(50),
+    @sys_SystemRight INT = 0
 AS
 BEGIN
     SET NOCOUNT ON;
@@ -166,17 +183,19 @@ BEGIN
         hl.TaiNguyenLoaiID, hl.TaiNguyenMucID,
         l.Code AS TaiNguyenLoaiCode, l.TenLoai, l.KieuLoc,
         m.Code AS TaiNguyenMucCode, m.TenMuc,
-        hl.CreateUser, hl.CreateTime, hl.UpdateTime,
+        hl.CreateUser, hl.CreateUser AS NguoiUploadID, hl.CreateTime, hl.UpdateTime,
+        gv.HoGV + N' ' + gv.TenGV AS NguoiUploadName,
         mh.MonHocName AS TenMonHoc,
         (SELECT COUNT(*) FROM dbo.tblNoiDungHocLieu_FP nd
          WHERE nd.HocLieuID = hl.HocLieuID AND nd.Is_Xoa = 0
            AND nd.LoaiNoiDung <> 'THU_MUC') AS SoLuongFile
     FROM dbo.tblHocLieu_FP hl
     LEFT JOIN dbo.tblMonHoc mh ON mh.MonHocID = hl.MonHocID
+    LEFT JOIN dbo.tblGiaoVien gv ON gv.GiaoVienID = hl.CreateUser
     LEFT JOIN dbo.tblFP_TaiNguyenLoai l ON l.TaiNguyenLoaiID = hl.TaiNguyenLoaiID
     LEFT JOIN dbo.tblFP_TaiNguyenMuc m ON m.TaiNguyenMucID = hl.TaiNguyenMucID
     WHERE hl.Is_Xoa = 0 AND hl.Loai = 'TAI_NGUYEN'
-      AND hl.CreateUser = @sys_UserID
+      AND (@sys_SystemRight IN (3, 9) OR hl.CreateUser = @sys_UserID)
       AND (ISNULL(@KhoiID, 0) = 0 OR hl.KhoiID = @KhoiID)
       AND (ISNULL(@MonHocID, 0) = 0 OR hl.MonHocID = @MonHocID)
       AND (ISNULL(@TaiNguyenLoaiID, 0) = 0 OR hl.TaiNguyenLoaiID = @TaiNguyenLoaiID)
@@ -197,7 +216,8 @@ CREATE OR ALTER PROCEDURE [dbo].[spAPI_FP_TaiNguyen_Save]
     @HocKy INT = NULL,
     @TinhTrang VARCHAR(50) = 'Private',
     @ThumbnailURL NVARCHAR(1000) = NULL,
-    @sys_UserID VARCHAR(50)
+    @sys_UserID VARCHAR(50),
+    @sys_SystemRight INT = 0
 AS
 BEGIN
     SET NOCOUNT ON;
@@ -223,7 +243,7 @@ BEGIN
             HocKy = @HocKy, TinhTrang = ISNULL(NULLIF(@TinhTrang, ''), 'Private'),
             ThumbnailURL = @ThumbnailURL, UpdateUser = @sys_UserID, UpdateTime = GETDATE()
         WHERE HocLieuID = @HocLieuID AND Loai = 'TAI_NGUYEN'
-          AND CreateUser = @sys_UserID AND Is_Xoa = 0;
+          AND (@sys_SystemRight IN (3, 9) OR CreateUser = @sys_UserID) AND Is_Xoa = 0;
 
         IF @@ROWCOUNT = 0
             THROW 50103, N'Không tìm thấy bộ tài nguyên hoặc bạn không có quyền cập nhật.', 1;
@@ -257,7 +277,8 @@ CREATE OR ALTER PROCEDURE [dbo].[spAPI_FP_TaiNguyen_Node_Save]
     @NguonTaiNguyenCode VARCHAR(50) = NULL,
     @NguonResourceType VARCHAR(50) = NULL,
     @NguonResourceID INT = NULL,
-    @sys_UserID VARCHAR(50)
+    @sys_UserID VARCHAR(50),
+    @sys_SystemRight INT = 0
 AS
 BEGIN
     SET NOCOUNT ON;
@@ -265,7 +286,7 @@ BEGIN
     IF NOT EXISTS (
         SELECT 1 FROM dbo.tblHocLieu_FP
         WHERE HocLieuID = @HocLieuID AND Loai = 'TAI_NGUYEN'
-          AND CreateUser = @sys_UserID AND Is_Xoa = 0
+          AND (@sys_SystemRight IN (3, 9) OR CreateUser = @sys_UserID) AND Is_Xoa = 0
     )
         THROW 50105, N'Không tìm thấy bộ tài nguyên hoặc bạn không có quyền cập nhật.', 1;
 
@@ -309,7 +330,8 @@ GO
 
 CREATE OR ALTER PROCEDURE [dbo].[spAPI_FP_TaiNguyen_GetTree]
     @HocLieuID INT,
-    @sys_UserID VARCHAR(50)
+    @sys_UserID VARCHAR(50),
+    @sys_SystemRight INT = 0
 AS
 BEGIN
     SET NOCOUNT ON;
@@ -317,7 +339,7 @@ BEGIN
     IF NOT EXISTS (
         SELECT 1 FROM dbo.tblHocLieu_FP
         WHERE HocLieuID = @HocLieuID AND Loai = 'TAI_NGUYEN'
-          AND CreateUser = @sys_UserID AND Is_Xoa = 0
+          AND (@sys_SystemRight IN (3, 9) OR CreateUser = @sys_UserID) AND Is_Xoa = 0
     )
         THROW 50108, N'Không tìm thấy bộ tài nguyên hoặc bạn không có quyền truy cập.', 1;
 
@@ -336,6 +358,7 @@ GO
 CREATE OR ALTER PROCEDURE [dbo].[spAPI_FP_TaiNguyen_File_Register]
     @KhoiID INT = NULL,
     @MonHocID INT = NULL,
+    @BoSachID INT = NULL,
     @TenNoiDung NVARCHAR(500),
     @LoaiNoiDung VARCHAR(50),
     @DataJson NVARCHAR(MAX),
@@ -355,6 +378,20 @@ BEGIN
     DECLARE @TaiNguyenLoaiID INT;
     SELECT @TaiNguyenLoaiID = TaiNguyenLoaiID FROM dbo.tblFP_TaiNguyenLoai WHERE Code = 'TAI_LIEU_THAM_KHAO';
 
+    /* BoSachID là bắt buộc ở tblHocLieu_FP; 0/null được quy về bộ sách đang hoạt động. */
+    SET @BoSachID = NULLIF(@BoSachID, 0);
+    IF @BoSachID IS NULL
+        SELECT TOP (1) @BoSachID = BoSachID
+        FROM dbo.tblBoSach_FP
+        WHERE Is_Xoa = 0
+        ORDER BY BoSachID;
+
+    IF @BoSachID IS NULL
+        THROW 50105, N'Không tìm thấy bộ sách đang hoạt động để tạo kho tài nguyên.', 1;
+
+    IF NOT EXISTS (SELECT 1 FROM dbo.tblBoSach_FP WHERE BoSachID = @BoSachID AND Is_Xoa = 0)
+        THROW 50106, N'Bộ sách không hợp lệ hoặc đã bị xóa.', 1;
+
     BEGIN TRANSACTION;
     SELECT TOP (1) @HocLieuID = HocLieuID
     FROM dbo.tblHocLieu_FP WITH (UPDLOCK, HOLDLOCK)
@@ -366,8 +403,8 @@ BEGIN
     IF @HocLieuID IS NULL
     BEGIN
         INSERT INTO dbo.tblHocLieu_FP
-            (TenHocLieu, MonHocID, KhoiID, TaiNguyenLoaiID, TinhTrang, Loai, Is_Xoa, CreateUser, CreateTime)
-        VALUES (@TenKho, @MonHocID, @KhoiID, @TaiNguyenLoaiID, 'Private', 'TAI_NGUYEN', 0, @sys_UserID, GETDATE());
+            (TenHocLieu, BoSachID, MonHocID, KhoiID, TaiNguyenLoaiID, TinhTrang, Loai, Is_Xoa, CreateUser, CreateTime)
+        VALUES (@TenKho, @BoSachID, @MonHocID, @KhoiID, @TaiNguyenLoaiID, 'Private', 'TAI_NGUYEN', 0, @sys_UserID, GETDATE());
         SET @HocLieuID = SCOPE_IDENTITY();
     END
     ELSE IF EXISTS (SELECT 1 FROM dbo.tblHocLieu_FP WHERE HocLieuID = @HocLieuID AND TaiNguyenLoaiID IS NULL)
@@ -406,4 +443,294 @@ BEGIN
 END;
 GO
 GRANT EXECUTE ON [dbo].[spAPI_FP_TaiNguyen_File_Register] TO [lmslhbs];
+GO
+
+CREATE OR ALTER PROCEDURE [dbo].[spAPI_FP_TaiNguyen_Delete]
+    @HocLieuID INT,
+    @sys_UserID VARCHAR(50),
+    @sys_SystemRight INT = 0
+AS
+BEGIN
+    SET NOCOUNT ON;
+    SET XACT_ABORT ON;
+
+    BEGIN TRANSACTION;
+
+    UPDATE dbo.tblHocLieu_FP
+    SET Is_Xoa = 1, UpdateUser = @sys_UserID, UpdateTime = GETDATE()
+    WHERE HocLieuID = @HocLieuID
+      AND Loai = 'TAI_NGUYEN'
+      AND (@sys_SystemRight IN (3, 9) OR CreateUser = @sys_UserID)
+      AND Is_Xoa = 0;
+
+    IF @@ROWCOUNT = 0
+    BEGIN
+        ROLLBACK TRANSACTION;
+        THROW 50109, N'Không tìm thấy bộ tài nguyên hoặc bạn không có quyền xóa.', 1;
+    END;
+
+    UPDATE dbo.tblNoiDungHocLieu_FP
+    SET Is_Xoa = 1, UpdateUser = @sys_UserID, UpdateTime = GETDATE()
+    WHERE HocLieuID = @HocLieuID AND Is_Xoa = 0;
+
+    COMMIT TRANSACTION;
+    SELECT Success = 1;
+END;
+GO
+GRANT EXECUTE ON [dbo].[spAPI_FP_TaiNguyen_Delete] TO [lmslhbs];
+GO
+
+CREATE OR ALTER PROCEDURE [dbo].[spAPI_FP_TaiNguyen_Node_Delete]
+    @NoiDungID INT,
+    @sys_UserID VARCHAR(50),
+    @sys_SystemRight INT = 0
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    DECLARE @HocLieuID INT;
+    SELECT @HocLieuID = nd.HocLieuID
+    FROM dbo.tblNoiDungHocLieu_FP nd
+    INNER JOIN dbo.tblHocLieu_FP hl ON hl.HocLieuID = nd.HocLieuID
+    WHERE nd.NoiDungID = @NoiDungID
+      AND nd.Is_Xoa = 0
+      AND hl.Loai = 'TAI_NGUYEN'
+      AND (@sys_SystemRight IN (3, 9) OR hl.CreateUser = @sys_UserID)
+      AND hl.Is_Xoa = 0;
+
+    IF @HocLieuID IS NULL
+        THROW 50110, N'Không tìm thấy mục tài nguyên hoặc bạn không có quyền xóa.', 1;
+
+    ;WITH NodesToDelete AS (
+        SELECT NoiDungID
+        FROM dbo.tblNoiDungHocLieu_FP
+        WHERE NoiDungID = @NoiDungID
+        UNION ALL
+        SELECT child.NoiDungID
+        FROM dbo.tblNoiDungHocLieu_FP child
+        INNER JOIN NodesToDelete parent ON child.ParentID = parent.NoiDungID
+        WHERE child.HocLieuID = @HocLieuID AND child.Is_Xoa = 0
+    )
+    UPDATE dbo.tblNoiDungHocLieu_FP
+    SET Is_Xoa = 1, UpdateUser = @sys_UserID, UpdateTime = GETDATE()
+    WHERE NoiDungID IN (SELECT NoiDungID FROM NodesToDelete);
+
+    SELECT Success = 1;
+END;
+GO
+GRANT EXECUTE ON [dbo].[spAPI_FP_TaiNguyen_Node_Delete] TO [lmslhbs];
+GO
+
+/* Lấy đúng file/source file từ Học liệu và Giao bài, không trả về bản ghi bài học/bài tập. */
+CREATE OR ALTER PROCEDURE [dbo].[spAPI_FP_TaiNguyen_SourceFile_GetAll]
+    @KhoiID INT = 0,
+    @MonHocID INT = 0,
+    @sys_UserID VARCHAR(50),
+    @sys_SystemRight INT = 0
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    ;WITH SourceFiles AS
+    (
+        SELECT
+            l.LessonID AS ResourceID,
+            'LESSON' AS ResourceType,
+            'HOC_LIEU' AS NguonTaiNguyenCode,
+            COALESCE(NULLIF(src.LmsFileID, ''), src.OriginalFileID) AS FileID,
+            src.FileName,
+            CASE WHEN NULLIF(src.LmsFileID, '') IS NULL THEN src.FileURL ELSE '/FileData/' + src.LmsFileID END AS FileURL,
+            src.ContentType,
+            COALESCE(src.FileSize, src.SourceSize) AS FileSize,
+            l.KhoiID,
+            l.MonHocID,
+            l.CreateUser AS NguoiUploadID,
+            l.CreateTime,
+            l.Title AS ContentTitle,
+            l.Chuong AS ContentChapter,
+            e.ElementType,
+            e.SortOrder AS ElementSortOrder
+        FROM dbo.tblEL_Lessons l
+        INNER JOIN dbo.tblEL_Elements e ON e.LessonID = l.LessonID AND e.IsDeleted = 0
+        CROSS APPLY OPENJSON(e.ElementData, '$.sources')
+        WITH
+        (
+            OriginalFileID NVARCHAR(500) '$.id',
+            LmsFileID NVARCHAR(500) '$.resourceFileId',
+            FileName NVARCHAR(500) '$.name',
+            FileURL NVARCHAR(2000) '$.source',
+            ContentType NVARCHAR(100) '$.contentType',
+            FileSize BIGINT '$.fileSize',
+            SourceSize BIGINT '$.size'
+        ) src
+        WHERE l.IsDeleted = 0
+          AND (@sys_SystemRight IN (3, 9) OR l.CreateUser = @sys_UserID)
+
+        UNION ALL
+
+        SELECT
+            a.AssignmentID,
+            'ASSIGNMENT',
+            'GIAO_BAI',
+            COALESCE(NULLIF(src.LmsFileID, ''), src.OriginalFileID),
+            src.FileName,
+            CASE WHEN NULLIF(src.LmsFileID, '') IS NULL THEN src.FileURL ELSE '/FileData/' + src.LmsFileID END,
+            src.ContentType,
+            COALESCE(src.FileSize, src.SourceSize),
+            a.KhoiID,
+            a.MonHocID,
+            a.CreateUser,
+            a.CreateTime,
+            a.Title,
+            NULL,
+            NULL,
+            NULL
+        FROM dbo.tblEL_Assignments a
+        CROSS APPLY OPENJSON(a.AssignmentConfig, '$.groups') g
+        CROSS APPLY OPENJSON(JSON_QUERY(g.value, '$.media.sourceFiles.file'))
+        WITH
+        (
+            OriginalFileID NVARCHAR(500) '$.id',
+            LmsFileID NVARCHAR(500) '$.resourceFileId',
+            FileName NVARCHAR(500) '$.name',
+            FileURL NVARCHAR(2000) '$.source',
+            ContentType NVARCHAR(100) '$.contentType',
+            FileSize BIGINT '$.fileSize',
+            SourceSize BIGINT '$.size'
+        ) src
+        WHERE a.IsDeleted = 0
+          AND (@sys_SystemRight IN (3, 9) OR a.CreateUser = @sys_UserID)
+
+        UNION ALL
+
+        SELECT
+            a.AssignmentID,
+            'ASSIGNMENT',
+            'GIAO_BAI',
+            COALESCE(NULLIF(src.LmsFileID, ''), src.OriginalFileID),
+            src.FileName,
+            CASE WHEN NULLIF(src.LmsFileID, '') IS NULL THEN src.FileURL ELSE '/FileData/' + src.LmsFileID END,
+            src.ContentType,
+            COALESCE(src.FileSize, src.SourceSize),
+            a.KhoiID,
+            a.MonHocID,
+            a.CreateUser,
+            a.CreateTime,
+            a.Title,
+            NULL,
+            NULL,
+            NULL
+        FROM dbo.tblEL_Assignments a
+        CROSS APPLY OPENJSON(a.AssignmentConfig, '$.groups') g
+        CROSS APPLY OPENJSON(JSON_QUERY(g.value, '$.media.sourceFiles.image'))
+        WITH
+        (
+            OriginalFileID NVARCHAR(500) '$.id',
+            LmsFileID NVARCHAR(500) '$.resourceFileId',
+            FileName NVARCHAR(500) '$.name',
+            FileURL NVARCHAR(2000) '$.source',
+            ContentType NVARCHAR(100) '$.contentType',
+            FileSize BIGINT '$.fileSize',
+            SourceSize BIGINT '$.size'
+        ) src
+        WHERE a.IsDeleted = 0
+          AND (@sys_SystemRight IN (3, 9) OR a.CreateUser = @sys_UserID)
+
+        UNION ALL
+
+        SELECT
+            a.AssignmentID,
+            'ASSIGNMENT',
+            'GIAO_BAI',
+            COALESCE(NULLIF(src.LmsFileID, ''), src.OriginalFileID),
+            src.FileName,
+            CASE WHEN NULLIF(src.LmsFileID, '') IS NULL THEN src.FileURL ELSE '/FileData/' + src.LmsFileID END,
+            src.ContentType,
+            COALESCE(src.FileSize, src.SourceSize),
+            a.KhoiID,
+            a.MonHocID,
+            a.CreateUser,
+            a.CreateTime,
+            a.Title,
+            NULL,
+            NULL,
+            NULL
+        FROM dbo.tblEL_Assignments a
+        CROSS APPLY OPENJSON(a.AssignmentConfig, '$.groups') g
+        CROSS APPLY OPENJSON(g.value, '$.questions') q
+        CROSS APPLY OPENJSON(JSON_QUERY(q.value, '$.config.media.sourceFiles.file'))
+        WITH
+        (
+            OriginalFileID NVARCHAR(500) '$.id',
+            LmsFileID NVARCHAR(500) '$.resourceFileId',
+            FileName NVARCHAR(500) '$.name',
+            FileURL NVARCHAR(2000) '$.source',
+            ContentType NVARCHAR(100) '$.contentType',
+            FileSize BIGINT '$.fileSize',
+            SourceSize BIGINT '$.size'
+        ) src
+        WHERE a.IsDeleted = 0
+          AND (@sys_SystemRight IN (3, 9) OR a.CreateUser = @sys_UserID)
+
+        UNION ALL
+
+        SELECT
+            a.AssignmentID,
+            'ASSIGNMENT',
+            'GIAO_BAI',
+            COALESCE(NULLIF(src.LmsFileID, ''), src.OriginalFileID),
+            src.FileName,
+            CASE WHEN NULLIF(src.LmsFileID, '') IS NULL THEN src.FileURL ELSE '/FileData/' + src.LmsFileID END,
+            src.ContentType,
+            COALESCE(src.FileSize, src.SourceSize),
+            a.KhoiID,
+            a.MonHocID,
+            a.CreateUser,
+            a.CreateTime,
+            a.Title,
+            NULL,
+            NULL,
+            NULL
+        FROM dbo.tblEL_Assignments a
+        CROSS APPLY OPENJSON(a.AssignmentConfig, '$.groups') g
+        CROSS APPLY OPENJSON(g.value, '$.questions') q
+        CROSS APPLY OPENJSON(JSON_QUERY(q.value, '$.config.media.sourceFiles.image'))
+        WITH
+        (
+            OriginalFileID NVARCHAR(500) '$.id',
+            LmsFileID NVARCHAR(500) '$.resourceFileId',
+            FileName NVARCHAR(500) '$.name',
+            FileURL NVARCHAR(2000) '$.source',
+            ContentType NVARCHAR(100) '$.contentType',
+            FileSize BIGINT '$.fileSize',
+            SourceSize BIGINT '$.size'
+        ) src
+        WHERE a.IsDeleted = 0
+          AND (@sys_SystemRight IN (3, 9) OR a.CreateUser = @sys_UserID)
+    )
+    SELECT DISTINCT
+        sf.ResourceID, sf.ResourceType, sf.NguonTaiNguyenCode,
+        sf.FileID, sf.FileName, sf.FileURL, sf.ContentType, sf.FileSize,
+        sf.ContentTitle, sf.ContentChapter, sf.ElementType, sf.ElementSortOrder,
+        CASE
+            WHEN sf.ResourceType = 'LESSON' THEN CONCAT(sf.ContentTitle,
+                CASE WHEN NULLIF(sf.ContentChapter, '') IS NULL THEN '' ELSE N' / ' + sf.ContentChapter END,
+                CASE WHEN NULLIF(sf.ElementType, '') IS NULL THEN '' ELSE N' / ' + sf.ElementType END)
+            WHEN sf.ResourceType = 'ASSIGNMENT' THEN sf.ContentTitle
+            ELSE NULL
+        END AS ThuocNoiDung,
+        sf.KhoiID, sf.MonHocID, sf.NguoiUploadID, sf.CreateTime,
+        mh.MonHocName, k.TenKhoiHoc AS TenKhoi,
+        gv.HoGV + N' ' + gv.TenGV AS NguoiUploadName
+    FROM SourceFiles sf
+    LEFT JOIN dbo.tblMonHoc mh ON mh.MonHocID = sf.MonHocID
+    LEFT JOIN dbo.tblKhoi k ON k.KhoiID = sf.KhoiID
+    LEFT JOIN dbo.tblGiaoVien gv ON gv.GiaoVienID = sf.NguoiUploadID
+    WHERE ISNULL(sf.FileID, '') <> ''
+      AND (ISNULL(@KhoiID, 0) = 0 OR sf.KhoiID = @KhoiID)
+      AND (ISNULL(@MonHocID, 0) = 0 OR sf.MonHocID = @MonHocID)
+    ORDER BY sf.KhoiID, sf.MonHocID, sf.CreateTime DESC, sf.FileName;
+END;
+GO
+GRANT EXECUTE ON [dbo].[spAPI_FP_TaiNguyen_SourceFile_GetAll] TO [lmslhbs];
 GO

@@ -1,4 +1,5 @@
 <template>
+	<Global upload-manager>
 	<div class="builder-layout">
 		<!-- Cột trái: Thư viện -->
 		<div class="builder-sidebar left-sidebar">
@@ -99,11 +100,12 @@
 			</v-card>
 		</v-dialog>
 	</div>
+	</Global>
 </template>
 
 <script>
-export default {
-	name: 'uc-lesson-builder',
+	export default {
+		name: 'uc-lesson-builder',
 	props: {
 		initialLesson: Object,
 		isEditMode: Boolean,
@@ -315,5 +317,5 @@ export default {
 			this.timeDialogVisible = true;
 		},
 	}
-}
+	}
 </script>

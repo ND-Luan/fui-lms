@@ -41,12 +41,13 @@
 							<v-icon start class="me-1">mdi-upload</v-icon>
 							{{ $t('message.UploadImage') }}
 						</v-btn>
-						<input ref="inputImage" type="file" @change="(e) => handleChangeFile(e, element.ElementType)"
+						<input ref="inputImage" type="file" accept="image/*"
+							@change="(e) => handleChangeFile(e, element.ElementType)"
 							style="display: none" />
 						<div class="d-flex ga-2">
 							<div v-for="(file, index) in element.ElementData.sources" class="position-relative"
 								style="width:200px">
-								<v-btn class="position-absolute" @click="element.ElementData.sources.splice(index, 1)"
+								<v-btn class="position-absolute" @click="removeSource(index)"
 									size="small" icon="mdi-close" color="red" variant="tonal"
 									style="right: 4px; top: 4px; z-index: 1" />
 								<v-img
@@ -91,9 +92,9 @@
 						<input ref="inputFile" type="file" @change="(e) => handleChangeFile(e, element.ElementType)"
 							style="display: none" />
 						<div class="d-flex ga-2">
-							<v-chip v-for="(file, index) in element.ElementData.sources">
-								{{ file.name }}
-								<v-icon @click="element.ElementData.sources.splice(index, 1)">mdi-close</v-icon>
+								<v-chip v-for="(file, index) in element.ElementData.sources">
+									{{ file.name }}
+									<v-icon @click="removeSource(index)">mdi-close</v-icon>
 							</v-chip>
 						</div>
 					</div>
@@ -107,6 +108,10 @@
 							</v-btn>
 							<input ref="inputUploadAudio" type="file" accept="audio/*"
 								@change="(e) => handleChangeFile(e, 'UPLOAD_AUDIO')" style="display:none" />
+							<v-btn v-if="element.ElementData.source" color="error" variant="outlined"
+								@click="removeSingleSource()">
+								<v-icon start>mdi-delete-outline</v-icon>{{ $t('message.Delete') }}
+							</v-btn>
 						</div>
 						<uc-audio-record v-model:file="fileRecordAudio" v-model:src="element.ElementData.source"
 							@handleSave="handleChangeFile(fileRecordAudio, element.ElementType)" />
@@ -283,6 +288,126 @@
 					SortOrder: this.element.SortOrder,
 				})
 			},
+			getUploadManager() {
+				if (!window.UploadManager) throw new Error('UploadManager chưa được khởi tạo')
+				return window.UploadManager
+			},
+			uploadWithManager(method, file, options = {}) {
+				return new Promise((resolve, reject) => {
+					this.getUploadManager()[method](file, {
+						...options,
+						onComplete: resolve,
+						onError: reject,
+					})
+				})
+			},
+			async uploadToGoogleDriveViaManager(file) {
+				const uploaded = await this.uploadWithManager('uploadLmsGoogleDrive', file, {
+					folderPath: `LMS_Lesson/Lesson_${this.element.LessonID}/${vueData.user.UserID}`,
+				})
+				return { id: uploaded.id, name: uploaded.name || file.name, source: uploaded.source }
+			},
+			async uploadFileYoutubeViaManager(file) {
+				const uploaded = await this.uploadWithManager('uploadLmsYoutube', file, {
+					playlistName: `LMS_Lesson_${this.element.LessonID}`,
+					title: file.name.replace(/\.[^/.]+$/, ''),
+				})
+				return { id: uploaded.id, name: uploaded.name || file.name, source: uploaded.source }
+			},
+			async registerResourceFile(file, resourceType) {
+				const uploadManager = this.getUploadManager()
+				return new Promise((resolve, reject) => {
+					uploadManager.uploadLmsFile(file, {
+						onComplete: async response => {
+							try {
+								const uploaded = response?.Files?.[0]
+								if (!uploaded?.FILE_ID) throw new Error('Upload tài nguyên không trả về FILE_ID')
+								const metadata = {
+									uploadSource: 'db',
+									fileId: uploaded.FILE_ID,
+									fileName: uploaded.FILE_NAME || file.name,
+									contentType: uploaded.FILE_CONTENTTYPE || file.type || '',
+									fileSize: Number(uploaded.FILE_SIZE || file.size || 0),
+									url: uploaded.FILE_URL || `/FileData/${uploaded.FILE_ID}`,
+									origin: 'SOAN_BAI_HOC',
+									publishSource: resourceType,
+									lessonID: this.element.LessonID,
+								}
+								await fetchPromise('lms/FP_TaiNguyen_File_Register', {
+									KhoiID: this.element.KhoiID || vueData.lesson?.KhoiID || null,
+									MonHocID: this.element.MonHocID || vueData.lesson?.MonHocID || null,
+									TenNoiDung: metadata.fileName,
+									LoaiNoiDung: resourceType,
+									NguonTaiNguyenCode: 'SOAN_BAI_HOC',
+									NguonResourceType: 'LESSON',
+									NguonResourceID: this.element.LessonID,
+									DataJson: JSON.stringify(metadata),
+								}, { cache: false })
+								resolve(metadata)
+							} catch (error) { reject(error) }
+						},
+						onError: reject,
+					})
+				})
+			},
+			getDriveFileIdFromSource(source) {
+				if (!source || typeof source !== 'string') return null
+				const match = source.match(/\/d\/([^/]+)/)
+				return match?.[1] || null
+			},
+			async deleteDriveFile(source) {
+				const fileId = this.getDriveFileIdFromSource(source)
+				if (!fileId) throw new Error('Không tìm thấy Google Drive file id')
+
+				const { access_token } = await this.ajaxCALLPromise('lms/FP_Youtube_Token_Get')
+				const response = await fetch(`https://www.googleapis.com/drive/v3/files/${fileId}`, {
+					method: 'DELETE',
+					headers: { Authorization: `Bearer ${access_token}` },
+				})
+				if (!response.ok) throw new Error(`Xóa file Google Drive thất bại: ${response.statusText}`)
+			},
+			async removeSource(index) {
+				const source = this.element?.ElementData?.sources?.[index]
+				if (!source) return
+				try {
+						this.loadingPage.isLoading = true
+						this.loadingPage.text = this.$t('message.LoadingData')
+						if (this.getDriveFileIdFromSource(source.source)) {
+							await this.deleteDriveFile(source.source)
+						}
+						if (source.resourceFileId) {
+							await this.getUploadManager().deleteLmsFile(source.resourceFileId)
+						}
+						this.element.ElementData.sources.splice(index, 1)
+					await this.saveElement()
+				} catch (error) {
+					console.error('Lỗi xóa file bài học:', error)
+					Vue.$toast.error(error.message || 'Không thể xóa file', { position: 'top' })
+				} finally {
+					this.loadingPage.isLoading = false
+				}
+			},
+			async removeSingleSource() {
+				const source = this.element?.ElementData?.source
+				if (!source) return
+				try {
+					this.loadingPage.isLoading = true
+					this.loadingPage.text = this.$t('message.LoadingData')
+					if (this.getDriveFileIdFromSource(source)) {
+						await this.deleteDriveFile(source)
+					}
+					if (this.element.ElementData.resourceFileId) {
+						await this.getUploadManager().deleteLmsFile(this.element.ElementData.resourceFileId)
+					}
+					this.element.ElementData.source = ''
+					await this.saveElement()
+				} catch (error) {
+					console.error('Lỗi xóa file bài học:', error)
+					Vue.$toast.error(error.message || 'Không thể xóa file', { position: 'top' })
+				} finally {
+					this.loadingPage.isLoading = false
+				}
+			},
 			async handleChangeFile(e, ElementType) {
 				let file = null
 				if (ElementType === "AUDIO") file = e
@@ -290,35 +415,48 @@
 				console.log('file', file)
 				if (!file) return
 				if (ElementType === "IMAGE") {
-					const { id, name, source } = await this.uploadToGoogleDrive(file)
+					const { id, name, source } = await this.uploadToGoogleDriveViaManager(file)
+					const resource = await this.registerResourceFile(file, 'IMAGE')
 					this.element.ElementData.sources.push({
 						id,
 						name,
 						source,
+						fileSize: Number(file.size || 0),
+						resourceFileId: resource.fileId,
 					})
 					await this.saveElement()
 				}
 				else if (ElementType === 'YOUTUBE') {
-					const { id, name, source } = await this.uploadFileYoutube(file)
+					const { id, name, source } = await this.uploadFileYoutubeViaManager(file)
+					const resource = await this.registerResourceFile(file, 'VIDEO')
 					this.element.ElementData.source = source
+					this.element.ElementData.videoId = id
+					this.element.ElementData.resourceFileId = resource.fileId
 					await this.saveElement()
 				}
 				else if (ElementType === 'FILE') {
-					const { id, name, source } = await this.uploadToGoogleDrive(file)
+					const { id, name, source } = await this.uploadToGoogleDriveViaManager(file)
+					const resource = await this.registerResourceFile(file, 'FILE')
 					this.element.ElementData.sources.push({
 						id,
 						name,
 						source,
+						fileSize: Number(file.size || 0),
+						resourceFileId: resource.fileId,
 					})
 					await this.saveElement()
 				}
 				else if (ElementType === 'UPLOAD_AUDIO') {
-					const { id, name, source } = await this.uploadToGoogleDrive(file)
+					const { id, name, source } = await this.uploadToGoogleDriveViaManager(file)
+					const resource = await this.registerResourceFile(file, 'AUDIO')
 					this.element.ElementData.source = source
+					this.element.ElementData.resourceFileId = resource.fileId
 					await this.saveElement()
 				} else if (ElementType === 'AUDIO') {
-					const { id, name, source } = await this.uploadToGoogleDrive(file)
+					const { id, name, source } = await this.uploadToGoogleDriveViaManager(file)
+					const resource = await this.registerResourceFile(file, 'AUDIO')
 					this.element.ElementData.source = source
+					this.element.ElementData.resourceFileId = resource.fileId
 					await this.saveElement()
 					return // return luôn ko cần chạy tiếp tục phía dưới code
 				}

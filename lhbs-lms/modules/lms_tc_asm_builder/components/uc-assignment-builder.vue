@@ -7,7 +7,12 @@
 
         <!-- Mobile: Properties Drawer (right) -->
         <v-navigation-drawer v-if="isMobile" v-model="isPropertiesDrawerOpen" location="right" temporary width="320">
-            <uc-assignment-properties :assignment="assignment" :groups="assignment.AssignmentConfig?.groups" :item="selectedItem" @update:groups="updateGroups" @update:assignment="assignment = $event" :in-drawer="true" @close="isPropertiesDrawerOpen = false" />
+            <uc-assignment-properties :assignment="assignment" :groups="assignment.AssignmentConfig?.groups" :item="selectedItem" :open-import-type="groupImportType" @update:groups="updateGroups" @update:assignment="assignment = $event" :in-drawer="true" @close="isPropertiesDrawerOpen = false" />
+        </v-navigation-drawer>
+
+        <!-- Desktop: Properties navigation drawer -->
+        <v-navigation-drawer v-if="!isMobile" v-model="isPropertiesDrawerOpen" location="right" temporary width="360" scrim @click:outside="isPropertiesDrawerOpen = false" class="assignment-properties-drawer">
+            <uc-assignment-properties :assignment="assignment" :groups="assignment.AssignmentConfig?.groups" :item="selectedItem" :open-import-type="groupImportType" @update:groups="updateGroups" @update:assignment="assignment = $event" :in-drawer="true" @close="isPropertiesDrawerOpen = false" />
         </v-navigation-drawer>
 
         <!-- Mobile: Top Bar -->
@@ -41,7 +46,7 @@
                 </div>
                 <v-divider />
                 <div v-if="assignment.AssignmentType !== 'INTEGRATED'">
-                    <uc-assignment-component-library @add-component="addComponent" :hide-title="true" style="height: calc(-285px + 100dvh); overflow: auto" />
+                    <uc-assignment-component-library @add-component="addComponent" :hide-title="true" style="height: calc(-302px + 100dvh); overflow: auto" />
                 </div>
                 <div v-else class="pa-4 text-center">
                     <v-icon size="64" color="info" class="mb-4 opacity-20">mdi-link-variant</v-icon>
@@ -66,9 +71,6 @@
                             </v-chip>
                         </div>
                         <v-row dense>
-                            <v-col cols="12" v-if="!assignment.ExternalLink">
-                                <v-btn @click="onOpenPreview" variant="outlined" color="teal" block size="small"> <v-icon start class="me-1">mdi-file-eye-outline</v-icon>{{ $t('message.Preview') }} </v-btn>
-                            </v-col>
                             <v-col cols="12">
                                 <v-btn @click="onRemarkQuestion" variant="outlined" color="amber" block size="small" :disabled="assignment.AssignmentType === 'INTEGRATED'">
                                     <v-icon start class="me-1">mdi-update</v-icon>{{ $t('message.SortNumber') }}
@@ -83,13 +85,30 @@
                 <v-divider vertical />
             </v-col>
 
-            <v-col cols="12" md="7" style="height: calc(100dvh); overflow: auto" class="d-flex flex-column">
+            <v-col cols="12" md="10" style="height: calc(100dvh); overflow: auto" class="d-flex flex-column">
                 <!-- Top Bar (Clean) -->
                 <div class="pa-4 pb-0 d-flex align-center justify-space-between">
                     <div class="d-flex align-center ga-2">
                         <span class="text-subtitle-1 font-weight-bold">
                             {{ assignment.Title || 'Chưa đặt tiêu đề' }}
                         </span>
+                    </div>
+
+                    <div class="d-flex align-center ga-2 ms-auto">
+                        <v-chip v-if="autoSaveStatus" size="x-small" :color="autoSaveStatus === 'saving' ? 'grey' : 'success'" variant="tonal">
+                            <v-icon v-if="autoSaveStatus === 'saving'" start size="12" class="mdi-spin">mdi-loading</v-icon>
+                            <v-icon v-else start size="12">mdi-check-circle-outline</v-icon>
+                            {{ autoSaveStatus === 'saving' ? 'Đang lưu...' : 'Đã lưu' }}
+                        </v-chip>
+                        <v-btn v-if="!assignment.ExternalLink" @click="onOpenPreview" variant="outlined" color="teal" size="small">
+                            <v-icon start>mdi-file-eye-outline</v-icon>{{ $t('message.Preview') }}
+                        </v-btn>
+                        <v-btn @click="handleSave(true)" variant="outlined" color="info" size="small">
+                            <v-icon start>mdi-content-save-outline</v-icon>{{ $t('message.SaveAssignment') }}
+                        </v-btn>
+                        <v-btn v-if="!vueData.AssignToClassID" @click="openDialogAssignToStudent" variant="flat" color="success" size="small">
+                            <v-icon start>mdi-clipboard-arrow-right-outline</v-icon>{{ $t('message.Assigned') }}
+                        </v-btn>
                     </div>
 
                     <div v-if="assignment.AssignmentType === 'INTEGRATED'" class="d-flex align-center ga-2">
@@ -111,6 +130,7 @@
                         :selected-item="selectedItem"
                         @update:groups="updateGroups"
                         @update:selected-item="selectedItem = $event"
+                        @open-group-import="handleGroupImport"
                     />
 
                     <div v-else class="px-4 pb-4 h-100 d-flex flex-column">
@@ -134,33 +154,6 @@
                     </div>
                 </div>
                 <v-divider vertical />
-            </v-col>
-            <v-col class="pa-0" cols="12" md="3">
-                <div style="height: calc(100dvh - 45px); overflow: auto" class="position-relative">
-                    <uc-assignment-properties :assignment="assignment" :groups="assignment.AssignmentConfig?.groups" :item="selectedItem" @update:groups="updateGroups" @update:assignment="assignment = $event" />
-                </div>
-                <v-divider />
-                <v-row class="ma-0" dense v-if="assignment.AssignmentConfig?.groups?.length > 0 || assignment.AssignmentType === 'INTEGRATED'">
-                    <!-- <v-col :cols="!vueData.AssignToClassID ? 4 : 6">
-						<v-btn @click="onOpenPreview" text='Xem trước' color="teal" block />
-					</v-col> -->
-                    <v-col cols="12" v-if="autoSaveStatus" class="pb-0">
-                        <v-chip size="x-small" :color="autoSaveStatus === 'saving' ? 'grey' : 'success'" variant="tonal" class="w-100 justify-center">
-                            <v-icon v-if="autoSaveStatus === 'saving'" start size="12" class="mdi-spin">mdi-loading</v-icon>
-                            <v-icon v-else start size="12">mdi-check-circle-outline</v-icon>
-                            <span v-if="autoSaveStatus === 'saving'">Đang lưu tự động...</span>
-                            <span v-else
-                                >Đã lưu tự động<span v-if="lastSavedRelative"> — {{ lastSavedRelative }}</span></span
-                            >
-                        </v-chip>
-                    </v-col>
-                    <v-col :cols="!vueData.AssignToClassID ? 6 : 12">
-                        <v-btn color="info" variant="outlined" block @click="handleSave(true)"> <v-icon start class="me-1">mdi-content-save-outline</v-icon>{{ $t('message.SaveAssignment') }} </v-btn>
-                    </v-col>
-                    <v-col cols="6" v-if="!vueData.AssignToClassID">
-                        <v-btn class="w-100" variant="outlined" color="success" @click="openDialogAssignToStudent"> <v-icon start class="me-1">mdi-clipboard-arrow-right-outline</v-icon>{{ $t('message.Assigned') }} </v-btn>
-                    </v-col>
-                </v-row>
             </v-col>
         </v-row>
 
@@ -186,7 +179,7 @@
                 </v-card>
                 <v-alert v-else type="info" variant="tonal" density="compact" text="Vui lòng thiết lập link bài tập để xem trước." />
             </div>
-            <uc-assignment-canvas v-else :groups="assignment?.AssignmentConfig?.groups" :selected-item="selectedItem" @update:groups="updateGroups" @update:selected-item="selectedItem = $event" />
+            <uc-assignment-canvas v-else :groups="assignment?.AssignmentConfig?.groups" :selected-item="selectedItem" @update:groups="updateGroups" @update:selected-item="selectedItem = $event" @open-group-import="handleGroupImport" />
         </div>
 
         <!-- Mobile: Bottom Bar -->
@@ -383,6 +376,7 @@
                 AssignmentConfig: { groups: [] },
             },
             selectedItem: null,
+            groupImportType: '',
             fileAudio: null,
             classOptions: [],
             isOpenSheetAssignToClass: false,
@@ -565,6 +559,12 @@
                     return x
                 })
             })
+        },
+        handleGroupImport({ groupIndex, source }) {
+            this.selectedItem = { type: 'group', groupIndex, qIndex: null }
+            this.isPropertiesDrawerOpen = true
+            this.groupImportType = ''
+            this.$nextTick(() => { this.groupImportType = source })
         },
         async onOpenPreview() {
             const groups = this.assignment.AssignmentConfig.groups
@@ -1004,7 +1004,7 @@
 
         selectedItem: function (item) {
             this.fileAudio = null
-            if (item && this.isMobile) {
+            if (item) {
                 this.isPropertiesDrawerOpen = true
             }
         },
