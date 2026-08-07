@@ -664,7 +664,8 @@
 				return (this.isCap1 && this.tab === 'ren-luyen') || (!this.isCap1 && this.tab === 'so-lien-lac')
 			},
 			workflowPeriod() {
-				return this.isCap1 ? this.selectedNhanXetThangLmsPeriod : this.selectedSoLienLacPeriod
+				if (this.isCap1) return this.tab === 'ren-luyen' ? this.selectedNhanXetThangLmsPeriod : null
+				return this.tab === 'so-lien-lac' ? this.selectedSoLienLacPeriod : null
 			},
 			workflowActionMenuVisible() {
 				return this.isWorkflowActionTab && !!this.workflowPeriod && [0, 1, 3].includes(Number(this.workflowPeriod.TinhTrang))
@@ -701,10 +702,10 @@
 				return [
 					{ title: 'MÃ HỌC SINH', width: 120, readOnly: true },
 					{ title: 'HỌ TÊN HỌC SINH', width: 200, readOnly: true },
-					{ title: 'NHẬN XÉT MÔN TOÁN', width: 280 }, { title: 'ĐIỂM TOÁN', width: 110, type: 'numeric' },
-					{ title: 'NHẬN XÉT MÔN TIẾNG VIỆT', width: 280 }, { title: 'ĐIỂM TIẾNG VIỆT', width: 130, type: 'numeric' },
-					{ title: 'NHẬN XÉT MÔN HỌC KHÁC', width: 280 }, { title: 'HOẠT ĐỘNG GIÁO DỤC KHÁC', width: 280 },
-					{ title: 'PHẨM CHẤT - NĂNG LỰC', width: 280 }
+					{ title: 'NHẬN XÉT MÔN TOÁN', width: 420, align: 'justify' }, { title: 'ĐIỂM TOÁN', width: 110, type: 'numeric', align: 'center' },
+					{ title: 'NHẬN XÉT MÔN TIẾNG VIỆT', width: 420, align: 'justify' }, { title: 'ĐIỂM TIẾNG VIỆT', width: 130, type: 'numeric', align: 'center' },
+					{ title: 'NHẬN XÉT MÔN HỌC KHÁC', width: 420, align: 'justify' }, { title: 'HOẠT ĐỘNG GIÁO DỤC KHÁC', width: 420, align: 'justify' },
+					{ title: 'PHẨM CHẤT - NĂNG LỰC', width: 420, align: 'justify' }
 				]
 			},
 			nhanXetThangLmsNestedHeaders() {

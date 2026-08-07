@@ -84,7 +84,12 @@
 				this.instance = soGvcnJspreadsheet.create(container, {
 					worksheets: [{
 						data: this.rows || [],
-						columns: (this.columns || []).map(column => this.readOnly ? { ...column, readOnly: true } : column),
+						columns: (this.columns || []).map(column => {
+							const normalizedColumn = this.readOnly ? { ...column, readOnly: true } : column
+							return !normalizedColumn.readOnly && normalizedColumn.type !== 'numeric' && normalizedColumn.align !== 'center'
+								? { ...normalizedColumn, align: 'justify' }
+								: normalizedColumn
+						}),
 						nestedHeaders: this.nestedHeaders || [],
 						rowResize: true,
 						columnDrag: false,

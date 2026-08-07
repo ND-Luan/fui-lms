@@ -180,7 +180,8 @@
 					})
 					const worksheet = Array.isArray(this.instance) ? this.instance[0] : this.instance
 					if (worksheet && typeof worksheet.hideColumn === 'function') {
-						worksheet.hideColumn(1)
+						// Chỉ ẩn trên giao diện; vẫn giữ cột và dữ liệu để getData/serialize sử dụng về sau.
+						[1, 9, 10, 15, 16].forEach(columnIndex => worksheet.hideColumn(columnIndex))
 						window.requestAnimationFrame(() => soGvcnJspreadsheet.syncNestedHeaders(container, [2], [[0, 2]]))
 					}
 			}

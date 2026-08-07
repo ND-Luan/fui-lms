@@ -1,6 +1,7 @@
 <template>
 	<v-card-text class="pa-0 so-gvcn-sheet-wrap" :style="{ height: sheetHeight, overflow: 'hidden' }">
-		<v-alert v-if="selectedLopID === '__ALL__'" type="info" variant="tonal" density="compact" class="ma-2">
+		<v-alert v-if="selectedLopID === '__ALL__'" type="info" variant="tonal" density="compact"
+			class="ma-2 flex-grow-0 align-self-start" style="height: auto; min-height: 0; flex: 0 0 auto;">
 			Chọn một lớp ở thanh trên để theo dõi tình hình Phụ huynh tham dự họp.
 		</v-alert>
 		<div v-else class="so-gvcn-sheet-wrap">
