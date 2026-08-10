@@ -17,16 +17,18 @@
 				</v-card-title>
 				<v-card-text class="py-1">
 					<v-row dense align="center">
-						<v-col cols="12" sm="2">
+						<v-col cols="12" sm="6" md="3">
 							<v-select v-model="filter.CapID" :items="capOptions" item-title="text" item-value="value"
 								label="Cấp học" density="compact" variant="outlined" hide-details />
 						</v-col>
-						<v-col cols="12" sm="2">
+						<v-col cols="12" sm="6" md="3">
 							<v-select v-model="selectedLopID" :items="classOptions" item-title="TenLop"
-								item-value="LopID" label="Lớp" density="compact" variant="outlined" hide-details
-								:loading="loading.list" @update:model-value="onClassChange" />
+								item-value="LopID" :label="classOptions.length ? 'Lớp' : 'Lớp (chưa được phân công)'"
+								density="compact" variant="outlined" hide-details :disabled="!classOptions.length"
+								no-data-text="Chưa được phân công lớp chủ nhiệm" :loading="loading.list"
+								@update:model-value="onClassChange" />
 						</v-col>
-						<v-col v-if="!isCap1 && tab === 'so-lien-lac'" cols="12" sm="3">
+						<v-col v-if="!isCap1 && tab === 'so-lien-lac'" cols="12" sm="6" md="3">
 							<v-select v-model="selectedSoLienLacPeriodId" :items="soLienLacPeriods"
 								item-title="Thang_HienThi" item-value="Lop_NhanXetThangID"
 								label="Chọn tháng" density="compact" variant="outlined" hide-details
@@ -42,7 +44,7 @@
 								</template>
 							</v-select>
 						</v-col>
-						<v-col v-if="isCap1 && tab === 'ren-luyen'" cols="12" sm="3">
+						<v-col v-if="isCap1 && tab === 'ren-luyen'" cols="12" sm="6" md="3">
 							<v-select v-model="selectedNhanXetThangLmsPeriodId" :items="nhanXetThangLmsPeriods"
 								item-title="Thang_HienThi" item-value="Lop_NhanXetThangID"
 								label="Chọn tháng" density="compact" variant="outlined" hide-details
@@ -58,7 +60,7 @@
 								</template>
 							</v-select>
 						</v-col>
-						<v-col cols="12" sm="5" class="d-flex align-center justify-end ga-2 flex-nowrap">
+						<v-col cols="12" sm="12" md="6" class="so-gvcn-actions d-flex align-center justify-start ga-2 flex-wrap">
 							<v-btn v-if="isCap1 && tab === 'ren-luyen'" color="primary" variant="flat" size="small"
 								:disabled="saveButtonDisabled" :loading="loading.save" @click="onWorkflowSave">
 								<v-icon start>mdi-content-save</v-icon>
@@ -330,7 +332,8 @@
 			classList: [],
 			allTeachers: [],
 			allStudentRows: [],
-			selectedLopID: '__ALL__',
+			selectedLopID: null,
+			hasUnsavedChanges: false,
 			classSelectionInitialized: false,
 			studentSheetRows: [],
 			sheetInstance: null,
@@ -634,12 +637,12 @@
 				const visibleClasses = this.isCap1GradeManager
 					? this.classList.filter(item => this.cap1ManagedKhoiIDs.includes(Number(item.KhoiID)))
 					: this.classList
-				return this.isTeacherOrLead && !this.isCap1GradeManager
-					? visibleClasses
-					: [
+				return this.isBghOrAdmin
+					? [
 						{ LopID: '__ALL__', TenLop: 'Tất cả lớp' },
 						...visibleClasses
 					]
+					: visibleClasses
 			},
 			userSystemRight() {
 				return Number(vueData?.user?.SystemRight || vueData?.SystemRight || vueData?.sys_SystemRight || 0)
@@ -660,7 +663,7 @@
 				return this.isCap1 && this.cap1ManagedKhoiIDs.length > 0
 			},
 			isTeacherOrLead() {
-				return [1, 5].includes(this.userSystemRight)
+				return [1, 2, 5].includes(this.userSystemRight)
 			},
 			isTeacher() {
 				return this.isTeacherOrLead
@@ -841,14 +844,31 @@
 		this.getList()
 		this.getTeachersList()
 		window.addEventListener('resize', this.onResize)
+		window.addEventListener('beforeunload', this.onBeforeUnload)
+		document.addEventListener('input', this.onEditableInput, true)
+		document.addEventListener('change', this.onEditableInput, true)
 		this.onResize()
 	},
 	beforeUnmount() {
 		window.removeEventListener('resize', this.onResize)
+		window.removeEventListener('beforeunload', this.onBeforeUnload)
+		document.removeEventListener('input', this.onEditableInput, true)
+		document.removeEventListener('change', this.onEditableInput, true)
+	},
+	beforeRouteLeave(to, from, next) {
+		if (!this.hasUnsavedChanges) return next()
+		const confirmation = this.confirmRef?.value?.show?.({
+			title: 'Bạn có dữ liệu chưa lưu. Bạn có chắc muốn rời trang không?'
+		})
+		if (confirmation && typeof confirmation.then === 'function') {
+			confirmation.then(confirmed => confirmed ? next() : next(false))
+		} else {
+			next(confirmation ? undefined : false)
+		}
 	},
 	watch: {
 		'filter.CapID'() {
-			this.selectedLopID = '__ALL__'
+			this.selectedLopID = this.isBghOrAdmin ? '__ALL__' : null
 			this.classSelectionInitialized = false
 			this.getList()
 		},
@@ -864,7 +884,7 @@
 		},
 		currentNienKhoa() {
 			this.filter.NienKhoa = this.currentNienKhoa
-			this.selectedLopID = '__ALL__'
+			this.selectedLopID = this.isBghOrAdmin ? '__ALL__' : null
 			this.classSelectionInitialized = false
 			this.getList()
 		},
@@ -914,6 +934,23 @@
 		}
 	},
 	methods: {
+		onEditableInput(event) {
+			const target = event.target
+			const isSheetTarget = target?.closest?.('.so-gvcn-sheet-wrap, .so-gvcn-sheet, .so-gvcn-cong-tac-thang-sheet, td.editor')
+			if (isSheetTarget || target?.matches?.('textarea, [contenteditable="true"]')) {
+				this.hasUnsavedChanges = true
+				window.__soGvcnHasUnsavedChanges = true
+			}
+		},
+		onBeforeUnload(event) {
+			if (!this.hasUnsavedChanges && !window.__soGvcnHasUnsavedChanges) return
+			event.preventDefault()
+			event.returnValue = 'Bạn có dữ liệu chưa lưu.'
+		},
+		clearUnsavedChanges() {
+			this.hasUnsavedChanges = false
+			window.__soGvcnHasUnsavedChanges = false
+		},
 		getFunctionRightCapIDs() {
 			const value = vueData?.user?.FunctionRight ?? vueData?.user?.functionRight ?? ''
 			const rights = (Array.isArray(value) ? value : String(value).split(/[;,|\s]+/))
@@ -1001,22 +1038,23 @@
 					}
 					// Giáo viên và tổ trưởng chỉ thấy lớp đang chủ nhiệm trong niên khóa hiện tại.
 					// Khối trưởng/khối phó cấp 1 (FunctionRight 11-15) được xem toàn bộ lớp.
-					if (this.isTeacherOrLead && !this.isCap1GradeManager) {
+					if (!this.isBghOrAdmin && !this.isCap1GradeManager) {
 						const teacherClassIds = await this.getTeacherHomeroomClassIds()
 						const teacherRows = (this.allStudentRows || []).filter(row => teacherClassIds.has(String(row.LopID)))
-						// SoGVCNDanhSachHocSinhLop đã giới hạn dữ liệu theo quyền người dùng.
-						// Một số response không có mã GVCN/UserID để đối chiếu; trong trường
-						// hợp đó không được ghi đè danh sách API bằng một mảng rỗng.
-						if (teacherRows.length) this.allStudentRows = teacherRows
+						// Không được giữ lại toàn bộ danh sách khi không tìm thấy lớp GVCN.
+						// Giáo viên bộ môn (SR 2) không có lớp chủ nhiệm phải thấy danh sách rỗng.
+						this.allStudentRows = teacherRows
 					}
 					this.classList = this.buildClassList(this.allStudentRows)
 					if (!this.classSelectionInitialized) {
-						this.selectedLopID = this.classList[0]?.LopID || '__ALL__'
+						this.selectedLopID = this.classList[0]?.LopID || (this.isBghOrAdmin ? '__ALL__' : null)
 						this.classSelectionInitialized = true
 					}
-					await this.mergeThongTinGiaDinh()
+					// Chỉ tải dữ liệu bổ sung của tab Dữ liệu HS khi tab này đang được mở.
+					// Các tab nghiệp vụ khác không cần gọi thêm API điểm tổng kết/thông tin gia đình.
+					if (this.tab === 'du-lieu-hs') await this.mergeThongTinGiaDinh()
 					if (!this.classOptions.some(x => String(x.LopID) === String(this.selectedLopID))) {
-						this.selectedLopID = this.classList[0]?.LopID || '__ALL__'
+						this.selectedLopID = this.classList[0]?.LopID || (this.isBghOrAdmin ? '__ALL__' : null)
 					}
 					await this.onClassChange(this.selectedLopID)
 					await this.ensureSpecificClassForClassTabs()
@@ -1026,7 +1064,6 @@
 			},
 			async getTeacherHomeroomClassIds() {
 				const userID = String(vueData?.user?.UserID || vueData?.sys_UserID || '').trim()
-				const fallbackLopID = vueData?.LopID ? String(vueData.LopID) : ''
 				const khoiIds = [...new Set((this.allStudentRows || []).map(row => Number(row.KhoiID)).filter(Boolean))]
 				const classRows = (await Promise.all(khoiIds.map(khoiID => ajaxCALLPromise('lms/Lop_Get_ByKhoiID', {
 					NienKhoa: this.filter.NienKhoa,
@@ -1035,7 +1072,6 @@
 				const matchedIds = classRows.concat(this.allStudentRows || [])
 					.filter(row => row && row.IsNhom !== true && this.isHomeroomClassOfCurrentUser(row, userID))
 					.map(row => String(row.LopID))
-				if (!matchedIds.length && fallbackLopID) matchedIds.push(fallbackLopID)
 				return new Set(matchedIds)
 			},
 			isHomeroomClassOfCurrentUser(row, userID) {
@@ -1045,14 +1081,7 @@
 					'GVCNID',
 					'GVCN_ID',
 					'GVCNUserID',
-					'UserID_GVCN',
-					'GiaoVienChuNhiemID',
-					'GiaoVienChuNhiem',
-					'GiaoVienID',
-					'MaGiaoVien',
-					'NhanVienID',
-					'TeacherID',
-					'UserID'
+					'UserID_GVCN'
 				]
 				return candidateKeys.some(key => this.valueMatchesUserID(row[key], userID))
 			},
@@ -1252,11 +1281,11 @@
 		async onClassChange(lopID) {
 			this.selectedLopID = lopID
 			this.resetSo()
-			if (lopID === '__ALL__') {
+			if (!lopID || lopID === '__ALL__') {
 				this.setStudentSheets(this.allStudentRows)
 				return
 			}
-			await this.mergeTongKetDiem()
+			if (this.tab === 'du-lieu-hs') await this.mergeTongKetDiem()
 			const item = this.classList.find(x => String(x.LopID) === String(lopID))
 			if (item) await this.openSo(item)
 		},
@@ -3309,6 +3338,7 @@
 						await this.getTongKetNamC1()
 					}
 				}
+				this.clearUnsavedChanges()
 				if (this.detail) this.detail.TrangThai = this.detail.TrangThai === 'NEW' ? 'DRAFT' : this.detail.TrangThai
 				if (this.selectedClass) this.selectedClass.TrangThai = this.selectedClass.TrangThai === 'NEW' ? 'DRAFT' : this.selectedClass.TrangThai
 				const tabNames = {
@@ -3649,6 +3679,7 @@
 					await this.getDetail()
 				}
 				this.initKeHoachSheet()
+				this.clearUnsavedChanges()
 				this.notify('Đã lưu kế hoạch tháng')
 			} finally {
 				this.loading.month = false

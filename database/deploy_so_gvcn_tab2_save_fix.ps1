@@ -1,7 +1,7 @@
 $ErrorActionPreference = 'Stop'
 
-$configPath = Join-Path $PSScriptRoot '.agents\scripts\db_config.json'
-$procPath = Join-Path $PSScriptRoot '.agents\docs\lhbs\sql_export\spAPI_SoGVCNPhuLucTab2Save.sql'
+$configPath = Join-Path $PSScriptRoot '..\.agents\scripts\db_config.json'
+$procPath = Join-Path $PSScriptRoot '..\.agents\docs\lhbs\sql_export\spAPI_SoGVCNPhuLucTab2Save.sql'
 $config = Get-Content $configPath -Raw | ConvertFrom-Json
 $connectionString = "Server=$($config.server);Database=$($config.database);User ID=$($config.user);Password=$($config.password);Encrypt=False;TrustServerCertificate=True"
 $connection = [System.Data.SqlClient.SqlConnection]::new($connectionString)

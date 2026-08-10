@@ -82,8 +82,12 @@
 			scrollToCard(key) {
 				this.activeCardKey = key
 				const targetEl = document.getElementById(`card_section_${key}`)
-				if (targetEl) {
-					targetEl.scrollIntoView({ behavior: 'smooth', block: 'start' })
+				const container = this.$refs.scrollContainer
+				if (targetEl && container) {
+					container.scrollTo({
+						top: targetEl.offsetTop - container.offsetTop,
+						behavior: 'smooth'
+					})
 				}
 			},
 			destroySheet(cardKey) {

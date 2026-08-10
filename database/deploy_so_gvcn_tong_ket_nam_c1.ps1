@@ -1,10 +1,10 @@
 $ErrorActionPreference = 'Stop'
 
-$configPath = Join-Path $PSScriptRoot '.agents\scripts\db_config.json'
+$configPath = Join-Path $PSScriptRoot '..\.agents\scripts\db_config.json'
 $sqlFiles = @(
-    'alter_so_gvcn_nhan_xet_thang_lms.sql',
-    'spAPI_SoGVCNHsNhanXetThangLmsSave.sql',
-    'spAPI_SoGVCNHsNhanXetThangLmsGet.sql'
+    'alter_so_gvcn_tong_ket_nam_c1.sql',
+    'spAPI_SoGVCNTongKetNamC1Save.sql',
+    'spAPI_SoGVCNTongKetNamC1Get.sql'
 )
 $config = Get-Content $configPath -Raw | ConvertFrom-Json
 $connectionString = "Server=$($config.server);Database=$($config.database);User ID=$($config.user);Password=$($config.password);Encrypt=False;TrustServerCertificate=True"
@@ -40,7 +40,7 @@ SELECT
     IsReady = CASE WHEN OBJECT_ID('dbo.' + target.ObjectName, 'U') IS NOT NULL THEN 1 ELSE 0 END,
     HasExecuteGrant = CAST(NULL AS int)
 FROM (VALUES
-    ('tblSoGVCNHocSinhNhanXetThangLms')
+    ('tblSoGVCNTongKetNamHocC1')
 ) target(ObjectName)
 UNION ALL
 SELECT
@@ -59,8 +59,8 @@ SELECT
     ) THEN 1 ELSE 0 END
 FROM sys.procedures p
 WHERE p.name IN (
-    'spAPI_SoGVCNHsNhanXetThangLmsSave',
-    'spAPI_SoGVCNHsNhanXetThangLmsGet'
+    'spAPI_SoGVCNTongKetNamC1Save',
+    'spAPI_SoGVCNTongKetNamC1Get'
 )
 ORDER BY ObjectType, ObjectName;
 '@

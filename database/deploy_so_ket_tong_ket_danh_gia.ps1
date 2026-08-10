@@ -1,6 +1,6 @@
 $ErrorActionPreference = 'Stop'
 
-$configPath = Join-Path $PSScriptRoot '.agents\scripts\db_config.json'
+$configPath = Join-Path $PSScriptRoot '..\.agents\scripts\db_config.json'
 $sqlFiles = @(
     'alter_so_gvcn_so_ket_tong_ket_danh_gia.sql',
     'spAPI_SoGVCNSoKetHKISave.sql',

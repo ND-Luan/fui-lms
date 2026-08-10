@@ -1,10 +1,10 @@
 $ErrorActionPreference = 'Stop'
 
-$configPath = Join-Path $PSScriptRoot '.agents\scripts\db_config.json'
+$configPath = Join-Path $PSScriptRoot '..\.agents\scripts\db_config.json'
 $sqlFiles = @(
-    'alter_so_gvcn_theo_doi_si_so_thang.sql',
-    'spAPI_SoGVCNTheoDoiSiSoThangSave.sql',
-    'spAPI_SoGVCNTheoDoiSiSoThangGet.sql'
+    'alter_so_gvcn_hs_can_quan_tam.sql',
+    'spAPI_SoGVCNHsCanQuanTamSave.sql',
+    'spAPI_SoGVCNHsCanQuanTamGet.sql'
 )
 $config = Get-Content $configPath -Raw | ConvertFrom-Json
 $connectionString = "Server=$($config.server);Database=$($config.database);User ID=$($config.user);Password=$($config.password);Encrypt=False;TrustServerCertificate=True"
@@ -40,7 +40,7 @@ SELECT
     IsReady = CASE WHEN OBJECT_ID('dbo.' + target.ObjectName, 'U') IS NOT NULL THEN 1 ELSE 0 END,
     HasExecuteGrant = CAST(NULL AS int)
 FROM (VALUES
-    ('tblSoGVCNTheoDoiSiSoThang')
+    ('tblSoGVCNHocSinhCanQuanTam')
 ) target(ObjectName)
 UNION ALL
 SELECT
@@ -59,8 +59,8 @@ SELECT
     ) THEN 1 ELSE 0 END
 FROM sys.procedures p
 WHERE p.name IN (
-    'spAPI_SoGVCNTheoDoiSiSoThangSave',
-    'spAPI_SoGVCNTheoDoiSiSoThangGet'
+    'spAPI_SoGVCNHsCanQuanTamSave',
+    'spAPI_SoGVCNHsCanQuanTamGet'
 )
 ORDER BY ObjectType, ObjectName;
 '@

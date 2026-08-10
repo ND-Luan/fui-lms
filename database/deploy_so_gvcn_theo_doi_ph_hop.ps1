@@ -1,10 +1,10 @@
 $ErrorActionPreference = 'Stop'
 
-$configPath = Join-Path $PSScriptRoot '.agents\scripts\db_config.json'
+$configPath = Join-Path $PSScriptRoot '..\.agents\scripts\db_config.json'
 $sqlFiles = @(
-    'alter_so_gvcn_theo_doi_thanh_tich.sql',
-    'spAPI_SoGVCNTheoDoiThanhTichSave.sql',
-    'spAPI_SoGVCNTheoDoiThanhTichGet.sql'
+    'alter_so_gvcn_theo_doi_ph_hop.sql',
+    'spAPI_SoGVCNTheoDoiPhuHuynhHopSave.sql',
+    'spAPI_SoGVCNTheoDoiPhuHuynhHopGet.sql'
 )
 $config = Get-Content $configPath -Raw | ConvertFrom-Json
 $connectionString = "Server=$($config.server);Database=$($config.database);User ID=$($config.user);Password=$($config.password);Encrypt=False;TrustServerCertificate=True"
@@ -40,7 +40,7 @@ SELECT
     IsReady = CASE WHEN OBJECT_ID('dbo.' + target.ObjectName, 'U') IS NOT NULL THEN 1 ELSE 0 END,
     HasExecuteGrant = CAST(NULL AS int)
 FROM (VALUES
-    ('tblSoGVCNTheoDoiThanhTichHocSinh')
+    ('tblSoGVCNTheoDoiPhuHuynhHop')
 ) target(ObjectName)
 UNION ALL
 SELECT
@@ -59,8 +59,8 @@ SELECT
     ) THEN 1 ELSE 0 END
 FROM sys.procedures p
 WHERE p.name IN (
-    'spAPI_SoGVCNTheoDoiThanhTichSave',
-    'spAPI_SoGVCNTheoDoiThanhTichGet'
+    'spAPI_SoGVCNTheoDoiPhuHuynhHopSave',
+    'spAPI_SoGVCNTheoDoiPhuHuynhHopGet'
 )
 ORDER BY ObjectType, ObjectName;
 '@

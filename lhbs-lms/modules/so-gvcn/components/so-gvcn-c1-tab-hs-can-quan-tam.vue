@@ -176,9 +176,21 @@
 						allowInsertRow: false,
 						showHeader: true
 					}],
+					onload: () => {
+						this.$nextTick(() => {
+							setTimeout(() => {
+								const sheet = this.getInstance()
+								if (!sheet || typeof sheet.setHeight !== 'function') return
+								this.buildRows().forEach((_, rowIndex) => sheet.setHeight(rowIndex, 96))
+							}, 100)
+						})
+					},
 					contextMenu: () => false
 					})
 					const worksheet = Array.isArray(this.instance) ? this.instance[0] : this.instance
+					if (worksheet && typeof worksheet.setHeight === 'function') {
+						this.buildRows().forEach((_, rowIndex) => worksheet.setHeight(rowIndex, 96))
+					}
 					if (worksheet && typeof worksheet.hideColumn === 'function') {
 						// Chỉ ẩn trên giao diện; vẫn giữ cột và dữ liệu để getData/serialize sử dụng về sau.
 						[1, 9, 10, 15, 16].forEach(columnIndex => worksheet.hideColumn(columnIndex))

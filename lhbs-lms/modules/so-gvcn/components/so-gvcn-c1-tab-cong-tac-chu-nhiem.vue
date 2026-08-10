@@ -23,7 +23,7 @@
 				</v-list>
 			</div>
 
-			<div class="flex-grow-1 h-100 overflow-y-auto pr-1">
+			<div ref="contentContainer" class="flex-grow-1 h-100 overflow-y-auto pr-1">
 				<div class="text-h6 text-center font-weight-bold py-3">
 					{{ pageTitle }}
 				</div>
@@ -92,12 +92,12 @@
 				localPlans: {},
 				instance: null,
 				weeklyColumns: [
-					{ title: 'THÁNG', width: 80, readOnly: true, align: 'center' },
-					{ title: 'TUẦN', width: 90, readOnly: true, align: 'center' },
+					{ title: 'THÁNG', width: 80, align: 'center' },
+					{ title: 'TUẦN', width: 90, align: 'center' },
 					{ title: 'THỜI GIAN', width: 150, align: 'center' },
-					{ title: 'KẾ HOẠCH THỰC HIỆN', width: 390, align: 'justify' },
-					{ title: 'KẾT QUẢ', width: 330, align: 'justify' },
-					{ title: 'NGUYÊN NHÂN ĐẠT ĐƯỢC KẾT QUẢ', width: 390, align: 'justify' }
+					{ title: 'KẾ HOẠCH THỰC HIỆN', width: 460, align: 'justify' },
+					{ title: 'KẾT QUẢ', width: 400, align: 'justify' },
+					{ title: 'NGUYÊN NHÂN ĐẠT ĐƯỢC KẾT QUẢ', width: 460, align: 'justify' }
 				]
 			}
 		},
@@ -148,7 +148,8 @@
 				return Number(this.activeMonth) === 5 ? this.activeYearLabel : this.planYearLabel
 			},
 			weeklySheetHeight() {
-				return '360px'
+				const rowCount = this.currentPlan?.weeklyRows?.length || 5
+				return Math.max(400, rowCount * 68 + 44) + 'px'
 			}
 		},
 		watch: {
@@ -180,6 +181,10 @@
 		beforeUnmount() {
 			this.commitCurrentSheet()
 			this.destroySheet()
+			if (this._editorWheelGuard) {
+				document.removeEventListener('wheel', this._editorWheelGuard, true)
+				this._editorWheelGuard = null
+			}
 		},
 		methods: {
 			getMonths() {
@@ -211,7 +216,7 @@
 						Thang: month.value,
 						DanhGia: saved.DanhGia || '',
 						MucTieu: saved.MucTieu || saved.ChuDe || '',
-						weeklyRows: this.normalizeWeeklyRows(savedWeeks, month)
+						weeklyRows: this.normalizeWeeklyRows(savedWeeks, month, savedMap.has(String(month.value)))
 					}
 				})
 				this.localPlans = plans
@@ -220,31 +225,42 @@
 				}
 				this.initSheet()
 			},
-			normalizeWeeklyRows(rows, month = null) {
+			normalizeWeeklyRows(rows, month = null, preserveMissing = false) {
 				const targetMonth = month || this.months.find(item =>
 					Number(item.value) === Number(this.activeMonth))
 				const calendarRows = this.buildCalendarWeekRows(targetMonth)
+				const periods = this.getCalendarWeekPeriods(targetMonth)
+				const persistedRows = (rows || []).filter(row => row && !Array.isArray(row))
 				return calendarRows.map((calendarRow, index) => {
-					const source = rows?.[index] || []
-					if (!Array.isArray(source)) {
+					const period = periods[index]
+					const source = persistedRows.length
+						? persistedRows.find(row => Number(row.ThangThucTe) === Number(period?.actualMonth) &&
+							Number(row.TuanTrongThang) === Number(period?.week))
+						: rows?.[index]
+					if (!source && preserveMissing) return ['', '', '', '', '', '']
+					const normalizedSource = source || []
+					if (!Array.isArray(normalizedSource)) {
 						return [
 							calendarRow[0],
 							calendarRow[1],
-							source.ThoiGian || this.formatSavedWeekTime(source, calendarRow[2]),
-							source.KeHoachThucHien || '',
-							source.KetQua || '',
-							source.NguyenNhan || ''
+							normalizedSource.ThoiGian || this.formatSavedWeekTime(normalizedSource, calendarRow[2]),
+							normalizedSource.KeHoachThucHien || '',
+							normalizedSource.KetQua || '',
+							normalizedSource.NguyenNhan || ''
 						]
 					}
-					const hasSavedTime = source.length >= 6
-					const contentStart = hasSavedTime ? 3 : (source.length >= 5 ? 2 : 1)
+					const hasSavedTime = normalizedSource.length >= 6
+					if (hasSavedTime) {
+						return [normalizedSource[0], normalizedSource[1], normalizedSource[2], normalizedSource[3] || '', normalizedSource[4] || '', normalizedSource[5] || '']
+					}
+					const contentStart = normalizedSource.length >= 5 ? 2 : 1
 					return [
 						calendarRow[0],
 						calendarRow[1],
-						hasSavedTime ? (source[2] || calendarRow[2]) : calendarRow[2],
-						source[contentStart] || '',
-						source[contentStart + 1] || '',
-						source[contentStart + 2] || ''
+						calendarRow[2],
+						normalizedSource[contentStart] || '',
+						normalizedSource[contentStart + 1] || '',
+						normalizedSource[contentStart + 2] || ''
 					]
 				})
 			},
@@ -344,6 +360,23 @@
 				} catch (error) {}
 				this.instance = null
 			},
+			bindEditorWheelGuard() {
+				if (this._editorWheelGuard) return
+				this._editorWheelGuard = (event) => {
+					const activeElement = document.activeElement
+					const isEditing = activeElement?.tagName === 'TEXTAREA' &&
+						activeElement.closest?.('.so-gvcn-cong-tac-thang-sheet td.editor')
+					if (!isEditing) return
+					event.preventDefault()
+					event.stopImmediatePropagation()
+					const scrollContainer = this.$refs.contentContainer
+					if (scrollContainer) {
+						scrollContainer.scrollTop += event.deltaY
+						scrollContainer.scrollLeft += event.deltaX
+					}
+				}
+				document.addEventListener('wheel', this._editorWheelGuard, { capture: true, passive: false })
+			},
 			initSheet() {
 				if (this.selectedLopID === '__ALL__') {
 					this.destroySheet()
@@ -352,15 +385,24 @@
 				this.$nextTick(() => {
 					const container = this.$refs.sheetRef
 					if (!container || !this.currentPlan || typeof jspreadsheet !== 'function') return
+					this.bindEditorWheelGuard()
 
-					// Ngăn chặn sự kiện cuộn (scroll) lan ra ngoài khi đang edit ô để tránh đóng editor
+					// Giữ editor đang mở khi cuộn: jspreadsheet thường blur editor nếu nhận được wheel trực tiếp.
 					if (!container._wheelListenerAdded) {
 						container.addEventListener('wheel', (e) => {
 							const target = e.target
-							if (target && (target.tagName === 'TEXTAREA' || target.tagName === 'INPUT' || target.classList.contains('jss_editor') || target.closest('.jss_editor'))) {
+							const isEditor = target && (target.tagName === 'TEXTAREA' || target.tagName === 'INPUT' ||
+								target.classList?.contains('jss_editor') || target.closest?.('.jss_editor'))
+							if (isEditor) {
+								e.preventDefault()
 								e.stopPropagation()
+								const scrollContainer = this.$refs.contentContainer
+								if (scrollContainer) {
+									scrollContainer.scrollTop += e.deltaY
+									scrollContainer.scrollLeft += e.deltaX
+								}
 							}
-						}, { capture: true, passive: true })
+						}, { capture: true, passive: false })
 						container._wheelListenerAdded = true
 					}
 
@@ -379,16 +421,34 @@
 							wordWrap: true,
 							allowInsertColumn: false,
 							allowInsertRow: false,
+							allowDeleteRow: false,
 							showHeader: true
 						}],
-						contextMenu: () => false,
+						contextMenu: (worksheet, x, y) => {
+							if (y === null || y === undefined) return []
+							return [{
+								title: 'Xóa dữ liệu tuần',
+								onclick: () => this.clearWeekRow(worksheet, Number(y))
+							}]
+						},
 						onchange: worksheet => {
 							if (this.currentPlan) {
 								this.currentPlan.weeklyRows = this.normalizeWeeklyRows(worksheet.getData())
 							}
 						}
-					})
 				})
+					const sheet = Array.isArray(this.instance) ? this.instance[0] : this.instance
+					if (sheet && typeof sheet.setHeight === 'function') {
+						this.currentPlan.weeklyRows.forEach((_, rowIndex) => sheet.setHeight(rowIndex, 68))
+					}
+				})
+			},
+			clearWeekRow(worksheet, rowIndex) {
+				if (!worksheet || !Number.isInteger(rowIndex) || typeof worksheet.setValueFromCoords !== 'function') return
+				for (let columnIndex = 0; columnIndex <= 5; columnIndex++) {
+					worksheet.setValueFromCoords(columnIndex, rowIndex, '')
+				}
+				if (this.currentPlan) this.currentPlan.weeklyRows = this.normalizeWeeklyRows(worksheet.getData())
 			},
 			getInstance() {
 				return this.instance
@@ -416,6 +476,7 @@
 					const weeklyRows = this.normalizeWeeklyRows(plan.weeklyRows || [], month)
 					const periods = this.getCalendarWeekPeriods(month)
 					weeklyRows.forEach((week, index) => {
+						if (!week.some(value => String(value || '').trim())) return
 						rows.push({
 							SoGVCNID: soGVCNID,
 							Thang: month.value,
