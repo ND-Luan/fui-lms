@@ -66,10 +66,15 @@
 								<v-icon start>mdi-content-save</v-icon>
 								Lưu tạm tất cả
 							</v-btn>
-							<v-btn v-else color="primary" variant="outlined" size="small" :loading="loading.list"
+			<v-btn v-else color="primary" variant="outlined" size="small" :loading="loading.list"
 								@click="onRefreshCurrentTab">
 								<v-icon start>mdi-refresh</v-icon>
 								Làm mới
+							</v-btn>
+							<v-btn v-if="!isCap1 && tab === 'ren-luyen' && attendanceWarningCount" color="warning"
+								variant="tonal" size="small" @click="showAttendanceAlert = true">
+								<v-icon start>mdi-alert-outline</v-icon>
+								Cảnh báo chuyên cần ({{ attendanceWarningCount }})
 							</v-btn>
 							<v-btn color="success" variant="outlined" size="small" :disabled="!studentSheetRows.length"
 								:loading="loading.export" @click="onExportExcel">
@@ -234,7 +239,9 @@
 									:selected-lop-i-d="selectedLopID" :selected-class="selectedClass"
 									:school-year-text="getCurrentSchoolYearText()" :columns="renLuyenColumns"
 									:nested-headers="renLuyenNestedHeaders" :sheet-height="sheetHeight"
-									:ren-luyen-sheet-height="renLuyenSheetHeight" :sheet-key="sheetKey" />
+									:ren-luyen-sheet-height="renLuyenSheetHeight" :sheet-key="sheetKey"
+									:attendance-summaries="attendanceSummaries" :attendance-loading="attendanceLoading"
+									:show-attendance-alert="showAttendanceAlert" @close-attendance-alert="showAttendanceAlert = false" />
 							</v-window-item>
 
 							<!-- Tab Sơ kết HKI (C1 only) -->
@@ -339,6 +346,10 @@
 			sheetInstance: null,
 			renLuyenRows: [],
 			renLuyenSavedRows: [],
+			attendanceSummaries: {},
+			attendanceCache: {},
+			attendanceLoading: false,
+			showAttendanceAlert: false,
 			hsCanQuanTamSavedRows: [],
 			nhanXetThangLmsSavedRows: [],
 			nhanXetThangLmsPeriods: [],
@@ -600,7 +611,8 @@
 				{ title: 'KQRL HKII', width: 100 },
 				{ title: 'KQHT HKII', width: 100 },
 				{ title: 'DANH HIỆU', width: 150 },
-				{ title: 'THÀNH TÍCH KHÁC', width: 200 }
+				{ title: 'THÀNH TÍCH KHÁC', width: 200 },
+				{ title: 'CHUYÊN CẦN / VI PHẠM', width: 300, readOnly: true, align: 'left' }
 			],
 			soLienLacColumns: [
 				{ title: 'STT', width: 60, readOnly: true },
@@ -626,7 +638,10 @@
 			],
 		}
 	},
-	computed: {
+		computed: {
+			attendanceWarningCount() {
+				return Object.values(this.attendanceSummaries || {}).filter(item => item.warningLevel).length
+			},
 			isCap1() {
 				return Number(this.filter.CapID || vueData.CapID || 0) === 1
 			},
@@ -820,7 +835,7 @@
 			return [
 				[
 					{ title: '', colspan: 4 },
-					{ title: 'THEO DÕI QUÁ TRÌNH RÈN LUYỆN CỦA HỌC SINH LỚP ' + (this.selectedClass?.TenLop || '.......') + ' NĂM HỌC ' + this.getCurrentSchoolYearText(), colspan: 19 }
+					{ title: 'THEO DÕI QUÁ TRÌNH RÈN LUYỆN CỦA HỌC SINH LỚP ' + (this.selectedClass?.TenLop || '.......') + ' NĂM HỌC ' + this.getCurrentSchoolYearText(), colspan: 20 }
 				]
 			]
 		},
@@ -913,7 +928,11 @@
 				if (this.isCap1) {
 					this.getNhanXetThangLmsPeriods()
 				} else {
-					setTimeout(() => this.$refs.tabRenLuyenRef?.scheduleInit(), 50)
+					this.loadChuyenCanViPham().then(() => {
+						this.renLuyenRows = this.toRenLuyenRows(this.getSelectedClassStudents())
+						this.sheetKey++
+						setTimeout(() => this.$refs.tabRenLuyenRef?.scheduleInit(), 50)
+					})
 				}
 			} else if (newTab === 'so-ket-hk1' && this.isCap1) {
 				this.getSoKetHk1()
@@ -1291,9 +1310,11 @@
 		},
 		resetSo() {
 			this.selectedClass = null
+			this.showAttendanceAlert = false
 			this.detail = {}
 			this.monthList = []
 			this.weeklyPlanList = []
+			this.attendanceSummaries = {}
 			this.chiTieuSavedRows = []
 			this.siSoSavedRows = []
 			this.hsCanQuanTamSavedRows = []
@@ -1332,6 +1353,7 @@
 				const created = await ajaxCALLPromise('lms/SoGVCNEnsure', { NienKhoa: item.NienKhoa, LopID: item.LopID })
 				this.form.SoGVCNID = created.SoGVCNID
 				await this.getStudents()
+				if (!this.isCap1) await this.loadChuyenCanViPham(this.getSelectedClassStudents())
 				await this.getDetail()
 			} finally {
 				this.loading.detail = false
@@ -1547,6 +1569,10 @@
 			const students = this.getSelectedClassStudents()
 			if (students.length > 0) {
 				this.renLuyenRows = this.toRenLuyenRows(students)
+				if (!this.isCap1 && this.tab === 'ren-luyen') {
+					await this.loadChuyenCanViPham(students)
+					this.renLuyenRows = this.toRenLuyenRows(students)
+				}
 				if (!this.isCap1 && this.tab === 'so-lien-lac') await this.getSoLienLacPeriods(students)
 				else this.soLienLacRows = this.toSoLienLacRows(students)
 				this.setStudentSheets(students)
@@ -1702,8 +1728,110 @@
 				this.getSavedMonthlyValue(this.renLuyenSavedRows, x.HSLopID, 93, 'NoiDung'), // KQRL HKII
 				this.getSavedMonthlyValue(this.renLuyenSavedRows, x.HSLopID, 94, 'NoiDung'), // KQHT HKII
 				this.getSavedMonthlyValue(this.renLuyenSavedRows, x.HSLopID, 95, 'NoiDung'), // DANH HIỆU
-				this.getSavedMonthlyValue(this.renLuyenSavedRows, x.HSLopID, 96, 'NoiDung')  // THÀNH TÍCH KHÁC
+				this.getSavedMonthlyValue(this.renLuyenSavedRows, x.HSLopID, 96, 'NoiDung'), // THÀNH TÍCH KHÁC
+				this.getAttendanceDisplay(x)
 			])
+		},
+		async loadChuyenCanViPham(students = this.getSelectedClassStudents()) {
+			if (this.isCap1 || !students.length || !this.selectedClass) return
+			const cacheKey = `${this.currentNienKhoa}:${this.selectedLopID}`
+			if (this.attendanceCache[cacheKey]) {
+				this.attendanceSummaries = this.attendanceCache[cacheKey]
+				return
+			}
+			this.attendanceLoading = true
+			this.attendanceSummaries = {}
+			try {
+			const lopHocID = await this.getSelectedLopHocID()
+				if (!lopHocID) {
+					console.warn('[so-gvcn] Không tìm thấy LopHocID quansinh cho lớp', {
+						LopID: this.selectedLopID,
+						TenLop: this.selectedClass?.TenLop,
+						KhoiID: this.selectedClass?.KhoiID,
+						NienKhoa: this.currentNienKhoa,
+					})
+					return
+				}
+				const summaries = {}
+				for (const month of this.getMonthlyAttendanceRanges()) {
+					const types = await ajaxCALLPromise('quansinh/LMS_SoDauBai_TongHopTheoLoaiViPham', {
+						TuNgay: month.firstDay, DenNgay: month.lastDay, LopHocID: lopHocID
+					}, { cache: false }).catch(() => [])
+					const details = await Promise.all((types || []).filter(type => Number(type.SoLuong) > 0).map(type => ajaxCALLPromise(
+						'quansinh/LMS_SoDauBai_TongHopTheoLoaiViPham_ChiTiet', {
+							TuNgay: month.firstDay, DenNgay: month.lastDay, LopHocID: lopHocID,
+							LoaiViPham: type.LoaiViPham
+						}, { cache: false }).catch(() => []).then(rows => ({ type, rows: rows || [] }))))
+					students.forEach(student => {
+						const key = this.getAttendanceStudentKey(student)
+						const current = summaries[key] || { key, hoTen: student.HoTen || '', months: [], violations: [] }
+						const absentRows = (details.find(item => Number(item.type.LoaiViPham) === 2)?.rows || [])
+							.filter(row => this.sameStudent(row.HocSinhID, student.HocSinhID))
+						const absentDates = [...new Set(absentRows.map(row => String(row.Ngay || '').slice(0, 10)).filter(Boolean))]
+						const violations = details.filter(item => Number(item.type.LoaiViPham) !== 2).map(item => ({
+							name: this.getViolationName(item.type.TenViPham),
+							count: item.rows.filter(row => this.sameStudent(row.HocSinhID, student.HocSinhID)).length
+						})).filter(item => item.count > 0)
+						current.months.push({ label: month.label, absentDays: absentDates.length, absentDates, violations })
+						violations.forEach(item => {
+							const old = current.violations.find(x => x.name === item.name)
+							if (old) old.count += item.count
+							else current.violations.push({ ...item })
+						})
+						summaries[key] = current
+					})
+				}
+				Object.values(summaries).forEach(item => {
+					const hk1Months = item.months.filter(month => ['Tháng 8', 'Tháng 9', 'Tháng 10', 'Tháng 11', 'Tháng 12'].includes(month.label))
+					const hk2Months = item.months.filter(month => ['Tháng 1-2', 'Tháng 3', 'Tháng 4', 'Tháng 5'].includes(month.label))
+					item.semesterTotals = {
+						hk1: hk1Months.reduce((total, month) => total + month.absentDays, 0),
+						hk2: hk2Months.reduce((total, month) => total + month.absentDays, 0)
+					}
+					const warningSemesters = Object.entries(item.semesterTotals).filter(([, total]) => total >= 3)
+					item.warningLevel = warningSemesters.length ? 'warning' : ''
+					item.warningText = warningSemesters.length
+						? `${warningSemesters.map(([semester, total]) => `${semester === 'hk1' ? 'HKI' : 'HKII'} nghỉ ${total} ngày`).join('; ')}; cần GVCN nắm bắt.`
+						: ''
+				})
+				this.attendanceSummaries = summaries
+				this.attendanceCache = { ...this.attendanceCache, [cacheKey]: summaries }
+			} finally {
+				this.attendanceLoading = false
+			}
+		},
+		async getSelectedLopHocID() {
+			const khoiID = Number(this.selectedClass?.KhoiID)
+			if (!khoiID) return null
+			const khois = await ajaxCALLPromise('quansinh/Basic_KhoiSelectByNamHocID', { NamHocID: this.currentNienKhoa, DonViID: 1 }).catch(() => [])
+			const khoi = (khois || []).find(item => String(item.TenKhoi).trim() === `Khối ${khoiID}`)
+			if (!khoi) return null
+			const classes = await ajaxCALLPromise('quansinh/Basic_LopHocSelectByKhoiNamHocID', { NamHocID: this.currentNienKhoa, KhoiID: khoi.KhoiID }).catch(() => [])
+			const selectedName = String(this.selectedClass?.TenLop || '').trim()
+			return (classes || []).find(item => String(item.TenLop || '').trim() === selectedName)?.LopHocID || null
+		},
+		getMonthlyAttendanceRanges() {
+			const year = Number(this.currentNienKhoa)
+			return [[8, 'Tháng 8', year + 1], [9, 'Tháng 9', year], [10, 'Tháng 10', year], [11, 'Tháng 11', year], [12, 'Tháng 12', year], [1, 'Tháng 1-2', year + 1], [3, 'Tháng 3', year + 1], [4, 'Tháng 4', year + 1], [5, 'Tháng 5', year + 1]].map(([month, label, calendarYear]) => ({
+				label, firstDay: this.formatDate(calendarYear, month, 1),
+				lastDay: this.formatDate(calendarYear, month === 1 ? 3 : month, month === 1 ? 0 : this.daysInMonth(calendarYear, month))
+			}))
+		},
+		formatDate(year, month, day) {
+			const date = new Date(year, month - 1, day || 0)
+			return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`
+		},
+		daysInMonth(year, month) { return new Date(year, month, 0).getDate() },
+		getAttendanceStudentKey(student) { return String(student.HSLopID || `hs:${student.HocSinhID}`) },
+		sameStudent(left, right) { return String(left) === String(right) },
+		getViolationName(name) { return String(name || '').split('/')[0].trim() },
+		getAttendanceDisplay(student) {
+			const item = this.attendanceSummaries[this.getAttendanceStudentKey(student)]
+			if (!item) return ''
+			const semesterTotals = item.semesterTotals || { hk1: 0, hk2: 0 }
+			const lines = [`HKI: ${semesterTotals.hk1} ngày nghỉ`, `HKII: ${semesterTotals.hk2} ngày nghỉ`]
+			lines.push(...item.months.filter(month => month.absentDays || month.violations.length).map(month => `${month.label}: ${month.absentDays ? `${month.absentDays} ngày nghỉ` : 'không nghỉ'}${month.violations.length ? `; ${month.violations.map(x => `${x.name} ${x.count}`).join(', ')}` : ''}`))
+			return lines.join('\n')
 		},
 		applySoLienLacColumns() {
 			this.soLienLacColumns = [

@@ -24,7 +24,12 @@ function onSave() {
             }
         }
     }
-    const filterData = jsonData.filter(x => x.TemplateBangDiemID > 0)
+    const filterData = jsonData
+        .filter(x => x.TemplateBangDiemID > 0)
+    console.group('[fui-mon-hoc-lop] Kiểm tra payload lưu')
+    console.log('Payload lưu:', filterData)
+    console.log('Payload JSON:', JSON.stringify(filterData, null, 2))
+    console.groupEnd()
     confirm({
         title: "Xác nhận lưu môn học lớp",
         action: () => {
@@ -37,7 +42,65 @@ function onSave() {
         }
     })
 }
-function renderDSMonHocLop() {
+async function normalizeMonHocLopByNhom() {
+    if (vueData.CapItem?.CapID !== 3) {
+        return false
+    }
+    if (vueData._isLoadingDSNhom || (vueData._hasLoadedDSNhom && vueData.DSNhom.length === 0)) {
+        return false
+    }
+    if (!vueData._hasLoadedDSNhom) {
+        vueData._isLoadingDSNhom = true
+        try {
+            const res = await fetchPromise('lms/NhomAV_Get', { NienKhoa: vueData.NienKhoa })
+            vueData.DSNhom = Array.isArray(res?.data) ? res.data : (Array.isArray(res) ? res : [])
+            vueData._hasLoadedDSNhom = true
+        } finally {
+            vueData._isLoadingDSNhom = false
+        }
+    }
+
+    const source = vueData.DSMonHocLopRaw || vueData.DSMonHocLop
+    const nhomHoc = vueData.DSNhom
+    const isGroupMode = vueData.ShowNhom === true
+    vueData.DSMonHocLop = source.flatMap(item => {
+        const itemMonHocID = item.MonHocID ?? vueData.MonHocItem?.MonHocID
+        const subjectGroups = nhomHoc.filter(nhom =>
+            String(nhom.MonHocID) === String(itemMonHocID) &&
+            String(nhom.KhoiID) === String(item.KhoiID)
+        )
+        const groups = subjectGroups.filter(nhom =>
+            (
+                String(nhom.NhomID) === String(item.LopNhomID) ||
+                [item.LopNhomID, item.LopID, item.LopGocID, item.LopHocID]
+                    .filter(id => id !== undefined && id !== null)
+                    .some(id => String(id) === String(nhom.LopID ?? nhom.LopGocID ?? nhom.LopHocID))
+            )
+        )
+        if (!isGroupMode) {
+            return subjectGroups.some(nhom => String(nhom.NhomID) === String(item.LopNhomID)) ? [] : [item]
+        }
+
+        if (subjectGroups.length > 0) {
+            return subjectGroups.map(nhom => ({
+                ...item,
+                MonHocID: itemMonHocID,
+                LopNhomID: nhom.NhomID,
+                TenLop: nhom.TenNhom,
+                IsLopNhom: true
+            }))
+        }
+
+        return [item]
+    })
+}
+function toggleDisplayMode() {
+    if (vueData.CapItem?.CapID === 3) {
+        renderDSMonHocLop()
+    }
+}
+async function renderDSMonHocLop() {
+    await normalizeMonHocLopByNhom()
     const ITEMS = []
     const HEADERS = []
     let _listKhoi = []
@@ -53,7 +116,7 @@ function renderDSMonHocLop() {
         const _items = []
         const DSMonHoc_WithoutSelectAll = vueData.DSMonHoc.filter(x => x.MonHocID !== 0)
         let DSMonHoc = DSMonHoc_WithoutSelectAll
-        if (vueData.MonHocItem.MonHocID > 0) {
+        if (vueData.MonHocItem?.MonHocID > 0) {
             DSMonHoc = DSMonHoc_WithoutSelectAll.filter(x => x.MonHocID === vueData.MonHocItem.MonHocID)
         }
         let headers = [{
@@ -65,6 +128,10 @@ function renderDSMonHocLop() {
         const filterDSByKhoi = vueData.DSMonHocLop
             .map(x => ({ ...x, TemplateBangDiemID: x.TemplateBangDiemID === 0 ? null : x.TemplateBangDiemID }))
             .filter(x => x.KhoiID === khoiItem.value)
+        if (vueData.CapItem?.CapID === 3 && vueData.ShowNhom === true) {
+            const monHocCoNhom = new Set(filterDSByKhoi.map(x => String(x.MonHocID)))
+            DSMonHoc = DSMonHoc.filter(x => monHocCoNhom.has(String(x.MonHocID)))
+        }
         const uniqueDSLop = [...new Set(filterDSByKhoi.map(x => x.LopNhomID))]
         console.log('uniqueDSLop', uniqueDSLop)
         console.log('filterDSByKhoi', filterDSByKhoi)
@@ -138,6 +205,10 @@ function onSaveChonNhanh(val, item) {
             if (itemCT.MonHocID === item.MonHocID) {
                 for (var key in itemCT) {
                     if (key.includes('TemplateBangDiem_')) {
+                        const LopNhomID = key.replace('TemplateBangDiem_', '')
+                        if (vueData.CapItem?.CapID === 3 && vueData.ShowNhom === true && !(vueData.DSNhom || []).some(nhom => nhom.IsNhomLMS_GiaoBai === false && String(nhom.NhomID) === String(LopNhomID))) {
+                            continue
+                        }
                         itemCT[key] = val
                     }
                 }
@@ -151,3 +222,4 @@ vueData.initSelectAll = initSelectAll
 vueData.onSave = onSave
 vueData.renderDSMonHocLop = renderDSMonHocLop
 vueData.onSaveChonNhanh = onSaveChonNhanh
+vueData.toggleDisplayMode = toggleDisplayMode

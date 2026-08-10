@@ -289,7 +289,9 @@ const DataProcessor = {
                     cotDiem.DiemMax
                 );
                 if (cotDiem_HS.IsError === 1) {
-                    const cellAddress = jspreadsheet.helpers.getCellNameFromCoords(currentJ, currentI);
+                    // currentJ là index trong danh sách cột điểm, còn ô trên sheet
+                    // phải dùng đúng tọa độ x của editedCells (đã bao gồm freezeColumns).
+                    const cellAddress = jspreadsheet.helpers.getCellNameFromCoords(exists.x, currentI);
                     instance[0].setStyle(cellAddress, 'background-color', 'red');
                     Vue.$toast.error(
                         `Cột điểm ${cotDiem.MaCotDiem} chỉ cho phép nhập thang điểm từ ${cotDiem.DiemMin} đến ${cotDiem.DiemMax}!`,

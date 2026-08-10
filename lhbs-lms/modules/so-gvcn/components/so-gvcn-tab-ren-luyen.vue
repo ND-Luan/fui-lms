@@ -4,6 +4,13 @@
 			Chọn một lớp ở thanh trên để xem và nhập hồ sơ theo dõi quá trình rèn luyện của học sinh lớp đó.
 		</v-alert>
 		<template v-else>
+			<v-alert v-if="showAttendanceAlert && attendanceWarnings.length" type="warning" variant="tonal" density="compact" closable class="mb-2"
+				@click:close="$emit('close-attendance-alert')">
+				<div class="font-weight-bold">Cảnh báo chuyên cần</div>
+				<div v-for="warning in attendanceWarnings" :key="warning.key" class="text-body-2 mt-1">
+					{{ warning.text }}
+				</div>
+			</v-alert>
 			<v-expansion-panels class="mb-2">
 				<v-expansion-panel>
 					<v-expansion-panel-title class="text-subtitle-1 font-weight-bold py-2 px-3 text-primary"
@@ -39,14 +46,27 @@
 			rows: { type: Array, default: () => [] },
 			columns: { type: Array, default: () => [] },
 			nestedHeaders: { type: Array, default: () => [] },
+			attendanceSummaries: { type: Object, default: () => ({}) },
+			attendanceLoading: { type: Boolean, default: false },
+			showAttendanceAlert: { type: Boolean, default: false },
 			sheetHeight: { type: String, default: 'calc(100vh - 230px)' },
 			renLuyenSheetHeight: { type: String, default: 'calc(100vh - 370px)' },
 			sheetKey: { type: [Number, String], default: 0 }
 		},
-		emits: ['update:rows'],
+		emits: ['update:rows', 'close-attendance-alert'],
 		data() {
 			return {
 				instance: null
+			}
+		},
+		computed: {
+			attendanceWarnings() {
+				return Object.values(this.attendanceSummaries || {})
+					.filter(item => item.warningLevel)
+					.map(item => ({
+						key: item.key,
+						text: `${item.hoTen}: ${item.warningText}`
+					}))
 			}
 		},
 		watch: {
