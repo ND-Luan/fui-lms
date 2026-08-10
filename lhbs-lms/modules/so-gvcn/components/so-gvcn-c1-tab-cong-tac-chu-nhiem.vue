@@ -352,6 +352,18 @@
 				this.$nextTick(() => {
 					const container = this.$refs.sheetRef
 					if (!container || !this.currentPlan || typeof jspreadsheet !== 'function') return
+
+					// Ngăn chặn sự kiện cuộn (scroll) lan ra ngoài khi đang edit ô để tránh đóng editor
+					if (!container._wheelListenerAdded) {
+						container.addEventListener('wheel', (e) => {
+							const target = e.target
+							if (target && (target.tagName === 'TEXTAREA' || target.tagName === 'INPUT' || target.classList.contains('jss_editor') || target.closest('.jss_editor'))) {
+								e.stopPropagation()
+							}
+						}, { capture: true, passive: true })
+						container._wheelListenerAdded = true
+					}
+
 					this.destroySheet()
 					container.innerHTML = ''
 					this.instance = jspreadsheet(container, {

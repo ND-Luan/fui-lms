@@ -1,5 +1,5 @@
 <template>
-    <span>
+	<span>
         <slot :open="openWindow" />
 
         <v-dialog
@@ -52,8 +52,8 @@
 </template>
 
 <script>
-export default {
-    name: 'GlobalIframeWindow',
+	export default {
+		name: 'GlobalIframeWindow',
 
     props: {
         title: { type: String, default: '' },
@@ -206,5 +206,5 @@ export default {
             el.src = this.current.url;
         },
     },
-}
+	}
 </script>

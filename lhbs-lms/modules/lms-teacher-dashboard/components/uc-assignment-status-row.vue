@@ -91,7 +91,7 @@
 	export default {
 		name: 'uc-assignment-status-row',
 		props: { assignment: Object },
-			data() {
+		data() {
 	
 			return {
 				isOpen: false,

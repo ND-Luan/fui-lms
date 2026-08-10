@@ -86,7 +86,7 @@
 							<v-tabs-window v-model="activeTab" class="editor-content">
 								<!-- Tab 1: F-Editor (Rich Text) với tích hợp GeoGebra -->
 								<v-tabs-window-item value="rich" class="tab-content">
-									<uc-rich-text-editor :plugins="['ggb']" :imageapi="vueData.v_Set.apiFile" v-model="textContent"
+									<uc-ggb-editor :imageapi="vueData.v_Set.apiImageAdapter" v-model="textContent"
 										label="Nội dung văn bản" variant="outlined" :height="400" />
 								</v-tabs-window-item>
 
@@ -856,9 +856,16 @@
 				try {
 					const result = await this.uploadToGitHub(files, iSpringGUID);
 
-					// URL với tên folder encode
+					// Detect where index.html is located in the files list
+					const indexFile = files.find(f => f.name === 'index.html');
+					const indexRelPath = indexFile.webkitRelativePath || indexFile.name;
+					const indexParts = indexRelPath.split('/');
+					indexParts.shift(); // Remove the root folder name
+					const indexPath = indexParts.join('/'); // e.g. "res/index.html" or "index.html"
+
+					// URL với tên folder encode và đường dẫn tương đối của index.html
 					const encodedFolderName = encodeURIComponent(folderName);
-					const finalURL = `https://thientamlhu.github.io/lhbs.lms/content/${iSpringGUID}/${encodedFolderName}/index.html`;
+					const finalURL = `https://thientamlhu.github.io/lhbs.lms/content/${iSpringGUID}/${encodedFolderName}/${indexPath}`;
 
 					this.editableItem.DataJson = {
 						iSpringGUID: iSpringGUID,
@@ -900,7 +907,7 @@
 
 			getGitHubConfig() {
 				return {
-					token: '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',
+					token: '',
 					owner: 'thientamlhu',
 					repo: 'lhbs.lms',
 					branch: 'main'

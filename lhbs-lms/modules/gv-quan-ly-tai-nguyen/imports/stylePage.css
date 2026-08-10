@@ -16,9 +16,6 @@
 	    flex-direction: column;
 	    min-height: 0;
 	    overflow: hidden;
-	}
-
-	.resource-tree-panel {
 	    border-right: 1px solid rgba(var(--v-border-color), var(--v-border-opacity));
 	}
 

@@ -1,23 +1,25 @@
 <template>
 	<div class="uc-ggb-inserter-wrapper">
-		<uc-rich-text-editor v-model="editorContent" :image-api="imageApi" v-bind="$attrs">
-			<template v-slot:toolbar>
-			<label v-if="label" class="text-subtitle-2 text-medium-emphasis mr-2">{{ label }}</label>
+		<div class="d-flex align-center justify-space-between mb-1">
+			<label v-if="label" class="text-subtitle-2 text-medium-emphasis">{{ label }}</label>
+			<v-spacer v-else></v-spacer>
+
 			<v-btn size="small" color="deep-purple-darken-1" variant="tonal" class="text-none mb-1"
 				:loading="isProcessing" @click="triggerFileSelect">
 				<v-icon start size="small">mdi-shape-polygon-plus</v-icon>
 				Chèn hình GeoGebra (.ggb)
 			</v-btn>
-			</template>
-		</uc-rich-text-editor>
+		</div>
 
 		<input ref="ggbFileInput" type="file" accept=".ggb" style="display: none;" @change="handleGGBSelect" />
 
+		<f-editor v-model="editorContent" :imageapi="imageApi || vueData?.v_Set?.apiFile" v-bind="$attrs" />
 	</div>
 </template>
 
 <script>
 	export default {
+		name: 'uc-ggb-editor',
 	inject: { snackbarRef: { default: null } },
 	props: {
 		modelValue: { type: String, default: '' },
@@ -35,6 +37,12 @@
 		editorContent: {
 			get() { return this.modelValue || '' },
 			set(val) { this.$emit('update:modelValue', val) },
+		},
+	},
+	watch: {
+		editorContent(newHtml, oldHtml) {
+			if (!oldHtml || newHtml === oldHtml) return
+			this.detectAndHandleDeletedImages(oldHtml, newHtml)
 		},
 	},
 	mounted() { this.ensureJSZipLoaded() },
@@ -133,6 +141,25 @@
 				script.onload = () => resolve()
 				script.onerror = (err) => reject(err)
 				document.head.appendChild(script)
+			})
+		},
+		detectAndHandleDeletedImages(oldHtml, newHtml) {
+			const extractSrcs = (html) => {
+				const div = document.createElement('div')
+				div.innerHTML = html || ''
+				return Array.from(div.querySelectorAll('img')).map(img => img.src).filter(Boolean)
+			}
+			const oldSrcs = extractSrcs(oldHtml)
+			const newSrcs = extractSrcs(newHtml)
+			oldSrcs.filter(src => !newSrcs.includes(src)).forEach(src => {
+				const match = src.match(/\/FileData\/([^\/\?]+)/i)
+				const fileId = match ? match[1] : null
+				if (fileId && typeof UploadManager !== 'undefined' && UploadManager.deleteLmsFile) {
+					UploadManager.deleteLmsFile(fileId, {
+						onComplete: () => this.showNotification(`Đã xóa file ảnh (${fileId}) khỏi server!`, 'info'),
+						onError: (err) => console.warn('Lỗi khi xóa file trên server:', err),
+					})
+				}
 			})
 		},
 		showNotification(message, color = 'info') {
