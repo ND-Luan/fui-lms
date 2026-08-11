@@ -4,7 +4,7 @@
       "EXE": "IsCheck_NotRoleParent(vueData.user)"
     },
     {
-      "EXE": "setTimeout(()=>runAction(vueData.getDSLop), 300)"
+      "EXE": "(function(){ var t=setInterval(function(){ if(vueData.NienKhoa){ clearInterval(t); runAction(vueData.getDSLop); } }, 100); setTimeout(function(){ clearInterval(t); }, 8000); })()"
     },
     {
       "DSLop": [],
@@ -25,18 +25,18 @@
       "DSDangKy": [],
       "isLoadingExcel": false,
       "headersDangKy": [
-        { "text": "Khối", "value": "KhoiID", "width": "60px", "align": "center" },
-        { "text": "Lớp", "value": "TenLop", "width": "80px" },
-        { "text": "Loại TB", "value": "LoaiThietBi", "width": "90px" },
-        { "text": "Môn", "value": "TenMonHoc", "width": "120px" },
-        { "text": "GVBM đăng ký", "value": "TenGiaoVienDangKy", "width": "160px" },
-        { "text": "Ngày áp dụng", "value": "NgayApDung", "el": "t-time", "attr": { "format": "DD/MM/YYYY" }, "width": "120px" },
-        { "text": "Thứ", "value": "ThuHienThi", "width": "70px", "align": "center" },
-        { "text": "Tiết", "value": "TietHienThi", "width": "80px", "align": "center" },
-        { "text": "Số HS", "value": "SoHocSinh", "el": "t-num", "width": "70px" },
-        { "text": "Vi phạm", "value": "SoViPham", "el": "t-num", "width": "70px" },
-        { "text": "Trễ hạn", "value": "IsTreHan", "el": "t-boolean", "align": "center", "width": "80px" },
-        { "text": "Ghi chú", "value": "GhiChu" }
+        { "title": "Khối", "value": "KhoiID", "width": "60px", "align": "center" },
+        { "title": "Lớp", "value": "TenLop", "width": "80px" },
+        { "title": "Loại TB", "value": "LoaiThietBi", "width": "90px" },
+        { "title": "Môn", "value": "TenMonHoc", "width": "120px" },
+        { "title": "GVBM đăng ký", "value": "TenGiaoVienDangKy", "width": "160px" },
+        { "title": "Ngày áp dụng", "value": "NgayApDungHienThi", "width": "120px" },
+        { "title": "Thứ", "value": "ThuHienThi", "width": "70px", "align": "center" },
+        { "title": "Tiết", "value": "TietHienThi", "width": "80px", "align": "center" },
+        { "title": "Số HS", "value": "SoHocSinh", "el": "t-num", "width": "70px" },
+        { "title": "Vi phạm", "value": "SoViPham", "el": "t-num", "width": "70px" },
+        { "title": "Trễ hạn", "value": "TreHanHienThi", "width": "80px", "align": "center" },
+        { "title": "Ghi chú", "value": "GhiChu" }
       ]
     },
     {
@@ -111,7 +111,7 @@
                             ":items": "DSTuan",
                             "item-title": "Tuan_HienThi",
                             ":return-object": true,
-                            "clearable": true,
+                            ":clearable": true,
                             "hide-details": "auto"
                           }
                         }
@@ -152,7 +152,7 @@
                             ":items": "DSLop",
                             "item-title": "TenLop",
                             ":return-object": true,
-                            "clearable": true,
+                            ":clearable": true,
                             "hide-details": "auto"
                           }
                         }

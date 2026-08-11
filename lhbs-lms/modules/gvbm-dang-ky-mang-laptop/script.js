@@ -92,40 +92,76 @@ function renderTKB() {
 	vueData.TKBTuanInfo = (raw[0] && raw[0][0]) || null
 	const lich = raw[1] || []
 	const thuKeys = ['2', '3', '4', '5', '6', '7', '1']
-	vueData.DSTKB = lich.map(row => {
-		const cells = thuKeys.map(k => {
-			const parsed = parseTKBCell(row[k])
-			return { ThuKey: k, TenLop: parsed?.TenLop || '', TenMon: parsed?.TenMon || '', CoTiet: !!parsed }
+	vueData.DSTKB = lich
+		.filter(row => row.Buoi !== 3) // ẩn buổi Tối - trường chưa có lớp học tối
+		.map(row => {
+			const cells = thuKeys.map(k => {
+				const parsed = parseTKBCell(row[k])
+				return { ThuKey: k, TenLop: parsed?.TenLop || '', TenMon: parsed?.TenMon || '', CoTiet: !!parsed }
+			})
+			return { Buoi: row.Buoi, Tiet: row.Tiet, TenBuoi: tenBuoi(row.Buoi), Cells: cells }
 		})
-		return { Buoi: row.Buoi, Tiet: row.Tiet, TenBuoi: tenBuoi(row.Buoi), Cells: cells }
-	})
 }
-function onChonTietTKB(row, cell) {
-	if (!cell.CoTiet) return
-	const found = (vueData.DSLop_HienThi || []).find(x => x.TenLop === cell.TenLop && x.TenMonHoc === cell.TenMon)
-		|| (vueData.DSLop_HienThi || []).find(x => x.TenLop === cell.TenLop)
+function keyTKB(row, cell) {
+	return row.Buoi + '_' + row.Tiet + '_' + cell.ThuKey
+}
+function tinhNgayTuThuKey(thuKey) {
+	const tuNgay = vueData.TKBTuanInfo?.TuNgay // "dd/mm/yyyy", là Thứ 2 của tuần
+	if (!tuNgay) return null
+	const [d, m, y] = tuNgay.split('/').map(Number)
+	const base = new Date(y, m - 1, d)
+	const offsetMap = { '2': 0, '3': 1, '4': 2, '5': 3, '6': 4, '7': 5, '1': 6 }
+	base.setDate(base.getDate() + (offsetMap[thuKey] ?? 0))
+	const pad = n => String(n).padStart(2, '0')
+	return `${base.getFullYear()}-${pad(base.getMonth() + 1)}-${pad(base.getDate())}`
+}
+function dienFormTuTiet(item) {
+	const found = (vueData.DSLop_HienThi || []).find(x => x.TenLop === item.TenLop && x.TenMonHoc === item.TenMon)
+		|| (vueData.DSLop_HienThi || []).find(x => x.TenLop === item.TenLop)
 	if (found) {
 		vueData.LopItem = found
 	} else {
-		showModuleSnackbarDKLT(`Không tìm thấy lớp "${cell.TenLop}" trong danh sách lớp bạn dạy — vui lòng chọn tay`, 'warning')
+		showModuleSnackbarDKLT(`Không tìm thấy lớp "${item.TenLop}" trong danh sách lớp bạn dạy — vui lòng chọn tay`, 'warning')
 	}
-	vueData.Buoi = row.Buoi
-	vueData.TietBatDau = row.Tiet
-	vueData.TietKetThuc = row.Tiet
-	const tuNgay = vueData.TKBTuanInfo?.TuNgay // "dd/mm/yyyy", là Thứ 2 của tuần
-	if (tuNgay) {
-		const [d, m, y] = tuNgay.split('/').map(Number)
-		const base = new Date(y, m - 1, d)
-		const offsetMap = { '2': 0, '3': 1, '4': 2, '5': 3, '6': 4, '7': 5, '1': 6 }
-		base.setDate(base.getDate() + (offsetMap[cell.ThuKey] ?? 0))
-		const pad = n => String(n).padStart(2, '0')
-		vueData.NgayApDung = `${base.getFullYear()}-${pad(base.getMonth() + 1)}-${pad(base.getDate())}`
+	vueData.Buoi = item.Buoi
+	vueData.TietBatDau = item.Tiet
+	vueData.TietKetThuc = item.Tiet
+	vueData.NgayApDung = item.NgayApDung
+	vueData.TKBKeyDangChon = item.key
+}
+function onChonTietTKB(row, cell) {
+	if (!cell.CoTiet) return
+	const key = keyTKB(row, cell)
+	const daCo = (vueData.TKBQueue || []).find(x => x.key === key)
+	if (daCo) {
+		dienFormTuTiet(daCo)
+		return
 	}
-	showModuleSnackbarDKLT(`Đã điền: Lớp ${cell.TenLop}${cell.TenMon ? ' - ' + cell.TenMon : ''}, ${tenBuoi(row.Buoi)} tiết ${row.Tiet}`, 'success')
+	const item = {
+		key,
+		Buoi: row.Buoi,
+		Tiet: row.Tiet,
+		ThuKey: cell.ThuKey,
+		TenLop: cell.TenLop,
+		TenMon: cell.TenMon,
+		NgayApDung: tinhNgayTuThuKey(cell.ThuKey)
+	}
+	vueData.TKBQueue = [...(vueData.TKBQueue || []), item]
+	dienFormTuTiet(item)
+	showModuleSnackbarDKLT(`Đã thêm vào danh sách chọn: Lớp ${cell.TenLop}${cell.TenMon ? ' - ' + cell.TenMon : ''}, ${tenBuoi(row.Buoi)} tiết ${row.Tiet}`, 'success')
+}
+function isTietDaChon(row, cell) {
+	const key = keyTKB(row, cell)
+	return (vueData.TKBQueue || []).some(x => x.key === key)
+}
+function boChonTietTKB(item) {
+	vueData.TKBQueue = (vueData.TKBQueue || []).filter(x => x.key !== item.key)
+	if (vueData.TKBKeyDangChon === item.key) vueData.TKBKeyDangChon = null
 }
 function initHocSinhThietBi() {
 	vueData.HocSinhThietBi = (vueData.DSHocSinhLop || []).map(hs => ({
 		HocSinhID: hs.HocSinhID,
+		SoDanhBo: hs.SoDanhBo,
 		HoTen: hs.HoTen,
 		IsChon: true,
 		ThietBiChon: ['Laptop']
@@ -140,17 +176,41 @@ function boChonTatCaHocSinh() {
 function toggleChonHocSinh(hs) {
 	hs.IsChon = !hs.IsChon
 }
+function isCotThietBiChonHet(loai) {
+	const list = vueData.HocSinhThietBi || []
+	return list.length > 0 && list.every(x => x.ThietBiChon.includes(loai))
+}
+function toggleCotThietBi(loai) {
+	const list = vueData.HocSinhThietBi || []
+	const chonHet = isCotThietBiChonHet(loai)
+	list.forEach(x => {
+		const idx = x.ThietBiChon.indexOf(loai)
+		if (chonHet) {
+			if (idx > -1) x.ThietBiChon.splice(idx, 1)
+		} else {
+			if (idx === -1) x.ThietBiChon.push(loai)
+		}
+	})
+}
 function toggleThietBi(hs, loai) {
 	const idx = hs.ThietBiChon.indexOf(loai)
 	if (idx > -1) hs.ThietBiChon.splice(idx, 1)
 	else hs.ThietBiChon.push(loai)
+}
+function formatNgay(ngayStr) {
+	if (!ngayStr) return ''
+	const d = new Date(ngayStr)
+	const pad = n => String(n).padStart(2, '0')
+	return `${pad(d.getDate())}/${pad(d.getMonth() + 1)}/${d.getFullYear()}`
 }
 function renderDSDangKy() {
 	vueData.DSDangKy = (vueData.DSDangKy || []).map(x => ({
 		...x,
 		ThuHienThi: tenThu(x.Thu),
 		BuoiHienThi: tenBuoi(x.Buoi),
-		TietHienThi: x.TietBatDau + '-' + x.TietKetThuc
+		TietHienThi: x.TietBatDau + '-' + x.TietKetThuc,
+		NgayApDungHienThi: formatNgay(x.NgayApDung),
+		TreHanHienThi: x.IsTreHan ? 'Trễ hạn' : ''
 	}))
 }
 async function onSubmitDangKy() {
@@ -201,6 +261,10 @@ async function onSubmitDangKy() {
 			TenGiaoVienDangKy: vueData.user?.HoTen || vueData.user?.UserName || ''
 		})
 		showModuleSnackbarDKLT('Đăng ký thành công' + (isTreHan ? ' (đã trễ hạn quy định)' : ''), 'success')
+		if (vueData.TKBKeyDangChon) {
+			vueData.TKBQueue = (vueData.TKBQueue || []).filter(x => x.key !== vueData.TKBKeyDangChon)
+			vueData.TKBKeyDangChon = null
+		}
 		initHocSinhThietBi()
 		vueData.GhiChu = ''
 		vueData.NgayApDung = null
@@ -227,6 +291,11 @@ vueData.chonTuanTKBHienTai = chonTuanTKBHienTai
 vueData.tinhNgayDauTuanTKB = tinhNgayDauTuanTKB
 vueData.renderTKB = renderTKB
 vueData.onChonTietTKB = onChonTietTKB
+vueData.boChonTietTKB = boChonTietTKB
+vueData.dienFormTuTiet = dienFormTuTiet
+vueData.isTietDaChon = isTietDaChon
 vueData.chonTatCaHocSinh = chonTatCaHocSinh
 vueData.boChonTatCaHocSinh = boChonTatCaHocSinh
 vueData.toggleChonHocSinh = toggleChonHocSinh
+vueData.isCotThietBiChonHet = isCotThietBiChonHet
+vueData.toggleCotThietBi = toggleCotThietBi

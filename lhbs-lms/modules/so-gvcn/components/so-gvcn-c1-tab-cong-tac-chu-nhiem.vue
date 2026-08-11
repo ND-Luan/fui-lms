@@ -379,6 +379,22 @@
 			},
 			initSheet() {
 				if (this.selectedLopID === '__ALL__') {
+					if (!container._wheelListenerAdded) {
+						container.addEventListener('wheel', (e) => {
+							const target = e.target
+							const isEditor = target && (target.tagName === 'TEXTAREA' || target.tagName === 'INPUT' ||
+								target.classList?.contains('jss_editor') || target.closest?.('.jss_editor'))
+							if (!isEditor) return
+							e.preventDefault()
+							e.stopPropagation()
+							const scrollContainer = this.$refs.contentContainer
+							if (scrollContainer) {
+								scrollContainer.scrollTop += e.deltaY
+								scrollContainer.scrollLeft += e.deltaX
+							}
+						}, { capture: true, passive: false })
+						container._wheelListenerAdded = true
+					}
 					this.destroySheet()
 					return
 				}
@@ -386,26 +402,6 @@
 					const container = this.$refs.sheetRef
 					if (!container || !this.currentPlan || typeof jspreadsheet !== 'function') return
 					this.bindEditorWheelGuard()
-
-					// Giữ editor đang mở khi cuộn: jspreadsheet thường blur editor nếu nhận được wheel trực tiếp.
-					if (!container._wheelListenerAdded) {
-						container.addEventListener('wheel', (e) => {
-							const target = e.target
-							const isEditor = target && (target.tagName === 'TEXTAREA' || target.tagName === 'INPUT' ||
-								target.classList?.contains('jss_editor') || target.closest?.('.jss_editor'))
-							if (isEditor) {
-								e.preventDefault()
-								e.stopPropagation()
-								const scrollContainer = this.$refs.contentContainer
-								if (scrollContainer) {
-									scrollContainer.scrollTop += e.deltaY
-									scrollContainer.scrollLeft += e.deltaX
-								}
-							}
-						}, { capture: true, passive: false })
-						container._wheelListenerAdded = true
-					}
-
 					this.destroySheet()
 					container.innerHTML = ''
 					this.instance = jspreadsheet(container, {
@@ -421,22 +417,18 @@
 							wordWrap: true,
 							allowInsertColumn: false,
 							allowInsertRow: false,
-							allowDeleteRow: false,
-							showHeader: true
+						showHeader: true
 						}],
-						contextMenu: (worksheet, x, y) => {
-							if (y === null || y === undefined) return []
-							return [{
-								title: 'Xóa dữ liệu tuần',
-								onclick: () => this.clearWeekRow(worksheet, Number(y))
-							}]
-						},
+						contextMenu: (worksheet, x, y) => y === null || y === undefined ? [] : [{
+							title: 'Xóa dữ liệu tuần',
+							onclick: () => this.clearWeekRow(worksheet, Number(y))
+						}],
 						onchange: worksheet => {
 							if (this.currentPlan) {
 								this.currentPlan.weeklyRows = this.normalizeWeeklyRows(worksheet.getData())
 							}
 						}
-				})
+					})
 					const sheet = Array.isArray(this.instance) ? this.instance[0] : this.instance
 					if (sheet && typeof sheet.setHeight === 'function') {
 						this.currentPlan.weeklyRows.forEach((_, rowIndex) => sheet.setHeight(rowIndex, 68))

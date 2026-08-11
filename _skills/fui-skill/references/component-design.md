@@ -29,7 +29,8 @@ Component chỉ dùng trong một module?   → module-scope
 
 | Thao tác | Module-scope | Project-scope (global) |
 |---|---|---|
-| **Tạo / cập nhật** | `component_update(componentName)` — dùng session.moduleId | `component_update(componentName, projectId=<pid>)` — KHÔNG có moduleId |
+| **Tạo mới** (chưa có trên server) | `component_new(componentName)` — dùng session.moduleId | `component_new(componentName, projectId=<pid>)` — KHÔNG có moduleId |
+| **Cập nhật** (đã có trên server) | `component_update(componentName)` — dùng session.moduleId | `component_update(componentName, projectId=<pid>)` — KHÔNG có moduleId |
 | **Xóa** | `component_delete(componentName)` — dùng session.moduleId | `component_delete(componentName, projectId=<pid>)` — KHÔNG có moduleId |
 | **Đọc source** | `component_get(projectId, moduleId, componentName)` | `component_get(projectId, componentName)` — bỏ moduleId |
 | **Sync danh sách** | `component_list(projectId, moduleId)` | `component_list(projectId)` — bỏ moduleId |
@@ -37,11 +38,14 @@ Component chỉ dùng trong một module?   → module-scope
 
 **Quy tắc duy nhất:** `moduleId` có → module-scope · `moduleId` vắng, chỉ `projectId` → project-scope
 
-**`component_update` tự động upsert** — tự lookup ComID từ `_components.json` local, không cần truyền thủ công. Nếu tồn tại → UPDATE; nếu mới → INSERT.
+**Tạo và cập nhật là HAI tool riêng — không có upsert ngầm.** Cả hai đọc file `.vue` **local** (file phải tồn tại sẵn trên đĩa) và tự suy `ComID` từ `_components.json`, không truyền tay:
+
+- `component_new` — chỉ INSERT. Làm mới `_components.json` **từ server trước** rồi mới kiểm tra tên; trùng tên = **lỗi cứng**. (Cache cũ mà cứ INSERT thì server sinh **hai record cùng tên**, không sửa được từ MCP.) Sau khi tạo tự sync lại để lấy `ComID` thật.
+- `component_update` — chỉ UPDATE. Không tra được `ComID` = **lỗi cứng**, không âm thầm tạo mới: hoặc component chưa từng được tạo (→ `component_new`), hoặc cache local cũ (→ `component_list` rồi thử lại).
 
 **`component_delete` tự lookup ComID** từ `_components.json` local. Nếu danh sách lệch, chạy `component_list` trước.
 
-**`module_update_ui` không bao gồm project-scope component** — nếu có thay đổi component global, phải gọi `component_update` riêng trước hoặc sau.
+**`module_publish_html` không bao gồm project-scope component** — nếu có thay đổi component global, phải gọi `component_new`/`component_update` riêng trước hoặc sau.
 
 ---
 
@@ -192,7 +196,7 @@ methods: {
 </style>
 ```
 
-CSS toàn-module (không gắn riêng component nào) → đặt trong `style.css` (publish qua `module_css_update`), không phải `header.html`. `header.html` vẫn hợp lệ nhưng không còn là lựa chọn duy nhất.
+CSS toàn-module (không gắn riêng component nào) → đặt trong `style.css` (publish qua `module_publish_css`), không phải `header.html`. `header.html` vẫn hợp lệ nhưng không còn là lựa chọn duy nhất.
 
 ### Trước khi đặt một class mới → tra bộ từ vựng đã duyệt
 
@@ -369,7 +373,7 @@ Một `uc-*.vue` là đơn vị đầy đủ (template + script + style) nhưng 
 component_preview({
   componentName: "uc-invoice-list",
   projectId: "...",              // chỉ projectId → project-scope
-  // moduleId: "..."             // có moduleId → module-scope (suy luận y hệt component_update)
+  // moduleId: "..."             // có moduleId → module-scope (suy luận y hệt component_new/component_update)
   cases: [
     { name: "danh sách rỗng",  props: { items: [] } },
     { name: "có dữ liệu",      props: { items: [ {...}, {...} ], title: "Hoá đơn" } },
@@ -394,7 +398,7 @@ component_preview({
 ```
 sửa uc-*.vue cấp project
   → component_preview   (kiểm chứng bản local, chưa push)
-  → component_update    (push lên server)
+  → component_new       (lần đầu) hoặc component_update (các lần sau) — push lên server
   → module_simulate({ renderUI: true })   ← chỉ chạy được sau khi đã push
 ```
 

@@ -25,5 +25,5 @@
 5. Chạy `module_validate` rồi `module_outline` trước khi publish.
 
 **Không có filesystem access (SSE/remote)?** Đọc file mẫu qua `skill_reference_get`, sửa nội dung,
-rồi stage bằng `module_stage_ui_json` / `component_stage` trước khi gọi tool publish
+rồi stage bằng `module_stage_json` / `component_stage` trước khi gọi tool publish
 (xem [tools-registry.md](tools-registry.md)).

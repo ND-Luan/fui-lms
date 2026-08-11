@@ -28,12 +28,10 @@
 				if (this.vueData.CapItem?.CapID !== 3 || this.vueData.ShowNhom !== true) return true
 				return (this.vueData.DSNhom || []).some(nhom => nhom.IsNhomLMS_GiaoBai === false && String(nhom.NhomID) === String(LopNhomID))
 			},
-			getVisibleGroupIds(table) {
-				return (table.uniqueDSLop || []).filter(LopNhomID => this.isVisibleGroup(LopNhomID))
-			},
+			getVisibleGroupIds(table) { return (table.uniqueDSLop || []).filter(id => this.isVisibleGroup(id)) },
 			getVisibleHeaders(table) {
-				const visibleIds = new Set(this.getVisibleGroupIds(table).map(String))
-				return (table.headers || []).filter(header => !String(header.value).startsWith('TemplateBangDiem_') || visibleIds.has(String(header.value).replace('TemplateBangDiem_', '')))
+				const ids = new Set(this.getVisibleGroupIds(table).map(String))
+				return (table.headers || []).filter(header => !String(header.value).startsWith('TemplateBangDiem_') || ids.has(String(header.value).replace('TemplateBangDiem_', '')))
 			},
 			getVisibleItems(table) {
 				return table.items || []

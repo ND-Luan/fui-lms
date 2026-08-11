@@ -21,7 +21,7 @@
 						<div v-if="slideData.content.isType === 'rich'" class="lh-reading-iframe pa-4"
 							v-html="slideData.content.textContent" />
 						<iframe v-else :srcdoc="slideData.content.htmlContent"
-							sandbox="allow-scripts allow-popups allow-forms allow-same-origin" class="lh-reading-iframe"
+							sandbox="allow-scripts allow-popups allow-forms allow-same-origin allow-downloads" class="lh-reading-iframe"
 							ref="htmlContentIframe">
 						</iframe>
 

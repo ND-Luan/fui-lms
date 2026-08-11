@@ -316,19 +316,20 @@ chưa từng có trong schema cũ (khả năng là SP mới soạn local qua `db
 2. db_sp_get(name, projectId)         → fetch định nghĩa SP từ DB → lưu _db/sp/{name}.sql
 3. [sửa file _db/sp/{name}.sql]
 4. db_sp_save(name, sql, projectId)   → lưu SQL vào local, chưa deploy
-5. db_sp_update(name, projectId)      → deploy lên DB
+5. db_sp_deploy(name, projectId)      → deploy lên DB
                                          (bản ĐANG CHẠY trên server tự lưu vào _history/
                                           trước khi ghi — đây là bản để rollback)
                                          nếu tên là spAPI_*/spAPIFILE_* → tự gọi /help xoá
-                                         cache tAPI (best-effort, không chặn deploy nếu lỗi;
-                                         nếu báo lỗi xoá cache → BẮT BUỘC gọi bước 6)
-6. db_sp_help(name, projectId)        → BẮT BUỘC gọi thủ công khi:
-                                         (1) bước 5 báo lỗi xoá cache tAPI;
-                                         (2) SP được ALTER/deploy bằng con đường khác ngoài
-                                             db_sp_update (ví dụ: db_sql_execute_nonquery
-                                             chạy ALTER PROCEDURE trực tiếp).
+                                         cache tAPI (một lần, hỏng thì bỏ qua — không chặn
+                                         deploy, không cần gọi lại)
+6. db_sp_help(name, projectId)        → BẮT BUỘC gọi thủ công khi SP được ALTER/deploy bằng
+                                         con đường khác ngoài db_sp_deploy (ví dụ:
+                                         db_sql_execute_nonquery chạy ALTER PROCEDURE
+                                         trực tiếp) — đường đó không có auto-clear.
                                          Cũng dùng khi muốn xem tham số đầu vào của API
-                                         trước khi wire IN/OUT vào module.json
+                                         trước khi wire IN/OUT vào module.json.
+                                         Tool gọi MỘT lần theo URL chuẩn, hỏng thì chỉ báo
+                                         một dòng thông tin — ĐỪNG thử URL biến thể khác
 7. db_sp_verify(name, params)         → kiểm chứng TĨNH contract API vừa deploy (đọc hay ghi đều
                                          qua tool này) — KHÔNG gọi HTTP/SQL nào cả, chỉ đọc thân SP
                                          thật và suy luận response shape, contract lỗi, phân loại
@@ -344,7 +345,7 @@ chưa từng có trong schema cũ (khả năng là SP mới soạn local qua `db
 **Rollback SP:**
 1. Đọc file trong `{FUI_MCP_WORKDIR}/_history/{projectId}/_db/sp/{name}_{thời điểm}.sql`
 2. `db_sp_save(name, oldSql)` — ghi lại bản cũ vào local
-3. `db_sp_update(name)` — deploy lại
+3. `db_sp_deploy(name)` — deploy lại
 
 ---
 
@@ -371,9 +372,9 @@ Trả về tất cả metadata (`apiDomain`, `apiName`, `sqlServer`, `database`)
 | Refresh schema từ DB thực | `db_schema_get` |
 | Đọc schema đã cache | `db_schema_read` |
 | Lưu SQL chỉnh sửa vào local | `db_sp_save` |
-| Deploy SP lên DB (tự xoá cache tAPI nếu là spAPI_*/spAPIFILE_*) | `db_sp_update` |
+| Deploy SP lên DB (tự xoá cache tAPI nếu là spAPI_*/spAPIFILE_*) | `db_sp_deploy` |
 | Xem tham số đầu vào của API đã deploy (trước khi wire vào module.json) | `db_sp_help` |
-| Xoá cache tAPI thủ công (sau auto-clear lỗi hoặc ALTER qua db_sql_execute_nonquery) | `db_sp_help` **(bắt buộc)** |
+| Xoá cache tAPI thủ công sau khi ALTER qua `db_sql_execute_nonquery` (đường đó không có auto-clear) | `db_sp_help` **(bắt buộc)** |
 | Kiểm chứng tĩnh API vừa deploy (trước khi wire vào UI, không gọi sống) | `db_sp_verify` |
 | Xóa SP khỏi DB | `db_sp_delete` |
 | Đổi tên SP | `db_sp_rename` |

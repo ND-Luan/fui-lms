@@ -12,7 +12,7 @@ Mọi tool được phân loại theo 2 chiều:
 > **Nguyên tắc mặc định**: Tool là Mutating và cần xác nhận TRỪ KHI được đánh dấu rõ là ReadOnly/Safe.  
 > **Per-call rule**: Safety đánh giá theo input thực tế của từng lần gọi — cùng tool có thể safe hay không tùy ngữ cảnh.
 >
-> **Strict mode (`FUI_MCP_STRICT=1`)**: khi server chạy strict mode, các tool publish/deploy (`module_update_ui_json`, `module_update_ui`, `module_script_update`, `component_update`, `db_sp_update`) bị **chặn cứng** cho tới khi `skill_get` được gọi trong session; lỗi (error) từ `module_validate` cũng **chặn publish** module.json. Mode thường chỉ cảnh báo mềm.
+> **Strict mode (`FUI_MCP_STRICT=1`)**: khi server chạy strict mode, các tool publish/deploy (`module_publish_json`, `module_publish_html`, `module_publish_script`, `component_update`, `db_sp_deploy`) bị **chặn cứng** cho tới khi `skill_get` được gọi trong session; lỗi (error) từ `module_validate` cũng **chặn publish** module.json. Mode thường chỉ cảnh báo mềm.
 
 ---
 
@@ -28,7 +28,7 @@ Server FUI-MCP và client AI có thể **cùng máy (STDIO)** hoặc **khác má
 | Các tool `_stage`, `workspace_glob`, `workspace_grep` | **Không tồn tại** — server chỉ đăng ký các tool này khi chạy `--sse` | Có sẵn |
 
 **Quy tắc chọn tool khi sửa module.json / header.html / body.html / script.js / component .vue:**
-1. Nếu đang ở STDIO/CLI và có thể đọc/ghi file trực tiếp → sửa file, rồi gọi thẳng tool publish tương ứng (`module_update_ui_json`, `module_update_ui`, `module_script_update`, `component_update`).
+1. Nếu đang ở STDIO/CLI và có thể đọc/ghi file trực tiếp → sửa file, rồi gọi thẳng tool publish tương ứng (`module_publish_json`, `module_publish_html`, `module_publish_script`, `component_update`).
 2. Nếu không có filesystem access (SSE/remote) → gọi tool `*_stage` tương ứng trước để ghi nội dung vào workspace của server, sau đó gọi đúng tool publish y hệt bước 1 — không cần biết gì thêm, tool publish luôn đọc lại từ workspace bất kể nội dung đến từ đâu.
 
 Không bao giờ tự đoán mode đang chạy — nếu tool `*_stage` / `workspace_glob` / `workspace_grep` xuất hiện trong danh sách tool khả dụng, nghĩa là đang chạy SSE và nên dùng chúng thay vì giả định có filesystem.
@@ -97,36 +97,43 @@ User thường gọi tool bằng tên thân mật tiếng Việt. Bảng tra ng�
 | "bỏ active module" | `session_clear` |
 | "resolve target" | `session_resolve` |
 | "danh sách project" | `project_list` |
-| "tạo project", "cập nhật project" | `project_update` |
-| "cập nhật project.json" | `project_update_data` |
+| "tạo project" | `project_new` |
+| "cập nhật project", "sửa project" | `project_update` |
+| "cập nhật project.json" | `project_update_config` |
 | "đồng bộ project", "refresh project", "lấy project.json" | `project_sync` |
 | "danh sách module" | `module_list` |
-| "tạo module mới", "đổi tên module", "đổi ID module", "đổi framework" | `module_update` |
+| "tạo module mới", "thêm module" | `module_new` |
+| "đổi tên module", "đổi ID module", "đổi framework" | `module_update` |
 | "xóa module", "xoá module" | `module_delete` |
 | "lấy module về", "xem module", "đọc module", "down", "clone module", "refresh", "pull mới nhất" | `module_get` |
 | "lấy module.json" | `module_get_ui` |
 | "lấy header/body html" | `module_get_html` |
-| "cập nhật module.json" | `module_update_ui_json` |
+| "cập nhật module.json" | `module_publish_json` |
 | "xem trước", "kiểm tra trước khi up", "diff" | `module_preview` |
 | "validate module", "kiểm tra module.json" | `module_validate` |
 | "review giao diện", "xem layout", "outline module" | `module_outline` |
 | "mô phỏng", "test luồng", "simulate module", "chạy thử action" | `module_simulate` |
 | "render giao diện", "xem UI thật", "chụp màn hình module", "xem trên mobile" | `module_simulate({ renderUI: true })` |
-| "up header", "up body", "up html", "cập nhật html", "đẩy lên" | `module_update_ui` |
+| "up header", "up body", "up html", "cập nhật html", "đẩy lên" | `module_publish_html` |
 | "xem component", "đọc component vue" | `component_get` |
 | "thử component", "test component riêng", "xem component có chạy không", "component trên mobile" | `component_preview` |
-| "up component", "push component", "tạo component", "sửa component" | `component_update` |
+| "tạo component", "thêm component mới" | `component_new` |
+| "up component", "push component", "sửa component" | `component_update` |
 | "xóa component", "xoá component" | `component_delete` |
 | "sync component" | `component_list` |
-| "up script", "push script.js", "cập nhật script" | `module_script_update` |
-| "up style", "push style.css", "cập nhật CSS module" | `module_css_update` |
+| "up script", "push script.js", "cập nhật script" | `module_publish_script` |
+| "up style", "push style.css", "cập nhật CSS module" | `module_publish_css` |
 | "danh sách import file", "sync import" | `file_import_list` |
 | "lấy nội dung file import" | `file_import_get` |
-| "cập nhật nội dung file" | `file_import_upload` |
+| "cập nhật nội dung file" | `file_import_upload_content` |
 | "thêm import file" | `file_import_new` |
 | "cập nhật import file" | `file_import_update` |
 | "xóa import file" | `file_import_delete` |
 | "lấy skill rules" | `skill_get` |
+| "tạo SP mới", "deploy SP", "cập nhật SP" | `db_sp_save` → `db_sp_deploy` |
+| "thêm quyền chức năng", "tạo FunctionRight" | `right_function_new` |
+| "sửa quyền chức năng" / "xóa quyền chức năng" | `right_function_update` / `right_function_delete` |
+| "thêm/sửa/xóa mức SystemRight" | `right_system_new` / `right_system_update` / `right_system_delete` |
 | "lưu user token", "set userToken", "token để gọi API" | `db_user_token_set` |
 | "đổi password DB", "rebuild dbToken", "cập nhật kết nối DB" | `db_token_rebuild` |
 | "danh sách design", "có style nào" | `design_list` |
@@ -153,8 +160,9 @@ mức rủi ro xem các bảng bên dưới.
 | Tool | R/M | Safety | Ghi chú |
 |---|---|---|---|
 | `project_list` | R | ✅ | Chỉ đọc |
-| `project_update` | M | ⚠️ | Tạo/cập nhật project — tóm tắt trước khi gọi |
-| `project_update_data` | M | ⚠️ | Ghi đè project.json — preview với user |
+| `project_new` | M | ⚠️ | **Tạo** project mới — `projectData` KHÔNG được có `id` (có thì bị strip + cảnh báo). Tóm tắt trước khi gọi |
+| `project_update` | M | ⚠️ | **Chỉ sửa** project đã tồn tại — `projectData.id` **bắt buộc**, thiếu là lỗi cứng (thiếu id thì server sẽ tạo mới chứ không sửa). Tóm tắt trước khi gọi |
+| `project_update_config` | M | ⚠️ | Ghi đè project.json — preview với user |
 | `project_sync` | M | ✅ | Refresh **mọi file cấp project**: project.json, `_projectInfo.json`, `_modules.json`, component `.vue`, metadata import **và nội dung từng import file**; xóa file `.vue`/import content local nào đã từng được track nhưng server không còn nữa (component/import mới local chưa publish thì không đụng). Luôn ghi đè; file local khác bản server được lưu vào `_history/` trước |
 
 ---
@@ -164,21 +172,22 @@ mức rủi ro xem các bảng bên dưới.
 | Tool | R/M | Safety | Ghi chú |
 |---|---|---|---|
 | `module_list` | R | ✅ | List module từ server — đồng thời refresh cache local (`modules/_modules.json` + `_moduleInfo.json` các module đã checkout) |
-| `module_get` | M | ✅ | Fetch module từ server → ghi/refresh TOÀN BỘ vào local workspace (module.json, html, script, .vue, imports 2 scope) + set active session — luôn ghi đè, file local khác bản server được chép vào `_history/` trước; xóa luôn `.vue`/import content local đã từng track nhưng server đã xóa (cũng lưu `_history/` kèm hậu tố `_deleted`). Metadata đọc từ cache `_modules.json`, không gọi API list — cache miss → chạy `module_list` trước. Không tham số → refresh module đang active |
+| `module_get` | M | ✅ | Fetch module từ server → ghi/refresh TOÀN BỘ vào local workspace (module.json, html, script, .vue, imports 2 scope) + set active session — luôn ghi đè, file local khác bản server được chép vào `_history/` trước; xóa luôn `.vue`/import content local đã từng track nhưng server đã xóa (cũng lưu `_history/` kèm hậu tố `_deleted`). Metadata đọc từ cache `_modules.json`; cache miss thì **tool tự làm mới danh sách từ server một lần rồi thử lại** — không cần gọi `module_list` trước, và lỗi ở đây nghĩa là module thật sự không tồn tại. Không tham số → refresh module đang active |
 | `module_get_ui` | R | ✅ | Fetch module.json — ghi xuống local nếu module đã checkout |
 | `module_get_html` | R | ✅ | Fetch body html — ghi xuống local nếu module đã checkout |
-| `module_update` | M | ⚠️ | mode `new`: tạo module — xác nhận ID và tên. mode `update`: sửa metadata (name/ID/framework/mDomain/HTMLOnly) — đọc ModuleInfo từ local, gửi nguyên object + field sửa. Đổi ModuleID → URL đổi (link cũ vỡ) + rename dir local — cảnh báo user trước |
+| `module_new` | M | ⚠️ | **Tạo module mới** trên server (`projectId` + `moduleId` + `moduleName` bắt buộc) — xác nhận ID và tên với user trước. Module tạo ra là **rỗng, chưa có file local**: gọi `module_get` sau đó để checkout. Trùng `moduleId` trong `_modules.json` → lỗi cứng, trỏ sang `module_update` |
+| `module_update` | M | ⚠️ | **Chỉ sửa metadata module đã tồn tại** (name/ID/framework/mDomain/HTMLOnly). Định danh bắt buộc: `projectId` + `moduleId` **hiện hành**. Đọc ModuleInfo từ local, gửi nguyên object + field sửa. Đổi ModuleID → URL đổi (link cũ vỡ) + rename dir local — cảnh báo user trước. Tạo module mới → `module_new` |
 | `module_delete` | M | 🔴 | **Xóa vĩnh viễn module trên server (FUI_Dev_moduleDelete) — không khôi phục được, không lưu history.** Đồng thời xóa entry trong `_modules.json`, xóa nguyên thư mục local đã checkout (nếu có), clear active session nếu đang trỏ vào module đó. Yêu cầu xác nhận rõ ràng từ user trước khi gọi |
-| `module_update_ui_json` | M | ⚠️ | Ghi **chỉ module.json** lên server — không đụng header/body/title/script. Không cần preview |
+| `module_publish_json` | M | ⚠️ | Ghi **chỉ module.json** lên server — không đụng header/body/title/script. Không cần preview |
 | `module_preview` | R | ✅ | Diff local vs server — chỉ đọc + tạo token. Kèm sẵn báo cáo `module_validate` |
-| `module_validate` | R | ✅ | Static semantic validator cho `module.json` — kiểm tra CALL target, grid structure, `@`/`#` shorthand, `children`, component name, import thiếu, API vs schema... Kèm nhóm warning **`[design]`** (chuẩn thẩm mỹ App-mode mặc định: toolbar dialog có màu/dark, nút xóa màu error/đỏ, width dialog ngoài bộ chuẩn, form thiếu floating label, delete thiếu CONFIRM, nút Đóng thừa ở actions) — phải sửa trừ khi user yêu cầu rõ kiểu khác. Chạy SAU KHI sửa module.json, SỬA HẾT ERROR trước khi publish |
+| `module_validate` | R | ✅ | Static semantic validator cho `module.json` — kiểm tra CALL target, grid structure, `@`/`#` shorthand, `children`, component name, import thiếu, API vs schema, **statement trong giá trị `:attr`/`v-bind:`** (`function(){}`/`var`/`return`/`;` → hỏng compile template Vue → trang trắng mà 0 JS error, 0 Vue warn — xem [advanced-techniques.md](advanced-techniques.md) §1)... Kèm nhóm warning **`[design]`** (chuẩn thẩm mỹ App-mode mặc định: toolbar dialog có màu/dark, nút xóa màu error/đỏ, width dialog ngoài bộ chuẩn, form thiếu floating label, delete thiếu CONFIRM, nút Đóng thừa ở actions) — phải sửa trừ khi user yêu cầu rõ kiểu khác. Chạy SAU KHI sửa module.json, SỬA HẾT ERROR trước khi publish |
 | `module_outline` | R | ✅ | Render module.json thành cây layout TEXT để review UI: grid với w (flag Σw>12), binding, action tóm tắt 1 dòng, dialog + nơi mở, state/action không dùng. Cặp với `module_validate` — validate bắt lỗi quy tắc, outline để review cấu trúc |
 | `module_simulate` | R | ✅ | **Mô phỏng runtime FUI trên module.json — không cần browser.** Engine bám sát fastproject.js (runAction/getVueData/setValue/callAPI). Chạy init data[] + kịch bản sự kiện `{set}`/`{click}`/`{call}`/`{exe}`/`{assert}`, API trả mock từ `apiMocks` (hoặc `{__error}` để test ERROROUT), watch + deep-watch tự bắn sau mỗi bước (phát hiện vòng lặp), dialog mở/đóng được trace. Trả trace đầy đủ + state cuối + kết quả assert (isError khi assert fail). Không gọi network thật — hoàn toàn an toàn. **`renderUI: true`** → render module trong browser thật (Playwright chromium headless, optional — cần `npm i -D playwright && npx playwright install chromium`): trang được ghép **đúng như `spA_FUI_ModuleDataSelect`** — file framework theo V2/V3 lấy từ danh mục server (cache 24h) + import project + import module, sort chung `FileSort, FileName`; phần **cấp project** (`$projectData`, component project, CSS project) tải từ server qua `_aset` nên **sửa gì ở cấp project phải publish lên server trước, không thì render vẫn ra bản cũ**, còn phần **cấp module** (module.json, script.js, component/CSS module) dựng cục bộ nên sửa-thử được ngay chưa cần publish. Vue/Vuetify reactivity thật, cùng grammar scenario chạy trên DOM thật (KHÔNG hỗ trợ `item`/`index` — dùng `nth`), thu JS error + `[Vue warn]` + DOM audit (app rỗng, tràn ngang, text "undefined"/"NaN", ảnh vỡ, canvas chart 0-size) + state cuối vueData + screenshot vào `_preview/` (`render.png` trả inline image — quá lớn tự nén JPEG; dialog đang mở chụp riêng `render-dialog.jpg`). Test responsive: `device: "mobile"` (390×844 + touch) / `"tablet"` (768×1024). Chart/animation chậm chưa kịp render → tăng `settleMs` (mặc định 700ms). Toàn bộ network bị chặn — API chỉ trả từ `apiMocks`, demo data bơm qua param `vueData` |
-| `module_update_ui` | M | ⚠️ | Push **header.html / body.html / title** lên server — đồng thời cũng push module.json trong cùng lần gọi. Cần approval token từ `module_preview`. Không clear script rỗng |
+| `module_publish_html` | M | ⚠️ | Push **header.html / body.html / title** lên server — đồng thời cũng push module.json trong cùng lần gọi. Cần approval token từ `module_preview`. Không clear script rỗng |
 
 ### Quy tắc publish — Sửa file nào, gọi tool đó
 
-**Trước khi publish module.json (bằng bất kỳ tool nào):** chạy `module_validate` và sửa hết **error** (warning cân nhắc theo ngữ cảnh). `module_update_ui_json`/`module_update_ui` cũng tự chạy validator và đính kèm báo cáo — ở strict mode error sẽ chặn publish. Sau đó chạy `module_outline` để tự review cấu trúc UI: đọc cây layout, kiểm tra width từng row, dialog nào chưa có nút mở, action nào không ai gọi.
+**Trước khi publish module.json (bằng bất kỳ tool nào):** chạy `module_validate` và sửa hết **error** (warning cân nhắc theo ngữ cảnh). `module_publish_json`/`module_publish_html` cũng tự chạy validator và đính kèm báo cáo — ở strict mode error sẽ chặn publish. Sau đó chạy `module_outline` để tự review cấu trúc UI: đọc cây layout, kiểm tra width từng row, dialog nào chưa có nút mở, action nào không ai gọi.
 
 **Với logic runtime phức tạp (action chain nhiều bước, watch cascade, dialog flow):** chạy thêm `module_simulate` với kịch bản mô phỏng luồng chính (mở dialog → nhập → lưu → reload) + mock response theo shape suy luận tĩnh từ `db_sp_verify` (không gọi API thật). Assert các điều kiện then chốt (`dialogEdit === false` sau lưu, `items.length > 0` sau load). Trace sẽ chỉ ra CALL trỏ sai, IN thiếu biến, dialog quên đóng, watch lặp vô hạn — TRƯỚC khi publish.
 
@@ -186,28 +195,28 @@ mức rủi ro xem các bảng bên dưới.
 
 | File thay đổi | Tool | Ghi chú |
 |---|---|---|
-| Chỉ `module.json` | `module_update_ui_json` | Không cần preview |
-| `header.html` / `body.html` / title | `module_update_ui` | Cần `module_preview` trước. **module.json được push kèm tự động — không cần gọi thêm `module_update_ui_json`** |
-| `header.html` / `body.html` / title **và** module.json cùng lúc | `module_update_ui` | Một lần gọi đủ cả hai |
-| `script.js` (có nội dung hoặc rỗng để clear) | `module_script_update` | Luôn dùng tool này — kể cả khi xóa trắng script |
-| `style.css` (có nội dung hoặc rỗng để clear) | `module_css_update` | Luôn dùng tool này — kể cả khi xóa trắng CSS |
-| `uc-*.vue` component | `component_update` cho từng file | Scope suy từ `moduleId`; kèm gửi `<style scoped>` (nếu có) thành `ComCSS`. Component **cấp project**: phải `component_preview` rồi `component_update` **trước** khi render module dùng nó — `module_simulate({renderUI:true})` chặn cứng nếu bản local lệch bản server |
+| Chỉ `module.json` | `module_publish_json` | Không cần preview |
+| `header.html` / `body.html` / title | `module_publish_html` | Cần `module_preview` trước. **module.json được push kèm tự động — không cần gọi thêm `module_publish_json`** |
+| `header.html` / `body.html` / title **và** module.json cùng lúc | `module_publish_html` | Một lần gọi đủ cả hai |
+| `script.js` (có nội dung hoặc rỗng để clear) | `module_publish_script` | Luôn dùng tool này — kể cả khi xóa trắng script |
+| `style.css` (có nội dung hoặc rỗng để clear) | `module_publish_css` | Luôn dùng tool này — kể cả khi xóa trắng CSS |
+| `uc-*.vue` component | `component_new` cho lần đẩy ĐẦU TIÊN, `component_update` cho các lần sau | Scope suy từ `moduleId`; kèm gửi `<style scoped>` (nếu có) thành `ComCSS`. `component_update` **lỗi cứng** nếu component chưa có trên server (không âm thầm tạo). Component **cấp project**: phải `component_preview` rồi `component_new`/`component_update` **trước** khi render module dùng nó — `module_simulate({renderUI:true})` chặn cứng nếu bản local lệch bản server |
 
 **Khi nhiều file thay đổi trong một lần — gọi lần lượt từng tool:**
 
 ```
 Ví dụ: sửa cả module.json + script.js + một component
-→ module_update_ui_json   (hoặc module_update_ui nếu header/body cũng đổi)
-→ module_script_update
+→ module_publish_json   (hoặc module_publish_html nếu header/body cũng đổi)
+→ module_publish_script
 → component_update
 ```
 
-**Quy trình khi dùng `module_update_ui`:**
+**Quy trình khi dùng `module_publish_html`:**
 ```
-module_preview → user xem diff → user approve → module_update_ui
+module_preview → user xem diff → user approve → module_publish_html
 ```
 
-Không được gọi `module_update_ui` khi chưa có approval từ user.
+Không được gọi `module_publish_html` khi chưa có approval từ user.
 
 ---
 
@@ -218,8 +227,9 @@ Không được gọi `module_update_ui` khi chưa có approval từ user.
 | `component_get` | R | ✅ | Đọc .vue source từ server. Bỏ `moduleId` → project-scope |
 | `component_preview` | R | ✅ | Render **một** component trong không gian riêng (browser thật) với dữ liệu mẫu truyền thẳng trong tham số, mặc định desktop + mobile. Đọc file `.vue` **local** nên chạy được trên bản chưa push. Quy trình: xem `component-design.md` |
 | `component_list` | M | ✅ | Refresh `_components.json` local từ server + xóa `.vue` mồ côi (từng track, server đã xóa). Bỏ `moduleId` → project-scope. Dùng khi list lệch với server |
-| `component_update` | M | ⚠️ | Upsert component — tự lookup ComID, tự sync `_components.json`. Scope suy từ `moduleId`; kèm gửi `ComCSS` (trích từ khối `<style scoped>` trong `.vue`, nếu có) |
-| `component_delete` | M | 🔴 | **Xóa component khỏi server — không khôi phục được** (không lưu history như `db_sp_update`); tự lookup ComID từ `_components.json`. Scope suy từ `moduleId`. Tự sync `_components.json` + xóa `.vue` local mồ côi. Yêu cầu xác nhận rõ ràng trước khi gọi |
+| `component_new` | M | ⚠️ | **Tạo component chưa có trên server** (INSERT, không gửi ComID). Đọc file `.vue` local — file phải tồn tại sẵn. Làm mới `_components.json` **từ server trước** rồi mới kiểm tra tên: trùng tên = lỗi cứng (cache cũ mà cứ INSERT thì server sinh HAI record cùng tên, không sửa được từ MCP). Sau khi tạo tự sync lại để lấy ComID thật |
+| `component_update` | M | ⚠️ | **Chỉ ghi đè component đã tồn tại** — ComID tự lookup từ `_components.json` (không truyền tay); không có trong cache = **lỗi cứng**, không âm thầm tạo mới. Scope suy từ `moduleId`; kèm gửi `ComCSS` (trích từ khối `<style scoped>` trong `.vue`, nếu có). Tự sync `_components.json` sau khi ghi |
+| `component_delete` | M | 🔴 | **Xóa component khỏi server — không khôi phục được** (không lưu history như `db_sp_deploy`); tự lookup ComID từ `_components.json`. Scope suy từ `moduleId`. Tự sync `_components.json` + xóa `.vue` local mồ côi. Yêu cầu xác nhận rõ ràng trước khi gọi |
 
 ### Scope rule — áp dụng cho tất cả component tools
 
@@ -241,8 +251,8 @@ moduleId vắng mặt   →  project-scope (global, auto-load ở mọi module)
 
 | Tool | R/M | Safety | Ghi chú |
 |---|---|---|---|
-| `module_script_update` | M | ⚠️ | Push script.js lên server — dùng nội dung rỗng `""` để clear script trên server |
-| `module_css_update` | M | ⚠️ | Push style.css lên server — dùng nội dung rỗng `""` để clear CSS trên server |
+| `module_publish_script` | M | ⚠️ | Push script.js lên server — dùng nội dung rỗng `""` để clear script trên server |
+| `module_publish_css` | M | ⚠️ | Push style.css lên server — dùng nội dung rỗng `""` để clear CSS trên server |
 
 ---
 
@@ -254,7 +264,7 @@ moduleId vắng mặt   →  project-scope (global, auto-load ở mọi module)
 | `file_import_get` | R | ✅ | Fetch source của MỘT file theo fileId — đồng thời ghi xuống mọi `imports/` local đang khai fileID này |
 | `file_import_new` | M | ⚠️ | Tạo import file mới trên server, tự sync `_imports.json` |
 | `file_import_update` | M | ⚠️ | Cập nhật metadata import file — tự sync mọi `_imports.json` local có khai fileID này, migrate file vật lý nếu filePath đổi |
-| `file_import_upload` | M | ⚠️ | Ghi nội dung file lên server — tự ghi lại xuống mọi local imports/ có khai fileID này |
+| `file_import_upload_content` | M | ⚠️ | Ghi nội dung file lên server — tự ghi lại xuống mọi local imports/ có khai fileID này |
 | `file_import_delete` | M | 🔴 | **Xóa import file** — không khôi phục được; tự xóa entry + file vật lý mồ côi khỏi mọi `_imports.json` local; yêu cầu xác nhận rõ ràng |
 
 ---
@@ -272,19 +282,23 @@ moduleId vắng mặt   →  project-scope (global, auto-load ở mọi module)
 | `db_sp_list` | R | ✅ | Liệt kê SPs |
 | `db_sp_get` | R | ✅ | Đọc SP source + ghi đè `_db/sp/{name}.sql` — bản local khác server được lưu vào `_history/` trước |
 | `db_sql_execute` | R/M | ⚠️ | SELECT hoặc lệnh ghi trực tiếp (đường user chủ động sửa/xoá dữ liệu thật) — kết quả cắt tối đa 200 dòng; TOP 20 nếu chỉ cần khảo sát cấu trúc; không SELECT binary/max columns; **DROP TABLE/ALTER TABLE bị block ở code**; lệnh ghi cần `confirmWrite: true` |
-| `db_sp_save` | M | ⚠️ | Lưu SP vào local — chưa deploy |
+| `db_sp_save` | M | ⚠️ | Lưu SP vào local — chưa deploy. **Không có tool "tạo SP" riêng**: `CREATE PROCEDURE` lần đầu đi qua đúng cặp `db_sp_save` → `db_sp_deploy` y như một lần sửa |
 | `db_sp_rename` | M | ⚠️ | Đổi tên SP trong DB — tóm tắt trước khi gọi; tự đổi tên `_db/sp/{name}.sql` local theo nếu có |
-| `db_sp_update` | M | 🔴 | **Deploy SP vào DB** — tự lưu **định nghĩa đang chạy trên server** vào `_history/` trước khi ghi (đây là bản để rollback); tóm tắt SP nào, loại thao tác (CREATE/ALTER); chờ user xác nhận. Nếu tên là `spAPI_*`/`spAPIFILE_*`, tự gọi route `/help` để xoá cache tAPI sau khi deploy (best-effort, không chặn deploy nếu lỗi) |
-| `db_sp_help` | R | ✅ | Gọi route `/help` của một API SP đã deploy — trả tham số đầu vào **và** xoá cache tAPI cho hàm đó (side-effect bắt buộc của route này, không phải tuỳ chọn). `db_sp_update` đã tự gọi tool này; dùng tay khi auto-clear báo lỗi, SP đổi bằng đường khác, hoặc chỉ để tra tham số |
+| `db_sp_deploy` | M | 🔴 | **Deploy SP vào DB** — tự lưu **định nghĩa đang chạy trên server** vào `_history/` trước khi ghi (đây là bản để rollback); tóm tắt SP nào, loại thao tác (CREATE/ALTER); chờ user xác nhận. Nếu tên là `spAPI_*`/`spAPIFILE_*`, tự gọi route `/help` để xoá cache tAPI sau khi deploy (best-effort, không chặn deploy nếu lỗi) |
+| `db_sp_help` | R | ✅ | Gọi route `/help` của một API SP đã deploy — trả tham số đầu vào **và** xoá cache tAPI cho hàm đó. Gọi **đúng một lần** theo URL chuẩn; hỏng thì chỉ ghi một dòng thông tin, **không phải lỗi** và **không thử URL biến thể** (dạng `/auth/` suy ra từ tên SP, không phải thứ để đoán). `db_sp_deploy` đã tự gọi; dùng tay khi SP đổi bằng đường khác, hoặc chỉ để tra tham số |
 | `db_sp_verify` | R | ✅ | Kiểm chứng **tĩnh** contract API SP — **không gọi HTTP/SQL nào cả**. Đọc thân SP thật (local `_db/sp/{name}.sql` hoặc live `OBJECT_DEFINITION`), suy luận: tham số, response shape (đếm SELECT top-level, cột, cảnh báo `SELECT *`), contract lỗi (RAISERROR+RETURN), phân loại đọc/ghi, sinh sẵn snippet `apiMocks`/`vueData` cho `module_simulate`. Không đọc được thân SP thật (chưa lưu local, live fetch cũng lỗi) = **lỗi cứng**, không đoán theo tên |
 | `db_sp_delete` | M | 🔴 | **Xóa SP khỏi DB** — không khôi phục được; tự archive `_db/sp/{name}.sql` local vào `_history/` nếu có; yêu cầu xác nhận rõ ràng |
 | `db_sql_execute_nonquery` | R/M | 🔴 | **Chạy DDL/DML** (đọc lẫn ghi) — **DROP TABLE/ALTER TABLE bị block**; **DELETE/UPDATE không WHERE bị block** (chỉ hiển thị SQL); lệnh ghi khác cần `confirmWrite: true` |
 | `right_system_list` | R | ✅ | Liệt kê định nghĩa SystemRight (0–9) của project từ hệ thống phân quyền "acc" — cần userToken có quyền vào acc |
-| `right_system_update` | M | ⚠️ | Upsert định nghĩa SystemRight trên "acc" — tóm tắt trước khi gọi; **`delete: true` = 🔴 xóa định nghĩa quyền** (server chặn nếu còn user giữ quyền) |
-| `right_function_list` | R | ✅ | Liệt kê định nghĩa FunctionRight (FunctionCode/Name) của project từ "acc" |
-| `right_function_update` | M | ⚠️ | Tạo/sửa định nghĩa FunctionRight trên "acc" — tóm tắt trước khi gọi; **`delete: true` = 🔴 xóa function KÈM toàn bộ phân quyền user của nó** |
+| `right_system_new` | M | ⚠️ | **Định nghĩa một mức SystemRight CHƯA có**. Khoá `sysRight` do người dùng chọn (không có ID tự sinh) nên phải hỏi server bằng `SM_SystemRight_Select` trước — mức đó đã có định nghĩa = **lỗi cứng**, trỏ sang `right_system_update` |
+| `right_system_update` | M | ⚠️ | **Chỉ sửa mức SystemRight ĐÃ có**. Định danh bắt buộc: `sysRight` (lấy từ `right_system_list`). `sysRight=9` luôn được server gán note "Project Admin" |
+| `right_system_delete` | M | 🔴 | **Xóa định nghĩa một mức SystemRight** — tóm tắt trước khi gọi, chờ user xác nhận; server chặn nếu còn user đang giữ mức quyền đó |
+| `right_function_list` | R | ✅ | Liệt kê định nghĩa FunctionRight (FunctionID/Code/Name) của project từ "acc" — nguồn duy nhất để lấy `functionId` thật |
+| `right_function_new` | M | ⚠️ | **Tạo FunctionRight mới** (gửi `FunctionID: 0` — lệnh INSERT của SP). Server từ chối nếu `functionCode` trùng |
+| `right_function_update` | M | ⚠️ | **Chỉ sửa FunctionRight ĐÃ có**. Định danh bắt buộc: `functionId` (lấy từ `right_function_list`) — không còn `?? 0`, quên tham số không biến update thành create |
+| `right_function_delete` | M | 🔴 | **Xóa FunctionRight KÈM toàn bộ phân quyền user** đã gán mã đó — không khôi phục được. Định danh bắt buộc: `functionId`; tóm tắt hậu quả + chờ user xác nhận |
 
-> Khái niệm SystemRight (cấp bậc) vs FunctionRight (quyền theo chức năng) và chi tiết 4 tool trên: xem [permission-system.md](permission-system.md).
+> Khái niệm SystemRight (cấp bậc) vs FunctionRight (quyền theo chức năng) và chi tiết 8 tool trên: xem [permission-system.md](permission-system.md).
 
 ### Quy tắc bắt buộc cho DB tools
 
@@ -301,11 +315,11 @@ moduleId vắng mặt   →  project-scope (global, auto-load ở mọi module)
 - Lệnh ghi thiếu `confirmWrite: true` → blocked, trả bản xem trước (loại lệnh, bảng, có WHERE hay
   không) — set `confirmWrite: true` sau khi user xác nhận thì chạy thật. `confirmWrite` **không** mở
   được 2 guard phía trên
-- `db_sp_update` → tự lưu định nghĩa SP đang chạy trên server vào `{workspaceRoot}/_history/` trước khi overwrite
+- `db_sp_deploy` → tự lưu định nghĩa SP đang chạy trên server vào `{workspaceRoot}/_history/` trước khi overwrite
 
 **Quy tắc bắt buộc — xoá cache tAPI sau mỗi lần ALTER/UPDATE `spAPI_*`/`spAPIFILE_*`:**
-- Dùng `db_sp_update`: tự gọi `/help` xoá cache (best-effort); nếu báo lỗi → **bắt buộc gọi `db_sp_help` thủ công trước khi tiếp tục**.
-- Dùng `db_sql_execute_nonquery` chạy `ALTER PROCEDURE` trực tiếp: không có auto-clear → **bắt buộc gọi `db_sp_help` thủ công ngay sau ALTER thành công**.
+- Dùng `db_sp_deploy`: tự gọi `/help` xoá cache **một lần**; hỏng thì bỏ qua, đi tiếp — SP đã deploy xong, đây chỉ là dọn cache.
+- Dùng `db_sql_execute_nonquery` chạy `ALTER PROCEDURE` trực tiếp: không có auto-clear → **bắt buộc gọi `db_sp_help` thủ công ngay sau ALTER thành công**. Đây là ca duy nhất bắt buộc gọi tay.
 - Không xoá cache → tAPI tiếp tục phục vụ chữ ký cũ, wire IN/OUT sai params mà không có lỗi rõ ràng.
 
 **Khi dùng `db_sql_execute`:**
@@ -314,13 +328,13 @@ moduleId vắng mặt   →  project-scope (global, auto-load ở mọi module)
 - **Không dùng tool này để "test" logic một API** — kiểm chứng API là đọc thân SP + suy luận (`db_sp_verify`), không phải chạy sub-query sống để dò.
 
 **Kiểm chứng spAPI_* bằng `db_sp_verify` (tĩnh, zero HTTP):**
-- Sau khi `db_sp_update` một API **đọc** (Select/List/Get) mà sắp wire vào module.json → chạy `db_sp_verify` để suy luận shape response thật (array / array-of-arrays / convert_to_object) từ chính thân SP trước khi viết `OUT`/`CALLBACK` — không gọi endpoint để xác nhận, tool không bao giờ gọi gì cả.
+- Sau khi `db_sp_deploy` một API **đọc** (Select/List/Get) mà sắp wire vào module.json → chạy `db_sp_verify` để suy luận shape response thật (array / array-of-arrays / convert_to_object) từ chính thân SP trước khi viết `OUT`/`CALLBACK` — không gọi endpoint để xác nhận, tool không bao giờ gọi gì cả.
 - API **ghi** (Insert/Update/Delete/...): `db_sp_verify` đọc thân SP thật (local `_db/sp/{name}.sql`, hoặc live `OBJECT_DEFINITION` nếu chưa có local) và liệt kê checklist cần tự suy luận (điều kiện WHERE, transaction, RAISERROR đúng contract) — không chặn theo đọc/ghi vì không có gì được gọi cả.
   - Cần test **luồng UI** gọi API ghi (form submit, nút Lưu/Xóa...) → dùng `module_simulate({ apiMocks: { "{FunctionName}": { data: [...] } } })` (hoặc kèm `renderUI: true`) với snippet mock mà `db_sp_verify` sinh sẵn — không gọi API thật.
   - KHÔNG đọc được thân SP thật (chưa `db_sp_get`, và fetch live cũng lỗi — ví dụ thiếu quyền DB) → tool trả về **lỗi cứng**, không đoán theo tên, không có cách chạy tiếp; phải `db_sp_get` thành công trước rồi mới verify lại được.
 - Kiểm tra logic SP phức tạp trước khi deploy: đọc thân SP (`db_sp_get`) và suy luận tĩnh câu lệnh — **không gọi `spAPI_*` sống để dò logic** dưới bất kỳ hình thức nào.
 
-**GRANT EXECUTE:** `db_sp_update` chỉ tự động `GRANT EXECUTE TO public` khi script chứa `CREATE PROCEDURE`; với `ALTER PROCEDURE` thì **không cần** grant lại (checklist đầy đủ: [verification.md](verification.md)).
+**GRANT EXECUTE:** `db_sp_deploy` chỉ tự động `GRANT EXECUTE TO public` khi script chứa `CREATE PROCEDURE`; với `ALTER PROCEDURE` thì **không cần** grant lại (checklist đầy đủ: [verification.md](verification.md)).
 
 **Trước khi `db_connect`:** thông tin kết nối lưu vào `{projectId}/_db/` — projectId không rõ thì **hỏi user**, không tự đoán (chi tiết: [db-workflow.md](db-workflow.md) §4).
 
@@ -366,11 +380,11 @@ Scope của cả hai: `projectId`+`moduleId` → module-scope; chỉ `projectId`
 
 | Tool | R/M | Safety | Ghi chú | Gọi tiếp theo |
 |---|---|---|---|---|
-| `module_stage_ui_json` | M | ⚠️ | Ghi `content` (JSON string) vào `module.json` trên workspace server. Validate JSON trước khi ghi | `module_update_ui_json` |
-| `module_stage_html` | M | ⚠️ | Ghi `header`/`body`/`title` (field nào có mới ghi field đó) vào workspace | `module_preview` → `module_update_ui` |
-| `script_stage` | M | ⚠️ | Ghi `code` vào `script.js`. Truyền `""` để stage một script rỗng | `module_script_update` |
-| `css_stage` | M | ⚠️ | Ghi `code` vào `style.css`. Truyền `""` để stage một style rỗng | `module_css_update` |
-| `component_stage` | M | ⚠️ | Ghi `code` vào `{name}.vue`. Scope suy từ `moduleId` giống hệt `component_update` | `component_update` |
+| `module_stage_json` | M | ⚠️ | Ghi `content` (JSON string) vào `module.json` trên workspace server. Validate JSON trước khi ghi | `module_publish_json` |
+| `module_stage_html` | M | ⚠️ | Ghi `header`/`body`/`title` (field nào có mới ghi field đó) vào workspace | `module_preview` → `module_publish_html` |
+| `script_stage` | M | ⚠️ | Ghi `code` vào `script.js`. Truyền `""` để stage một script rỗng | `module_publish_script` |
+| `css_stage` | M | ⚠️ | Ghi `code` vào `style.css`. Truyền `""` để stage một style rỗng | `module_publish_css` |
+| `component_stage` | M | ⚠️ | Ghi `code` vào `{name}.vue`. Scope suy từ `moduleId` giống hệt `component_new`/`component_update` | `component_new` (lần đầu) hoặc `component_update` |
 
 **Lưu ý quan trọng:** các tool `_stage` chỉ ghi xuống đĩa workspace của server — **không** publish lên FUI. Luôn phải gọi tool publish tương ứng ở cột cuối sau khi stage xong, đúng như quy tắc "Sửa file nào, gọi tool đó" ở trên.
 
@@ -384,8 +398,8 @@ Các tools có thể chạy song song (parallel):
 
 Không được chạy song song:
 - Bất kỳ Destructive (🔴) tool nào
-- `module_update_ui` với bất kỳ tool nào khác
-- `db_sp_update` với `db_sp_update` khác
+- `module_publish_html` với bất kỳ tool nào khác
+- `db_sp_deploy` với `db_sp_deploy` khác
 
 ---
 

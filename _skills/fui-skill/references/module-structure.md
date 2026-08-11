@@ -35,7 +35,7 @@ The workspace is organized at two levels: **project** and **module**.
 |-- _moduleInfo.json              # Required: module metadata + mTitle (page title) + HTMLOnly
 |-- module.json                   # Required: data/watch/controls/set (unused when HTMLOnly=true)
 |-- script.js                     # Recommended: helper logic for FUN/EXE/chart/transform
-|-- style.css                     # Optional: module-wide CSS (published via module_css_update)
+|-- style.css                     # Optional: module-wide CSS (published via module_publish_css)
 |-- header.html                   # Full <head> content: <link>, <style>, <script> tags
 |-- body.html                     # HTMLOnly=false: supplementary body HTML
 |                                 # HTMLOnly=true: entire page content (custom HTML/Vue app)
@@ -88,12 +88,12 @@ When working without local workspace access:
 
 ### style.css (module-wide CSS)
 - CSS not tied to a single component — shared/global rules for the module.
-- Published via `module_css_update` (mirrors `script.js`/`module_script_update`); does not auto-clear on `module_update_ui` if left empty.
+- Published via `module_publish_css` (mirrors `script.js`/`module_publish_script`); does not auto-clear on `module_publish_html` if left empty.
 - Component-local CSS belongs in the component's own `<style scoped>` (see [component-design.md](component-design.md)), not here.
 
 ### _moduleInfo.json (metadata)
 - Keep `ProjectID`, `ModuleID`, `ModuleName`, `Framework` accurate.
-- Contains `mTitle` (page title). To update the module's page title, edit the `mTitle` field in `_moduleInfo.json`. This value is sent to the server as `title` when publishing via `module_update_ui`.
+- Contains `mTitle` (page title). To update the module's page title, edit the `mTitle` field in `_moduleInfo.json`. This value is sent to the server as `title` when publishing via `module_publish_html`.
 - Contains `HTMLOnly` (boolean). **Read this first before deciding how to structure the module.**
 
 ### header.html (head content)

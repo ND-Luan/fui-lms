@@ -4,6 +4,8 @@
 
 Dùng `f-echart` cho mọi loại biểu đồ: bar, line, pie, scatter, gauge, radar, heatmap, sankey, tree, map, graph...
 
+> ⚠️ `:option` / `:config` của `f-echart` là nơi luật **"`:attr` chỉ nhận expression thuần"** hay bị vi phạm nhất — logic dựng option nhiều bước phải nằm trong hàm `script.js` gọi qua `EXE`, không nhét IIFE / `var` / `return` vào JSON (vi phạm ⇒ trang trắng, 0 JS error, 0 Vue warn). Luật đầy đủ: [advanced-techniques.md](advanced-techniques.md) §1.
+
 File này là **core**: import, kiến trúc, props, config, theme, DataView, events, lỗi thường gặp. **Template từng loại chart + các pattern module.json** đã tách sang [echart-templates.md](echart-templates.md) — load thêm khi đã biết cần vẽ loại chart nào.
 
 ---

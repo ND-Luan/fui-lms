@@ -1,10 +1,10 @@
 # Hệ thống phân quyền FUI — SystemRight & FunctionRight
 
-> File này sở hữu: **khái niệm `SystemRight` vs `FunctionRight`, `rightTest`, gác `v-if`/menu, 4 tool quản lý định nghĩa quyền**. Kiểm quyền trong thân SP xem [tapi-permission-patterns.md](tapi-permission-patterns.md).
+> File này sở hữu: **khái niệm `SystemRight` vs `FunctionRight`, `rightTest`, gác `v-if`/menu, 8 tool quản lý định nghĩa quyền**. Kiểm quyền trong thân SP xem [tapi-permission-patterns.md](tapi-permission-patterns.md).
 
 FUI có **2 loại quyền độc lập, không thay thế nhau**. Nhầm lẫn hai loại này là lỗi thường gặp khi thiết kế `v-if`, menu `right`, hoặc kiểm tra quyền trong SP.
 
-> Kiểm tra quyền **trong thân SP** (pattern SQL cụ thể): xem [tapi-permission-patterns.md](tapi-permission-patterns.md). File này tập trung vào khái niệm + 4 tool quản lý định nghĩa quyền.
+> Kiểm tra quyền **trong thân SP** (pattern SQL cụ thể): xem [tapi-permission-patterns.md](tapi-permission-patterns.md). File này tập trung vào khái niệm + 8 tool quản lý định nghĩa quyền.
 
 ---
 
@@ -47,7 +47,7 @@ Mọi project FUI dùng chung 1 database phân quyền trung tâm, alias tAPI l�
 - **`tblSysRight`** — định nghĩa các mức `SystemRight` (0–9) của **một project cụ thể**, kèm `Note` (tên cấp bậc); `9` luôn cố định là **Project Admin**
 - **`tblFunction`** — định nghĩa các `FunctionRight` (`FunctionCode` số + `FunctionName`) của **một project cụ thể** — đây là danh mục "chức năng có thể gán quyền", không phải bảng gán quyền cho từng user
 
-> Việc **gán** một mức `SystemRight`/`FunctionRight` cụ thể cho từng user là thao tác quản trị riêng (ngoài phạm vi 4 tool bên dưới — các tool này chỉ quản lý **định nghĩa** danh mục quyền của project, không gán quyền cho user).
+> Việc **gán** một mức `SystemRight`/`FunctionRight` cụ thể cho từng user là thao tác quản trị riêng (ngoài phạm vi 8 tool bên dưới — các tool này chỉ quản lý **định nghĩa** danh mục quyền của project, không gán quyền cho user).
 
 ---
 
@@ -90,24 +90,30 @@ tAPI tự inject `@sys_SystemRight` và `@sys_FunctionRight` vào mọi SP — k
 
 ---
 
-## 4 MCP tools — quản lý định nghĩa quyền của project
+## 8 MCP tools — quản lý định nghĩa quyền của project
 
 Các tool này thao tác trực tiếp lên database `acc` (4 API `SM_SystemRight_Select/Update`, `SM_FunctionRight_Select/Update`), dùng **userToken** của dev (đã được cấp quyền vào `acc`) lấy từ `_db/config.json` của project hiện tại — không cần cấu hình kết nối riêng.
+
+Tạo / sửa / xóa là **ba tool riêng**: xóa là thao tác 🔴 không hoàn tác, không được nằm chung schema với thao tác thường dưới dạng một boolean dễ truyền nhầm.
 
 | Tool | Vai trò | Params chính | Ghi chú an toàn |
 |---|---|---|---|
 | `right_system_list` | Liệt kê định nghĩa `SystemRight` (0–9 + Note) của project | `apiName?`, `projectId?` | Read-only, an toàn |
-| `right_system_update` | Upsert (tạo/sửa) hoặc xóa 1 mức `SystemRight` | `sysRight` (0–9), `note?` (≤50 ký tự, bỏ qua nếu `sysRight=9`), `delete?`, `apiName?`, `projectId?` | 🔴 `delete: true` xóa định nghĩa — **server tự chặn** nếu còn user đang giữ mức quyền đó |
-| `right_function_list` | Liệt kê định nghĩa `FunctionRight` (FunctionID/Code/Name) của project | `apiName?`, `projectId?` | Read-only, an toàn |
-| `right_function_update` | Tạo mới (bỏ `functionId`), sửa (truyền `functionId` có sẵn), hoặc xóa 1 `FunctionRight` | `functionCode` (số, unique/project), `functionName?` (≤100 ký tự), `functionId?` (lấy từ `right_function_list`), `delete?`, `apiName?`, `projectId?` | 🔴 `delete: true` xóa function **KÈM toàn bộ phân quyền user** đã gán mã đó — không khôi phục được |
+| `right_system_new` | Định nghĩa một mức `SystemRight` **chưa có** | `sysRight` (0–9), `note?` (≤50 ký tự, bỏ qua nếu `sysRight=9`), `apiName?`, `projectId?` | Khoá do người dùng chọn (không có ID tự sinh) → tool hỏi `SM_SystemRight_Select` trước; mức đã có = **lỗi cứng**, trỏ sang `right_system_update` |
+| `right_system_update` | **Chỉ sửa** mức `SystemRight` đã có | `sysRight` (**bắt buộc**, lấy từ `right_system_list`), `note?`, `apiName?`, `projectId?` | ⚠️ Ghi đè note hiện tại |
+| `right_system_delete` | Xóa định nghĩa một mức `SystemRight` | `sysRight` (**bắt buộc**), `apiName?`, `projectId?` | 🔴 **Server tự chặn** nếu còn user đang giữ mức quyền đó |
+| `right_function_list` | Liệt kê định nghĩa `FunctionRight` (FunctionID/Code/Name) của project | `apiName?`, `projectId?` | Read-only, an toàn — nguồn duy nhất lấy `functionId` thật |
+| `right_function_new` | Tạo `FunctionRight` mới | `functionCode` (số, unique/project), `functionName?` (≤100 ký tự), `apiName?`, `projectId?` | Gửi `FunctionID: 0` (lệnh INSERT của SP); server từ chối nếu `functionCode` trùng |
+| `right_function_update` | **Chỉ sửa** `FunctionRight` đã có | `functionId` (**bắt buộc**, lấy từ `right_function_list`), `functionCode`, `functionName?`, `apiName?`, `projectId?` | ⚠️ Không còn `?? 0` — quên `functionId` là lỗi, không âm thầm biến thành tạo mới |
+| `right_function_delete` | Xóa 1 `FunctionRight` | `functionId` (**bắt buộc**), `apiName?`, `projectId?` | 🔴 Xóa function **KÈM toàn bộ phân quyền user** đã gán mã đó — không khôi phục được |
 
 **Quy tắc dùng:**
-1. Trước khi `right_system_update`/`right_function_update` với `delete: true` — luôn tóm tắt rõ hậu quả và chờ user xác nhận (destructive, không hoàn tác).
-2. `right_function_update` không truyền `functionId` (hoặc truyền `0`) → **tạo mới**; server từ chối nếu `functionCode` trùng đã tồn tại.
-3. Cả 4 tool đều lấy `apiName`/`projectId` mặc định từ project đang active trong session nếu không truyền — chỉ truyền `apiName` khi cần thao tác lên project **khác** project hiện tại.
+1. Trước khi gọi `right_system_delete`/`right_function_delete` — luôn tóm tắt rõ hậu quả và chờ user xác nhận (destructive, không hoàn tác).
+2. Tạo mới thì dùng `right_*_new`; sửa thì **bắt buộc** có định danh (`functionId` / `sysRight`) lấy từ `right_*_list` — không tool nào upsert ngầm.
+3. Cả 8 tool đều lấy `apiName`/`projectId` mặc định từ project đang active trong session nếu không truyền — chỉ truyền `apiName` khi cần thao tác lên project **khác** project hiện tại.
 4. Server tự kiểm tra quyền người gọi: Select cần `SystemRight >= 2` trên hệ thống `acc`; Update cần cao hơn hoặc là admin (`9`) của project đích.
 
-**API nền tảng** (tham khảo, thường không cần gọi trực tiếp — dùng 4 tool ở trên):
+**API nền tảng** (tham khảo, thường không cần gọi trực tiếp — dùng 8 tool ở trên):
 
 ```
 POST {apiDomain}/acc/SM_SystemRight_Select     { ModuleID | APIName }

@@ -73,6 +73,8 @@ FUI dùng hàm `getVueData(value, src)` để giải thích mọi string value t
 
 > **Quan trọng**: `"val1"` (no spaces) → FUI lấy GIÁ TRỊ của biến `val1`, KHÔNG phải string "val1". Muốn literal string "val1", phải dùng `` "`val1" ``.
 
+> ⚠️ **Bảng trên KHÔNG áp cho `:attr`.** Chỉ `data[]` và `IN` mapping mới đi qua `getVueData()`. Giá trị của một binding (`:option`, `:config`, mọi `v-bind:`) đi **thẳng vào template compiler của Vue**, nên luật khác hẳn: chỉ nhận **một biểu thức thuần**, cấm `function(){}`/`var`/`return`/`;`. Vi phạm ⇒ trang trắng với 0 JS error, 0 `[Vue warn]`. Luật đầy đủ + cách chuyển logic sang `script.js` + `EXE`: [advanced-techniques.md](advanced-techniques.md) §1.
+
 ### String interpolation với `{{ }}`
 
 `{{ }}` dùng lodash template — có thể chứa bất kỳ JS expression nào:

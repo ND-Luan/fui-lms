@@ -15,7 +15,7 @@
 
 ### CSS Classes
 -   **`<style scoped>` in `.vue` is allowed** (saved server-side as `ComCSS`), but `scoped` has **no real scoping effect** — FUI only concatenates `ComCSS` from every component in the module into one global stylesheet (`ComponentCSSBuild()`), no AST transform, no `data-v-xxxx` attribute injection. **Every selector must be manually scoped**: give the component's root template element a unique class matching the component name (kebab-case, e.g. `uc-invoice-list`), then write every rule as a descendant selector starting from that class (`.uc-invoice-list__title`, never a bare `.title`). See [component-design.md](component-design.md) for a full example.
--   **Style Placement**: Component-local CSS → `<style scoped>` in the `.vue` file (with manual scoping above). Module-wide CSS → `style.css` (publish via `module_css_update`). `header.html` is still valid for CSS but no longer the only option.
+-   **Style Placement**: Component-local CSS → `<style scoped>` in the `.vue` file (with manual scoping above). Module-wide CSS → `style.css` (publish via `module_publish_css`). `header.html` is still valid for CSS but no longer the only option.
 -   **Vuetify Utilities**: Prioritize Vuetify helper classes (e.g., `ma-2`, `pa-0`, `d-flex`, `primary--text`).
 -   **Custom Classes**: Use meaningful prefixed names (e.g., `ep-hero`, `ep-field-grid`). Avoid generic names like `.box` or `.red`.
 -   **State Classes**: Use descriptive names for state (e.g., `.is-active`, `.has-error`).

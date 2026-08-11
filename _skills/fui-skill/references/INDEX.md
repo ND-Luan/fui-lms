@@ -68,7 +68,7 @@
 
 | Tình huống | Load file |
 |---|---|
-| Khái niệm `SystemRight` (cấp bậc) vs `FunctionRight` (quyền theo chức năng), `v-if`/menu `right`, và 4 tool quản lý định nghĩa quyền (`right_system_list/update`, `right_function_list/update`) | `permission-system.md` |
+| Khái niệm `SystemRight` (cấp bậc) vs `FunctionRight` (quyền theo chức năng), `v-if`/menu `right`, và 8 tool quản lý định nghĩa quyền (`right_system_list/new/update/delete`, `right_function_list/new/update/delete`) | `permission-system.md` |
 | Kiểm tra quyền trong thân SP (5 pattern SQL) | `tapi-permission-patterns.md` |
 
 ## Database
@@ -92,6 +92,7 @@
 |---|---|
 | Watcher patterns (v_old, deep-watch, cascading) | `watcher-patterns.md` |
 | Kỹ thuật nâng cao (EXE, MAP, expression phức tạp) | `advanced-techniques.md` |
+| **Trang trắng dù 0 JS error / 0 Vue warn**, hoặc cần đặt logic phức tạp vào `:attr` `:option` `:config` | `advanced-techniques.md` §1 |
 | Hàm tiện ích FUI có sẵn (openWindow, ajaxCALL, jsonToExcel, groupBy...) | `default-function.md` |
 | **Thư viện đã bundled sẵn** (jQuery, lodash, moment, numeral, toast, jquery-confirm) — biết trước khi định thêm CDN | `script-map.md` §0 |
 | Bản đồ script FUI (defaultfunction.js, component.js...) | `script-map.md` |
@@ -105,6 +106,7 @@
 |---|---|
 | Mức độ an toàn của từng MCP tool (R/M, Safe/Confirm/Destructive), strict mode, `db_sp_verify`, error log | `tools-registry.md` |
 | Checklist definition-of-done trước khi publish (kèm bước `module_validate` + `module_outline` + `module_simulate` + `db_sp_verify` tĩnh) | `verification.md` |
+| **UI hỏng mà chưa biết vì sao — chọn tầng kiểm chứng nào cho rẻ nhất** (ma trận triệu chứng → tầng; đọc TRƯỚC khi chạy `renderUI`, và đọc lại khi đã render ≥2 lượt mà chưa khá hơn) | `verification.md` §Chọn tầng kiểm chứng |
 
 ---
 

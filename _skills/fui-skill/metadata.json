@@ -8,7 +8,7 @@
     "controls", "data", "watch", "CALL", "API", "CALLBACK", "OUT",
     "menuChucNang", "ctrl-update", "hidden-container",
     "spAPI_", "stored procedure", "tAPI",
-    "session_set", "module_get", "module_update_ui",
+    "session_set", "module_get", "module_publish_html",
     "websocket", "webSocket_Send", "webSocketJoinGroup", "signalr", "real-time",
     "httpCall", "httpAPI", "sendMail", "SQL CLR", "ImageResize", "ImageCrop",
     "FileReader", "FileWriter", "RegexMatch", "RegexReplace"
@@ -50,18 +50,18 @@
     "registry": "references/tools-registry.md",
     "default_stance": "RequiresConfirm",
     "destructive_tools": [
-      "module_update_ui",
+      "module_publish_html",
       "module_delete",
-      "db_sp_update",
+      "db_sp_deploy",
       "db_sp_delete",
       "db_sql_execute_nonquery",
       "file_import_delete",
       "component_delete"
     ],
     "mandatory_workflows": {
-      "module_update_ui": "module_preview → user approves → module_update_ui",
+      "module_publish_html": "module_preview → user approves → module_publish_html",
       "module_delete": "show summary → explicit user confirmation → module_delete",
-      "db_sp_update": "show summary → explicit user confirmation → db_sp_update"
+      "db_sp_deploy": "show summary → explicit user confirmation → db_sp_deploy"
     }
   },
   "verification": {

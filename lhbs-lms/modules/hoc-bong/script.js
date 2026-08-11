@@ -10,6 +10,12 @@ function showModuleSnackbarHB(message, color = 'warning') {
 	}
 	alert(message)
 }
+function normalizeHocBongText(value) {
+	return String(value ?? '')
+		.replaceAll('KỲ', 'KÌ')
+		.replaceAll('Kỳ', 'Kì')
+		.replaceAll('kỳ', 'kì')
+}
 function renderDSHocBong() {
 	vueData.columnHeader = [
 		{ title: 'STT', name: 'STT', width: 50, readOnly: true },
@@ -29,16 +35,16 @@ function renderDSHocBong() {
 	vueData.DSHocSinh = (vueData.DSHocBong || []).map((x, index) => [
 		index + 1,
 		x.HocSinhID,
-		x.HoTen || '',
-		x.TenLop || '',
+		normalizeHocBongText(x.HoTen),
+		normalizeHocBongText(x.TenLop),
 		x.KhoiID,
-		x.MucHocBong || '',
-		x.TieuChi_VI || '',
-		x.TieuChi_EN || '',
-		x.SoQuyetDinh || '',
+		normalizeHocBongText(x.MucHocBong),
+		normalizeHocBongText(x.TieuChi_VI),
+		normalizeHocBongText(x.TieuChi_EN),
+		normalizeHocBongText(x.SoQuyetDinh),
 		x.VaoSo ?? (index + 1),
-		x.NgayCap_VI || '',
-		x.NgayCap_EN || '',
+		normalizeHocBongText(x.NgayCap_VI),
+		normalizeHocBongText(x.NgayCap_EN),
 		x.Is_DaIn ? 'Có' : 'Không'
 	])
 	vueData.DSHocSinhChange = []
@@ -88,13 +94,13 @@ async function confirmSaveHocBong() {
 				const orig = (vueData.DSHocBong || []).find(x => String(x.HocSinhID) === String(o.HocSinhID))
 				return {
 					HocBongCertID: orig?.HocBongCertID,
-					MucHocBong: o.MucHocBong,
-					TieuChi_VI: o.TieuChi_VI,
-					TieuChi_EN: o.TieuChi_EN,
-					SoQuyetDinh: o.SoQuyetDinh,
+					MucHocBong: normalizeHocBongText(o.MucHocBong),
+					TieuChi_VI: normalizeHocBongText(o.TieuChi_VI),
+					TieuChi_EN: normalizeHocBongText(o.TieuChi_EN),
+					SoQuyetDinh: normalizeHocBongText(o.SoQuyetDinh),
 					VaoSo: Number(o.VaoSo) || null,
-					NgayCap_VI: o.NgayCap_VI,
-					NgayCap_EN: o.NgayCap_EN
+					NgayCap_VI: normalizeHocBongText(o.NgayCap_VI),
+					NgayCap_EN: normalizeHocBongText(o.NgayCap_EN)
 				}
 			})
 		await ajaxCALLPromise('lms/HocBongCert_Upd_JSON', { JsonData: JSON.stringify(payload) })
@@ -129,7 +135,7 @@ async function exportGiayChungNhanHocBong() {
 			khenTang_En: 'This certificate is proudly presented to',
 			hoTen: String(x.HoTen || '').toUpperCase(),
 			lop: x.TenLop || '',
-			hocBong_Vi: `Đạt Học bổng ${percent}% Học phí Học kỳ ${hocKyText} khối ${x.KhoiID}`,
+			hocBong_Vi: `Đạt Học bổng ${percent}% Học phí Học kì ${hocKyText} khối ${x.KhoiID}`,
 			hocBong_En: `Awarded a ${percent}% Tuition Scholarship for Semester ${hocKyText}, Grade ${x.KhoiID}`,
 			nhom_Vi: x.TieuChi_VI || '',
 			nhom_En: x.TieuChi_EN || '',
@@ -189,7 +195,7 @@ async function submitAddHocSinh() {
 			HocSinhID: hs.HocSinhID,
 			TenLop: hs.TenLop,
 			NgaySinh: hs.NgaySinh || '',
-			MucHocBong: vueData.AddMucHocBong || '',
+			MucHocBong: normalizeHocBongText(vueData.AddMucHocBong),
 			HocKy: vueData.Semester?.value,
 			NienKhoa: vueData.NienKhoa
 		}]

@@ -119,7 +119,7 @@ var defaultControlAttr = {
         },
     },
     "f-sheet": {
-        import: ["/include/ag-grid/ag-grid.min.css", "/include/ag-grid/ag-theme-alpine.min.css", "/include/ag-grid/ag-grid-community.min.js"]
+        import: ["/include/ag-grid/ag-grid-community.min.js", "/include/ag-grid/fsheet.js"]
     },
     "f-pdfmake": {
         attr: {

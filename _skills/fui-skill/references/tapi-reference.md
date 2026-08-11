@@ -166,9 +166,10 @@ Route xoá cache = URL gọi API thật, chèn thêm `/help` ngay sau domain (tr
 Gọi route này có hai tác dụng đồng thời: **(a) xoá cache tham số** của hàm đó và **(b) trả về danh sách tham số đầu vào** — hữu ích để tra cứu trước khi wire `IN` vào module.json mà không chắc SP đang nhận params nào.
 
 **Quy tắc bắt buộc — xoá cache sau mỗi lần ALTER/UPDATE SP:**
-- Dùng `db_sp_update`: tool tự gọi `/help` xoá cache (best-effort); nếu báo lỗi xoá cache → **bắt buộc gọi `db_sp_help` thủ công**.
-- Dùng `db_sql_execute_nonquery` để chạy `ALTER PROCEDURE` trực tiếp: **không có auto-clear** → **bắt buộc gọi `db_sp_help` thủ công** ngay sau khi ALTER thành công.
+- Dùng `db_sp_deploy`: tool tự gọi `/help` xoá cache. **Gọi đúng một lần theo URL chuẩn; hỏng thì bỏ qua** — SP đã deploy xong, đây chỉ là dọn cache.
+- Dùng `db_sql_execute_nonquery` để chạy `ALTER PROCEDURE` trực tiếp: **không có auto-clear** → **bắt buộc gọi `db_sp_help` thủ công** ngay sau khi ALTER thành công. Đây là ca duy nhất bắt buộc gọi tay.
 - Không xoá cache → endpoint thật tiếp tục phục vụ theo chữ ký **cũ**, có thể gây lỗi tham số ngay cả khi SP đã đúng.
+- **`/help` báo lỗi thì DỪNG, không thử URL biến thể.** Dạng URL (`/auth/` hay không) suy ra từ tên SP, không phải thứ để đoán; thử qua lại chỉ tốn lượt mà không đổi kết quả. Chỉ quay lại `db_sp_help` khi endpoint thật thực sự còn nhận tham số cũ.
 
 ---
 
@@ -337,20 +338,25 @@ RETURN
 { "Message": "Dữ liệu không hợp lệ" }
 ```
 
-### Lỗi Unauthorized (thiếu quyền)
+### Lỗi Unauthorized (thiếu quyền) — prefix `[Unauthorized]` → HTTP 401
 
 ```sql
 IF @sys_SystemRight < 2
 BEGIN
-    RAISERROR(N'Bạn không có quyền trên chức năng này.', 16, 1)
+    RAISERROR(N'[Unauthorized]Bạn không có quyền trên chức năng này.', 16, 1)
     RETURN
 END
+```
+
+```json
+{ "Message": "Bạn không có quyền trên chức năng này." }
 ```
 
 **Quy tắc bắt buộc:**
 - Luôn dùng severity `16` — không dùng `11`, `14`, hay giá trị khác
 - Luôn có `RETURN` ngay sau `RAISERROR` để dừng SP
 - Prefix `N` bắt buộc cho Unicode tiếng Việt
+- **Mọi lỗi liên quan đến quyền (thiếu `SystemRight`/`FunctionRight`) phải mở message bằng `[Unauthorized]`** — tAPI đọc chuỗi này để trả HTTP status `401` thay vì `200`/`500` mặc định; client (`errorMess()` trong `fastproject.js`) rẽ nhánh xử lý riêng theo status `401` (redirect login nếu message chứa "token", ngược lại hiện lỗi quyền). tAPI tự cắt `[Unauthorized]` khỏi `Message` trả về client — text người dùng thấy không có tiền tố này. Lỗi validation/ràng buộc dữ liệu thông thường (ví dụ trên) **không** dùng prefix này.
 
 > **Kiểm tra quyền chi tiết (5 pattern, `getSystemRight`, thứ tự kiểm tra, quy ước message):** xem [tapi-permission-patterns.md](tapi-permission-patterns.md).
 
@@ -422,4 +428,4 @@ spAPI_AUTH_CourseList      -- Danh sách môn học công khai
 8. Sau khi `CREATE PROCEDURE` → phải `GRANT EXECUTE ON [spName] TO [public]`
 9. **Không đưa tham số `sys_*` vào `IN` của module.json** — tAPI tự inject, truyền vào là thừa
 10. **File GET/UPLOAD**: prefix `spAPIFILE_`, cột binary alias `fileContent`, params `@sys_FileContent`/`@sys_FileName`, bảng chuẩn `tblFileData` — xem [tapi-file-api.md](tapi-file-api.md). Không tự suy từ training data.
-11. **Mọi ALTER/UPDATE SP đã deploy** (đổi tham số, đổi logic, hay bất kỳ thay đổi nào) → **BẮT BUỘC xoá cache tAPI** qua `db_sp_help` sau khi deploy — nếu không endpoint thật vẫn phục vụ theo chữ ký cũ. `db_sp_update` tự làm (best-effort); nếu auto-clear thất bại hoặc ALTER qua `db_sql_execute_nonquery`, phải gọi `db_sp_help` thủ công.
+11. **Mọi ALTER/UPDATE SP đã deploy** (đổi tham số, đổi logic, hay bất kỳ thay đổi nào) → **BẮT BUỘC xoá cache tAPI** qua `db_sp_help` sau khi deploy — nếu không endpoint thật vẫn phục vụ theo chữ ký cũ. `db_sp_deploy` tự làm (một lần, hỏng thì bỏ qua); chỉ khi ALTER qua `db_sql_execute_nonquery` mới phải gọi `db_sp_help` thủ công.

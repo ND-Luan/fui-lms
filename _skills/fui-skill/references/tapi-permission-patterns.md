@@ -59,7 +59,7 @@ Dùng cho mọi SP đọc dữ liệu cần đăng nhập. Yêu cầu ít nhất
 ```sql
 If @sys_SystemRight < 2
 Begin
-    Raiserror(N'Bạn không có quyền trên chức năng này.', 16, 1)
+    Raiserror(N'[Unauthorized]Bạn không có quyền trên chức năng này.', 16, 1)
     Return
 End
 ```
@@ -71,7 +71,7 @@ Dùng khi muốn cho phép cả `SysRight = 1` thao tác, chỉ chặn `SysRight
 ```sql
 If @sys_SystemRight = 0
 Begin
-    Raiserror(N'Bạn không có quyền trên chức năng này.', 16, 1)
+    Raiserror(N'[Unauthorized]Bạn không có quyền trên chức năng này.', 16, 1)
     Return
 End
 ```
@@ -86,14 +86,14 @@ Dùng cho các thao tác ghi có tác động đến cấu hình module hoặc d
 -- Tầng 1: phải có quyền cơ bản
 If @sys_SystemRight < 2
 Begin
-    Raiserror(N'Bạn không có quyền trên chức năng này.', 16, 1)
+    Raiserror(N'[Unauthorized]Bạn không có quyền trên chức năng này.', 16, 1)
     Return
 End
 
 -- Tầng 2: phải là admin hệ thống hoặc admin của module đó
 If @sys_SystemRight < 3 and dbo.getSystemRight(@ModuleID, @sys_UserID) < 9
 Begin
-    Raiserror(N'Bạn không có quyền trên Module này.', 16, 1)
+    Raiserror(N'[Unauthorized]Bạn không có quyền trên Module này.', 16, 1)
     Return
 End
 ```
@@ -120,7 +120,7 @@ Dùng khi phân quyền theo chức năng cụ thể (không chỉ theo mức s�
 ```sql
 If CHARINDEX('[ADMIN]', @sys_FunctionRight) = 0
 Begin
-    Raiserror(N'Bạn không có quyền thực hiện chức năng này.', 16, 1)
+    Raiserror(N'[Unauthorized]Bạn không có quyền thực hiện chức năng này.', 16, 1)
     Return
 End
 ```
@@ -140,10 +140,11 @@ End
 
 | Tình huống | Message chuẩn |
 |---|---|
-| Thiếu quyền global | `N'Bạn không có quyền trên chức năng này.'` |
-| Thiếu quyền module | `N'Bạn không có quyền trên Module này.'` |
-| Vi phạm ràng buộc | Mô tả cụ thể: `N'Phải xóa X trước khi xóa Y.'` |
-| Dữ liệu không hợp lệ | `N'Dữ liệu không hợp lệ.'` hoặc mô tả cụ thể |
+| Thiếu quyền global | `N'[Unauthorized]Bạn không có quyền trên chức năng này.'` |
+| Thiếu quyền module | `N'[Unauthorized]Bạn không có quyền trên Module này.'` |
+| Thiếu quyền chức năng (`FunctionRight`) | `N'[Unauthorized]Bạn không có quyền thực hiện chức năng này.'` |
+| Vi phạm ràng buộc | Mô tả cụ thể, **không** có prefix: `N'Phải xóa X trước khi xóa Y.'` |
+| Dữ liệu không hợp lệ | `N'Dữ liệu không hợp lệ.'` hoặc mô tả cụ thể, **không** có prefix |
 
 **Format `RAISERROR` bắt buộc:**
 ```sql
@@ -154,3 +155,4 @@ RETURN
 - Prefix `N` bắt buộc cho Unicode tiếng Việt
 - `RETURN` bắt buộc ngay sau `RAISERROR` — thiếu `RETURN` SP tiếp tục chạy dù đã báo lỗi
 - Client nhận `{ "Message": "..." }` với nội dung thông báo
+- **Mọi lỗi thiếu quyền ở 5 pattern trên phải mở message bằng `[Unauthorized]`** (vd `N'[Unauthorized]Bạn không có quyền...'`) — tAPI dựa vào tiền tố này để trả HTTP status `401` thay vì mặc định, và tự cắt `[Unauthorized]` khỏi `Message` trước khi trả về client. Lỗi ràng buộc/nghiệp vụ (Pattern 4) **không** dùng prefix này — chi tiết cơ chế + cách client xử lý status 401 xem [tapi-reference.md](tapi-reference.md) §5.

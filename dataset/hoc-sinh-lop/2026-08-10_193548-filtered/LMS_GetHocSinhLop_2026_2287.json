@@ -1,0 +1,134 @@
+{
+  "data": [
+    {
+      "HSLopID": 37780,
+      "HocSinhID": 26300097,
+      "LopID": 2287,
+      "SoDanhBo": null,
+      "CreateUser": "NV0000122",
+      "CreateTime": "2026-07-23T14:34:46.19",
+      "UpdateUser": null,
+      "UpdateTime": null
+    },
+    {
+      "HSLopID": 37781,
+      "HocSinhID": 26300101,
+      "LopID": 2287,
+      "SoDanhBo": null,
+      "CreateUser": "NV0000122",
+      "CreateTime": "2026-07-23T14:38:41.617",
+      "UpdateUser": null,
+      "UpdateTime": null
+    },
+    {
+      "HSLopID": 37692,
+      "HocSinhID": 16100048,
+      "LopID": 2287,
+      "SoDanhBo": null,
+      "CreateUser": "NV0000122",
+      "CreateTime": "2026-07-23T14:19:55.433",
+      "UpdateUser": null,
+      "UpdateTime": null
+    },
+    {
+      "HSLopID": 37693,
+      "HocSinhID": 16100072,
+      "LopID": 2287,
+      "SoDanhBo": null,
+      "CreateUser": "NV0000122",
+      "CreateTime": "2026-07-23T14:19:55.433",
+      "UpdateUser": null,
+      "UpdateTime": null
+    },
+    {
+      "HSLopID": 37694,
+      "HocSinhID": 16100073,
+      "LopID": 2287,
+      "SoDanhBo": null,
+      "CreateUser": "NV0000122",
+      "CreateTime": "2026-07-23T14:19:55.433",
+      "UpdateUser": null,
+      "UpdateTime": null
+    },
+    {
+      "HSLopID": 37695,
+      "HocSinhID": 16100257,
+      "LopID": 2287,
+      "SoDanhBo": null,
+      "CreateUser": "NV0000122",
+      "CreateTime": "2026-07-23T14:19:55.433",
+      "UpdateUser": null,
+      "UpdateTime": null
+    },
+    {
+      "HSLopID": 37696,
+      "HocSinhID": 17100176,
+      "LopID": 2287,
+      "SoDanhBo": null,
+      "CreateUser": "NV0000122",
+      "CreateTime": "2026-07-23T14:19:55.433",
+      "UpdateUser": null,
+      "UpdateTime": null
+    },
+    {
+      "HSLopID": 37697,
+      "HocSinhID": 18100233,
+      "LopID": 2287,
+      "SoDanhBo": null,
+      "CreateUser": "NV0000122",
+      "CreateTime": "2026-07-23T14:19:55.433",
+      "UpdateUser": null,
+      "UpdateTime": null
+    },
+    {
+      "HSLopID": 37698,
+      "HocSinhID": 21200013,
+      "LopID": 2287,
+      "SoDanhBo": null,
+      "CreateUser": "NV0000122",
+      "CreateTime": "2026-07-23T14:19:55.433",
+      "UpdateUser": null,
+      "UpdateTime": null
+    },
+    {
+      "HSLopID": 37699,
+      "HocSinhID": 21200054,
+      "LopID": 2287,
+      "SoDanhBo": null,
+      "CreateUser": "NV0000122",
+      "CreateTime": "2026-07-23T14:19:55.433",
+      "UpdateUser": null,
+      "UpdateTime": null
+    },
+    {
+      "HSLopID": 37700,
+      "HocSinhID": 25300005,
+      "LopID": 2287,
+      "SoDanhBo": null,
+      "CreateUser": "NV0000122",
+      "CreateTime": "2026-07-23T14:19:55.433",
+      "UpdateUser": null,
+      "UpdateTime": null
+    },
+    {
+      "HSLopID": 37701,
+      "HocSinhID": 25300022,
+      "LopID": 2287,
+      "SoDanhBo": null,
+      "CreateUser": "NV0000122",
+      "CreateTime": "2026-07-23T14:19:55.433",
+      "UpdateUser": null,
+      "UpdateTime": null
+    },
+    {
+      "HSLopID": 37702,
+      "HocSinhID": 25300034,
+      "LopID": 2287,
+      "SoDanhBo": null,
+      "CreateUser": "NV0000122",
+      "CreateTime": "2026-07-23T14:19:55.433",
+      "UpdateUser": null,
+      "UpdateTime": null
+    }
+  ]
+}

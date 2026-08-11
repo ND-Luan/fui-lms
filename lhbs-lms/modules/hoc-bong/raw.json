@@ -87,7 +87,7 @@
       "IsShowDialogAdd": false,
       "IsShowDialogDel": false,
       "AddHocSinhSelected": null,
-      "AddMucHocBong": "25% học phí học kỳ I",
+      "AddMucHocBong": "25% học phí học kì I",
       "DelHocSinhSelected": []
     },
     {
@@ -245,7 +245,7 @@
                             "text": "Thêm học sinh",
                             "variant": "outlined",
                             "color": "success",
-                            "v-on:click": "() => { vueData.AddHocSinhSelected = null; vueData.AddMucHocBong = '25% học phí học kỳ I'; vueData.IsShowDialogAdd = true }"
+                            "v-on:click": "() => { vueData.AddHocSinhSelected = null; vueData.AddMucHocBong = '25% học phí học kì I'; vueData.IsShowDialogAdd = true }"
                           }
                         },
                         {

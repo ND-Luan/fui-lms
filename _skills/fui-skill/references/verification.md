@@ -1,8 +1,44 @@
 # FUI Definition-of-Done Checklists
 
-> File này sở hữu: **checklist definition-of-done trước khi publish: module.json, `.vue`, SP, deploy workflow**.
+> File này sở hữu: **checklist definition-of-done trước khi publish (module.json, `.vue`, SP, deploy workflow)** và **ma trận chọn tầng kiểm chứng theo triệu chứng**.
 
 Use these checklists before publishing any artifact. Each item is a gate — a module/SP/component is not ready if any required item is unchecked.
+
+---
+
+## Chọn tầng kiểm chứng theo TRIỆU CHỨNG (đọc trước khi render)
+
+Năm tầng, chênh nhau khoảng **hai bậc** về chi phí mỗi lượt:
+
+| Tầng | Lệnh | Chi phí | Thấy được gì |
+|---|---|---|---|
+| 1 | `module_validate` | tức thì, chỉ đọc file | lỗi quy tắc/tham chiếu tĩnh |
+| 2 | `module_outline` | tức thì | cấu trúc layout, action mồ côi, dialog không ai mở |
+| 3 | `module_simulate` | ~1 s | luồng chạy: action chain, watch, OUT gán gì |
+| 4 | `component_preview` | browser, 1 component | lỗi của riêng một `uc-*.vue` |
+| 5 | `module_simulate({renderUI:true})` | browser, ~10–30 s | **hình ảnh thật**: layout, chiều cao, style, responsive |
+
+**Quy tắc:** đi từ tầng rẻ nhất **bắt được triệu chứng đó**, không mặc định leo thẳng lên tầng 5. Tầng 5 là tầng duy nhất thấy được hình ảnh, nhưng cũng là tầng duy nhất **không nói được vì sao** — nó chỉ chụp lại hậu quả.
+
+| Triệu chứng | Tầng rẻ nhất bắt được | Vì sao |
+|---|---|---|
+| Trang trắng / app rỗng, **không** JS error, **không** `[Vue warn]` | **1** `module_validate` | dấu hiệu kinh điển của statement trong một `:attr` — Vue nuốt lỗi compile template, browser không có gì để báo |
+| `[Vue warn] Property or method "x" is not defined` | **1** | biến dùng trong template chưa khai trong `data[]` |
+| Nút bấm không làm gì | **1** (CALL target) → **3** (luồng thật) | |
+| `Unknown custom element: <f-…>` / component trống | **1** | sai tên component, hoặc thiếu import bắt buộc |
+| Chart không vẽ ra gì | **1** (thiếu `echarts.min.js`/`fechart.js`) → **5** (canvas 0-size) | thiếu import chiếm phần lớn số ca |
+| Cột lệch, một hàng quá chật | **2** `module_outline` (Σw > 12) | |
+| Dialog không mở được | **2** (`⚠ không thấy lệnh mở`) → **3** | |
+| Action chạy sai thứ tự · watch lặp vô hạn · CONFIRM/MESS không đúng nhánh | **3** `module_simulate` | |
+| Số liệu sai · `undefined`/`NaN` hiện trên trang | **3** | gần như luôn là `OUT`/mapData trỏ sai khoá, không phải lỗi hiển thị |
+| API trả không đúng shape mong đợi | `db_sp_verify` (tĩnh, zero HTTP) | suy luận từ thân SP thật + sinh sẵn `apiMocks` cho tầng 3 |
+| Một `uc-*.vue` hiển thị sai | **4** `component_preview` | chứng minh component đúng trước ⇒ mọi lỗi còn lại là lỗi lắp ráp |
+| Bảng tràn ngang · chiều cao sai · style rò rỉ · khoảng cách xấu · vỡ ở mobile | **5** `renderUI` | không tầng nào khác thấy được hình học |
+| Import/asset không nạp được | **5**, đọc section `⛔ MÔI TRƯỜNG THIẾU FILE` | lỗi của môi trường, **không** sửa module theo nó |
+
+**Đọc report renderUI đúng thứ tự:** khối `═══ CHẨN ĐOÁN ═══` ở đầu đã xếp mọi thứ hỏng vào ba nhóm theo **nơi phải sửa** — `[MÔI TRƯỜNG]` (sửa môi trường trước, lỗi hai nhóm dưới có thể chỉ là hệ quả) · `[MODULE]` (module.json/script.js/component) · `[HIỂN THỊ]` (DOM audit + ảnh). Dòng `↪` gợi ý tầng rẻ hơn lẽ ra bắt được triệu chứng đó.
+
+**Dấu hiệu phải DỪNG render lại:** dòng `Δ so với lượt trước` báo *không chỉ số nào đổi*. Nghĩa là thay đổi vừa rồi không chạm tới lỗi đang có — render lại lần nữa với cùng hướng sửa chỉ tốn thêm một lượt. Quay xuống tầng 1–3 để biết **vì sao**, rồi mới lên lại tầng 5.
 
 ---
 
@@ -76,19 +112,19 @@ Use these checklists before publishing any artifact. Each item is a gate — a m
 - [ ] Chạy `module_outline` và ĐỌC cây layout để tự review cấu trúc UI: mỗi row có Σw hợp lý (≤12)? dialog nào có `⚠ không thấy lệnh mở`? action nào có `⚠ không thấy nơi gọi`? state nào `⚠ không thấy dùng`?
 - [ ] Với module có logic runtime phức tạp (action chain, watch cascade, dialog flow): chạy `module_simulate` với kịch bản luồng chính + `apiMocks` (shape lấy từ snippet do `db_sp_verify` sinh sẵn — không gọi API thật) + assert điều kiện then chốt — sửa mọi `⚠` và assert ✘ trong trace trước khi publish
 - [ ] **QA hiển thị cuối cùng (khi có Playwright)**: chạy `module_simulate({ renderUI: true, vueData: {..demo data..}, apiMocks: {...} })` — render browser thật, ĐỌC screenshot trả về (luôn có ảnh inline — PNG quá lớn tự nén JPEG) + DOM audit (app rỗng? tràn ngang? text "undefined"/"NaN"? ảnh vỡ? canvas chart 0-size?) + JS error/`[Vue warn]` + state cuối vueData — tự fix lỗi hiển thị rồi render lại cho tới khi sạch. **Có section `⛔ MÔI TRƯỜNG THIẾU FILE` thì đọc nó TRƯỚC**: import/asset chưa nạp được là lỗi môi trường (chạy lệnh nó gợi ý — `project_sync`/`module_get`), các lỗi JS/hiển thị bên dưới có thể chỉ là hệ quả — đừng sửa module.json theo chúng — cách ĐỌC ảnh có hệ thống: xem `ui-screenshot-review.md`. Chart/animation render thiếu trong ảnh → tăng `settleMs` (vd 1500). Dialog đang mở được chụp riêng `render-dialog.jpg`. Module có dùng trên mobile → render thêm lượt `device: "mobile"`. Không có Playwright → bỏ qua bước này (tool sẽ trả hướng dẫn cài)
-- [ ] **Vừa sửa cả cấp project lẫn cấp module** (component project, import project, `project.json`/menu): publish phần **cấp project** TRƯỚC rồi mới render — renderUI lấy `$projectData` + component project + CSS project từ server (`_aset`), nên bản project chưa publish sẽ không xuất hiện trong ảnh; ngược lại phần cấp module dựng cục bộ, cứ sửa-render-sửa thoải mái rồi publish sau. Riêng **component cấp project** thì không còn là lời nhắc: renderUI đối chiếu từng `uc-*.vue` local với bundle server và **chặn cứng** (không có cờ bỏ qua) nếu lệch — kiểm chứng bản local bằng `component_preview`, rồi `component_update`, rồi mới render. Bị chặn vì bản server mới hơn (ai đó sửa trên web IDE) → `project_sync`, đừng push đè
+- [ ] **Vừa sửa cả cấp project lẫn cấp module** (component project, import project, `project.json`/menu): publish phần **cấp project** TRƯỚC rồi mới render — renderUI lấy `$projectData` + component project + CSS project từ server (`_aset`), nên bản project chưa publish sẽ không xuất hiện trong ảnh; ngược lại phần cấp module dựng cục bộ, cứ sửa-render-sửa thoải mái rồi publish sau. Riêng **component cấp project** thì không còn là lời nhắc: renderUI đối chiếu từng `uc-*.vue` local với bundle server và **chặn cứng** (không có cờ bỏ qua) nếu lệch — kiểm chứng bản local bằng `component_preview`, rồi `component_new`/`component_update`, rồi mới render. Bị chặn vì bản server mới hơn (ai đó sửa trên web IDE) → `project_sync`, đừng push đè
 
 ### Publish Workflow — Smart (sửa cái nào, up cái đó)
 
-Không phải lúc nào cũng dùng `module_update_ui`. Chọn tool theo phần đã thay đổi:
+Không phải lúc nào cũng dùng `module_publish_html`. Chọn tool theo phần đã thay đổi:
 
-- [ ] Chỉ sửa `module.json` → dùng `module_update_ui_json` (không cần preview/approval)
-- [ ] Sửa `header.html` / `body.html` / title → `module_preview` → user approve → `module_update_ui` (đã kèm module.json, không cần gọi thêm `module_update_ui_json`)
-- [ ] Sửa `script.js` (kể cả làm rỗng) → `module_script_update` — **⚠️ `module_update_ui` không clear script rỗng trên server**
-- [ ] Sửa `uc-*.vue` → `component_update` per file
+- [ ] Chỉ sửa `module.json` → dùng `module_publish_json` (không cần preview/approval)
+- [ ] Sửa `header.html` / `body.html` / title → `module_preview` → user approve → `module_publish_html` (đã kèm module.json, không cần gọi thêm `module_publish_json`)
+- [ ] Sửa `script.js` (kể cả làm rỗng) → `module_publish_script` — **⚠️ `module_publish_html` không clear script rỗng trên server**
+- [ ] Sửa `uc-*.vue` → `component_new` (lần đẩy đầu tiên) hoặc `component_update` (các lần sau), per file — `component_update` lỗi cứng nếu component chưa có trên server, không âm thầm tạo
 - [ ] Nhiều phần → gọi tool tương ứng cho từng phần, lần lượt
 
-Khi dùng `module_update_ui`:
+Khi dùng `module_publish_html`:
 - [ ] `module_preview` đã chạy và diff đã được review
 - [ ] User đã xác nhận rõ ràng
 - [ ] Có approval token từ `module_preview`
@@ -112,7 +148,7 @@ Khi dùng `module_update_ui`:
 
 ### Security
 
-- [ ] Permission check at top: `IF @sys_SystemRight < N BEGIN RAISERROR(N'Bạn không có quyền...', 16, 1) RETURN END` — severity luôn là `16`
+- [ ] Permission check at top: `IF @sys_SystemRight < N BEGIN RAISERROR(N'[Unauthorized]Bạn không có quyền...', 16, 1) RETURN END` — severity luôn là `16`, prefix `[Unauthorized]` bắt buộc trên lỗi thiếu quyền để tAPI trả HTTP 401 (xem [tapi-reference.md](tapi-reference.md) §5)
 - [ ] No direct string concatenation for SQL (use parameterized queries)
 - [ ] `GRANT EXECUTE ON [spName] TO [public]` present after `CREATE PROCEDURE`
 - [ ] `ALTER PROCEDURE` scripts do NOT include a new `GRANT EXECUTE` (not needed)
@@ -129,7 +165,7 @@ Khi dùng `module_update_ui`:
 - [ ] `db_sp_save` called first (save to local, no DB change)
 - [ ] Full SP body reviewed in local file before deploy
 - [ ] Summary presented to user: SP name, operation type (CREATE/ALTER), affected tables
-- [ ] User has explicitly confirmed before `db_sp_update`
+- [ ] User has explicitly confirmed before `db_sp_deploy`
 - [ ] Sau deploy bất kỳ API nào (đọc hay ghi) sắp wire vào module.json → `db_sp_verify` một lần: suy luận tĩnh response shape/contract lỗi từ thân SP thật, đối chiếu params — **không gọi endpoint thật**, tool này không bao giờ gọi HTTP/SQL nào cả
 - [ ] API **ghi** (Insert/Update/Delete) → kiểm tra tính đúng bằng cách đọc thân SP (`db_sp_get`/`db_sp_verify`) và suy luận logic tĩnh (WHERE, transaction, RAISERROR); test luồng UI gọi API ghi bằng `module_simulate({ apiMocks: {...} })` với dữ liệu giả (snippet có sẵn từ `db_sp_verify`), không gọi API thật
 
@@ -164,7 +200,7 @@ Khi dùng `module_update_ui`:
 - [ ] Không còn JS error / `[Vue warn]` trong report
 - [ ] Component có tương tác → `scenario` với `click`/`set` + `assert` đã chạy đúng (dùng `nth`, không `item`/`index`)
 - [ ] Component tự đo chiều cao (chart, table) → thử thêm `viewport` chiều cao thấp
-- [ ] **Component cấp project**: đã `component_update` (push) NGAY SAU khi preview sạch — renderUI của module sẽ chặn cứng nếu bản local còn lệch bản server
+- [ ] **Component cấp project**: đã push (`component_new` lần đầu / `component_update` các lần sau) NGAY SAU khi preview sạch — renderUI của module sẽ chặn cứng nếu bản local còn lệch bản server
 
 ---
 
@@ -172,7 +208,7 @@ Khi dùng `module_update_ui`:
 
 - [ ] File type matches declared `ContentType` (`.js` → `application/javascript`, `.css` → `text/css`)
 - [ ] `sort` >= 40 khi thêm import mới — giá trị 1–39 dành cho hệ thống, không dùng
-- [ ] Content tested locally before `file_import_upload`
+- [ ] Content tested locally before `file_import_upload_content`
 - [ ] No sensitive data (tokens, passwords) in JS/CSS import files
 - [ ] If updating an existing file: `file_import_get` called first to review current content
 
@@ -198,7 +234,7 @@ Before any mutating tool call, answer:
 | Is this a ReadOnly tool? | Confirm intent with user |
 | Have I shown the user a summary? | Show summary first, then wait |
 | Is this a 🔴 Destructive tool? | Require explicit user confirmation |
-| For `module_update_ui`: do I have an approval token? | Run `module_preview` first |
-| For `db_sp_update`: has user seen the SP body? | Show SP body, wait for OK |
+| For `module_publish_html`: do I have an approval token? | Run `module_preview` first |
+| For `db_sp_deploy`: has user seen the SP body? | Show SP body, wait for OK |
 
 See [tools-registry.md](tools-registry.md) for the full per-tool classification.

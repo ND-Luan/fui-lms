@@ -51,7 +51,7 @@ Một số component yêu cầu import thêm thư viện — **phải gọi `fil
 | `f-qrcode` | `/include/qrcode/qrcode.min.js` |
 | `f-qrcode-reader` | `/include/qrcode/qrcode-reader.min.js` |
 | `f-echart` | `/include/chart/echarts.min.js` · `/include/chart/fechart.js` (**theo thứ tự này**) — nền tảng Apache ECharts |
-| `f-sheet` | `/include/ag-grid/ag-grid.min.css` · `/include/ag-grid/ag-theme-alpine.min.css` · `/include/ag-grid/ag-grid-community.min.js` — nền tảng AG Grid |
+| `f-sheet` | `/include/ag-grid/ag-grid-community.min.js` · `/include/ag-grid/fsheet.js` (**theo thứ tự này**) — nền tảng AG Grid |
 | `f-editor` | `/include/ckeditor5/build/ckeditor.js` |
 | `f-editor-dialog` | `/include/ckeditor5/build/ckeditor.js` |
 

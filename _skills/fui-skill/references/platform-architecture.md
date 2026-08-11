@@ -2,7 +2,7 @@
 
 > File này sở hữu: **cấu tạo FUI và phân cấp Project→Module: import/component/set trộn thế nào, `vueData`/`v_Set`, vòng đời runtime**.
 
-Hiểu FUI vận hành thế nào **dưới nắp** để thiết kế đúng ngay từ đầu. Nội dung ở đây rút trực tiếp từ runtime `scripts/fastproject.js` (file chính của nền tảng), `defaultfunction.js` (hàm dùng chung), `component.js`/`componentTable.js` (V3: `componentTable-3.0.js`)/`fechart.js` (component dựng sẵn — `f-table`, `t-*`, `f-sheet` đều nằm trong `componentTable*.js`). Đây là **nguồn sự thật** — không suy từ training data.
+Hiểu FUI vận hành thế nào **dưới nắp** để thiết kế đúng ngay từ đầu. Nội dung ở đây rút trực tiếp từ runtime `scripts/fastproject.js` (file chính của nền tảng), `defaultfunction.js` (hàm dùng chung), `component.js`/`componentTable.js` (V3: `componentTable-3.0.js`) — đăng ký component lõi có sẵn (`f-table`, `t-*`, dialog, editor...). `f-echart` (`fechart.js`) và `f-sheet` (`fsheet.js`) là hai component **tách file riêng, nạp qua import khai trong module/project**, không tự động load như phần lõi. Đây là **nguồn sự thật** — không suy từ training data.
 
 > Đọc file này TRƯỚC khi thiết kế hệ thống/module. Sau đó: cấu hình từng phần → [module-json-anatomy.md](module-json-anatomy.md); project.json & set → [project-config.md](project-config.md); pattern UI thực tế → [ui-patterns.md](ui-patterns.md) (ưu tiên cao — đã tinh chỉnh qua thực chiến).
 

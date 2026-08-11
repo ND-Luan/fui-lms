@@ -66,7 +66,7 @@ Map mỗi entity → bộ SP tAPI chuẩn (`List/Get/Insert/Update/Delete` + `AU
 Đây là phần **chỉ có ở cấp hệ thống** (một module đơn lẻ không cần):
 
 - **Menu & điều hướng:** cấu hình trong `project.json` (menuLeft/menu/menuStyle). Xem [project-config.md](project-config.md) và `examples/project-patterns.json`.
-- **Component dùng chung nhiều module** → đặt project-scope (`{projectId}/components/`, gọi `component_update` với `projectId` không kèm `moduleId`) để auto-load ở mọi module. Xem [component-design.md](component-design.md).
+- **Component dùng chung nhiều module** → đặt project-scope (`{projectId}/components/`, gọi `component_new`/`component_update` với `projectId` không kèm `moduleId`) để auto-load ở mọi module. Xem [component-design.md](component-design.md).
 - **Điều hướng giữa module:** `pushRouter`/`openWindow` (xem [ui-crosswindow-patterns.md](ui-crosswindow-patterns.md)); truyền ID qua URL, module con tự query.
 - **Phân quyền xuyên module:** thống nhất `SystemRight`/`FunctionRight` theo vai trò đã xác định ở Bước 0.
 

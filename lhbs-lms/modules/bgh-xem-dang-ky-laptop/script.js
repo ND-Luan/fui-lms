@@ -2,11 +2,19 @@ function tenThu(thu) {
 	if (thu === 8) return 'CN'
 	return 'Thứ ' + thu
 }
+function formatNgay(ngayStr) {
+	if (!ngayStr) return ''
+	const d = new Date(ngayStr)
+	const pad = n => String(n).padStart(2, '0')
+	return `${pad(d.getDate())}/${pad(d.getMonth() + 1)}/${d.getFullYear()}`
+}
 function renderDSDangKy() {
 	vueData.DSDangKy = (vueData.DSDangKy || []).map(x => ({
 		...x,
 		ThuHienThi: tenThu(x.Thu),
-		TietHienThi: x.TietBatDau + '-' + x.TietKetThuc
+		TietHienThi: x.TietBatDau + '-' + x.TietKetThuc,
+		NgayApDungHienThi: formatNgay(x.NgayApDung),
+		TreHanHienThi: x.IsTreHan ? 'Trễ hạn' : ''
 	}))
 }
 function onExportExcel() {

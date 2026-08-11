@@ -337,9 +337,13 @@
 			filter: this.getDefaultFilter(),
 			loading: { list: false, detail: false, students: false, save: false, submit: false, month: false, tongKet: false, family: false, export: false },
 			classList: [],
+			soGVCNContexts: [],
 			allTeachers: [],
 			allStudentRows: [],
 			selectedLopID: null,
+			savingClassContext: null,
+			serializationStudents: null,
+			savingGroupedClasses: false,
 			hasUnsavedChanges: false,
 			classSelectionInitialized: false,
 			studentSheetRows: [],
@@ -611,8 +615,7 @@
 				{ title: 'KQRL HKII', width: 100 },
 				{ title: 'KQHT HKII', width: 100 },
 				{ title: 'DANH HIỆU', width: 150 },
-				{ title: 'THÀNH TÍCH KHÁC', width: 200 },
-				{ title: 'CHUYÊN CẦN / VI PHẠM', width: 300, readOnly: true, align: 'left' }
+				{ title: 'THÀNH TÍCH KHÁC', width: 200 }
 			],
 			soLienLacColumns: [
 				{ title: 'STT', width: 60, readOnly: true },
@@ -701,7 +704,10 @@
 				return [2, 4].includes(Number(this.selectedSoLienLacPeriod?.TinhTrang))
 			},
 			selectedSoLienLacPeriod() {
-				return this.soLienLacPeriods.find(x => Number(x.Lop_NhanXetThangID) === Number(this.selectedSoLienLacPeriodId)) || null
+				const period = this.soLienLacPeriods.find(x => Number(x.Lop_NhanXetThangID) === Number(this.selectedSoLienLacPeriodId)) || null
+				if (!period || !this.savingClassContext || !period.__periods) return period
+				const contextPeriod = period.__periods.find(item => String(item.LopID) === String(this.savingClassContext.LopID))
+				return contextPeriod ? { ...period, ...contextPeriod } : period
 			},
 			isWorkflowActionTab() {
 				return (this.isCap1 && this.tab === 'ren-luyen') || (!this.isCap1 && this.tab === 'so-lien-lac')
@@ -1039,6 +1045,7 @@
 			return ({ NEW: 'grey', DRAFT: 'warning', SUBMITTED: 'success' })[status] || 'grey'
 		},
 		notify(message) {
+			if (this.savingGroupedClasses) return
 			if (window.Vue && Vue.$toast) return Vue.$toast.success(message, { position: 'top' })
 			if (window.showMessage) return showMessage({ title: message })
 			alert(message)
@@ -1064,6 +1071,7 @@
 						// Giáo viên bộ môn (SR 2) không có lớp chủ nhiệm phải thấy danh sách rỗng.
 						this.allStudentRows = teacherRows
 					}
+					this.allStudentRows = await this.enrichClassMetadata(this.allStudentRows)
 					this.classList = this.buildClassList(this.allStudentRows)
 					if (!this.classSelectionInitialized) {
 						this.selectedLopID = this.classList[0]?.LopID || (this.isBghOrAdmin ? '__ALL__' : null)
@@ -1092,6 +1100,18 @@
 					.filter(row => row && row.IsNhom !== true && this.isHomeroomClassOfCurrentUser(row, userID))
 					.map(row => String(row.LopID))
 				return new Set(matchedIds)
+			},
+			async enrichClassMetadata(rows) {
+				const khoiIds = [...new Set((rows || []).map(row => Number(row.KhoiID)).filter(Boolean))]
+				const classRows = (await Promise.all(khoiIds.map(khoiID => ajaxCALLPromise('lms/Lop_Get_ByKhoiID', {
+					NienKhoa: this.filter.NienKhoa,
+					KhoiID: khoiID
+				}).catch(() => [])))).flat()
+				const metadata = new Map(classRows.map(row => [String(row.LopID), row]))
+				return (rows || []).map(row => ({
+					...row,
+					...(metadata.get(String(row.LopID)) || {})
+				}))
 			},
 			isHomeroomClassOfCurrentUser(row, userID) {
 				if (!row || !userID) return false
@@ -1127,25 +1147,49 @@
 		buildClassList(rows) {
 			const map = new Map()
 			;(rows || []).forEach(row => {
-				if (!row.LopID || map.has(row.LopID)) return
-				map.set(row.LopID, {
+				if (!row.LopID) return
+				const tenLop = String(row.LopMoi || row.TenLop || row.LopID).trim()
+				const isLopToHop = Number(row.CapID || this.filter.CapID) === 3 &&
+					(row.IsLopToHop === true || Number(row.IsLopToHop) === 1)
+				const tenLopGoc = isLopToHop ? (tenLop.replace(/[0-9]+$/, '') || tenLop) : tenLop
+				const key = isLopToHop
+					? String(row.KhoiID || '') + '|' + tenLopGoc
+					: String(row.LopID)
+				const item = map.get(key) || {
 					NienKhoa: this.filter.NienKhoa,
 					LopID: row.LopID,
-					TenLop: row.LopMoi || row.TenLop || row.LopID,
+					LopIDs: [],
+					TenLop: tenLopGoc,
+					TenLopThanhVien: [],
 					KhoiID: row.KhoiID,
 					TrangThai: 'NEW'
-				})
+				}
+				const lopID = String(row.LopID)
+				if (!item.LopIDs.some(id => String(id) === lopID)) item.LopIDs.push(row.LopID)
+				if (!item.TenLopThanhVien.some(name => name === tenLop)) item.TenLopThanhVien.push(tenLop)
+				map.set(key, item)
 			})
-			return [...map.values()].sort((a, b) => {
+			return [...map.values()].map(item => ({
+				...item,
+				TenLopThanhVien: [...item.TenLopThanhVien].sort((a, b) => String(a).localeCompare(String(b), 'vi', { numeric: true })),
+				TenLop: item.TenLopThanhVien.length > 1
+					? item.TenLop + ' (' + [...item.TenLopThanhVien].sort((a, b) => String(a).localeCompare(String(b), 'vi', { numeric: true })).join(', ') + ')'
+					: item.TenLop
+			})).sort((a, b) => {
 				if ((a.KhoiID || 0) !== (b.KhoiID || 0)) return (a.KhoiID || 0) - (b.KhoiID || 0)
 				return `${a.TenLop}`.localeCompare(`${b.TenLop}`)
 			})
+		},
+		getSelectedClassIDs() {
+			if (this.selectedLopID === '__ALL__') return []
+			const item = this.selectedClass || this.classList.find(x => String(x.LopID) === String(this.selectedLopID))
+			return (item?.LopIDs || [item?.LopID || this.selectedLopID]).filter(Boolean).map(id => String(id))
 		},
 		async mergeTongKetDiem(classes) {
 			this.loading.tongKet = true
 			try {
 				const selectedRows = this.selectedLopID && this.selectedLopID !== '__ALL__'
-					? this.allStudentRows.filter(row => String(row.LopID) === String(this.selectedLopID))
+					? this.getSelectedClassStudents()
 					: []
 				const targets = this.buildTongKetTargets(selectedRows).filter(item => item.KhoiID >= 6)
 				const chunks = await Promise.all(targets.map(item => ajaxCALLPromise(`${this.getDiemSub(item.KhoiID)}/LMS_GetTongKetDTBMonHocByLop`, {
@@ -1350,8 +1394,16 @@
 			this.filter.LopID = item.LopID
 			this.loading.detail = true
 			try {
-				const created = await ajaxCALLPromise('lms/SoGVCNEnsure', { NienKhoa: item.NienKhoa, LopID: item.LopID })
-				this.form.SoGVCNID = created.SoGVCNID
+				const classIDs = item.LopIDs || [item.LopID]
+				const contexts = await Promise.all(classIDs.map(lopID => ajaxCALLPromise('lms/SoGVCNEnsure', {
+					NienKhoa: item.NienKhoa,
+					LopID: lopID
+				})))
+				this.soGVCNContexts = contexts.map((context, index) => ({
+					...context,
+					LopID: classIDs[index]
+				}))
+				this.form.SoGVCNID = this.soGVCNContexts[0]?.SoGVCNID || 0
 				await this.getStudents()
 				if (!this.isCap1) await this.loadChuyenCanViPham(this.getSelectedClassStudents())
 				await this.getDetail()
@@ -1476,21 +1528,38 @@
 			this.selectedSoLienLacPeriodId = null
 			this.soLienLacRows = []
 			try {
-				const response = await ajaxCALLPromise('lms/NhanXetThang_Lop_Get_GV', {
+				const classIDs = this.getSelectedClassIDs()
+				const responses = await Promise.all(classIDs.map(lopID => ajaxCALLPromise('lms/NhanXetThang_Lop_Get_GV', {
 					NienKhoa: this.currentNienKhoa,
-					LopID: this.selectedLopID
-				}).catch(() => [])
-				const periods = (Array.isArray(response) ? response : []).sort((a, b) => {
+					LopID: lopID
+				}).catch(() => [])))
+				const periodMap = new Map()
+				responses.forEach((response, classIndex) => {
+					const periods = Array.isArray(response?.[0]) ? response[0] : (Array.isArray(response) ? response : [])
+					periods.forEach(period => {
+						const key = String(period.Nam || '') + '|' + String(period.Thang || '') + '|' + String(period.Text_Thang_VI || '')
+						const current = periodMap.get(key) || { ...period, items: [], __periods: [] }
+						if (!current.__periods.some(item => String(item.LopID) === String(classIDs[classIndex]))) {
+							current.__periods.push({ ...period, LopID: classIDs[classIndex] })
+						}
+						periodMap.set(key, current)
+					})
+				})
+				const periods = [...periodMap.values()].sort((a, b) => {
 					const finalValue = item => item.Text_Thang_VI === 'Cuối năm' ? 1 : 0
 					return (Number(a.Nam) * 10000 + Number(a.Thang) * 10 + finalValue(a)) -
 						(Number(b.Nam) * 10000 + Number(b.Thang) * 10 + finalValue(b))
 				})
 				const loaded = await Promise.all(periods.map(async period => ({
 					...period,
-					items: await ajaxCALLPromise('lms/NhanXetThang_Get', {
-						Lop_NhanXetThangID: period.Lop_NhanXetThangID,
-						LopID: this.selectedLopID
-					}).catch(() => [])
+					items: (await Promise.all((period.__periods || []).map(async item => {
+						const response = await ajaxCALLPromise('lms/NhanXetThang_Get', {
+							Lop_NhanXetThangID: item.Lop_NhanXetThangID,
+							LopID: item.LopID
+						}).catch(() => [])
+						const rows = Array.isArray(response?.[0]) ? response[0] : (Array.isArray(response) ? response : [])
+						return rows.map(row => ({ ...row, __LopID: item.LopID, __Lop_NhanXetThangID: item.Lop_NhanXetThangID }))
+					}))).flat()
 				})))
 				loaded.forEach(period => {
 					period.fields = [12, 5].includes(Number(period.Thang))
@@ -1519,25 +1588,33 @@
 		},
 		async getDetail() {
 			if (!this.form.SoGVCNID) return
-			const data = await ajaxCALLPromise(`lms/SoGVCNGet/${this.form.SoGVCNID}`)
+			const contexts = this.soGVCNContexts.length
+				? this.soGVCNContexts
+				: [{ LopID: this.selectedLopID, SoGVCNID: this.form.SoGVCNID }]
+			const datasets = await Promise.all(contexts.map(context =>
+				ajaxCALLPromise('lms/SoGVCNGet/' + context.SoGVCNID).catch(() => [])
+			))
+			const data = datasets[0] || []
 			this.detail = Array.isArray(data) ? (data[0]?.[0] || {}) : data
 			this.monthList = Array.isArray(data?.[1]) ? data[1] : []
 			const shouldLoadWeeklyPlan = !this.isCap1 || this.tab === 'cong-tac-cn'
-			const weeklyResponse = shouldLoadWeeklyPlan
-				? await ajaxCALLPromise('lms/SoGVCNKeHoachTuanGet', { SoGVCNID: this.form.SoGVCNID }).catch(() => [])
+			const weeklyResponses = shouldLoadWeeklyPlan
+				? await Promise.all(contexts.map(context => ajaxCALLPromise('lms/SoGVCNKeHoachTuanGet', {
+					SoGVCNID: context.SoGVCNID
+				}).catch(() => [])))
 				: []
-			this.weeklyPlanList = Array.isArray(weeklyResponse?.[0])
-				? weeklyResponse[0]
-				: (Array.isArray(weeklyResponse) ? weeklyResponse : [])
-			this.chiTieuSavedRows = Array.isArray(data?.[2]) ? data[2] : []
-			this.renLuyenSavedRows = Array.isArray(data?.[3]) ? data[3] : []
-			this.soLienLacSavedRows = Array.isArray(data?.[4]) ? data[4] : []
-			this.siSoSavedRows = Array.isArray(data?.[5]) ? data[5] : []
-			this.giaoVienBoMonSavedRows = Array.isArray(data?.[6]) ? data[6] : []
-			this.banDaiDienCMHSSavedRows = Array.isArray(data?.[7]) ? data[7] : []
-			this.canBoLopSavedRows = Array.isArray(data?.[8]) ? data[8] : []
-			this.huongNghiepSavedRows = Array.isArray(data?.[9]) ? data[9] : []
-			this.toNhomHocSinhSavedRows = Array.isArray(data?.[10]) ? data[10] : []
+			this.weeklyPlanList = this.mergeSoGVCNRows(weeklyResponses.map(response =>
+				Array.isArray(response?.[0]) ? response[0] : (Array.isArray(response) ? response : [])
+			))
+			this.chiTieuSavedRows = this.mergeSoGVCNRows(datasets.map(item => item?.[2]))
+			this.renLuyenSavedRows = this.mergeSoGVCNRows(datasets.map(item => item?.[3]))
+			this.soLienLacSavedRows = this.mergeSoGVCNRows(datasets.map(item => item?.[4]))
+			this.siSoSavedRows = this.mergeSoGVCNRows(datasets.map(item => item?.[5]))
+			this.giaoVienBoMonSavedRows = this.mergeSoGVCNRows(datasets.map(item => item?.[6]))
+			this.banDaiDienCMHSSavedRows = this.mergeSoGVCNRows(datasets.map(item => item?.[7]))
+			this.canBoLopSavedRows = this.mergeSoGVCNRows(datasets.map(item => item?.[8]))
+			this.huongNghiepSavedRows = this.mergeSoGVCNRows(datasets.map(item => item?.[9]))
+			this.toNhomHocSinhSavedRows = this.mergeSoGVCNRows(datasets.map(item => item?.[10]))
 			if (this.isCap1) {
 				if (this.tab === 'chi-tieu') await this.getKeHoachNamHoc()
 				if (this.tab === 'ke-hoach') await this.getHsCanQuanTam()
@@ -1566,7 +1643,7 @@
 			this.huongNghiepRows = this.buildHuongNghiepRows()
 			if (!this.isCap1) await this.getGiaoVienBoMon()
 
-			const students = this.getSelectedClassStudents()
+			const students = this.getSheetStudents()
 			if (students.length > 0) {
 				this.renLuyenRows = this.toRenLuyenRows(students)
 				if (!this.isCap1 && this.tab === 'ren-luyen') {
@@ -1579,10 +1656,20 @@
 			}
 			this.sheetKey++
 		},
+		mergeSoGVCNRows(chunks) {
+			const rows = (chunks || []).flatMap(chunk => Array.isArray(chunk) ? chunk : [])
+			const seen = new Set()
+			return rows.filter(row => {
+				const key = JSON.stringify(row)
+				if (seen.has(key)) return false
+				seen.add(key)
+				return true
+			})
+		},
 		async getStudents() {
 			this.loading.students = true
 			try {
-				const rows = this.allStudentRows.filter(x => String(x.LopID) === String(this.filter.LopID))
+				const rows = this.getSelectedClassStudents()
 				this.setStudentSheets(rows)
 			} finally {
 				this.loading.students = false
@@ -1728,8 +1815,7 @@
 				this.getSavedMonthlyValue(this.renLuyenSavedRows, x.HSLopID, 93, 'NoiDung'), // KQRL HKII
 				this.getSavedMonthlyValue(this.renLuyenSavedRows, x.HSLopID, 94, 'NoiDung'), // KQHT HKII
 				this.getSavedMonthlyValue(this.renLuyenSavedRows, x.HSLopID, 95, 'NoiDung'), // DANH HIỆU
-				this.getSavedMonthlyValue(this.renLuyenSavedRows, x.HSLopID, 96, 'NoiDung'), // THÀNH TÍCH KHÁC
-				this.getAttendanceDisplay(x)
+				this.getSavedMonthlyValue(this.renLuyenSavedRows, x.HSLopID, 96, 'NoiDung') // THÀNH TÍCH KHÁC
 			])
 		},
 		async loadChuyenCanViPham(students = this.getSelectedClassStudents()) {
@@ -1742,8 +1828,8 @@
 			this.attendanceLoading = true
 			this.attendanceSummaries = {}
 			try {
-			const lopHocID = await this.getSelectedLopHocID()
-				if (!lopHocID) {
+				const lopHocIDs = await this.getSelectedLopHocIDs()
+				if (!lopHocIDs.length) {
 					console.warn('[so-gvcn] Không tìm thấy LopHocID quansinh cho lớp', {
 						LopID: this.selectedLopID,
 						TenLop: this.selectedClass?.TenLop,
@@ -1754,14 +1840,16 @@
 				}
 				const summaries = {}
 				for (const month of this.getMonthlyAttendanceRanges()) {
-					const types = await ajaxCALLPromise('quansinh/LMS_SoDauBai_TongHopTheoLoaiViPham', {
-						TuNgay: month.firstDay, DenNgay: month.lastDay, LopHocID: lopHocID
-					}, { cache: false }).catch(() => [])
-					const details = await Promise.all((types || []).filter(type => Number(type.SoLuong) > 0).map(type => ajaxCALLPromise(
-						'quansinh/LMS_SoDauBai_TongHopTheoLoaiViPham_ChiTiet', {
-							TuNgay: month.firstDay, DenNgay: month.lastDay, LopHocID: lopHocID,
-							LoaiViPham: type.LoaiViPham
-						}, { cache: false }).catch(() => []).then(rows => ({ type, rows: rows || [] }))))
+					const details = (await Promise.all(lopHocIDs.map(async lopHocID => {
+						const types = await ajaxCALLPromise('quansinh/LMS_SoDauBai_TongHopTheoLoaiViPham', {
+							TuNgay: month.firstDay, DenNgay: month.lastDay, LopHocID: lopHocID
+						}, { cache: false }).catch(() => [])
+						return Promise.all((types || []).filter(type => Number(type.SoLuong) > 0).map(type => ajaxCALLPromise(
+							'quansinh/LMS_SoDauBai_TongHopTheoLoaiViPham_ChiTiet', {
+								TuNgay: month.firstDay, DenNgay: month.lastDay, LopHocID: lopHocID,
+								LoaiViPham: type.LoaiViPham
+							}, { cache: false }).catch(() => []).then(rows => ({ type, rows: rows || [] }))))
+					}))).flat()
 					students.forEach(student => {
 						const key = this.getAttendanceStudentKey(student)
 						const current = summaries[key] || { key, hoTen: student.HoTen || '', months: [], violations: [] }
@@ -1804,11 +1892,23 @@
 			const khoiID = Number(this.selectedClass?.KhoiID)
 			if (!khoiID) return null
 			const khois = await ajaxCALLPromise('quansinh/Basic_KhoiSelectByNamHocID', { NamHocID: this.currentNienKhoa, DonViID: 1 }).catch(() => [])
-			const khoi = (khois || []).find(item => String(item.TenKhoi).trim() === `Khối ${khoiID}`)
+			const khoi = (khois || []).find(item => String(item.TenKhoi).trim() === 'Khối ' + khoiID)
 			if (!khoi) return null
 			const classes = await ajaxCALLPromise('quansinh/Basic_LopHocSelectByKhoiNamHocID', { NamHocID: this.currentNienKhoa, KhoiID: khoi.KhoiID }).catch(() => [])
-			const selectedName = String(this.selectedClass?.TenLop || '').trim()
+			const selectedName = String((this.selectedClass?.TenLopThanhVien || [this.selectedClass?.TenLop])[0] || '').trim()
 			return (classes || []).find(item => String(item.TenLop || '').trim() === selectedName)?.LopHocID || null
+		},
+		async getSelectedLopHocIDs() {
+			const khoiID = Number(this.selectedClass?.KhoiID)
+			if (!khoiID) return []
+			const khois = await ajaxCALLPromise('quansinh/Basic_KhoiSelectByNamHocID', { NamHocID: this.currentNienKhoa, DonViID: 1 }).catch(() => [])
+			const khoi = (khois || []).find(item => String(item.TenKhoi).trim() === 'Khối ' + khoiID)
+			if (!khoi) return []
+			const classes = await ajaxCALLPromise('quansinh/Basic_LopHocSelectByKhoiNamHocID', { NamHocID: this.currentNienKhoa, KhoiID: khoi.KhoiID }).catch(() => [])
+			const selectedNames = this.selectedClass?.TenLopThanhVien || [this.selectedClass?.TenLop]
+			return selectedNames.map(name => (classes || []).find(item =>
+				String(item.TenLop || '').trim() === String(name || '').trim()
+			)?.LopHocID).filter(Boolean)
 		},
 		getMonthlyAttendanceRanges() {
 			const year = Number(this.currentNienKhoa)
@@ -1859,7 +1959,8 @@
 				x.SoDanhBo || '',
 				x.HoTen || '',
 					...(period?.fields || []).map(field => {
-						const item = (period.items || []).find(row => Number(row.HSLopID) === Number(x.HSLopID))
+						const item = (period.items || []).find(row => Number(row.HSLopID) === Number(x.HSLopID) &&
+							(!row.__LopID || !x.LopID || String(row.__LopID) === String(x.LopID)))
 						return item?.[field.key] || ''
 					})
 				])
@@ -1994,12 +2095,24 @@
 		},
 		getSelectedClassStudents() {
 			if (this.selectedLopID === '__ALL__') return []
-			return (this.allStudentRows || []).filter(x => String(x.LopID) === String(this.selectedLopID))
+			const ids = new Set(this.getSelectedClassIDs())
+			return (this.allStudentRows || []).filter(x => ids.has(String(x.LopID)))
+		},
+		getSheetStudents() {
+			return this.serializationStudents || this.getSelectedClassStudents()
+		},
+		filterRowsForSaving(rows) {
+			if (!this.savingClassContext) return rows
+			const studentIDs = new Set((this.allStudentRows || [])
+				.filter(row => String(row.LopID) === String(this.savingClassContext.LopID))
+				.map(row => String(row.HSLopID || ''))
+				.filter(Boolean))
+			return (rows || []).filter(row => !row.HSLopID || studentIDs.has(String(row.HSLopID)))
 		},
 		findSelectedStudent(value) {
 			const text = this.cleanSheetValue(value)
 			if (!text) return null
-			const students = this.getSelectedClassStudents()
+			const students = this.getSheetStudents()
 			console.log('[Tab2 findSelectedStudent]', text, 'Students count:', students.length)
 
 			// Tìm theo Họ và tên, HocSinhID hoặc MaHocSinh
@@ -2318,14 +2431,12 @@
 			return hocKy === 2 ? 'Học kì 2' : 'Học kì 1'
 		},
 		async fetchGiaoVienBoMonRows() {
-			const baseParams = {
-				LopID: this.selectedClass.LopID,
-				NienKhoa: Number(this.currentNienKhoa || this.filter.NienKhoa || new Date().getFullYear())
-			}
-			const chunks = await Promise.all([1, 2].map(hocKy => ajaxCALLPromise('lms/GiaoVienLop_Get_ByLopID', {
-				...baseParams,
+			const classIDs = this.getSelectedClassIDs()
+			const chunks = await Promise.all(classIDs.flatMap(lopID => [1, 2].map(hocKy => ajaxCALLPromise('lms/GiaoVienLop_Get_ByLopID', {
+				LopID: lopID,
+				NienKhoa: Number(this.currentNienKhoa || this.filter.NienKhoa || new Date().getFullYear()),
 				HocKi: hocKy
-			}).then(rows => (rows || []).map(row => ({ ...row, HocKy: hocKy }))).catch(() => [])))
+			}).then(rows => (rows || []).map(row => ({ ...row, HocKy: hocKy }))).catch(() => []))))
 			const map = new Map()
 			chunks.flat().forEach(row => {
 				if (Number(row.VaiTro || 0) === 1) return
@@ -2413,7 +2524,7 @@
 		serializeBanDaiDienCMHSRows() {
 			const card = this.getChiTieuCard('ban-dai-dien-cmhs')
 			let validCounter = 0
-			return (card.rows || []).map((row, index) => {
+			return this.filterRowsForSaving((card.rows || []).map((row, index) => {
 				const student = this.findSelectedStudent(this.cleanSheetCell(row, 2, 'HocSinh')) || {}
 				const hocSinh = this.cleanSheetCell(row, 2, 'HocSinh')
 				const chaMe = this.cleanSheetCell(row, 3, 'ChaMe')
@@ -2441,7 +2552,7 @@
 				const valid = row._isValid
 				delete row._isValid
 				return valid
-			})
+			}))
 		},
 		applyCanBoLopRows() {
 			const card = this.getChiTieuCard('can-bo-lop')
@@ -2466,7 +2577,7 @@
 		serializeCanBoLopRows() {
 			const card = this.getChiTieuCard('can-bo-lop')
 			let validCounter = 0
-			return (card.rows || []).map((row, index) => {
+			return this.filterRowsForSaving((card.rows || []).map((row, index) => {
 				const student = this.findSelectedStudent(this.cleanSheetCell(row, 2, 'HocSinh')) || {}
 				const hocSinh = this.cleanSheetCell(row, 2, 'HocSinh')
 				const chucVu = this.cleanSheetCell(row, 3, 'ChucVu')
@@ -2488,7 +2599,7 @@
 				const valid = row._isValid
 				delete row._isValid
 				return valid
-			})
+			}))
 		},
 		parseSheetSavedRows(value) {
 			if (!value) return []
@@ -2967,7 +3078,7 @@
 				: this.parseHuongNghiepSavedRows(this.form.HuongNghiep)
 			const studentRows = this.selectedLopID === '__ALL__'
 				? []
-				: (this.allStudentRows || []).filter(x => String(x.LopID) === String(this.selectedLopID))
+				: this.getSelectedClassStudents()
 			const rows = studentRows.map((student, index) => {
 				const saved = savedRows.find(row => `${row.HSLopID || ''}` === `${student.HSLopID || ''}`)
 					|| savedRows.find(row => `${row.HocSinhID || ''}` === `${student.HocSinhID || ''}`)
@@ -3021,10 +3132,8 @@
 		serializeHuongNghiepRows() {
 			const sheet = Array.isArray(this.huongNghiepSheetInstance) ? this.huongNghiepSheetInstance[0] : this.huongNghiepSheetInstance
 			const sourceRows = sheet && typeof sheet.getData === 'function' ? sheet.getData() : (this.huongNghiepRows || [])
-			const sourceStudents = this.selectedLopID === '__ALL__'
-				? []
-				: (this.allStudentRows || []).filter(x => String(x.LopID) === String(this.selectedLopID))
-			return sourceRows.map((row, index) => {
+			const sourceStudents = this.getSheetStudents()
+			return this.filterRowsForSaving(sourceRows.map((row, index) => {
 				const student = sourceStudents[index] || {}
 				return {
 					STT: this.cleanSheetValue(this.getHuongNghiepCell(row, 0, 'STT')) || index + 1,
@@ -3037,7 +3146,7 @@
 					KQTracNghiem: this.cleanSheetValue(this.getHuongNghiepCell(row, 5, 'KQTracNghiem')),
 					RowIndex: index + 1
 				}
-			}).filter(row => row.HoTen || row.MonThiTN || row.KQTracNghiem)
+			}).filter(row => row.HoTen || row.MonThiTN || row.KQTracNghiem))
 		},
 		getHuongNghiepCell(row, index, key) {
 			if (Array.isArray(row)) return row[index]
@@ -3268,6 +3377,9 @@
 			return this.isCap1 ? this.sendNhanXetThangLmsToTruong() : this.sendSoLienLacToBgh()
 		},
 		async onSaveDraft() {
+			if (!this.savingGroupedClasses && (this.selectedClass?.LopIDs || []).length > 1) {
+				return this.onSaveDraftForGroupedClasses()
+			}
 			if (this.tab === 'to-chuc-lop' && this.isCap1) {
 				const ok = await this.confirmRef.value.show({ title: 'Xác nhận lưu thông tin tổ chức lớp?' })
 				if (!ok) return
@@ -3486,11 +3598,59 @@
 				this.loading.save = false
 			}
 		},
+		async onSaveDraftForGroupedClasses() {
+			const group = this.selectedClass
+			const groupStudents = this.getSelectedClassStudents()
+			let completed = false
+			const original = {
+				selectedLopID: this.selectedLopID,
+				selectedClass: group,
+				filterLopID: this.filter.LopID,
+				formSoGVCNID: this.form.SoGVCNID
+			}
+			this.savingGroupedClasses = true
+			try {
+				for (const context of this.soGVCNContexts) {
+					const member = (this.allStudentRows || []).find(row => String(row.LopID) === String(context.LopID))?.TenLop || group.TenLop
+					this.selectedLopID = context.LopID
+					this.selectedClass = {
+						...group,
+						LopID: context.LopID,
+						LopIDs: [context.LopID],
+						TenLop: member
+					}
+					this.filter.LopID = context.LopID
+					this.form.SoGVCNID = context.SoGVCNID
+					this.savingClassContext = context
+					this.serializationStudents = groupStudents
+					await this.onSaveDraft()
+				}
+				completed = true
+			} finally {
+				this.savingClassContext = null
+				this.serializationStudents = null
+				this.selectedLopID = original.selectedLopID
+				this.selectedClass = original.selectedClass
+				this.filter.LopID = original.filterLopID
+				this.form.SoGVCNID = original.formSoGVCNID
+				this.savingGroupedClasses = false
+			}
+			if (completed) {
+				const labels = {
+					'chi-tieu': this.isCap1 ? 'kế hoạch chủ nhiệm năm học' : 'chỉ tiêu',
+					'ke-hoach': this.isCap1 ? 'hồ sơ HS cần quan tâm' : 'kế hoạch chủ nhiệm',
+					'huong-nghiep': 'hướng nghiệp',
+					'ren-luyen': 'hồ sơ theo dõi rèn luyện',
+					'so-lien-lac': 'sổ liên lạc'
+				}
+				this.notify(labels[this.tab] ? 'Đã lưu ' + labels[this.tab] : 'Đã lưu')
+			}
+		},
 
 		serializeNhanXetThangLmsRows() {
 			const sheet = this.$refs.tabNhanXetThangLmsRef?.getInstance()
 			const sourceRows = sheet && typeof sheet.getData === 'function' ? sheet.getData() : []
-			const students = this.getSelectedClassStudents()
+			const students = this.getSheetStudents()
 			const rows = []
 			sourceRows.forEach((row, rowIndex) => {
 				const student = students[rowIndex] || {}
@@ -3518,15 +3678,16 @@
 			if (!period) return []
 			const sheet = this.$refs.tabNhanXetThangLmsRef?.getInstance?.()
 			const sourceRows = sheet && typeof sheet.getData === 'function' ? sheet.getData() : this.nhanXetThangLmsRows
-			const students = this.getSelectedClassStudents()
+			const students = this.getSheetStudents()
 			const fields = ['NhanXetToan_HTML', 'DiemToan', 'NhanXetTiengViet_HTML', 'DiemTiengViet', 'NhanXetMonHocKhac_HTML', 'HoatDongGiaoDucKhac_HTML', 'PhamChatNangLuc_HTML']
-			return sourceRows.map((row, rowIndex) => {
+			return this.filterRowsForSaving(sourceRows.map((row, rowIndex) => {
 				const student = students[rowIndex] || {}
-				const existing = (period.items || []).find(item => Number(item.HSLopID) === Number(student.HSLopID)) || {}
+				const existing = (period.items || []).find(item => Number(item.HSLopID) === Number(student.HSLopID) &&
+					(!item.__LopID || !student.LopID || String(item.__LopID) === String(student.LopID))) || {}
 				const payload = { ...existing, LopID: this.selectedLopID, Lop_NhanXetThangID: period.Lop_NhanXetThangID, HocSinhID: student.HocSinhID, HSLopID: student.HSLopID }
 				fields.forEach((field, index) => { payload[field] = this.cleanSheetValue(row[index + 2]) })
 				return payload
-			}).filter(row => row.HSLopID)
+			}).filter(row => row.HSLopID))
 		},
 		async saveSelectedNhanXetThangLmsPeriod() {
 			const period = this.selectedNhanXetThangLmsPeriod
@@ -3565,7 +3726,7 @@
 				try { sheet.closeEditor(true) } catch (error) {}
 			}
 			const sourceRows = sheet && typeof sheet.getData === 'function' ? sheet.getData() : []
-			const students = this.getSelectedClassStudents()
+			const students = this.getSheetStudents()
 			const rows = []
 			sourceRows.forEach((row, rowIndex) => {
 				const student = students[rowIndex] || {}
@@ -3598,7 +3759,7 @@
 
 		serializeTheoDoiPhHopRows() {
 			const sourceRows = this.$refs.tabTheoDoiPhHopRef?.getRows?.() || []
-			const students = this.getSelectedClassStudents()
+			const students = this.getSheetStudents()
 			const isChecked = value => value === true || value === 1 || value === '1' || value === 'true'
 			const rows = []
 			sourceRows.forEach((row, rowIndex) => {
@@ -3613,12 +3774,12 @@
 					GhiChu: this.cleanSheetValue(row[7])
 				})
 			})
-			return rows
+			return this.filterRowsForSaving(rows)
 		},
 
 		serializeTheoDoiThanhTichRows() {
 			const sourceRows = this.$refs.tabTheoDoiThanhTichRef?.getRows?.() || []
-			const students = this.getSelectedClassStudents()
+			const students = this.getSheetStudents()
 			const rows = []
 			sourceRows.forEach((row, rowIndex) => {
 				const student = students[rowIndex] || {}
@@ -3630,7 +3791,7 @@
 					CuoiNam: this.cleanSheetValue(row[5])
 				})
 			})
-			return rows
+			return this.filterRowsForSaving(rows)
 		},
 
 		serializeThongKeDoTuoiRows() {
@@ -3683,7 +3844,7 @@
 		serializeRenLuyenMonthlyRows() {
 			const sheet = Array.isArray(this.renLuyenSheetInstance) ? this.renLuyenSheetInstance[0] : this.renLuyenSheetInstance
 			const sourceRows = sheet && typeof sheet.getData === 'function' ? sheet.getData() : (this.renLuyenRows || [])
-			const students = this.getSelectedClassStudents()
+			const students = this.getSheetStudents()
 			const months = this.getMonthlySheetMonths()
 			const rows = []
 			sourceRows.forEach((row, rowIndex) => {
@@ -3714,15 +3875,15 @@
 				// Cột 22: THÀNH TÍCH KHÁC (Thang = 96)
 				rows.push({ HSLopID: student.HSLopID, Thang: 96, NoiDung: this.cleanSheetValue(row[22]) })
 			})
-			return rows
+			return this.filterRowsForSaving(rows)
 		},
 		serializeSelectedSoLienLacPayload() {
 			const period = this.selectedSoLienLacPeriod
 			if (!period) return []
 			const sheet = this.$refs.tabSoLienLacRef?.getInstance?.()
 			const sourceRows = sheet && typeof sheet.getData === 'function' ? sheet.getData() : (this.soLienLacRows || [])
-			const students = this.getSelectedClassStudents()
-			return sourceRows.map((row, rowIndex) => {
+			const students = this.getSheetStudents()
+			return this.filterRowsForSaving(sourceRows.map((row, rowIndex) => {
 				const student = students[rowIndex] || {}
 				const existing = (period.items || []).find(item => Number(item.HSLopID) === Number(student.HSLopID)) || {}
 				const payload = {
@@ -3736,7 +3897,7 @@
 					payload[field.key] = this.cleanSheetValue(row[index + 4])
 				})
 				return payload
-			}).filter(row => row.HSLopID)
+			}).filter(row => row.HSLopID))
 		},
 		async saveSelectedSoLienLacPeriod() {
 			const period = this.selectedSoLienLacPeriod
@@ -3749,9 +3910,12 @@
 				Lop_NhanXetThangID: period.Lop_NhanXetThangID,
 				ReasonReject: ''
 			})
-			await this.getSoLienLacPeriods(this.getSelectedClassStudents())
+			if (!this.savingGroupedClasses) await this.getSoLienLacPeriods(this.getSelectedClassStudents())
 		},
 		async sendSoLienLacToBgh() {
+			if (!this.savingGroupedClasses && (this.selectedClass?.LopIDs || []).length > 1) {
+				return this.sendSoLienLacToBghForGroupedClasses()
+			}
 			const period = this.selectedSoLienLacPeriod
 			if (!period || !this.soLienLacRows.length) return
 			if ([2, 4].includes(Number(period.TinhTrang))) return
@@ -3759,25 +3923,73 @@
 			if (!confirmed) return
 			this.loading.submit = true
 			try {
-				const payload = this.serializeSelectedSoLienLacPayload()
-				if (payload.some(row => Number(row.NhanXetThangID) <= 0)) {
-					this.notify('Vui lòng nhập đủ nhận xét cho tất cả học sinh trước khi gửi BGH')
-					return
-				}
-				await ajaxCALLPromise('lms/NhanXetThang_Ins', { JSON_NhanXetThang: payload })
-				await ajaxCALLPromise('lms/NhanXetThang_Upd_TinhTrang', {
-					TinhTrang: 2,
-					Lop_NhanXetThangID: period.Lop_NhanXetThangID,
-					ReasonReject: ''
-				})
+				await this.sendSoLienLacToBghForCurrentClass()
 				await this.getSoLienLacPeriods(this.getSelectedClassStudents())
 				this.notify('Đã gửi nhận xét lên BGH')
 			} finally {
 				this.loading.submit = false
 			}
 		},
+		async sendSoLienLacToBghForCurrentClass() {
+			const period = this.selectedSoLienLacPeriod
+			if (!period || [2, 4].includes(Number(period.TinhTrang))) return
+			const payload = this.serializeSelectedSoLienLacPayload()
+			if (payload.some(row => Number(row.NhanXetThangID) <= 0)) {
+				throw new Error('Vui lòng nhập đủ nhận xét cho tất cả học sinh trước khi gửi BGH')
+			}
+			if (!payload.length) return
+			await ajaxCALLPromise('lms/NhanXetThang_Ins', { JSON_NhanXetThang: payload })
+			await ajaxCALLPromise('lms/NhanXetThang_Upd_TinhTrang', {
+				TinhTrang: 2,
+				Lop_NhanXetThangID: period.Lop_NhanXetThangID,
+				ReasonReject: ''
+			})
+		},
+		async sendSoLienLacToBghForGroupedClasses() {
+			const group = this.selectedClass
+			const original = {
+				selectedLopID: this.selectedLopID,
+				selectedClass: group,
+				filterLopID: this.filter.LopID,
+				formSoGVCNID: this.form.SoGVCNID
+			}
+			const confirmed = await this.confirmRef?.value?.show?.({ title: 'Xác nhận gửi nhận xét tháng lên BGH?' })
+			if (!confirmed) return
+			this.loading.submit = true
+			this.savingGroupedClasses = true
+			let completed = false
+			let errorMessage = ''
+			try {
+				for (const context of this.soGVCNContexts) {
+					const member = (this.allStudentRows || []).find(row => String(row.LopID) === String(context.LopID))?.TenLop || group.TenLop
+					this.selectedLopID = context.LopID
+					this.selectedClass = { ...group, LopID: context.LopID, LopIDs: [context.LopID], TenLop: member }
+					this.filter.LopID = context.LopID
+					this.form.SoGVCNID = context.SoGVCNID
+					this.savingClassContext = context
+					await this.sendSoLienLacToBghForCurrentClass()
+				}
+				completed = true
+			} catch (error) {
+				errorMessage = error?.message || 'Không thể gửi nhận xét lên BGH'
+			} finally {
+				this.savingClassContext = null
+				this.selectedLopID = original.selectedLopID
+				this.selectedClass = original.selectedClass
+				this.filter.LopID = original.filterLopID
+				this.form.SoGVCNID = original.formSoGVCNID
+				this.savingGroupedClasses = false
+				this.loading.submit = false
+				await this.getSoLienLacPeriods(this.getSelectedClassStudents())
+			}
+			if (errorMessage) this.notify(errorMessage)
+			else if (completed) this.notify('Đã gửi nhận xét lên BGH')
+		},
 
 		async saveKeHoachSheet() {
+			if (!this.savingGroupedClasses && (this.selectedClass?.LopIDs || []).length > 1) {
+				return this.saveKeHoachSheetForGroupedClasses()
+			}
 			if (!this.form.SoGVCNID) return
 			if (document.activeElement && typeof document.activeElement.blur === 'function') {
 				document.activeElement.blur()
@@ -3812,6 +4024,39 @@
 			} finally {
 				this.loading.month = false
 			}
+		},
+		async saveKeHoachSheetForGroupedClasses() {
+			const group = this.selectedClass
+			let completed = false
+			const original = {
+				selectedLopID: this.selectedLopID,
+				selectedClass: group,
+				filterLopID: this.filter.LopID,
+				formSoGVCNID: this.form.SoGVCNID
+			}
+			this.savingGroupedClasses = true
+			try {
+				for (const context of this.soGVCNContexts) {
+					this.selectedLopID = context.LopID
+					this.selectedClass = {
+						...group,
+						LopID: context.LopID,
+						LopIDs: [context.LopID],
+						TenLop: (this.allStudentRows || []).find(row => String(row.LopID) === String(context.LopID))?.TenLop || group.TenLop
+					}
+					this.filter.LopID = context.LopID
+					this.form.SoGVCNID = context.SoGVCNID
+					await this.saveKeHoachSheet()
+				}
+				completed = true
+			} finally {
+				this.selectedLopID = original.selectedLopID
+				this.selectedClass = original.selectedClass
+				this.filter.LopID = original.filterLopID
+				this.form.SoGVCNID = original.formSoGVCNID
+				this.savingGroupedClasses = false
+			}
+			if (completed) this.notify('Đã lưu kế hoạch tháng')
 		}
 	}
 	}

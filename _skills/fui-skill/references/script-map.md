@@ -11,8 +11,9 @@ Mục tiêu: tra cứu nhanh "hàm nào dùng để làm gì" theo từng file r
 > | Core engine (action, API, layout) | `scripts/fastproject.js` | `scripts/fastproject-3.0.js` |
 > | Utility layer (router, export, auth, WS) | `scripts/defaultfunction.js` | `scripts/defaultfunction-3.0.js` |
 > | Component registry (`f-*`, dialog, editor...) | `scripts/component.js` | `scripts/component-3.0.js` |
-> | Table system (`f-table`, `t-*`, `f-sheet`) | `scripts/componentTable.js` | `scripts/componentTable-3.0.js` |
+> | Table system (`f-table`, `t-*`) | `scripts/componentTable.js` | `scripts/componentTable-3.0.js` |
 > | Biểu đồ (`f-echart`) | `scripts/fechart.js` | `scripts/fechart.js` |
+> | Bảng tính nhập liệu (`f-sheet`) | `scripts/fsheet.js` (dùng chung, xem §5) | `scripts/fsheet.js` (dùng chung, xem §5) |
 
 Lưu ý dùng đúng chuẩn FUI:
 - Metadata chính là `module.json` (không dùng `controls.json`).
@@ -28,7 +29,8 @@ Lưu ý dùng đúng chuẩn FUI:
 - [3) scripts/component.js](#3-scriptscomponentjs)
 - [4) scripts/componentTable.js](#4-scriptscomponenttablejs)
 - [4b) scripts/componentTable-3.0.js](#4b-scriptscomponenttable-30js)
-- [5) Tra cứu theo tác vụ](#5-tra-cuu-theo-tac-vu)
+- [5) scripts/fsheet.js](#5-scriptsfsheetjs)
+- [6) Tra cứu theo tác vụ](#6-tra-cuu-theo-tac-vu)
 
 ## 0) Thư viện nhúng sẵn (FUI V2)
 
@@ -235,13 +237,12 @@ Vai trò: table system cho FUI, gồm component table chính và cell renderer `
 | 616 | `t-menu` | Cell menu action. |
 | 654 | `t-link` | Cell link điều hướng/open dialog. |
 | 678 | `t-button` | Cell button action custom. |
-| 738 | `f-sheet` | Bảng tính nhập liệu trên AG Grid — xem [fsheet.md](fsheet.md). |
 
-**`:height` (dùng chung `f-table` + `f-sheet`)** — computed `heightNum`/`tableHeight` + method `updateFillHeight()`: bỏ trống = tự giãn theo số dòng; `<=0` = đo `getBoundingClientRect()` thật rồi fill tới đáy màn hình chừa `abs(n)` px (có `window.resize` listener); `>0` = px cố định. Chi tiết: [fsheet.md](fsheet.md) §Chiều cao.
+**`:height` (`f-table`)** — computed `heightNum`/`tableHeight` + method `updateFillHeight()`: bỏ trống = tự giãn theo số dòng; `<=0` = đo `getBoundingClientRect()` thật rồi fill tới đáy màn hình chừa `abs(n)` px (có `window.resize` listener); `>0` = px cố định.
 
 ## 4b) scripts/componentTable-3.0.js
 
-Bản **V3** (Vue 3 + Vuetify 3) của cùng bộ component trên — tên đăng ký PascalCase (`FTable`, `THtml`, `TNum`, ...) trừ `f-sheet` giữ nguyên kebab. Framework version của module quyết định file nào được nạp (`_moduleInfo.json`).
+Bản **V3** (Vue 3 + Vuetify 3) của cùng bộ component trên — tên đăng ký PascalCase (`FTable`, `THtml`, `TNum`, ...). Framework version của module quyết định file nào được nạp (`_moduleInfo.json`).
 
 Khác biệt phải nhớ khi sửa **cả hai** file:
 - Lifecycle: V3 dùng `beforeUnmount` (các component khai cả hai để chạy được ở cả V2 lẫn V3).
@@ -252,7 +253,27 @@ Khác biệt phải nhớ khi sửa **cả hai** file:
 
 Kiểm chứng bản V3 sau khi sửa: `node test/v3-table-harness.mjs [sum|fill|auto]` — nạp framework V3 thật từ `https://fui.vn` trong chromium headless nhưng **thay `componentTable-3.0.js` bằng file local**, mọi API bị chặn + trả mock. In ra lỗi JS/`[Vue warn]`, chiều cao thật, nội dung dòng tổng, ô AG Grid, và chụp `test/v3-{mode}.png`.
 
-## 5) Tra cứu theo tác vụ
+## 5) scripts/fsheet.js — dùng chung V2 + V3
+
+Vai trò: toàn bộ component `f-sheet`, một file **duy nhất** dùng chung cho cả V2 và V3 (khai cả `beforeDestroy` lẫn `beforeUnmount` để chạy được ở cả hai runtime) — không tách theo framework version như các file khác trong bảng ở đầu tài liệu.
+
+Import bắt buộc (2 file, trích từ `component.js` `defaultControlAttr["f-sheet"].import`), **đúng thứ tự**:
+```
+/include/ag-grid/ag-grid-community.min.js
+/include/ag-grid/fsheet.js
+```
+
+| Nội dung | Ghi chú |
+|---|---|
+| `Vue.component('FSheet', {...})` | Component chính — props/cột/wiring API chi tiết ở [fsheet.md](fsheet.md) |
+| 4 cell renderer dựng sẵn (`fsHtmlCellRenderer`/`fsLinkCellRenderer`/`fsButtonCellRenderer`/`fsMenuCellRenderer`) | Tương đương `t-html`/`t-link`/`t-button`/`t-menu` của `f-table` — xem [fsheet.md](fsheet.md) |
+| Hệ thống chọn vùng nhiều ô + fill handle + clipboard TSV tự viết | AG Grid Community không có Cell Selection (thuộc bản Enterprise) nên f-sheet tự điều khiển rồi gắn đúng bộ class CSS của AG Grid (`.ag-cell-range-*`, `.ag-selection-fill-*`, `.ag-fill-handle`) |
+
+`:height` dùng cùng 3 chế độ (tự giãn / fill đáy / px cố định) — chi tiết: [fsheet.md](fsheet.md) §Chiều cao.
+
+Kiểm chứng `fsheet.js`: `component_preview` (render `f-sheet` cô lập với dữ liệu mẫu, không cần push lên server) hoặc `module_simulate({renderUI:true})` (kiểm trong module thật) — cả hai chạy browser thật, không cần harness riêng.
+
+## 6) Tra cứu theo tác vụ
 
 > Cột "Mở file trước" ghi tên file V2. Nếu module là **V3**, thay bằng file `-3.0` tương ứng (xem quy tắc ở đầu tài liệu).
 
@@ -266,3 +287,4 @@ Kiểm chứng bản V3 sau khi sửa: `node test/v3-table-harness.mjs [sum|fill
 | Upload ảnh, crop, lưu file | `component.js` / `component-3.0.js` | `f-image-update`. |
 | Export Excel/PDF | `defaultfunction.js` + `component.js` (cùng bản V2/V3) | `jsonToExcel`, `printPDF`, `f-pdfmake`, `f-excel-reader`. |
 | Sự cố đăng nhập/quyền/menu | `fastproject.js` + `defaultfunction.js` (cùng bản V2/V3) | `loadModuleInfo`, `loginFUN`, `rightTest`. |
+| `f-sheet` không hiện / báo "FSheet is not defined" | `fsheet.js` (dùng chung V2+V3) | Thiếu import — xem [component-quickref.md](component-quickref.md) hoặc [fsheet.md](fsheet.md). |

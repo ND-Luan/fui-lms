@@ -167,7 +167,7 @@ END
 GRANT EXECUTE ON [dbo].[spAPI_StudentList] TO [public] AS [dbo]
 ```
 
-Deploy bằng `db_sp_save` + `db_sp_update` (không tự gọi endpoint để "chạy thử" — xem bước 6).
+Deploy bằng `db_sp_save` + `db_sp_deploy` (không tự gọi endpoint để "chạy thử" — xem bước 6).
 
 **Output bước 4:** Toàn bộ SQL script đã deploy cho các SP thiết kế ở bước 3.
 

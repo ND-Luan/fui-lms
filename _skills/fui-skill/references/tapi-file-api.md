@@ -154,7 +154,7 @@ CREATE PROCEDURE spAPIFILE_Document
     @sys_SystemRight int = 0
 AS BEGIN
     IF @sys_SystemRight < 1
-    BEGIN RAISERROR(N'Bạn không có quyền.', 16, 1) RETURN END
+    BEGIN RAISERROR(N'[Unauthorized]Bạn không có quyền.', 16, 1) RETURN END
 
     -- BinaryContent phải alias là fileContent — tAPI đọc đúng tên này
     SELECT FileName, ContentType, fileContent = BinaryContent
@@ -175,7 +175,7 @@ CREATE PROCEDURE spAPIFILE_UPLOAD_Document
     @sys_FileSize        int
 AS BEGIN
     IF @sys_SystemRight < 2
-    BEGIN RAISERROR(N'Bạn không có quyền.', 16, 1) RETURN END
+    BEGIN RAISERROR(N'[Unauthorized]Bạn không có quyền.', 16, 1) RETURN END
 
     DECLARE @NewFileID char(36) = newid()  -- sinh UUID trước, dùng để SELECT lại sau
 

@@ -77,8 +77,8 @@ var vueOBJ = {
 
 //===========================================================================================
 const app = createApp(vueOBJ);
-app.config.globalProperties.vueData = vueData;
 app.config.globalProperties = reactive({
+    vueData,
     v_isMobile: $isMobile,
     v_Loading: false,
     v_LoadingOverlay: [],
