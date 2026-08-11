@@ -916,6 +916,9 @@
 
 			async uploadToGitHub(files, guid, folderName) {
 				const { token, owner, repo } = this.getGitHubConfig();
+				if (!token) {
+					throw new Error('GitHub token chưa được cấu hình an toàn.');
+				}
 
 				const total = files.length;
 				let completed = 0;
