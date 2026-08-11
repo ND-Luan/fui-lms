@@ -21,6 +21,9 @@ async function loadMonHoc() {
     vueData.DSMonHoc = Array.isArray(res?.data) ? res.data : (Array.isArray(res) ? res : [])
     initSelectAll()
 }
+function sameId(left, right) {
+    return left !== undefined && left !== null && right !== undefined && right !== null && String(left) === String(right)
+}
 function onSave() {
     // const jsonData = vueData.items.map(x => {
     //     return {
@@ -119,14 +122,14 @@ async function normalizeMonHocLopByNhom() {
     vueData.DSMonHocLop = sourceForRoot.flatMap(item => {
         const itemMonHocID = item.MonHocID ?? vueData.MonHocItem?.MonHocID
         const subjectGroups = nhomHoc.filter(nhom =>
-            String(nhom.MonHocID) === String(itemMonHocID) &&
-            String(nhom.KhoiID) === String(item.KhoiID)
+            sameId(nhom.MonHocID, itemMonHocID) &&
+            sameId(nhom.KhoiID, item.KhoiID)
         )
         if (subjectGroups.length > 0) {
             return subjectGroups.map(nhom => {
                 const groupItem = sourceGroups.find(group =>
-                    String(group.LopNhomID) === String(nhom.NhomID) &&
-                    String(group.MonHocID ?? itemMonHocID) === String(itemMonHocID)
+                    sameId(group.LopNhomID, nhom.NhomID) &&
+                    sameId(group.MonHocID ?? itemMonHocID, itemMonHocID)
                 )
                 return {
                 ...item,
@@ -176,9 +179,9 @@ async function renderDSMonHocLop() {
         }]
         const filterDSByKhoi = vueData.DSMonHocLop
             .map(x => ({ ...x, TemplateBangDiemID: x.TemplateBangDiemID === 0 ? null : x.TemplateBangDiemID }))
-            .filter(x => x.KhoiID === khoiItem.value)
+            .filter(x => sameId(x.KhoiID, khoiItem.value))
         const nhomByKhoi = vueData.CapItem?.CapID === 3 && vueData.ShowNhom === true
-            ? (vueData.DSNhom || []).filter(x => x.KhoiID === khoiItem.value)
+            ? (vueData.DSNhom || []).filter(x => sameId(x.KhoiID, khoiItem.value))
             : []
         if (vueData.CapItem?.CapID === 3 && vueData.ShowNhom === true) {
             const monHocCoNhom = new Set(nhomByKhoi.map(x => String(x.MonHocID)))
@@ -210,7 +213,9 @@ async function renderDSMonHocLop() {
                 LopNhomIDs: []  // thêm mảng để lưu LopNhomID
             }
             for (const LopNhomID of uniqueDSLop) {
-                const lop = filterDSByKhoi.find(x => x.LopNhomID === LopNhomID && x.MonHocID === monHoc.MonHocID)
+                const lop = filterDSByKhoi.find(x =>
+                    sameId(x.LopNhomID, LopNhomID) && sameId(x.MonHocID, monHoc.MonHocID)
+                )
                 if (lop) {
                     obj['TemplateBangDiem_' + lop.LopNhomID] = lop.TemplateBangDiemID
                 } else {
