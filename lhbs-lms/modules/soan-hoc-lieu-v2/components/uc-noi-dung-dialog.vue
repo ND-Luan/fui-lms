@@ -517,11 +517,15 @@
 				if (!await this.ensureDraftNode(selectedFile)) return;
 				this.archiveFileToLmsInBackground(selectedFile, targetItem);
 				this.notify(`Đang phát hành ${selectedFile.name} lên Google Drive...`, 'info');
-
 				uploadManager.uploadLmsGoogleDrive(selectedFile, {
 					folderPath: `${targetItem.TenHocLieu || this.item?.TenHocLieu || 'HocLieu'}/${vueData.user.UserID}`,
 					onComplete: async fileDrive => {
 						try {
+							const slideType = this.getSlideContentType(selectedFile.type);
+							const driveUrl = (slideType === 'PDF' || slideType === 'DOCX')
+								? `https://drive.google.com/file/d/${fileDrive.id}/preview`
+								: `https://docs.google.com/presentation/d/${fileDrive.id}/preview`;
+
 							const metadata = {
 								title: selectedFile.name,
 								fileName: selectedFile.name,
@@ -529,8 +533,8 @@
 								fileSize: Number(selectedFile.size || 0),
 								uploadSource: 'ggdrive',
 								driveFileId: fileDrive.id,
-								url: `https://docs.google.com/presentation/d/${fileDrive.id}/preview`,
-								slideType: this.getSlideContentType(selectedFile.type),
+								url: driveUrl,
+								slideType: slideType,
 								mediaType: targetItem.LoaiNoiDung === 'AUDIO' ? 'audio' : undefined,
 							};
 							await this.savePublishedMetadata(targetItem, metadata);
@@ -618,25 +622,38 @@
 
 				// Case 1: Canva Link
 				if (link.includes('canva.com')) {
-					const designIdMatch = link.match(/\/design\/([^\/]+)/);
-					if (designIdMatch) {
-						const designId = designIdMatch[1];
-						// Ensure format is: https://www.canva.com/design/DESIGN_ID/view?embed
-						const embedUrl = `https://www.canva.com/design/${designId}/view?embed`;
-						metadata = {
-							title: 'Canva Presentation',
-							fileName: 'Canva Presentation',
-							contentType: 'text/html',
-							fileSize: 0,
-							uploadSource: 'canva',
-							driveFileId: designId,
-							url: embedUrl,
-							slideType: 'PPT',
-						};
-					} else {
-						this.notify("Đường link Canva không hợp lệ. Vui lòng kiểm tra lại.", "error");
-						return;
+					// Clean up any existing query parameters
+					let cleanUrl = link.split('?')[0].trim();
+					if (cleanUrl.endsWith('/')) {
+						cleanUrl = cleanUrl.slice(0, -1);
 					}
+
+					let embedUrl = '';
+					if (cleanUrl.includes('/view')) {
+						// E.g. https://www.canva.com/design/DAG2e7KcKXw/80_2b2QO75d4MJVYW7OaWg/view -> view?embed
+						embedUrl = cleanUrl + '?embed';
+					} else if (cleanUrl.includes('/watch')) {
+						// E.g. /watch -> watch?embed or view?embed
+						embedUrl = cleanUrl.replace('/watch', '/view') + '?embed';
+					} else {
+						// Fallback: append /view?embed
+						embedUrl = cleanUrl + '/view?embed';
+					}
+
+					// Extract designId (the part after /design/)
+					const designIdMatch = cleanUrl.match(/\/design\/([^\/]+)/);
+					const designId = designIdMatch ? designIdMatch[1] : 'canva-design';
+
+					metadata = {
+						title: 'Canva Presentation',
+						fileName: 'Canva Presentation',
+						contentType: 'text/html',
+						fileSize: 0,
+						uploadSource: 'canva',
+						driveFileId: designId,
+						url: embedUrl,
+						slideType: 'PPT',
+					};
 				} else {
 					// Case 2: Google Drive / Slides Link
 					const reg = /\/d\/([^\/]+)/;
@@ -916,9 +933,6 @@
 
 			async uploadToGitHub(files, guid, folderName) {
 				const { token, owner, repo } = this.getGitHubConfig();
-				if (!token) {
-					throw new Error('GitHub token chưa được cấu hình an toàn.');
-				}
 
 				const total = files.length;
 				let completed = 0;

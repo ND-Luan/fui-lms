@@ -75,7 +75,8 @@
 	export default {
 		name: 'uc-achievement-card-desktop',
 		props: {
-			HocSinh: { type: Object }
+			HocSinh: { type: Object },
+			NienKhoa: { type: Number, default: null }
 		},
 		data() {
 			return {
@@ -116,7 +117,8 @@
 		},
 		mounted() { if (this.HocSinh) this.fetchData(); },
 		watch: {
-			HocSinh(val) { if (val) this.fetchData(); }
+		HocSinh(val) { if (val) this.fetchData(); },
+		NienKhoa() { this.fetchData(); }
 		},
 		methods: {
 			countByType(type) {
@@ -127,10 +129,10 @@
 				}).length;
 			},
 			fetchData() {
-				ajaxCALL('lms/EL_Student_Achievement_Get', { HocSinhID: this.HocSinh?.HocSinhID ?? 0 }, res => {
+				ajaxCALL('lms/EL_Student_Achievement_Get', { HocSinhID: this.HocSinh?.HocSinhID ?? 0, NienKhoa: this.NienKhoa }, res => {
 					this.achievements = res.data;
 				});
 			}
 		}
 	}
-</script> 
+</script>

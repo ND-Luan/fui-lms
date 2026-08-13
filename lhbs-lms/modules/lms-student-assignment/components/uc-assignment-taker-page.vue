@@ -8,21 +8,15 @@
 			<p class="loading-label">Đang tải dữ liệu học sinh...</p>
 		</div>
 
-		<!-- Thông báo tính năng mới: Đánh dấu câu hỏi (hiện trong 2 ngày) -->
-		<v-alert v-if="showFlagFeatureAlert && !isIntegrated" type="info" variant="tonal" closable class="ma-2"
-			@click:close="dismissFlagFeatureAlert">
-			<template #prepend>
-				<v-icon>mdi-flag-variant</v-icon>
-			</template>
-			<strong>Tính năng mới:</strong> Bạn có thể <strong>đánh dấu câu hỏi</strong> bằng nút
-			<v-icon size="16" color="red">mdi-flag-variant-outline</v-icon>
-			để xem lại sau — kể cả sau khi đã nộp bài.
-			Tất cả câu hỏi đã đánh dấu sẽ được tổng hợp tại trang <strong>Câu hỏi đã đánh dấu</strong> trong Trang chủ
-			học sinh.
-		</v-alert>
-
 		<!-- Main Content -->
-		<v-container v-if="dataReady" fluid class="pa-0">
+		<v-container v-else-if="loadError" fluid class="pa-4">
+			<v-alert type="error" variant="tonal" prominent>
+				<template #title>Không thể tải bài tập</template>
+				{{ loadError }}
+			</v-alert>
+		</v-container>
+
+		<v-container v-else fluid class="pa-0">
 			<v-row :no-gutters="true">
 				<v-col cols="12">
 					<!-- Assignment Taker Component -->
@@ -106,6 +100,7 @@
             isSendToClass,
 
             dataReady: false,
+            loadError: '',
             assignmentData: [],
             monHocName: '',
             confirmSubmitDialog: false,
@@ -124,9 +119,6 @@
 
             // Guard flag — chặn loadAssignmentData chạy đồng thời
             isLoadingAssignment: false,
-
-            // Alert tính năng mới đánh dấu câu hỏi
-            showFlagFeatureAlert: false,
 
             // Guard cho beforeunload
             beforeunloadHandler: null,
@@ -169,8 +161,6 @@
 
     mounted() {
         this.callNienKhoa_Get();
-        this._initFlagFeatureAlert();
-
         // Chặn đóng tab browser khi bài đang làm chưa nộp
         this.beforeunloadHandler = (e) => {
             if (this.isActiveDirty) {
@@ -268,6 +258,7 @@
             // Guard: chặn gọi đồng thời, tránh race condition
             if (this.isLoadingAssignment) return;
             this.isLoadingAssignment = true;
+            this.loadError = '';
 
             try {
                 const isSendToStudent = !this.isSendToClass;
@@ -300,9 +291,10 @@
 
                 const data = await fetchPromise(endpoint, params, { cache: false });
                 await this.processAssignmentResponse({ data });
-                this.keyComp++;
+                if (!this.loadError) this.keyComp++;
             } catch (err) {
                 console.error('Lỗi loadAssignmentData:', err);
+                this.handleInvalidResponse(err);
             } finally {
                 // Luôn release guard dù thành công hay lỗi
                 this.isLoadingAssignment = false;
@@ -311,7 +303,7 @@
 
         async processAssignmentResponse(response) {
             if (!this.isValidResponse(response)) {
-                this.handleInvalidResponse();
+                this.handleInvalidResponse(response?.data);
                 return;
             }
             this.setAssignmentData(response);
@@ -328,9 +320,14 @@
             return response?.data?.length > 0 && response.data[0]?.length > 0;
         },
 
-        handleInvalidResponse() {
-            console.error('API getAssignmentDetail không trả về dữ liệu hợp lệ.');
-            Vue.$toast.error('Không thể tải được dữ liệu bài tập.', { position: 'top' });
+        handleInvalidResponse(errorResponse = null) {
+            console.error('API getAssignmentDetail không trả về dữ liệu hợp lệ.', errorResponse);
+            const message = errorResponse?.Message
+                || errorResponse?.message
+                || errorResponse?.response?.data?.Message
+                || 'Không thể tải được dữ liệu bài tập.';
+            this.loadError = message;
+            Vue.$toast.error(message, { position: 'top' });
         },
 
         setAssignmentData(response) {
@@ -934,33 +931,6 @@
             } catch (err) {
                 console.error('Lỗi insertSubmissionForResubmit:', err);
             }
-        },
-
-        // ===========================
-        // ALERT TÍNH NĂNG MỚI
-        // ===========================
-
-        _initFlagFeatureAlert() {
-            const KEY = 'flag_feature_alert_dismissed';
-            const dismissed = localStorage.getItem(KEY);
-            if (dismissed) return;
-            // Hiện trong 2 ngày kể từ lần đầu vào
-            const FIRST_KEY = 'flag_feature_alert_first_seen';
-            const now = Date.now();
-            const firstSeen = localStorage.getItem(FIRST_KEY);
-            if (!firstSeen) {
-                localStorage.setItem(FIRST_KEY, now.toString());
-            } else if (now - parseInt(firstSeen) > 2 * 24 * 60 * 60 * 1000) {
-                // Quá 2 ngày — tự ẩn, không cần user tắt
-                localStorage.setItem(KEY, '1');
-                return;
-            }
-            this.showFlagFeatureAlert = true;
-        },
-
-        dismissFlagFeatureAlert() {
-            this.showFlagFeatureAlert = false;
-            localStorage.setItem('flag_feature_alert_dismissed', '1');
         },
 
         // ===========================

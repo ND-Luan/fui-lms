@@ -291,6 +291,9 @@
 					this.loadData();
 				},
 			},
+			NienKhoa() {
+				if (this.hocSinhID) this.loadData();
+			},
 		},
 		methods: {
 			syncTopbar() {

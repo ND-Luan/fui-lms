@@ -93,6 +93,9 @@ BEGIN
 END
 GO
 
+GRANT EXECUTE ON [dbo].[spAPI_FP_HocLieu_GetAll] TO [lmslhbs];
+GO
+
 
 -- Cập nhật spAPI_FP_HocLieu_Save
 SET ANSI_NULLS ON
@@ -140,6 +143,9 @@ BEGIN
 END
 GO
 
+GRANT EXECUTE ON [dbo].[spAPI_FP_HocLieu_Save] TO [lmslhbs];
+GO
+
 
 -- Tạo spAPI_FileData_Delete để xóa dữ liệu filedata
 SET ANSI_NULLS ON
@@ -162,4 +168,7 @@ GO
 
 -- Cấp quyền thực thi cho Stored Procedure
 GRANT EXECUTE ON [dbo].[spAPI_FileData_Delete] TO [lmslhbs];
+GRANT ALTER, CONTROL, TAKE OWNERSHIP, VIEW DEFINITION ON OBJECT::[dbo].[spAPI_FP_HocLieu_GetAll] TO [lmslhbs];
+GRANT ALTER, CONTROL, TAKE OWNERSHIP, VIEW DEFINITION ON OBJECT::[dbo].[spAPI_FP_HocLieu_Save] TO [lmslhbs];
+GRANT ALTER, CONTROL, TAKE OWNERSHIP, VIEW DEFINITION ON OBJECT::[dbo].[spAPI_FileData_Delete] TO [lmslhbs];
 GO

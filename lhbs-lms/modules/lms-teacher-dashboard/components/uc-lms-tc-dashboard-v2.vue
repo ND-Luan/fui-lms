@@ -626,7 +626,7 @@
 			xemTinhTrang(assignment) {
 				this.iframeRef.value.openWindow({
 					title: this.$t('message.ClassGradebook'),
-					url: `/lms-teacher-gradebook?LopID=${assignment.LopID}&MonHocID=${assignment.MonHocID}&HocKi=${vueData.NienKhoaItem?.HocKi}&AssignType=CLASS`,
+					url: `/lms-teacher-gradebook?LopID=${assignment.LopID}&MonHocID=${assignment.MonHocID}&HocKi=${vueData.NienKhoaItem?.HocKi}&NienKhoa=${vueData.NienKhoa}&AssignType=CLASS`,
 					onclose: () => vueData.initPage()
 				})
 			},

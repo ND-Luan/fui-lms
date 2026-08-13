@@ -113,13 +113,11 @@
 			"HocSinh.HocSinhID": {
 				immediate: true, // chạy ngay khi mount, không cần mounted()
 				async handler(hocSinhID) {
-					if (!hocSinhID) return // guard an toàn
-					this.DSMonHoc = await ajaxCALLPromise('lms/EL_Student_Get_MonHoc_ByHocSinhID', {
-						HocSinhID: this.hocSinhID,
-						NienKhoa: this.NienKhoa
-					});
-					this.onRefresh();
+					if (hocSinhID) this.loadSchoolYearData()
 				}
+			},
+			NienKhoa() {
+				if (this.hocSinhID) this.loadSchoolYearData()
 			},
 			DSNhiemVu_Filter() { this.syncTopbar() },
 		},
@@ -149,6 +147,16 @@
 			},
 		},
 		methods: {
+			async loadSchoolYearData() {
+				if (!this.hocSinhID || !this.NienKhoa) return
+				this.monHocSelected = []
+				this.selectedMonHoc = null
+				this.DSMonHoc = await ajaxCALLPromise('lms/EL_Student_Get_MonHoc_ByHocSinhID', {
+					HocSinhID: this.hocSinhID,
+					NienKhoa: this.NienKhoa
+				})
+				await this.onRefresh()
+			},
 			syncTopbar() {
 				if (!this.topbarCtx) return
 				this.topbarCtx.subtitle = this.DSNhiemVu_Filter.length + ' nhiệm vụ'

@@ -16,18 +16,24 @@
 		</div>
 
 		<!-- Tabs học kỳ — render động từ DSHocKy (C2/C3: HK1/HK2/CaNam, C1: GHKI/CHKI/GHKII/CN) -->
-		<v-tabs v-model="activeTab" color="primary" class="kqht-tabs">
+		<v-tabs v-if="DSHocKy.length" v-model="activeTab" color="primary" class="kqht-tabs">
 			<v-tab v-for="hk in DSHocKy" :key="hk.id" :value="hk.id">
 				<v-icon start size="16">mdi-calendar-month-outline</v-icon>
 				{{ hk.name }}
 			</v-tab>
 		</v-tabs>
-		<v-divider />
+		<v-divider v-if="DSHocKy.length" />
 
 		<!-- Loading -->
 		<div v-if="loading" class="kqht-loading">
 			<v-progress-circular indeterminate color="primary" size="32" />
 			<span>Đang tải kết quả học tập...</span>
+		</div>
+
+		<div v-else-if="!DSHocKy.length" class="kqht-empty-state">
+			<div class="kqht-empty-icon"><v-icon size="30">mdi-calendar-clock-outline</v-icon></div>
+			<div class="kqht-empty-title">Chưa có kỳ đánh giá được công bố</div>
+			<div class="kqht-empty-description">Kết quả học tập sẽ xuất hiện tại đây khi nhà trường công bố.</div>
 		</div>
 
 		<!-- C2 / C3: Bảng điểm dạng table -->
@@ -62,10 +68,20 @@
 								<template #item.dtb="{ item }">
 									<span class="font-weight-bold text-primary">{{ fmtScore(item.dtb) }}</span>
 								</template>
+								<template #no-data>
+									<div class="kqht-empty-state kqht-empty-state--table">
+										<div class="kqht-empty-icon"><v-icon size="30">mdi-clipboard-text-clock-outline</v-icon></div>
+										<div class="kqht-empty-title">Chưa có điểm học kỳ 1</div>
+										<div class="kqht-empty-description">Điểm sẽ hiển thị sau khi giáo viên hoàn tất và nhà trường công bố.</div>
+									</div>
+								</template>
 							</v-data-table>
 						</v-card>
 						<div v-else class="kqht-mobile-list">
-							<div v-if="!dataHK1.Diem.length" class="kqht-mobile-empty">Chưa có dữ liệu điểm học kỳ 1
+							<div v-if="!dataHK1.Diem.length" class="kqht-empty-state kqht-empty-state--mobile">
+								<div class="kqht-empty-icon"><v-icon size="30">mdi-clipboard-text-clock-outline</v-icon></div>
+								<div class="kqht-empty-title">Chưa có điểm học kỳ 1</div>
+								<div class="kqht-empty-description">Điểm sẽ hiển thị sau khi giáo viên hoàn tất và nhà trường công bố.</div>
 							</div>
 							<div v-for="item in dataHK1.Diem" :key="item.LopmonID || item.TenMon"
 								class="kqht-mobile-card">
@@ -139,10 +155,20 @@
 								<template #item.dtb="{ item }">
 									<span class="font-weight-bold text-primary">{{ fmtScore(item.dtb) }}</span>
 								</template>
+								<template #no-data>
+									<div class="kqht-empty-state kqht-empty-state--table">
+										<div class="kqht-empty-icon"><v-icon size="30">mdi-clipboard-text-clock-outline</v-icon></div>
+										<div class="kqht-empty-title">Chưa có điểm học kỳ 2</div>
+										<div class="kqht-empty-description">Điểm sẽ hiển thị sau khi giáo viên hoàn tất và nhà trường công bố.</div>
+									</div>
+								</template>
 							</v-data-table>
 						</v-card>
 						<div v-else class="kqht-mobile-list">
-							<div v-if="!dataHK2.Diem.length" class="kqht-mobile-empty">Chưa có dữ liệu điểm học kỳ 2
+							<div v-if="!dataHK2.Diem.length" class="kqht-empty-state kqht-empty-state--mobile">
+								<div class="kqht-empty-icon"><v-icon size="30">mdi-clipboard-text-clock-outline</v-icon></div>
+								<div class="kqht-empty-title">Chưa có điểm học kỳ 2</div>
+								<div class="kqht-empty-description">Điểm sẽ hiển thị sau khi giáo viên hoàn tất và nhà trường công bố.</div>
 							</div>
 							<div v-for="item in dataHK2.Diem" :key="item.LopmonID || item.TenMon"
 								class="kqht-mobile-card">
@@ -208,10 +234,20 @@
 								<template #item.dtb="{ item }">
 									<span class="font-weight-medium">{{ fmtScore(item.dtb) }}</span>
 								</template>
+								<template #no-data>
+									<div class="kqht-empty-state kqht-empty-state--table">
+										<div class="kqht-empty-icon"><v-icon size="30">mdi-school-outline</v-icon></div>
+										<div class="kqht-empty-title">Chưa có kết quả cả năm</div>
+										<div class="kqht-empty-description">Kết quả tổng kết sẽ hiển thị khi học kỳ 2 kết thúc và được công bố.</div>
+									</div>
+								</template>
 							</v-data-table>
 						</v-card>
 						<div v-else class="kqht-mobile-list">
-							<div v-if="!dataCN.Diem.length" class="kqht-mobile-empty">Chưa có dữ liệu kết quả cả năm
+							<div v-if="!dataCN.Diem.length" class="kqht-empty-state kqht-empty-state--mobile">
+								<div class="kqht-empty-icon"><v-icon size="30">mdi-school-outline</v-icon></div>
+								<div class="kqht-empty-title">Chưa có kết quả cả năm</div>
+								<div class="kqht-empty-description">Kết quả tổng kết sẽ hiển thị khi học kỳ 2 kết thúc và được công bố.</div>
 							</div>
 							<div v-for="item in dataCN.Diem" :key="item.LopmonID || item.TenMon"
 								class="kqht-mobile-card kqht-mobile-card--compact">
@@ -255,7 +291,7 @@
 		</template>
 
 		<!-- C1: Bảng điểm dạng nhóm (Kiến thức-Kĩ năng, Năng lực, Phẩm chất) -->
-		<template v-else>
+		<template v-else-if="hasPrimarySchoolData">
 			<v-window v-model="activeTab">
 				<v-window-item v-for="hk in DSHocKy" :key="hk.id" :value="hk.id">
 					<div class="kqht-section">
@@ -451,6 +487,11 @@
 				</v-window-item>
 			</v-window>
 		</template>
+		<div v-else class="kqht-empty-state">
+			<div class="kqht-empty-icon"><v-icon size="30">mdi-book-open-page-variant-outline</v-icon></div>
+			<div class="kqht-empty-title">Chưa có kết quả đánh giá</div>
+			<div class="kqht-empty-description">Nhận xét và mức đánh giá sẽ hiển thị sau khi được nhà trường công bố.</div>
+		</div>
 
 	</div>
 </template>
@@ -521,6 +562,10 @@
 		isCapTrung() {
 			return this.HocSinh.CapID === 2 || this.HocSinh.CapID === 3
 		},
+		hasPrimarySchoolData() {
+			return [...Object.values(this.groupKTKN), ...Object.values(this.groupNLC), ...Object.values(this.groupPC), ...Object.values(this.groupNLR)]
+				.some(group => Object.values(group).some(value => value != null && value !== ''))
+		},
 		hoTenViet() {
 			const ho = this.HocSinh?.HoTen || ''
 			return ho.split(' ').filter(Boolean).map(w => w[0]).slice(-2).join('').toUpperCase() || 'HS'
@@ -533,10 +578,21 @@
 			localStorage.setItem('Semester', tab)
 			this.loadBangDiem(tab)
 		},
+		NienKhoa() {
+			if (this.NienKhoa) this.reloadSchoolYearData()
+		},
 	},
 
 	methods: {
 		// ─── API Calls ────────────────────────────────────────────────
+		async reloadSchoolYearData() {
+			this.loading = true
+			try {
+				await this.loadCongBoBangDiem()
+			} finally {
+				this.loading = false
+			}
+		},
 
 		loadCongBoBangDiem() {
 			return new Promise(resolve => {

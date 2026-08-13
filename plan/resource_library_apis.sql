@@ -507,4 +507,14 @@ GRANT EXECUTE ON [dbo].[spAPI_FP_TaiNguyen_Node_Delete] TO [lmslhbs];
 GRANT EXECUTE ON [dbo].[spAPI_FP_TaiNguyen_File_Register] TO [lmslhbs];
 GRANT EXECUTE ON [dbo].[spAPI_FP_TaiNguyen_Audit_GetAll] TO [lmslhbs];
 GRANT EXECUTE ON [dbo].[spAPI_FP_TaiNguyen_Audit_GetTree] TO [lmslhbs];
+
+GRANT ALTER, CONTROL, TAKE OWNERSHIP, VIEW DEFINITION ON OBJECT::[dbo].[spAPI_FP_TaiNguyen_GetAll] TO [lmslhbs];
+GRANT ALTER, CONTROL, TAKE OWNERSHIP, VIEW DEFINITION ON OBJECT::[dbo].[spAPI_FP_TaiNguyen_Save] TO [lmslhbs];
+GRANT ALTER, CONTROL, TAKE OWNERSHIP, VIEW DEFINITION ON OBJECT::[dbo].[spAPI_FP_TaiNguyen_Delete] TO [lmslhbs];
+GRANT ALTER, CONTROL, TAKE OWNERSHIP, VIEW DEFINITION ON OBJECT::[dbo].[spAPI_FP_TaiNguyen_GetTree] TO [lmslhbs];
+GRANT ALTER, CONTROL, TAKE OWNERSHIP, VIEW DEFINITION ON OBJECT::[dbo].[spAPI_FP_TaiNguyen_Node_Save] TO [lmslhbs];
+GRANT ALTER, CONTROL, TAKE OWNERSHIP, VIEW DEFINITION ON OBJECT::[dbo].[spAPI_FP_TaiNguyen_Node_Delete] TO [lmslhbs];
+GRANT ALTER, CONTROL, TAKE OWNERSHIP, VIEW DEFINITION ON OBJECT::[dbo].[spAPI_FP_TaiNguyen_File_Register] TO [lmslhbs];
+GRANT ALTER, CONTROL, TAKE OWNERSHIP, VIEW DEFINITION ON OBJECT::[dbo].[spAPI_FP_TaiNguyen_Audit_GetAll] TO [lmslhbs];
+GRANT ALTER, CONTROL, TAKE OWNERSHIP, VIEW DEFINITION ON OBJECT::[dbo].[spAPI_FP_TaiNguyen_Audit_GetTree] TO [lmslhbs];
 GO

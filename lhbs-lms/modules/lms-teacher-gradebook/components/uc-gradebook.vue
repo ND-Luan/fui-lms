@@ -97,13 +97,14 @@
 </template>
 
 <script>
-export default {
-	name: 'uc-gradebook',
+	export default {
+		name: 'uc-gradebook',
 	inject: ['snackbarRef', 'iframeRef', 'confirmRef'],
 	props: {
 		initialLopId: Number,
 		initialMonHocId: Number,
 		initialHocKi: Number,
+		initialNienKhoa: Number,
 	},
 	data() {
 		this.$i18n.locale = (localStorage.getItem('IsLanguage') && localStorage.getItem('IsLanguage') == 'true') ? 'en' : 'vi'
@@ -150,8 +151,9 @@ export default {
 			this.loading = false;
 		},
 		async fetchMyClasses() {
-			ajaxCALL("lms/EL_Teacher_GetMyClasses", { HocKi: this.initialHocKi }, (res) => {
-				this.lopList = res.data || [];
+			ajaxCALL("lms/EL_Teacher_GetMyClasses", { NienKhoa: this.initialNienKhoa, HocKi: this.initialHocKi }, (res) => {
+				// SP trả 2 resultset: data[0]=NienKhoa hiện tại, data[1]=danh sách lớp thật
+				this.lopList = (Array.isArray(res.data) && Array.isArray(res.data[1])) ? res.data[1] : (res.data || []);
 				if (!this.selectedLopID && this.lopList.length > 0) {
 
 					this.selectedLopID = this.lopList.find(x => x.LopID == this.initialLopId)?.LopID ?? this.lopList[0].LopID;
@@ -241,7 +243,5 @@ export default {
 		console.log('initialLopId', this.initialLopId);
 		this.initialize();
 	}
-}
+	}
 </script>
-
-<style scoped></style>

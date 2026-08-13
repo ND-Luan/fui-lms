@@ -61,7 +61,20 @@
           3. Đồng bộ dữ liệu Học sinh - Lớp
         </v-card-title>
         <v-card-text class="text-body-2 text-medium-emphasis">
-          Lấy dữ liệu theo đúng giai đoạn: lớp chủ nhiệm đầu năm, lớp tổ hợp sau khi phân tổ hợp.
+          Lấy dữ liệu theo đúng giai đoạn của niên khóa chọn: lớp chủ nhiệm đầu năm, lớp tổ hợp sau khi phân tổ hợp.
+          <v-select
+            v-model="selectedNienKhoa"
+            class="mt-3"
+            density="compact"
+            variant="outlined"
+            label="Niên khóa cần đồng bộ"
+            :items="nienKhoaItems"
+            item-title="label"
+            item-value="NienKhoa"
+            :loading="loadingNienKhoa"
+            :disabled="loadingNienKhoa || loadingSyncHocSinhLop"
+            hide-details
+          />
           <div v-if="hocSinhLopSyncSummary" class="mt-2">
             <v-chip size="small" color="info" variant="tonal">
               <v-icon start>mdi-check-circle</v-icon>
@@ -71,9 +84,9 @@
         </v-card-text>
         <v-card-actions class="px-4 pb-4">
           <v-btn color="info" :loading="loadingSyncHocSinhLop"
-            :disabled="loadingGV || loadingFetchLop || loadingSyncLop || loadingSyncHocSinhLop"
+            :disabled="loadingGV || loadingFetchLop || loadingSyncLop || loadingSyncHocSinhLop || !selectedNienKhoa"
             @click="onSyncHocSinhLop" prepend-icon="mdi-sync">
-            Đồng bộ học sinh-lớp 2023–2026
+            Đồng bộ học sinh-lớp {{ selectedNienKhoa ? `năm ${selectedNienKhoa}–${Number(selectedNienKhoa) + 1}` : '' }}
           </v-btn>
         </v-card-actions>
       </v-card>
@@ -95,6 +108,9 @@
       loadingSyncLop: false,
       lopFetchedCount: null,
       _cachedLopData: null,
+      loadingNienKhoa: false,
+      nienKhoaItems: [],
+      selectedNienKhoa: null,
       loadingSyncHocSinhLop: false,
       hocSinhLopSyncSummary: null,
     }
@@ -106,9 +122,36 @@
         : 'Cài đặt mặc định'
     },
   },
+  mounted() {
+    this.loadNienKhoa()
+  },
   methods: {
     showSnackbar(message, color = 'success') {
       this.snackbarRef?.value?.showSnackbar({ message, color })
+    },
+
+    async loadNienKhoa() {
+      this.loadingNienKhoa = true
+      try {
+        const data = await this._ajaxPromise('lms/NienKhoa_Get')
+        this.nienKhoaItems = [...new Map((Array.isArray(data) ? data : [])
+          .map(item => [item.NienKhoa, {
+            ...item,
+            label: `${item.NienKhoa} - ${Number(item.NienKhoa) + 1}`,
+          }]))
+          .values()]
+        this.selectedNienKhoa = this.nienKhoaItems.find(item => item.IsActive)?.NienKhoa
+          ?? Number(vueData.NienKhoa)
+          ?? this.nienKhoaItems[0]?.NienKhoa
+          ?? null
+      } catch (err) {
+        console.error('loadNienKhoa', err)
+        this.nienKhoaItems = []
+        this.selectedNienKhoa = Number(vueData.NienKhoa) || null
+        this.showSnackbar('Không lấy được danh sách niên khóa', 'warning')
+      } finally {
+        this.loadingNienKhoa = false
+      }
     },
 
     // ── 1. Giáo viên ────────────────────────────────────────────────────────
@@ -207,18 +250,21 @@
       this.loadingSyncHocSinhLop = true
       this.hocSinhLopSyncSummary = null
       try {
-        const namHocHienTai = Number(vueData.NienKhoa)
-        const namHocBatDau = namHocHienTai - 3
+        const namHoc = Number(this.selectedNienKhoa)
+        if (!namHoc) {
+          this.showSnackbar('Vui lòng chọn niên khóa cần đồng bộ', 'warning')
+          return
+        }
         let tongSoHocSinhLop = 0
         let tongSoNienKhoa = 0
 
-        for (let namHoc = namHocBatDau; namHoc <= namHocHienTai; namHoc += 1) {
+        {
           const [dsLopChuNhiem, dsLopLMS] = await Promise.all([
             this._ajaxPromise('student/LMS_GetLopChuNhiem?NamHoc=' + namHoc),
             this._ajaxPromise('student/LMS_GetLop?NamHoc=' + namHoc),
           ])
           const lopMau = Array.isArray(dsLopLMS) && dsLopLMS.length ? dsLopLMS[0].LopID : null
-          if (lopMau === null || lopMau === undefined) continue
+          if (lopMau === null || lopMau === undefined) return
 
           const isCap3 = lop => Number(lop?.KhoiID) >= 10
           const isLopToHop = lop => {
@@ -236,7 +282,7 @@
 
           const [dsHocSinhLopChuNhiem, dsHocSinhLopLMS] = await Promise.all([
             this._ajaxPromise('student/LMS_GetHocSinhLopChuNhiem', { NienKhoa: namHoc }),
-            hasLopToHop
+            hasLopToHopCap3
               ? this._ajaxPromise('student/LMS_GetHocSinhLop', {
                   LopID: String(lopMau),
                   NienKhoa: namHoc,
@@ -249,10 +295,10 @@
           const rowsLMS = Array.isArray(dsHocSinhLopLMS)
             ? dsHocSinhLopLMS.filter(row => lopLMSCap3IDs.has(String(row.LopID)))
             : []
-          const rows = (hasLopToHop ? rowsChuNhiem.filter(row => {
+          const rows = (hasLopToHopCap3 ? rowsChuNhiem.filter(row => {
             const lop = dsLopChuNhiem.find(item => String(item.LopID) === String(row.LopID))
             return !isCap3(lop)
-          }) : rowsChuNhiem).concat(hasLopToHop ? rowsLMS : [])
+            }) : rowsChuNhiem).concat(hasLopToHopCap3 ? rowsLMS : [])
             .map(row => ({ ...row, Enable: true }))
 
           for (let i = 0; i < rows.length; i += 500) {

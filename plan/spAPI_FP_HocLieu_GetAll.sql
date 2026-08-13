@@ -45,3 +45,7 @@ BEGIN
     FETCH NEXT @PageSize ROWS ONLY;
 END;
 GO
+
+GRANT EXECUTE ON [dbo].[spAPI_FP_HocLieu_GetAll] TO [lmslhbs];
+GRANT ALTER, CONTROL, TAKE OWNERSHIP, VIEW DEFINITION ON OBJECT::[dbo].[spAPI_FP_HocLieu_GetAll] TO [lmslhbs];
+GO

@@ -498,6 +498,10 @@ function initKeyboardShortcuts() {
                 goToLastSlide();
                 break;
             case 'Escape':
+                if (document.querySelector('.lh-fullscreen') || document.querySelector('.lh-fullscreen-overlay') || document.fullscreenElement) {
+                    // If exiting fullscreen, do not trigger page navigation
+                    break;
+                }
                 e.preventDefault();
                 goBack();
                 break;

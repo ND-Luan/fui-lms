@@ -183,7 +183,11 @@
 	
 		methods: {
 			async getKhoi(forceRefresh = false) {
-				this.DSKhoi = await fetchPromise("lms/KhoiHocByCapHoc_Get", { CapID: vueData.CapID }, { forceRefresh })
+				this.DSKhoi = await fetchPromise("lms/KhoiHocByCapHoc_Get", { 
+					CapID: vueData.CapID,
+					HocKi: vueData.NienKhoaItem.HocKi,
+					NienKhoa: vueData.NienKhoa,
+					 }, { forceRefresh })
 			},
 	
 			async getLop(forceRefresh = false) {

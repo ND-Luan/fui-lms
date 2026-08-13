@@ -200,7 +200,7 @@
 				// console.log(assignmentID)
 				openWindow({
 					title: "Sổ điểm Lớp học",
-					url: `/lms-teacher-gradebook?LopID=${assignment.LopID}&MonHocID=${assignment.MonHocID}&HocKi=${vueData.HocKiItem.HocKi}`,
+					url: `/lms-teacher-gradebook?LopID=${assignment.LopID}&MonHocID=${assignment.MonHocID}&HocKi=${vueData.HocKiItem.HocKi}&NienKhoa=${vueData.NienKhoa}`,
 					id: "WinGiaoBaiTap"
 				})
 			}
