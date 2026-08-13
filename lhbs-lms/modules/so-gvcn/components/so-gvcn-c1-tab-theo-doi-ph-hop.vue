@@ -30,7 +30,7 @@
 					{ title: 'I', width: 100, type: 'checkbox' },
 					{ title: 'II', width: 100, type: 'checkbox' },
 					{ title: 'III', width: 100, type: 'checkbox' },
-					{ title: 'Ghi chú', width: 350 }
+					{ title: 'Ghi chú', width: 380, align: 'justify' }
 				]
 			}
 		},

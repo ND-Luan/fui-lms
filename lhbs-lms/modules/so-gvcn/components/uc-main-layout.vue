@@ -210,15 +210,16 @@
 									:selected-lop-i-d="selectedLopID" :sheet-height="sheetHeight"
 									:month-sheet-height="keHoachSheetHeight" :month-list="monthList"
 									:week-list="weeklyPlanList" :nien-khoa="currentNienKhoa"
-									:get-ke-hoach-export-months="getKeHoachExportMonths" />
+									:get-ke-hoach-export-months="getKeHoachExportMonths"
+									@changed="markTabDirty('cong-tac-cn')" />
 							</v-window-item>
 
 							<!-- Hồ sơ HS cần quan tâm (C1) / Kế hoạch tháng tuần (C2, C3) -->
 							<v-window-item value="ke-hoach" :eager="!isCap1">
 								<so-gvcn-c1-tab-hs-can-quan-tam v-if="isCap1" ref="tabHsCanQuanTamRef"
-									:selected-lop-i-d="selectedLopID" :students="getSelectedClassStudents()"
-									:saved-rows="hsCanQuanTamSavedRows" :sheet-height="sheetHeight"
-									:sheet-key="sheetKey" />
+					:selected-lop-i-d="selectedLopID" :students="getSelectedClassStudents()"
+					:saved-rows="hsCanQuanTamSavedRows" :sheet-height="sheetHeight"
+					:sheet-key="sheetKey" @changed="markTabDirty('ke-hoach')" />
 								<so-gvcn-tab-ke-hoach v-else ref="tabKeHoachRef" :selected-lop-i-d="selectedLopID"
 									:selected-class="selectedClass" :school-year-text="getCurrentSchoolYearText()"
 									:sheet-height="sheetHeight" :ke-hoach-sheet-height="keHoachSheetHeight"
@@ -241,7 +242,8 @@
 									:nested-headers="renLuyenNestedHeaders" :sheet-height="sheetHeight"
 									:ren-luyen-sheet-height="renLuyenSheetHeight" :sheet-key="sheetKey"
 									:attendance-summaries="attendanceSummaries" :attendance-loading="attendanceLoading"
-									:show-attendance-alert="showAttendanceAlert" @close-attendance-alert="showAttendanceAlert = false" />
+									:show-attendance-alert="showAttendanceAlert" @update:rows="markTabDirty('ren-luyen')"
+									@close-attendance-alert="showAttendanceAlert = false" />
 							</v-window-item>
 
 							<!-- Tab Sơ kết HKI (C1 only) -->
@@ -294,7 +296,8 @@
 									:nested-headers="soLienLacNestedHeaders" :sheet-height="sheetHeight"
 									:so-lien-lac-sheet-height="soLienLacSheetHeight" :sheet-key="sheetKey"
 									:read-only="soLienLacReadOnly"
-									:reason-reject="Number(selectedSoLienLacPeriod?.TinhTrang) === 3 ? selectedSoLienLacPeriod?.ReasonReject : ''" />
+									:reason-reject="Number(selectedSoLienLacPeriod?.TinhTrang) === 3 ? selectedSoLienLacPeriod?.ReasonReject : ''"
+									@update:rows="markTabDirty('so-lien-lac')" />
 							</v-window-item>
 
 							<!-- Tab Nội dung họp PHHS (C1 only) -->
@@ -344,7 +347,9 @@
 			savingClassContext: null,
 			serializationStudents: null,
 			savingGroupedClasses: false,
+			tabChangeSaving: false,
 			hasUnsavedChanges: false,
+			dirtyTabs: {},
 			classSelectionInitialized: false,
 			studentSheetRows: [],
 			sheetInstance: null,
@@ -868,6 +873,7 @@
 		window.addEventListener('beforeunload', this.onBeforeUnload)
 		document.addEventListener('input', this.onEditableInput, true)
 		document.addEventListener('change', this.onEditableInput, true)
+		document.addEventListener('keydown', this.onSheetKeydown, true)
 		this.onResize()
 	},
 	beforeUnmount() {
@@ -875,9 +881,10 @@
 		window.removeEventListener('beforeunload', this.onBeforeUnload)
 		document.removeEventListener('input', this.onEditableInput, true)
 		document.removeEventListener('change', this.onEditableInput, true)
+		document.removeEventListener('keydown', this.onSheetKeydown, true)
 	},
 	beforeRouteLeave(to, from, next) {
-		if (!this.hasUnsavedChanges) return next()
+		if (!Object.keys(this.dirtyTabs).length) return next()
 		const confirmation = this.confirmRef?.value?.show?.({
 			title: 'Bạn có dữ liệu chưa lưu. Bạn có chắc muốn rời trang không?'
 		})
@@ -909,7 +916,51 @@
 			this.classSelectionInitialized = false
 			this.getList()
 		},
-		tab(newTab) {
+		async tab(newTab, oldTab) {
+			if (this.tabChangeSaving) return
+			if (oldTab && newTab !== oldTab && this.isTabDirty(oldTab) && this.isTabSaveSupported(oldTab)) {
+				this.tabChangeSaving = true
+				this.tab = oldTab
+				try {
+					await this.$nextTick()
+					await this.saveTabBeforeSwitch(oldTab)
+					this.tab = newTab
+					await this.$nextTick()
+					this.activateTab(newTab)
+				} catch (error) {
+					console.error('[Sổ GVCN] Không thể tự lưu trước khi chuyển tab:', error)
+					this.notify(error?.message || 'Không thể lưu dữ liệu. Vui lòng thử lại.', 'error')
+				} finally {
+					this.tabChangeSaving = false
+				}
+				return
+			}
+			this.activateTab(newTab)
+		},
+	},
+	methods: {
+		isTabDirty(tabName) {
+			return !!this.dirtyTabs?.[tabName]
+		},
+		markTabDirty(tabName = this.tab) {
+			if (!tabName) return
+			this.dirtyTabs = { ...this.dirtyTabs, [tabName]: true }
+			this.hasUnsavedChanges = true
+			window.__soGvcnHasUnsavedChanges = true
+		},
+		isTabSaveSupported(tabName) {
+			return this.selectedLopID !== '__ALL__' && [
+				'to-chuc-lop', 'chi-tieu', 'cong-tac-cn', 'ke-hoach', 'ren-luyen',
+				'so-ket-hk1', 'tong-ket-nam', 'theo-doi-si-so', 'thong-ke-do-tuoi',
+				'theo-doi-thanh-tich', 'so-lien-lac', 'noi-dung-hop-ph', 'huong-nghiep'
+			].includes(tabName)
+		},
+		async saveTabBeforeSwitch(tabName) {
+			if (!this.isTabSaveSupported(tabName)) return
+			if (this.tab !== tabName) this.tab = tabName
+			await this.onSaveButtonClick()
+		},
+		activateTab(newTab) {
 			this.ensureSpecificClassForClassTabs()
 			if (newTab === 'to-chuc-lop') {
 				setTimeout(() => this.$refs.tabToChucLopRef?.initAllSheets(), 50)
@@ -956,25 +1007,45 @@
 			} else if (newTab === 'tong-ket-nam' && this.isCap1) {
 				this.getTongKetNamC1()
 			}
-		}
-	},
-	methods: {
+		},
 		onEditableInput(event) {
+			if (event && event.isTrusted === false) return
 			const target = event.target
 			const isSheetTarget = target?.closest?.('.so-gvcn-sheet-wrap, .so-gvcn-sheet, .so-gvcn-cong-tac-thang-sheet, td.editor')
 			if (isSheetTarget || target?.matches?.('textarea, [contenteditable="true"]')) {
-				this.hasUnsavedChanges = true
-				window.__soGvcnHasUnsavedChanges = true
+				this.markTabDirty(this.tab)
 			}
+		},
+		onSheetKeydown(event) {
+			const target = event.target
+			const isSheetTarget = target?.closest?.('.so-gvcn-sheet, .so-gvcn-sheet-wrap, td.editor')
+			if (isSheetTarget && !event.altKey && !event.ctrlKey && !event.metaKey
+				&& ['Backspace', 'Delete'].includes(event.key)) {
+				this.markTabDirty(this.tab)
+				return
+			}
+			if (event.key !== 'Enter' || event.altKey || event.ctrlKey || event.metaKey) return
+			if (target?.tagName !== 'TEXTAREA' || !target.closest?.('.so-gvcn-sheet, .so-gvcn-cong-tac-thang-sheet, td.editor')) return
+			event.preventDefault()
+			event.stopPropagation()
+			const start = target.selectionStart ?? target.value.length
+			const end = target.selectionEnd ?? start
+			target.value = target.value.slice(0, start) + '\n' + target.value.slice(end)
+			target.selectionStart = target.selectionEnd = start + 1
+			target.dispatchEvent(new Event('input', { bubbles: true }))
+			this.markTabDirty(this.tab)
 		},
 		onBeforeUnload(event) {
 			if (!this.hasUnsavedChanges && !window.__soGvcnHasUnsavedChanges) return
 			event.preventDefault()
 			event.returnValue = 'Bạn có dữ liệu chưa lưu.'
 		},
-		clearUnsavedChanges() {
-			this.hasUnsavedChanges = false
-			window.__soGvcnHasUnsavedChanges = false
+		clearUnsavedChanges(tabName = this.tab) {
+			const nextDirtyTabs = { ...this.dirtyTabs }
+			delete nextDirtyTabs[tabName]
+			this.dirtyTabs = nextDirtyTabs
+			this.hasUnsavedChanges = Object.keys(nextDirtyTabs).length > 0
+			window.__soGvcnHasUnsavedChanges = this.hasUnsavedChanges
 		},
 		getFunctionRightCapIDs() {
 			const value = vueData?.user?.FunctionRight ?? vueData?.user?.functionRight ?? ''
@@ -1044,11 +1115,12 @@
 		statusColor(status) {
 			return ({ NEW: 'grey', DRAFT: 'warning', SUBMITTED: 'success' })[status] || 'grey'
 		},
-		notify(message) {
+		notify(message, color = 'success') {
 			if (this.savingGroupedClasses) return
-			if (window.Vue && Vue.$toast) return Vue.$toast.success(message, { position: 'top' })
+			if (this.snackbarRef?.value?.showSnackbar) {
+				return this.snackbarRef.value.showSnackbar({ message, color })
+			}
 			if (window.showMessage) return showMessage({ title: message })
-			alert(message)
 		},
 			async getList() {
 				this.loading.list = true
@@ -2010,6 +2082,7 @@
 			if (card.key === 'can-bo-lop') this.form.CanBoLop = JSON.stringify({ version: 1, rows: this.serializeCanBoLopRows() })
 		},
 		handleChiTieuCardChange(card, event) {
+			this.markTabDirty('chi-tieu')
 			console.log('[Tab2 handleChiTieuCardChange]', card.key, event)
 			if (!card || !event) return
 			const colIndex = Number(event.x)
@@ -3107,6 +3180,7 @@
 			})
 		},
 		updateHuongNghiepRows(rows) {
+			this.markTabDirty('huong-nghiep')
 			this.huongNghiepRows = rows || []
 			this.form.HuongNghiep = JSON.stringify({ version: 1, rows: this.serializeHuongNghiepRows() })
 		},
@@ -3365,9 +3439,9 @@
 		},
 		onSaveButtonClick() {
 			if (this.tab === 'cong-tac-cn' || (this.tab === 'ke-hoach' && !this.isCap1)) {
-				this.saveKeHoachSheet()
+				return this.saveKeHoachSheet()
 			} else {
-				this.onSaveDraft()
+				return this.onSaveDraft()
 			}
 		},
 		onWorkflowSave() {

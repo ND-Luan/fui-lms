@@ -26,7 +26,7 @@
 					{ title: 'HỌ VÀ TÊN HỌC SINH', width: 250, readOnly: true },
 					{ title: 'BHYT', width: 180 },
 					{ title: 'BHTN', width: 180 },
-					{ title: 'Ghi chú', width: 350 }
+					{ title: 'Ghi chú', width: 380, align: 'justify' }
 				]
 			}
 		},

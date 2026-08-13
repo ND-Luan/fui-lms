@@ -18,6 +18,18 @@
     z-index: 10;
 }
 
+/* Keep the action buttons on one line on desktop so the header height stays aligned. */
+@media (min-width: 960px) {
+    .so-gvcn-actions {
+        flex-wrap: nowrap !important;
+    }
+
+    .so-gvcn-actions .v-btn,
+    .so-gvcn-actions .v-menu {
+        flex: 0 0 auto;
+    }
+}
+
 /* Left Vertical Navigation in Tab 2 */
 .chi-tieu-vertical-tabs .v-list-item--active {
     background-color: rgba(var(--v-theme-primary), 0.1) !important;

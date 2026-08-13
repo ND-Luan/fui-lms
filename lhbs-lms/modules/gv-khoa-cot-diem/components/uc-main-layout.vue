@@ -2,70 +2,101 @@
 	<Global>
         <template #header>
             <v-card>
-                <v-card-title>{{ TitlePage }} • {{ TitleCap }}</v-card-title>
-                <v-card-text>
-                    <v-row align="center">
-                        <v-col cols="12" sm="3">
-                            <v-select v-model="LopItem" label="Chọn lớp" :items="DSLop" item-title="TenLopDisplay"
-                                item-value="LopID" return-object />
-                        </v-col>
-
-                        <v-col cols="12" sm="3">
-                            <v-select v-model="MonHocItem" label="Chọn môn học" :items="DSMonHoc" item-title="TenMonHoc"
-                                item-value="MonHocID" :disabled="!LopItem" return-object />
-                        </v-col>
-
-                        <v-col cols="12" sm="3">
-                            <v-select v-model="MaNhomCotDiemItem" label="Nhóm cột điểm" :items="DSMaNhomCotDiem"
-                                item-title="TenNhomCotDiemDisplay" item-value="MaNhomCotDiem" :disabled="!MonHocItem"
-                                return-object />
-                        </v-col>
-
-                        <v-col class="d-flex align-center ga-2 flex-wrap">
-                            <v-btn variant="outlined" color="primary" @click="onRefresh">
-                                <v-icon start>mdi-reload</v-icon>
-                                Làm mới
-                            </v-btn>
-                        </v-col>
-                    </v-row>
-                </v-card-text>
+                <v-card-title class="d-flex align-center">
+                    {{ TitlePage }} • {{ TitleCap }}
+                    <v-spacer />
+                    <v-btn variant="outlined" color="primary" prepend-icon="mdi-reload" @click="onRefresh">
+                        Làm mới
+                    </v-btn>
+                </v-card-title>
             </v-card>
         </template>
 
         <v-divider />
 
-        <v-card-text class="py-2 d-flex align-center ga-2 flex-wrap">
-            <v-chip v-if="selectedStatusFilter !== null" size="small" color="info" variant="tonal">
+        <div class="khoa-cot-diem-layout">
+            <aside class="khoa-cot-diem-tree-panel">
+                <div class="pa-3">
+                    <div class="text-subtitle-1 font-weight-bold">Danh sách khối, lớp, môn</div>
+                    <div class="text-caption text-medium-emphasis">Chọn môn để xem các cột điểm</div>
+                    <v-text-field v-model="treeSearch" label="Tìm khối, lớp hoặc môn"
+                        prepend-inner-icon="mdi-magnify" clearable density="compact" hide-details class="mt-3" />
+                </div>
+                <v-divider />
+                <v-treeview v-if="treeNodes.length" v-model:opened="openedTreeNodeIDs"
+                    v-model:activated="activatedTreeNodeIDs" :items="filteredTreeNodes" item-title="title"
+                    item-value="id" item-children="children"
+                    activatable density="compact" color="primary" class="pa-2"
+                    @update:opened="onTreeOpened" @update:activated="onTreeActivated">
+                    <template #append="{ item }">
+                        <v-btn v-if="['khoi', 'lop'].includes((item.raw || item).type)"
+                            size="small" variant="text" color="primary" prepend-icon="mdi-refresh"
+                            @click.stop="onLoadWholeScope(item.raw || item)">
+                            {{ (item.raw || item).type === 'khoi' ? 'Tải khối' : 'Tải lớp' }}
+                        </v-btn>
+                    </template>
+                </v-treeview>
+                <div v-else class="pa-4 text-caption text-medium-emphasis">
+                    Đang tải danh sách khối, lớp, môn...
+                </div>
+            </aside>
+
+            <main class="khoa-cot-diem-table-panel">
+                <div class="pa-3 d-flex align-center flex-wrap ga-3">
+                    <div>
+                        <div class="text-subtitle-1 font-weight-bold">
+                            {{ isSummaryView ? summaryTitle : (selectedSubjectTitle || 'Danh sách cột điểm') }}
+                        </div>
+                        <div class="text-caption text-medium-emphasis">
+                            {{ isSummaryView ? 'Danh sách tổng hợp lớp, môn và cột điểm' : (selectedSubjectContext || 'Vui lòng chọn môn học trên cây') }}
+                        </div>
+                    </div>
+                    <v-spacer />
+                    <v-select v-if="!isSummaryView" v-model="MaNhomCotDiemItem" label="Nhóm cột điểm" :items="DSMaNhomCotDiem"
+                        item-title="TenNhomCotDiemDisplay" item-value="MaNhomCotDiem" :disabled="!MonHocItem"
+                        return-object density="compact" hide-details style="max-width: 230px" />
+                </div>
+                <v-divider />
+
+                <v-card-text class="py-2 d-flex align-center ga-2 flex-wrap">
+            <v-chip v-if="!isSummaryView && selectedStatusFilter !== null" size="small" color="info" variant="tonal">
                 Đang lọc: {{ selectedStatusFilter ? 'Đã khóa' : 'Chưa khóa' }}
             </v-chip>
 
-            <v-chip v-if="hasMixedSelectedStatus" size="small" color="warning" variant="tonal">
+            <v-chip v-if="!isSummaryView && hasMixedSelectedStatus" size="small" color="warning" variant="tonal">
                 Đang chọn lẫn Đã khóa/Chưa khóa
             </v-chip>
 
-            <v-btn v-if="canShowLockButton" size="small" color="success" variant="outlined"
+            <v-btn v-if="!isSummaryView && canShowLockButton" size="small" color="success" variant="outlined"
                 :disabled="selectedUnlockedCount === 0 || hasMixedSelectedStatus"
                 @click="onLockSelected">
                 <v-icon start>mdi-lock</v-icon>
                 Khóa đã chọn ({{ selectedUnlockedCount }})
             </v-btn>
 
-            <v-btn v-if="canShowUnlockButton" size="small" color="warning" variant="outlined"
+            <v-btn v-if="!isSummaryView && canShowUnlockButton" size="small" color="warning" variant="outlined"
                 :disabled="selectedLockedCount === 0 || hasMixedSelectedStatus"
                 @click="onOpenUnlockSelected">
                 <v-icon start>mdi-lock-open</v-icon>
                 Mở khóa đã chọn ({{ selectedLockedCount }})
             </v-btn>
 
-            <v-btn v-if="selectedStatusFilter !== null" size="small" color="primary" variant="text"
+            <v-btn v-if="!isSummaryView && selectedStatusFilter !== null" size="small" color="primary" variant="text"
                 @click="clearSelectionFilter">
                 Hiện tất cả
             </v-btn>
-        </v-card-text>
+                </v-card-text>
 
-        <v-divider />
+                <v-divider />
 
-        <v-data-table v-model="DSSelected" :headers="headers" :items="DSView" :row-props="getRowProps"
+                <v-data-table v-if="isSummaryView" :headers="summaryHeaders" :items="summaryRows"
+                    items-per-page="-1" hide-default-footer hover>
+                    <template #item.TenTinhTrang="{ item }">
+                        <v-chip size="x-small" :color="item.MauTinhTrang" variant="tonal">{{ item.TenTinhTrang }}</v-chip>
+                    </template>
+                </v-data-table>
+
+                <v-data-table v-else v-model="DSSelected" :headers="headers" :items="DSView" :row-props="getRowProps"
             item-selectable="IsSelectable" item-value="RowKey" :show-select="true"
             items-per-page="-1" hide-default-footer hover style="max-height: calc(100dvh - 77px); overflow-y: auto;">
             <template #item.actions="{ item }">
@@ -86,10 +117,23 @@
 
                 <div class="d-flex flex-column align-center justify-center py-12 text-medium-emphasis">
                     <v-icon size="48" class="mb-3 opacity-40">mdi-table-search</v-icon>
-                    <p class="text-body-2">Chọn lớp để xem danh sách khóa cột điểm</p>
+                    <p class="text-body-2">Chọn môn học để xem danh sách cột điểm</p>
                 </div>
             </template>
-        </v-data-table>
+                </v-data-table>
+            </main>
+        </div>
+
+        <v-dialog v-model="summaryLoading.show" persistent max-width="430">
+            <v-card class="pa-5">
+                <div class="text-subtitle-1 font-weight-bold mb-2">Đang tải dữ liệu cột điểm</div>
+                <div class="text-body-2 text-medium-emphasis mb-3">{{ summaryLoading.label }}</div>
+                <v-progress-linear :model-value="summaryLoading.percent" color="primary" rounded height="8" />
+                <div class="text-caption text-center mt-2">
+                    Đã tải {{ summaryLoading.current }} / {{ summaryLoading.total }} môn
+                </div>
+            </v-card>
+        </v-dialog>
 
         <uc-dialog v-model="dialogKhoa.show" title="Xác nhận mở khóa" done-text="Xác nhận"
             @onSubmit="onConfirmMoKhoa">
@@ -112,6 +156,11 @@
         return {
             vueData,
             CapID: vueData.CapID,
+            treeNodes: [],
+            openedTreeNodeIDs: [],
+            activatedTreeNodeIDs: [],
+            treeSubjectMap: {},
+            treeSearch: '',
             DSLop: [],
             LopItem: null,
             DSMonHoc: [],
@@ -119,6 +168,10 @@
             DSMaNhomCotDiem: [],
             MaNhomCotDiemItem: null,
             DS: [],
+            summaryRows: [],
+            viewMode: 'empty',
+            summaryTitleText: '',
+            summaryLoading: { show: false, current: 0, total: 0, percent: 0, label: '' },
             DSSelected: [],
             dialogKhoa: { show: false, item: null, LyDo: '' },
             dialogMoKhoaSelected: { show: false, LyDo: '' },
@@ -129,6 +182,14 @@
                 { title: 'Tình trạng', key: 'TenTinhTrang', minWidth: 120, sortable: false },
                 { title: 'Thao tác', key: 'actions', width: 130, sortable: false },
             ],
+            summaryHeaders: [
+                { title: 'Lớp', key: 'TenLop', minWidth: 120 },
+                { title: 'Môn học', key: 'TenMonHoc', minWidth: 180 },
+                { title: 'Nhóm cột điểm', key: 'TenNhomCotDiem', minWidth: 150 },
+                { title: 'Mã cột điểm', key: 'MaCotDiemDisplay', minWidth: 150 },
+                { title: 'Tên cột điểm', key: 'TenCotDiem_VI', minWidth: 200 },
+                { title: 'Tình trạng', key: 'TenTinhTrang', minWidth: 120, sortable: false },
+            ],
         }
     },
     computed: {
@@ -136,6 +197,26 @@
         TitlePage() { return getTitlePageByURL(window.location.pathname + window.location.search) },
         HocKi() { return vueData.NienKhoaItem?.HocKi },
         HocKiCode() { return this.HocKi === 1 ? 'HK1' : 'HK2' },
+        isSummaryView() { return this.viewMode === 'summary' },
+        summaryTitle() { return this.summaryTitleText },
+        selectedSubjectTitle() {
+            return this.MonHocItem?.TenMonHoc || this.MonHocItem?.TenMonHoc_HienThi || ''
+        },
+        selectedSubjectContext() {
+            if (!this.LopItem || !this.MonHocItem) return ''
+            return `${this.LopItem.TenLop || ''} • ${this.LopItem.TenKhoiHoc || ''}`
+        },
+        filteredTreeNodes() {
+            const keyword = this.treeSearch?.trim().toLocaleLowerCase()
+            if (!keyword) return this.treeNodes
+            const filterNodes = nodes => (nodes || []).reduce((result, node) => {
+                const children = filterNodes(node.children)
+                const matched = node.title?.toLocaleLowerCase().includes(keyword)
+                if (matched || children.length) result.push({ ...node, children })
+                return result
+            }, [])
+            return filterNodes(this.treeNodes)
+        },
         selectedRows() {
             if (!this.DSSelected?.length) return []
             const selectedKeys = new Set(
@@ -180,29 +261,20 @@
         },
     },
     watch: {
-        LopItem(v) {
-            this.MonHocItem = null
-            this.DSMonHoc = []
-            this.MaNhomCotDiemItem = null
-            this.DSMaNhomCotDiem = []
-            this.DS = []
-            if (v) this.getMonHoc()
-        },
-        MonHocItem(v) {
-            this.MaNhomCotDiemItem = null
-            this.DSMaNhomCotDiem = []
-            this.DS = []
-            if (v) this.getMaNhomCotDiem()
-        },
         MaNhomCotDiemItem(v) {
             this.DS = []
+            this.summaryRows = []
+            this.viewMode = 'empty'
             if (v) this.getDS()
         },
         HocKi() {
             this.MaNhomCotDiemItem = null
             this.DSMaNhomCotDiem = []
             this.DS = []
-            if (this.MonHocItem) this.getMaNhomCotDiem()
+            this.MonHocItem = null
+            this.LopItem = null
+            this.activatedTreeNodeIDs = []
+            this.getAllLop()
         },
         DS() {
             this.DSSelected = []
@@ -241,22 +313,222 @@
             const resKhoi = await fetchPromise('lms/KhoiHocByCapHoc_Get', { CapID: this.CapID })
             const dsKhoi = resKhoi.data ?? resKhoi ?? []
             if (!dsKhoi.length) return
-            const batch = dsKhoi.map(khoi => ({
-                url: 'lms/Lop_Get_ByKhoiID',
-                params: { NienKhoa: vueData.NienKhoa, KhoiID: khoi.KhoiID },
+            this.treeNodes = dsKhoi.map(khoi => ({
+                id: `khoi-${khoi.KhoiID}`,
+                title: khoi.TenKhoiHoc,
+                type: 'khoi',
+                KhoiID: khoi.KhoiID,
+                loaded: false,
+                children: [{ id: `loading-khoi-${khoi.KhoiID}`, title: 'Mở để tải danh sách lớp', type: 'loading' }],
             }))
-            const results = await fetchBatchPromise(batch)
-            const dsLop = []
-            results.forEach((res, idx) => {
-                const lops = res.data ?? res ?? []
-                const khoi = dsKhoi[idx]
-                lops.forEach(lop => dsLop.push({
-                    ...lop,
-                    TenLopDisplay: `${lop.TenLop} (${khoi.TenKhoiHoc})`,
-                    KhoiID: khoi.KhoiID,
-                }))
+        },
+        findTreeNode(nodes, id) {
+            for (const node of nodes || []) {
+                if (node.id === id) return node
+                const found = this.findTreeNode(node.children, id)
+                if (found) return found
+            }
+            return null
+        },
+        async onTreeOpened(ids) {
+            const openedID = ids?.[ids.length - 1]
+            const node = this.findTreeNode(this.treeNodes, openedID)
+            if (!node || node.loaded) return
+            if (node.type === 'khoi') await this.loadTreeClasses(node)
+            if (node.type === 'lop') await this.loadTreeSubjects(node)
+        },
+        async loadSummaryForNode(node) {
+            let subjectNodes = []
+            if (node.type === 'khoi') {
+                if (!node.loaded) await this.loadTreeClasses(node)
+                this.LopItem = { TenKhoiHoc: node.title, KhoiID: node.KhoiID }
+                this.summaryRows = []
+                for (const lopNode of node.children || []) {
+                    if (!lopNode.loaded) await this.loadTreeSubjects(lopNode)
+                    this.LopItem = lopNode.Lop
+                    subjectNodes.push(...(lopNode.children || []))
+                }
+            } else if (node.type === 'lop') {
+                if (!node.loaded) await this.loadTreeSubjects(node)
+                this.LopItem = node.Lop
+                subjectNodes = node.children || []
+            } else {
+                return
+            }
+
+            this.summaryLoading = {
+                show: true,
+                current: 0,
+                total: subjectNodes.length,
+                percent: 0,
+                label: 'Đang chuẩn bị dữ liệu lớp và môn học...',
+            }
+            try {
+                for (const subjectNode of subjectNodes) {
+                    this.summaryLoading.label = `Đang tải ${subjectNode.title}...`
+                    await this.loadSummarySubject(subjectNode)
+                    this.summaryLoading.current += 1
+                    this.summaryLoading.percent = this.summaryLoading.total
+                        ? Math.round(this.summaryLoading.current * 100 / this.summaryLoading.total)
+                        : 100
+                }
+            } finally {
+                this.summaryLoading.show = false
+            }
+        },
+        async onLoadWholeScope(node) {
+            const scopeNode = this.findTreeNode(this.treeNodes, node?.id)
+            if (!scopeNode || !['khoi', 'lop'].includes(scopeNode.type)) return
+            this.viewMode = 'summary'
+            this.summaryTitleText = scopeNode.type === 'khoi'
+                ? `Tổng hợp ${scopeNode.title}`
+                : `Tổng hợp ${scopeNode.title}`
+            this.summaryRows = []
+            await this.loadSummaryForNode(scopeNode)
+        },
+        async loadSummarySubject(subjectNode) {
+            const lop = subjectNode.Lop
+            const mon = subjectNode.MonHoc
+            const groupRes = await fetchPromise('lms/NhomCauTrucDiem_Get_ByTemplateBangDiemID', {
+                TemplateBangDiemID: mon.TemplateBangDiemID,
             })
-            this.DSLop = dsLop
+            const groups = (groupRes.data ?? groupRes ?? []).filter(x => x.Semester === this.HocKiCode)
+            for (const group of groups) {
+                const [scoreRes, lockRes] = await Promise.all([
+                    fetchPromise('lms/HocSinhBangDiem_Get_ByMonHocID_MaNhom', {
+                        LopID: lop.LopID,
+                        MonHocID: mon.MonHocID,
+                        TemplateBangDiemID: mon.TemplateBangDiemID,
+                        MaNhomCotDiem: group.MaNhomCotDiem,
+                        ThuTuNhom: group.ThuTuNhom,
+                        Semester: group.Semester,
+                        NienKhoa: vueData.NienKhoa,
+                        KhoiID: lop.KhoiID,
+                    }, { cache: false }),
+                    fetchPromise('lms/KhoaCotDiem_Get', {
+                        LopID: lop.LopID,
+                        MonHocLopID: mon.MonHocLopID,
+                        MaNhomCotDiem: group.MaNhomCotDiem,
+                        Semester: group.Semester,
+                        NienKhoa: vueData.NienKhoa,
+                    }, { cache: false }),
+                ])
+                const scores = scoreRes.data ?? scoreRes ?? []
+                const locks = lockRes.data ?? lockRes ?? []
+                const firstStudentID = scores[0]?.HocSinhID
+                const columns = firstStudentID ? scores.filter(x => x.HocSinhID === firstStudentID) : []
+                const lockMap = locks.reduce((map, item) => {
+                    const key = this.getKhoaKey(item.MonHocLopID, item.MaCotDiem)
+                    const current = map[key]
+                    if (!current || Number(item.KhoaCotDiemID || 0) >= Number(current.KhoaCotDiemID || 0)) {
+                        map[key] = item
+                    }
+                    return map
+                }, {})
+                columns.forEach(column => {
+                    const maCotDiem = column.MaCotDiem || ''
+                    const lock = lockMap[this.getKhoaKey(column.MonHocLopID || mon.MonHocLopID, maCotDiem)] || {}
+                    const isLocked = !!lock.TinhTrang
+                    this.summaryRows.push({
+                        RowKey: `summary-${lop.LopID}-${mon.MonHocID}-${group.MaNhomCotDiem}-${maCotDiem}`,
+                        TenLop: lop.TenLop,
+                        TenMonHoc: mon.TenMonHoc,
+                        TenNhomCotDiem: group.TenNhomCotDiem_VI || group.MaNhomCotDiem,
+                        MaCotDiemDisplay: maCotDiem,
+                        TenCotDiem_VI: column.TenCotDiem_VI || maCotDiem,
+                        TenTinhTrang: isLocked ? 'Đã khóa' : 'Chưa khóa',
+                        MauTinhTrang: isLocked ? 'success' : 'warning',
+                    })
+                })
+            }
+        },
+        async loadTreeClasses(node) {
+            node.loading = true
+            const res = await fetchPromise('lms/Lop_Get_ByKhoiID', {
+                NienKhoa: vueData.NienKhoa,
+                KhoiID: node.KhoiID,
+            })
+            const dsLop = res.data ?? res ?? []
+            const khoi = { KhoiID: node.KhoiID, TenKhoiHoc: node.title }
+            dsLop.forEach(lop => {
+                const item = {
+                    ...lop,
+                    TenLopDisplay: `${lop.TenLop} (${node.title})`,
+                    TenKhoiHoc: node.title,
+                    KhoiID: node.KhoiID,
+                }
+                this.DSLop.push(item)
+            })
+            node.children = dsLop.map(lop => ({
+                id: `lop-${lop.LopID}`,
+                title: lop.TenLop,
+                type: 'lop',
+                Lop: { ...lop, ...khoi, TenKhoiHoc: node.title },
+                LopID: lop.LopID,
+                loaded: false,
+                children: [{ id: `loading-lop-${lop.LopID}`, title: 'Mở để tải danh sách môn', type: 'loading' }],
+            }))
+            node.loaded = true
+            node.loading = false
+        },
+        async loadTreeSubjects(node) {
+            node.loading = true
+            const lop = node.Lop
+            const res = await fetchPromise('lms/MonHoc_Get_ByLopID_BoMon', {
+                LopID: lop.LopID,
+                NienKhoa: vueData.NienKhoa,
+                HocKi: this.HocKi,
+            })
+            const dsMonHoc = res.data ?? res ?? []
+            const subjects = dsMonHoc.map(mon => ({
+                ...mon,
+                TenMonHoc: mon.TenMonHoc_HienThi || mon.TenMonHoc || '',
+                Lop: lop,
+            }))
+            this.DSMonHoc = subjects
+            this.treeSubjectMap[lop.LopID] = subjects
+            node.children = subjects.map(mon => ({
+                id: `mon-${lop.LopID}-${mon.MonHocID}`,
+                title: mon.TenMonHoc,
+                type: 'mon',
+                Lop: lop,
+                MonHoc: mon,
+            }))
+            node.loaded = true
+            node.loading = false
+        },
+        async onTreeActivated(ids) {
+            const activeID = ids?.[ids.length - 1]
+            if (!activeID) return
+            const node = this.findTreeNode(this.treeNodes, activeID)
+            if (!node || node.type === 'loading') return
+            if (node.type === 'khoi') {
+                if (!node.loaded) await this.loadTreeClasses(node)
+                this.viewMode = 'empty'
+                this.summaryTitleText = ''
+                this.summaryRows = []
+                this.DS = []
+                return
+            }
+            if (node.type === 'lop') {
+                if (!node.loaded) await this.loadTreeSubjects(node)
+                this.viewMode = 'empty'
+                this.summaryTitleText = ''
+                this.summaryRows = []
+                this.DS = []
+                return
+            }
+            if (node.type !== 'mon') return
+            this.viewMode = 'detail'
+            this.summaryTitleText = ''
+            this.summaryRows = []
+            this.LopItem = node.Lop
+            this.MonHocItem = node.MonHoc
+            this.DSMonHoc = this.treeSubjectMap[node.Lop.LopID] || []
+            this.MaNhomCotDiemItem = null
+            this.DSMaNhomCotDiem = []
+            this.DS = []
+            this.getMaNhomCotDiem()
         },
         async getMonHoc() {
             if (!this.LopItem) return

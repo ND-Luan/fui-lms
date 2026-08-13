@@ -19,6 +19,7 @@
 			sheetHeight: { type: String, default: 'calc(100vh - 230px)' },
 			sheetKey: { type: [Number, String], default: 0 }
 		},
+		emits: ['changed'],
 		created() {
 			this.instance = null
 		},
@@ -30,17 +31,17 @@
 					{ title: 'SỐ DANH BỘ', width: 120, readOnly: true },
 					{ title: 'HỌ TÊN HỌC SINH', width: 200, readOnly: true },
 					{ title: 'HS cần hỗ trợ đặc biệt (ghi rõ vấn đề-nếu có)', width: 280 },
-					{ title: 'THÁNG 8', width: 160 },
-					{ title: 'THÁNG 9', width: 160 },
-					{ title: 'THÁNG 10', width: 160 },
-					{ title: 'THÁNG 11', width: 160 },
-					{ title: 'THÁNG 12', width: 160 },
+					{ title: 'THÁNG 8', width: 220, align: 'center' },
+					{ title: 'THÁNG 9', width: 220, align: 'center' },
+					{ title: 'THÁNG 10', width: 220, align: 'center' },
+					{ title: 'THÁNG 11', width: 220, align: 'center' },
+					{ title: 'THÁNG 12', width: 220, align: 'center' },
 					{ title: 'NHẬN XÉT HKI', width: 250 },
 					{ title: 'KẾT QUẢ HỌC TẬP VÀ RÈN LUYỆN HKI', width: 260 },
-					{ title: 'THÁNG 01 VÀ 02', width: 170 },
-					{ title: 'THÁNG 3', width: 160 },
-					{ title: 'THÁNG 4', width: 160 },
-					{ title: 'THÁNG 5', width: 160 },
+					{ title: 'THÁNG 01 VÀ 02', width: 230, align: 'center' },
+					{ title: 'THÁNG 3', width: 220, align: 'center' },
+					{ title: 'THÁNG 4', width: 220, align: 'center' },
+					{ title: 'THÁNG 5', width: 220, align: 'center' },
 					{ title: 'NHẬN XÉT CUỐI NĂM HỌC', width: 250 },
 					{
 						title: 'KẾT QUẢ HỌC TẬP VÀ RÈN LUYỆN CUỐI NĂM HỌC',
@@ -185,7 +186,8 @@
 							}, 100)
 						})
 					},
-					contextMenu: () => false
+					contextMenu: () => false,
+					onchange: () => this.$emit('changed')
 					})
 					const worksheet = Array.isArray(this.instance) ? this.instance[0] : this.instance
 					if (worksheet && typeof worksheet.setHeight === 'function') {

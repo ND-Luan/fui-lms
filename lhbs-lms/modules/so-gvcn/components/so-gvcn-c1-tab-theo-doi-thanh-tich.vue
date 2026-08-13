@@ -27,7 +27,7 @@
 					{ title: 'Số danh bộ', width: 110, readOnly: true },
 					{ title: 'Họ và tên học sinh', width: 220, readOnly: true },
 					{ title: 'HKI', width: 350 },
-					{ title: 'Cuối năm học', width: 350 }
+					{ title: 'Cuối năm học', width: 350, align: 'justify' }
 				]
 			}
 		},

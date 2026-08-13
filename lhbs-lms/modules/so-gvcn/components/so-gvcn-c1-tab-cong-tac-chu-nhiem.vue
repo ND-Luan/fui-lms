@@ -37,7 +37,8 @@
 							<v-card-text>
 								<v-textarea v-if="currentPlan" v-model="currentPlan.DanhGia" rows="6" auto-grow
 									variant="outlined" density="compact" hide-details class="text-body-2"
-									placeholder="Nhập nội dung đánh giá kết quả thực hiện trong tháng..." />
+									placeholder="Nhập nội dung đánh giá kết quả thực hiện trong tháng..."
+									@update:model-value="$emit('changed')" />
 							</v-card-text>
 						</v-card>
 					</v-col>
@@ -49,7 +50,8 @@
 							<v-card-text>
 								<v-textarea v-if="currentPlan" v-model="currentPlan.MucTieu" rows="6" auto-grow
 									variant="outlined" density="compact" hide-details class="text-body-2"
-									placeholder="Nhập nội dung và nhiệm vụ trọng tâm của tháng..." />
+									placeholder="Nhập nội dung và nhiệm vụ trọng tâm của tháng..."
+									@update:model-value="$emit('changed')" />
 							</v-card-text>
 						</v-card>
 					</v-col>
@@ -84,6 +86,7 @@
 			nienKhoa: { type: [String, Number], default: null },
 			getKeHoachExportMonths: { type: Function, default: () => () => [] }
 		},
+		emits: ['changed'],
 		data() {
 			const months = this.getMonths()
 			return {
@@ -95,9 +98,9 @@
 					{ title: 'THÁNG', width: 80, align: 'center' },
 					{ title: 'TUẦN', width: 90, align: 'center' },
 					{ title: 'THỜI GIAN', width: 150, align: 'center' },
-					{ title: 'KẾ HOẠCH THỰC HIỆN', width: 460, align: 'justify' },
-					{ title: 'KẾT QUẢ', width: 400, align: 'justify' },
-					{ title: 'NGUYÊN NHÂN ĐẠT ĐƯỢC KẾT QUẢ', width: 460, align: 'justify' }
+					{ title: 'KẾ HOẠCH THỰC HIỆN', width: 500, align: 'justify' },
+					{ title: 'KẾT QUẢ', width: 440, align: 'justify' },
+					{ title: 'NGUYÊN NHÂN ĐẠT ĐƯỢC KẾT QUẢ', width: 500, align: 'justify' }
 				]
 			}
 		},

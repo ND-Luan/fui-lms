@@ -922,17 +922,13 @@
 				}
 			},
 
-			getGitHubConfig() {
-				return {
-					token: '',
-					owner: 'thientamlhu',
-					repo: 'lhbs.lms',
-					branch: 'main'
-				};
+			async getGitHubConfig() {
+				const config = await fetchPromise('lms/FP_Github_Config_Get');
+				return config || {};
 			},
 
 			async uploadToGitHub(files, guid, folderName) {
-				const { token, owner, repo } = this.getGitHubConfig();
+				const { token, owner, repo } = await this.getGitHubConfig();
 
 				const total = files.length;
 				let completed = 0;
@@ -962,7 +958,7 @@
 				}
 
 				// Return URL
-				const url = `https://thientamlhu.github.io/lhbs.lms/content/${guid}/${folderName}/index.html`;
+				const url = `https://${owner}.github.io/${repo}/content/${guid}/${folderName}/index.html`;
 				return { url, guid };
 			},
 
@@ -979,7 +975,7 @@
 			},
 
 			async uploadSingleFile(token, owner, repo, path, content, fileName) {
-				const { branch } = this.getGitHubConfig();
+				const { branch } = await this.getGitHubConfig();
 				const response = await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/${this.encodeGitHubPath(path)}`, {
 					method: 'PUT',
 					headers: {
@@ -1007,7 +1003,7 @@
 			},
 
 			async deleteGitHubPath(path) {
-				const { token, owner, repo, branch } = this.getGitHubConfig();
+				const { token, owner, repo, branch } = await this.getGitHubConfig();
 				const encodedPath = this.encodeGitHubPath(path);
 				const response = await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/${encodedPath}?ref=${branch}`, {
 					headers: {
@@ -1034,7 +1030,7 @@
 			},
 
 			async deleteGitHubFile(path, sha) {
-				const { token, owner, repo, branch } = this.getGitHubConfig();
+				const { token, owner, repo, branch } = await this.getGitHubConfig();
 				const response = await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/${this.encodeGitHubPath(path)}`, {
 					method: 'DELETE',
 					headers: {
