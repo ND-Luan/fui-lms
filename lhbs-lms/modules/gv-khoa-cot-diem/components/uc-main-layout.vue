@@ -19,6 +19,9 @@
                 <div class="pa-3">
                     <div class="text-subtitle-1 font-weight-bold">Danh sách khối, lớp, môn</div>
                     <div class="text-caption text-medium-emphasis">Chọn môn để xem các cột điểm</div>
+                    <v-select v-model="selectedEvaluation" :items="evaluationOptions"
+                        item-title="label" item-value="value" label="Kì đánh giá"
+                        density="compact" hide-details return-object class="mt-3" />
                     <v-text-field v-model="treeSearch" label="Tìm khối, lớp hoặc môn"
                         prepend-inner-icon="mdi-magnify" clearable density="compact" hide-details class="mt-3" />
                 </div>
@@ -37,7 +40,7 @@
                     </template>
                 </v-treeview>
                 <div v-else class="pa-4 text-caption text-medium-emphasis">
-                    Đang tải danh sách khối, lớp, môn...
+                    {{ selectedEvaluation ? 'Đang tải danh sách khối, lớp, môn...' : 'Vui lòng chọn kỳ đánh giá' }}
                 </div>
             </aside>
 
@@ -59,6 +62,18 @@
                 <v-divider />
 
                 <v-card-text class="py-2 d-flex align-center ga-2 flex-wrap">
+            <template v-if="isSummaryView">
+                <v-btn size="small" color="success" variant="outlined"
+                    :disabled="summaryUnlockedRows.length === 0" @click="openBulkDialog('lock')">
+                    <v-icon start>mdi-lock</v-icon>
+                    Khóa hàng loạt ({{ summaryUnlockedRows.length }})
+                </v-btn>
+                <v-btn size="small" color="warning" variant="outlined"
+                    :disabled="summaryLockedRows.length === 0" @click="openBulkDialog('unlock')">
+                    <v-icon start>mdi-lock-open</v-icon>
+                    Mở khóa hàng loạt ({{ summaryLockedRows.length }})
+                </v-btn>
+            </template>
             <v-chip v-if="!isSummaryView && selectedStatusFilter !== null" size="small" color="info" variant="tonal">
                 Đang lọc: {{ selectedStatusFilter ? 'Đã khóa' : 'Chưa khóa' }}
             </v-chip>
@@ -90,7 +105,8 @@
                 <v-divider />
 
                 <v-data-table v-if="isSummaryView" :headers="summaryHeaders" :items="summaryRows"
-                    items-per-page="-1" hide-default-footer hover>
+                    v-model="summarySelected" item-value="RowKey" show-select
+                    items-per-page="-1" hide-default-footer hover class="khoa-cot-diem-data-table">
                     <template #item.TenTinhTrang="{ item }">
                         <v-chip size="x-small" :color="item.MauTinhTrang" variant="tonal">{{ item.TenTinhTrang }}</v-chip>
                     </template>
@@ -98,7 +114,7 @@
 
                 <v-data-table v-else v-model="DSSelected" :headers="headers" :items="DSView" :row-props="getRowProps"
             item-selectable="IsSelectable" item-value="RowKey" :show-select="true"
-            items-per-page="-1" hide-default-footer hover style="max-height: calc(100dvh - 77px); overflow-y: auto;">
+            items-per-page="-1" hide-default-footer hover class="khoa-cot-diem-data-table">
             <template #item.actions="{ item }">
                 <v-btn size="small" :color="item.IsLocked ? 'warning' : 'success'" variant="outlined"
                     @click="onClickToggle(item)">
@@ -124,16 +140,48 @@
             </main>
         </div>
 
-        <v-dialog v-model="summaryLoading.show" persistent max-width="430">
-            <v-card class="pa-5">
+        <div v-if="summaryLoading.show" class="summary-loading-panel">
+            <v-card class="pa-4 elevation-8">
                 <div class="text-subtitle-1 font-weight-bold mb-2">Đang tải dữ liệu cột điểm</div>
                 <div class="text-body-2 text-medium-emphasis mb-3">{{ summaryLoading.label }}</div>
                 <v-progress-linear :model-value="summaryLoading.percent" color="primary" rounded height="8" />
                 <div class="text-caption text-center mt-2">
-                    Đã tải {{ summaryLoading.current }} / {{ summaryLoading.total }} môn
+                    {{ summaryLoading.percent }}% — Đã tải {{ summaryLoading.current }} / {{ summaryLoading.total }} môn
                 </div>
             </v-card>
-        </v-dialog>
+        </div>
+
+        <uc-dialog v-model="dialogBulk.show"
+            :title="dialogBulk.action === 'lock' ? 'Xác nhận khóa hàng loạt' : 'Xác nhận mở khóa hàng loạt'"
+            :done-text="dialogBulk.action === 'lock' ? 'Xác nhận khóa' : 'Xác nhận mở khóa'"
+            :width="1000"
+            @onSubmit="confirmBulkAction">
+            <div class="bulk-preview-scroll">
+            <div class="text-body-2 mb-3">
+                Sẽ xử lý {{ bulkDialogRows.length }} cột điểm được chọn:
+            </div>
+            <v-data-table :headers="bulkSummaryHeaders" :items="bulkDialogGroups"
+                items-per-page="-1" hide-default-footer density="compact" class="bulk-preview-table">
+                <template #item.MaCotDiemDisplay="{ item }">
+                    <div class="bulk-column-list d-flex flex-column align-start">
+                        <v-chip size="x-small" variant="tonal" class="mb-1">
+                            {{ item.MaCotDiemDisplay || 'Chưa có mã cột' }}
+                        </v-chip>
+                    </div>
+                </template>
+                <template #item.TenMonHoc="{ item }">
+                    <div class="bulk-column-list">
+                        <v-chip v-for="subject in item.subjects" :key="subject" size="x-small"
+                            variant="tonal" class="me-1 mb-1">
+                            {{ subject }}
+                        </v-chip>
+                    </div>
+                </template>
+            </v-data-table>
+            <v-textarea v-if="dialogBulk.action === 'unlock'" v-model="dialogBulk.LyDo"
+                class="mt-3" label="Lý do mở khóa*" rows="3" auto-grow />
+            </div>
+        </uc-dialog>
 
         <uc-dialog v-model="dialogKhoa.show" title="Xác nhận mở khóa" done-text="Xác nhận"
             @onSubmit="onConfirmMoKhoa">
@@ -161,6 +209,13 @@
             activatedTreeNodeIDs: [],
             treeSubjectMap: {},
             treeSearch: '',
+            selectedEvaluation: null,
+            evaluationOptions: [
+                { value: 'GK_HK1', label: 'Giữa kì 1', semester: 'HK1' },
+                { value: 'CK_HK1', label: 'Cuối kì 1', semester: 'HK1' },
+                { value: 'GK_HK2', label: 'Giữa kì 2', semester: 'HK2' },
+                { value: 'CK_HK2', label: 'Cuối kì 2', semester: 'HK2' },
+            ],
             DSLop: [],
             LopItem: null,
             DSMonHoc: [],
@@ -169,9 +224,11 @@
             MaNhomCotDiemItem: null,
             DS: [],
             summaryRows: [],
+            summarySelected: [],
             viewMode: 'empty',
             summaryTitleText: '',
             summaryLoading: { show: false, current: 0, total: 0, percent: 0, label: '' },
+            dialogBulk: { show: false, action: 'lock', LyDo: '' },
             DSSelected: [],
             dialogKhoa: { show: false, item: null, LyDo: '' },
             dialogMoKhoaSelected: { show: false, LyDo: '' },
@@ -190,6 +247,13 @@
                 { title: 'Tên cột điểm', key: 'TenCotDiem_VI', minWidth: 200 },
                 { title: 'Tình trạng', key: 'TenTinhTrang', minWidth: 120, sortable: false },
             ],
+            bulkSummaryHeaders: [
+                { title: 'Lớp', key: 'TenLop', width: 90 },
+                { title: 'Nhóm cột điểm', key: 'TenNhomCotDiem', minWidth: 130 },
+                { title: 'Cột điểm', key: 'MaCotDiemDisplay', minWidth: 180, sortable: false },
+                { title: 'Môn áp dụng', key: 'TenMonHoc', minWidth: 300, sortable: false },
+                { title: 'SL môn', key: 'SoLuongMon', width: 70, align: 'center' },
+            ],
         }
     },
     computed: {
@@ -197,8 +261,43 @@
         TitlePage() { return getTitlePageByURL(window.location.pathname + window.location.search) },
         HocKi() { return vueData.NienKhoaItem?.HocKi },
         HocKiCode() { return this.HocKi === 1 ? 'HK1' : 'HK2' },
+        SelectedSemester() { return this.selectedEvaluation?.semester || null },
         isSummaryView() { return this.viewMode === 'summary' },
         summaryTitle() { return this.summaryTitleText },
+        summarySelectedRows() {
+            const keys = new Set((this.summarySelected || []).map(x => typeof x === 'string' ? x : x?.RowKey).filter(Boolean))
+            return this.summaryRows.filter(x => keys.has(x.RowKey))
+        },
+        summaryLockedRows() { return this.summarySelectedRows.filter(x => x.IsLocked) },
+        summaryUnlockedRows() { return this.summarySelectedRows.filter(x => !x.IsLocked) },
+        bulkDialogRows() {
+            return this.dialogBulk.action === 'lock' ? this.summaryUnlockedRows : this.summaryLockedRows
+        },
+        bulkDialogGroups() {
+            const groups = new Map()
+            this.bulkDialogRows.forEach(row => {
+                const key = `${row.LopID}|${row.TenNhomCotDiem}|${row.MaCotDiemDisplay}`
+                if (!groups.has(key)) {
+                    groups.set(key, {
+                        RowKey: `bulk-${key}`,
+                        TenLop: row.TenLop,
+                        TenNhomCotDiem: row.TenNhomCotDiem,
+                        MaCotDiemDisplay: row.MaCotDiemDisplay,
+                        TenCotDiem_VI: row.TenCotDiem_VI,
+                        subjects: [],
+                        SoLuongMon: 0,
+                    })
+                }
+                const group = groups.get(key)
+                if (!group.subjects.includes(row.TenMonHoc)) group.subjects.push(row.TenMonHoc)
+                if (!group.TenCotDiem_VI && row.TenCotDiem_VI) group.TenCotDiem_VI = row.TenCotDiem_VI
+                group.SoLuongMon += 1
+            })
+            return Array.from(groups.values()).map(group => ({
+                ...group,
+                TenMonHoc: group.subjects.join(', '),
+            }))
+        },
         selectedSubjectTitle() {
             return this.MonHocItem?.TenMonHoc || this.MonHocItem?.TenMonHoc_HienThi || ''
         },
@@ -261,9 +360,14 @@
         },
     },
     watch: {
+        selectedEvaluation() {
+            this.resetTreeData()
+            if (this.selectedEvaluation) this.getAllLop()
+        },
         MaNhomCotDiemItem(v) {
             this.DS = []
             this.summaryRows = []
+            this.summarySelected = []
             this.viewMode = 'empty'
             if (v) this.getDS()
         },
@@ -274,7 +378,8 @@
             this.MonHocItem = null
             this.LopItem = null
             this.activatedTreeNodeIDs = []
-            this.getAllLop()
+            this.resetTreeData()
+            if (this.selectedEvaluation) this.getAllLop()
         },
         DS() {
             this.DSSelected = []
@@ -284,6 +389,28 @@
         this.getAllLop()
     },
     methods: {
+        resetTreeData() {
+            this.treeNodes = []
+            this.openedTreeNodeIDs = []
+            this.activatedTreeNodeIDs = []
+            this.treeSubjectMap = {}
+            this.DSLop = []
+            this.DSMonHoc = []
+            this.LopItem = null
+            this.MonHocItem = null
+            this.DSMaNhomCotDiem = []
+            this.MaNhomCotDiemItem = null
+            this.DS = []
+            this.summaryRows = []
+            this.summarySelected = []
+            this.viewMode = 'empty'
+            this.summaryTitleText = ''
+        },
+        isSelectedEvaluationGroup(group) {
+            if (!group || !this.selectedEvaluation) return false
+            const code = String(group.MaNhomCotDiem || '').replace(/^Diem/, '')
+            return code === this.selectedEvaluation.value
+        },
         normalizeMaCotDiem(maCotDiem) {
             if (typeof maCotDiem !== 'string') return maCotDiem
             const splitIndex = maCotDiem.indexOf('_')
@@ -310,6 +437,7 @@
             return current
         },
         async getAllLop() {
+            if (!this.selectedEvaluation) return
             const resKhoi = await fetchPromise('lms/KhoiHocByCapHoc_Get', { CapID: this.CapID })
             const dsKhoi = resKhoi.data ?? resKhoi ?? []
             if (!dsKhoi.length) return
@@ -339,23 +467,6 @@
         },
         async loadSummaryForNode(node) {
             let subjectNodes = []
-            if (node.type === 'khoi') {
-                if (!node.loaded) await this.loadTreeClasses(node)
-                this.LopItem = { TenKhoiHoc: node.title, KhoiID: node.KhoiID }
-                this.summaryRows = []
-                for (const lopNode of node.children || []) {
-                    if (!lopNode.loaded) await this.loadTreeSubjects(lopNode)
-                    this.LopItem = lopNode.Lop
-                    subjectNodes.push(...(lopNode.children || []))
-                }
-            } else if (node.type === 'lop') {
-                if (!node.loaded) await this.loadTreeSubjects(node)
-                this.LopItem = node.Lop
-                subjectNodes = node.children || []
-            } else {
-                return
-            }
-
             this.summaryLoading = {
                 show: true,
                 current: 0,
@@ -364,6 +475,27 @@
                 label: 'Đang chuẩn bị dữ liệu lớp và môn học...',
             }
             try {
+                if (node.type === 'khoi') {
+                    if (!node.loaded) await this.loadTreeClasses(node)
+                    this.LopItem = { TenKhoiHoc: node.title, KhoiID: node.KhoiID }
+                    this.summaryRows = []
+                    for (const lopNode of node.children || []) {
+                        if (!lopNode.loaded) await this.loadTreeSubjects(lopNode)
+                        this.LopItem = lopNode.Lop
+                        subjectNodes.push(...(lopNode.children || []))
+                    }
+                } else if (node.type === 'lop') {
+                    if (!node.loaded) await this.loadTreeSubjects(node)
+                    this.LopItem = node.Lop
+                    subjectNodes = node.children || []
+                } else {
+                    return
+                }
+
+                this.summaryLoading.total = subjectNodes.length
+                this.summaryLoading.label = subjectNodes.length
+                    ? 'Đang tải dữ liệu cột điểm...'
+                    : 'Không có môn học cần tải.'
                 for (const subjectNode of subjectNodes) {
                     this.summaryLoading.label = `Đang tải ${subjectNode.title}...`
                     await this.loadSummarySubject(subjectNode)
@@ -391,8 +523,8 @@
             const mon = subjectNode.MonHoc
             const groupRes = await fetchPromise('lms/NhomCauTrucDiem_Get_ByTemplateBangDiemID', {
                 TemplateBangDiemID: mon.TemplateBangDiemID,
-            })
-            const groups = (groupRes.data ?? groupRes ?? []).filter(x => x.Semester === this.HocKiCode)
+            }, { silent: true })
+            const groups = (groupRes.data ?? groupRes ?? []).filter(x => this.isSelectedEvaluationGroup(x))
             for (const group of groups) {
                 const [scoreRes, lockRes] = await Promise.all([
                     fetchPromise('lms/HocSinhBangDiem_Get_ByMonHocID_MaNhom', {
@@ -404,14 +536,14 @@
                         Semester: group.Semester,
                         NienKhoa: vueData.NienKhoa,
                         KhoiID: lop.KhoiID,
-                    }, { cache: false }),
+                    }, { cache: false, silent: true }),
                     fetchPromise('lms/KhoaCotDiem_Get', {
                         LopID: lop.LopID,
                         MonHocLopID: mon.MonHocLopID,
                         MaNhomCotDiem: group.MaNhomCotDiem,
                         Semester: group.Semester,
                         NienKhoa: vueData.NienKhoa,
-                    }, { cache: false }),
+                    }, { cache: false, silent: true }),
                 ])
                 const scores = scoreRes.data ?? scoreRes ?? []
                 const locks = lockRes.data ?? lockRes ?? []
@@ -436,18 +568,62 @@
                         TenNhomCotDiem: group.TenNhomCotDiem_VI || group.MaNhomCotDiem,
                         MaCotDiemDisplay: maCotDiem,
                         TenCotDiem_VI: column.TenCotDiem_VI || maCotDiem,
+                        LopID: lop.LopID,
+                        MonHocLopID: column.MonHocLopID || mon.MonHocLopID,
+                        MaCotDiemSave: this.normalizeMaCotDiem(maCotDiem),
+                        KhoaCotDiemID: lock.KhoaCotDiemID || null,
+                        IsLocked: isLocked,
                         TenTinhTrang: isLocked ? 'Đã khóa' : 'Chưa khóa',
                         MauTinhTrang: isLocked ? 'success' : 'warning',
                     })
                 })
             }
         },
+        openBulkDialog(action) {
+            if (action === 'lock' && !this.summaryUnlockedRows.length) return
+            if (action === 'unlock' && !this.summaryLockedRows.length) return
+            this.dialogBulk = { show: true, action, LyDo: '' }
+        },
+        async confirmBulkAction() {
+            const rows = this.bulkDialogRows
+            if (!rows.length) return
+            if (this.dialogBulk.action === 'unlock' && !this.dialogBulk.LyDo?.trim()) {
+                this.snackbarRef.value.showSnackbar({ message: 'Vui lòng nhập lý do mở khóa', color: 'error' })
+                return
+            }
+            for (const item of rows) {
+                if (this.dialogBulk.action === 'lock') {
+                    if (item.KhoaCotDiemID) {
+                        await fetchPromise('lms/KhoaCotDiem_TinhTrang_Upd_ByKhoaCotDiem', {
+                            KhoaCotDiemID: item.KhoaCotDiemID, TinhTrang: 1, LyDo: '',
+                        }, { cache: false, silent: true })
+                    } else {
+                        await fetchPromise('lms/KhoaCotDiem_Ins_And_Upd', {
+                            LopID: item.LopID, MonHocLopID: item.MonHocLopID,
+                            MaCotDiem: item.MaCotDiemSave, IsKhoaCotDiem: true,
+                        }, { cache: false, silent: true })
+                    }
+                } else {
+                    await fetchPromise('lms/KhoaCotDiem_TinhTrang_Upd_ByKhoaCotDiem', {
+                        KhoaCotDiemID: item.KhoaCotDiemID,
+                        TinhTrang: 0,
+                        LyDo: this.dialogBulk.LyDo.trim(),
+                    }, { cache: false, silent: true })
+                }
+            }
+            this.dialogBulk.show = false
+            this.summarySelected = []
+            this.snackbarRef.value.showSnackbar({
+                message: `${this.dialogBulk.action === 'lock' ? 'Khóa' : 'Mở khóa'} thành công ${rows.length} cột điểm`,
+                color: 'success',
+            })
+        },
         async loadTreeClasses(node) {
             node.loading = true
             const res = await fetchPromise('lms/Lop_Get_ByKhoiID', {
                 NienKhoa: vueData.NienKhoa,
                 KhoiID: node.KhoiID,
-            })
+            }, { silent: true })
             const dsLop = res.data ?? res ?? []
             const khoi = { KhoiID: node.KhoiID, TenKhoiHoc: node.title }
             dsLop.forEach(lop => {
@@ -478,7 +654,7 @@
                 LopID: lop.LopID,
                 NienKhoa: vueData.NienKhoa,
                 HocKi: this.HocKi,
-            })
+            }, { silent: true })
             const dsMonHoc = res.data ?? res ?? []
             const subjects = dsMonHoc.map(mon => ({
                 ...mon,
@@ -551,7 +727,7 @@
             })
             const dsNhom = res.data ?? res ?? []
             this.DSMaNhomCotDiem = dsNhom
-                .filter(x => x.Semester === this.HocKiCode)
+                .filter(x => this.isSelectedEvaluationGroup(x))
                 .map(x => ({
                     ...x,
                     TenNhomCotDiemDisplay: x.TenNhomCotDiem_VI || x.MaNhomCotDiem,
@@ -749,14 +925,18 @@
             this.getDS()
         },
         async onRefresh() {
-            if (!this.MaNhomCotDiemItem) {
+            if (!this.selectedEvaluation) {
                 this.snackbarRef.value.showSnackbar({
-                    message: 'Vui lòng chọn đủ bộ lọc trước khi làm mới',
+                    message: 'Vui lòng chọn kỳ đánh giá trước khi làm mới',
                     color: 'warning',
                 })
                 return
             }
-            await this.getDS()
+            if (this.MonHocItem && this.MaNhomCotDiemItem) {
+                await this.getDS()
+                return
+            }
+            await this.getAllLop()
         },
     },
 	}
