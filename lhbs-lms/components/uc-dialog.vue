@@ -30,9 +30,10 @@
 		</v-card>
 	</v-dialog>
 </template>
+
 <script>
 	export default {
-	    props: {
+		props: {
 	        modelValue: {
 	            type: Boolean,
 	            required: true,

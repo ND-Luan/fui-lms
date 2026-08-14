@@ -5,6 +5,7 @@
     },
     {
       "DSLop": [],
+      "DSLopChuNhiem": [],
       "LopItem": null,
       "DSTuan": [],
       "TuanXemTKB": null,
@@ -49,7 +50,13 @@
         "API": "lms/GiaoVienLop_Get_By_GiaoVienID",
         "IN": { "GiaoVienID": "vueData.user.UserID" },
         "OUT": "DSLop",
-        "CALLBACK": { "EXE": "renderDSLop(); runAction(vueData.getDSTuan)" }
+        "CALLBACK": { "EXE": "runAction(vueData.getDSLopChuNhiem)" }
+      },
+      "getDSLopChuNhiem": {
+        "API": "lms/Lop_Get_ByGVCN",
+        "IN": { "NienKhoa": "vueData.NienKhoa", "sys_UserID": "vueData.user.UserID" },
+        "OUT": "DSLopChuNhiem",
+        "CALLBACK": { "EXE": "renderDSLop(); runAction(vueData.getDSTuan); runAction(vueData.getDSDangKy)" }
       },
       "getDSTuan": {
         "API": "lms/TuanHocTap_Get",
@@ -128,6 +135,36 @@
                 },
                 { "el": "v-divider", "attr": { "class": "mb-3" } },
                 {
+                  "el": "div",
+                  "attr": { "class": "d-flex flex-wrap align-center ga-4 mb-2" },
+                  "innerHTML": [
+                    {
+                      "el": "div",
+                      "attr": { "class": "d-flex align-center ga-1" },
+                      "innerHTML": [
+                        { "el": "span", "attr": { "style": "display:inline-block;width:14px;height:14px;background:#B2DFDB;border:1px solid #ccc" } },
+                        { "el": "span", "attr": { "class": "text-caption" }, "innerHTML": "Đã đăng ký" }
+                      ]
+                    },
+                    {
+                      "el": "div",
+                      "attr": { "class": "d-flex align-center ga-1" },
+                      "innerHTML": [
+                        { "el": "span", "attr": { "style": "display:inline-block;width:14px;height:14px;background:#BBDEFB;border:1px solid #ccc" } },
+                        { "el": "span", "attr": { "class": "text-caption" }, "innerHTML": "Đang chọn để đăng ký" }
+                      ]
+                    },
+                    {
+                      "el": "div",
+                      "attr": { "class": "d-flex align-center ga-1" },
+                      "innerHTML": [
+                        { "el": "span", "attr": { "style": "display:inline-block;width:14px;height:14px;background:#E8F5E9;border:1px solid #ccc" } },
+                        { "el": "span", "attr": { "class": "text-caption" }, "innerHTML": "Có tiết dạy, chưa đăng ký" }
+                      ]
+                    }
+                  ]
+                },
+                {
                   "el": "v-row",
                   "innerHTML": [
                     {
@@ -190,10 +227,13 @@
                                     "v-for": "cell in row.Cells",
                                     ":key": "cell.ThuKey",
                                     "class": "pa-2 border text-center",
-                                    ":style": "!cell.CoTiet ? '' : (vueData.isTietDaChon(row, cell) ? 'cursor:pointer;background:#BBDEFB;font-weight:600' : 'cursor:pointer;background:#E8F5E9')",
+                                    ":style": "!cell.CoTiet ? '' : (vueData.isTietDaChon(row, cell) ? 'cursor:pointer;background:#BBDEFB;font-weight:600' : (cell.IsDaDangKy ? 'cursor:pointer;background:#B2DFDB;font-weight:600' : 'cursor:pointer;background:#E8F5E9'))",
                                     "v-on:click": "cell.CoTiet ? vueData.onChonTietTKB(row, cell) : null"
                                   },
-                                  "innerHTML": "{{cell.TenLop}}{{cell.TenMon ? ' - ' + cell.TenMon : ''}}"
+                                  "innerHTML": [
+                                    { "el": "span", "innerHTML": "{{cell.TenLop}}{{cell.TenMon ? ' - ' + cell.TenMon : ''}}" },
+                                    { "el": "v-icon", "attr": { "v-if": "cell.IsDaDangKy", "size": "x-small", "color": "teal-darken-3", "class": "ml-1" }, "innerHTML": "mdi-check-circle" }
+                                  ]
                                 }
                               ]
                             }

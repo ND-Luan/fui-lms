@@ -94,6 +94,15 @@
 								<v-tabs-window-item value="html" class="tab-content">
 									<v-card>
 										<v-card-text>
+											<v-file-input
+												accept=".html"
+												label="Tải tệp tin .html để import nội dung"
+												variant="outlined"
+												density="compact"
+												prepend-icon="mdi-code-tags"
+												class="mb-3"
+												@change="onHtmlFileChange"
+											/>
 											<v-textarea v-model="htmlContent" label="Mã HTML" variant="outlined"
 												auto-grow rows="20" placeholder="Nhập mã HTML tại đây..." />
 										</v-card-text>
@@ -347,6 +356,19 @@
 		methods: {
 			notify(message, color = 'success') {
 				this.snackbarRef?.value?.showSnackbar?.({ message, color });
+			},
+			onHtmlFileChange(event) {
+				const file = event.target.files[0];
+				if (!file) return;
+				const reader = new FileReader();
+				reader.onload = (e) => {
+					this.htmlContent = e.target.result;
+					this.notify(`Đã import nội dung từ file "${file.name}" thành công!`, 'success');
+				};
+				reader.onerror = () => {
+					this.notify('Không thể đọc file .html này.', 'error');
+				};
+				reader.readAsText(file);
 			},
 			buildSavePayload(item, fallbackItem = this.editableItem) {
 				const payload = { ...(item || {}) };

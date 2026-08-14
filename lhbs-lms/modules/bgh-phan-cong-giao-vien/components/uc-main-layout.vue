@@ -313,6 +313,21 @@
     }
   },
   watch: {
+    'vueData.NienKhoa': {
+      async handler(val) {
+        this.KhoiID = null
+        this.LopID = null
+        this.DSLop = []
+        this.DSPhanCongGiaoVien = []
+        this.filterMonHocIds = []
+        if (val) {
+          await Promise.all([this.getKhoi(), this.getMonHoc()])
+          if (this.DSKhoi.length > 0) {
+            this.KhoiID = this.DSKhoi[0].KhoiID
+          }
+        }
+      }
+    },
     viewMode(val) {
       if (val === 'matrix') {
         this.loadMatrixData()

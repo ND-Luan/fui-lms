@@ -429,9 +429,10 @@
 				DSMonHocActive: [],
 				KhoiItem: {},
 				isShowMyLiberies: false,
-				cascadeKhoiID: null,
-				cascadeMonHocName: null,
-				cascadeTuanID: null,
+				// Khôi phục lựa chọn khi iframe đóng làm component được mount lại.
+				cascadeKhoiID: vueData.cascadeKhoiID ?? null,
+				cascadeMonHocName: vueData.cascadeMonHocName ?? null,
+				cascadeTuanID: vueData.cascadeTuanID ?? null,
 				drawerOnboarding: false,
 				tourActive: false,
 				tourStep: 0,
@@ -547,6 +548,14 @@
 			teachingGroups: {
 				handler(newVal) {
 					if (!newVal || newVal.length === 0) return
+					console.log('[lms-teacher-dashboard][cascade] teachingGroups reloaded', {
+						count: newVal.length,
+						selected: { khoi: this.cascadeKhoiID, mon: this.cascadeMonHocName, tuan: this.cascadeTuanID },
+						vueData: { khoi: vueData.cascadeKhoiID, mon: vueData.cascadeMonHocName, tuan: vueData.cascadeTuanID },
+					})
+					const previousKhoiID = this.cascadeKhoiID
+					const previousMonHocName = this.cascadeMonHocName
+					const previousTuanID = this.cascadeTuanID
 					this.DSMonHocActive = [...new Set(newVal.map(item => item.MonHocName))].map(mh => {
 						const groups = newVal.filter(item => item.MonHocName == mh)
 						groups.forEach(g => {
@@ -559,10 +568,14 @@
 						return { MonHocName: mh, activeTab: groups[0].KhoiID, groups, groupsWithWeeks: groups.filter(g => g.weeks?.length > 0) }
 					})
 
-					// Reset các mục lựa chọn cascade khi đổi niên khóa/học kỳ
-					this.cascadeKhoiID = null
-					this.cascadeMonHocName = null
-					this.cascadeTuanID = null
+					const selectedKhoi = newVal.some(g => String(g.KhoiID) === String(previousKhoiID))
+					const selectedGroup = selectedKhoi && newVal.find(g =>
+						String(g.KhoiID) === String(previousKhoiID) && g.MonHocName === previousMonHocName)
+					const selectedTuan = selectedGroup?.weeks?.some(w =>
+						String(w.TuanHocID) === String(previousTuanID))
+					this.cascadeKhoiID = selectedKhoi ? previousKhoiID : null
+					this.cascadeMonHocName = selectedGroup ? previousMonHocName : null
+					this.cascadeTuanID = selectedTuan ? previousTuanID : null
 				},
 				immediate: false,
 			},
@@ -572,13 +585,16 @@
 			},
 			cascadeKhoiID(val) {
 				vueData.cascadeKhoiID = val ?? null
+				console.log('[lms-teacher-dashboard][cascade] khối changed', val)
 			},
 			cascadeMonHocName(val) {
 				vueData.cascadeMonHocName = val ?? null
+				console.log('[lms-teacher-dashboard][cascade] môn changed', val)
 			},
 			cascadeTuanID(val) {
 				vueData.cascadeTuanID = val ?? null
 				vueData.cascadeTuanHienThi = this.cascadeTuanHienThi ?? null
+				console.log('[lms-teacher-dashboard][cascade] tuần changed', val)
 			},
 			cascadeTuanHienThi(val) {
 				vueData.cascadeTuanHienThi = val ?? null
@@ -598,6 +614,10 @@
 			})
 		},
 		mounted() {
+			console.log('[lms-teacher-dashboard][cascade] mounted', {
+				local: { khoi: this.cascadeKhoiID, mon: this.cascadeMonHocName, tuan: this.cascadeTuanID },
+				vueData: { khoi: vueData.cascadeKhoiID, mon: vueData.cascadeMonHocName, tuan: vueData.cascadeTuanID },
+			})
 			if (!localStorage.getItem('lms-tc-tour-done')) {
 				this.drawerOnboarding = true
 			}
@@ -626,7 +646,7 @@
 			xemTinhTrang(assignment) {
 				this.iframeRef.value.openWindow({
 					title: this.$t('message.ClassGradebook'),
-					url: `/lms-teacher-gradebook?LopID=${assignment.LopID}&MonHocID=${assignment.MonHocID}&HocKi=${vueData.NienKhoaItem?.HocKi}&NienKhoa=${vueData.NienKhoa}&AssignType=CLASS`,
+					url: `/lms-teacher-gradebook?LopID=${assignment.LopID}&MonHocID=${assignment.MonHocID}&HocKi=${vueData.NienKhoaItem?.HocKi}&AssignType=CLASS`,
 					onclose: () => vueData.initPage()
 				})
 			},

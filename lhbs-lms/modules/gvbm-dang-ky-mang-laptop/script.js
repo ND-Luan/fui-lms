@@ -30,6 +30,23 @@ function renderDSLop() {
 			TenHienThi: (x.TenLop || '') + (tenMonHoc ? ' - ' + tenMonHoc : '')
 		})
 	})
+	// Lớp chủ nhiệm (tiết Sinh hoạt): TKB hiển thị tên lớp gốc (vd "11B"), khác với các
+	// lớp-nhóm theo tổ hợp môn ở trên (vd "11B1"/"11B2") nên phải nạp riêng từ tblLop.GVCN.
+	;(vueData.DSLopChuNhiem || []).forEach(x => {
+		const lopID = x.LopID
+		if (!lopID) return
+		const key = lopID + '_CN'
+		if (seen.has(key)) return
+		seen.add(key)
+		out.push({
+			LopID: lopID,
+			MonHocID: 0,
+			TenLop: x.TenLop || '',
+			KhoiID: x.KhoiID,
+			TenMonHoc: 'Sinh hoạt',
+			TenHienThi: (x.TenLop || '') + ' - Sinh hoạt (Chủ nhiệm)'
+		})
+	})
 	out.sort((a, b) => String(a.TenLop).localeCompare(String(b.TenLop)))
 	vueData.DSLop_HienThi = out
 }
@@ -101,6 +118,27 @@ function renderTKB() {
 			})
 			return { Buoi: row.Buoi, Tiet: row.Tiet, TenBuoi: tenBuoi(row.Buoi), Cells: cells }
 		})
+	danhDauDaDangKyTKB()
+}
+// Đánh dấu các ô TKB trùng với đăng ký đã lưu (lớp + ngày + buổi + tiết) để hiện icon/màu riêng.
+function danhDauDaDangKyTKB() {
+	const dsDangKy = vueData.DSDangKy || []
+	;(vueData.DSTKB || []).forEach(row => {
+		row.Cells.forEach(cell => {
+			if (!cell.CoTiet) {
+				cell.IsDaDangKy = false
+				return
+			}
+			const ngayCell = tinhNgayTuThuKey(cell.ThuKey)
+			cell.IsDaDangKy = dsDangKy.some(dk =>
+				dk.TenLop === cell.TenLop &&
+				dk.Buoi === row.Buoi &&
+				dk.TietBatDau <= row.Tiet && dk.TietKetThuc >= row.Tiet &&
+				String(dk.NgayApDung || '').slice(0, 10) === ngayCell
+			)
+		})
+	})
+	vueData.DSTKB = [...vueData.DSTKB]
 }
 function keyTKB(row, cell) {
 	return row.Buoi + '_' + row.Tiet + '_' + cell.ThuKey
@@ -212,6 +250,7 @@ function renderDSDangKy() {
 		NgayApDungHienThi: formatNgay(x.NgayApDung),
 		TreHanHienThi: x.IsTreHan ? 'Trễ hạn' : ''
 	}))
+	danhDauDaDangKyTKB()
 }
 async function onSubmitDangKy() {
 	if (!vueData.LopItem?.LopID) {
