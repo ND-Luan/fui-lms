@@ -4,8 +4,21 @@
       "LopID": "parseInt(LopID)",
       "MonHocID": "parseInt(MonHocID)",
       "AssignType": "AssignType",
-      "HocKi": "parseInt(HocKi)",
-      "NienKhoa": "parseInt(NienKhoa)"
+      "HocKi": "parseInt(HocKi) || null",
+      "NienKhoa": "parseInt(NienKhoa) || null",
+      "DSNienKhoa": []
+    },
+    {
+      "NienKhoa_Get": {
+        "API": "lms/NienKhoa_Get",
+        "OUT": "DSNienKhoa",
+        "CALLBACK": {
+          "EXE": "const active = vueData.DSNienKhoa.find(x => x.IsActive); vueData.NienKhoa = vueData.NienKhoa || active?.NienKhoa || null; vueData.HocKi = vueData.HocKi || active?.HocKi || null;"
+        }
+      }
+    },
+    {
+      "CALL": "NienKhoa_Get"
     },
     {
       "CallTest": {
@@ -29,7 +42,9 @@
           "cols": [
             {
               "el": "uc-gradebook",
+              "w": 12,
               "attr": {
+                "v-if": "NienKhoa && HocKi",
                 ":initial-lop-id": "LopID",
                 ":initial-mon-hoc-id": "MonHocID",
                 ":initial-hoc-ki": "HocKi",

@@ -20,10 +20,15 @@ function renderDSLop() {
 		const key = lopID + '_' + monHocID
 		if (seen.has(key)) return
 		seen.add(key)
-		const tenMonHoc = x.TenMonHoc_HienThi || x.MonHocName || ''
+		const tenMonHoc = x.TenMonHoc_HienThi || x.TenMonHoc || x.MonHocName || x.MonHocName_HienThi || ''
 		out.push({
 			LopID: lopID,
 			MonHocID: monHocID,
+			// GiaoVienLop_Get_By_GiaoVienID trả về lớp thường từ tblLop và
+			// lớp nhóm từ tblNhom. Giữ nguyên các khóa nhận diện để không
+			// biến lớp thường thành lớp nhóm chỉ vì trùng tên hiển thị.
+			NhomID: x.NhomID ?? x.LopNhomID ?? x.NhomLopID ?? null,
+			LoaiLop: x.LoaiLop ?? x.Loai ?? x.IsLopNhom ?? null,
 			TenLop: x.TenLop || '',
 			KhoiID: x.KhoiID,
 			TenMonHoc: tenMonHoc,
@@ -98,10 +103,14 @@ function tinhNgayDauTuanTKB() {
 function parseTKBCell(html) {
 	if (!html) return null
 	const match = html.match(/<b>\s*([^<]+)<\/b>/)
-	const tenLop = match ? match[1].trim() : ''
+	const boldText = match ? match[1].trim() : ''
 	const withoutBold = html.replace(/<b>[\s\S]*?<\/b>/, '')
 	const parts = withoutBold.split('<br>').map(s => s.replace(/<[^>]+>/g, '').trim()).filter(Boolean)
-	const tenMon = parts[0] || ''
+	// TKB quansinh có 2 dạng: <b>Lớp</b><br>Môn và
+	// <b>Lớp - Môn</b>. Chuẩn hóa cả hai để tra đúng tblLop/tblNhom.
+	const inlineParts = boldText.split(/\s+-\s+/)
+	const tenLop = inlineParts[0] || boldText
+	const tenMon = parts[0] || inlineParts.slice(1).join(' - ')
 	return { TenLop: tenLop, TenMon: tenMon }
 }
 function renderTKB() {
@@ -153,27 +162,73 @@ function tinhNgayTuThuKey(thuKey) {
 	const pad = n => String(n).padStart(2, '0')
 	return `${base.getFullYear()}-${pad(base.getMonth() + 1)}-${pad(base.getDate())}`
 }
+function normalizeLookupText(value) {
+	let text = String(value || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/&/g, ' va ').replace(/[^a-z0-9]+/g, ' ').trim().replace(/\s+/g, ' ')
+	const aliases = {
+		'gd kt va pl': 'giao duc kinh te va phap luat',
+		'gdkt va pl': 'giao duc kinh te va phap luat',
+		'gdcd': 'giao duc cong dan',
+		'hd trai nghiem': 'hoat dong trai nghiem'
+	}
+	Object.keys(aliases).forEach(key => {
+		text = text.replace(new RegExp('(^| )' + key + '(?= |$)', 'g'), '$1' + aliases[key])
+	})
+	return text.replace(/\s+/g, ' ').trim()
+}
+function scoreSubjectMatch(source, candidate) {
+	const sourceTokens = new Set(normalizeLookupText(source).split(' ').filter(Boolean))
+	const candidateTokens = new Set(normalizeLookupText(candidate).split(' ').filter(Boolean))
+	let score = 0
+	sourceTokens.forEach(token => {
+		if (candidateTokens.has(token)) score += token.length >= 2 ? 2 : 1
+	})
+	return score
+}
 function dienFormTuTiet(item) {
-	const found = (vueData.DSLop_HienThi || []).find(x => x.TenLop === item.TenLop && x.TenMonHoc === item.TenMon)
-		|| (vueData.DSLop_HienThi || []).find(x => x.TenLop === item.TenLop)
+	const tenLop = normalizeLookupText(item.TenLop)
+	const tenMon = normalizeLookupText(item.TenMon)
+	const candidates = (vueData.DSLop_HienThi || []).filter(x => normalizeLookupText(x.TenLop) === tenLop)
+	const exactCandidates = candidates.filter(x => normalizeLookupText(x.TenMonHoc) === tenMon)
+	const exact = exactCandidates.find(x => !x.NhomID && !x.IsLopNhom && !x.LoaiLop) || exactCandidates[0]
+	const scored = candidates.map(x => ({ item: x, score: scoreSubjectMatch(tenMon, x.TenMonHoc) })).sort((a, b) => b.score - a.score)
+	const bestScore = scored[0]?.score || 0
+	const bestMatches = scored.filter(x => x.score === bestScore && x.score > 0)
+	// Khi TKB là lớp thường (tblLop), ưu tiên bản ghi không có NhomID.
+	// Chỉ yêu cầu chọn lớp nhóm khi thực sự có nhiều bản ghi cùng môn.
+	const normalCandidates = candidates.filter(x => !x.NhomID && !x.IsLopNhom && !x.LoaiLop)
+	// Tạm thời không chặn luồng đăng ký khi API trả nhiều bản ghi lớp nhóm.
+	// Ưu tiên lớp thường; nếu chưa có metadata phân biệt tblLop/tblNhom thì
+	// dùng bản ghi đầu tiên để giáo viên vẫn thao tác được.
+	const found = exact || (bestMatches.length === 1 ? bestMatches[0].item :
+		(normalCandidates[0] || candidates[0] || null))
 	if (found) {
 		vueData.LopItem = found
 	} else {
-		showModuleSnackbarDKLT(`Không tìm thấy lớp "${item.TenLop}" trong danh sách lớp bạn dạy — vui lòng chọn tay`, 'warning')
+		const message = `Không tìm thấy lớp "${item.TenLop}" trong danh sách lớp bạn dạy — vui lòng chọn tay`
+		showModuleSnackbarDKLT(message, 'warning')
+		return false
 	}
 	vueData.Buoi = item.Buoi
 	vueData.TietBatDau = item.Tiet
 	vueData.TietKetThuc = item.Tiet
 	vueData.NgayApDung = item.NgayApDung
 	vueData.TKBKeyDangChon = item.key
+	return true
 }
 function onChonTietTKB(row, cell) {
-	if (!cell.CoTiet) return
+	if (!cell.CoTiet) return false
+	if (cell.IsDaDangKy) {
+		showModuleSnackbarDKLT('Tiết này đã được đăng ký, không thể đăng ký lại', 'warning')
+		return false
+	}
+	if (cell.IsBiTrungLich) {
+		showModuleSnackbarDKLT('Tiết này đã có đăng ký trùng lịch', 'warning')
+		return false
+	}
 	const key = keyTKB(row, cell)
 	const daCo = (vueData.TKBQueue || []).find(x => x.key === key)
 	if (daCo) {
-		dienFormTuTiet(daCo)
-		return
+		return dienFormTuTiet(daCo)
 	}
 	const item = {
 		key,
@@ -185,8 +240,11 @@ function onChonTietTKB(row, cell) {
 		NgayApDung: tinhNgayTuThuKey(cell.ThuKey)
 	}
 	vueData.TKBQueue = [...(vueData.TKBQueue || []), item]
-	dienFormTuTiet(item)
-	showModuleSnackbarDKLT(`Đã thêm vào danh sách chọn: Lớp ${cell.TenLop}${cell.TenMon ? ' - ' + cell.TenMon : ''}, ${tenBuoi(row.Buoi)} tiết ${row.Tiet}`, 'success')
+	if (!dienFormTuTiet(item)) {
+		vueData.TKBQueue = (vueData.TKBQueue || []).filter(x => x.key !== key)
+		return false
+	}
+	return true
 }
 function isTietDaChon(row, cell) {
 	const key = keyTKB(row, cell)
@@ -202,6 +260,7 @@ function initHocSinhThietBi() {
 		SoDanhBo: hs.SoDanhBo,
 		HoTen: hs.HoTen,
 		IsChon: true,
+		GhiChu: '',
 		ThietBiChon: ['Laptop']
 	}))
 }
@@ -252,6 +311,23 @@ function renderDSDangKy() {
 	}))
 	danhDauDaDangKyTKB()
 }
+function danhDauTietBiTrungLich() {
+	const key = vueData.TKBKeyDangChon
+	if (!key) return
+	const parts = String(key).split('_')
+	const buoi = Number(parts[0])
+	const tiet = Number(parts[1])
+	const thuKey = parts[2]
+	;(vueData.DSTKB || []).forEach(row => {
+		if (row.Buoi !== buoi || row.Tiet !== tiet) return
+		;(row.Cells || []).forEach(cell => {
+			if (cell.ThuKey === thuKey) cell.IsBiTrungLich = true
+		})
+	})
+	vueData.DSTKB = [...(vueData.DSTKB || [])]
+	vueData.TKBQueue = (vueData.TKBQueue || []).filter(item => item.key !== key)
+	vueData.TKBKeyDangChon = null
+}
 async function onSubmitDangKy() {
 	if (!vueData.LopItem?.LopID) {
 		showModuleSnackbarDKLT('Vui lòng chọn lớp', 'warning')
@@ -279,8 +355,13 @@ async function onSubmitDangKy() {
 	try {
 		const thu = getThu(vueData.NgayApDung)
 		const isTreHan = canhBaoTreHan()
-		const jsonHocSinh = dsChon.map(x => ({ HocSinhID: x.HocSinhID, HoTen: x.HoTen, LoaiThietBi: x.ThietBiChon.join(',') }))
-		await ajaxCALLPromise('lms/DangKyMangLaptop_Ins_JSON', {
+		const jsonHocSinh = dsChon.map(x => ({
+			HocSinhID: x.HocSinhID,
+			HoTen: x.HoTen,
+			LoaiThietBi: x.ThietBiChon.join(','),
+			GhiChu: x.GhiChu || ''
+		}))
+		await fetchPromise('lms/DangKyMangLaptop_Ins_JSON', {
 			LopID: vueData.LopItem.LopID,
 			TenLop: vueData.LopItem.TenLop,
 			KhoiID: vueData.LopItem.KhoiID,
@@ -298,7 +379,7 @@ async function onSubmitDangKy() {
 			IsTreHan: isTreHan,
 			JsonHocSinh: JSON.stringify(jsonHocSinh),
 			TenGiaoVienDangKy: vueData.user?.HoTen || vueData.user?.UserName || ''
-		})
+		}, { cache: false })
 		showModuleSnackbarDKLT('Đăng ký thành công' + (isTreHan ? ' (đã trễ hạn quy định)' : ''), 'success')
 		if (vueData.TKBKeyDangChon) {
 			vueData.TKBQueue = (vueData.TKBQueue || []).filter(x => x.key !== vueData.TKBKeyDangChon)
@@ -307,13 +388,15 @@ async function onSubmitDangKy() {
 		initHocSinhThietBi()
 		vueData.GhiChu = ''
 		vueData.NgayApDung = null
-		await ajaxCALLPromise('lms/DangKyMangLaptop_Get', {
+		await fetchPromise('lms/DangKyMangLaptop_Get', {
 			NienKhoa: vueData.NienKhoa, TuanHocID: 0, LopID: vueData.LopItem.LopID, KhoiID: 0, ViewMode: 'GVBM'
-		}).then(res => {
+		}, { cache: false }).then(res => {
 			vueData.DSDangKy = res || []
 			renderDSDangKy()
 		})
 	} catch (error) {
+		const errorText = String(error?.message || error || '')
+		if (/trùng buổi|đã có đăng ký trùng|đã đăng ký trùng/i.test(errorText)) danhDauTietBiTrungLich()
 		showModuleSnackbarDKLT('Đăng ký thất bại: ' + (error?.message || ''), 'error')
 	} finally {
 		vueData.isLoadingSave = false

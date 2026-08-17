@@ -576,6 +576,7 @@
 					this.cascadeKhoiID = selectedKhoi ? previousKhoiID : null
 					this.cascadeMonHocName = selectedGroup ? previousMonHocName : null
 					this.cascadeTuanID = selectedTuan ? previousTuanID : null
+					this.$nextTick(() => this.autoSelectCascade())
 				},
 				immediate: false,
 			},
@@ -586,10 +587,12 @@
 			cascadeKhoiID(val) {
 				vueData.cascadeKhoiID = val ?? null
 				console.log('[lms-teacher-dashboard][cascade] khối changed', val)
+				this.$nextTick(() => this.autoSelectCascade())
 			},
 			cascadeMonHocName(val) {
 				vueData.cascadeMonHocName = val ?? null
 				console.log('[lms-teacher-dashboard][cascade] môn changed', val)
+				this.$nextTick(() => this.autoSelectCascade())
 			},
 			cascadeTuanID(val) {
 				vueData.cascadeTuanID = val ?? null
@@ -612,6 +615,7 @@
 				})
 				return { MonHocName: mh, activeTab: groups[0].KhoiID, groups, groupsWithWeeks: groups.filter(g => g.weeks?.length > 0) }
 			})
+			this.$nextTick(() => this.autoSelectCascade())
 		},
 		mounted() {
 			console.log('[lms-teacher-dashboard][cascade] mounted', {
@@ -623,6 +627,20 @@
 			}
 		},
 		methods: {
+			autoSelectCascade() {
+				// Chỉ tự chọn khi cấp hiện tại có đúng một phương án, không thay thế lựa chọn thủ công.
+				if (!this.cascadeKhoiID && this.DSKhoiCascade.length === 1) {
+					this.pickKhoi(this.DSKhoiCascade[0].KhoiID)
+					return
+				}
+				if (!this.cascadeMonHocName && this.DSMonCascade.length === 1) {
+					this.pickMon(this.DSMonCascade[0].MonHocName)
+					return
+				}
+				if (!this.cascadeTuanID && this.DSTuanCascade.length === 1) {
+					this.pickTuan(this.DSTuanCascade[0].TuanHocID)
+				}
+			},
 			getPendingCount(classItem) {
 				if (!classItem.assignments) return 0
 				return classItem.assignments.reduce((sum, a) => sum + (a.PendingGradingCount || 0), 0)
@@ -713,11 +731,6 @@
 				if (this.cascadeMonHocName === monHocName) return
 				this.cascadeMonHocName = monHocName
 				this.cascadeTuanID = null
-				this.$nextTick(() => {
-					if (this.DSTuanCascade.length > 0) {
-						this.cascadeTuanID = this.DSTuanCascade[0].TuanHocID
-					}
-				})
 			},
 			pickTuan(tuanID) {
 				this.cascadeTuanID = tuanID

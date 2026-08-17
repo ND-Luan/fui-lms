@@ -138,7 +138,7 @@
 
 			<uc-libery-details v-if="isShowModalLiberyDetails" v-model:isOpen="isShowModalLiberyDetails"
 				v-model:selectedLibery="selectedLibery" :key="keyComp" :DSAssignedClass="DSAssignedClass"
-				@update:selectedLibery="() => { vueData.apiCall3() }" />
+				@update:selectedLibery="handleLibraryItemUpdated" />
 
 		</div>
 	</v-navigation-drawer>
@@ -358,6 +358,10 @@
 		async refreshLibrary() {
 			this.isLibraryLoading = true
 			try { await vueData.apiCall3() } finally { this.isLibraryLoading = false }
+		},
+		async handleLibraryItemUpdated() {
+			this.hocLieuMappings = {}
+			await this.refreshLibrary()
 		},
 		onDeleteItem(item) {
 			this.confirmRef.value.show({

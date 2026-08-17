@@ -97,7 +97,7 @@
 				const language = this.t('message.english')
 				openWindow({
 					title: language,
-					url: `/report-ket-qua-hoc-tap-tieng-anh-hoc-sinh?hsid=${nhomDiem.HocSinhID}&mnd=${nhomDiem.MaNhomCotDiem}&tnd=${nhomDiem.TenNhomCotDiem_VI}`
+					url: `/report-ket-qua-hoc-tap-tieng-anh-hoc-sinh?hsid=${nhomDiem.HocSinhID}&mnd=${nhomDiem.MaNhomCotDiem}&tnd=${nhomDiem.TenNhomCotDiem_VI}&nienkhoa=${vueData.NienKhoa}`
 				})
 			},
 			renderTextTitle(obj) {

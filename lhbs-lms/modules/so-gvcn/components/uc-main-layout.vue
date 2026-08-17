@@ -8,12 +8,12 @@
 						{{ currentNienKhoa }}
 					</v-chip>
 					<v-chip v-if="selectedClass" color="primary" variant="text" size="small" class="font-weight-medium">
-						{{ selectedClass.TenLop }}
+						{{ selectedClass.TenLop }} (Sĩ số: {{ getSelectedClassStudents().length }})
 					</v-chip>
 					<v-chip v-if="workflowPeriod" :color="workflowPeriod.MauTinhTrang || 'default'" size="small" variant="tonal">
 						{{ workflowPeriod.TenTinhTrang || 'Chưa lưu' }}
 					</v-chip>
-					<v-spacer />
+					<v-spacer /> 
 				</v-card-title>
 				<v-card-text class="py-1">
 					<v-row dense align="center">
@@ -145,7 +145,8 @@
 		</template>
 
 		<v-card>
-			<v-card-text class="pa-0" style="height: calc(100vh - 78px);">
+			<v-card-text class="pa-0"
+				:style="{ height: isCap1 && tab === 'ren-luyen' ? 'calc(100vh - 114px)' : 'calc(100vh - 78px)' }">
 				<v-row no-gutters style="height:100%">
 					<v-col cols="12">
 						<v-tabs v-model="tab" density="compact">
@@ -217,16 +218,17 @@
 							<!-- Hồ sơ HS cần quan tâm (C1) / Kế hoạch tháng tuần (C2, C3) -->
 							<v-window-item value="ke-hoach" :eager="!isCap1">
 								<so-gvcn-c1-tab-hs-can-quan-tam v-if="isCap1" ref="tabHsCanQuanTamRef"
-					:selected-lop-i-d="selectedLopID" :students="getSelectedClassStudents()"
-					:saved-rows="hsCanQuanTamSavedRows" :sheet-height="sheetHeight"
-					:sheet-key="sheetKey" @changed="markTabDirty('ke-hoach')" />
+									:selected-lop-i-d="selectedLopID" :students="getSelectedClassStudents()"
+									:saved-rows="hsCanQuanTamSavedRows" :sheet-height="sheetHeight"
+									:sheet-key="sheetKey" @changed="markTabDirty('ke-hoach')" />
 								<so-gvcn-tab-ke-hoach v-else ref="tabKeHoachRef" :selected-lop-i-d="selectedLopID"
 									:selected-class="selectedClass" :school-year-text="getCurrentSchoolYearText()"
 									:sheet-height="sheetHeight" :ke-hoach-sheet-height="keHoachSheetHeight"
 									:columns="keHoachSheetColumns" :nested-headers="keHoachSheetNestedHeaders"
 									:data-ao-a="keHoachSheetRows" :sheet-style="keHoachSheetStyle"
 									:get-ke-hoach-export-months="getKeHoachExportMonths"
-									:get-ke-hoach-month-row-count="getKeHoachMonthRowCount" />
+									:get-ke-hoach-month-row-count="getKeHoachMonthRowCount"
+									@changed="markTabDirty('ke-hoach')" />
 							</v-window-item>
 
 							<!-- Tab 4 -->
@@ -391,12 +393,12 @@
 				{ title: 'Tháng', width: 70, readOnly: true },
 				{ title: 'Chủ đề', width: 220 },
 				{ title: 'Mục tiêu', width: 220 },
-				{ title: 'Tuần 1', width: 210 },
-				{ title: 'Tuần 2', width: 210 },
-				{ title: 'Tuần 3', width: 210 },
-				{ title: 'Tuần 4', width: 210 },
-				{ title: 'Tuần 5', width: 210 },
-				{ title: 'Ưu điểm - Hạn chế + giải pháp khắc phục', width: 300 }
+				{ title: 'Tuần 1', width: 800, type: 'note' },
+				{ title: 'Tuần 2', width: 800, type: 'note' },
+				{ title: 'Tuần 3', width: 800, type: 'note' },
+				{ title: 'Tuần 4', width: 800, type: 'note' },
+				{ title: 'Tuần 5', width: 800, type: 'note' },
+				{ title: 'Ưu điểm - Hạn chế + giải pháp khắc phục', width: 300, type: 'note' }
 			],
 			keHoachSheetStyle: {},
 			huongNghiepColumns: [
@@ -527,7 +529,7 @@
 								{ title: 'Họ và tên học sinh', name: 'HocSinh', width: 230, type: 'dropdown', source: [], autocomplete: true, align: 'left' },
 								{
 									title: 'Chức vụ', name: 'ChucVu', width: 180,
-									type: 'dropdown', source: ['Lớp trưởng', 'Lớp phó học tập', 'Lớp phó văn thể mỹ', 'Bí thư', 'Phó bí thư', 'Tổ trưởng', 'Tổ phó', 'Thủ quỹ']
+									type: 'dropdown', source: ['Lớp trưởng', 'Lớp phó học tập', 'Lớp phó lao động', 'Lớp phó văn thể mỹ', 'Lớp phó kỉ luật', 'Bí thư', 'Phó bí thư', 'Tổ trưởng', 'Tổ phó', 'Thủ quỹ']
 								},
 								{ title: 'Ghi chú', name: 'GhiChu', width: 180 }
 							],
@@ -830,7 +832,8 @@
 				[
 					{ title: '', colspan: 1 },
 					{ title: 'Mục tiêu giáo dục tháng', colspan: 2 },
-					{ title: '', colspan: 6 }
+					{ title: '', colspan: 5 },
+					{ title: '', colspan: 1 }
 				]
 			]
 		},
@@ -874,6 +877,35 @@
 		document.addEventListener('input', this.onEditableInput, true)
 		document.addEventListener('change', this.onEditableInput, true)
 		document.addEventListener('keydown', this.onSheetKeydown, true)
+		document.addEventListener('paste', this.onSheetPasteOrMenu, true)
+		document.addEventListener('mousedown', this.onSheetPasteOrMenu, true)
+		
+		this._scrollMap = new Map();
+		this._scrollObserver = new MutationObserver((mutations) => {
+			mutations.forEach(m => {
+				if (m.type === 'childList') {
+					m.addedNodes.forEach(node => {
+						if (node.nodeType === 1) {
+							const targetClass = node.classList.contains('jexcel_content') ? node : 
+								(node.classList.contains('jspreadsheet_content') ? node : 
+								node.querySelector('.jexcel_content, .jspreadsheet_content'));
+							if (targetClass) {
+								const saved = this._scrollMap.get(this.tab);
+								if (saved && saved.length) {
+									const pos = saved[0];
+									setTimeout(() => {
+										targetClass.scrollTop = pos.top;
+										targetClass.scrollLeft = pos.left;
+									}, 50);
+								}
+							}
+						}
+					});
+				}
+			});
+		});
+		this._scrollObserver.observe(this.$el, { childList: true, subtree: true });
+		
 		this.onResize()
 	},
 	beforeUnmount() {
@@ -882,6 +914,12 @@
 		document.removeEventListener('input', this.onEditableInput, true)
 		document.removeEventListener('change', this.onEditableInput, true)
 		document.removeEventListener('keydown', this.onSheetKeydown, true)
+		document.removeEventListener('paste', this.onSheetPasteOrMenu, true)
+		document.removeEventListener('mousedown', this.onSheetPasteOrMenu, true)
+		if (this._scrollObserver) {
+			this._scrollObserver.disconnect();
+			this._scrollObserver = null;
+		}
 	},
 	beforeRouteLeave(to, from, next) {
 		if (!Object.keys(this.dirtyTabs).length) return next()
@@ -895,6 +933,16 @@
 		}
 	},
 	watch: {
+		tab(newVal, oldVal) {
+			if (oldVal) {
+				const contents = this.$el.querySelectorAll('.jexcel_content, .jspreadsheet_content');
+				if (contents.length) {
+					const positions = Array.from(contents).map(c => ({ top: c.scrollTop, left: c.scrollLeft }));
+					if (!this._scrollMap) this._scrollMap = new Map();
+					this._scrollMap.set(oldVal, positions);
+				}
+			}
+		},
 		'filter.CapID'() {
 			this.selectedLopID = this.isBghOrAdmin ? '__ALL__' : null
 			this.classSelectionInitialized = false
@@ -979,7 +1027,9 @@
 				if (this.isCap1) {
 					this.getHsCanQuanTam()
 				} else {
-					setTimeout(() => this.initKeHoachSheet(), 50)
+					this.keHoachSheetRows = this.buildKeHoachThangTuanExportAoA(false, true)
+					this.keHoachSheetStyle = this.buildKeHoachSheetStyle(false)
+					setTimeout(() => this.$refs.tabKeHoachRef?.initSheet(), 50)
 				}
 			} else if (newTab === 'ren-luyen') {
 				if (this.isCap1) {
@@ -1008,10 +1058,18 @@
 				this.getTongKetNamC1()
 			}
 		},
+		onSheetPasteOrMenu(event) {
+			const target = event.target
+			const isSheetTarget = target?.closest?.('.so-gvcn-sheet-wrap, .so-gvcn-sheet, .so-gvcn-cong-tac-thang-sheet, td.editor, .jexcel_textarea')
+			const isContextMenu = target?.closest?.('.jexcel_contextmenu, .jexcel_contextmenu_item')
+			if (isSheetTarget || isContextMenu) {
+				this.markTabDirty(this.tab)
+			}
+		},
 		onEditableInput(event) {
 			if (event && event.isTrusted === false) return
 			const target = event.target
-			const isSheetTarget = target?.closest?.('.so-gvcn-sheet-wrap, .so-gvcn-sheet, .so-gvcn-cong-tac-thang-sheet, td.editor')
+			const isSheetTarget = target?.closest?.('.so-gvcn-sheet-wrap, .so-gvcn-sheet, .so-gvcn-cong-tac-thang-sheet, td.editor, .jexcel_textarea')
 			if (isSheetTarget || target?.matches?.('textarea, [contenteditable="true"]')) {
 				this.markTabDirty(this.tab)
 			}
@@ -1578,7 +1636,7 @@
 			const row = Array.isArray(res) ? (res[0]?.[0] || res[0]) : res
 			if (row) {
 				const parseJson = (str) => {
-					try { return typeof str === 'string' ? JSON.parse(str) : (str || []) } catch (e) { return [] }
+					return typeof str === 'string' ? (this.safeParseJson(str, []) || []) : (str || [])
 				}
 				this.tongKetNamC1SavedData = {
 					DuyTriSoLuong: row.DuyTriSoLuong || '',
@@ -1762,7 +1820,7 @@
 				return
 			}
 			try {
-				this.keHoachNamHocData = typeof json === 'string' ? JSON.parse(json) : json
+				this.keHoachNamHocData = typeof json === 'string' ? this.safeParseJson(json) : json
 			} catch (error) {
 				console.error('Dữ liệu kế hoạch năm học không hợp lệ:', error)
 				this.keHoachNamHocData = null
@@ -2299,9 +2357,9 @@
 		parseSiSoSavedRows(value) {
 			if (!value) return []
 			try {
-				const parsed = JSON.parse(value)
+				const parsed = this.safeParseJson(value)
 				if (Array.isArray(parsed)) return parsed
-				if (Array.isArray(parsed.rows)) return parsed.rows
+				if (parsed && Array.isArray(parsed.rows)) return parsed.rows
 			} catch (error) {
 				return []
 			}
@@ -2373,7 +2431,7 @@
 				}
 			} else if (this.form.ChiTieu) {
 				try {
-					parsed = JSON.parse(this.form.ChiTieu)
+					parsed = this.safeParseJson(this.form.ChiTieu, {})
 				} catch (e) {
 					parsed = { text: this.form.ChiTieu }
 				}
@@ -2428,9 +2486,9 @@
 		parseChiTieuSavedRows(value) {
 			if (!value) return []
 			try {
-				const parsed = JSON.parse(value)
+				const parsed = this.safeParseJson(value)
 				if (Array.isArray(parsed)) return parsed
-				if (Array.isArray(parsed.rows)) return parsed.rows
+				if (parsed && Array.isArray(parsed.rows)) return parsed.rows
 			} catch (error) {
 				return []
 			}
@@ -2530,9 +2588,9 @@
 		parseGiaoVienBoMonSavedRows(value) {
 			if (!value) return []
 			try {
-				const parsed = JSON.parse(value)
+				const parsed = this.safeParseJson(value)
 				if (Array.isArray(parsed)) return parsed
-				if (Array.isArray(parsed.rows)) return parsed.rows
+				if (parsed && Array.isArray(parsed.rows)) return parsed.rows
 			} catch (error) {
 				return String(value).split(/\r?\n/).filter(Boolean).map(line => ({
 					BoMon: '',
@@ -2677,9 +2735,9 @@
 		parseSheetSavedRows(value) {
 			if (!value) return []
 			try {
-				const parsed = JSON.parse(value)
+				const parsed = this.safeParseJson(value)
 				if (Array.isArray(parsed)) return parsed
-				if (Array.isArray(parsed.rows)) return parsed.rows
+				if (parsed && Array.isArray(parsed.rows)) return parsed.rows
 			} catch (error) {
 				return []
 			}
@@ -2841,18 +2899,18 @@
 
 			this.getKeHoachExportMonths().forEach(month => {
 				const item = this.findMonthPlan(month.value)
-				const chuDeLines = (item.ChuDe || '').split(/\r?\n/)
-				const mucTieuLines = (item.MucTieu || '').split(/\r?\n/)
+				const chuDeLines = this.parseKeHoachListField(item.ChuDe)
+				const mucTieuLines = this.parseKeHoachListField(item.MucTieu)
 
 				rows.push([
 					month.label,
 					chuDeLines[0] || '',
 					mucTieuLines[0] || '',
-					this.getKeHoachWeekValue(item.KeHoachTuan, '', 1, 0),
-					this.getKeHoachWeekValue(item.KeHoachTuan, '', 2, 0),
-					this.getKeHoachWeekValue(item.KeHoachTuan, '', 3, 0),
-					this.getKeHoachWeekValue(item.KeHoachTuan, '', 4, 0),
-					this.getKeHoachWeekValue(item.KeHoachTuan, '', 5, 0),
+					this.getKeHoachWeekValue(item, 1, 0),
+					this.getKeHoachWeekValue(item, 2, 0),
+					this.getKeHoachWeekValue(item, 3, 0),
+					this.getKeHoachWeekValue(item, 4, 0),
+					this.getKeHoachWeekValue(item, 5, 0),
 					item.DanhGia || ''
 				])
 				this.getKeHoachTaskLabels().forEach((label, idx) => {
@@ -2861,11 +2919,11 @@
 						'',
 						chuDeLines[rIdx] || '',
 						mucTieuLines[rIdx] !== undefined ? mucTieuLines[rIdx] : label,
-						this.getKeHoachWeekValue(item.KeHoachTuan, label, 1, rIdx),
-						this.getKeHoachWeekValue(item.KeHoachTuan, label, 2, rIdx),
-						this.getKeHoachWeekValue(item.KeHoachTuan, label, 3, rIdx),
-						this.getKeHoachWeekValue(item.KeHoachTuan, label, 4, rIdx),
-						this.getKeHoachWeekValue(item.KeHoachTuan, label, 5, rIdx),
+						this.getKeHoachWeekValue(item, 1, rIdx, label),
+						this.getKeHoachWeekValue(item, 2, rIdx, label),
+						this.getKeHoachWeekValue(item, 3, rIdx, label),
+						this.getKeHoachWeekValue(item, 4, rIdx, label),
+						this.getKeHoachWeekValue(item, 5, rIdx, label),
 						''
 					])
 				})
@@ -2912,7 +2970,6 @@
 		},
 		buildKeHoachSheetStyle(includeGuidelines = false) {
 			const style = {}
-			const border = 'border:1px solid #000;'
 			const black = 'color:#000000;'
 			const center = 'text-align:center;vertical-align:middle;'
 			const bold = 'font-weight:700;'
@@ -2938,56 +2995,24 @@
 				const start = 1 + offset + (index * rowCount)
 				for (let r = start; r < start + rowCount; r++) {
 					cols.forEach(col => {
-						style[col + r] = border + wrap
+						style[col + r] = wrap
 					})
-					style['B' + r] = border + black + wrap
-					style['C' + r] = border + black + wrap
+					style['B' + r] = black + wrap
+					style['C' + r] = black + wrap
 				}
-				style['A' + start] = border + center
-				style['I' + start] = border + wrap
+				style['A' + start] = center
+				style['I' + start] = wrap
 			})
 			return style
 		},
 		initKeHoachSheet() {
-			// Dùng setTimeout thay vì $nextTick để đảm bảo container đã có kích thước thực
-			// Khởi tạo jspreadsheet trực tiếp cho các sheet của module.
-			const doInit = () => {
-				const container = this.$refs.keHoachSheetRef
-				if (!container) return
-				if (this.keHoachSheetInstance) {
-					try {
-						const sheet = Array.isArray(this.keHoachSheetInstance) ? this.keHoachSheetInstance[0] : this.keHoachSheetInstance
-						if (sheet && typeof sheet.destroy === 'function') sheet.destroy()
-					} catch (e) {}
-					this.keHoachSheetInstance = null
-				}
-				container.innerHTML = ''
-
-				const data = this.buildKeHoachThangTuanExportAoA(false, true)
-				const style = this.buildKeHoachSheetStyle(false)
-				if (typeof jspreadsheet === 'function') {
-					this.keHoachSheetInstance = jspreadsheet(container, {
-						worksheets: [{
-							data: data,
-							columns: this.keHoachSheetColumns,
-							rowResize: true,
-							columnDrag: false,
-							tableWidth: '100%',
-							tableOverflow: true,
-							tableHeight: this.keHoachSheetHeight,
-							lazyLoading: false,
-							wordWrap: true,
-							allowInsertColumn: false,
-							allowInsertRow: false,
-							style: style,
-							showHeader: true
-						}],
-						contextMenu: () => false,
-						onload: () => this.onKeHoachSheetLoad()
-					})
-				}
-			}
-			setTimeout(doInit, 0)
+			this.keHoachSheetRows = this.buildKeHoachThangTuanExportAoA(false, true)
+			this.keHoachSheetStyle = this.buildKeHoachSheetStyle(false)
+			this.$nextTick(() => {
+				setTimeout(() => {
+					this.$refs.tabKeHoachRef?.initSheet?.()
+				}, 50)
+			})
 		},
 		onKeHoachSheetLoad() {
 			this.$nextTick(() => {
@@ -3128,15 +3153,100 @@
 		getDefaultKeHoachChuDe(thang) {
 			return Number(thang) === 8 ? 'Ổn định lớp, học tập nội quy' : ''
 		},
-		getKeHoachWeekValue(text, label, week, rowIdx = 0) {
-			if (!text) return ''
-			const lines = String(text).split(/\r?\n/)
-			if (lines[rowIdx] !== undefined && lines[rowIdx].includes('\t')) {
-				const cols = lines[rowIdx].split('\t')
-				return cols[week - 1] || ''
+		
+		safeParseJson(val, fallback = null) {
+			if (!val) return fallback;
+			if (typeof val !== 'string') return val;
+			let currentVal = val;
+			while (typeof currentVal === 'string' && (currentVal.trim().startsWith('[') || currentVal.trim().startsWith('{'))) {
+				try {
+					const parsed = JSON.parse(currentVal);
+					if (typeof parsed === 'string') {
+						currentVal = parsed;
+					} else {
+						return parsed;
+					}
+				} catch (e) { break; }
 			}
+			return fallback !== null ? fallback : currentVal;
+		},
+		parseKeHoachListField(val) {
+			if (!val) return []
+			if (Array.isArray(val)) return val;
+			let currentVal = val
+			while (typeof currentVal === 'string' && currentVal.trim().startsWith('[')) {
+				try {
+					const parsed = JSON.parse(currentVal)
+					if (Array.isArray(parsed)) return parsed
+					if (typeof parsed === 'string') currentVal = parsed
+					else break
+				} catch (e) {
+					// Invalid JSON, try to clean it manually before splitting
+					let cleaned = currentVal;
+					cleaned = cleaned.replace(/\\*"+,\\*"+/g, '|~|');
+					while (cleaned.match(/^\[+/) || cleaned.match(/^"+/) || cleaned.match(/^\\+"/)) {
+						cleaned = cleaned.replace(/^\[+/, '');
+						cleaned = cleaned.replace(/^"+/, '');
+						cleaned = cleaned.replace(/^\\+"/, '');
+					}
+					while (cleaned.match(/\]+$/) || cleaned.match(/"+$/) || cleaned.match(/\\+"+$/)) {
+						cleaned = cleaned.replace(/\]+$/, '');
+						cleaned = cleaned.replace(/"+$/, '');
+						cleaned = cleaned.replace(/\\+"+$/, '');
+					}
+					cleaned = cleaned.replace(/\\+n/g, '\n');
+					return cleaned.split('|~|');
+				}
+			}
+			return String(currentVal).split(/\r?\n/)
+		},
+		parseKeHoachWeekData(keHoachTuan) {
+			if (!keHoachTuan) return []
+			if (Array.isArray(keHoachTuan)) return keHoachTuan;
+			let currentVal = keHoachTuan
+			while (typeof currentVal === 'string' && currentVal.trim().startsWith('[')) {
+				try {
+					const parsed = JSON.parse(currentVal)
+					if (Array.isArray(parsed)) return parsed
+					if (typeof parsed === 'string') currentVal = parsed
+					else break
+				} catch (e) {
+					let cleaned = currentVal;
+					cleaned = cleaned.replace(/\\*"+,\\*"+/g, '|~|');
+					while (cleaned.match(/^\[+/) || cleaned.match(/^"+/) || cleaned.match(/^\\+"/)) {
+						cleaned = cleaned.replace(/^\[+/, '');
+						cleaned = cleaned.replace(/^"+/, '');
+						cleaned = cleaned.replace(/^\\+"/, '');
+					}
+					while (cleaned.match(/\]+$/) || cleaned.match(/"+$/) || cleaned.match(/\\+"+$/)) {
+						cleaned = cleaned.replace(/\]+$/, '');
+						cleaned = cleaned.replace(/"+$/, '');
+						cleaned = cleaned.replace(/\\+"+$/, '');
+					}
+					cleaned = cleaned.replace(/\\+n/g, '\n');
+					currentVal = cleaned.split('|~|');
+					break;
+				}
+			}
+			const lines = Array.isArray(currentVal) ? currentVal : String(currentVal).split(/\r?\n/)
+			return lines.map(line => {
+				if (line && line.includes('\t')) {
+					const cols = line.split('\t')
+					return [cols[0] || '', cols[1] || '', cols[2] || '', cols[3] || '', cols[4] || '']
+				}
+				return ['', '', '', '', '']
+			})
+		},
+		getKeHoachWeekValue(item, week, rowIdx = 0, label = '') {
+			if (!item) return ''
+			const weekData = this.parseKeHoachWeekData(item.KeHoachTuan)
+			if (weekData[rowIdx] && weekData[rowIdx][week - 1] !== undefined) {
+				return weekData[rowIdx][week - 1] || ''
+			}
+			const text = item.KeHoachTuan || ''
+			const lines = String(text).split(/\r?\n/)
 			const prefix = 'Tuần ' + week + ':'
-			const line = lines.find(item => item.trim().startsWith(prefix))
+			const line = lines.find(l => l.trim().startsWith(prefix))
 			return line ? line.trim().slice(prefix.length).trim() : ''
 		},
 		findMonthPlan(thang) {
@@ -3187,9 +3297,9 @@
 		parseHuongNghiepSavedRows(value) {
 			if (!value) return []
 			try {
-				const parsed = JSON.parse(value)
+				const parsed = this.safeParseJson(value)
 				if (Array.isArray(parsed)) return parsed
-				if (Array.isArray(parsed.rows)) return parsed.rows
+				if (parsed && Array.isArray(parsed.rows)) return parsed.rows
 			} catch (error) {
 				const lines = String(value).split(/\r?\n/).filter(Boolean)
 				return lines.map(line => {
@@ -3204,7 +3314,8 @@
 			return []
 		},
 		serializeHuongNghiepRows() {
-			const sheet = Array.isArray(this.huongNghiepSheetInstance) ? this.huongNghiepSheetInstance[0] : this.huongNghiepSheetInstance
+			const sheetInstance = this.$refs.tabHuongNghiepRef?.getInstance?.()
+			const sheet = Array.isArray(sheetInstance) ? sheetInstance[0] : sheetInstance
 			const sourceRows = sheet && typeof sheet.getData === 'function' ? sheet.getData() : (this.huongNghiepRows || [])
 			const sourceStudents = this.getSheetStudents()
 			return this.filterRowsForSaving(sourceRows.map((row, index) => {
@@ -3245,30 +3356,28 @@
 			const rowCount = this.getKeHoachMonthRowCount()
 			return this.getKeHoachExportMonths().map((month, index) => {
 				const start = index * rowCount
-				const row = source[start] || []
 				const weekRows = source.slice(start, start + rowCount)
 				
-				// Gom dữ liệu kế hoạch các tuần 1..5 theo từng dòng (row)
-				const keHoachTuan = weekRows.map(wRow => {
-					return [wRow[3], wRow[4], wRow[5], wRow[6], wRow[7]].map(v => v || '').join('\t')
-				}).join('\n')
+				// Gom dữ liệu kế hoạch các tuần 1..5 dạng ma trận lưu JSON
+				const weekData = weekRows.map(wRow => [
+					this.cleanSheetValue(wRow[3]),
+					this.cleanSheetValue(wRow[4]),
+					this.cleanSheetValue(wRow[5]),
+					this.cleanSheetValue(wRow[6]),
+					this.cleanSheetValue(wRow[7])
+				])
 
 				const chuDeList = weekRows.map(wRow => this.cleanSheetValue(wRow[1]))
 				const mucTieuList = weekRows.map(wRow => this.cleanSheetValue(wRow[2]))
-
-				// Bỏ các ô rỗng ở cuối để khi copy/paste hoặc lưu không sinh ra các ô xuống dòng thừa
-				while (chuDeList.length > 0 && !chuDeList[chuDeList.length - 1]) chuDeList.pop()
-				while (mucTieuList.length > 0 && !mucTieuList[mucTieuList.length - 1]) mucTieuList.pop()
-
 				const danhGiaVal = weekRows.map(wRow => this.cleanSheetValue(wRow[8])).find(v => v) || ''
 
 				return {
 					SoGVCNID: this.form.SoGVCNID,
 					Thang: month.value,
-					ChuDe: chuDeList.join('\n'),
-					MucTieu: mucTieuList.join('\n'),
+					ChuDe: JSON.stringify(chuDeList),
+					MucTieu: JSON.stringify(mucTieuList),
 					NhiemVu: chuDeList.find(x => x) || '',
-					KeHoachTuan: keHoachTuan,
+					KeHoachTuan: JSON.stringify(weekData),
 					DanhGia: danhGiaVal
 				}
 			})
@@ -3404,7 +3513,7 @@
 		},
 		buildTheoDoiPhHopExportAoA() {
 			const rows = [['THEO DÕI PHỤ HUYNH ĐI HỌP'], ['STT', 'Mã học sinh', 'Số danh bộ', 'Họ và tên', 'Lần 1', 'Lần 2', 'Lần 3', 'Ghi chú']]
-			const data = this.$refs.tabSoLienLacRef?.getRows?.() || []
+			const data = this.$refs.tabTheoDoiPhHopRef?.getRows?.() || []
 			data.forEach((r, idx) => {
 				rows.push([idx + 1, r[1] || '', r[2] || '', r[3] || '', r[4] ? 'X' : '', r[5] ? 'X' : '', r[6] ? 'X' : '', r[7] || ''])
 			})
@@ -3461,10 +3570,18 @@
 			if (document.activeElement && typeof document.activeElement.blur === 'function') {
 				document.activeElement.blur()
 			}
-			[this.sheetInstance, this.renLuyenSheetInstance, this.soLienLacSheetInstance, this.huongNghiepSheetInstance].forEach(inst => {
+			const instances = [this.sheetInstance]
+			if (this.$refs) {
+				Object.values(this.$refs).forEach(ref => {
+					if (ref && typeof ref.getInstance === 'function') {
+						instances.push(ref.getInstance())
+					}
+				})
+			}
+			instances.forEach(inst => {
 				const sheet = Array.isArray(inst) ? inst[0] : inst
 				if (sheet && typeof sheet.closeEditor === 'function') {
-					try { sheet.closeEditor(true) } catch (e) {}
+					try { sheet.closeEditor(sheet.edition ? sheet.edition[0] : null, true) } catch (e) {}
 				}
 			})
 			this.loading.save = true
@@ -3797,7 +3914,7 @@
 			const instance = this.$refs.tabHsCanQuanTamRef?.getInstance()
 			const sheet = Array.isArray(instance) ? instance[0] : instance
 			if (sheet && typeof sheet.closeEditor === 'function') {
-				try { sheet.closeEditor(true) } catch (error) {}
+				try { sheet.closeEditor(sheet.edition ? sheet.edition[0] : null, true) } catch (error) {}
 			}
 			const sourceRows = sheet && typeof sheet.getData === 'function' ? sheet.getData() : []
 			const students = this.getSheetStudents()
@@ -3808,20 +3925,20 @@
 				rows.push({
 					HSLopID: student.HSLopID,
 					HocSinhID: student.HocSinhID || null,
-					CanHoTroDacBiet: this.cleanSheetValue(row[3]),
-					Thang8: this.cleanSheetValue(row[4]),
-					Thang9: this.cleanSheetValue(row[5]),
-					Thang10: this.cleanSheetValue(row[6]),
-					Thang11: this.cleanSheetValue(row[7]),
-					Thang12: this.cleanSheetValue(row[8]),
-					NhanXetHKI: this.cleanSheetValue(row[9]),
-					KetQuaHKI: this.cleanSheetValue(row[10]),
-					Thang1_2: this.cleanSheetValue(row[11]),
-					Thang3: this.cleanSheetValue(row[12]),
-					Thang4: this.cleanSheetValue(row[13]),
-					Thang5: this.cleanSheetValue(row[14]),
-					NhanXetCuoiNam: this.cleanSheetValue(row[15]),
-					KetQuaCuoiNam: this.cleanSheetValue(row[16])
+					CanHoTroDacBiet: this.cleanSheetValue(row[2]),
+					Thang8: this.cleanSheetValue(row[3]),
+					Thang9: this.cleanSheetValue(row[4]),
+					Thang10: this.cleanSheetValue(row[5]),
+					Thang11: this.cleanSheetValue(row[6]),
+					Thang12: this.cleanSheetValue(row[7]),
+					NhanXetHKI: this.cleanSheetValue(row[8]),
+					KetQuaHKI: this.cleanSheetValue(row[9]),
+					Thang1_2: this.cleanSheetValue(row[10]),
+					Thang3: this.cleanSheetValue(row[11]),
+					Thang4: this.cleanSheetValue(row[12]),
+					Thang5: this.cleanSheetValue(row[13]),
+					NhanXetCuoiNam: this.cleanSheetValue(row[14]),
+					KetQuaCuoiNam: this.cleanSheetValue(row[15])
 				})
 			})
 			return rows
@@ -3916,7 +4033,8 @@
 		},
 
 		serializeRenLuyenMonthlyRows() {
-			const sheet = Array.isArray(this.renLuyenSheetInstance) ? this.renLuyenSheetInstance[0] : this.renLuyenSheetInstance
+			const sheetInstance = this.$refs.tabRenLuyenRef?.getInstance?.()
+			const sheet = Array.isArray(sheetInstance) ? sheetInstance[0] : sheetInstance
 			const sourceRows = sheet && typeof sheet.getData === 'function' ? sheet.getData() : (this.renLuyenRows || [])
 			const students = this.getSheetStudents()
 			const months = this.getMonthlySheetMonths()
@@ -4072,10 +4190,10 @@
 				? this.$refs.tabCongTacChuNhiemRef
 				: this.$refs.tabKeHoachRef
 			const tabRefInstance = activeRef?.getInstance ? activeRef.getInstance() : null
-			const inst = tabRefInstance || this.keHoachSheetInstance
+			const inst = tabRefInstance || this.$refs.tabKeHoachRef?.getInstance?.() || this.keHoachSheetInstance
 			const sheet = Array.isArray(inst) ? inst[0] : inst
 			if (sheet && typeof sheet.closeEditor === 'function') {
-				try { sheet.closeEditor(true) } catch (e) {}
+				try { sheet.closeEditor(sheet.edition ? sheet.edition[0] : null, true) } catch (e) {}
 			}
 			// Đợi DOM flush sau closeEditor trước khi đọc getData()
 			await this.$nextTick()
@@ -4090,9 +4208,15 @@
 					})))
 					const weekRows = this.$refs.tabCongTacChuNhiemRef?.getSaveWeekRows?.(this.form.SoGVCNID) || []
 					await Promise.all(weekRows.map(row => ajaxCALLPromise('lms/SoGVCNKeHoachTuanSave', row)))
-					await this.getDetail()
 				}
-				this.initKeHoachSheet()
+				await this.getDetail()
+				if (this.tab === 'cong-tac-cn') {
+					this.$refs.tabCongTacChuNhiemRef?.initSheet?.()
+				} else {
+					this.keHoachSheetRows = this.buildKeHoachThangTuanExportAoA(false, true)
+					this.keHoachSheetStyle = this.buildKeHoachSheetStyle(false)
+					this.$refs.tabKeHoachRef?.initSheet?.()
+				}
 				this.clearUnsavedChanges()
 				this.notify('Đã lưu kế hoạch tháng')
 			} finally {

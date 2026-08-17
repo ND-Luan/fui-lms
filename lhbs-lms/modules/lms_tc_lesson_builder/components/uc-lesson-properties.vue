@@ -117,12 +117,6 @@
 							@handleSave="handleChangeFile(fileRecordAudio, element.ElementType)" />
 					</div>
 					<div v-else-if="element.ElementType === 'HTML'" class="d-flex flex-column ga-2">
-						<div class="d-flex">
-							<v-spacer></v-spacer>
-							<v-btn variant="outlined" color="primary" @click="onOpenModalImportFromHocLieu()">
-								<v-icon start class="me-1">mdi-database-import-outline</v-icon>{{ $t('message.ImportFromLibrary') }}
-							</v-btn>
-						</div>
 						<v-checkbox v-model="element.ElementData.IsHTML" label="HTML" />
 						<v-textarea v-model="element.ElementData.source" :placeholder="$t('message.PasteHTML')" />
 						<!-- <f-editor v-model="element.ElementData.source" /> -->
@@ -244,8 +238,6 @@
 			</v-window-item>
 		</v-window>
 		<uc-loading-page v-model="loadingPage.isLoading" v-model:text="loadingPage.text" />
-		<uc-lesson-from-hoc-lieu v-if="isShowModalImportFromHocLieu" v-model:isOpen="isShowModalImportFromHocLieu"
-			:lessonDetail="lessonHeader" @importJson="bindingImport" />
 	</div>
 </template>
 
@@ -267,7 +259,6 @@
 					isLoading: false,
 					text: this.$t('message.LoadingData')
 				},
-				isShowModalImportFromHocLieu: false,
 				vueData,
 			}
 		},
@@ -762,13 +753,6 @@
 				this.$emit('update:element', { index: this.index, element: updatedElement });
 			},
 	
-			onOpenModalImportFromHocLieu() {
-				this.isShowModalImportFromHocLieu = true
-				console.log('lessonHeader', this.lessonHeader)
-			},
-			bindingImport(val) {
-				this.element.ElementData.source = val
-			},
 			renderUrlYoutube
 		}
 	}

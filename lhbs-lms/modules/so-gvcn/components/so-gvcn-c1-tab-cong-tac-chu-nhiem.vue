@@ -4,26 +4,41 @@
 			Chọn một lớp ở thanh trên để cập nhật công tác chủ nhiệm tháng.
 		</v-alert>
 		<div v-else class="d-flex h-100 ga-3">
-			<div class="flex-shrink-0 overflow-y-auto"
-				style="width: 220px; border-right: 1px solid rgba(0, 0, 0, 0.12);">
+			<div class="flex-shrink-0 overflow-y-auto" 
+				:style="{ width: isMonthSidebarCollapsed ? '44px' : '220px', borderRight: '1px solid rgba(0, 0, 0, 0.12)' }">
+				<div class="d-flex align-center py-1" :class="isMonthSidebarCollapsed ? 'justify-center' : 'justify-end px-1'">
+					<v-btn :icon="isMonthSidebarCollapsed" size="small" variant="text" color="primary"
+						:aria-label="isMonthSidebarCollapsed ? 'Mở danh sách tháng' : 'Ẩn danh sách tháng'"
+						:title="isMonthSidebarCollapsed ? 'Mở danh sách tháng' : 'Ẩn danh sách tháng'"
+						@click="isMonthSidebarCollapsed = !isMonthSidebarCollapsed">
+						<template v-if="isMonthSidebarCollapsed">
+							<v-icon>mdi-chevron-right</v-icon>
+						</template>
+						<template v-else>
+							<v-icon start>mdi-chevron-left</v-icon>
+							<span>Ẩn danh sách tháng</span>
+						</template>
+					</v-btn>
+				</div>
 				<v-list density="compact" nav color="primary" class="pa-0">
 					<v-list-item v-for="month in months" :key="month.value" :value="month.value"
 						:active="Number(activeMonth) === Number(month.value)" class="mb-1 rounded"
 						@click="selectMonth(month.value)">
 						<template #prepend>
 							<v-icon size="small" class="mr-2"
-								:color="Number(activeMonth) === Number(month.value) ? 'primary' : ''">
+								:color="Number(activeMonth) === Number(month.value) ? 'primary' : ''"
+								v-if="!isMonthSidebarCollapsed">
 								mdi-calendar-month-outline
 							</v-icon>
 						</template>
 						<v-list-item-title class="text-caption font-weight-bold">
-							Công tác CN tháng {{ month.label }}
+							{{ isMonthSidebarCollapsed ? `T${month.label}` : `Công tác CN tháng ${month.label}` }}
 						</v-list-item-title>
 					</v-list-item>
 				</v-list>
 			</div>
 
-			<div ref="contentContainer" class="flex-grow-1 h-100 overflow-y-auto pr-1">
+			<div ref="contentContainer" class="flex-grow-1 h-100 overflow-auto pr-1" style="min-width: 0;">
 				<div class="text-h6 text-center font-weight-bold py-3">
 					{{ pageTitle }}
 				</div>
@@ -63,9 +78,9 @@
 					</v-card-title>
 					<v-divider />
 					<v-card-text class="pa-2">
-						<div class="wrapper-jexcel">
+						<div class="wrapper-jexcel so-gvcn-cong-tac-thang-wrapper">
 							<div ref="sheetRef" class="w-100 so-gvcn-sheet so-gvcn-cong-tac-thang-sheet"
-								:style="{ height: weeklySheetHeight }"></div>
+								></div>
 						</div>
 					</v-card-text>
 				</v-card>
@@ -92,15 +107,16 @@
 			return {
 				months,
 				activeMonth: months[0]?.value || 8,
+				isMonthSidebarCollapsed: false,
 				localPlans: {},
 				instance: null,
 				weeklyColumns: [
 					{ title: 'THÁNG', width: 80, align: 'center' },
 					{ title: 'TUẦN', width: 90, align: 'center' },
 					{ title: 'THỜI GIAN', width: 150, align: 'center' },
-					{ title: 'KẾ HOẠCH THỰC HIỆN', width: 500, align: 'justify' },
-					{ title: 'KẾT QUẢ', width: 440, align: 'justify' },
-					{ title: 'NGUYÊN NHÂN ĐẠT ĐƯỢC KẾT QUẢ', width: 500, align: 'justify' }
+					{ title: 'KẾ HOẠCH THỰC HIỆN', width: 540, align: 'justify', type: 'note' },
+					{ title: 'KẾT QUẢ', width: 480, align: 'justify', type: 'note' },
+					{ title: 'NGUYÊN NHÂN ĐẠT ĐƯỢC KẾT QUẢ', width: 540, align: 'justify', type: 'note' }
 				]
 			}
 		},
@@ -150,23 +166,17 @@
 			weeklyPlanYearLabel() {
 				return Number(this.activeMonth) === 5 ? this.activeYearLabel : this.planYearLabel
 			},
-			weeklySheetHeight() {
-				const rowCount = this.currentPlan?.weeklyRows?.length || 5
-				return Math.max(400, rowCount * 68 + 44) + 'px'
-			}
 		},
 		watch: {
 			selectedLopID() {
 				this.buildPlans()
 			},
 			monthList: {
-				deep: true,
 				handler() {
 					this.buildPlans()
 				}
 			},
 			weekList: {
-				deep: true,
 				handler() {
 					this.buildPlans()
 				}
@@ -184,10 +194,6 @@
 		beforeUnmount() {
 			this.commitCurrentSheet()
 			this.destroySheet()
-			if (this._editorWheelGuard) {
-				document.removeEventListener('wheel', this._editorWheelGuard, true)
-				this._editorWheelGuard = null
-			}
 		},
 		methods: {
 			getMonths() {
@@ -350,7 +356,7 @@
 				const sheet = Array.isArray(this.instance) ? this.instance[0] : this.instance
 				if (plan && sheet && typeof sheet.getData === 'function') {
 					try {
-						if (typeof sheet.closeEditor === 'function') sheet.closeEditor(true)
+						if (typeof sheet.closeEditor === 'function') sheet.closeEditor(sheet.edition ? sheet.edition[0] : null, true)
 						plan.weeklyRows = this.normalizeWeeklyRows(sheet.getData())
 					} catch (error) {}
 				}
@@ -363,48 +369,20 @@
 				} catch (error) {}
 				this.instance = null
 			},
-			bindEditorWheelGuard() {
-				if (this._editorWheelGuard) return
-				this._editorWheelGuard = (event) => {
-					const activeElement = document.activeElement
-					const isEditing = activeElement?.tagName === 'TEXTAREA' &&
-						activeElement.closest?.('.so-gvcn-cong-tac-thang-sheet td.editor')
-					if (!isEditing) return
-					event.preventDefault()
-					event.stopImmediatePropagation()
-					const scrollContainer = this.$refs.contentContainer
-					if (scrollContainer) {
-						scrollContainer.scrollTop += event.deltaY
-						scrollContainer.scrollLeft += event.deltaX
-					}
-				}
-				document.addEventListener('wheel', this._editorWheelGuard, { capture: true, passive: false })
-			},
 			initSheet() {
 				if (this.selectedLopID === '__ALL__') {
-					if (!container._wheelListenerAdded) {
-						container.addEventListener('wheel', (e) => {
-							const target = e.target
-							const isEditor = target && (target.tagName === 'TEXTAREA' || target.tagName === 'INPUT' ||
-								target.classList?.contains('jss_editor') || target.closest?.('.jss_editor'))
-							if (!isEditor) return
-							e.preventDefault()
-							e.stopPropagation()
-							const scrollContainer = this.$refs.contentContainer
-							if (scrollContainer) {
-								scrollContainer.scrollTop += e.deltaY
-								scrollContainer.scrollLeft += e.deltaX
-							}
-						}, { capture: true, passive: false })
-						container._wheelListenerAdded = true
-					}
 					this.destroySheet()
 					return
 				}
 				this.$nextTick(() => {
 					const container = this.$refs.sheetRef
 					if (!container || !this.currentPlan || typeof jspreadsheet !== 'function') return
-					this.bindEditorWheelGuard()
+					
+					let scrollTop = 0;
+					if (this.$refs.contentContainer) {
+						scrollTop = this.$refs.contentContainer.scrollTop;
+					}
+
 					this.destroySheet()
 					container.innerHTML = ''
 					this.instance = jspreadsheet(container, {
@@ -413,9 +391,10 @@
 							columns: this.weeklyColumns,
 							rowResize: true,
 							columnDrag: false,
+						rowDrag: false,
+						columnSorting: false,
 							tableWidth: '100%',
-							tableOverflow: true,
-							tableHeight: this.weeklySheetHeight,
+							tableOverflow: false,
 							lazyLoading: false,
 							wordWrap: true,
 							allowInsertColumn: false,
@@ -429,13 +408,45 @@
 						onchange: worksheet => {
 							if (this.currentPlan) {
 								this.currentPlan.weeklyRows = this.normalizeWeeklyRows(worksheet.getData())
+								this.$emit('changed')
 							}
+						},
+						onbeforepaste: (worksheet, data, x, y) => {
+							const col = worksheet.options.columns ? worksheet.options.columns[x] : null;
+							this.$emit('changed');
+							if (Array.isArray(data)) {
+								const normalizedData = data.map(row => row.map(cell => {
+									if (cell === null || cell === undefined) return '';
+									if (typeof cell === 'string' || typeof cell === 'number') return String(cell);
+									if (typeof cell === 'object') {
+										return cell.innerHTML || cell.textContent || cell.innerText || cell.value || cell.v || '';
+									}
+									return String(cell);
+								}));
+								
+								if (col && (col.type === 'note' || col.type === 'html')) {
+									let text = normalizedData.map(row => row.join('\t')).join('\n');
+									if (text.startsWith('"') && text.endsWith('"')) {
+										text = text.substring(1, text.length - 1).replace(/""/g, '"');
+									}
+									return [[text]];
+								}
+								
+								return normalizedData;
+							}
+							return data;
 						}
 					})
 					const sheet = Array.isArray(this.instance) ? this.instance[0] : this.instance
 					if (sheet && typeof sheet.setHeight === 'function') {
 						this.currentPlan.weeklyRows.forEach((_, rowIndex) => sheet.setHeight(rowIndex, 68))
 					}
+
+					this.$nextTick(() => {
+						if (this.$refs.contentContainer) {
+							this.$refs.contentContainer.scrollTop = scrollTop;
+						}
+					})
 				})
 			},
 			clearWeekRow(worksheet, rowIndex) {
@@ -443,7 +454,10 @@
 				for (let columnIndex = 0; columnIndex <= 5; columnIndex++) {
 					worksheet.setValueFromCoords(columnIndex, rowIndex, '')
 				}
-				if (this.currentPlan) this.currentPlan.weeklyRows = this.normalizeWeeklyRows(worksheet.getData())
+				if (this.currentPlan) {
+					this.currentPlan.weeklyRows = this.normalizeWeeklyRows(worksheet.getData())
+					this.$emit('changed')
+				}
 			},
 			getInstance() {
 				return this.instance

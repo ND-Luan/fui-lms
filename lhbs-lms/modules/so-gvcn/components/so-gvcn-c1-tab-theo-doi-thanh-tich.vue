@@ -24,10 +24,8 @@
 				columns: [
 					{ title: 'STT', width: 50, readOnly: true, align: 'center' },
 					{ title: 'Mã học sinh', width: 110, readOnly: true },
-					{ title: 'Số danh bộ', width: 110, readOnly: true },
 					{ title: 'Họ và tên học sinh', width: 220, readOnly: true },
-					{ title: 'HKI', width: 350 },
-					{ title: 'Cuối năm học', width: 350, align: 'justify' }
+					{ title: 'Cuối năm học', width: 350 }
 				]
 			}
 		},
@@ -58,8 +56,8 @@
 			nestedHeaders() {
 				return [
 					[
-						{ title: '', colspan: 4 },
-						{ title: 'Nội dung khen thưởng/ Thành tích đạt được', colspan: 2 }
+						{ title: '', colspan: 3 },
+						{ title: 'Nội dung khen thưởng/ Thành tích đạt được', colspan: 1 }
 					]
 				]
 			}
@@ -71,9 +69,22 @@
 			getRows() {
 				const sheet = Array.isArray(this.instance) ? this.instance[0] : this.instance
 				if (sheet && typeof sheet.closeEditor === 'function') {
-					try { sheet.closeEditor(true) } catch (error) {}
+					try { sheet.closeEditor(sheet.edition ? sheet.edition[0] : null, true) } catch (error) {}
 				}
-				return sheet && typeof sheet.getData === 'function' ? sheet.getData() : []
+				const visibleRows = sheet && typeof sheet.getData === 'function' ? sheet.getData() : []
+				return visibleRows.map((row, index) => {
+					const student = (this.students || [])[index] || {}
+					const saved = (this.savedRows || []).find(item =>
+						Number(item.HSLopID) === Number(student.HSLopID)) || {}
+					return [
+						row[0] ?? index + 1,
+						row[1] ?? student.MaHocSinh ?? student.HocSinhID ?? '',
+						student.SoDanhBo || '',
+						row[2] ?? student.HoTen ?? student.HoTenHocSinh ?? '',
+						saved.HKI || saved.ThanhTich || '',
+						row[3] ?? ''
+					]
+				})
 			},
 			buildRows() {
 				const findSaved = (hslopID) => (this.savedRows || []).find(r => Number(r.HSLopID) === Number(hslopID)) || {}
@@ -82,9 +93,7 @@
 					return [
 						idx + 1,
 						student.MaHocSinh || student.HocSinhID || '',
-						student.SoDanhBo || '',
 						student.HoTen || student.HoTenHocSinh || '',
-						saved.HKI || saved.ThanhTich || '',
 						saved.CuoiNam || ''
 					]
 				})
@@ -119,30 +128,22 @@
 								nestedHeaders: this.nestedHeaders,
 								rowResize: true,
 								columnDrag: false,
+						rowDrag: false,
+						columnSorting: false,
 								tableWidth: '100%',
 								tableOverflow: true,
 								tableHeight: this.sheetHeight,
 								lazyLoading: false,
-								freezeColumns: 4,
+								freezeColumns: 3,
 								wordWrap: true,
 								allowInsertColumn: false,
+								allowDeleteColumn: false,
 								allowInsertRow: false,
+								allowDeleteRow: false,
 								showHeader: true
 							}],
 							contextMenu: () => false
 						})
-						const worksheet = Array.isArray(this.instance) ? this.instance[0] : this.instance
-						if (worksheet && typeof worksheet.hideColumn === 'function') {
-							worksheet.hideColumn(2)
-							// Ẩn HKI trên giao diện nhưng không ẩn nested header chứa HKI và Cuối năm học.
-							const hkiCells = container.querySelectorAll('[data-x="4"]')
-							hkiCells.forEach(cell => {
-								cell.style.display = 'none'
-							})
-							const hkiColumn = container.querySelectorAll('colgroup col')[5]
-							if (hkiColumn) hkiColumn.style.display = 'none'
-							window.requestAnimationFrame(() => soGvcnJspreadsheet.syncNestedHeaders(container, [4]))
-						}
 					}
 				})
 			}

@@ -1,5 +1,5 @@
 <template>
-	<v-card-text class="pa-0 so-gvcn-sheet-wrap" :style="{ height: sheetHeight, overflow: 'hidden' }">
+	<v-card-text class="pa-0 so-gvcn-sheet-wrap" :style="{ height: sheetHeight, 'overflow-y': 'auto' }">
 		<v-alert v-if="selectedLopID === '__ALL__'" type="info" variant="tonal" density="compact" class="ma-2">
 			Chọn một lớp ở thanh trên để theo dõi sĩ số học sinh theo từng tháng.
 		</v-alert>
@@ -40,7 +40,6 @@
 				this.initSheet()
 			},
 			students: {
-				deep: true,
 				handler() {
 					this.initSheet()
 				}
@@ -59,6 +58,24 @@
 			this.destroySheet()
 		},
 		methods: {
+
+		safeParseJson(val, fallback = null) {
+			if (!val) return fallback;
+			if (typeof val !== 'string') return val;
+			let currentVal = val;
+			while (typeof currentVal === 'string' && (currentVal.trim().startsWith('[') || currentVal.trim().startsWith('{'))) {
+				try {
+					const parsed = JSON.parse(currentVal);
+					if (typeof parsed === 'string') {
+						currentVal = parsed;
+					} else {
+						return parsed;
+					}
+				} catch (e) { break; }
+			}
+			return fallback !== null ? fallback : currentVal;
+		},
+
 			getInstance() {
 				return this.instance
 			},
@@ -155,7 +172,7 @@
 					let savedEthnicCounts = saved.DanTocJson || saved.DanToc || {}
 					if (typeof savedEthnicCounts === 'string') {
 						try {
-							savedEthnicCounts = JSON.parse(savedEthnicCounts)
+							savedEthnicCounts = this.safeParseJson(savedEthnicCounts, [])
 						} catch (error) {
 							savedEthnicCounts = {}
 						}
@@ -213,6 +230,8 @@
 								nestedHeaders: nestedHeaders,
 								rowResize: true,
 								columnDrag: false,
+						rowDrag: false,
+						columnSorting: false,
 								tableWidth: '100%',
 								tableOverflow: true,
 								tableHeight: this.sheetHeight,

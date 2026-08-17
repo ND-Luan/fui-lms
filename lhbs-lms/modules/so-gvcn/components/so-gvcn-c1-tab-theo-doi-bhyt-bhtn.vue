@@ -26,7 +26,7 @@
 					{ title: 'HỌ VÀ TÊN HỌC SINH', width: 250, readOnly: true },
 					{ title: 'BHYT', width: 180 },
 					{ title: 'BHTN', width: 180 },
-					{ title: 'Ghi chú', width: 380, align: 'justify' }
+					{ title: 'Ghi chú', width: 350 }
 				]
 			}
 		},
@@ -115,6 +115,8 @@
 								nestedHeaders: this.nestedHeaders,
 								rowResize: true,
 								columnDrag: false,
+						rowDrag: false,
+						columnSorting: false,
 								tableWidth: '100%',
 								tableOverflow: true,
 								tableHeight: this.sheetHeight,

@@ -8,9 +8,15 @@
 		<div v-for="(element, index) in elements" :key="index" class="element-preview"
 			:class="{ 'selected': selectedIndex === index }" @click="$emit('update:selectedIndex', index)">
 			<div class="d-flex ga-2 element-title">
-				<p v-if="element.ElementData.title" style="word-break: break-word; width: 97%">
+				<p v-if="element.ElementData.title" class="mb-0" style="word-break: break-word;">
 					{{ element.ElementData.title }}
 				</p>
+				<v-chip v-if="element.ElementData.sourceTracking?.sourceType === 'HOC_LIEU_SO'"
+					size="x-small" color="primary" variant="tonal" class="mt-1 flex-shrink-0"
+					:v-tooltip="'Học liệu #' + element.ElementData.sourceTracking.HocLieuID + ' · Nội dung #' + element.ElementData.sourceTracking.NoiDungID">
+					<v-icon start size="14">mdi-database-import-outline</v-icon>Học liệu số
+				</v-chip>
+				<v-spacer />
 				<v-btn size="x-small" variant="text" @click.stop="removeElement(index)" class="delete-btn"
 					icon="mdi-delete-outline" />
 			</div>

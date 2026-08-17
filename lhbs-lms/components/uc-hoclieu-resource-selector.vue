@@ -16,7 +16,7 @@
 					@click="isPanelOpen = false" />
 			</div>
 			<div class="text-caption text-medium-emphasis mb-2">
-				Tùy chọn. Chỉ hiển thị học liệu số loại HOC_LIEU.
+				Gắn bài học hoặc bài tập với nội dung đã chọn để lấy và dùng lại nội dung từ học liệu số. Chỉ hiển thị học liệu loại HOC_LIEU.
 			</div>
 			<v-select v-model="selectedHocLieuID" :items="hocLieuItems" item-title="TenHocLieu"
 				item-value="HocLieuID" label="Chọn học liệu số" clearable density="compact" variant="outlined"
@@ -112,6 +112,10 @@
 			}, response => {
 				this.hocLieuItems = this.rows(response)
 				this.isLoadingHocLieu = false
+				// Chỉ có một học liệu phù hợp thì tự chọn để giáo viên không phải thao tác thêm.
+				if (!this.selectedHocLieuID && this.hocLieuItems.length === 1) {
+					this.selectedHocLieuID = this.hocLieuItems[0].HocLieuID
+				}
 			})
 		},
 		loadTree(hocLieuID) {

@@ -13,7 +13,7 @@
 				<v-chip v-if="isLinked" size="x-small" color="success" variant="flat">Đã gắn</v-chip>
 				<v-btn icon="mdi-close" size="x-small" variant="text" aria-label="Đóng học liệu số" @click="isPanelOpen = false" />
 			</div>
-			<div class="text-caption text-medium-emphasis mb-2">Tùy chọn. Chỉ hiển thị học liệu số loại HOC_LIEU.</div>
+			<div class="text-caption text-medium-emphasis mb-2">Gắn bài học hoặc bài tập với nội dung đã chọn để lấy và dùng lại nội dung từ học liệu số. Chỉ hiển thị học liệu loại HOC_LIEU.</div>
 			<v-select v-model="selectedHocLieuID" :items="hocLieuItems" item-title="TenHocLieu" item-value="HocLieuID"
 				label="Chọn học liệu số" clearable density="compact" variant="outlined" :loading="isLoadingHocLieu"
 				:disabled="!khoiId || !monHocId" hide-details="auto" />
@@ -56,7 +56,8 @@
 			activeTreeNodeIDs: [],
 			selectedHocLieuID: null,
 			selectedNoiDungID: null,
-			isPanelOpen: false,
+			// Luôn mở sẵn để giáo viên không phải bấm mới tải/chọn được học liệu.
+			isPanelOpen: true,
 			isLoadingHocLieu: false,
 			isLoadingTree: false,
 		}
@@ -106,6 +107,10 @@
 			ajaxCALL('lms/FP_HocLieu_GetByLopMon', { KhoiID: this.khoiId, MonHocID: this.monHocId }, response => {
 				this.hocLieuItems = this.rows(response)
 				this.isLoadingHocLieu = false
+				// Bài chưa có liên kết: chỉ tự chọn khi không có khả năng chọn nhầm.
+				if (!this.selectedHocLieuID && this.hocLieuItems.length === 1) {
+					this.selectedHocLieuID = this.hocLieuItems[0].HocLieuID
+				}
 			})
 		},
 		loadMapping() {
@@ -130,6 +135,12 @@
 				this.treeNodes = this.buildTree(nodes)
 				this.openedTreeNodeIDs = this.getExpandableIDs(this.treeNodes)
 				this.isLoadingTree = false
+				// Khi học liệu chỉ có một vị trí hợp lệ, chọn luôn vị trí đó.
+				if (!this.selectedNoiDungID && this.nodeItems.length === 1) {
+					const nodeID = this.nodeItems[0].NoiDungID
+					this.activeTreeNodeIDs = [nodeID]
+					this.selectedNoiDungID = nodeID
+				}
 			})
 		},
 		isLinkableNode(node) {

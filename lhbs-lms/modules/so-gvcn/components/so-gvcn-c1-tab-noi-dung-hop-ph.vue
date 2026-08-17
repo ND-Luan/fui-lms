@@ -7,7 +7,7 @@
 			<v-card v-for="(meetingTitle, idx) in defaultMeetings" :key="idx" variant="outlined" class="rounded-lg">
 				<v-card-title class="bg-lightprimary text-subtitle-1 font-weight-bold d-flex align-center justify-space-between py-2">
 					<span>Hội PHHS • {{ meetingTitle }}</span>
-				</v-card-title>
+				</v-card-title> 
 				<v-divider />
 				<v-card-text class="pa-3">
 					<v-textarea
@@ -47,7 +47,6 @@
 		watch: {
 			savedRows: {
 				immediate: true,
-				deep: true,
 				handler() {
 					this.syncSavedData()
 				}

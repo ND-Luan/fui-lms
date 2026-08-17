@@ -47,7 +47,7 @@
 						<v-window v-model="tab">
 							<v-window-item value="du-lieu-hs">
 								<v-card-text class="pa-0 so-gvcn-sheet-wrap" :style="{ height: sheetHeight, 'overflow-y': 'auto' }">
-									<uc-jexcel v-if="studentSheetRows.length" :key="sheetKey" v-model="sheetInstance"
+									<so-gvcn-gv-sheet v-if="studentSheetRows.length" :key="sheetKey" v-model="sheetInstance"
 										v-model:dataSource="studentSheetRows" :columns="studentSheetColumns" :freeze-columns="5"
 										:nestedHeaders="studentNestedHeaders" :table-height="sheetHeight" table-width="100%"
 										class="so-gvcn-sheet" />
@@ -106,13 +106,15 @@
 													<div class="font-weight-bold mb-1">Gợi ý thực hiện:</div>
 													<ul class="pl-4">
 														<li>Căn cứ Khung chủ đề giáo dục của nhà trường để cập nhật tên Chủ đề hàng tháng và Mục tiêu giáo dục chính thông qua chủ đề của tháng đó.</li>
-														<li>Căn cứ chủ đề - mục tiêu giáo dục đã xác định và các gợi ý nhiệm vụ để lên kế hoạch cho các nội dung giáo dục sẽ triển khai trong 15 phút đầu ngày, sinh hoạt cuối tuần, các sinh hoạt tập trung khác... cho từng tuần trong tháng.</li>
-														<li style="list-style-type: none; margin-left: -10px;" class="text-grey-darken-1 py-1">
-															• Video tư liệu liên quan đến giáo dục hành vi trái phép (nếu cần).<br>
-															• Video tư liệu về các ngày lễ, kỉ niệm.<br>
-															• Phim ngắn liên quan đến chủ đề giáo dục tháng.
-														</li>
-														<li>Cuối tháng, GVCN cập nhật đánh giá ngắn gọn tình hình cả lớp trong tháng đó.</li>
+														<li>Căn cứ chủ đề - mục tiêu giáo dục đã xác định để lên kế hoạch cho các nội dung giáo dục sẽ triển khai cho từng tuần trong tháng.</li>
+														<li class="font-weight-bold mt-1 text-primary">Các gợi ý nhiệm vụ thực hiện theo tuần:</li>
+														<ul class="pl-4 text-grey-darken-2">
+															<li>15 phút đầu giờ</li>
+															<li>Sinh hoạt lớp cuối tuần</li>
+															<li>Phim ngắn / Video tư liệu liên quan đến chủ đề giáo dục tháng, ngày lễ kỉ niệm, hoặc hành vi (nếu cần)</li>
+															<li>Dặn dò khác</li>
+														</ul>
+														<li class="mt-1">Cuối tháng, GVCN cập nhật đánh giá ngắn gọn tình hình cả lớp trong tháng đó.</li>
 													</ul>
 												</v-expansion-panel-text>
 											</v-expansion-panel>
@@ -126,8 +128,9 @@
 											</v-btn>
 										</div>
 										<div class="so-gvcn-sheet-wrap">
-											<uc-jexcel :key="'kh-' + sheetKey" v-model="keHoachSheetInstance"
+											<so-gvcn-gv-sheet :key="'kh-' + sheetKey" v-model="keHoachSheetInstance"
 												:data-source="keHoachSheetRows" :columns="keHoachSheetColumns"
+												:nested-headers="keHoachSheetNestedHeaders"
 												:freeze-columns="3" :table-height="keHoachSheetHeight" table-width="100%"
 												:table-header="true" :table-row-number="false" :disable-lazy-loading="true"
 												:style-sheet="keHoachSheetStyle" :on-load="onKeHoachSheetLoad"
@@ -139,17 +142,39 @@
 							</v-window-item>
 
 							<v-window-item value="ren-luyen">
-								<v-card-text class="pa-0 so-gvcn-sheet-wrap" :style="{ height: sheetHeight, 'overflow-y': 'auto' }">
-									<uc-jexcel :key="`ren-${sheetKey}`" v-model="renLuyenSheetInstance"
-										v-model:dataSource="renLuyenRows" :columns="renLuyenColumns" :freeze-columns="4"
-										:nestedHeaders="renLuyenNestedHeaders" :table-height="renLuyenSheetHeight" table-width="100%"
-										class="so-gvcn-sheet" />
+								<v-card-text class="pa-2" :style="{ height: sheetHeight, 'overflow-y': 'auto' }">
+									<v-alert v-if="selectedLopID === '__ALL__'" type="info" variant="tonal" density="compact" class="mb-0">
+										Chọn một lớp ở thanh trên để xem và nhập hồ sơ theo dõi quá trình rèn luyện của học sinh lớp đó.
+									</v-alert>
+									<template v-else>
+										<v-expansion-panels class="mb-2">
+											<v-expansion-panel>
+												<v-expansion-panel-title class="text-subtitle-1 font-weight-bold py-2 px-3 text-primary" style="min-height: 48px;">
+													<v-icon start color="primary" class="mr-2">mdi-information-outline</v-icon>
+													THEO DÕI QUÁ TRÌNH RÈN LUYỆN CỦA HỌC SINH LỚP {{ selectedClass?.TenLop || '.......' }} NĂM HỌC {{ getCurrentSchoolYearText() }}
+												</v-expansion-panel-title>
+												<v-expansion-panel-text class="text-caption text-medium-emphasis">
+													<div class="font-weight-bold mb-1">Cột từng tháng:</div>
+													<ul class="pl-4 mb-0">
+														<li>Ghi tóm tắt vi phạm, tái phạm, số ngày nghỉ, thời gian/xử lí/có mời PH/có cam kết lần...</li>
+														<li>Ghi nhận tiến bộ về mặt nào đó, thành tích, đóng góp.</li>
+													</ul>
+												</v-expansion-panel-text>
+											</v-expansion-panel>
+										</v-expansion-panels>
+										<div class="so-gvcn-sheet-wrap">
+											<so-gvcn-gv-sheet :key="`ren-${sheetKey}`" v-model="renLuyenSheetInstance"
+												v-model:dataSource="renLuyenRows" :columns="renLuyenColumns" :freeze-columns="4"
+												:nestedHeaders="renLuyenNestedHeaders" :table-height="renLuyenSheetHeight" table-width="100%"
+												class="so-gvcn-sheet" />
+										</div>
+									</template>
 								</v-card-text>
 							</v-window-item>
 
 							<v-window-item value="so-lien-lac">
 								<v-card-text class="pa-0 so-gvcn-sheet-wrap" :style="{ height: sheetHeight, 'overflow-y': 'auto' }">
-									<uc-jexcel :key="`sll-${sheetKey}`" v-model="soLienLacSheetInstance"
+											<so-gvcn-gv-sheet :key="`sll-${sheetKey}`" v-model="soLienLacSheetInstance"
 										v-model:dataSource="soLienLacRows" :columns="soLienLacColumns" :freeze-columns="3"
 										:table-height="soLienLacSheetHeight" table-width="100%" class="so-gvcn-sheet" />
 								</v-card-text>
@@ -217,8 +242,8 @@
 			keHoachSheetStyle: {},
 			keHoachSheetColumns: [
 				{ title: 'Tháng', width: 70, readOnly: true },
-				{ title: 'Mục tiêu giáo dục tháng', width: 220 },
-				{ title: 'Gợi ý nhiệm vụ', width: 230 },
+				{ title: 'Chủ đề', width: 220 },
+				{ title: 'Mục tiêu', width: 220 },
 				{ title: 'Tuần 1', width: 210 },
 				{ title: 'Tuần 2', width: 210 },
 				{ title: 'Tuần 3', width: 210 },
@@ -249,7 +274,7 @@
 				{ title: 'Sinh', width: 80, readOnly: true },
 				{ title: 'KQRL', width: 90, readOnly: true },
 				{ title: 'KQHT', width: 90, readOnly: true },
-				{ title: 'Nhận xét GVCN', width: 500, align: 'left', readOnly: true },
+				{ title: 'Nhận xét GVCN', width: 220, readOnly: true },
 				{ title: 'Cha', width: 160, readOnly: true },
 				{ title: 'Nghề nghiệp cha', width: 160, readOnly: true },
 				{ title: 'SDT cha', width: 120, readOnly: true },
@@ -347,6 +372,15 @@
 					{ title: 'GHI NHẬN/ THEO DÕI QUÁ TRÌNH RÈN LUYỆN CỦA HỌC SINH', colspan: 17 }
 				]
 			]
+		},
+		keHoachSheetNestedHeaders() {
+			return [
+				[
+					{ title: '', colspan: 1 },
+					{ title: 'Mục tiêu giáo dục tháng', colspan: 2 },
+					{ title: '', colspan: 6 }
+				]
+			]
 		}
 	},
 	mounted() {
@@ -365,6 +399,9 @@
 		},
 		tab() {
 			this.ensureSpecificClassForInputTabs()
+			this.$nextTick(() => {
+				this.sheetKey++
+			})
 		}
 	},
 	methods: {
@@ -413,7 +450,7 @@
 				}
 			},
 		async ensureSpecificClassForInputTabs() {
-			if (!this.isTeacher || this.tab === 'du-lieu-hs' || this.selectedLopID !== '__ALL__') return
+			if (this.tab === 'du-lieu-hs' || this.selectedLopID !== '__ALL__') return
 			const firstClass = this.classList[0]
 			if (firstClass) await this.onClassChange(firstClass.LopID)
 		},
@@ -658,7 +695,7 @@
 				x.Sinh || '',
 				x.KQRL || '',
 				x.KQHT || '',
-				x.NhanXetGVCN || '',
+				x.NhanXetGVCN_VeHocSinh_HTML || x.NhanXetGVCN || '',
 				x.Cha || '',
 				x.NgheNghiepCha || '',
 				x.SDTCha || '',
@@ -869,7 +906,7 @@
 			this.getKeHoachExportMonths().forEach((month, index) => {
 				const start = 1 + (index * rowCount)
 				this.applySheetMerge(sheet, 'A' + start, 1, rowCount)
-				this.applySheetMerge(sheet, 'I' + start, 1, rowCount)
+				this.applySheetMerge(sheet, 'H' + start, 1, rowCount)
 			})
 		},
 		applySheetMerge(sheet, cell, colspan, rowspan) {

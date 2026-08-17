@@ -1,11 +1,11 @@
 <template>
-    <v-dialog v-model="isOpen" max-width="1200">
+	<v-dialog v-model="isOpen" max-width="1200">
         <v-card>
-            <v-card-title class="d-flex ga-2 bg-primary"
+            <v-card-title class="d-flex align-center ga-2 bg-primary text-white"
                 style="max-height: 48px !important; position: sticky; top: 0; z-index: 50;">
-                <p>Import câu hỏi từ học liệu số</p>
+                <span class="text-subtitle-1 font-weight-bold" style="color: white !important;">Import câu hỏi từ học liệu số</span>
                 <v-spacer></v-spacer>
-                <v-btn icon @click="$emit('update:isOpen', false)" variant="text">
+                <v-btn icon color="white" @click="$emit('update:isOpen', false)" variant="text">
                     <v-icon>mdi-close</v-icon>
                 </v-btn>
             </v-card-title>
@@ -19,24 +19,29 @@
                             @click="toggleExpand(internalItem)"></v-btn>
                     </template>
                     <template v-slot:item.Thumnail="{ item }">
-                        <v-avatar size="80" :rounded="10">
-                            <v-img :src="item?.ThumbnailURL" :cover="false">
+                        <div class="d-flex align-center justify-center bg-grey-lighten-3" style="width: 80px; height: 80px;">
+                            <v-img v-if="getThumbnailUrl(item) && !thumbnailErrors[item.HocLieuID]"
+                                :src="getThumbnailUrl(item)" :cover="true" width="80" height="80"
+                                @error="thumbnailErrors[item.HocLieuID] = true">
                                 <template v-slot:placeholder>
                                     <div class="d-flex align-center justify-center fill-height">
                                         <v-progress-circular color="grey-lighten-4" indeterminate></v-progress-circular>
                                     </div>
                                 </template>
                             </v-img>
-                        </v-avatar>
+                            <v-icon v-else color="grey" size="32">mdi-book-open-page-variant-outline</v-icon>
+                        </div>
                     </template>
                     <template v-slot:expanded-row="{ columns, item }">
                         <tr>
                             <td :colspan="columns.length" class="py-2">
                                 <div class="d-flex">
                                     <v-spacer></v-spacer>
-                                    <v-btn color="orange" variant="tonal" size="small" @click="importQuestion(question)"
-                                        :disabled="CountSelectedQuestion == 0">Import câu hỏi
-                                    </v-btn>
+									<v-btn v-if="CountSelectedQuestion" color="orange" variant="tonal" size="small"
+										prepend-icon="mdi-import" @click="importQuestion()">
+										Import {{ CountSelectedQuestion }} câu đã chọn
+									</v-btn>
+									<span v-else class="text-caption text-medium-emphasis">Chọn câu hỏi để import vào bài tập</span>
                                 </div>
                             </td>
                         </tr>
@@ -52,21 +57,30 @@
                                                 <th style="width:150px" class="text-center">
                                                     <v-checkbox v-model="isSelectedAll" v-tooltip="'Chọn tất cả'"
                                                         style="width: fit-content;margin: auto;"
-                                                        :indeterminate="isNotSelectecAll" />
+                                                        :indeterminate="isNotSelectecAll" :disabled="!importableQuestions.length" />
                                                 </th>
                                             </tr>
                                         </tbody>
 
                                         <tbody>
-                                            <tr v-for="(question, index) in DataQuestion.filter(l => l.HocLieuID === item.HocLieuID)"
+											<tr v-if="!getQuestionsForHocLieu(item.HocLieuID).length">
+												<td colspan="4" class="py-6 text-center">
+													<v-icon color="grey" size="36">mdi-text-box-search-outline</v-icon>
+													<div class="text-body-2 text-medium-emphasis mt-2">Chưa có câu hỏi để import</div>
+													<div class="text-caption text-medium-emphasis">Học liệu này chưa có nội dung Quiz hợp lệ.</div>
+												</td>
+											</tr>
+											<tr v-for="(question, index) in getQuestionsForHocLieu(item.HocLieuID)"
                                                 :key="index">
                                                 <td class="py-2">
                                                     {{ question.TenNoiDung }}
                                                 </td>
                                                 <td class="py-2 text-center" style="width:150px">
-                                                    <v-icon color="primary">
-                                                        {{ getLabelQuestion(question?.LoaiNoiDung)?.icon }}
-                                                    </v-icon>
+                                                    <div class="d-inline-flex align-center ga-2">
+                                                        <v-icon color="primary">{{ getLabelQuestion(question?.LoaiNoiDung)?.icon }}</v-icon>
+                                                        <span>{{ getLabelQuestion(question?.LoaiNoiDung)?.label || question?.LoaiNoiDung }}</span>
+                                                        <v-chip v-if="!question.isImportSupported" size="x-small" color="warning" variant="tonal">Chưa hỗ trợ</v-chip>
+                                                    </div>
                                                 </td>
                                                 <td class="py-2 text-center" style="width:150px">
                                                     <v-btn color="pink" variant="tonal" size="small"
@@ -78,7 +92,7 @@
                                                         @click="importQuestion(question)">Import
                                                     </v-btn> -->
                                                     <v-checkbox v-model="question.isSelected"
-                                                        style="width: fit-content;margin: auto;" />
+                                                        style="width: fit-content;margin: auto;" :disabled="!question.isImportSupported" />
                                                 </td>
                                             </tr>
                                         </tbody>
@@ -93,9 +107,10 @@
         </v-card>
     </v-dialog>
 </template>
+
 <script>
-export default {
-    props: {
+	export default {
+		props: {
         isOpen: {
             type: Boolean,
             default: false
@@ -104,6 +119,7 @@ export default {
             type: Object,
             default: {}
         },
+		linkedHocLieuID: { type: Number, default: 0 },
     },
     emits: ['update:isOpen', 'importJson'],
     data() {
@@ -118,6 +134,7 @@ export default {
             ],
             DataHocLieu: [],
             DataQuestion: [],
+			thumbnailErrors: {},
             defineQuestionType: [
                 { type: 'QUIZ_SINGLE_CHOICE', label: 'Trắc nghiệm', description: "Một đáp án", icon: 'mdi-radiobox-marked', kind: "quiz" },
                 { type: 'QUIZ_MULTIPLE_CHOICE', label: 'Trắc nghiệm', description: "Nhiều đáp án", icon: 'mdi-checkbox-multiple-marked-outline', kind: "quiz" },
@@ -132,12 +149,14 @@ export default {
         }
     },
     computed: {
+		importableQuestions() {
+			return this.DataQuestion.filter(question => question.isImportSupported)
+		},
         CountSelectedQuestion() {
-
-            return this.DataQuestion.filter(q => q.isSelected).length
+            return this.importableQuestions.filter(q => q.isSelected).length
         },
         isNotSelectecAll() {
-            return this.CountSelectedQuestion > 0 && this.CountSelectedQuestion < this.DataQuestion.length
+            return this.CountSelectedQuestion > 0 && this.CountSelectedQuestion < this.importableQuestions.length
         },
 
     },
@@ -146,18 +165,10 @@ export default {
     },
     watch: {
         isSelectedAll(val) {
-            if (val) {
-                this.DataQuestion.forEach(q => {
-                    q.isSelected = true
-                })
-            } else {
-                this.DataQuestion.forEach(q => {
-                    q.isSelected = false
-                })
-            }
+			this.importableQuestions.forEach(question => { question.isSelected = val })
         },
         CountSelectedQuestion(val) {
-            if (val === this.DataQuestion.length) {
+            if (this.importableQuestions.length && val === this.importableQuestions.length) {
                 this.isSelectedAll = true
             } else if (val === 0) {
                 this.isSelectedAll = false
@@ -165,6 +176,21 @@ export default {
         },
     },
     methods: {
+		getThumbnailUrl(item) {
+			let url = item?.ThumbnailURL
+			if (!url && Array.isArray(item?.ThumbnailURLs)) url = item.ThumbnailURLs.find(Boolean)
+			if (!url && typeof item?.ThumbnailURLs === 'string') {
+				try {
+					const urls = JSON.parse(item.ThumbnailURLs)
+					if (Array.isArray(urls)) url = urls.find(Boolean)
+				} catch (error) {
+					url = item.ThumbnailURLs
+				}
+			}
+			if (!url) return ''
+			if (/^https?:\/\//i.test(url)) return url
+			return `https://file.lhbs.vn/lms${url.startsWith('/') ? '' : '/'}${url}`
+		},
         getQuestionFromHocLieu() {
             if (!this.assignmentDetail || !this.assignmentDetail.MonHocID || !this.assignmentDetail.KhoiID) return
 
@@ -173,30 +199,55 @@ export default {
                 KhoiID: this.assignmentDetail.KhoiID,
             }
             ajaxCALL('lms/EL_Teacher_GetQuestionFromHocLieu', payload, res => {
-                this.DataHocLieu = res.data[0]
-                this.DataQuestion = res.data[1].map(item => {
-                    let objFindHocLieu = res.data[0].find(i => i.HocLieuID === item.HocLieuID)
-                    if (objFindHocLieu) {
-                        return {
-                            ...item,
-                            TenHocLieu: objFindHocLieu.TenHocLieu || '',
-                            isSelected: false,
-
-                        }
-                    } else {
-                        return {
-                            ...item,
-                            TenHocLieu: '',
-                            isSelected: false,
-                        }
-                    }
-                })
+                const hocLieuList = res?.data?.[0] || []
+                const questionList = res?.data?.[1] || []
+                this.DataHocLieu = this.linkedHocLieuID
+                    ? hocLieuList.filter(item => Number(item.HocLieuID) === Number(this.linkedHocLieuID))
+                    : hocLieuList
+                this.DataQuestion = this.normalizeQuestions(questionList, hocLieuList)
             });
         },
+		normalizeQuestions(questionList, hocLieuList) {
+			return (questionList || []).flatMap(item => {
+				const hocLieu = hocLieuList.find(i => i.HocLieuID === item.HocLieuID)
+				const base = { ...item, TenHocLieu: hocLieu?.TenHocLieu || '', isSelected: false, isImportSupported: this.isSupportedQuestionType(item.LoaiNoiDung) }
+				if (item.LoaiNoiDung !== 'QUIZ_COMPOSITE') return [base]
+
+				try {
+					const composite = typeof item.DataJson === 'string' ? JSON.parse(item.DataJson) : item.DataJson
+					const groupedQuestions = (composite?.groups || []).flatMap(group =>
+						(group?.questions || []).map(question => ({ question, groupTitle: group.title || '' }))
+					)
+					const questions = [
+						...(composite?.questions || []).map(question => ({ question, groupTitle: '' })),
+						...groupedQuestions,
+					]
+					return questions.map(({ question, groupTitle }, index) => ({
+						...base,
+						CompositeQuestionID: question.id || `${item.NoiDungID}_${index}`,
+						TenNoiDung: `${item.TenNoiDung}${groupTitle ? ` — ${groupTitle}` : ''} — Câu ${index + 1}`,
+						LoaiNoiDung: question.type,
+						Points: question.points || 1,
+						DataJson: JSON.stringify(question.content || {}),
+						isImportSupported: this.isSupportedQuestionType(question.type),
+					}))
+				} catch (error) {
+					console.warn('Không thể đọc bộ câu hỏi từ học liệu số', error)
+					return []
+				}
+			})
+		},
+		getQuestionsForHocLieu(hocLieuID) {
+			return this.DataQuestion.filter(question => String(question.HocLieuID) === String(hocLieuID))
+		},
+		isSupportedQuestionType(type) {
+			return ['QUIZ_SINGLE_CHOICE', 'QUIZ_MULTIPLE_CHOICE', 'QUIZ_TRUE_FALSE',
+				'QUIZ_MULTIPLE_TRUE_FALSE', 'QUIZ_FILL_IN_BLANK', 'QUIZ_MATCHING'].includes(type)
+		},
         importQuestion(question) {
-            let listQuestionSelect = this.DataQuestion.filter(q => q.isSelected)
+            let listQuestionSelect = this.importableQuestions.filter(q => q.isSelected)
             listQuestionSelect.forEach(q => {
-                let source = this.parseQuestionData(q.LoaiNoiDung, JSON.parse(q.DataJson))
+                let source = this.parseQuestionData(q.LoaiNoiDung, JSON.parse(q.DataJson), q.Points, q)
                 this.GroupQuestion.push(source)
                 this.$emit('importJson', source)
             })
@@ -209,7 +260,7 @@ export default {
                 url: `https://lms.lhbs.vn/hoc-lieu-view-v2?hoclieuid=${question.HocLieuID}&noidungid=${question.NoiDungID}`,
             })
         },
-        parseQuestionData(type, data) {
+        parseQuestionData(type, data, points = 1, sourceInfo = {}) {
             console.log(' data', data)
             if (type === 'QUIZ_TRUE_FALSE') {
                 type = 'QUIZ_MULTIPLE_TRUE_FALSE'
@@ -219,7 +270,7 @@ export default {
                 type: type,
                 label: this.getLabelQuestion(type)?.label,
                 ordinalNumber: this.GroupQuestion.length + 1,
-                points: 1.0,
+                points: points || 1.0,
                 gradingType: 'auto',
                 config: {
                     media: {
@@ -241,7 +292,15 @@ export default {
                     },
                     isAdvanced: data.isAdvanced || false,
                     questionText: data.prompt
-                }
+                },
+				sourceTracking: {
+					sourceType: 'HOC_LIEU_SO',
+					HocLieuID: sourceInfo.HocLieuID,
+					NoiDungID: sourceInfo.NoiDungID,
+					CompositeQuestionID: sourceInfo.CompositeQuestionID || null,
+					LoaiNoiDung: sourceInfo.LoaiNoiDung || type,
+					importedAt: new Date().toISOString(),
+				}
             };
 
             switch (type) {
@@ -254,7 +313,11 @@ export default {
                     newQuestion.config.correctAnswers = data.correctAnswers;
                     break;
                 case 'QUIZ_MULTIPLE_TRUE_FALSE':
-                    newQuestion.config.options = data.options
+                    newQuestion.config.options = (data.options || []).map(option => ({
+						...option,
+						correctAnswer: option.correctAnswer ?? option.isTrue === true,
+						inCorrectAnswer: option.inCorrectAnswer ?? option.isTrue === false,
+					}))
                     break;
                 case 'QUIZ_FILL_IN_BLANK':
                     newQuestion.config.parts = (data.parts || []).map(p => {
@@ -273,7 +336,9 @@ export default {
                 case 'QUIZ_MATCHING':
                     newQuestion.config.columnA = data.columnA || []
                     newQuestion.config.columnB = data.columnB || []
-                    newQuestion.config.correctPairs = data.correctPairs || []
+                    newQuestion.config.correctPairs = data.correctPairs?.length
+						? data.correctPairs
+						: (data.columnA || []).map((item, index) => ({ from: item.id, to: data.columnB?.[index]?.id })).filter(pair => pair.to)
                     break;
             }
 
@@ -285,5 +350,5 @@ export default {
         }
 
     }
-}
+	}
 </script>

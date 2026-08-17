@@ -25,12 +25,11 @@
 				columns: [
 					{ title: 'STT', width: 60, readOnly: true, align: 'center' },
 					{ title: 'Mã học sinh', width: 110, readOnly: true, align: 'center' },
-					{ title: 'Số danh bộ', width: 110, readOnly: true, align: 'center' },
 					{ title: 'Họ và tên học sinh', width: 250, readOnly: true },
 					{ title: 'I', width: 100, type: 'checkbox' },
 					{ title: 'II', width: 100, type: 'checkbox' },
 					{ title: 'III', width: 100, type: 'checkbox' },
-					{ title: 'Ghi chú', width: 380, align: 'justify' }
+					{ title: 'Ghi chú', width: 350 }
 				]
 			}
 		},
@@ -61,7 +60,7 @@
 			nestedHeaders() {
 				return [
 					[
-						{ title: '', colspan: 4 },
+						{ title: '', colspan: 3 },
 						{ title: 'Kiểm diện PH đi họp', colspan: 3 },
 						{ title: '', colspan: 1 }
 					]
@@ -74,7 +73,23 @@
 			},
 			getRows() {
 				const sheet = Array.isArray(this.instance) ? this.instance[0] : this.instance
-				return sheet && typeof sheet.getData === 'function' ? sheet.getData() : []
+				if (sheet && typeof sheet.closeEditor === 'function') {
+					try { sheet.closeEditor(sheet.edition ? sheet.edition[0] : null, true) } catch (error) {}
+				}
+				const visibleRows = sheet && typeof sheet.getData === 'function' ? sheet.getData() : []
+				return visibleRows.map((row, index) => {
+					const student = (this.students || [])[index] || {}
+					return [
+						row[0] ?? index + 1,
+						row[1] ?? student.MaHocSinh ?? student.HocSinhID ?? '',
+						student.SoDanhBo || '',
+						row[2] ?? student.HoTen ?? student.HoTenHocSinh ?? '',
+						row[3] ?? false,
+						row[4] ?? false,
+						row[5] ?? false,
+						row[6] ?? ''
+					]
+				})
 			},
 			buildRows() {
 				const findSaved = (hslopID) => (this.savedRows || [])
@@ -84,7 +99,6 @@
 					return [
 						idx + 1,
 						student.MaHocSinh || student.HocSinhID || '',
-						student.SoDanhBo || '',
 						student.HoTen || student.HoTenHocSinh || '',
 						!!(saved.Lan1 || saved.DauNamCoMat),
 						!!(saved.Lan2 || saved.HK1CoMat),
@@ -123,23 +137,22 @@
 								nestedHeaders: this.nestedHeaders,
 								rowResize: true,
 								columnDrag: false,
+						rowDrag: false,
+						columnSorting: false,
 								tableWidth: '100%',
 								tableOverflow: true,
 								tableHeight: this.sheetHeight,
 								lazyLoading: false,
-								freezeColumns: 4,
+								freezeColumns: 3,
 								wordWrap: true,
 								allowInsertColumn: false,
+								allowDeleteColumn: false,
 								allowInsertRow: false,
+								allowDeleteRow: false,
 								showHeader: true
 							}],
 							contextMenu: () => false
 						})
-						const worksheet = Array.isArray(this.instance) ? this.instance[0] : this.instance
-						if (worksheet && typeof worksheet.hideColumn === 'function') {
-							worksheet.hideColumn(2)
-							window.requestAnimationFrame(() => soGvcnJspreadsheet.syncNestedHeaders(container, [4]))
-						}
 					}
 				})
 			}

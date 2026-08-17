@@ -117,74 +117,90 @@
 			studentGrades: [],
 			columnStats: [],
 			vueData,
-			selectedClassName:''
+			selectedClassName:'',
+			isInitializing: false
 		};
+	},
+	computed: {
+		currentHocKi() {
+			return this.initialHocKi || vueData.NienKhoaItem?.HocKi || vueData.HocKiItem?.HocKi || null;
+		},
+		currentNienKhoa() {
+			return this.initialNienKhoa || vueData.NienKhoa || null;
+		}
 	},
 	watch: {
 		selectedLopID(newLopID, oldLopID) {
 
-			if (newLopID && newLopID !== oldLopID) {
+			if (!this.isInitializing && newLopID && newLopID !== oldLopID) {
 				this.monHocList = [];
 				this.selectedMonHocID = null;
+				this.selectedClassName = this.lopList.find(x => x.LopID == newLopID)?.TenLop || '';
 				this.clearData();
 				this.fetchSubjectsByClass(newLopID);
 			}
 		},
 		selectedMonHocID(newMonHocID, oldMonHocID) {
-			if (newMonHocID && newMonHocID !== oldMonHocID) {
+			if (!this.isInitializing && newMonHocID && newMonHocID !== oldMonHocID) {
 				this.fetchData();
 			}
 		}
 	},
 	methods: {
-		async initialize() {
-			await this.fetchMyClasses();
-
-			if (this.selectedLopID && !this.selectedMonHocID) {
-				await this.fetchSubjectsByClass(this.selectedLopID);
-			}
-			if (this.selectedLopID && this.selectedMonHocID) {
-				this.selectedLopID = this.lopList.find(x => x.LopID == this.initialLopId)?.LopID ?? null;
-				await this.fetchSubjectsByClass(this.selectedLopID);
-				await this.fetchData();
-			}
-			this.loading = false;
-		},
-		async fetchMyClasses() {
-			ajaxCALL("lms/EL_Teacher_GetMyClasses", { NienKhoa: this.initialNienKhoa, HocKi: this.initialHocKi }, (res) => {
-				// SP trả 2 resultset: data[0]=NienKhoa hiện tại, data[1]=danh sách lớp thật
-				this.lopList = (Array.isArray(res.data) && Array.isArray(res.data[1])) ? res.data[1] : (res.data || []);
-				if (!this.selectedLopID && this.lopList.length > 0) {
-
-					this.selectedLopID = this.lopList.find(x => x.LopID == this.initialLopId)?.LopID ?? this.lopList[0].LopID;
+		initialize() {
+			this.isInitializing = true;
+			this.fetchMyClasses(() => {
+				if (!this.selectedLopID) {
+					this.loading = false;
+					this.isInitializing = false;
+					return;
 				}
+				this.fetchSubjectsByClass(this.selectedLopID, () => {
+					this.isInitializing = false;
+					if (this.selectedMonHocID) this.fetchData();
+					else this.loading = false;
+				});
 			});
 		},
-		async fetchSubjectsByClass(lopId) {
+		fetchMyClasses(done) {
+			const params = { HocKi: this.currentHocKi };
+			if (this.currentNienKhoa) params.NienKhoa = this.currentNienKhoa;
+
+			fetchPromise("lms/EL_Teacher_GetMyClasses", params, { cache: false }).then((data) => {
+				// API cũ trả 2 resultset, API mới trả trực tiếp danh sách lớp.
+				this.lopList = (Array.isArray(data) && Array.isArray(data[1])) ? data[1] : (Array.isArray(data) ? data : []);
+				this.selectedLopID = this.lopList.find(x => x.LopID == this.initialLopId)?.LopID ?? this.lopList[0]?.LopID ?? null;
+				this.selectedClassName = this.lopList.find(x => x.LopID == this.selectedLopID)?.TenLop || '';
+				if (done) done();
+			}).catch(() => {
+				this.loading = false;
+				this.isInitializing = false;
+			});
+		},
+		fetchSubjectsByClass(lopId, done) {
 			if(!lopId) return
-			await ajaxCALL("lms/EL_Teacher_GetSubjectsByClass", { LopID: lopId, HocKi: this.initialHocKi }, (res) => {
-				this.monHocList = res.data || [];
-
-				if (!this.selectedMonHocID && this.monHocList.length > 0) {
-
-					this.selectedMonHocID = this.monHocList.find(x => x.MonHocID == this.initialMonHocId)?.MonHocID ?? this.monHocList[0].MonHocID;
-
-				}
+			fetchPromise("lms/EL_Teacher_GetSubjectsByClass", { LopID: lopId, HocKi: this.currentHocKi }, { cache: false }).then((data) => {
+				this.monHocList = Array.isArray(data) ? data : [];
+				this.selectedMonHocID = this.monHocList.find(x => x.MonHocID == this.initialMonHocId)?.MonHocID ?? this.monHocList[0]?.MonHocID ?? null;
+				if (done) done();
+			}).catch(() => {
+				this.loading = false;
+				this.isInitializing = false;
 			});
 		},
-		async fetchData() {
+		fetchData() {
 			if (!this.selectedLopID || !this.selectedMonHocID) return;
 			this.loading = true;
-			await ajaxCALL("lms/EL_Teacher_GetGradebook", { LopID: this.selectedLopID, MonHocID: this.selectedMonHocID }, (res) => {
-				if (res && res.data && res.data.length >= 3) {
-					this.assignmentHeaders = res.data[0];
-					this.studentGrades = res.data[1];
-					this.columnStats = res.data[2];
-				} else {
-					this.clearData();
-				}
+			fetchPromise("lms/EL_Teacher_GetGradebook", { LopID: this.selectedLopID, MonHocID: this.selectedMonHocID }, { cache: false }).then((data) => {
+				if (Array.isArray(data) && data.length >= 3) {
+					this.assignmentHeaders = data[0] || [];
+					this.studentGrades = data[1] || [];
+					this.columnStats = data[2] || [];
+				} else this.clearData();
+				this.loading = false;
+			}).catch(() => {
+				this.loading = false;
 			});
-			this.loading = false;
 		},
 		async updateStudentScore(payload) {
 			ajaxCALL("lms/EL_Teacher_UpdateQuickGrade", { SubmissionID: payload.submissionId, NewScore: payload.newScore }, (res) => {

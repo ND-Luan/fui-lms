@@ -7,12 +7,12 @@
 
         <!-- Mobile: Properties Drawer (right) -->
         <v-navigation-drawer v-if="isMobile" v-model="isPropertiesDrawerOpen" location="right" temporary width="400">
-            <uc-assignment-properties :assignment="assignment" :groups="assignment.AssignmentConfig?.groups" :item="selectedItem" :open-import-type="groupImportType" @update:groups="updateGroups" @update:assignment="assignment = $event" :in-drawer="true" @close="isPropertiesDrawerOpen = false" />
+			<uc-assignment-properties :assignment="assignment" :groups="assignment.AssignmentConfig?.groups" :item="selectedItem" :open-import-type="groupImportType" :linked-hoc-lieu-i-d="linkedHocLieu?.HocLieuID || 0" @update:groups="updateGroups" @update:assignment="assignment = $event" :in-drawer="true" @close="isPropertiesDrawerOpen = false" />
         </v-navigation-drawer>
 
         <!-- Desktop: Properties navigation drawer -->
         <v-navigation-drawer v-if="!isMobile" v-model="isPropertiesDrawerOpen" location="right" temporary width="480" scrim @click:outside="isPropertiesDrawerOpen = false" class="assignment-properties-drawer">
-            <uc-assignment-properties :assignment="assignment" :groups="assignment.AssignmentConfig?.groups" :item="selectedItem" :open-import-type="groupImportType" @update:groups="updateGroups" @update:assignment="assignment = $event" :in-drawer="true" @close="isPropertiesDrawerOpen = false" />
+			<uc-assignment-properties :assignment="assignment" :groups="assignment.AssignmentConfig?.groups" :item="selectedItem" :open-import-type="groupImportType" :linked-hoc-lieu-i-d="linkedHocLieu?.HocLieuID || 0" @update:groups="updateGroups" @update:assignment="assignment = $event" :in-drawer="true" @close="isPropertiesDrawerOpen = false" />
         </v-navigation-drawer>
 
         <!-- Mobile: Top Bar -->
@@ -129,6 +129,7 @@
                         class="flex-grow-1 overflow-auto"
                         v-if="!assignment.ExternalLink"
                         :groups="assignment?.AssignmentConfig?.groups"
+                        :can-import-from-hoc-lieu="hasHocLieuLink"
                         :selected-item="selectedItem"
                         @update:groups="updateGroups"
                         @update:selected-item="selectedItem = $event"
@@ -181,7 +182,7 @@
                 </v-card>
                 <v-alert v-else type="info" variant="tonal" density="compact" text="Vui lòng thiết lập link bài tập để xem trước." />
             </div>
-            <uc-assignment-canvas v-else :groups="assignment?.AssignmentConfig?.groups" :selected-item="selectedItem" @update:groups="updateGroups" @update:selected-item="selectedItem = $event" @open-group-import="handleGroupImport" />
+			<uc-assignment-canvas v-else :groups="assignment?.AssignmentConfig?.groups" :selected-item="selectedItem" :can-import-from-hoc-lieu="hasHocLieuLink" @update:groups="updateGroups" @update:selected-item="selectedItem = $event" @open-group-import="handleGroupImport" />
         </div>
 
         <!-- Mobile: Bottom Bar -->
@@ -401,6 +402,7 @@
             isSaving: false,
             _skipNextAutoSave: false,
             autoSaveTimer: null,
+            linkedHocLieu: null,
             relativeTimeTimer: null,
         }
     },
@@ -428,6 +430,7 @@
         isMobile() {
             return this.$vuetify.display.smAndDown
         },
+		hasHocLieuLink() { return !!this.linkedHocLieu?.HocLieuID },
         lastSavedRelative() {
             if (!this.lastSavedAt) return ''
             const now = this.relativeTimeNow || Date.now()
@@ -469,6 +472,13 @@
         },
     },
     methods: {
+		loadHocLieuMapping(assignmentID) {
+			if (!assignmentID) { this.linkedHocLieu = null; return }
+			ajaxCALL('lms/EL_HocLieuResource_Get', { ResourceType: 'ASSIGNMENT', ResourceID: assignmentID }, response => {
+				const rows = response?.data ?? response ?? []
+				this.linkedHocLieu = Array.isArray(rows?.[0]) ? rows[0][0] : (Array.isArray(rows) ? rows[0] : rows)
+			})
+		},
         setIframeCloseHidden(hidden) {
             const message = { type: hidden ? 'iframeRef_hideClose' : 'iframeRef_showClose' }
             if (window !== window.top) window.parent.postMessage(message, '*')
@@ -1009,6 +1019,7 @@
                     // Prevent the deep assignment watcher from triggering auto-save on initial load
                     this._skipNextAutoSave = true
                     this.assignment = JSON.parse(JSON.stringify(newVal))
+					this.loadHocLieuMapping(newVal.AssignmentID)
                 }
             },
             immediate: true,

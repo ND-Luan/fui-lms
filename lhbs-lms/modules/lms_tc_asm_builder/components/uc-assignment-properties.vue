@@ -333,7 +333,7 @@
 
 	<uc-loading-page v-model="loadingPage.isLoading" v-model:text="loadingPage.text" />
 	<uc-question-from-hoc-lieu v-if="isShowModalImportFromHocLieu" v-model:isOpen="isShowModalImportFromHocLieu"
-		:assignmentDetail="assignment" @importJson="bindingImport" />
+		:assignmentDetail="assignment" :linked-hoc-lieu-i-d="linkedHocLieuID" @importJson="bindingImport" />
 	<uc-question-from-bank v-if="isShowModalImportFromBank" v-model:isOpen="isShowModalImportFromBank"
 		:assignmentDetail="assignment" @importJson="bindingImport" />
 	<uc-chon-ki-nang v-model:dialog="isShowModalSkill" @skillApplied="handleSubmitSkill"></uc-chon-ki-nang>
@@ -342,7 +342,7 @@
 <script>
 	export default {
 		name: 'uc-assignment-properties', 
-		props: { groups: { type: Array, default: () => [] }, item: Object, assignment: Object, inDrawer: { type: Boolean, default: false }, openImportType: { type: String, default: '' } },
+		props: { groups: { type: Array, default: () => [] }, item: Object, assignment: Object, inDrawer: { type: Boolean, default: false }, openImportType: { type: String, default: '' }, linkedHocLieuID: { type: Number, default: 0 } },
 		emits: ['update:groups', 'update:item', 'update:assignment', 'close'],
 		data() {
 			this.$i18n.locale = (localStorage.getItem('IsLanguage') && localStorage.getItem('IsLanguage') == 'true') ? 'en' : 'vi'

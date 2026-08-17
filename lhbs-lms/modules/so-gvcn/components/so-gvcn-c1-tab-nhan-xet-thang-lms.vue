@@ -1,22 +1,22 @@
 <template>
-	<v-card-text class="pa-0 so-gvcn-sheet-wrap" :style="{ height: sheetHeight, overflow: 'hidden' }">
-		<v-alert v-if="selectedLopID === '__ALL__'" type="info" variant="tonal" density="compact" class="ma-2"
-			style="flex: 0 0 auto; min-height: auto;">
-			Chọn một lớp ở thanh trên để nhập nhận xét tháng LMS.
-		</v-alert>
-		<div v-else-if="loading" class="d-flex align-center justify-center ga-3 pa-4 text-primary"
-			style="flex: 0 0 auto; min-height: auto;">
-			<v-progress-circular indeterminate size="24" width="2" />
-			<span class="text-body-2">Đang tải nhận xét tháng...</span>
+	<v-card>
+		<div class="w-100" style="overflow: auto;">
+			<v-alert v-if="selectedLopID === '__ALL__'" type="info" variant="tonal" density="compact" class="ma-2"
+				style="flex: 0 0 auto; min-height: auto;">
+				Chọn một lớp ở thanh trên để nhập nhận xét tháng LMS.
+			</v-alert>
+			<div v-else-if="loading" class="d-flex align-center justify-center ga-3 pa-4 text-primary"
+				style="flex: 0 0 auto; min-height: auto;">
+				<v-progress-circular indeterminate size="24" width="2" />
+				<span class="text-body-2">Đang tải nhận xét tháng...</span>
+			</div>
+			<v-alert v-else-if="reasonReject" type="error" variant="tonal" density="compact" class="ma-2"
+				style="flex: 0 0 auto; min-height: auto;">
+				Lý do từ chối: {{ reasonReject }}
+			</v-alert>
+			<div v-if="selectedLopID !== '__ALL__' && !loading" ref="sheetRef" class="so-gvcn-sheet"></div>
 		</div>
-		<v-alert v-else-if="reasonReject" type="error" variant="tonal" density="compact" class="ma-2"
-			style="flex: 0 0 auto; min-height: auto;">
-			Lý do từ chối: {{ reasonReject }}
-		</v-alert>
-		<div v-if="selectedLopID !== '__ALL__' && !loading" class="so-gvcn-sheet-wrap">
-			<div ref="sheetRef" class="w-100 so-gvcn-sheet"></div>
-		</div>
-	</v-card-text>
+	</v-card>
 </template>
 
 <script>
@@ -27,7 +27,7 @@
 			rows: { type: Array, default: () => [] },
 			columns: { type: Array, default: () => [] },
 			nestedHeaders: { type: Array, default: () => [] },
-			sheetHeight: { type: String, default: 'calc(100vh - 230px)' },
+			sheetHeight: { type: String  },
 			sheetKey: { type: [Number, String], default: 0 },
 			readOnly: { type: Boolean, default: false },
 			reasonReject: { type: String, default: '' },
@@ -93,9 +93,11 @@
 						nestedHeaders: this.nestedHeaders || [],
 						rowResize: true,
 						columnDrag: false,
+						rowDrag: false,
+						columnSorting: false,
 						tableWidth: '100%',
 						tableOverflow: true,
-						tableHeight: this.sheetHeight,
+						tableHeight: "calc(100vh - 150px)",
 						lazyLoading: false,
 						freezeColumns: 2,
 						wordWrap: true,

@@ -1,9 +1,9 @@
 <template>
-	<v-card-text class="pa-2 so-gvcn-sheet-wrap" :style="{ height: sheetHeight, overflow: 'hidden' }">
+	<v-card-text class="pa-2 so-gvcn-sheet-wrap so-gvcn-plan-tab" :style="{ height: sheetHeight, overflow: 'hidden' }">
 		<v-alert v-if="selectedLopID === '__ALL__'" type="info" variant="tonal" density="compact">
 			Chọn một lớp ở thanh trên để lập kế hoạch chủ nhiệm năm học.
 		</v-alert>
-		<div v-else class="d-flex h-100 ga-3">
+		<div v-else class="d-flex h-100 ga-3 so-gvcn-plan-layout">
 			<div class="flex-shrink-0 overflow-y-auto"
 				style="width: 260px; border-right: 1px solid rgba(0, 0, 0, 0.12);">
 				<v-list density="compact" nav color="primary" class="pa-0">
@@ -65,7 +65,7 @@
 				</v-list>
 			</div>
 
-			<div ref="scrollContainer" class="flex-grow-1 h-100 overflow-y-auto pr-1">
+			<div ref="scrollContainer" class="flex-grow-1 h-100 overflow-y-auto pr-1 so-gvcn-plan-scroll">
 				<div class="text-h6 text-center font-weight-bold py-3">
 					KẾ HOẠCH CHỦ NHIỆM NĂM HỌC
 					<div class="text-body-2 mt-1">
@@ -237,6 +237,24 @@
 			this.destroyAllSheets()
 		},
 		methods: {
+
+		safeParseJson(val, fallback = null) {
+			if (!val) return fallback;
+			if (typeof val !== 'string') return val;
+			let currentVal = val;
+			while (typeof currentVal === 'string' && (currentVal.trim().startsWith('[') || currentVal.trim().startsWith('{'))) {
+				try {
+					const parsed = JSON.parse(currentVal);
+					if (typeof parsed === 'string') {
+						currentVal = parsed;
+					} else {
+						return parsed;
+					}
+				} catch (e) { break; }
+			}
+			return fallback !== null ? fallback : currentVal;
+		},
+
 			buildPlanCards(value) {
 				const saved = this.parseAnnualPlan(value)
 				return [
@@ -248,7 +266,7 @@
 						domId: 'ke-hoach-nam-hoc-muc-i',
 						refName: 'annualSectionIRef',
 						title: 'I. ĐẶC ĐIỂM TÌNH HÌNH\n1. THỐNG KÊ TÌNH HÌNH LỚP HỌC',
-						height: '360px',
+						height: '100%',
 						columns: [
 							{ title: 'Thời điểm / Nội dung', width: 190, readOnly: true },
 							{ title: 'Tổng số', width: 85 },
@@ -282,7 +300,7 @@
 						domId: 'ke-hoach-nam-hoc-muc-ii-pcnl',
 						refName: 'annualQualityCompetencyRef',
 						title: '2.1. PHẨM CHẤT – NĂNG LỰC\na. CHỈ TIÊU PHẤN ĐẤU',
-						height: '205px',
+						height: '100%',
 						freezeColumns: 1,
 						columns: this.buildQualityCompetencyColumns(),
 						nestedHeaders: this.buildQualityCompetencyNestedHeaders(),
@@ -296,7 +314,7 @@
 						domId: 'ke-hoach-nam-hoc-muc-ii-mon-hoc',
 						refName: 'annualAcademicTargetRef',
 						title: '2.2. MÔN HỌC VÀ HOẠT ĐỘNG GIÁO DỤC\na. CHỈ TIÊU PHẤN ĐẤU',
-						height: '205px',
+						height: '100%',
 						freezeColumns: 1,
 						columns: this.buildAcademicColumns(),
 						nestedHeaders: this.buildAcademicNestedHeaders(),
@@ -450,7 +468,7 @@
 			parseAnnualPlan(value) {
 				if (!value) return {}
 				try {
-					return typeof value === 'string' ? JSON.parse(value) : value
+					return typeof value === 'string' ? this.safeParseJson(value, []) : value
 				} catch (error) {
 					return {}
 				}
@@ -567,6 +585,8 @@
 							...(card.freezeColumns ? { freezeColumns: card.freezeColumns } : {}),
 							rowResize: true,
 							columnDrag: false,
+						rowDrag: false,
+						columnSorting: false,
 							tableWidth: '100%',
 							tableOverflow: true,
 							tableHeight: card.height,
@@ -626,7 +646,7 @@
 					if (!subjects[subjectIndex]) return
 					const quantityColumn = 1 + subjectIndex * 2
 					const percentageColumn = quantityColumn + 1
-					const rowIndexes = changedRow !== null ? [changedRow] : rows.map((row, index) => index)
+					const rowIndexes = rows.map((row, index) => index)
 					rowIndexes.forEach(rowIndex => {
 						const row = rows[rowIndex]
 						if (!Array.isArray(row)) return

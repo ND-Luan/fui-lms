@@ -51,6 +51,12 @@
 		mounted() {
 			this.generateViewerUrl(this._fileUrl);
 		},
+		watch: {
+			fileUrl(newVal) {
+				this._fileUrl = newVal;
+				this.generateViewerUrl(newVal);
+			}
+		},
 		computed: {
 			nameFile: function () {
 				let name = ''

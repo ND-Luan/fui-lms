@@ -49,9 +49,9 @@
 						<div class="ft-bt-body">
 							<div class="ft-bt-name">{{ lop.TenLop }}</div>
 							<div class="ft-bt-meta">{{ lop.TongBT }} {{ $t('message.Assignment').toLowerCase() }}</div>
-							<div class="ft-bt-footer" v-if="lop.BaiTapCanCham_PendingGrading + lop.BaiTapSapToi_Upcoming > 0">
+							<div class="ft-bt-footer" v-if="lop.BaiTapCanCham_PendingGrading > 0">
 								<span class="ft-pill ft-pill-blue">
-									{{ lop.BaiTapCanCham_PendingGrading + lop.BaiTapSapToi_Upcoming }} {{
+									{{ lop.BaiTapCanCham_PendingGrading }} {{
 										$t('message.NeedGrade').toLowerCase() }}
 								</span>
 							</div>
@@ -222,7 +222,7 @@
 				})
 				.filter(item => {
 					if (this.StatusSelected == -1) return true
-					if (this.StatusSelected == 0) return ['UPCOMING', 'PENDING_GRADING'].includes(item.Status)
+					if (this.StatusSelected == 0) return item.Status === 'PENDING_GRADING'
 					return ['OVERDUE'].includes(item.Status)
 				})
 		},
@@ -235,7 +235,7 @@
 				})
 				.filter(item => {
 					if (this.StatusSelected == -1) return true
-					if (this.StatusSelected == 0) return ['UPCOMING', 'PENDING_GRADING'].includes(item.Status)
+					if (this.StatusSelected == 0) return item.Status === 'PENDING_GRADING'
 					return ['OVERDUE'].includes(item.Status)
 				})
 		},

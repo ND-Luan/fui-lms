@@ -38,7 +38,7 @@
 					</v-row>
 				</v-form>
 				<v-btn @click="onRedirectToASM(selectedLibery)" color="success" variant="outlined" size="small"
-					class="mt-2">
+					class="mt-2" :loading="isOpeningBuilder" :disabled="isOpeningBuilder">
 					<v-icon class="me-1">mdi-file-document-outline</v-icon>{{ $t('message.ViewDetail') }}
 					{{ formData.ResourceType == 'LESSON' ? ($i18n.locale ==
 					'en' ? 'lesson' : 'bài học') : ($i18n.locale == 'en' ? 'assignment' : 'bài tập') }}
@@ -147,6 +147,7 @@
 			return {
 				formData: {},
 				hocLieuLink: {},
+				isOpeningBuilder: false,
 			editDialog: [],
 			editDataLimitAssigned: [],
 			editData: [],
@@ -247,6 +248,19 @@
 		}
 	},
 		methods: {
+			syncHocLieuLink() {
+				const link = this.hocLieuLink || {}
+				this.formData = {
+					...this.formData,
+					HocLieuID: link.HocLieuID || null,
+					NoiDungID: link.NoiDungID || null,
+				}
+				this.$emit('update:selectedLibery', { ...this.formData })
+			},
+			onSaveCompleted(message) {
+				this.syncHocLieuLink()
+				Vue.$toast.success(message, { position: 'top' })
+			},
 			saveHocLieuLink(done) {
 				const link = this.hocLieuLink || {}
 				ajaxCALL('lms/EL_HocLieuResource_Save', {
@@ -287,9 +301,7 @@
 						IsPublic: this.formData.IsPublic ? 1 : 0,
 					}, res => {
 						this.saveHocLieuLink(() => {
-							this.$emit('update:selectedLibery', { ...this.formData })
-							Vue.$toast.success('Cập nhật bài học thành công', { position: "top" })
-							this.CloseModal()
+							this.onSaveCompleted('Cập nhật bài học thành công')
 						})
 					})
 				} else {
@@ -302,9 +314,7 @@
 						LimitAssigned: this.formData.LimitAssigned ?? 1,
 					}, res => {
 						this.saveHocLieuLink(() => {
-							this.$emit('update:selectedLibery', { ...this.formData })
-							Vue.$toast.success('Cập nhật bài tập thành công', { position: "top" })
-							this.CloseModal()
+							this.onSaveCompleted('Cập nhật bài tập thành công')
 						})
 					})
 				}
@@ -430,11 +440,21 @@
 			} else if (item.ResourceType === 'LESSON') {
 				url = `/lms_tc_lesson_builder?LessonID=${item.ResourceID}`
 			}
-			this.iframeRef.value.openWindow({
+			const openBuilder = () => this.iframeRef.value.openWindow({
 				title: item.Title,
 				url,
 				onclose: () => vueData.initPage()
-			});
+			})
+			const link = this.hocLieuLink || {}
+			if (!link.HocLieuID || !link.NoiDungID || !this.resourceIdForMapping) return openBuilder()
+
+			// Giáo viên vừa chọn học liệu: lưu liên kết ngầm trước rồi mới mở trình soạn thảo.
+			this.isOpeningBuilder = true
+			this.saveHocLieuLink(() => {
+				this.syncHocLieuLink()
+				this.isOpeningBuilder = false
+				openBuilder()
+			})
 		},
 		async saveAllLimitAssigned() {
 			const ok = await this.confirmRef.value.show({ title: 'Xác nhận lưu giới hạn lần nộp?' })

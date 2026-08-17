@@ -1,10 +1,10 @@
 <template>
-	<v-card-text class="pa-2" :style="{ height: sheetHeight, 'overflow-y': 'auto' }">
-		<v-alert v-if="selectedLopID === '__ALL__'" type="info" variant="tonal" density="compact" class="mb-0">
+	<div class="h-100 d-flex flex-column">
+		<v-alert v-if="selectedLopID === '__ALL__'" type="info" variant="tonal" density="compact" class="ma-2">
 			Chọn một lớp ở thanh trên để xem và nhập kế hoạch giáo dục của lớp đó.
 		</v-alert>
 		<template v-else>
-			<v-expansion-panels class="mb-2">
+			<v-expansion-panels class="pa-2 pb-0">
 				<v-expansion-panel>
 					<v-expansion-panel-title class="text-subtitle-1 font-weight-bold py-2 px-3 text-primary"
 						style="min-height: 48px;">
@@ -34,14 +34,14 @@
 				</v-expansion-panel>
 			</v-expansion-panels>
 
-			<div class="so-gvcn-sheet-wrap">
-				<div class="wrapper-jexcel">
-					<div ref="sheetRef" class="w-100 so-gvcn-sheet so-gvcn-ke-hoach-sheet"
-						:style="{ height: keHoachSheetHeight }"></div>
-				</div>
+			<div class="w-100 flex-grow-1" style="overflow: auto;">
+				<template v-if="dataAoA && dataAoA.length">
+					<div ref="sheetRef"></div>
+				</template>
+				<uc-card-empty v-else />
 			</div>
 		</template>
-	</v-card-text>
+	</div>
 </template>
 
 <script>
@@ -51,8 +51,7 @@
 		selectedLopID: { type: String, default: '__ALL__' },
 		selectedClass: { type: Object, default: null },
 		schoolYearText: { type: String, default: '' },
-		sheetHeight: { type: String, default: 'calc(100vh - 230px)' },
-		keHoachSheetHeight: { type: String, default: 'calc(100vh - 430px)' },
+		sheetHeight: { type: String },
 		columns: { type: Array, default: () => [] },
 		dataAoA: { type: Array, default: () => [] },
 		sheetStyle: { type: Object, default: () => ({}) },
@@ -61,80 +60,152 @@
 		getKeHoachMonthRowCount: { type: Function, required: true }
 	},
 	data() {
-		return {}
-	},
-	created() {
-		this.instance = null
+		return {
+			instance: null
+		}
 	},
 	watch: {
 		selectedLopID() {
-			this.$nextTick(() => this.initSheet())
+			this.initSheet()
 		},
 		dataAoA: {
-			deep: false,
+			handler() {
+				this.initSheet()
+			}
+		},
+		nestedHeaders: {
 			handler() {
 				this.initSheet()
 			}
 		}
 	},
+	computed: {
+		sheetStyleComputed() {
+			return this.sheetStyle || {}
+		}
+	},
 	mounted() {
 		this.initSheet()
+	},
+	beforeUnmount() {
+		this.destroySheet()
 	},
 	methods: {
 		getInstance() {
 			return this.instance
 		},
+		destroySheet() {
+			if (!this.instance) return
+			try {
+				const s = Array.isArray(this.instance) ? this.instance[0] : this.instance
+				if (s && typeof s.destroy === 'function') s.destroy()
+			} catch (e) {}
+			this.instance = null
+		},
 		initSheet() {
-			if (this.selectedLopID === '__ALL__') return
+			if (this.selectedLopID === '__ALL__') {
+				this.destroySheet()
+				return
+			}
 			this.$nextTick(() => {
 				const container = this.$refs.sheetRef
-				if (!container) return
-
-				if (this.instance) {
-					try {
-						const s = Array.isArray(this.instance) ? this.instance[0] : this.instance
-						if (s && typeof s.destroy === 'function') s.destroy()
-					} catch (e) {}
-					this.instance = null
+				if (!container || !this.dataAoA || !this.dataAoA.length) {
+					this.destroySheet()
+					return
 				}
+
+				let scrollTop = 0;
+				let scrollLeft = 0;
+				const content = container.querySelector('.jexcel_content') || container.querySelector('.jspreadsheet_content');
+				if (content) {
+					scrollTop = content.scrollTop;
+					scrollLeft = content.scrollLeft;
+				}
+
+				this.destroySheet()
 				container.innerHTML = ''
 
-				if (typeof jspreadsheet === 'function') {
-					this.instance = jspreadsheet(container, {
-						worksheets: [{
-							data: this.dataAoA,
-							columns: (this.columns || []).map(column => (
-								!column.readOnly && column.type !== 'numeric' && column.align !== 'center'
-									? { ...column, align: 'justify' }
-									: column
-							)),
-							nestedHeaders: this.nestedHeaders,
-							rowResize: true,
-							columnDrag: false,
-							tableWidth: '100%',
-							tableOverflow: true,
-							tableHeight: this.keHoachSheetHeight,
-							lazyLoading: false,
-							wordWrap: true,
-							allowInsertColumn: false,
-							allowInsertRow: false,
-							style: this.sheetStyle,
-							showHeader: true
-						}],
-						contextMenu: () => false,
-						onload: () => {
-							this.$nextTick(() => {
-								setTimeout(this.applyLayout, 100)
-							})
-						}
-					})
+				if (typeof jspreadsheet === 'undefined') {
+					setTimeout(() => this.initSheet(), 100)
+					return
 				}
+
+				const factory = (typeof soGvcnJspreadsheet !== 'undefined' && soGvcnJspreadsheet.create)
+					? soGvcnJspreadsheet.create.bind(soGvcnJspreadsheet)
+					: jspreadsheet
+
+				this.isInitialized = false
+				this.instance = factory(container, {
+					worksheets: [{
+						data: this.dataAoA,
+						columns: (this.columns || []).map(column => (
+							!column.readOnly && column.type !== 'numeric' && column.align !== 'center'
+								? { ...column, align: 'justify' }
+								: column
+						)),
+						nestedHeaders: this.nestedHeaders,
+						rowResize: true,
+						columnDrag: false,
+						rowDrag: false,
+						columnSorting: false,
+						tableWidth: '100%',
+						tableOverflow: true,
+						tableHeight: "calc(100vh - 175px)",
+						lazyLoading: false,
+						freezeColumns: 1,
+						wordWrap: true,
+						allowInsertColumn: false,
+						allowInsertRow: false,
+						style: this.sheetStyle,
+						showHeader: true
+					}],
+					onchange: () => { if (this.isInitialized) this.$emit('changed') },
+					onbeforepaste: (worksheet, data, x, y) => {
+						const col = worksheet.options.columns ? worksheet.options.columns[x] : null;
+						if (this.isInitialized) this.$emit('changed');
+						if (Array.isArray(data)) {
+							const normalizedData = data.map(row => row.map(cell => {
+								if (cell === null || cell === undefined) return '';
+								if (typeof cell === 'string' || typeof cell === 'number') return String(cell);
+								if (typeof cell === 'object') {
+									return cell.innerHTML || cell.textContent || cell.innerText || cell.value || cell.v || '';
+								}
+								return String(cell);
+							}));
+							
+							if (col && (col.type === 'note' || col.type === 'html')) {
+								let text = normalizedData.map(row => row.join('\t')).join('\n');
+								if (text.startsWith('"') && text.endsWith('"')) {
+									text = text.substring(1, text.length - 1).replace(/""/g, '"');
+								}
+								return [[text]];
+							}
+							
+							return normalizedData;
+						}
+						return data;
+					},
+					onafterchanges: () => { if (this.isInitialized) this.$emit('changed') },
+					contextMenu: () => false,
+					onload: () => {
+						this.$nextTick(() => {
+							setTimeout(() => {
+								this.applyLayout()
+								this.isInitialized = true
+							}, 100)
+						})
+					}
+				})
 			})
+		},
+		getRows() {
+			const sheet = Array.isArray(this.instance) ? this.instance[0] : this.instance
+			return sheet && typeof sheet.getData === 'function' ? sheet.getData() : []
 		},
 		applyLayout() {
 			const sheet = Array.isArray(this.instance) ? this.instance[0] : this.instance
 			if (!sheet) return
-			const rowCount = this.getKeHoachMonthRowCount ? this.getKeHoachMonthRowCount() : 7
+			const rowCount = this.getKeHoachMonthRowCount ? this.getKeHoachMonthRowCount() : 6
 			const months = this.getKeHoachExportMonths ? this.getKeHoachExportMonths() : []
 			months.forEach((month, index) => {
 				const start = 1 + (index * rowCount)

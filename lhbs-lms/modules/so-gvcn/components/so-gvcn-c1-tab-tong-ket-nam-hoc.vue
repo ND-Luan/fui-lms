@@ -29,7 +29,7 @@
 				</v-list>
 			</div>
 
-			<div ref="scrollContainer" class="flex-grow-1 h-100 overflow-y-auto pr-1">
+		 	<div ref="scrollContainer" class="flex-grow-1 h-100 overflow-y-auto pr-1">
 				<div class="text-h6 text-center font-weight-bold py-3">TỔNG KẾT NĂM HỌC</div>
 				<v-card ref="sectionDuyTri" class="mb-4" variant="outlined">
 					<v-card-title class="text-subtitle-1 font-weight-bold">1. Công tác duy trì số lượng</v-card-title>
@@ -148,7 +148,6 @@
 				this.initAllSheets()
 			},
 			savedData: {
-				deep: true,
 				handler(val) {
 					if (val) {
 						this.localForm.DuyTriSoLuong = val.DuyTriSoLuong || ''
@@ -197,7 +196,7 @@
 				const getSheetData = (inst) => {
 					const sheet = Array.isArray(inst) ? inst[0] : inst
 					if (sheet && typeof sheet.closeEditor === 'function') {
-						try { sheet.closeEditor(true) } catch (error) {}
+						try { sheet.closeEditor(sheet.edition ? sheet.edition[0] : null, true) } catch (error) {}
 					}
 					return sheet && typeof sheet.getData === 'function' ? sheet.getData() : []
 				}
@@ -215,7 +214,7 @@
 				const getSheetData = (inst) => {
 					const sheet = Array.isArray(inst) ? inst[0] : inst
 					if (sheet && typeof sheet.closeEditor === 'function') {
-						try { sheet.closeEditor(true) } catch (error) {}
+						try { sheet.closeEditor(sheet.edition ? sheet.edition[0] : null, true) } catch (error) {}
 					}
 					return sheet && typeof sheet.getData === 'function' ? sheet.getData() : []
 				}
@@ -344,9 +343,7 @@
 					if (subjectIndex >= subjectCount) return
 					const quantityColumn = 1 + subjectIndex * 2
 					const percentageColumn = quantityColumn + 1
-					const rowIndexes = changedRow !== null && rows[changedRow]
-						? [changedRow]
-						: rows.map((row, index) => index)
+					const rowIndexes = rows.map((row, index) => index)
 					rowIndexes.forEach(rowIndex => {
 						const row = rows[rowIndex]
 						if (!Array.isArray(row)) return
@@ -437,7 +434,7 @@
 								nestedHeaders: nested1,
 								tableOverflow: true,
 								tableWidth: '100%',
-								tableHeight: '205px',
+								tableHeight: '100%',
 								freezeColumns: 1,
 								wordWrap: true,
 								allowInsertRow: false,
@@ -488,7 +485,7 @@
 								nestedHeaders: nested2,
 								tableOverflow: true,
 								tableWidth: '100%',
-								tableHeight: '205px',
+								tableHeight: '100%',
 								freezeColumns: 1,
 								wordWrap: true,
 								allowInsertRow: false,
@@ -522,7 +519,7 @@
 								],
 								tableOverflow: true,
 								tableWidth: '100%',
-								tableHeight: '205px',
+								tableHeight: '100%',
 								freezeColumns: 1,
 								wordWrap: true,
 								rowResize: true,
@@ -555,7 +552,7 @@
 								],
 								tableOverflow: true,
 								tableWidth: '100%',
-								tableHeight: '205px',
+								tableHeight: '100%',
 								freezeColumns: 1,
 								wordWrap: true,
 								rowResize: true,

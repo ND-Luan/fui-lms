@@ -116,7 +116,7 @@
 
 <script>
 	export default {
-	name: 'uc-pdf-book-reader',
+		name: 'uc-pdf-book-reader',
 	props: {
 		pdfUrl: {
 			type: String,
@@ -820,5 +820,5 @@
 			}
 		}
 	}
-}
+	}
 </script>

@@ -39,7 +39,7 @@
 				</div>
 				<div class="group-import-actions" @click.stop>
 					<span class="text-caption text-medium-emphasis">Thêm câu hỏi từ:</span>
-					<v-btn size="x-small" variant="tonal" color="primary" @click="$emit('open-group-import', { groupIndex, source: 'hocLieu' })">
+					<v-btn v-if="canImportFromHocLieu" size="x-small" variant="tonal" color="primary" @click="$emit('open-group-import', { groupIndex, source: 'hocLieu' })">
 						<v-icon start size="14">mdi-database-import-outline</v-icon>Kho học liệu
 					</v-btn>
 					<v-btn size="x-small" variant="tonal" color="secondary" @click="$emit('open-group-import', { groupIndex, source: 'bank' })">
@@ -157,7 +157,8 @@
 		name: 'uc-assignment-canvas',
 	props: {
 		groups: { type: Array, default: () => [] },
-		selectedItem: Object // { type, groupIndex, qIndex }
+		selectedItem: Object, // { type, groupIndex, qIndex }
+		canImportFromHocLieu: { type: Boolean, default: false }
 	},
 	emits: ['update:groups', 'update:selectedItem', 'open-group-import'],
 	data() {
