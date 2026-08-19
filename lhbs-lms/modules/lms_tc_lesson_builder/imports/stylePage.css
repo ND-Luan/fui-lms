@@ -110,6 +110,25 @@
     line-height: 1.6;
 }
 
+.empty-element-state {
+    display: flex;
+    min-height: 120px;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 24px;
+    border: 1px dashed #cbd5e1;
+    border-radius: 8px;
+    color: #64748b;
+    background-color: #f8fafc;
+    flex-direction: column;
+    font-size: 14px;
+}
+
+.empty-element-state .v-icon {
+    color: #94a3b8;
+}
+
 /* ======================================================= */
 /* == 3. COMPONENT: uc-lesson-properties                == */
 /* ======================================================= */
@@ -140,4 +159,49 @@
 
 li {
     list-style-position: inside
+}
+
+/* ======================================================= */
+/* == 5. FILE PREVIEW                                   == */
+/* ======================================================= */
+
+.file-source-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 12px;
+}
+
+.file-source-card {
+    min-width: 0;
+    overflow: hidden;
+    border: 1px solid rgba(var(--v-theme-on-surface), 0.14);
+    border-radius: 8px;
+    background: rgb(var(--v-theme-surface));
+}
+
+.file-source-iframe {
+    display: block;
+    width: 100%;
+    height: 280px;
+    border: 0;
+    object-fit: contain;
+    background: rgba(var(--v-theme-on-surface), 0.04);
+}
+
+.file-source-fallback {
+    display: flex;
+    min-height: 150px;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 18px;
+    flex-direction: column;
+}
+
+.file-source-name {
+    max-width: 100%;
+    overflow: hidden;
+    font-size: 13px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }

@@ -1,5 +1,5 @@
 <template>
-	<v-card-text class="pa-0 so-gvcn-sheet-wrap" :style="{ height: sheetHeight, 'overflow-y': 'auto' }">
+	<v-card>
 		<v-alert v-if="selectedLopID === '__ALL__'" type="info" variant="tonal" density="compact" class="ma-2 mb-0">
 			Chọn một lớp ở thanh trên để xem và nhập thông tin định hướng nghề nghiệp của học sinh lớp đó.
 		</v-alert>
@@ -22,11 +22,14 @@
 					</v-expansion-panel>
 				</v-expansion-panels>
 			</div>
-			<div class="so-gvcn-sheet-wrap pa-2 pt-0">
-				<div ref="sheetRef" class="so-gvcn-sheet so-gvcn-huong-nghiep-sheet w-100"></div>
+			<div class="w-100" style="overflow: auto;">
+				<template v-if="rows && rows.length">
+					<div ref="sheetRef"></div>
+				</template>
+				<uc-card-empty v-else />
 			</div>
 		</template>
-	</v-card-text>
+	</v-card>
 </template>
 
 <script>
@@ -37,8 +40,7 @@
 			rows: { type: Array, default: () => [] },
 			columns: { type: Array, default: () => [] },
 			nestedHeaders: { type: Array, default: () => [] },
-			sheetHeight: { type: String, default: 'calc(100vh - 230px)' },
-			huongNghiepSheetHeight: { type: String, default: 'calc(100vh - 360px)' },
+			sheetHeight: { type: String, default: 'calc(100vh - 175px)' },
 			sheetKey: { type: [Number, String], default: 0 }
 		},
 		emits: ['update-rows'],
@@ -68,15 +70,19 @@
 			},
 			initSheet() {
 				const container = this.$refs.sheetRef
-				if (!container || this.selectedLopID === '__ALL__') {
+				if (!container || this.selectedLopID === '__ALL__' || !this.rows || !this.rows.length) {
 					this.destroySheet()
 					return
 				}
 				this.destroySheet()
 				container.innerHTML = ''
 
-				if (typeof jspreadsheet === 'function') {
-					this.sheetInstance = soGvcnJspreadsheet.create(container, {
+				const factory = (typeof soGvcnJspreadsheet !== 'undefined' && soGvcnJspreadsheet.create)
+					? soGvcnJspreadsheet.create.bind(soGvcnJspreadsheet)
+					: jspreadsheet
+
+				this.isInitialized = false
+				this.sheetInstance = factory(container, {
 						worksheets: [{
 							data: this.rows || [],
 							columns: (this.columns || []).map(column => (
@@ -87,9 +93,11 @@
 							nestedHeaders: this.nestedHeaders || [],
 							rowResize: true,
 							columnDrag: false,
+						rowDrag: false,
+						columnSorting: false,
 							tableWidth: '100%',
 							tableOverflow: true,
-							tableHeight: this.huongNghiepSheetHeight,
+							tableHeight: "calc(100vh - 175px)",
 							lazyLoading: false,
 							freezeColumns: 4,
 							wordWrap: true,
@@ -101,11 +109,13 @@
 						onchange: (worksheet, cell, x, y, value) => {
 							if (Array.isArray(this.rows) && this.rows[y]) {
 								this.rows[y][x] = value
-								this.$emit('update-rows', this.rows)
+								if (this.isInitialized) this.$emit('update-rows', this.rows)
 							}
+						},
+						onload: () => {
+							setTimeout(() => { this.isInitialized = true }, 100)
 						}
 					})
-				}
 			}
 		},
 		watch: {
@@ -114,6 +124,11 @@
 			},
 			sheetKey() {
 				this.scheduleInit()
+			},
+			rows: {
+				handler() {
+					this.scheduleInit()
+				}
 			}
 		},
 		mounted() {

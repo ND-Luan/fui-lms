@@ -429,9 +429,10 @@
 				DSMonHocActive: [],
 				KhoiItem: {},
 				isShowMyLiberies: false,
-				cascadeKhoiID: null,
-				cascadeMonHocName: null,
-				cascadeTuanID: null,
+				// Khôi phục lựa chọn khi iframe đóng làm component được mount lại.
+				cascadeKhoiID: vueData.cascadeKhoiID ?? null,
+				cascadeMonHocName: vueData.cascadeMonHocName ?? null,
+				cascadeTuanID: vueData.cascadeTuanID ?? null,
 				drawerOnboarding: false,
 				tourActive: false,
 				tourStep: 0,
@@ -547,6 +548,14 @@
 			teachingGroups: {
 				handler(newVal) {
 					if (!newVal || newVal.length === 0) return
+					console.log('[lms-teacher-dashboard][cascade] teachingGroups reloaded', {
+						count: newVal.length,
+						selected: { khoi: this.cascadeKhoiID, mon: this.cascadeMonHocName, tuan: this.cascadeTuanID },
+						vueData: { khoi: vueData.cascadeKhoiID, mon: vueData.cascadeMonHocName, tuan: vueData.cascadeTuanID },
+					})
+					const previousKhoiID = this.cascadeKhoiID
+					const previousMonHocName = this.cascadeMonHocName
+					const previousTuanID = this.cascadeTuanID
 					this.DSMonHocActive = [...new Set(newVal.map(item => item.MonHocName))].map(mh => {
 						const groups = newVal.filter(item => item.MonHocName == mh)
 						groups.forEach(g => {
@@ -559,10 +568,15 @@
 						return { MonHocName: mh, activeTab: groups[0].KhoiID, groups, groupsWithWeeks: groups.filter(g => g.weeks?.length > 0) }
 					})
 
-					// Reset các mục lựa chọn cascade khi đổi niên khóa/học kỳ
-					this.cascadeKhoiID = null
-					this.cascadeMonHocName = null
-					this.cascadeTuanID = null
+					const selectedKhoi = newVal.some(g => String(g.KhoiID) === String(previousKhoiID))
+					const selectedGroup = selectedKhoi && newVal.find(g =>
+						String(g.KhoiID) === String(previousKhoiID) && g.MonHocName === previousMonHocName)
+					const selectedTuan = selectedGroup?.weeks?.some(w =>
+						String(w.TuanHocID) === String(previousTuanID))
+					this.cascadeKhoiID = selectedKhoi ? previousKhoiID : null
+					this.cascadeMonHocName = selectedGroup ? previousMonHocName : null
+					this.cascadeTuanID = selectedTuan ? previousTuanID : null
+					this.$nextTick(() => this.autoSelectCascade())
 				},
 				immediate: false,
 			},
@@ -572,13 +586,18 @@
 			},
 			cascadeKhoiID(val) {
 				vueData.cascadeKhoiID = val ?? null
+				console.log('[lms-teacher-dashboard][cascade] khối changed', val)
+				this.$nextTick(() => this.autoSelectCascade())
 			},
 			cascadeMonHocName(val) {
 				vueData.cascadeMonHocName = val ?? null
+				console.log('[lms-teacher-dashboard][cascade] môn changed', val)
+				this.$nextTick(() => this.autoSelectCascade())
 			},
 			cascadeTuanID(val) {
 				vueData.cascadeTuanID = val ?? null
 				vueData.cascadeTuanHienThi = this.cascadeTuanHienThi ?? null
+				console.log('[lms-teacher-dashboard][cascade] tuần changed', val)
 			},
 			cascadeTuanHienThi(val) {
 				vueData.cascadeTuanHienThi = val ?? null
@@ -596,13 +615,32 @@
 				})
 				return { MonHocName: mh, activeTab: groups[0].KhoiID, groups, groupsWithWeeks: groups.filter(g => g.weeks?.length > 0) }
 			})
+			this.$nextTick(() => this.autoSelectCascade())
 		},
 		mounted() {
+			console.log('[lms-teacher-dashboard][cascade] mounted', {
+				local: { khoi: this.cascadeKhoiID, mon: this.cascadeMonHocName, tuan: this.cascadeTuanID },
+				vueData: { khoi: vueData.cascadeKhoiID, mon: vueData.cascadeMonHocName, tuan: vueData.cascadeTuanID },
+			})
 			if (!localStorage.getItem('lms-tc-tour-done')) {
 				this.drawerOnboarding = true
 			}
 		},
 		methods: {
+			autoSelectCascade() {
+				// Chỉ tự chọn khi cấp hiện tại có đúng một phương án, không thay thế lựa chọn thủ công.
+				if (!this.cascadeKhoiID && this.DSKhoiCascade.length === 1) {
+					this.pickKhoi(this.DSKhoiCascade[0].KhoiID)
+					return
+				}
+				if (!this.cascadeMonHocName && this.DSMonCascade.length === 1) {
+					this.pickMon(this.DSMonCascade[0].MonHocName)
+					return
+				}
+				if (!this.cascadeTuanID && this.DSTuanCascade.length === 1) {
+					this.pickTuan(this.DSTuanCascade[0].TuanHocID)
+				}
+			},
 			getPendingCount(classItem) {
 				if (!classItem.assignments) return 0
 				return classItem.assignments.reduce((sum, a) => sum + (a.PendingGradingCount || 0), 0)
@@ -693,11 +731,6 @@
 				if (this.cascadeMonHocName === monHocName) return
 				this.cascadeMonHocName = monHocName
 				this.cascadeTuanID = null
-				this.$nextTick(() => {
-					if (this.DSTuanCascade.length > 0) {
-						this.cascadeTuanID = this.DSTuanCascade[0].TuanHocID
-					}
-				})
 			},
 			pickTuan(tuanID) {
 				this.cascadeTuanID = tuanID

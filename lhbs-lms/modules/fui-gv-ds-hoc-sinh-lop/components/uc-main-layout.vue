@@ -183,7 +183,11 @@
 	
 		methods: {
 			async getKhoi(forceRefresh = false) {
-				this.DSKhoi = await fetchPromise("lms/KhoiHocByCapHoc_Get", { CapID: vueData.CapID }, { forceRefresh })
+				this.DSKhoi = await fetchPromise("lms/KhoiHocByCapHoc_Get", { 
+					CapID: vueData.CapID,
+					HocKi: vueData.NienKhoaItem.HocKi,
+					NienKhoa: vueData.NienKhoa,
+					 }, { forceRefresh })
 			},
 	
 			async getLop(forceRefresh = false) {
@@ -196,10 +200,15 @@
 	
 			async getHocSinh(forceRefresh = false) {
 				this.DSHocSinhSelected = []
+				const isLopToHop = Number(vueData.CapID) === 3
+					&& (this.LopItem?.IsLopToHop === true || Number(this.LopItem?.IsLopToHop) === 1)
+				const hocSinhLopSource = isLopToHop
+					? { url: 'student/LMS_GetHocSinhLop', params: { LopID: this.LopItem?.LopID, NienKhoa: vueData.NienKhoa } }
+					: { url: 'student/LMS_GetHocSinhLopChuNhiem', params: { NienKhoa: vueData.NienKhoa } }
 				const [DSHocSinhLop, DSHocSinh_LMS, DSHocSinhLop_LMS, DSNhanXetChuanBiNienKhoaSau] = await fetchBatchPromise([
-					{ url: 'lms/HocSinhLop_Get', params: { LopID: this.LopItem?.LopID, NienKhoa: vueData.NienKhoa } },
-					{ url: 'student/LMS_GetHocSinh', params: { LopID: this.LopItem?.LopID, NienKhoa: vueData.NienKhoa } },
-					{ url: 'student/LMS_GetHocSinhLopChuNhiem', params: { NienKhoa: vueData.NienKhoa } },
+				{ url: 'lms/HocSinhLop_Get', params: { LopID: this.LopItem?.LopID, NienKhoa: vueData.NienKhoa } },
+				{ url: 'student/LMS_GetHocSinh', params: { LopID: this.LopItem?.LopID, NienKhoa: vueData.NienKhoa } },
+				hocSinhLopSource,
 					{
 						url: 'lms/NhanXet_HocSinh_NienKhoaSau_Get_ByLopID',
 						params: { LopID: this.LopItem?.LopID, NienKhoa: vueData.NienKhoa },

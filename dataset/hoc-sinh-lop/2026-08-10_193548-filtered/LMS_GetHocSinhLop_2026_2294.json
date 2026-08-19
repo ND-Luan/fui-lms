@@ -1,0 +1,84 @@
+{
+  "data": [
+    {
+      "HSLopID": 37843,
+      "HocSinhID": 22200037,
+      "LopID": 2294,
+      "SoDanhBo": null,
+      "CreateUser": "NV0000122",
+      "CreateTime": "2026-07-23T16:17:56.24",
+      "UpdateUser": null,
+      "UpdateTime": null
+    },
+    {
+      "HSLopID": 37844,
+      "HocSinhID": 23200053,
+      "LopID": 2294,
+      "SoDanhBo": null,
+      "CreateUser": "NV0000122",
+      "CreateTime": "2026-07-23T16:17:56.24",
+      "UpdateUser": null,
+      "UpdateTime": null
+    },
+    {
+      "HSLopID": 37849,
+      "HocSinhID": 24300041,
+      "LopID": 2294,
+      "SoDanhBo": null,
+      "CreateUser": "NV0000122",
+      "CreateTime": "2026-07-23T16:17:56.24",
+      "UpdateUser": null,
+      "UpdateTime": null
+    },
+    {
+      "HSLopID": 37910,
+      "HocSinhID": 15100120,
+      "LopID": 2294,
+      "SoDanhBo": null,
+      "CreateUser": "NV0000122",
+      "CreateTime": "2026-07-23T16:28:36.043",
+      "UpdateUser": null,
+      "UpdateTime": null
+    },
+    {
+      "HSLopID": 37911,
+      "HocSinhID": 15100131,
+      "LopID": 2294,
+      "SoDanhBo": null,
+      "CreateUser": "NV0000122",
+      "CreateTime": "2026-07-23T16:28:36.043",
+      "UpdateUser": null,
+      "UpdateTime": null
+    },
+    {
+      "HSLopID": 37912,
+      "HocSinhID": 15100141,
+      "LopID": 2294,
+      "SoDanhBo": null,
+      "CreateUser": "NV0000122",
+      "CreateTime": "2026-07-23T16:28:36.043",
+      "UpdateUser": null,
+      "UpdateTime": null
+    },
+    {
+      "HSLopID": 37913,
+      "HocSinhID": 20200048,
+      "LopID": 2294,
+      "SoDanhBo": null,
+      "CreateUser": "NV0000122",
+      "CreateTime": "2026-07-23T16:28:36.043",
+      "UpdateUser": null,
+      "UpdateTime": null
+    },
+    {
+      "HSLopID": 37914,
+      "HocSinhID": 24300030,
+      "LopID": 2294,
+      "SoDanhBo": null,
+      "CreateUser": "NV0000122",
+      "CreateTime": "2026-07-23T16:28:36.043",
+      "UpdateUser": null,
+      "UpdateTime": null
+    }
+  ]
+}

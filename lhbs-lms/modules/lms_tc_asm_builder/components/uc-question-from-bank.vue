@@ -61,9 +61,17 @@
 					</template>
 
 					<template #no-data>
-						<div class="d-flex flex-column align-center justify-center py-8 text-medium-emphasis">
+						<div v-if="!loadingQuestions && !DSQuestion.length" class="d-flex flex-column align-center justify-center py-8 text-medium-emphasis">
+							<v-icon size="40" class="mb-2 opacity-50">mdi-database-plus-outline</v-icon>
+							<p class="text-body-2 mb-1">Chưa có câu hỏi trong ngân hàng</p>
+							<p class="text-caption mb-3">Hãy thêm câu hỏi vào ngân hàng để có thể sử dụng trong bài tập.</p>
+							<v-btn color="primary" variant="tonal" size="small" @click="openQuestionBank">
+								<v-icon start>mdi-open-in-new</v-icon>Mở ngân hàng câu hỏi
+							</v-btn>
+						</div>
+						<div v-else class="d-flex flex-column align-center justify-center py-8 text-medium-emphasis">
 							<v-icon size="40" class="mb-2 opacity-50">mdi-text-box-search-outline</v-icon>
-							<p class="text-body-2">Không tìm thấy câu hỏi nào trong nhóm này</p>
+							<p class="text-body-2">Không tìm thấy câu hỏi nào theo bộ lọc</p>
 						</div>
 					</template>
 				</v-data-table>
@@ -243,6 +251,7 @@
     getTypeColor(type) {
       return this.TypeOptions.find((t) => t.value === type)?.color || 'grey'
     },
+    openQuestionBank() { window.open('/lms-teacher-question-bank', '_blank', 'noopener,noreferrer') },
     handleImport() {
       const selectedList = this.DSQuestion.filter((q) => q.isSelected)
       selectedList.forEach((q) => {

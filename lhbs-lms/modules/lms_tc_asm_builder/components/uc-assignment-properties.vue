@@ -1,14 +1,14 @@
 <template>
-	<v-card :sticky="inDrawer ? undefined : true" top="80px">
+	<v-card class="assignment-properties-card" :sticky="inDrawer ? undefined : true" top="80px">
 		<div v-if="inDrawer" class="d-flex align-center pa-3 border-b">
 			<span class="text-subtitle-2 font-weight-medium flex-grow-1">Thuộc tính</span>
 			<v-btn icon size="small" variant="text" @click="$emit('close')">
 				<v-icon>mdi-close</v-icon>
 			</v-btn>
 		</div>
-		<div class="d-flex align-center text-subtitle-1 font-weight-medium flex-wrap ga-2 px-3 pt-2">
-			{{ $t('message.Attribute') }}
-			<div class="ml-2" v-if="item.type === 'question' && globalQuestionNumber !== 0">
+		<div class="properties-context-header d-flex align-center text-subtitle-1 font-weight-medium flex-wrap ga-2 px-3 pt-2">
+			<span v-if="!inDrawer">{{ $t('message.Attribute') }}</span>
+			<div class="ml-2" v-if="item?.type === 'question' && globalQuestionNumber !== 0">
 				<v-chip v-if="isQuestionTextField === false" label variant="outlined" color="primary"
 					@click="isQuestionTextField = true; $nextTick(() => { $refs.questionInput.focus() });">
 					{{ $t('message.Question') }} {{ selectedQuestionData.ordinalNumber }} <v-icon end>mdi-pencil-circle
@@ -17,23 +17,12 @@
 				<v-text-field v-else ref="questionInput" v-model="selectedQuestionData.ordinalNumber"
 					hide-details="auto" @blur="isQuestionTextField = false" />
 			</div>
-			<v-chip v-else-if="item.type === 'group'" class="ml-2" label color="primary">
+			<v-chip v-else-if="item?.type === 'group'" class="ml-2" label color="primary">
 				{{ selectedGroupData.title }}
 			</v-chip>
 			<v-spacer></v-spacer>
-			<div class="d-flex">
-				<v-spacer></v-spacer>
-				<v-btn v-if="item.type === 'group'" variant="outlined" color="primary" class="me-2"
-					@click="onOpenModalImportFromHocLieu()">
-					<v-icon start class="me-1">mdi-download</v-icon> Import từ
-					kho học liệu
-				</v-btn>
-				<v-btn v-if="item.type === 'group'" variant="outlined" color="secondary"
-					@click="onOpenModalImportFromBank()">
-					<v-icon start class="me-1">mdi-database-search</v-icon> Import từ
-					ngân hàng câu hỏi
-				</v-btn>
-				<v-btn v-else-if="item.type === 'question'" icon variant="text" @click="onOpenModalKiNang()">
+			<div v-if="item?.type === 'question'" class="ms-auto">
+				<v-btn icon variant="text" @click="onOpenModalKiNang()">
 					<v-icon>mdi-cog-outline</v-icon>
 				</v-btn>
 			</div>
@@ -45,10 +34,12 @@
 		</div>
 
 		<div v-else class="px-3 pb-3">
-			<div v-if="item.type === 'group'" class="d-flex flex-column ga-2">
+			<div v-if="item?.type === 'group'" class="d-flex flex-column ga-2">
 				<v-text-field class="mt-2" :model-value="selectedGroupData.title"
 					@update:model-value="updateItem('title', $event)" :label="$t('message.SectionGroupName')"
 					variant="outlined" density="compact" />
+				<v-checkbox v-model="selectedGroupData.isCheckShowAllQuestion"
+					:label="$t('message.ShowAllQuestionsInGroup')" density="compact" hide-details />
 				<div class="d-flex align-center ga-2 w-100">
 					<v-checkbox :model-value="selectedGroupData.advancedFeatures.isShuffleQuestions"
 						@update:model-value="(value) => { updateShuffleQuestions(selectedGroupData.id, value) }"
@@ -67,73 +58,61 @@
 				<v-textarea :model-value="selectedGroupData.description"
 					@update:model-value="updateItem('description', $event)" :label="$t('message.SectionDescription')"
 					variant="outlined" density="compact" rows="3" />
-				<v-checkbox v-model="selectedGroupData.isCheckShowAllQuestion"
-					:label="$t('message.ShowAllQuestionsInGroup')" />
 			</div>
 
-			<div v-else-if="item.type === 'question' && selectedQuestionData">
-				<v-row dense>
-					<v-col cols="12">
-						<div class="d-flex flex-wrap ga-2">
-							<b>Cấu hình kĩ năng: </b>
-							<v-chip v-for="(skill, index) in groups[item.groupIndex]?.questions[item.qIndex].skills"
-								color="primary" size="small" closable @click:close="removeChip(index)"
-								:key="skill.KyNang_MonHoc_ChiTietID">
-								{{ getSkillLabel(skill) }}
-							</v-chip>
-						</div>
-					</v-col>
-					<v-col cols="6">
-						<v-text-field :model-value="selectedQuestionData.points" @update:model-value="onPointInput"
-							:label="$t('message.Score')" type="text" variant="outlined" density="compact"
-							:clearable="false" :disabled="isPartialScoring" />
-					</v-col>
-					<v-col cols="6">
-						<v-select :model-value="selectedQuestionData.gradingType || 'auto'"
-							@update:model-value="updateQuestion('gradingType', $event)"
-							:label="$t('message.GradingMethod')"
-							:items="[{ value: 'auto', title: IsEngLish == 'en' ? 'auto' : 'Tự động' }, { value: 'manual', title: IsEngLish == 'en' ? 'manual' : 'Chấm tay' }]"
-							variant="outlined" density="compact" :disabled="!isAutoGradable(selectedQuestionData.type)"
-							:clearable="false" />
-					</v-col>
-				</v-row>
-				<v-divider class="my-2" />
-				<uc-media :selectedData="selectedQuestionData.config" :item="item" v-model:loadingPage="loadingPage"
-					@update:selectedData="handleQuestionMediaUpdate" />
-				<v-divider class="my-2" />
+			<div v-else-if="item?.type === 'question' && selectedQuestionData">
 				<p class="mb-2 text-subtitle-1 font-weight-medium">{{ $t('message.QuestionContent') }}:</p>
 				<div :key="selectedQuestionData.id">
-					<f-editor :model-value="selectedQuestionData.config.questionText"
+					<uc-rich-text-editor :model-value="selectedQuestionData.config.questionText"
 						:placeholder="$t('message.EnterQuestion')"
 						@update:model-value="updateQuestionConfig('questionText', $event)"
-						:imageapi="vueData.v_Set.apiImageAdapter" />
+						:imageapi="vueData.v_Set.apiFile" />
+				</div>
+				<div class="question-settings-grid mt-3">
+						<div class="d-flex flex-wrap ga-2 align-center">
+						<v-chip v-for="(skill, index) in groups[item.groupIndex]?.questions[item.qIndex].skills"
+							color="primary" size="small" closable @click:close="removeChip(index)"
+							:key="skill.KyNang_MonHoc_ChiTietID">{{ getSkillLabel(skill) }}</v-chip>
+					</div>
+					<v-row dense>
+						<v-col cols="6"><v-text-field :model-value="selectedQuestionData.points" @update:model-value="onPointInput"
+							:label="$t('message.Score')" type="text" variant="outlined" density="compact"
+							:clearable="false" :disabled="isPartialScoring" /></v-col>
+						<v-col cols="6"><v-select :model-value="selectedQuestionData.gradingType || 'auto'"
+							@update:model-value="updateQuestion('gradingType', $event)" :label="$t('message.GradingMethod')"
+							:items="[{ value: 'auto', title: IsEngLish == 'en' ? 'auto' : 'Tự động' }, { value: 'manual', title: IsEngLish == 'en' ? 'manual' : 'Chấm tay' }]"
+							variant="outlined" density="compact" :disabled="!isAutoGradable(selectedQuestionData.type)" :clearable="false" /></v-col>
+					</v-row>
 				</div>
 				<v-divider class="my-2" />
 				<!-- END -->
-				<div class="d-flex justify-space-between align-center"
+				<div class="question-answer-section d-flex justify-space-between align-center"
 					v-if="!['QUIZ_TRUE_FALSE', 'ESSAY', 'AUDIO_RESPONSE', 'FILE_UPLOAD', 'SHORT_ANSWER'].includes(selectedQuestionData.type)">
 					<p class="font-weight-medium">{{ $t('message.Answer') }}:</p>
 					<v-checkbox v-model="selectedQuestionData.config.isAdvanced" :label="$t('message.Advanced')" />
 				</div>
 				<!-- QUIZ_SINGLE_CHOICE -->
 				<div v-if="selectedQuestionData.type === 'QUIZ_SINGLE_CHOICE'">
-					<v-row dense v-for="(option, index) in selectedQuestionData.config.options" :key="option.id">
-						<v-col cols="2" class="d-flex justify-center align-center">
+					<v-row dense class="question-answer-row" v-for="(option, index) in selectedQuestionData.config.options" :key="option.id">
+						<v-col cols="1" class="d-flex justify-center align-center">
 							<v-radio-group :model-value="selectedQuestionData.config.correctAnswer"
 								@update:model-value="updateQuestionConfig('correctAnswer', $event)"
 								class="flex-shrink-0">
 								<v-radio :value="option.id" hide-details />
 							</v-radio-group>
 						</v-col>
-						<v-col cols="8" class="d-flex justify-center align-center">
+						<v-col cols="10" class="d-flex justify-center align-center">
 							<v-textarea v-if="!selectedQuestionData.config.isAdvanced" :model-value="option.text"
-								@update:model-value="updateOptionText(index, $event)" dense variant="outlined"
-								hide-details :clearable="false" placeholder="Nhập nội dung đáp án..." auto-grow
-								:rows="2" />
+								@update:model-value="updateOptionText(index, $event)" variant="outlined" density="compact"
+								hide-details :clearable="false" rows="2" :auto-grow="false"
+								placeholder="Nhập nội dung đáp án..." />
 							<uc-latex-edit class="w-100" v-else v-model:content="option.text" />
 						</v-col>
-						<v-col cols="2" class="d-flex justify-center align-center">
-							<v-btn size="x-small" @click="removeOption(index)" class="ml-1" icon="mdi-close" />
+						<v-col cols="1" class="d-flex justify-center align-center">
+							<v-btn class="answer-remove-btn" size="x-small" variant="text"
+								@click="removeOption(index)" aria-label="Xóa đáp án">
+								<v-icon size="17">mdi-close</v-icon>
+							</v-btn>
 						</v-col>
 					</v-row>
 					<v-btn block size="small" @click="addOption" variant="tonal" class="mt-2">
@@ -159,24 +138,26 @@
 							</div>
 						</v-alert>
 					</div>
-					<v-row dense v-for="(option, index) in selectedQuestionData.config.options" :key="option.id"
+					<v-row dense class="question-answer-row" v-for="(option, index) in selectedQuestionData.config.options" :key="option.id"
 						align="center">
-						<v-col cols="2" class="d-flex justify-center">
+						<v-col cols="1" class="d-flex justify-center">
 							<v-checkbox :model-value="selectedQuestionData.config.correctAnswers" :value="option.id"
 								@update:model-value="updateQuestionConfig('correctAnswers', $event)" hide-details
 								class="flex-shrink-0">
 							</v-checkbox>
 						</v-col>
-						<v-col cols="9">
+						<v-col cols="10">
 							<v-textarea v-if="!selectedQuestionData.config.isAdvanced" :model-value="option.text"
-								@update:model-value="updateOptionText(index, $event)" variant="outlined" hide-details
-								:clearable="false" density="compact" placeholder="Nhập nội dung đáp án..." auto-grow
-								:rows="2" />
+								@update:model-value="updateOptionText(index, $event)" variant="outlined" density="compact" hide-details
+								:clearable="false" rows="2" :auto-grow="false" placeholder="Nhập nội dung đáp án..." />
 							<uc-latex-edit v-else v-model:content="option.text" />
 						</v-col>
-						<v-col cols="1" class="d-flex justify-center">
-							<v-icon v-if="(selectedQuestionData.config.scoringMode || 'equal') !== 'partial'" size="20"
-								class="cursor-pointer text-red" @click="removeOption(index)">mdi-close</v-icon>
+						<v-col cols="1" class="d-flex justify-center align-center">
+							<v-btn v-if="(selectedQuestionData.config.scoringMode || 'equal') !== 'partial'"
+								class="answer-remove-btn" size="x-small" variant="text"
+								@click="removeOption(index)" aria-label="Xóa đáp án">
+								<v-icon size="17">mdi-close</v-icon>
+							</v-btn>
 						</v-col>
 					</v-row>
 					<v-btn v-if="(selectedQuestionData.config.scoringMode || 'equal') !== 'partial'" block size="small"
@@ -211,7 +192,7 @@
 							</div>
 						</v-alert>
 					</div>
-					<v-row v-for="(option, index) in selectedQuestionData.config.options" :key="index" dense
+					<v-row v-for="(option, index) in selectedQuestionData.config.options" :key="index" dense class="question-answer-row"
 						align="center">
 						<v-col class="d-flex justify-space-evenly" cols="3">
 							<v-checkbox v-model="option.correctAnswer" color="primary" hide-details
@@ -342,13 +323,17 @@
 						{{ $t('message.NoAnswerConfig') }}.
 					</p>
 				</div>
+
+				<v-divider class="my-3" />
+				<uc-media :selectedData="selectedQuestionData.config" :item="item" v-model:loadingPage="loadingPage"
+					@update:selectedData="handleQuestionMediaUpdate" />
 			</div>
 		</div>
 	</v-card>
 
 	<uc-loading-page v-model="loadingPage.isLoading" v-model:text="loadingPage.text" />
 	<uc-question-from-hoc-lieu v-if="isShowModalImportFromHocLieu" v-model:isOpen="isShowModalImportFromHocLieu"
-		:assignmentDetail="assignment" @importJson="bindingImport" />
+		:assignmentDetail="assignment" :linked-hoc-lieu-i-d="linkedHocLieuID" @importJson="bindingImport" />
 	<uc-question-from-bank v-if="isShowModalImportFromBank" v-model:isOpen="isShowModalImportFromBank"
 		:assignmentDetail="assignment" @importJson="bindingImport" />
 	<uc-chon-ki-nang v-model:dialog="isShowModalSkill" @skillApplied="handleSubmitSkill"></uc-chon-ki-nang>
@@ -357,8 +342,8 @@
 <script>
 	export default {
 		name: 'uc-assignment-properties', 
-		props: { groups: { type: Array, default: () => [] }, item: Object, assignment: Object, inDrawer: { type: Boolean, default: false } },
-		emits: ['update:groups', 'update:item', 'close'],
+		props: { groups: { type: Array, default: () => [] }, item: Object, assignment: Object, inDrawer: { type: Boolean, default: false }, openImportType: { type: String, default: '' }, linkedHocLieuID: { type: Number, default: 0 } },
+		emits: ['update:groups', 'update:item', 'update:assignment', 'close'],
 		data() {
 			this.$i18n.locale = (localStorage.getItem('IsLanguage') && localStorage.getItem('IsLanguage') == 'true') ? 'en' : 'vi'
 			return {
@@ -379,6 +364,10 @@
 			}
 		},
 		watch: {
+			openImportType(value) {
+				if (value === 'hocLieu') this.onOpenModalImportFromHocLieu()
+				if (value === 'bank') this.onOpenModalImportFromBank()
+			},
 			item() {
 				this.editingBlankState = {}
 				this.isQuestionTextField = false
@@ -461,11 +450,12 @@
 					...ng[this.item.groupIndex],
 					media: {
 						...ng[this.item.groupIndex].media,
+						type: media.type,
 						sourceYT: media.sourceYT,
 						sourceRecord: media.sourceRecord,
 						sourceFiles: {
-							file: media.sourceFiles.file ?? [],
-							image: media.sourceFiles.image ?? [],
+							file: media.sourceFiles?.file ?? [],
+							image: media.sourceFiles?.image ?? [],
 						}
 					}
 				};
@@ -477,23 +467,19 @@
 				const ng = this.groups;
 				const media = updatedData.media
 	
-				const keysToRemove = ["sourceYT", "sourceRecord", "sourceFiles"]; //Này bị thêm do phần cấu trúc uc-media, xóa đi cho gọn json, media đã thêm vào config, phần này bị dư ra
-	
-				keysToRemove.forEach(key => {
-					if (ng[this.item.groupIndex].questions[this.item.qIndex].config.hasOwnProperty(key)) {
-						delete ng[this.item.groupIndex].questions[this.item.qIndex].config[key];
-					}
-				});
-	
 				ng[this.item.groupIndex].questions[this.item.qIndex] = {
 					...ng[this.item.groupIndex].questions[this.item.qIndex],
 					config: {
 						...ng[this.item.groupIndex].questions[this.item.qIndex].config,
-						sourceYT: media.sourceYT,
-						sourceRecord: media.sourceRecord,
-						sourceFiles: {
-							file: media.sourceFiles.file,
-							image: media.sourceFiles.image,
+						media: {
+							...ng[this.item.groupIndex].questions[this.item.qIndex].config.media,
+							type: media.type,
+							sourceYT: media.sourceYT,
+							sourceRecord: media.sourceRecord,
+							sourceFiles: {
+								file: media.sourceFiles?.file ?? [],
+								image: media.sourceFiles?.image ?? [],
+							}
 						}
 					}
 				};

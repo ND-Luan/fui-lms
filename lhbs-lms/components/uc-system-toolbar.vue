@@ -1,12 +1,11 @@
 <template>
 	<div v-if="vueData.user && vueData.user.UserID">
 		<!-- Floating Action Button (FAB) kiểu Vercel -->
-		<div class="vercel-fab-container" :style="fabStyle" @mousedown="fabDragStart"
-			@touchstart.prevent="fabDragStart">
+		<div class="vercel-fab-container" :style="fabStyle">
 			<v-badge :content="unreadAlertsCount" :model-value="unreadAlertsCount > 0" color="error" overlap bordered>
 				<v-btn icon class="vercel-fab-btn"
 					:class="{ 'pulse-animation': unreadAlertsCount > 0, 'fab-today-alert': hasTodayAlert }"
-					:loading="isLoadingAlerts" @click="fabClick" elevation="4">
+					:loading="isLoadingAlerts" @pointerdown="fabDragStart" @click="fabClick" elevation="4">
 					<v-icon color="white">
 						{{ unreadAlertsCount > 0 ? 'mdi-bell-ring-outline' : 'mdi-cube-outline' }}
 					</v-icon>
@@ -721,9 +720,9 @@
 
 		// ── THAO TÁC KÉO THẢ FAB (DRAG) ───────────────────────────
 		fabDragStart(e) {
-			const isTouch = e.type === 'touchstart'
-			const clientX = isTouch ? e.touches[0].clientX : e.clientX
-			const clientY = isTouch ? e.touches[0].clientY : e.clientY
+			if (e.button !== undefined && e.button !== 0) return
+			const clientX = e.clientX
+			const clientY = e.clientY
 			const el = (e.currentTarget.$el ?? e.currentTarget)
 			const rect = el.getBoundingClientRect()
 			const startFabX = this.fab.x !== null ? this.fab.x : rect.left
@@ -731,11 +730,12 @@
 			const offsetX = clientX - rect.left
 			const offsetY = clientY - rect.top
 			this.fab.hasMoved = false
+			e.currentTarget?.setPointerCapture?.(e.pointerId)
 
 			const onMove = (ev) => {
 				if (ev.cancelable) ev.preventDefault()
-				const cx = ev.type === 'touchmove' ? ev.touches[0].clientX : ev.clientX
-				const cy = ev.type === 'touchmove' ? ev.touches[0].clientY : ev.clientY
+				const cx = ev.clientX
+				const cy = ev.clientY
 				if (!this.fab.hasMoved && (Math.abs(cx - clientX) > 4 || Math.abs(cy - clientY) > 4)) {
 					this.fab.hasMoved = true
 					this.fab.x = startFabX
@@ -748,10 +748,9 @@
 			}
 
 			const onEnd = () => {
-				document.removeEventListener('mousemove', onMove)
-				document.removeEventListener('mouseup', onEnd)
-				document.removeEventListener('touchmove', onMove)
-				document.removeEventListener('touchend', onEnd)
+				document.removeEventListener('pointermove', onMove)
+				document.removeEventListener('pointerup', onEnd)
+				document.removeEventListener('pointercancel', onEnd)
 				if (this.fab.hasMoved && this.fab.x !== null) {
 					try {
 						localStorage.setItem('uc-system-toolbar-pos', JSON.stringify({
@@ -762,10 +761,9 @@
 				}
 			}
 
-			document.addEventListener('mousemove', onMove)
-			document.addEventListener('mouseup', onEnd)
-			document.addEventListener('touchmove', onMove, { passive: false })
-			document.addEventListener('touchend', onEnd)
+			document.addEventListener('pointermove', onMove, { passive: false })
+			document.addEventListener('pointerup', onEnd)
+			document.addEventListener('pointercancel', onEnd)
 		},
 		fabClick() {
 			if (this.fab.hasMoved) return

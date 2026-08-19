@@ -1,0 +1,210 @@
+{
+  "data": [
+    {
+      "EXE": "IsCheck_NotRoleParent(vueData.user)"
+    },
+    {
+      "EXE": "(function(){ var t=setInterval(function(){ if(vueData.NienKhoa){ clearInterval(t); runAction(vueData.getDSLop); } }, 100); setTimeout(function(){ clearInterval(t); }, 8000); })()"
+    },
+    {
+      "DSLop": [],
+      "LopItem": null,
+      "DSKhoi": [
+        { "title": "Tất cả khối", "value": 0 },
+        { "title": "Khối 6", "value": 6 },
+        { "title": "Khối 7", "value": 7 },
+        { "title": "Khối 8", "value": 8 },
+        { "title": "Khối 9", "value": 9 },
+        { "title": "Khối 10", "value": 10 },
+        { "title": "Khối 11", "value": 11 },
+        { "title": "Khối 12", "value": 12 }
+      ],
+      "KhoiItem": { "title": "Tất cả khối", "value": 0 },
+      "DSTuan": [],
+      "TuanItem": null,
+      "DSDangKy": [],
+      "isLoadingExcel": false,
+      "headersDangKy": [
+        { "title": "Khối", "value": "KhoiID", "width": "60px", "align": "center" },
+        { "title": "Lớp", "value": "TenLop", "width": "80px" },
+        { "title": "Loại TB", "value": "LoaiThietBi", "width": "90px" },
+        { "title": "Môn", "value": "TenMonHoc", "width": "120px" },
+        { "title": "GVBM đăng ký", "value": "TenGiaoVienDangKy", "width": "160px" },
+        { "title": "Ngày áp dụng", "value": "NgayApDungHienThi", "width": "120px" },
+        { "title": "Thứ", "value": "ThuHienThi", "width": "70px", "align": "center" },
+        { "title": "Tiết", "value": "TietHienThi", "width": "80px", "align": "center" },
+        { "title": "Số HS", "value": "SoHocSinh", "el": "t-num", "width": "70px" },
+        { "title": "Vi phạm", "value": "SoViPham", "el": "t-num", "width": "70px" },
+        { "title": "Trễ hạn", "value": "TreHanHienThi", "width": "80px", "align": "center" },
+        { "title": "Ghi chú", "value": "GhiChu" }
+      ]
+    },
+    {
+      "getDSLop": {
+        "API": "lms/Lop_Get_ByNienKhoa",
+        "IN": { "NienKhoa": "vueData.NienKhoa" },
+        "OUT": "DSLop",
+        "CALLBACK": { "CALL": "getDSTuan" }
+      },
+      "getDSTuan": {
+        "API": "lms/TuanHocTap_Get",
+        "IN": { "NienKhoa": "vueData.NienKhoa" },
+        "OUT": "DSTuan",
+        "CALLBACK": { "CALL": "getDSDangKy" }
+      },
+      "getDSDangKy": {
+        "API": "lms/DangKyMangLaptop_Get",
+        "IN": {
+          "NienKhoa": "vueData.NienKhoa",
+          "TuanHocID": "vueData.TuanItem?.TuanHocID || 0",
+          "LopID": "vueData.LopItem?.LopID || 0",
+          "KhoiID": "vueData.KhoiItem?.value || 0",
+          "ViewMode": "`BGH"
+        },
+        "OUT": "DSDangKy",
+        "CALLBACK": { "EXE": "renderDSDangKy()" }
+      }
+    }
+  ],
+  "watch": {
+    "TuanItem": { "CALL": "getDSDangKy" },
+    "LopItem": { "CALL": "getDSDangKy" },
+    "KhoiItem": { "CALL": "getDSDangKy" }
+  },
+  "controls": [
+    {
+      "prop": "fluid grid-list-md",
+      "rows": [
+        {
+          "prop": "",
+          "cols": [
+            {
+              "el": "v-card",
+              "attr": { "class": "pa-4 mb-4" },
+              "innerHTML": [
+                {
+                  "el": "v-card-title",
+                  "attr": { "class": "text-primary px-0 pt-0 d-flex align-center ga-2" },
+                  "innerHTML": [
+                    { "el": "v-icon", "innerHTML": "mdi-laptop" },
+                    { "el": "span", "innerHTML": "Giám sát HS mang Laptop toàn trường" }
+                  ]
+                },
+                {
+                  "el": "v-chip",
+                  "attr": { "color": "primary", "variant": "tonal", "size": "small", "class": "mb-2" },
+                  "innerHTML": "Tổng số lượt đăng ký: {{DSDangKy.length}}"
+                },
+                { "el": "v-divider", "attr": { "class": "mb-4" } },
+                {
+                  "el": "v-row",
+                  "innerHTML": [
+                    {
+                      "el": "v-col",
+                      "attr": { ":cols": 12, ":sm": 6 },
+                      "innerHTML": [
+                        {
+                          "el": "v-select",
+                          "attr": {
+                            "v-model": "TuanItem",
+                            "label": "Chọn tuần",
+                            ":items": "DSTuan",
+                            "item-title": "Tuan_HienThi",
+                            ":return-object": true,
+                            ":clearable": true,
+                            "hide-details": "auto"
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "el": "v-col",
+                      "attr": { ":cols": 12, ":sm": 6 },
+                      "innerHTML": [
+                        {
+                          "el": "v-select",
+                          "attr": {
+                            "v-model": "KhoiItem",
+                            "label": "Chọn khối",
+                            ":items": "DSKhoi",
+                            "item-title": "title",
+                            "item-value": "value",
+                            ":return-object": true,
+                            "hide-details": "auto"
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "el": "v-row",
+                  "innerHTML": [
+                    {
+                      "el": "v-col",
+                      "attr": { ":cols": 12, ":sm": 8 },
+                      "innerHTML": [
+                        {
+                          "el": "v-select",
+                          "attr": {
+                            "v-model": "LopItem",
+                            "label": "Chọn lớp",
+                            ":items": "DSLop",
+                            "item-title": "TenLop",
+                            ":return-object": true,
+                            ":clearable": true,
+                            "hide-details": "auto"
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "el": "v-col",
+                      "attr": { "class": "d-flex align-center", ":cols": 12, ":sm": 4 },
+                      "innerHTML": [
+                        {
+                          "el": "v-btn",
+                          "attr": {
+                            "color": "primary",
+                            "variant": "outlined",
+                            "prepend-icon": "mdi-file-excel",
+                            "text": "Xuất Excel",
+                            "block": true,
+                            ":disabled": "DSDangKy.length===0",
+                            ":loading": "isLoadingExcel",
+                            "v-on:click": "vueData.onExportExcel()"
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ],
+              "w": 12
+            },
+            {
+              "el": "v-card",
+              "attr": { "class": "pa-4" },
+              "innerHTML": [
+                {
+                  "el": "f-table",
+                  "attr": {
+                    "label": "",
+                    ":headers": "headersDangKy",
+                    ":items": "DSDangKy",
+                    "show-search": true,
+                    "excel": false,
+                    ":fixed-header": true,
+                    "height": "500"
+                  }
+                }
+              ],
+              "w": 12
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "set": {}
+}

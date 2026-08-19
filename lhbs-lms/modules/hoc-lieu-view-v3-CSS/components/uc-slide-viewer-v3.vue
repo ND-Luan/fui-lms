@@ -342,8 +342,8 @@
 				<div v-else-if="slideData.content.slideType === 'DOCX'" class="lh-pdf-book-container">
 					<uc-office-reader :file-url="slideData.content.url" />
 				</div>
-				<div v-else-if="slideData.content.slideType === 'PPT'" class="lh-pdf-book-container">
-					<uc-office-reader :file-url="slideData.content.url" />
+				<div v-else-if="slideData.content.slideType === 'PPT' || slideData.content.slideType === 'PPTX'" class="lh-pdf-book-container">
+					<uc-office-reader :file-url="slideData.content.url" file-type="PPT" />
 				</div>
 
 				<!-- 3. Fallback cho loại slide chưa được hỗ trợ -->
@@ -396,6 +396,7 @@
 		</div>
 	</div>
 </template>
+
 <script>
 	export default {
 		name: 'uc-slide-viewer-v3',

@@ -1,0 +1,444 @@
+{
+  "data": [
+    {
+      "EXE": "IsCheck_NotRoleParent(vueData.user)"
+    },
+    {
+      "EXE": "(function(){ var t=setInterval(function(){ if(vueData.NienKhoa){ clearInterval(t); runAction(vueData.getDSTuan); } }, 100); setTimeout(function(){ clearInterval(t); }, 8000); })()"
+    },
+    {
+      "DSTuan": [],
+      "TuanItem": null,
+      "DSLopChuNhiem": [],
+      "DSDangKy": [],
+      "DSNhomNgay": [],
+      "DSThongBao": [],
+      "IsShowDialogChiTiet": false,
+      "DangKyDangXem": null,
+      "DSHocSinhChiTiet": [],
+      "isLoadingChiTiet": false,
+      "IsShowDialogThongBaoPH": false,
+      "NhomDangThongBao": null,
+      "DSHocSinhThongBaoNhom": [],
+      "isLoadingHocSinhThongBaoNhom": false,
+      "NoiDungThongBaoPH": "",
+      "isDangGuiThongBaoPH": false
+    },
+    {
+      "getDSTuan": {
+        "API": "lms/TuanHocTap_Get",
+        "IN": { "NienKhoa": "vueData.NienKhoa" },
+        "OUT": "DSTuan",
+        "CALLBACK": { "EXE": "chonTuanHienTai(); runAction(vueData.getDSThongBao); runAction(vueData.getDSLopChuNhiem)" }
+      },
+      "getDSLopChuNhiem": {
+        "API": "lms/Lop_Get_ByGVCN",
+        "IN": { "NienKhoa": "vueData.NienKhoa" },
+        "OUT": "DSLopChuNhiem"
+      },
+      "getDSDangKy": {
+        "API": "lms/DangKyMangLaptop_Get",
+        "IN": {
+          "NienKhoa": "vueData.NienKhoa",
+          "TuanHocID": "vueData.TuanItem?.TuanHocID || 0",
+          "LopID": 0,
+          "KhoiID": 0,
+          "ViewMode": "`GVCN"
+        },
+        "OUT": "DSDangKy",
+        "CALLBACK": { "EXE": "renderDSDangKy()" }
+      },
+      "getDSThongBao": {
+        "API": "lms/DangKyMangLaptop_ThongBao_Get",
+        "OUT": "DSThongBao"
+      },
+      "xemChiTiet": {
+        "EXE": "onXemChiTiet(item)"
+      }
+    }
+  ],
+  "watch": {
+    "TuanItem": { "CALL": "getDSDangKy" }
+  },
+  "controls": [
+    {
+      "prop": "fluid grid-list-md",
+      "rows": [
+        {
+          "prop": "",
+          "cols": [
+            {
+              "el": "v-card",
+              "attr": { "class": "pa-4 mb-4" },
+              "innerHTML": [
+                {
+                  "el": "v-card-title",
+                  "attr": { "class": "text-primary px-0 pt-0 d-flex align-center ga-2" },
+                  "innerHTML": [
+                    { "el": "v-icon", "innerHTML": "mdi-laptop" },
+                    { "el": "span", "innerHTML": "Theo dõi HS mang Laptop - Lớp chủ nhiệm" },
+                    { "el": "v-spacer" },
+                    {
+                      "el": "v-badge",
+                      "attr": {
+                        ":content": "DSThongBao.filter(x=>!x.IsRead).length",
+                        ":model-value": "DSThongBao.filter(x=>!x.IsRead).length > 0",
+                        "color": "error"
+                      },
+                      "innerHTML": [
+                        { "el": "v-icon", "innerHTML": "mdi-bell-outline" }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "el": "div",
+                  "attr": { "class": "d-flex align-center flex-wrap ga-2 mb-3" },
+                  "innerHTML": [
+                    { "el": "span", "attr": { "class": "text-body-2 text-medium-emphasis" }, "innerHTML": "Lớp chủ nhiệm:" },
+                    {
+                      "el": "v-chip",
+                      "attr": { "v-for": "lop in vueData.DSLopChuNhiem", ":key": "lop.LopID", "size": "small", "color": "primary", "variant": "flat" },
+                      "innerHTML": "{{lop.TenLop}}"
+                    },
+                    {
+                      "el": "v-chip",
+                      "attr": { "v-if": "vueData.DSLopChuNhiem.length===0", "size": "small", "color": "warning", "variant": "tonal" },
+                      "innerHTML": "Chưa được gán chủ nhiệm lớp nào"
+                    }
+                  ]
+                },
+                { "el": "v-divider", "attr": { "class": "mb-4" } },
+                {
+                  "el": "v-row",
+                  "innerHTML": [
+                    {
+                      "el": "v-col",
+                      "attr": { ":cols": 12, ":sm": 6 },
+                      "innerHTML": [
+                        {
+                          "el": "v-select",
+                          "attr": {
+                            "v-model": "TuanItem",
+                            "label": "Chọn tuần",
+                            ":items": "DSTuan",
+                            "item-title": "Tuan_HienThi",
+                            ":return-object": true,
+                            "hide-details": "auto"
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ],
+              "w": 12
+            },
+            {
+              "el": "v-card",
+              "attr": { "class": "pa-4 mb-4" },
+              "innerHTML": [
+                {
+                  "el": "v-card-title",
+                  "attr": { "class": "text-primary px-0 pt-0 d-flex align-center ga-2" },
+                  "innerHTML": [
+                    { "el": "v-icon", "innerHTML": "mdi-format-list-bulleted" },
+                    { "el": "span", "innerHTML": "Danh sách đăng ký trong tuần" },
+                    { "el": "span", "attr": { "class": "text-caption text-medium-emphasis" }, "innerHTML": "— gộp theo ngày để dễ báo phụ huynh 1 lần/ngày dù nhiều GVBM cùng đăng ký" }
+                  ]
+                },
+                { "el": "v-divider", "attr": { "class": "mb-2" } },
+                {
+                  "el": "div",
+                  "attr": { "v-if": "vueData.DSNhomNgay.length===0", "class": "text-center text-medium-emphasis pa-6" },
+                  "innerHTML": "Chưa có đăng ký trong tuần này"
+                },
+                {
+                  "el": "v-card",
+                  "attr": {
+                    "v-for": "nhom in vueData.DSNhomNgay",
+                    ":key": "nhom.LopID + '_' + nhom.NgayApDung",
+                    "variant": "outlined",
+                    "class": "mb-3 pa-3"
+                  },
+                  "innerHTML": [
+                    {
+                      "el": "div",
+                      "attr": { "class": "d-flex align-center flex-wrap ga-2 mb-2" },
+                      "innerHTML": [
+                        { "el": "span", "attr": { "class": "text-subtitle-1 font-weight-medium" }, "innerHTML": "{{nhom.ThuHienThi}} — {{new Date(nhom.NgayApDung).toLocaleDateString('vi-VN')}}" },
+                        {
+                          "el": "v-chip",
+                          "attr": { "size": "small", "color": "primary", "variant": "tonal" },
+                          "innerHTML": "{{nhom.TongLuot}} lượt đăng ký — {{nhom.TongHocSinh}} lượt HS"
+                        },
+                        { "el": "v-spacer" },
+                        {
+                          "el": "v-chip",
+                          "attr": { "v-if": "nhom.DaThongBaoHet", "size": "small", "color": "success", "variant": "flat", "prepend-icon": "mdi-check-circle" },
+                          "innerHTML": "Đã thông báo PH"
+                        },
+                        {
+                          "el": "v-btn",
+                          "attr": {
+                            "v-if": "!nhom.DaThongBaoHet",
+                            "size": "small",
+                            "color": "warning",
+                            "variant": "flat",
+                            "prepend-icon": "mdi-send-outline",
+                            "v-on:click": "vueData.moDialogThongBaoNhom(nhom)"
+                          },
+                          "innerHTML": "Thông báo PH cả lớp"
+                        }
+                      ]
+                    },
+                    {
+                      "el": "table",
+                      "attr": { "class": "w-100 text-body-2" },
+                      "innerHTML": [
+                        {
+                          "el": "thead",
+                          "innerHTML": [
+                            {
+                              "el": "tr",
+                              "attr": { "class": "text-medium-emphasis" },
+                              "innerHTML": [
+                                { "el": "th", "attr": { "class": "text-left pa-1" }, "innerHTML": "GVBM" },
+                                { "el": "th", "attr": { "class": "text-left pa-1" }, "innerHTML": "Môn" },
+                                { "el": "th", "attr": { "class": "text-left pa-1" }, "innerHTML": "Buổi/Tiết" },
+                                { "el": "th", "attr": { "class": "text-left pa-1" }, "innerHTML": "Loại TB" },
+                                { "el": "th", "attr": { "class": "text-center pa-1" }, "innerHTML": "Số HS" },
+                                { "el": "th", "attr": { "class": "text-center pa-1" }, "innerHTML": "Vi phạm" },
+                                { "el": "th", "attr": { "class": "text-left pa-1 text-no-wrap" }, "innerHTML": "Đăng ký lúc" },
+                                { "el": "th", "attr": { "class": "text-center pa-1" }, "innerHTML": "" }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "el": "tbody",
+                          "innerHTML": [
+                            {
+                              "el": "tr",
+                              "attr": { "v-for": "luot in nhom.DSLuot", ":key": "luot.DangKyID", "class": "border-t" },
+                              "innerHTML": [
+                                { "el": "td", "attr": { "class": "pa-1" }, "innerHTML": "{{luot.TenGiaoVienDangKy}}" },
+                                { "el": "td", "attr": { "class": "pa-1" }, "innerHTML": "{{luot.TenMonHoc}}" },
+                                { "el": "td", "attr": { "class": "pa-1" }, "innerHTML": "{{luot.BuoiHienThi}} - Tiết {{luot.TietHienThi}}" },
+                                { "el": "td", "attr": { "class": "pa-1" }, "innerHTML": "{{luot.LoaiThietBi}}" },
+                                { "el": "td", "attr": { "class": "text-center pa-1" }, "innerHTML": "{{luot.SoHocSinh}}" },
+                                { "el": "td", "attr": { "class": "text-center pa-1" }, "innerHTML": "{{luot.SoViPham}}" },
+                                { "el": "td", "attr": { "class": "pa-1 text-no-wrap text-medium-emphasis" }, "innerHTML": "{{luot.ThoiGianDangKyHienThi}}" },
+                                {
+                                  "el": "td",
+                                  "attr": { "class": "text-center pa-1" },
+                                  "innerHTML": [
+                                    {
+                                      "el": "v-btn",
+                                      "attr": { "size": "x-small", "variant": "text", "icon": "mdi-eye", "v-on:click": "vueData.onXemChiTiet(luot)" }
+                                    }
+                                  ]
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ],
+                  "w": 12
+                }
+              ],
+              "w": 12
+            },
+            {
+              "el": "v-card",
+              "attr": { "class": "pa-4" },
+              "innerHTML": [
+                {
+                  "el": "v-card-title",
+                  "attr": { "class": "text-primary px-0 pt-0 d-flex align-center ga-2" },
+                  "innerHTML": [
+                    { "el": "v-icon", "innerHTML": "mdi-bell-outline" },
+                    { "el": "span", "innerHTML": "Thông báo" }
+                  ]
+                },
+                { "el": "v-divider", "attr": { "class": "mb-2" } },
+                {
+                  "el": "v-list",
+                  "innerHTML": [
+                    {
+                      "el": "v-list-item",
+                      "attr": {
+                        "v-for": "tb in vueData.DSThongBao",
+                        ":key": "tb.ThongBaoID",
+                        ":title": "tb.NoiDung",
+                        ":class": "!tb.IsRead ? 'bg-blue-lighten-5' : ''",
+                        "v-on:click": "vueData.markReadThongBao(tb)"
+                      }
+                    }
+                  ]
+                }
+              ],
+              "w": 12
+            },
+            {
+              "el": "f-dialog",
+              "attr": {
+                "v-model": "IsShowDialogChiTiet",
+                ":title": "'Chi tiết đăng ký - ' + (vueData.DangKyDangXem?.TenLop || '')",
+                ":width": 650,
+                ":controls": [
+                  {
+                    "el": "div",
+                    "attr": { "class": "px-4 pt-2 pb-1" },
+                    "innerHTML": [
+                      {
+                        "el": "div",
+                        "attr": { "class": "text-body-2 text-medium-emphasis mb-2" },
+                        "innerHTML": "{{vueData.DangKyDangXem?.TenGiaoVienDangKy}} — {{vueData.DangKyDangXem?.TenMonHoc}} — {{vueData.DangKyDangXem?.BuoiHienThi}} tiết {{vueData.DangKyDangXem?.TietHienThi}}"
+                      },
+                      {
+                        "el": "table",
+                        "attr": { "class": "w-100 text-body-2 hs-thietbi-table" },
+                        "innerHTML": [
+                          {
+                            "el": "thead",
+                            "innerHTML": [
+                              {
+                                "el": "tr",
+                                "attr": { "class": "text-medium-emphasis" },
+                                "innerHTML": [
+                                  { "el": "th", "attr": { "class": "text-left pa-1 text-no-wrap" }, "innerHTML": "Mã HS" },
+                                  { "el": "th", "attr": { "class": "text-left pa-1 text-no-wrap" }, "innerHTML": "SDB" },
+                                  { "el": "th", "attr": { "class": "text-left pa-1" }, "innerHTML": "Họ tên" },
+                                  { "el": "th", "attr": { "class": "text-center pa-1" }, "innerHTML": "Vi phạm" }
+                                ]
+                              }
+                            ]
+                          },
+                          {
+                            "el": "tbody",
+                            "innerHTML": [
+                              {
+                                "el": "tr",
+                                "attr": { "v-for": "hs in vueData.DSHocSinhChiTiet", ":key": "hs.DangKyHocSinhID", "class": "border-b" },
+                                "innerHTML": [
+                                  { "el": "td", "attr": { "class": "pa-1 text-medium-emphasis" }, "innerHTML": "{{hs.HocSinhID}}" },
+                                  { "el": "td", "attr": { "class": "pa-1 text-medium-emphasis" }, "innerHTML": "{{hs.SoDanhBo}}" },
+                                  { "el": "td", "attr": { "class": "pa-1" }, "innerHTML": "{{hs.HoTen}}" },
+                                  {
+                                    "el": "td",
+                                    "attr": { "class": "pa-0 text-center" },
+                                    "innerHTML": [
+                                      {
+                                        "el": "div",
+                                        "attr": { "class": "d-flex justify-center" },
+                                        "innerHTML": [
+                                          {
+                                            "el": "v-checkbox",
+                                            "attr": {
+                                              ":model-value": "hs.IsViPham",
+                                              "color": "warning",
+                                              "density": "compact",
+                                              "hide-details": "auto",
+                                              "v-on:update:model-value": "vueData.danhDauViPham(hs)"
+                                            }
+                                          }
+                                        ]
+                                      }
+                                    ]
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ],
+                ":button": [
+                  {
+                    "label": "Đóng",
+                    "action": { "IsShowDialogChiTiet": false }
+                  }
+                ]
+              },
+              "w": 12
+            },
+            {
+              "el": "f-dialog",
+              "attr": {
+                "v-model": "IsShowDialogThongBaoPH",
+                ":title": "'Thông báo phụ huynh — Lớp ' + (vueData.NhomDangThongBao?.TenLop || '')",
+                ":width": 550,
+                ":controls": [
+                  {
+                    "el": "div",
+                    "attr": { "class": "px-4 pt-2 pb-1" },
+                    "innerHTML": [
+                      {
+                        "el": "div",
+                        "attr": { "class": "text-caption text-medium-emphasis mb-2" },
+                        "innerHTML": "Gửi 1 lần qua ME Messenger tới toàn bộ phụ huynh có con trong danh sách bên dưới. Bạn có thể chỉnh sửa nội dung trước khi gửi."
+                      },
+                      {
+                        "el": "div",
+                        "attr": { "v-if": "vueData.isLoadingHocSinhThongBaoNhom", "class": "text-center pa-4" },
+                        "innerHTML": [{ "el": "v-progress-circular", "attr": { "indeterminate": true, "color": "primary", "size": "28" } }]
+                      },
+                      {
+                        "el": "div",
+                        "attr": { "v-if": "!vueData.isLoadingHocSinhThongBaoNhom", "class": "mb-3" },
+                        "innerHTML": [
+                          { "el": "div", "attr": { "class": "text-caption text-medium-emphasis mb-1" }, "innerHTML": "Người nhận ({{vueData.DSHocSinhThongBaoNhom.length}} phụ huynh):" },
+                          {
+                            "el": "div",
+                            "attr": { "class": "d-flex flex-wrap ga-1" },
+                            "innerHTML": [
+                              {
+                                "el": "v-chip",
+                                "attr": { "v-for": "hs in vueData.DSHocSinhThongBaoNhom", ":key": "hs.HocSinhID", "size": "x-small", "variant": "tonal" },
+                                "innerHTML": "{{hs.HoTen}}"
+                              }
+                            ]
+                          }
+                        ]
+                      },
+                      {
+                        "el": "v-textarea",
+                        "attr": {
+                          ":model-value": "vueData.NoiDungThongBaoPH",
+                          "label": "Nội dung thông báo",
+                          "rows": 8,
+                          "hide-details": "auto",
+                          "v-on:update:model-value": "vueData.NoiDungThongBaoPH = $event"
+                        }
+                      }
+                    ]
+                  }
+                ],
+                ":button": [
+                  {
+                    "label": "Hủy",
+                    "action": { "IsShowDialogThongBaoPH": false }
+                  },
+                  {
+                    "label": "Gửi thông báo",
+                    "color": "primary",
+                    ":loading": "isDangGuiThongBaoPH",
+                    ":disabled": "isLoadingHocSinhThongBaoNhom",
+                    "action": { "EXE": "guiThongBaoNhom()" }
+                  }
+                ]
+              },
+              "w": 12
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "set": {}
+}

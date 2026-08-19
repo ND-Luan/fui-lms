@@ -386,20 +386,7 @@ body {
   }
 }
 
-/* Dark mode support */
-@media (prefers-color-scheme: dark) {
-  :root {
-    --lh-gray-50: #111827;
-    --lh-gray-100: #1F2937;
-    --lh-gray-800: #F3F4F6;
-    --lh-gray-900: #FFFFFF;
-  }
-  
-  body {
-    background: var(--lh-gray-100);
-    color: var(--lh-gray-800);
-  }
-}
+/* Dark mode support disabled to prevent broken color contrasts in premium theme */
 
 /* === PRINT STYLES === */
 @media print {

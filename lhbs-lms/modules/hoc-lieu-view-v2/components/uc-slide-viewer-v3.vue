@@ -21,7 +21,7 @@
 						<div v-if="slideData.content.isType === 'rich'" class="lh-reading-iframe pa-4"
 							v-html="slideData.content.textContent" />
 						<iframe v-else :srcdoc="slideData.content.htmlContent"
-							sandbox="allow-scripts  allow-popups allow-forms" class="lh-reading-iframe"
+							sandbox="allow-scripts allow-popups allow-forms allow-same-origin allow-downloads" class="lh-reading-iframe"
 							ref="htmlContentIframe">
 						</iframe>
 
@@ -100,6 +100,17 @@
 				<!-- Quiz Header -->
 				<div class="lh-quiz-header">
 					<div class="lh-quiz-type-badge">{{ getQuestionTypeLabel(slideData.type) }}</div>
+					<div v-if="isQuiz && slideData.type !== 'QUIZ_COMPOSITE'" class="lh-header-actions">
+						<button class="lh-header-btn lh-btn-hint" @click="showHint" title="Gợi ý">
+							<span>💡 Gợi ý</span>
+						</button>
+						<button class="lh-header-btn lh-btn-solution" @click="showSolution" title="Đáp án">
+							<span>🔑 Đáp án</span>
+						</button>
+						<button class="lh-header-btn lh-btn-check" @click="checkAnswer" title="Kiểm tra">
+							<span>🎯 Nộp bài</span>
+						</button>
+					</div>
 				</div>
 
 				<!-- Quiz Content -->
@@ -342,8 +353,8 @@
 				<div v-else-if="slideData.content.slideType === 'DOCX'" class="lh-pdf-book-container">
 					<uc-office-reader :file-url="slideData.content.url" />
 				</div>
-				<div v-else-if="slideData.content.slideType === 'PPT'" class="lh-pdf-book-container">
-					<uc-office-reader :file-url="slideData.content.url" />
+				<div v-else-if="slideData.content.slideType === 'PPT' || slideData.content.slideType === 'PPTX'" class="lh-pdf-book-container">
+					<uc-office-reader :file-url="slideData.content.url" file-type="PPT" />
 				</div>
 
 				<!-- 3. Fallback cho loại slide chưa được hỗ trợ -->
@@ -372,18 +383,7 @@
 				<div class="lh-explanation-content" v-html="slideData.content.explanation"></div>
 			</div>
 
-			<!-- Floating Action Buttons cho Single Slides -->
-			<div v-if="isQuiz && slideData.type !== 'QUIZ_COMPOSITE'" class="lh-floating-actions">
-				<button class="lh-fab lh-fab-hint" @click="showHint" :title="'Gợi ý'">
-					<span class="lh-fab-icon">💡</span>
-				</button>
-				<button class="lh-fab lh-fab-solution" @click="showSolution" :title="'Đáp án'">
-					<span class="lh-fab-icon">🔑</span>
-				</button>
-				<button class="lh-fab lh-fab-check" @click="checkAnswer" :title="'Kiểm tra'">
-					<span class="lh-fab-icon">🎯</span>
-				</button>
-			</div>
+
 
 			<!-- Footer Controls for Single Slides - Simplified -->
 			<div v-if="!isQuiz && isSubmitted && feedbackMessage" class="lh-slide-footer">
@@ -396,6 +396,7 @@
 		</div>
 	</div>
 </template>
+
 <script>
 	export default {
 		name: 'uc-slide-viewer-v3',
@@ -1604,3 +1605,80 @@
 		}
 	}
 </script>
+
+<style scoped>
+.lh-quiz-header {
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+  margin-bottom: var(--lh-space-md) !important;
+  flex-wrap: wrap !important;
+  gap: 8px !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+}
+.lh-header-actions {
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+}
+.lh-header-btn {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+  padding: 6px 14px !important;
+  border-radius: 100px !important;
+  font-size: 0.85rem !important;
+  font-weight: 600 !important;
+  border: none !important;
+  cursor: pointer !important;
+  transition: all 0.2s ease !important;
+  color: #fff !important;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1) !important;
+}
+.lh-btn-hint {
+  background-color: #2196F3 !important;
+}
+.lh-btn-solution {
+  background-color: #FFB300 !important;
+}
+.lh-btn-check {
+  background-color: #4CAF50 !important;
+}
+.lh-header-btn:hover {
+  filter: brightness(0.9) !important;
+  transform: translateY(-1px) !important;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.15) !important;
+}
+.lh-header-btn:active {
+  transform: translateY(0) !important;
+}
+.lh-matching-container {
+  display: flex !important;
+  flex-direction: row !important;
+  max-width: 100% !important;
+  gap: 12px !important;
+  box-sizing: border-box !important;
+}
+.lh-matching-column {
+  flex: 1 !important;
+  min-width: 0 !important;
+  padding: 8px !important;
+  box-sizing: border-box !important;
+  overflow: hidden !important;
+}
+.lh-matching-item-a, .lh-matching-item-b {
+  max-width: 100% !important;
+  font-size: 0.95rem !important;
+  padding: 8px 12px !important;
+  box-sizing: border-box !important;
+}
+.lh-question-prompt {
+  font-size: 1.05rem !important;
+  padding: var(--lh-space-2) var(--lh-space-4) !important;
+}
+.lh-slide-wrapper, .lh-slide-container {
+  max-width: 100% !important;
+  overflow-x: hidden !important;
+}
+</style>

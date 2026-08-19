@@ -1,43 +1,50 @@
 <template>
-	<v-card-text class="pa-2" :style="{ height: sheetHeight, overflow: 'hidden' }">
+	<v-card :style="{ height: sheetHeight, overflow: 'hidden' }">
+	<v-card-text class="pa-0" style="height: 100%; overflow: hidden;">
     <v-alert v-if="selectedLopID === '__ALL__'" type="info" variant="tonal" density="compact">
       Chọn một lớp ở thanh trên để nhập thông tin tổ chức lớp.
     </v-alert>
-    <div v-else class="d-flex h-100 ga-3">
-      <div class="flex-shrink-0 overflow-y-auto" style="width: 260px; border-right: 1px solid rgba(0, 0, 0, 0.12);">
+    <v-row v-else no-gutters class="h-100" style="overflow: hidden;">
+      <v-col cols="3" class="h-100 overflow-y-auto" style="border-right: 1px solid rgba(0, 0, 0, 0.12);">
         <v-list density="compact" nav color="primary" class="pa-0">
-          <v-list-item v-for="card in organizationCards" :key="card.key" :value="card.key"
-            :active="activeCardKey === card.key" class="mb-1 rounded" @click="scrollToCard(card)">
-            <template #prepend>
-              <v-icon size="small" class="mr-2" :color="activeCardKey === card.key ? 'primary' : ''">
-                {{ card.icon }}
-              </v-icon>
-            </template>
-            <v-list-item-title class="text-caption font-weight-bold text-wrap" style="line-height: 1.3;">
-              {{ card.navTitle }}
-            </v-list-item-title>
-          </v-list-item>
+          <template v-for="card in organizationCards" :key="card.key">
+            <v-list-item v-if="card.key !== 'to-nhom-hoc-sinh'" :value="card.key"
+              :active="activeCardKey === card.key" class="mb-1 rounded" @click="scrollToCard(card)">
+              <template #prepend>
+                <v-icon size="small" class="mr-2" :color="activeCardKey === card.key ? 'primary' : ''">
+                  {{ card.icon }}
+                </v-icon>
+              </template>
+              <v-list-item-title class="text-caption font-weight-bold text-wrap" style="line-height: 1.3;">
+                {{ card.navTitle }}
+              </v-list-item-title>
+            </v-list-item>
+          </template>
         </v-list>
-      </div>
-
-      <div ref="scrollContainer" class="flex-grow-1 h-100 overflow-y-auto pr-1">
-        <v-row dense class="pb-16">
-          <v-col v-for="card in organizationCards" :key="card.key" cols="12" class="py-1 mb-16">
-            <v-card :id="card.domId" outlined elevation="0" style="margin-bottom: 120px;">
-              <v-card-title class="px-3 py-2 text-subtitle-2 font-weight-bold text-primary d-flex align-center">
-                <v-icon start color="primary" class="mr-2" size="small">{{ card.icon }}</v-icon>
-                {{ card.title }}
-              </v-card-title>
-              <v-divider />
-              <v-card-text class="pa-0 so-gvcn-card-sheet-wrap">
-                <div :ref="card.refName" class="w-100 so-gvcn-sheet"></div>
-              </v-card-text>
-            </v-card>
-          </v-col>
-        </v-row>
-      </div>
-    </div>
+      </v-col>
+      <v-col cols="9" class="h-100" style="min-height: 0;">
+        <div ref="scrollContainer" class="h-100 overflow-y-auto" style="overflow-x: hidden;">
+          <v-row dense class="pb-16 ma-0">
+            <template v-for="card in organizationCards" :key="card.key">
+              <v-col v-if="card.key !== 'to-nhom-hoc-sinh'" cols="12" class="py-1">
+                <v-card :id="card.domId" outlined elevation="0" style="margin-bottom: 40px;">
+                  <v-card-title class="px-3 py-2 text-subtitle-2 font-weight-bold text-primary d-flex align-center">
+                    <v-icon start color="primary" class="mr-2" size="small">{{ card.icon }}</v-icon>
+                    {{ card.title }}
+                  </v-card-title>
+                  <v-divider />
+                  <v-card-text class="pa-0 so-gvcn-card-sheet-wrap">
+                    <div :ref="card.refName" class="w-100 so-gvcn-sheet"></div>
+                  </v-card-text>
+                </v-card>
+              </v-col>
+            </template>
+          </v-row>
+        </div>
+      </v-col>
+    </v-row>
   </v-card-text>
+  </v-card>
 </template>
 
 <script>
@@ -49,7 +56,7 @@
 			canBoRows: { type: Array, default: () => [] },
 			parentRows: { type: Array, default: () => [] },
 			groupRows: { type: Array, default: () => [] },
-			sheetHeight: { type: String, default: 'calc(100vh - 230px)' }
+			sheetHeight: { type: String}
 		},
 		data() {
 			return {
@@ -64,25 +71,21 @@
 				this.buildCards()
 			},
 			students: {
-				deep: true,
 				handler() {
 					this.buildCards()
 				}
 			},
 			canBoRows: {
-				deep: true,
 				handler() {
 					this.buildCards()
 				}
 			},
 			parentRows: {
-				deep: true,
 				handler() {
 					this.buildCards()
 				}
 			},
 			groupRows: {
-				deep: true,
 				handler() {
 					this.buildCards()
 				}
@@ -267,8 +270,32 @@
 							worksheets: [{
 								data: card.rows,
 								columns: card.columns,
+								onbeforepaste: (ws, data, x, y) => {
+									const col = ws.options.columns ? ws.options.columns[x] : null;
+									if (Array.isArray(data)) {
+										const normalizedData = data.map(row => row.map(cell => {
+											if (cell === null || cell === undefined) return '';
+											if (typeof cell === 'string' || typeof cell === 'number') return String(cell);
+											if (typeof cell === 'object') {
+												return cell.innerHTML || cell.textContent || cell.innerText || cell.value || cell.v || '';
+											}
+											return String(cell);
+										}));
+										if (col && (col.type === 'note' || col.type === 'html')) {
+											let text = normalizedData.map(row => row.join('\t')).join('\n');
+											if (text.startsWith('"') && text.endsWith('"')) {
+												text = text.substring(1, text.length - 1).replace(/""/g, '"');
+											}
+											return [[text]];
+										}
+										return normalizedData;
+									}
+									return data;
+								},
 								rowResize: true,
 								columnDrag: false,
+						rowDrag: false,
+						columnSorting: false,
 								tableWidth: '100%',
 								tableOverflow: true,
 								tableHeight: card.height,
@@ -293,6 +320,10 @@
 								card.rows = worksheet.getData()
 							}
 						})
+						const worksheet = Array.isArray(this.sheetInstances[card.key])
+							? this.sheetInstances[card.key][0]
+							: this.sheetInstances[card.key]
+						if (worksheet && typeof worksheet.hideColumn === 'function') worksheet.hideColumn(2)
 					} catch (error) {
 						console.error('Không thể khởi tạo bảng tổ chức lớp:', card.key, error)
 					}
@@ -311,7 +342,7 @@
 				const worksheet = Array.isArray(instance) ? instance[0] : instance
 				if (worksheet && typeof worksheet.closeEditor === 'function') {
 					try {
-						worksheet.closeEditor(true)
+						worksheet.closeEditor(worksheet.edition ? worksheet.edition[0] : null, true)
 					} catch (error) {}
 				}
 				if (worksheet && typeof worksheet.getData === 'function') {

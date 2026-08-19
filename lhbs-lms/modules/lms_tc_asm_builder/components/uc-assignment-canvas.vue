@@ -37,6 +37,23 @@
 						<v-icon>mdi-delete-outline</v-icon>
 					</v-btn>
 				</div>
+				<div class="group-import-actions" @click.stop>
+					<span class="text-caption text-medium-emphasis">Thêm câu hỏi từ:</span>
+					<v-btn v-if="canImportFromHocLieu" size="x-small" variant="tonal" color="primary" @click="$emit('open-group-import', { groupIndex, source: 'hocLieu' })">
+						<v-icon start size="14">mdi-database-import-outline</v-icon>Kho học liệu
+					</v-btn>
+					<v-btn size="x-small" variant="tonal" color="secondary" @click="$emit('open-group-import', { groupIndex, source: 'bank' })">
+						<v-icon start size="14">mdi-database-search</v-icon>Ngân hàng câu hỏi
+					</v-btn>
+				</div>
+				<div v-if="hasMedia(group.media)" class="assignment-canvas-media" @click.stop>
+					<iframe v-if="group.media.sourceYT?.source" :src="renderUrlYoutube(group.media.sourceYT.source)" title="Video nhóm" />
+					<audio v-else-if="group.media.sourceRecord?.source" :src="group.media.sourceRecord.source" controls />
+					<div v-else class="assignment-canvas-media-grid">
+						<v-img v-for="(file, index) in (group.media.sourceFiles?.image || [])" :key="file.id || index" :src="imageSource(file)" />
+						<iframe v-for="(file, index) in (group.media.sourceFiles?.file || [])" :key="file.id || index" :src="file.source" title="Tệp đính kèm" />
+					</div>
+				</div>
 
 				<!-- Container cho câu hỏi với drop zone -->
 				<div class="questions-container">
@@ -99,6 +116,14 @@
 										:escapeHtml="false"
 										style="-webkit-box-orient: unset; word-break: break-word; line-height: 1.25rem !important; align-items: unset !important; display: table !important;" />
 								</v-list-item-subtitle>
+								<div v-if="hasMedia(question.config.media)" class="assignment-canvas-media mt-2" @click.stop>
+									<iframe v-if="question.config.media.sourceYT?.source" :src="renderUrlYoutube(question.config.media.sourceYT.source)" title="Video câu hỏi" />
+									<audio v-else-if="question.config.media.sourceRecord?.source" :src="question.config.media.sourceRecord.source" controls />
+									<div v-else class="assignment-canvas-media-grid">
+										<v-img v-for="(file, index) in (question.config.media.sourceFiles?.image || [])" :key="file.id || index" :src="imageSource(file)" />
+										<iframe v-for="(file, index) in (question.config.media.sourceFiles?.file || [])" :key="file.id || index" :src="file.source" title="Tệp câu hỏi" />
+									</div>
+								</div>
 							</v-list-item>
 
 							<!-- Drop indicator phía dưới (chỉ hiện ở item cuối) -->
@@ -128,13 +153,14 @@
 </template>
 
 <script>
-export default {
-	name: 'uc-assignment-canvas',
+	export default {
+		name: 'uc-assignment-canvas',
 	props: {
 		groups: { type: Array, default: () => [] },
-		selectedItem: Object // { type, groupIndex, qIndex }
+		selectedItem: Object, // { type, groupIndex, qIndex }
+		canImportFromHocLieu: { type: Boolean, default: false }
 	},
-	emits: ['update:groups', 'update:selectedItem'],
+	emits: ['update:groups', 'update:selectedItem', 'open-group-import'],
 	data() {
 		return {
 			draggedQuestion: null, // { groupIndex, qIndex, question }
@@ -152,7 +178,20 @@ export default {
 			return number
 		},
 	},
-	methods: {
+		methods: {
+		hasMedia(media) {
+			return !!(media?.sourceYT?.source || media?.sourceRecord?.source || media?.sourceFiles?.image?.length || media?.sourceFiles?.file?.length)
+		},
+		imageSource(file) {
+			if (!file?.source) return ''
+			if (!file.source.includes('drive.google.com')) return file.source
+			return `https://drive.google.com/thumbnail?id=${file.id || this.getDriveFileId(file.source)}&sz=w1000`
+		},
+		getDriveFileId(url) {
+			const match = url?.match(/\/d\/([^/]+)/)
+			return match ? match[1] : null
+		},
+		renderUrlYoutube,
 		stripHtml(html) {
 			if (!html) return 'Chưa có nội dung';
 			let doc = new DOMParser().parseFromString(html, 'text/html');
@@ -431,5 +470,5 @@ export default {
 			this.dragOverGroupIndex = null;
 		}
 	}
-}
+	}
 </script>

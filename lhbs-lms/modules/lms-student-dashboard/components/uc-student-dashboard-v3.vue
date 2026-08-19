@@ -46,7 +46,7 @@
 				<uc-hoc-lieu-so :HocSinh="studentInfoDetail" :isMobile />
 			</div>
 			<uc-achievement-card v-if="activeKey === 6 && NienKhoa && studentInfoDetail?.HocSinhID"
-				:HocSinh="studentInfoDetail" :inline="true" :isMobile />
+				:HocSinh="studentInfoDetail" :NienKhoa="NienKhoa" :inline="true" :isMobile />
 			<div v-if="activeKey === 8 && NienKhoa && studentInfoDetail?.HocSinhID">
 				<uc-store-question :HocSinh="studentInfoDetail" :NienKhoa="NienKhoa" :isMobile :hide-header="true" />
 			</div>
@@ -161,6 +161,12 @@
 			'$vuetify.display.mobile'() {
 				this.activeKey = 0
 			},
+			async NienKhoa(newNienKhoa, oldNienKhoa) {
+				if (!newNienKhoa || newNienKhoa === oldNienKhoa || !this.studentInfoDetail?.HocSinhID) return
+				await this.getInfoHocSinhByUserName()
+				await this.getTuanHocTap_Get()
+				await this.getTienDoMonHoc()
+			},
 			menuVisible: function (menu) {
 				if (menu) this.scrollToSelectedItem();
 			},
@@ -192,7 +198,8 @@
 				const data = await ajaxCALLPromise('lms/EL_Student_GetDashboardData_TienDoMonHoc', {
 					// MonHocID: monHocID,
 					TuanHocID: this.TuanHoc?.TuanHocID,
-					HocSinhID: this.studentInfoDetail.HocSinhID
+					HocSinhID: this.studentInfoDetail.HocSinhID,
+					NienKhoa: this.NienKhoa
 				})
 				this.subjectProgress = data[0]
 				if (this.activeMonHocID === undefined || this.activeMonHocID === null) {
@@ -202,7 +209,7 @@
 			},
 			async getNienKhoaIsActive() {
 				const DSNienKhoa = await ajaxCALLPromise('/lms/NienKhoa_Get')
-				this.NienKhoa = DSNienKhoa.filter(item => item.IsActive)[0].NienKhoa
+				this.NienKhoa = DSNienKhoa.find(item => item.IsActive)?.NienKhoa ?? null
 			},
 			async getInfoHocSinhByUserName() {
 				// Admin: NA0000022 + hocsinhid param → dùng hocsinhid từ URL

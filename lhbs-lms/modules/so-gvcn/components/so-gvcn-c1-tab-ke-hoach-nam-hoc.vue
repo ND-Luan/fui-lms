@@ -1,9 +1,9 @@
 <template>
-	<v-card-text class="pa-2 so-gvcn-sheet-wrap" :style="{ height: sheetHeight, overflow: 'hidden' }">
+	<v-card-text class="pa-2 so-gvcn-sheet-wrap so-gvcn-plan-tab" :style="{ height: sheetHeight, overflow: 'hidden' }">
 		<v-alert v-if="selectedLopID === '__ALL__'" type="info" variant="tonal" density="compact">
 			Chọn một lớp ở thanh trên để lập kế hoạch chủ nhiệm năm học.
 		</v-alert>
-		<div v-else class="d-flex h-100 ga-3">
+		<div v-else class="d-flex h-100 ga-3 so-gvcn-plan-layout">
 			<div class="flex-shrink-0 overflow-y-auto"
 				style="width: 260px; border-right: 1px solid rgba(0, 0, 0, 0.12);">
 				<v-list density="compact" nav color="primary" class="pa-0">
@@ -37,7 +37,8 @@
 					<v-list-subheader class="text-caption font-weight-bold text-primary px-3 mt-2">
 						2. CHẤT LƯỢNG GIÁO DỤC
 					</v-list-subheader>
-					<v-list-item v-for="card in planCards.slice(2, 5)" :key="card.key" :value="card.key"
+					<template v-for="card in planCards.slice(2, 5)" :key="card.key">
+					<v-list-item v-if="card.key !== 'phong-trao-vo-sach'" :value="card.key"
 						:active="activeCardKey === card.key" class="mb-1 rounded" @click="scrollToCard(card)">
 						<template #prepend>
 							<v-icon size="small" class="mr-2" :color="activeCardKey === card.key ? 'primary' : ''">
@@ -48,6 +49,7 @@
 							{{ card.navTitle }}
 						</v-list-item-title>
 					</v-list-item>
+					</template>
 					<v-list-item :value="planCards[5].key" :active="activeCardKey === planCards[5].key"
 						class="mb-1 rounded" @click="scrollToCard(planCards[5])">
 						<template #prepend>
@@ -63,7 +65,7 @@
 				</v-list>
 			</div>
 
-			<div ref="scrollContainer" class="flex-grow-1 h-100 overflow-y-auto pr-1">
+			<div ref="scrollContainer" class="flex-grow-1 h-100 overflow-y-auto pr-1 so-gvcn-plan-scroll">
 				<div class="text-h6 text-center font-weight-bold py-3">
 					KẾ HOẠCH CHỦ NHIỆM NĂM HỌC
 					<div class="text-body-2 mt-1">
@@ -88,9 +90,9 @@
 										:style="{ height: planCards[0].height }"></div>
 								</div>
 								<v-textarea v-model="planText.advantages" label="2. Thuận lợi" rows="4" auto-grow
-									variant="outlined" density="compact" class="mt-3 mb-2" />
+									variant="outlined" density="compact" class="mt-3 mb-2 text-body-2" />
 								<v-textarea v-model="planText.difficulties" label="3. Khó khăn" rows="4" auto-grow
-									variant="outlined" density="compact" hide-details />
+									variant="outlined" density="compact" hide-details class="text-body-2" />
 							</v-card-text>
 						</v-card>
 					</v-col>
@@ -104,7 +106,8 @@
 							</v-card-title>
 							<v-divider />
 							<v-card-text class="pa-0">
-								<section v-for="(card, index) in planCards.slice(1)" :id="card.domId" :key="card.key"
+								<template v-for="(card, index) in planCards.slice(1)" :key="card.key">
+								<section v-if="card.key !== 'phong-trao-vo-sach'" :id="card.domId"
 									class="pa-3" :class="{ 'border-t': index > 0 }">
 									<div v-if="card.key === 'pham-chat-nang-luc'"
 										class="text-subtitle-1 font-weight-bold text-primary mb-3">
@@ -122,64 +125,63 @@
 
 									<template v-if="card.key === 'duy-tri-so-luong'">
 										<v-textarea v-model="planText.attendanceTarget" label="1.1. Chỉ tiêu phấn đấu"
-											rows="4" auto-grow variant="outlined" density="compact" class="mb-2" />
+									rows="4" auto-grow variant="outlined" density="compact" class="mb-2 text-body-2" />
 										<v-textarea v-model="planText.attendanceSolution"
 											label="1.2. Nhiệm vụ và giải pháp" rows="4" auto-grow variant="outlined"
-											density="compact" hide-details />
+										 density="compact" hide-details class="text-body-2" />
 									</template>
 									<v-textarea v-if="card.key === 'pham-chat-nang-luc'"
 										v-model="planText.qualitySolution" label="b. Nhiệm vụ và giải pháp" rows="4"
-										auto-grow variant="outlined" density="compact" class="mt-3" hide-details />
+										auto-grow variant="outlined" density="compact" class="mt-3 text-body-2" hide-details />
 									<v-textarea v-if="card.key === 'mon-hoc-hoat-dong'"
 										v-model="planText.academicSolution" label="b. Nhiệm vụ và giải pháp" rows="4"
-										auto-grow variant="outlined" density="compact" class="mt-3" hide-details />
+										auto-grow variant="outlined" density="compact" class="mt-3 text-body-2" hide-details />
 									<template v-if="card.key === 'phong-trao-vo-sach'">
 										<v-textarea v-model="planText.handwritingTarget" label="a. Chỉ tiêu phấn đấu"
-											rows="4" auto-grow variant="outlined" density="compact" class="mb-2" />
+										rows="4" auto-grow variant="outlined" density="compact" class="mb-2 text-body-2" />
 										<v-textarea v-model="planText.handwritingSolution"
 											label="b. Nhiệm vụ và giải pháp" rows="4" auto-grow variant="outlined"
-											density="compact" hide-details />
+										 density="compact" hide-details class="text-body-2" />
 									</template>
 									<div v-if="card.key === 'hoat-dong-khac'">
 										<div class="text-body-2 font-weight-bold mb-2">3.1. Hoạt động ngoài giờ lên lớp
 										</div>
 										<v-textarea v-model="planText.extracurricularTarget" label="a. Chỉ tiêu"
-											rows="4" auto-grow variant="outlined" density="compact" class="mb-2" />
+										rows="4" auto-grow variant="outlined" density="compact" class="mb-2 text-body-2" />
 										<v-textarea v-model="planText.extracurricularSolution"
 											label="b. Nhiệm vụ và giải pháp" rows="4" auto-grow variant="outlined"
-											density="compact" class="mb-3" />
+										 density="compact" class="mb-3 text-body-2" />
 
 										<div class="text-body-2 font-weight-bold mb-2">
 											3.2. Trang trí lớp học, giữ gìn và bảo quản CSVC của lớp
 										</div>
 										<v-textarea v-model="planText.classroomTarget"
 											label="a. Chỉ tiêu (số lượng, tỉ lệ %)" rows="4" auto-grow
-											variant="outlined" density="compact" class="mb-2" />
+										variant="outlined" density="compact" class="mb-2 text-body-2" />
 										<v-textarea v-model="planText.classroomSolution"
 											label="b. Nhiệm vụ và giải pháp" rows="4" auto-grow variant="outlined"
-											density="compact" class="mb-3" />
+										 density="compact" class="mb-3 text-body-2" />
 
 										<div class="text-body-2 font-weight-bold mb-2">
 											3.3. Công tác lao động, xây dựng trường lớp xanh - sạch - đẹp
 										</div>
 										<v-textarea v-model="planText.laborTarget"
 											label="a. Chỉ tiêu (số lượng, tỉ lệ %)" rows="4" auto-grow
-											variant="outlined" density="compact" class="mb-2" />
+										variant="outlined" density="compact" class="mb-2 text-body-2" />
 										<v-textarea v-model="planText.laborSolution" label="b. Nhiệm vụ và giải pháp"
-											rows="4" auto-grow variant="outlined" density="compact" class="mb-3" />
+										rows="4" auto-grow variant="outlined" density="compact" class="mb-3 text-body-2" />
 
 										<div class="text-body-2 font-weight-bold mb-2">3.4. Công tác xã hội hoá giáo dục
 										</div>
 										<v-textarea v-model="planText.socializationTarget"
 											label="a. Chỉ tiêu (số lượng, tỉ lệ %)" rows="4" auto-grow
-											variant="outlined" density="compact" class="mb-2" />
+										variant="outlined" density="compact" class="mb-2 text-body-2" />
 										<v-textarea v-model="planText.socializationSolution"
 											label="b. Nhiệm vụ và giải pháp" rows="4" auto-grow variant="outlined"
-											density="compact" class="mb-3" />
-										<v-textarea v-model="planText.classTitle" label="* Lớp phấn đấu đạt danh hiệu"
-											rows="3" auto-grow variant="outlined" density="compact" hide-details />
-									</div>
+										 density="compact" class="mb-3 text-body-2" />
+					</div>
 								</section>
+								</template>
 							</v-card-text>
 						</v-card>
 					</v-col>
@@ -235,6 +237,24 @@
 			this.destroyAllSheets()
 		},
 		methods: {
+
+		safeParseJson(val, fallback = null) {
+			if (!val) return fallback;
+			if (typeof val !== 'string') return val;
+			let currentVal = val;
+			while (typeof currentVal === 'string' && (currentVal.trim().startsWith('[') || currentVal.trim().startsWith('{'))) {
+				try {
+					const parsed = JSON.parse(currentVal);
+					if (typeof parsed === 'string') {
+						currentVal = parsed;
+					} else {
+						return parsed;
+					}
+				} catch (e) { break; }
+			}
+			return fallback !== null ? fallback : currentVal;
+		},
+
 			buildPlanCards(value) {
 				const saved = this.parseAnnualPlan(value)
 				return [
@@ -246,7 +266,7 @@
 						domId: 'ke-hoach-nam-hoc-muc-i',
 						refName: 'annualSectionIRef',
 						title: 'I. ĐẶC ĐIỂM TÌNH HÌNH\n1. THỐNG KÊ TÌNH HÌNH LỚP HỌC',
-						height: '360px',
+						height: '100%',
 						columns: [
 							{ title: 'Thời điểm / Nội dung', width: 190, readOnly: true },
 							{ title: 'Tổng số', width: 85 },
@@ -280,7 +300,7 @@
 						domId: 'ke-hoach-nam-hoc-muc-ii-pcnl',
 						refName: 'annualQualityCompetencyRef',
 						title: '2.1. PHẨM CHẤT – NĂNG LỰC\na. CHỈ TIÊU PHẤN ĐẤU',
-						height: '205px',
+						height: 'auto',
 						freezeColumns: 1,
 						columns: this.buildQualityCompetencyColumns(),
 						nestedHeaders: this.buildQualityCompetencyNestedHeaders(),
@@ -294,7 +314,7 @@
 						domId: 'ke-hoach-nam-hoc-muc-ii-mon-hoc',
 						refName: 'annualAcademicTargetRef',
 						title: '2.2. MÔN HỌC VÀ HOẠT ĐỘNG GIÁO DỤC\na. CHỈ TIÊU PHẤN ĐẤU',
-						height: '205px',
+						height: 'auto',
 						freezeColumns: 1,
 						columns: this.buildAcademicColumns(),
 						nestedHeaders: this.buildAcademicNestedHeaders(),
@@ -380,9 +400,13 @@
 				const subjects = this.qualityCompetencySubjects || this.getDefaultQualityCompetencySubjects()
 				return [
 					{ title: 'Xếp loại', width: 150, readOnly: true },
-					...subjects.flatMap(() => [
+					...subjects.flatMap(subject => [
 						{ title: 'Số lượng', width: 95, type: 'numeric' },
-						{ title: 'Tỉ lệ', width: 85, type: 'numeric' }
+						{
+							title: 'Tỉ lệ',
+							width: this.getQualityCompetencyName(subject).includes('Giải quyết vấn đề') ? 150 : 85,
+							type: 'numeric'
+						}
 					])
 				]
 			},
@@ -408,10 +432,8 @@
 			buildQualityCompetencyRows(saved) {
 				const subjects = this.qualityCompetencySubjects || this.getDefaultQualityCompetencySubjects()
 				const savedRows = saved.qualityCompetencyTargets || saved['pham-chat-nang-luc']
-				if (Array.isArray(savedRows)) {
-					return savedRows.map(row => row.slice())
-				}
-				return ['Tốt (T)', 'Đạt (Đ)', 'Cần cố gắng (C)'].map(title => [
+				if (Array.isArray(savedRows)) return savedRows.map(row => [this.getTargetRatingDisplayLabel(row?.[0]), ...row.slice(1)])
+				return ['Tốt (T) >=', 'Đạt (Đ)', 'Cần cố gắng (C)'].map(title => [
 					title,
 					...subjects.flatMap(() => ['', ''])
 				])
@@ -439,16 +461,24 @@
 			buildAcademicRows(saved) {
 				const subjects = this.academicSubjects || this.getDefaultAcademicSubjects()
 				const savedRows = saved.academicTargets || saved['mon-hoc-hoat-dong']
-				if (Array.isArray(savedRows)) return savedRows.map(row => row.slice())
-				return ['Hoàn thành tốt (T)', 'Hoàn thành (H)', 'Chưa hoàn thành (C)'].map(title => [
+				if (Array.isArray(savedRows)) return savedRows.map(row => [this.getTargetRatingDisplayLabel(row?.[0]), ...row.slice(1)])
+				return ['Hoàn thành tốt (T) >=', 'Hoàn thành (H)', 'Chưa hoàn thành (C)'].map(title => [
 					title,
 					...subjects.flatMap(() => ['', ''])
 				])
 			},
+			getTargetRatingDisplayLabel(label) {
+				return {
+					'Tốt (T)': 'Tốt (T) >=',
+					'Tốt (T) >= 75': 'Tốt (T) >=',
+					'Hoàn thành tốt (T)': 'Hoàn thành tốt (T) >=',
+					'Hoàn thành tốt (T) >= 75': 'Hoàn thành tốt (T) >='
+				}[String(label || '').trim()] || label
+			},
 			parseAnnualPlan(value) {
 				if (!value) return {}
 				try {
-					return typeof value === 'string' ? JSON.parse(value) : value
+					return typeof value === 'string' ? this.safeParseJson(value, []) : value
 				} catch (error) {
 					return {}
 				}
@@ -556,7 +586,12 @@
 					if (!container || typeof jspreadsheet !== 'function') return
 					this.destroySheet(card.key)
 					container.innerHTML = ''
-					this.syncTargetPercentages(card, card.rows)
+					container.classList.toggle('so-gvcn-quality-target-sheet', card.key === 'pham-chat-nang-luc')
+					container.classList.toggle('so-gvcn-academic-target-sheet', card.key === 'mon-hoc-hoat-dong')
+					const isTargetCard = ['pham-chat-nang-luc', 'mon-hoc-hoat-dong'].includes(card.key)
+					const targetTableHeight = isTargetCard
+						? `${Math.max(180, (card.rows.length * 40) + (((card.nestedHeaders || []).length + 1) * 42) + 8)}px`
+						: card.height
 					this.sheetInstances[card.key] = soGvcnJspreadsheet.create(container, {
 						worksheets: [{
 							data: card.rows,
@@ -565,9 +600,11 @@
 							...(card.freezeColumns ? { freezeColumns: card.freezeColumns } : {}),
 							rowResize: true,
 							columnDrag: false,
-							tableWidth: '100%',
+						rowDrag: false,
+						columnSorting: false,
+							tableWidth: isTargetCard ? 'auto' : '100%',
 							tableOverflow: true,
-							tableHeight: card.height,
+							tableHeight: targetTableHeight,
 							lazyLoading: false,
 							wordWrap: true,
 							allowInsertColumn: false,
@@ -575,20 +612,43 @@
 							showHeader: true
 						}],
 						contextMenu: () => false,
-						onchange: (worksheet, cell, x, y) => {
-							if (this.syncingTargetPercentages) {
-								card.rows = worksheet.getData()
-								return
-							}
-							const rows = worksheet.getData()
-							this.syncingTargetPercentages = true
-							try {
-								this.syncTargetPercentages(card, rows, worksheet, x, y)
-								card.rows = rows
-							} finally {
-								this.syncingTargetPercentages = false
-							}
+						onchange: worksheet => {
+							card.rows = worksheet.getData()
 						}
+					})
+					this.$nextTick(() => {
+						this.hideAnnualPlanColumnsAndRows(container, card)
+					})
+				})
+			},
+			hideAnnualPlanColumnsAndRows(container, card) {
+				const hiddenRowLabels = new Set(['Đạt (Đ)', 'Hoàn thành (H)'])
+				const tables = container?.querySelectorAll?.('table') || []
+				tables.forEach(table => {
+					const quantityColumns = (card?.columns || [])
+						.map((column, index) => column?.title === 'Số lượng' ? index : null)
+						.filter(index => Number.isInteger(index))
+					const columnCount = card?.columns?.length || 0
+					const colgroup = table.querySelectorAll('colgroup col')
+					const colOffset = colgroup.length > columnCount ? 1 : 0
+					quantityColumns.forEach(columnIndex => {
+						table.querySelectorAll(`[data-x="${columnIndex}"]`).forEach(cell => {
+							cell.style.setProperty('display', 'none', 'important')
+						})
+						const col = colgroup[columnIndex + colOffset]
+						if (col) col.style.setProperty('display', 'none', 'important')
+					})
+					table.querySelectorAll('thead tr.jss_nested [data-column]').forEach(cell => {
+						const columns = String(cell.dataset.column || '').split(',').map(Number).filter(Number.isInteger)
+						const visibleColumns = columns.filter(columnIndex => !quantityColumns.includes(columnIndex))
+						if (columns.length && visibleColumns.length !== columns.length) {
+							cell.colSpan = Math.max(1, visibleColumns.length)
+							cell.dataset.column = visibleColumns.join(',')
+						}
+					})
+					table.querySelectorAll('tbody tr').forEach(row => {
+						const labelCell = row.querySelector('[data-x="0"]')
+						if (hiddenRowLabels.has(labelCell?.textContent?.trim())) row.style.display = 'none'
 					})
 				})
 			},
@@ -624,7 +684,7 @@
 					if (!subjects[subjectIndex]) return
 					const quantityColumn = 1 + subjectIndex * 2
 					const percentageColumn = quantityColumn + 1
-					const rowIndexes = changedRow !== null ? [changedRow] : rows.map((row, index) => index)
+					const rowIndexes = rows.map((row, index) => index)
 					rowIndexes.forEach(rowIndex => {
 						const row = rows[rowIndex]
 						if (!Array.isArray(row)) return

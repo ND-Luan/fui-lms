@@ -739,8 +739,9 @@
 			vueData.loading = false;
 		},
 		async fetchMyClasses() {
-			await ajaxCALL("lms/EL_Teacher_GetMyClasses", { HocKi: vueData.NienKhoaItem.HocKi }, (res) => {
-				this.lopList = res.data || [];
+			await ajaxCALL("lms/EL_Teacher_GetMyClasses", { NienKhoa: vueData.NienKhoa, HocKi: vueData.NienKhoaItem.HocKi }, (res) => {
+				// SP trả 2 resultset: data[0]=NienKhoa hiện tại, data[1]=danh sách lớp thật
+				this.lopList = (Array.isArray(res.data) && Array.isArray(res.data[1])) ? res.data[1] : (res.data || []);
 				if (this.lopList.length > 0) {
 					this.selectedLopID = this.lopList.find(x => x.LopID == this.lopid)?.LopID ?? this.lopList[0].LopID;
 				}

@@ -14,7 +14,7 @@
                 <div class="d-flex align-center justify-space-between ga-2">
                     <span class="text-caption text-truncate">{{ task.fileName }}</span>
                     <v-btn
-                        v-if="isActiveUploadTask(task)"
+                        v-if="isCancellableUploadTask(task)"
                         icon="mdi-close"
                         size="x-small"
                         variant="text"
@@ -22,7 +22,7 @@
                         @click="cancelUploadTask(task.id)"
                     />
                     <v-btn
-                        v-else
+                        v-else-if="task.status !== 'processing'"
                         icon="mdi-delete-outline"
                         size="x-small"
                         variant="text"
@@ -101,6 +101,10 @@
 
         isActiveUploadTask(task) {
             return ['uploading', 'pending', 'processing'].includes(task.status);
+        },
+
+        isCancellableUploadTask(task) {
+            return ['uploading', 'pending'].includes(task.status);
         },
 
         cancelUploadTask(taskId) {

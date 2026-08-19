@@ -52,8 +52,6 @@ function saveLesson(payload) {
         ThumbnailURL: dataToSend.ThumbnailURL,
         Status: dataToSend.Status,
         IsPublic: dataToSend.IsPublic ? 1 : 0,
-        SyllabusID: dataToSend.SyllabusID,
-        NodeID: dataToSend.NodeID,
     }, (response) => {
         console.log('response', response)
         if (response && response.data && response.data[0]) {

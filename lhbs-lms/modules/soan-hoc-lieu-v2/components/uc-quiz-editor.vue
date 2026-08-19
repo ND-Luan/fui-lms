@@ -4,8 +4,8 @@
 		<div v-if="loaiNoiDung === 'QUIZ_SINGLE_CHOICE'">
 			<!-- <v-textarea label="Câu hỏi/Yêu cầu" v-model="editableData.prompt" variant="outlined" rows="2" auto-grow>
 			</v-textarea> -->
-			<uc-ggb-editor label="Câu hỏi/Yêu cầu" v-model="editableData.prompt"
-				:imageapi="vueData.v_Set.apiImageAdapter" variant="outlined" rows="2" auto-grow />
+			<uc-rich-text-editor :plugins="['ggb']" label="Câu hỏi/Yêu cầu" v-model="editableData.prompt"
+				:imageapi="vueData.v_Set.apiFile" variant="outlined" rows="2" auto-grow />
 			<div class="d-flex align-center justify-space-between form-label mt-4">
 				<label>Các lựa chọn và đáp án đúng:</label>
 				<v-checkbox v-model="editableData.isAdvanced" label="Soạn đáp án nâng cao" />
@@ -33,8 +33,8 @@
 		<div v-else-if="loaiNoiDung === 'QUIZ_MULTIPLE_CHOICE'">
 			<!-- <v-textarea label="Câu hỏi/Yêu cầu" v-model="editableData.prompt" variant="outlined" rows="2" auto-grow>
 			</v-textarea> -->
-			<uc-ggb-editor label="Câu hỏi/Yêu cầu" v-model="editableData.prompt"
-				:imageapi="vueData.v_Set.apiImageAdapter" variant="outlined" rows="2" auto-grow />
+			<uc-rich-text-editor :plugins="['ggb']" label="Câu hỏi/Yêu cầu" v-model="editableData.prompt"
+				:imageapi="vueData.v_Set.apiFile" variant="outlined" rows="2" auto-grow />
 
 			<div class="d-flex align-center justify-space-between form-label mt-4">
 				<label class="form-label mt-4">Các lựa chọn (chọn các đáp án đúng):</label>
@@ -60,8 +60,8 @@
 		<div v-else-if="loaiNoiDung === 'QUIZ_MATCHING'">
 			<!-- <v-textarea label="Câu hỏi/Yêu cầu" v-model="editableData.prompt" variant="outlined" rows="2" auto-grow>
 			</v-textarea> -->
-			<uc-ggb-editor label="Câu hỏi/Yêu cầu" v-model="editableData.prompt"
-				:imageapi="vueData.v_Set.apiImageAdapter" variant="outlined" rows="2" auto-grow />
+			<uc-rich-text-editor :plugins="['ggb']" label="Câu hỏi/Yêu cầu" v-model="editableData.prompt"
+				:imageapi="vueData.v_Set.apiFile" variant="outlined" rows="2" auto-grow />
 			<div>
 				<v-checkbox v-model="editableData.isAdvanced" label="Soạn đáp án nâng cao" />
 			</div>
@@ -90,8 +90,8 @@
 		<div v-else-if="loaiNoiDung === 'QUIZ_ORDERING'">
 			<!-- <v-textarea label="Câu hỏi/Yêu cầu" v-model="editableData.prompt" variant="outlined" rows="2" auto-grow>
 			</v-textarea> -->
-			<uc-ggb-editor label="Câu hỏi/Yêu cầu" v-model="editableData.prompt"
-				:imageapi="vueData.v_Set.apiImageAdapter" variant="outlined" rows="2" auto-grow />
+			<uc-rich-text-editor :plugins="['ggb']" label="Câu hỏi/Yêu cầu" v-model="editableData.prompt"
+				:imageapi="vueData.v_Set.apiFile" variant="outlined" rows="2" auto-grow />
 			<div class="d-flex align-center justify-space-between form-label mt-4">
 				<label class="form-label mt-4">Các mục (nhập theo thứ tự đúng):</label>
 				<v-checkbox v-model="editableData.isAdvanced" label="Soạn đáp án nâng cao" />
@@ -112,8 +112,8 @@
 		<div v-else-if="loaiNoiDung === 'QUIZ_DRAG_DROP_CATEGORIZE'">
 			<!-- <v-textarea label="Câu hỏi/Yêu cầu" v-model="editableData.prompt" variant="outlined" rows="2" auto-grow>
 			</v-textarea> -->
-			<uc-ggb-editor label="Câu hỏi/Yêu cầu" v-model="editableData.prompt"
-				:imageapi="vueData.v_Set.apiImageAdapter" variant="outlined" rows="2" auto-grow />
+			<uc-rich-text-editor :plugins="['ggb']" label="Câu hỏi/Yêu cầu" v-model="editableData.prompt"
+				:imageapi="vueData.v_Set.apiFile" variant="outlined" rows="2" auto-grow />
 			<label class="form-label mt-4">Các nhóm:</label>
 			<div v-for="(cat, index) in editableData.categories" :key="index" class="d-flex align-center mb-2">
 				<v-text-field v-model="cat.name" density="compact" variant="outlined" hide-details
@@ -139,7 +139,7 @@
 
 		<!-- ==================== 6. QUIZ_FILL_IN_BLANK ==================== -->
 		<div v-else-if="loaiNoiDung === 'QUIZ_FILL_IN_BLANK'">
-			<uc-ggb-editor v-model="editableData.prompt" :imageapi="vueData.v_Set.apiImageAdapter" />
+			<uc-rich-text-editor :plugins="['ggb']" v-model="editableData.prompt" :imageapi="vueData.v_Set.apiFile" />
 			<!-- <v-textarea label="Hướng dẫn" v-model="editableData.prompt" variant="outlined" rows="2" auto-grow>
 			</v-textarea> -->
 			<label class="form-label mt-4">Nội dung câu (thêm các phần text và chỗ trống):</label>
@@ -157,7 +157,7 @@
 		</div>
 		<!-- ==================== 7. Soạn thảo: Nối nhóm (QUIZ_CONNECTION) ==================== -->
 		<div v-else-if="loaiNoiDung === 'QUIZ_CONNECTION'">
-			<uc-ggb-editor v-model="editableData.prompt" :imageapi="vueData.v_Set.apiImageAdapter" />
+			<uc-rich-text-editor :plugins="['ggb']" v-model="editableData.prompt" :imageapi="vueData.v_Set.apiFile" />
 			<!-- <v-textarea label="Câu hỏi/Yêu cầu" v-model="editableData.prompt" variant="outlined" rows="2" auto-grow>
 			</v-textarea> -->
 			<label class="form-label mt-4">Các nhóm:</label>
@@ -433,8 +433,8 @@
 		<div v-else-if="loaiNoiDung === 'QUIZ_TRUE_FALSE'">
 			<!-- <v-textarea label="Câu hỏi/Yêu cầu" v-model="editableData.prompt" variant="outlined" rows="2" auto-grow>
 			</v-textarea> -->
-			<uc-ggb-editor label="Câu hỏi/Yêu cầu" v-model="editableData.prompt"
-				:imageapi="vueData.v_Set.apiImageAdapter" variant="outlined" rows="2" auto-grow />
+			<uc-rich-text-editor :plugins="['ggb']" label="Câu hỏi/Yêu cầu" v-model="editableData.prompt"
+				:imageapi="vueData.v_Set.apiFile" variant="outlined" rows="2" auto-grow />
 			<div class="d-flex align-center justify-space-between form-label mt-4">
 				<label>Các lựa chọn và đáp án đúng:</label>
 				<v-checkbox v-model="editableData.isAdvanced" label="Soạn đáp án nâng cao" />

@@ -8,18 +8,31 @@
 		<div v-for="(element, index) in elements" :key="index" class="element-preview"
 			:class="{ 'selected': selectedIndex === index }" @click="$emit('update:selectedIndex', index)">
 			<div class="d-flex ga-2 element-title">
-				<p v-if="element.ElementData.title" style="word-break: break-word; width: 97%">
+				<p v-if="element.ElementData.title" class="mb-0" style="word-break: break-word;">
 					{{ element.ElementData.title }}
 				</p>
+				<v-chip v-if="element.ElementData.sourceTracking?.sourceType === 'HOC_LIEU_SO'"
+					size="x-small" color="primary" variant="tonal" class="mt-1 flex-shrink-0"
+					:v-tooltip="'Học liệu #' + element.ElementData.sourceTracking.HocLieuID + ' · Nội dung #' + element.ElementData.sourceTracking.NoiDungID">
+					<v-icon start size="14">mdi-database-import-outline</v-icon>Học liệu số
+				</v-chip>
+				<v-spacer />
 				<v-btn size="x-small" variant="text" @click.stop="removeElement(index)" class="delete-btn"
 					icon="mdi-delete-outline" />
 			</div>
 
 			<div class="element-content" :class="{'with-title': element.ElementData.title}">
-				<div v-if="element.ElementType === 'TEXT'" v-html="element.ElementData.content" class="text-content"
-					style="word-break: auto-phrase;" />
+				<div v-if="element.ElementType === 'TEXT'">
+					<div v-if="element.ElementData.content" v-html="element.ElementData.content" class="text-content"
+						style="word-break: auto-phrase;" />
+					<div v-else class="empty-element-state">
+						<v-icon>mdi-text-box-remove-outline</v-icon>
+						<span>Chưa có nội dung văn bản</span>
+					</div>
+				</div>
 
-				<div v-else-if="element.ElementType === 'IMAGE'" class="d-flex ga-2">
+				<div v-else-if="element.ElementType === 'IMAGE'">
+					<div v-if="element.ElementData.sources?.length" class="d-flex ga-2">
 					<div v-for="file in element.ElementData.sources" style="width: 200px">
 						<v-img
 							:src="'https://drive.google.com/thumbnail?id='+ getDriveFileId(file.source) + '&sz=w1000'"
@@ -32,6 +45,11 @@
 						</v-img>
 						<p class="text-caption text-center text-medium-emphasis">{{ file.caption }}</p>
 					</div>
+					</div>
+					<div v-else class="empty-element-state">
+						<v-icon>mdi-image-off-outline</v-icon>
+						<span>Chưa có hình ảnh</span>
+					</div>
 				</div>
 
 				<div v-else-if="element.ElementType === 'YOUTUBE'">
@@ -39,18 +57,43 @@
 						:src="renderUrlYoutube(element.ElementData.source)" title="YouTube video player" frameborder="0"
 						allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
 						allowfullscreen></iframe>
-					<div v-else class="text-center text-grey pa-4">{{ $t('message.NoVideo') }}</div>
+					<div v-else class="empty-element-state">
+						<v-icon>mdi-youtube-off</v-icon>
+						<span>Chưa có video</span>
+					</div>
 				</div>
-				<div v-else-if="element.ElementType === 'FILE'" class="d-flex ga-2">
-					<v-chip v-for="file in element.ElementData.sources" @click="window.open(file.source)"
-						label>{{file.name}} </v-chip>
+				<div v-else-if="element.ElementType === 'FILE'">
+					<div v-if="element.ElementData.sources?.length" class="file-source-grid">
+					<div v-for="(file, fileIndex) in element.ElementData.sources" :key="file.id || fileIndex"
+						class="file-source-card">
+						<iframe v-if="file.source" class="file-source-iframe" :src="file.source" :title="file.name"
+							loading="lazy" />
+						<div v-else class="file-source-fallback">
+							<v-icon size="36" color="primary">mdi-file-outline</v-icon>
+							<div class="file-source-name" :title="file.name">{{ file.name }}</div>
+							<v-btn :href="file.source" target="_blank" rel="noopener" size="small" variant="outlined"
+								color="primary">
+								<v-icon start size="16">mdi-open-in-new</v-icon> Mở tệp
+							</v-btn>
+						</div>
+					</div>
+					</div>
+					<div v-else class="empty-element-state">
+						<v-icon>mdi-file-alert-outline</v-icon>
+						<span>Chưa có tệp đính kèm</span>
+					</div>
 				</div>
 
 				<div v-else-if="element.ElementType === 'AUDIO'">
-					<uc-wave-audio-player :audio-url="element.ElementData.source" />
+					<uc-wave-audio-player v-if="element.ElementData.source" :audio-url="element.ElementData.source" />
+					<div v-else class="empty-element-state">
+						<v-icon>mdi-volume-off</v-icon>
+						<span>Chưa có âm thanh</span>
+					</div>
 				</div>
 				<div v-else-if="element.ElementType === 'HTML'" style="width: 100%">
 					<!-- <div v-html="element.ElementData.source" /> -->
+					<template v-if="element.ElementData.source">
 					<iframe v-if="element.ElementData?.IsHTML" :srcdoc="element.ElementData.source"
 						sandbox="allow-scripts allow-popups allow-forms allow-same-origin" style="width: 100%;height: 600px;">
 					</iframe>
@@ -58,11 +101,22 @@
 					<iframe v-else :src="element.ElementData.source"
 						sandbox="allow-scripts allow-popups allow-forms allow-same-origin" style="width: 100%;height: 600px;">
 					</iframe>
+					</template>
+					<div v-else class="empty-element-state">
+						<v-icon>mdi-language-html5</v-icon>
+						<span>Chưa có nội dung HTML</span>
+					</div>
 				</div>
 				<div v-else-if="element.ElementType?.includes('QUIZ')">
-					<uc-latex-view :content="element.ElementData.config.questionText" />
-					<component :is="getQuestionComponent(element.ElementType)" :question="element.ElementData"
-						:answer="getAnswerForChild(element)" :isGrade="false" :readonly="true" />
+					<template v-if="element.ElementData.config?.questionText">
+						<uc-latex-view :content="element.ElementData.config.questionText" />
+						<component :is="getQuestionComponent(element.ElementType)" :question="element.ElementData"
+							:answer="getAnswerForChild(element)" :isGrade="false" :readonly="true" />
+					</template>
+					<div v-else class="empty-element-state">
+						<v-icon>mdi-help-box-outline</v-icon>
+						<span>Chưa có nội dung câu hỏi</span>
+					</div>
 				</div>
 
 				<div v-else class="text-center pa-4 text-grey">
@@ -100,19 +154,41 @@
 			}
 		},
 		methods: {
-			removeElement(index) {
+			async removeElement(index) {
 				const element = this.elements[index]
-				ajaxCALL('lms/EL_Element_Delete', {
-					ElementID: element.ElementID
-				}, res => {
-					CALL('getLessonData')
-					if (this.selectedIndex === index) {
-						this.$emit('update:selectedIndex', null);
+				try {
+					const sources = element?.ElementData?.sources ||
+						(element?.ElementData?.source ? [{ source: element.ElementData.source }] : [])
+					const driveSources = sources.filter(file => this.getDriveFileId(file.source))
+					if (driveSources.length) {
+						const { access_token } = await new Promise(resolve => {
+							ajaxCALL('lms/FP_Youtube_Token_Get', null, res => resolve(res?.data || res || {}))
+						})
+						await Promise.all(driveSources.map(file => fetch(
+							`https://www.googleapis.com/drive/v3/files/${this.getDriveFileId(file.source)}`,
+							{ method: 'DELETE', headers: { Authorization: `Bearer ${access_token}` } }
+						).then(response => {
+							if (!response.ok) throw new Error(`Xóa file Google Drive thất bại: ${response.statusText}`)
+						})))
 					}
-				})
+					await new Promise((resolve, reject) => ajaxCALL('lms/EL_Element_Delete', {
+						ElementID: element.ElementID
+					}, response => response?.data ? resolve(response) : reject(new Error('Xóa nội dung bài học thất bại'))))
+					CALL('getLessonData')
+					if (this.selectedIndex === index) this.$emit('update:selectedIndex', null)
+				} catch (error) {
+					console.error('Lỗi xóa block bài học:', error)
+					Vue.$toast.error(error.message || 'Không thể xóa nội dung bài học', { position: 'top' })
+				}
 				// this.$emit('update:elements', newElements);
 				// newElements.splice(index, 1);
 	
+			},
+
+			getDriveFileId(url) {
+				if (!url || typeof url !== 'string') return null
+				const match = url.match(/\/d\/([^/]+)/)
+				return match?.[1] || null
 			},
 	
 			getYoutubeEmbedUrl(url) {

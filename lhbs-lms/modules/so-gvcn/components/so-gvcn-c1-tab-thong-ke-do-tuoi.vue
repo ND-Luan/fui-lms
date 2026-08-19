@@ -28,7 +28,6 @@
 				this.initSheet()
 			},
 			students: {
-				deep: true,
 				handler() {
 					this.initSheet()
 				}
@@ -47,11 +46,32 @@
 			this.destroySheet()
 		},
 		methods: {
+
+		safeParseJson(val, fallback = null) {
+			if (!val) return fallback;
+			if (typeof val !== 'string') return val;
+			let currentVal = val;
+			while (typeof currentVal === 'string' && (currentVal.trim().startsWith('[') || currentVal.trim().startsWith('{'))) {
+				try {
+					const parsed = JSON.parse(currentVal);
+					if (typeof parsed === 'string') {
+						currentVal = parsed;
+					} else {
+						return parsed;
+					}
+				} catch (e) { break; }
+			}
+			return fallback !== null ? fallback : currentVal;
+		},
+
 			getInstance() {
 				return this.instance
 			},
 			getRows() {
 				const sheet = Array.isArray(this.instance) ? this.instance[0] : this.instance
+				if (sheet && typeof sheet.closeEditor === 'function') {
+					try { sheet.closeEditor(sheet.edition ? sheet.edition[0] : null, true) } catch (error) {}
+				}
 				return sheet && typeof sheet.getData === 'function' ? sheet.getData() : []
 			},
 			// Tự động phân tích danh sách dân tộc xuất hiện trong lớp
@@ -105,7 +125,7 @@
 					let ethnicCounts = saved.EthnicCounts || saved.DanToc || {}
 					if (saved.DanTocJson) {
 						try {
-							ethnicCounts = JSON.parse(saved.DanTocJson)
+							ethnicCounts = this.safeParseJson(saved.DanTocJson, [])
 						} catch (error) {}
 					}
 					return [
@@ -133,7 +153,7 @@
 						KhuyetTat: row[3 + ethnicList.length] ?? ''
 					}
 				}).filter(row => row.AgeLabel || row.Nam || row.Nu
-					|| row.KhuyetTat || Object.values(JSON.parse(row.DanTocJson)).some(value => value !== ''))
+					|| row.KhuyetTat || Object.values(this.safeParseJson(row.DanTocJson, [])).some(value => value !== ''))
 			},
 
 			destroySheet() {
@@ -171,6 +191,8 @@
 								nestedHeaders: nestedHeaders,
 								rowResize: true,
 								columnDrag: false,
+						rowDrag: false,
+						columnSorting: false,
 								tableWidth: '100%',
 								tableOverflow: true,
 								tableHeight: this.sheetHeight,
@@ -178,7 +200,9 @@
 								freezeColumns: 1,
 								wordWrap: true,
 								allowInsertColumn: false,
+								allowDeleteColumn: false,
 								allowInsertRow: false,
+								allowDeleteRow: false,
 								showHeader: true
 							}],
 							contextMenu: () => false

@@ -1,0 +1,231 @@
+{
+  "data": [
+    {
+      "EXE": "IsCheck_NotRoleParent(vueData.user)"
+    },
+    {
+      "EXE": "(function(){ var t=setInterval(function(){ if(vueData.NienKhoa){ clearInterval(t); runAction(vueData.getDSTuan); } }, 100); setTimeout(function(){ clearInterval(t); }, 8000); })()"
+    },
+    {
+      "DSTuan": [],
+      "TuanItem": null,
+      "DSTheoLop": [],
+      "ChartTheoKhoi": { "chart": { "type": "bar", "height": 320, "toolbar": { "show": false } }, "series": [{ "name": "Số lượt đăng ký", "data": [] }], "xaxis": { "categories": [] }, "plotOptions": { "bar": { "borderRadius": 4, "columnWidth": "45%" } }, "dataLabels": { "enabled": true }, "colors": ["#2e7d32"] },
+      "DSHocSinh": [],
+      "DSThongBaoPH": [],
+      "isLoading": false,
+      "headersTheoLop": [
+        { "title": "Khối", "value": "KhoiID", "width": "70px", "align": "center" },
+        { "title": "Lớp", "value": "TenLop", "width": "80px" },
+        { "title": "GVBM", "value": "TenGiaoVienDangKy", "width": "160px" },
+        { "title": "Số lượt đăng ký", "value": "SoLuot", "el": "t-num", "width": "130px" },
+        { "title": "Tổng lượt HS", "value": "SoLuotHocSinh", "el": "t-num", "width": "120px" }
+      ],
+      "headersHocSinh": [
+        { "title": "Học sinh", "value": "HoTen", "width": "180px" },
+        { "title": "Lớp", "value": "TenLop", "width": "80px" },
+        { "title": "Số lượt mang thiết bị", "value": "SoLuot", "el": "t-num", "width": "150px" },
+        { "title": "Số lần vi phạm", "value": "SoLanViPham", "el": "t-num", "width": "120px" }
+      ],
+      "headersThongBaoPH": [
+        { "title": "Lớp", "value": "TenLop", "width": "80px" },
+        { "title": "Ngày áp dụng", "value": "NgayApDungHienThi", "width": "120px" },
+        { "title": "Số lượt trong ngày", "value": "SoLuot", "el": "t-num", "width": "130px" },
+        { "title": "GVBM gần nhất", "value": "GiaoVienGanNhat", "width": "160px" },
+        { "title": "Trạng thái", "value": "TrangThaiHienThi", "width": "150px", "align": "center" }
+      ]
+    },
+    {
+      "getDSTuan": {
+        "API": "lms/TuanHocTap_Get",
+        "IN": { "NienKhoa": "vueData.NienKhoa" },
+        "OUT": "DSTuan",
+        "CALLBACK": { "EXE": "chonTuanHienTai(); runAction(vueData.getThongKeTheoLop); runAction(vueData.getThongKeHocSinh); runAction(vueData.getThongKeThongBaoPH)" }
+      },
+      "getThongKeTheoLop": {
+        "API": "lms/DangKyMangLaptop_ThongKe_TheoLop",
+        "IN": { "NienKhoa": "vueData.NienKhoa", "TuanHocID": "vueData.TuanItem?.TuanHocID || 0" },
+        "OUT": "DSTheoLop",
+        "CALLBACK": { "EXE": "renderChartTheoKhoi()" }
+      },
+      "getThongKeHocSinh": {
+        "API": "lms/DangKyMangLaptop_ThongKe_HocSinh",
+        "IN": { "NienKhoa": "vueData.NienKhoa", "TuanHocID": "vueData.TuanItem?.TuanHocID || 0" },
+        "OUT": "DSHocSinh"
+      },
+      "getThongKeThongBaoPH": {
+        "API": "lms/DangKyMangLaptop_ThongKe_ThongBaoPH",
+        "IN": { "NienKhoa": "vueData.NienKhoa", "TuanHocID": "vueData.TuanItem?.TuanHocID || 0" },
+        "OUT": "DSThongBaoPH",
+        "CALLBACK": { "EXE": "renderDSThongBaoPH()" }
+      }
+    }
+  ],
+  "watch": {
+    "TuanItem": {
+      "THEN": [
+        { "CALL": "getThongKeTheoLop" },
+        { "CALL": "getThongKeHocSinh" },
+        { "CALL": "getThongKeThongBaoPH" }
+      ]
+    }
+  },
+  "controls": [
+    {
+      "prop": "fluid grid-list-md",
+      "rows": [
+        {
+          "prop": "",
+          "cols": [
+            {
+              "el": "v-card",
+              "attr": { "class": "pa-4 mb-4" },
+              "innerHTML": [
+                {
+                  "el": "v-card-title",
+                  "attr": { "class": "text-primary px-0 pt-0 d-flex align-center ga-2" },
+                  "innerHTML": [
+                    { "el": "v-icon", "innerHTML": "mdi-chart-box-outline" },
+                    { "el": "span", "innerHTML": "Thống kê Đăng ký mang Laptop" }
+                  ]
+                },
+                { "el": "v-divider", "attr": { "class": "mb-4" } },
+                {
+                  "el": "v-row",
+                  "innerHTML": [
+                    {
+                      "el": "v-col",
+                      "attr": { ":cols": 12, ":sm": 6 },
+                      "innerHTML": [
+                        {
+                          "el": "v-select",
+                          "attr": {
+                            "v-model": "TuanItem",
+                            "label": "Chọn tuần",
+                            ":items": "DSTuan",
+                            "item-title": "Tuan_HienThi",
+                            ":return-object": true,
+                            ":clearable": true,
+                            "hide-details": "auto"
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ],
+              "w": 12
+            },
+            {
+              "el": "v-card",
+              "attr": { "class": "pa-4 mb-4" },
+              "innerHTML": [
+                {
+                  "el": "v-card-title",
+                  "attr": { "class": "text-primary px-0 pt-0 d-flex align-center ga-2" },
+                  "innerHTML": [
+                    { "el": "v-icon", "innerHTML": "mdi-chart-bar" },
+                    { "el": "span", "innerHTML": "Số lượt đăng ký theo Khối" }
+                  ]
+                },
+                { "el": "v-divider", "attr": { "class": "mb-2" } },
+                {
+                  "el": "div",
+                  "attr": { "v-if": "vueData.DSTheoLop.length===0", "class": "text-center text-medium-emphasis pa-6" },
+                  "innerHTML": "Chưa có dữ liệu"
+                },
+                {
+                  "el": "uc-chart-apex",
+                  "attr": { "v-if": "vueData.DSTheoLop.length>0", ":options": "ChartTheoKhoi" }
+                }
+              ],
+              "w": 12
+            },
+            {
+              "el": "v-card",
+              "attr": { "class": "pa-4 mb-4" },
+              "innerHTML": [
+                {
+                  "el": "v-card-title",
+                  "attr": { "class": "text-primary px-0 pt-0 d-flex align-center ga-2" },
+                  "innerHTML": [
+                    { "el": "v-icon", "innerHTML": "mdi-google-classroom" },
+                    { "el": "span", "innerHTML": "Chi tiết theo Lớp / GVBM" }
+                  ]
+                },
+                { "el": "v-divider", "attr": { "class": "mb-2" } },
+                {
+                  "el": "f-table",
+                  "attr": {
+                    "label": "",
+                    ":headers": "headersTheoLop",
+                    ":items": "DSTheoLop",
+                    "show-search": true,
+                    ":fixed-header": true,
+                    "height": "400"
+                  }
+                }
+              ],
+              "w": 12
+            },
+            {
+              "el": "v-card",
+              "attr": { "class": "pa-4 mb-4" },
+              "innerHTML": [
+                {
+                  "el": "v-card-title",
+                  "attr": { "class": "text-primary px-0 pt-0 d-flex align-center ga-2" },
+                  "innerHTML": [
+                    { "el": "v-icon", "innerHTML": "mdi-account-alert-outline" },
+                    { "el": "span", "innerHTML": "Học sinh mang thiết bị nhiều nhất" }
+                  ]
+                },
+                { "el": "v-divider", "attr": { "class": "mb-2" } },
+                {
+                  "el": "f-table",
+                  "attr": {
+                    "label": "",
+                    ":headers": "headersHocSinh",
+                    ":items": "DSHocSinh",
+                    "show-search": true,
+                    ":fixed-header": true,
+                    "height": "400"
+                  }
+                }
+              ],
+              "w": 12
+            },
+            {
+              "el": "v-card",
+              "attr": { "class": "pa-4" },
+              "innerHTML": [
+                {
+                  "el": "v-card-title",
+                  "attr": { "class": "text-primary px-0 pt-0 d-flex align-center ga-2" },
+                  "innerHTML": [
+                    { "el": "v-icon", "innerHTML": "mdi-bell-alert-outline" },
+                    { "el": "span", "innerHTML": "Tình trạng thông báo phụ huynh" }
+                  ]
+                },
+                { "el": "v-divider", "attr": { "class": "mb-2" } },
+                {
+                  "el": "f-table",
+                  "attr": {
+                    "label": "",
+                    ":headers": "headersThongBaoPH",
+                    ":items": "DSThongBaoPH",
+                    "show-search": true,
+                    ":fixed-header": true,
+                    "height": "400"
+                  }
+                }
+              ],
+              "w": 12
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "set": {}
+}

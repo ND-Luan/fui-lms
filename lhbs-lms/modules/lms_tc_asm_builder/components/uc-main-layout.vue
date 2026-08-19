@@ -178,6 +178,10 @@
         dataToSend.AssignmentConfig_NoAnswer = JSON.stringify(cloneGroup)
         dataToSend.AssignmentConfig = JSON.stringify(fullConfig)
       }
+      delete dataToSend.HocLieuID
+      delete dataToSend.NoiDungID
+      delete dataToSend.TenHocLieu
+      delete dataToSend.TenNoiDung
       return dataToSend
     },
 
@@ -204,7 +208,7 @@
 
     async autoSaveAssignment(payload) {
       const dataToSend = this._buildPayload({ ...payload, isPublishing: false })
-      await fetchPromise('lms/EL_Teacher_SaveAssignment', dataToSend, { cache: false, silent: true })
+      const res = await fetchPromise('lms/EL_Teacher_SaveAssignment', dataToSend, { cache: false, silent: true })
     },
   },
 	}

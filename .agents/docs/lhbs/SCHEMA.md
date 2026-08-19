@@ -799,6 +799,62 @@ class tblCongBoBangDiem {
    int Is_Public
    int NamHoc
 }
+class tblDangKyMangLaptop {
+   int DangKyID
+   int LopID
+   varchar(10) TenLop
+   int KhoiID
+   int MonHocID
+   nvarchar(100) TenMonHoc
+   varchar(10) GiaoVienDangKyID
+   nvarchar(200) TenGiaoVienDangKy
+   tinyint Thu
+   tinyint TietBatDau
+   tinyint TietKetThuc
+   date NgayApDung
+   int TuanHocID
+   int NienKhoa
+   int HocKy
+   nvarchar(500) GhiChu
+   bit IsTreHan
+   bit Enable
+   varchar(20) CreateUser
+   datetime CreateTime
+   varchar(20) UpdateUser
+   datetime UpdateTime
+   nvarchar(50) LoaiThietBi
+   tinyint Buoi
+   bit IsDaThongBaoPH
+   varchar(20) NguoiThongBaoPH
+   datetime ThoiGianThongBaoPH
+}
+class tblDangKyMangLaptop_HocSinh {
+   int DangKyHocSinhID
+   int DangKyID
+   int HocSinhID
+   nvarchar(200) HoTen
+   bit IsViPham
+   nvarchar(500) GhiChuViPham
+   varchar(20) NguoiDanhDauViPham
+   datetime ThoiGianDanhDauViPham
+   bit Enable
+   varchar(20) CreateUser
+   datetime CreateTime
+   varchar(20) UpdateUser
+   datetime UpdateTime
+   nvarchar(200) LoaiThietBi
+}
+class tblDangKyMangLaptop_ThongBao {
+   int ThongBaoID
+   int DangKyID
+   varchar(20) TargetUserID
+   nvarchar(500) NoiDung
+   bit IsRead
+   datetime ReadTime
+   bit Enable
+   varchar(20) CreateUser
+   datetime CreateTime
+}
 class tblDanhSachHocSinh_CoIELTS {
    int DSHS_Ielts_ID
    int NienKhoa
@@ -1011,6 +1067,18 @@ class tblEL_GiaoVienLop {
    varchar(20) UpdateUser
    datetime UpdateTime
 }
+class tblEL_HocLieuResourceMapping {
+   int MappingID
+   varchar(20) ResourceType
+   int ResourceID
+   int HocLieuID
+   int NoiDungID
+   bit IsDeleted
+   varchar(50) CreateUser
+   datetime CreateTime
+   varchar(50) UpdateUser
+   datetime UpdateTime
+}
 class tblEL_KyNang_MonHoc {
    int KyNang_MonHocID
    int MonHocID
@@ -1201,45 +1269,6 @@ class tblEL_Submissions {
    int DurationTime
    int AccessTime
 }
-class tblEL_Syllabus {
-   int SyllabusID
-   nvarchar(255) Title
-   nvarchar(1000) Description
-   int KhoiID
-   int MonHocID
-   int NienKhoa
-   tinyint HocKi
-   bit IsDeleted
-   varchar(9) CreateUser
-   datetime CreateTime
-   varchar(9) UpdateUser
-   datetime UpdateTime
-}
-class tblEL_SyllabusMapping {
-   int MappingID
-   varchar(20) ResourceType
-   int ResourceID
-   int SyllabusID
-   int NodeID
-   bit IsDeleted
-   varchar(9) CreateUser
-   datetime CreateTime
-   varchar(9) UpdateUser
-   datetime UpdateTime
-}
-class tblEL_SyllabusNode {
-   int NodeID
-   int SyllabusID
-   int ParentID
-   nvarchar(255) Title
-   varchar(20) NodeType
-   int SortOrder
-   bit IsDeleted
-   varchar(9) CreateUser
-   datetime CreateTime
-   varchar(9) UpdateUser
-   datetime UpdateTime
-}
 class tblEL_ThongBao {
    int ThongBaoID
    int SubmissionID
@@ -1299,6 +1328,23 @@ class tblEL_YKienPhuHuynh {
    datetime ThoiGianXacNhan
    varchar(9) PhuHuynhTruyCap
    datetime PhuHuynhTruyCapLanCuoi
+}
+class tblFP_TaiNguyenLoai {
+   int TaiNguyenLoaiID
+   varchar(50) Code
+   nvarchar(255) TenLoai
+   varchar(50) KieuLoc
+   bit IsActive
+   int ThuTu
+   datetime CreateTime
+}
+class tblFP_TaiNguyenMuc {
+   int TaiNguyenMucID
+   int TaiNguyenLoaiID
+   varchar(50) Code
+   nvarchar(255) TenMuc
+   bit IsActive
+   int ThuTu
 }
 class tblGiaoVien {
    varchar(10) GiaoVienID
@@ -1364,6 +1410,30 @@ class tblGiaoVienLopTiengAnh {
    varchar(9) GiaoVienID2
    nvarchar(250) HoTenGiaoVien2
 }
+class tblHocBongCert {
+   int HocBongCertID
+   int HocSinhID
+   nvarchar(200) HoTen
+   varchar(10) TenLop
+   int LopID
+   int KhoiID
+   varchar(20) NgaySinh
+   nvarchar(100) MucHocBong
+   int HocKy
+   int NienKhoa
+   nvarchar(500) TieuChi_VI
+   nvarchar(500) TieuChi_EN
+   nvarchar(50) SoQuyetDinh
+   int VaoSo
+   nvarchar(100) NgayCap_VI
+   nvarchar(100) NgayCap_EN
+   bit Is_DaIn
+   bit Enable
+   varchar(20) CreateUser
+   datetime CreateTime
+   varchar(20) UpdateUser
+   datetime UpdateTime
+}
 class tblHocLieu_FP {
    int HocLieuID
    nvarchar(255) TenHocLieu
@@ -1380,6 +1450,8 @@ class tblHocLieu_FP {
    varchar(50) UpdateUser
    varchar(50) Loai
    nvarchar(max) ThumbnailURLs
+   int TaiNguyenLoaiID
+   int TaiNguyenMucID
 }
 class tblHocSinh {
    int HocSinhID
@@ -1780,6 +1852,7 @@ class tblLop {
    datetime UpdateTime
    int CapID
    int LopIDQLD
+   bit IsLopToHop
 }
 class tblLop_TinhTrang {
    int Lop_TinhTrangID
@@ -1974,6 +2047,9 @@ class tblNoiDungHocLieu_FP {
    varchar(50) CreateUser
    datetime UpdateTime
    varchar(50) UpdateUser
+   varchar(50) NguonTaiNguyenCode
+   varchar(50) NguonResourceType
+   int NguonResourceID
 }
 class tblNXT_aChien {
    int HocSinhID
@@ -2580,6 +2656,54 @@ class tblThietLap_KiNang_IELTS {
    int MaxCorrectAns
    float BandScore
 }
+class tblTKB_Khoi {
+   int KhoiID
+   varchar(20) NamHoc
+   int DonViID
+   nvarchar(200) TenKhoi
+   datetime NgayDongBo
+   varchar(50) Nguon
+}
+class tblTKB_Lich {
+   int TKBLichID
+   varchar(20) NienKhoa
+   int CapHoc
+   int LopID
+   nvarchar(200) Lop
+   int Thu
+   int BuoiID
+   int Tiet
+   int MonHocID
+   varchar(50) MaMon
+   nvarchar(200) TenMonHoc
+   int GiaoVienID
+   nvarchar(max) GhiChu
+   int MaDonVi
+   datetime NgayTao
+   varchar(50) NguoiTao
+   varchar(20) NamHoc
+   int HocKy
+   int Tuan
+   date NgayApDung
+   int LoaiTKB
+   int LopHocID
+}
+class tblTKB_LopHoc {
+   int LopHocID
+   varchar(20) NamHoc
+   int KhoiID
+   nvarchar(200) TenLop
+   nvarchar(200) GVCN
+   nvarchar(200) GVCN_HoTro
+   int HinhThucLop
+   datetime NgayDongBo
+   varchar(50) Nguon
+}
+class tblTKB_MonHoc {
+   int MonHocID
+   varchar(50) MaMon
+   nvarchar(255) TenMonHoc
+}
 class tblToGiangDay {
    int ToGiangDayID
    nvarchar(254) ToDayName
@@ -2695,6 +2819,7 @@ class tblXetKetQuaRenLuyen {
 }
 
 tblNoiDungHocLieu_FP --|> tblHocLieu_FP : HocLieuID
+tblEL_HocLieuResourceMapping --|> tblHocLieu_FP : HocLieuID
 tblSoGVCNKeHoachThang_Bak_20260718 --|> tblSoGVCN_Bak_20260718 : SoGVCNID
 tblSoGVCNTheoDoiRenLuyen_Bak_20260718 --|> tblSoGVCN_Bak_20260718 : SoGVCNID
 tblSoGVCNNhanXetSoLienLac_Bak_20260718 --|> tblSoGVCN_Bak_20260718 : SoGVCNID
@@ -2731,6 +2856,8 @@ tblSoGVCNNhanXetSoLienLac --|> tblHocSinhLop : HSLopID
 tblSoGVCNBanDaiDienCMHS --|> tblHocSinhLop : HSLopID
 tblSoGVCNCanBoLop --|> tblHocSinhLop : HSLopID
 tblSoGVCNKeHoachTuan --|> tblSoGVCNKeHoachThang : KeHoachThangID
+tblDangKyMangLaptop_HocSinh --|> tblDangKyMangLaptop : DangKyID
+tblDangKyMangLaptop_ThongBao --|> tblDangKyMangLaptop : DangKyID
 tblSoGVCNBanDaiDienCMHS --|> tblHocSinh : HocSinhID
 tblSoGVCNCanBoLop --|> tblHocSinh : HocSinhID
 tblSoGVCNHuongNghiep --|> tblHocSinh : HocSinhID
@@ -2738,6 +2865,9 @@ tblSoGVCNToNhomHocSinh --|> tblHocSinh : HocSinhID
 tblSoGVCNKeHoachNamHocChiTieu --|> tblLop : LopID
 tblSoGVCNKeHoachNamHocThongKeLop --|> tblLop : LopID
 tblSoGVCN --|> tblLop : LopID
+tblFP_TaiNguyenMuc --|> tblFP_TaiNguyenLoai : TaiNguyenLoaiID
+tblHocLieu_FP --|> tblFP_TaiNguyenLoai : TaiNguyenLoaiID
+tblHocLieu_FP --|> tblFP_TaiNguyenMuc : TaiNguyenMucID
 tblLMS_LessonElements --|> tblLMS_Lessons : LessonID
 tblSoGVCNKeHoachNamHocChiTieu --|> tblMonHoc : MonHocID
 tblToGiangDay_GiaoVien_MonHoc --|> tblMonHoc : MonHocID
@@ -2748,5 +2878,6 @@ tblSoGVCNSiSo --|> tblSoGVCNDanhMuc : MocDanhMucID
 tblSoGVCNCanBoLop --|> tblSoGVCNDanhMuc : ChucVuDanhMucID
 tblSoGVCNBanDaiDienCMHS --|> tblSoGVCNDanhMuc : NhiemVuDanhMucID
 tblSoGVCNHuongNghiep --|> tblSoGVCNDanhMuc : MonThiTNDanhMucID
+tblEL_HocLieuResourceMapping --|> tblNoiDungHocLieu_FP : NoiDungID
 tblNoiDungHocLieu_FP --|> tblNoiDungHocLieu_FP : ParentID
 ```

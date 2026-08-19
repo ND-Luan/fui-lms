@@ -47,7 +47,6 @@
                 bodyBuilder: (f) => {
                     const formData = new FormData();
                     formData.append('file', f);
-                    formData.append('File', f);
                     return formData;
                 },
                 onComplete,

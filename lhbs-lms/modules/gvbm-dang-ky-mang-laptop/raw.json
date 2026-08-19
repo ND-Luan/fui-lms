@@ -1,0 +1,117 @@
+{
+  "data": [
+    { "EXE": "IsCheck_NotRoleParent(vueData.user)" },
+    {
+      "DSLop": [],
+      "DSLopChuNhiem": [],
+      "LopItem": null,
+      "DSTuan": [],
+      "TuanXemTKB": null,
+      "TKBRaw": null,
+      "TKBTuanInfo": null,
+      "DSTKB": [],
+      "TKBQueue": [],
+      "TKBKeyDangChon": null,
+      "isLoadingTKB": false,
+      "NgayApDung": null,
+      "Buoi": 1,
+      "DSBuoi": [
+        { "title": "Sáng", "value": 1 },
+        { "title": "Chiều", "value": 2 },
+        { "title": "Tối", "value": 3 }
+      ],
+      "TietBatDau": 1,
+      "TietKetThuc": 1,
+      "DSTiet": [1, 2, 3, 4, 5],
+      "DSLoaiThietBi": ["Laptop", "Tablet", "Điện thoại di động", "Thiết bị khác"],
+      "DSHocSinhLop": [],
+      "HocSinhThietBi": [],
+      "TimKiemHocSinh": "",
+      "GhiChu": "",
+      "DSDangKy": [],
+      "isLoadingSave": false,
+      "headersDangKy": [
+        { "title": "Lớp", "value": "TenLop", "width": "80px" },
+        { "title": "Loại TB", "value": "LoaiThietBi", "width": "90px" },
+        { "title": "Ngày áp dụng", "value": "NgayApDungHienThi", "width": "120px" },
+        { "title": "Thứ", "value": "ThuHienThi", "width": "70px", "align": "center" },
+        { "title": "Buổi", "value": "BuoiHienThi", "width": "70px", "align": "center" },
+        { "title": "Tiết", "value": "TietHienThi", "width": "80px", "align": "center" },
+        { "title": "Số HS", "value": "SoHocSinh", "el": "t-num", "width": "70px" },
+        { "title": "Ghi chú", "value": "GhiChu" },
+        { "title": "Trễ hạn", "value": "TreHanHienThi", "width": "80px", "align": "center" },
+        { "title": "", "value": "ctrl-del", "el": "t-button", "width": "60px", "attr": { "icon-text": "mdi-delete", "color": "warning", ":action": { "CALL": "xoaDangKy" } } }
+      ]
+    },
+    {
+      "getDSLop": {
+        "API": "lms/GiaoVienLop_Get_By_GiaoVienID",
+        "IN": { "GiaoVienID": "vueData.user.UserID" },
+        "OUT": "DSLop",
+        "CALLBACK": { "EXE": "runAction(vueData.getDSLopChuNhiem)" }
+      },
+      "getDSLopChuNhiem": {
+        "API": "lms/Lop_Get_ByGVCN",
+        "IN": { "NienKhoa": "vueData.NienKhoa", "sys_UserID": "vueData.user.UserID" },
+        "OUT": "DSLopChuNhiem",
+        "CALLBACK": { "EXE": "renderDSLop(); runAction(vueData.getDSTuan); runAction(vueData.getDSDangKy)" }
+      },
+      "getDSTuan": {
+        "API": "lms/TuanHocTap_Get",
+        "IN": { "NienKhoa": "vueData.NienKhoa" },
+        "OUT": "DSTuan",
+        "CALLBACK": { "EXE": "chonTuanTKBHienTai()" }
+      },
+      "getTKB": {
+        "API": "https://tapi.lhbs.vn/quansinh/ThoiKhoaBieu_GiaoVien",
+        "IN": { "NgayDauTuan": "vueData.tinhNgayDauTuanTKB()", "GiaoVienID": "vueData.user.UserID" },
+        "OUT": "TKBRaw",
+        "CALLBACK": { "EXE": "renderTKB()" }
+      },
+      "getDSHocSinhLop": {
+        "API": "lms/HocSinhLop_Get_ByLopID",
+        "IN": { "LopID": "vueData.LopItem.LopID", "NienKhoa": "vueData.NienKhoa" },
+        "OUT": "DSHocSinhLop",
+        "CALLBACK": { "EXE": "initHocSinhThietBi()" }
+      },
+      "getDSDangKy": {
+        "API": "lms/DangKyMangLaptop_Get",
+        "IN": { "NienKhoa": "vueData.NienKhoa", "TuanHocID": 0, "LopID": 0, "KhoiID": 0, "ViewMode": "`GVBM" },
+        "OUT": "DSDangKy",
+        "CALLBACK": { "EXE": "renderDSDangKy()" }
+      },
+      "xoaDangKy": {
+        "CONFIRM": "Xác nhận xóa đăng ký này?",
+        "API": "lms/DangKyMangLaptop_Del",
+        "IN": { "DangKyID": "item.DangKyID" },
+        "CALLBACK": { "CALL": "getDSDangKy", "MESS": "Đã xóa" }
+      }
+    },
+    { "EXE": "(function(){ var t=setInterval(function(){ if(vueData.NienKhoa){ clearInterval(t); runAction(vueData.getDSLop); } }, 100); setTimeout(function(){ clearInterval(t); }, 8000); })()" }
+  ],
+  "watch": {
+    "LopItem": {
+      "IF": "vueData.LopItem?.LopID > 0",
+      "THEN": [
+        { "DSHocSinhLop": [], "HocSinhThietBi": [] },
+        { "CALL": "getDSHocSinhLop" },
+        { "CALL": "getDSDangKy" }
+      ]
+    },
+    "TuanXemTKB": { "CALL": "getTKB" }
+  },
+  "controls": [
+    {
+      "prop": "fluid pa-0",
+      "rows": [
+        {
+          "prop": ":no-gutters='true'",
+          "cols": [
+            { "el": "uc-main-layout", "w": 12 }
+          ]
+        }
+      ]
+    }
+  ],
+  "set": {}
+}

@@ -16,41 +16,29 @@
 
 				<v-form ref="formData">
 					<v-row dense>
-						<v-col cols="12" md="12">
-							<v-text-field :label="$t('message.Title')" v-model="formData.Title" hide-details="auto"
-								dense></v-text-field>
-						</v-col>
-						<v-col cols="12" md="12">
+						<v-col cols="12" md="7" class="d-flex flex-column" style="gap: 8px; align-self: flex-start">
+							<v-text-field density="compact" :label="$t('message.Title')" v-model="formData.Title"
+								hide-details="auto" />
 							<v-textarea v-if="$i18n.locale == 'en'"
 								:label="formData.ResourceType == 'LESSON' ? 'Decriptions' : 'Instructions'"
 								variant="outlined" density="compact" v-model="formData.Instructions" hide-details="auto"
-								:rows="2"></v-textarea>
+								:rows="2" />
 							<v-textarea v-else :label="formData.ResourceType == 'LESSON' ? 'Mô tả' : 'Hướng dẫn'"
 								variant="outlined" density="compact" v-model="formData.Instructions" hide-details="auto"
-								:rows="2"></v-textarea>
-						</v-col>
-						<v-col cols="12" md="12">
-							<v-select :items="DSSyllabus" item-title="Title" item-value="SyllabusID"
-								v-model="formData.SyllabusID" :label="$i18n.locale == 'en' ? 'Curriculum (Textbook)' : 'Chương trình học (Bộ sách)'"
-								clearable />
-						</v-col>
-						<v-col cols="12" md="12" v-if="formData.SyllabusID">
-							<v-select :items="DSSyllabusNodes" item-title="displayName" item-value="NodeID"
-								v-model="formData.NodeID" :label="$i18n.locale == 'en' ? 'Chapter / Lesson' : 'Chương / Bài học'"
-								clearable />
-						</v-col>
-						<v-col cols="12" md="12">
-							<v-text-field v-model="formData.Chuong" :label="$t('message.Chapter')" />
-						</v-col>
-						<v-col cols="12" md="12">
+								:rows="2" />
+							<v-text-field density="compact" v-model="formData.Chuong" :label="$t('message.Chapter')" />
 							<v-checkbox v-model="formData.IsPublic"
-								:label="$i18n.locale == 'en' ? 'Public' : 'Chia sẻ bài tập'" hide-details="auto"
-								dense />
+								:label="$i18n.locale == 'en' ? 'Public' : 'Chia sẻ bài tập'" hide-details="auto" density="compact" />
+						</v-col>
+						<v-col cols="12" md="5" class="ps-md-4">
+							<uc-hoclieu-resource-selector-dashboard v-model="hocLieuLink"
+								:khoi-id="formData.KhoiID" :mon-hoc-id="formData.MonHocID"
+								:resource-type="formData.ResourceType" :resource-id="resourceIdForMapping" />
 						</v-col>
 					</v-row>
 				</v-form>
 				<v-btn @click="onRedirectToASM(selectedLibery)" color="success" variant="outlined" size="small"
-					class="mt-2">
+					class="mt-2" :loading="isOpeningBuilder" :disabled="isOpeningBuilder">
 					<v-icon class="me-1">mdi-file-document-outline</v-icon>{{ $t('message.ViewDetail') }}
 					{{ formData.ResourceType == 'LESSON' ? ($i18n.locale ==
 					'en' ? 'lesson' : 'bài học') : ($i18n.locale == 'en' ? 'assignment' : 'bài tập') }}
@@ -140,6 +128,7 @@
 			</div>
 			<v-card-actions class="border-t">
 				<v-spacer></v-spacer>
+				<v-btn @click="CloseModal" variant="text">Đóng</v-btn>
 				<v-btn @click="onSave()" variant="outlined" color="primary">
 					<v-icon class="me-1">mdi-content-save-outline</v-icon>{{
 					$t('message.Update') }}
@@ -154,9 +143,11 @@
 		inject: ['snackbarRef', 'iframeRef', 'confirmRef'],
 	props: ["selectedLibery", "isOpen"],
 	emits: ["update:isOpen", 'update:selectedLibery'],
-	data() {
-		return {
-			formData: {},
+		data() {
+			return {
+				formData: {},
+				hocLieuLink: {},
+				isOpeningBuilder: false,
 			editDialog: [],
 			editDataLimitAssigned: [],
 			editData: [],
@@ -172,11 +163,12 @@
 				{ title: this.$i18n.locale == 'en' ? 'Max score' : 'Điểm tối đa', value: 'MaxScore', align: 'center', key: 'MaxScore', sortable: false },
 				{ title: this.$i18n.locale == 'en' ? 'Action' : 'Thao tác', value: 'actions', align: 'center', sortable: false, key: 'actions', sortable: false, width: 100 },
 			],
-			DSSyllabus: [],
-			DSSyllabusNodes: [],
 		}
 	},
 	computed: {
+		resourceIdForMapping() {
+			return this.formData.ResourceID || this.formData.AssignmentID || this.formData.LessonID
+		},
 		title: function () {
 			return this.selectedLibery.Title
 		},
@@ -244,41 +236,40 @@
 
 		this.$nextTick(() => {
 			this.formData = { ...this.selectedLibery, IsPublic: !this.selectedLibery?.IsPublic ? false : true }
+				this.hocLieuLink = {}
 			console.log('assignedClassList', this.assignedClassList)
 			console.log('this.formData', this.formData)
 		})
 
 	},
 	watch: {
-		isOpen: {
-			handler(val) {
-				if (val) {
-					this.getSyllabusList();
-				}
-			},
-			immediate: true
-		},
-		'formData.SyllabusID'(newSyllabusID) {
-			this.DSSyllabusNodes = [];
-			if (newSyllabusID) {
-				this.getSyllabusTree(newSyllabusID);
-			} else {
-				this.formData.NodeID = null;
-			}
-		},
-		'formData.NodeID'(newNodeID) {
-			if (newNodeID) {
-				const node = this.DSSyllabusNodes.find(n => n.NodeID === newNodeID);
-				if (node) {
-					this.formData.Chuong = node.Title;
-				}
-			}
-		},
 		editData: function (newVal) {
 			console.log('newVal', newVal)
 		}
 	},
-	methods: {
+		methods: {
+			syncHocLieuLink() {
+				const link = this.hocLieuLink || {}
+				this.formData = {
+					...this.formData,
+					HocLieuID: link.HocLieuID || null,
+					NoiDungID: link.NoiDungID || null,
+				}
+				this.$emit('update:selectedLibery', { ...this.formData })
+			},
+			onSaveCompleted(message) {
+				this.syncHocLieuLink()
+				Vue.$toast.success(message, { position: 'top' })
+			},
+			saveHocLieuLink(done) {
+				const link = this.hocLieuLink || {}
+				ajaxCALL('lms/EL_HocLieuResource_Save', {
+					ResourceType: this.formData.ResourceType,
+					ResourceID: this.resourceIdForMapping,
+					HocLieuID: link.HocLieuID || null,
+					NoiDungID: link.NoiDungID || null,
+				}, () => done())
+			},
 		getNow() {
 			let date = dayjs().add(1, "minute").format("YYYY-MM-DDTHH:mm");
 			return date
@@ -289,67 +280,45 @@
 		async onSave() {
 			const { valid } = await this.$refs.formData.validate()
 			if (valid) {
+				const link = this.hocLieuLink || {}
+				if (!link.HocLieuID || !link.NoiDungID) {
+					const ok = await this.confirmRef.value.show({
+						title: 'Bài chưa gắn mục lục học liệu số',
+						text: 'Bạn vẫn có thể cập nhật bài, nhưng nên gắn vào mục lục học liệu số để thuận tiện truy xuất ngược và tái sử dụng bài này ở các niên khóa sau.',
+						type: 'warning',
+						confirmText: 'Vẫn cập nhật',
+						cancelText: 'Quay lại gắn học liệu',
+						maxWidth: 520
+					})
+					if (!ok) return
+				}
 				if (this.formData.ResourceType === 'LESSON') {
 					ajaxCALL('lms/EL_Lesson_Save', {
 						...this.formData,
 						Description: this.formData.Instructions,
-						LessonID: this.formData.ResourceID,
+						LessonID: this.resourceIdForMapping,
 						NienKhoa: vueData.NienKhoa,
 						IsPublic: this.formData.IsPublic ? 1 : 0,
-						SyllabusID: this.formData.SyllabusID,
-						NodeID: this.formData.NodeID,
 					}, res => {
-						this.$emit('update:selectedLibery', { ...this.formData })
-						Vue.$toast.success('Cập nhật bài học thành công', { position: "top" })
-						this.CloseModal()
+						this.saveHocLieuLink(() => {
+							this.onSaveCompleted('Cập nhật bài học thành công')
+						})
 					})
 				} else {
 					ajaxCALL('lms/EL_Assignment_Upd', {
 						Title: this.formData.Title,
-						AssignmentID: this.formData.ResourceID,
+						AssignmentID: this.resourceIdForMapping,
 						Instructions: this.formData.Instructions,
 						IsPublic: this.formData.IsPublic ? 1 : 0,
 						NienKhoa: vueData.NienKhoa,
 						LimitAssigned: this.formData.LimitAssigned ?? 1,
-						SyllabusID: this.formData.SyllabusID,
-						NodeID: this.formData.NodeID,
 					}, res => {
-						this.$emit('update:selectedLibery', { ...this.formData })
-						Vue.$toast.success('Cập nhật bài tập thành công', { position: "top" })
-						this.CloseModal()
+						this.saveHocLieuLink(() => {
+							this.onSaveCompleted('Cập nhật bài tập thành công')
+						})
 					})
 				}
 			}
-		},
-		getSyllabusList() {
-			if (!this.formData?.KhoiID || !this.formData?.MonHocID) return;
-			ajaxCALL('lms/EL_Syllabus_GetByLopMon', {
-				KhoiID: this.formData.KhoiID,
-				MonHocID: this.formData.MonHocID,
-				NienKhoa: vueData.NienKhoa
-			}, res => {
-				this.DSSyllabus = res?.data || res || [];
-			});
-		},
-		getSyllabusTree(syllabusID) {
-			ajaxCALL('lms/EL_Syllabus_GetTree', { SyllabusID: syllabusID }, res => {
-				const rawNodes = res?.data || res || [];
-				this.DSSyllabusNodes = this.flattenTree(rawNodes, null, 0);
-			});
-		},
-		flattenTree(nodes, parentId = null, depth = 0) {
-			let result = [];
-			const currentLevel = nodes.filter(n => n.ParentID === parentId);
-			for (const node of currentLevel) {
-				if (node.NodeType === 'CHAPTER' || node.NodeType === 'LESSON') {
-					result.push({
-						...node,
-						displayName: '  '.repeat(depth) + (node.NodeType === 'CHAPTER' ? '📁 ' : '📄 ') + node.Title
-					});
-					result = result.concat(this.flattenTree(nodes, node.NodeID, depth + 1));
-				}
-			}
-			return result;
 		},
 		async onToggleStatus(row) {
 			const prev = row.Status // lưu trạng thái cũ (1/0)
@@ -471,11 +440,21 @@
 			} else if (item.ResourceType === 'LESSON') {
 				url = `/lms_tc_lesson_builder?LessonID=${item.ResourceID}`
 			}
-			this.iframeRef.value.openWindow({
+			const openBuilder = () => this.iframeRef.value.openWindow({
 				title: item.Title,
 				url,
 				onclose: () => vueData.initPage()
-			});
+			})
+			const link = this.hocLieuLink || {}
+			if (!link.HocLieuID || !link.NoiDungID || !this.resourceIdForMapping) return openBuilder()
+
+			// Giáo viên vừa chọn học liệu: lưu liên kết ngầm trước rồi mới mở trình soạn thảo.
+			this.isOpeningBuilder = true
+			this.saveHocLieuLink(() => {
+				this.syncHocLieuLink()
+				this.isOpeningBuilder = false
+				openBuilder()
+			})
 		},
 		async saveAllLimitAssigned() {
 			const ok = await this.confirmRef.value.show({ title: 'Xác nhận lưu giới hạn lần nộp?' })

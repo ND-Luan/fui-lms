@@ -27,6 +27,10 @@
                 @click="exportExcel">
                 <v-icon start="">mdi-file-excel</v-icon>Xuất Excel{{ DataThongKe.length > 0 ? ' (2 bảng)' : '' }}
               </v-btn>
+              <v-btn variant="outlined" color="primary" :disabled="!KhoiID || !MonHocItem?.TemplateBangDiemID"
+                @click="exportExcelAll">
+                <v-icon start="">mdi-file-excel</v-icon>Xuất tất cả kì
+              </v-btn>
             </v-col>
           </v-row>
         </v-card-text>
@@ -80,15 +84,25 @@
       headers: [],
       columns: [],
       freezeColumns: 3,
-      DSSemester: [
+    }
+  },
+  computed: {
+    DSSemester() {
+      const capId = parseInt(vueData.CapID || capid)
+      if (capId === 2 || capId === 3) {
+        return [
+          { title: 'Học kì 1', value: 'HK1' },
+          { title: 'Học kì 2', value: 'HK2' },
+          { title: 'Cả năm', value: 'CaNam' },
+        ]
+      }
+      return [
         { title: 'Giữa kì 1', value: 'GK_HK1' },
         { title: 'Cuối kì 1', value: 'CK_HK1' },
         { title: 'Giữa kì 2', value: 'GK_HK2' },
         { title: 'Cuối kì 2', value: 'CK_HK2' },
-      ],
-    }
-  },
-  computed: {
+      ]
+    },
     TitleCap() {
       return renderText(parseInt(vueData.CapID || capid))
     },
@@ -212,6 +226,87 @@
       XLSX.writeFile(
         workbook,
         `Bang_Diem_Chi_Tiet_Khoi${this.KhoiID || ''}_${this.MonHocItem?.MonHocName || 'MonHoc'}.xlsx`
+      )
+    },
+    getExcelSheetFromCotDiem(dsCotDiem) {
+      const uniqueHocSinhID = [...new Set((dsCotDiem ?? []).map(x => x.HocSinhID))]
+      const dsHocSinh = []
+      
+      for (const hocSinhID of uniqueHocSinhID) {
+        const hocSinh = dsCotDiem.find(x => x.HocSinhID === hocSinhID)
+        if (!hocSinh) continue
+
+        const obj = {
+          SoDanhBo: hocSinh.SoDanhBo,
+          HoTen: hocSinh.HoTen,
+          HocSinhID: hocSinh.HocSinhID,
+        }
+
+        const arrDSCotDiemFilter = dsCotDiem.filter(x => x.HocSinhID === hocSinhID)
+        for (const maCotDiem of arrDSCotDiemFilter) {
+          obj[maCotDiem.MaCotDiem] = maCotDiem.KetQuaDanhGia_VI
+        }
+        dsHocSinh.push(obj)
+      }
+
+      const firstHocSinhID = uniqueHocSinhID[0]
+      const arrDSCotDiemFirstStudent = firstHocSinhID
+        ? dsCotDiem.filter(x => x.HocSinhID === firstHocSinhID)
+        : []
+
+      const columnThongTinHocSinh = [
+        { title: 'Mã học sinh', name: 'HocSinhID' },
+        { title: 'Số Danh Bộ', name: 'SoDanhBo' },
+        { title: 'Họ tên học sinh', name: 'HoTen' },
+      ]
+
+      const listMonHoc = [5, 46, 76]
+
+      const columnsCotDiem = arrDSCotDiemFirstStudent.map((x) => {
+        const title = (listMonHoc.includes(this.MonHocItem?.MonHocID) ? x.TenHienThi_EN : x.TenHienThi_VI) || x.TenHienThi_VI || x.TenHienThi_EN || x.MaCotDiem
+        return {
+          title,
+          name: x.MaCotDiem,
+        }
+      })
+
+      const columns = [...columnThongTinHocSinh, ...columnsCotDiem]
+      
+      const detailHeaders = columns.map(x => x.title ?? x.name)
+      const detailKeys = columns.map(x => x.name)
+      const detailData = dsHocSinh.map(item => detailKeys.map(key => item[key] ?? ''))
+      
+      return XLSX.utils.aoa_to_sheet([detailHeaders, ...detailData])
+    },
+    async exportExcelAll() {
+      if (!this.KhoiID || !this.MonHocItem?.TemplateBangDiemID) return
+      
+      this.snackbarRef?.value?.showSnackbar({ message: 'Đang xử lý xuất Excel tất cả các kì...', color: 'info' })
+      const workbook = XLSX.utils.book_new()
+      
+      for (const sem of this.DSSemester) {
+        const res = await fetchPromise('lms/HocSinhBangDiem_Get_By_KhoiID_MonHocID', {
+          KhoiID: this.KhoiID,
+          TemplateBangDiemID: this.MonHocItem.TemplateBangDiemID,
+          Semester: sem.value,
+          NienKhoa: vueData.NienKhoa,
+        })
+        const dsCotDiem = res ?? []
+        if (dsCotDiem.length > 0) {
+          const worksheet = this.getExcelSheetFromCotDiem(dsCotDiem)
+          let sheetName = sem.title
+          XLSX.utils.book_append_sheet(workbook, worksheet, sheetName)
+        }
+      }
+      
+      if (workbook.SheetNames.length === 0) {
+        this.snackbarRef?.value?.showSnackbar({ message: 'Không có dữ liệu để xuất', color: 'error' })
+        return
+      }
+      
+      XLSX.writeFile(
+        workbook,
+        `Bang_Diem_Chi_Tiet_Khoi${this.KhoiID || ''}_${this.MonHocItem?.MonHocName || 'MonHoc'}_TatCaCacKi.xlsx`
       )
     },
     renderHocSinh() {

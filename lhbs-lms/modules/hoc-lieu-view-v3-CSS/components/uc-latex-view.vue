@@ -1,11 +1,10 @@
-<!-- uc-latex-view.vue -->
 <template>
 	<div ref="contentContainer" class="uc-latex-view" v-html="renderedContent" />
 </template>
 
 <script>
 	export default {
-	  name: 'uc-latex-view',
+		name: 'uc-latex-view',
 	  props: {
 	    content: {
 	      type: String,

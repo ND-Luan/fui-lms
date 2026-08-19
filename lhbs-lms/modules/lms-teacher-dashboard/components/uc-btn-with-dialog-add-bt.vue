@@ -1,5 +1,5 @@
 <template>
-	<v-dialog :model-value="isOpen" @update:model-value="val => { if (!val) CloseModal() }" max-width="500">
+	<v-dialog :model-value="isOpen" @update:model-value="val => { if (!val) CloseModal() }" max-width="900">
 		<v-card>
 			<v-card-title class="d-flex align-center">
 				{{ $t('message.CreateContent') }} - {{ $t('message.Grade') }} {{ khoiItem?.KhoiID
@@ -25,34 +25,25 @@
 							</div>
 						</v-col>
 						<v-col cols="12">
-							<v-select :items="typeItems" item-title='text' item-value='value' v-model="form.type"
-								:label="$t('message.ChooseContent')" />
-						</v-col>
-						<v-col cols="12">
-							<v-select :items="DSTuan" item-title='Tuan_HienThi' item-value='TuanHocID'
-								v-model="form.TuanHocID" :label="$t('message.ChooseWeek')" />
-						</v-col>
-						<v-col cols="12">
-							<v-select :items="DSSyllabus" item-title="Title" item-value="SyllabusID"
-								v-model="form.SyllabusID" :label="$i18n.locale == 'en' ? 'Curriculum (Textbook)' : 'Chương trình học (Bộ sách)'"
-								clearable />
-						</v-col>
-						<v-col cols="12" v-if="form.SyllabusID">
-							<v-select :items="DSSyllabusNodes" item-title="displayName" item-value="NodeID"
-								v-model="form.NodeID" :label="$i18n.locale == 'en' ? 'Chapter / Lesson' : 'Chương / Bài học'"
-								clearable />
-						</v-col>
-						<v-col cols="12">
-							<v-text-field v-model="form.Chuong" :label="$t('message.Chapter')" />
-						</v-col>
-						<v-col cols="12">
-							<v-text-field v-model="form.Title" :label="$t('message.Title')" required
-								:rules="[v => !!v || 'Vui lòng nhập tiêu đề']" />
-						</v-col>
-						<v-col cols="12">
-							<v-text-field v-if="form.type == 1" v-model="form.Description"
-								:label="$t('message.Decriptions')" />
-							<v-text-field v-else v-model="form.Instructions" :label="$t('message.Instructions')" />
+							<v-row dense>
+								<v-col cols="12" md="7" class="d-flex flex-column" style="gap: 8px; align-self: flex-start">
+									<v-select density="compact" :items="typeItems" item-title='text' item-value='value' v-model="form.type"
+										:label="$t('message.ChooseContent')" />
+									<v-select density="compact" :items="DSTuan" item-title='Tuan_HienThi' item-value='TuanHocID'
+										v-model="form.TuanHocID" :label="$t('message.ChooseWeek')" />
+									<v-text-field density="compact" v-model="form.Chuong" :label="$t('message.Chapter')" />
+									<v-text-field density="compact" v-model="form.Title" :label="$t('message.Title')" required
+										:rules="[v => !!v || 'Vui lòng nhập tiêu đề']" />
+									<v-text-field density="compact" v-if="form.type == 1" v-model="form.Description"
+										:label="$t('message.Decriptions')" />
+									<v-text-field density="compact" v-else v-model="form.Instructions" :label="$t('message.Instructions')" />
+								</v-col>
+								<v-col cols="12" md="5" class="ps-md-4">
+									<uc-hoclieu-resource-selector v-model="hocLieuLink"
+										:khoi-id="khoiItem?.KhoiID" :mon-hoc-id="khoiItem?.MonHocID"
+										:resource-type="form.type == 1 ? 'LESSON' : 'ASSIGNMENT'" />
+								</v-col>
+							</v-row>
 						</v-col>
 
 					</v-row>
@@ -91,22 +82,19 @@
 	},
 	data() {
 		return {
-			form: {
+							form: {
 				Title: "",
 				Instructions: "",
 				Description: "",
 				TuanHocID: null,
 				Chuong: "",
-				type: this.defaultType ?? 0,
-				SyllabusID: null,
-				NodeID: null
-			},
+								type: this.defaultType ?? 0
+							},
+			hocLieuLink: {},
 			typeItems: [
 				{ text: this.$i18n.locale == 'en' ? 'Create lesson' : 'Tạo bài học', value: 1 },
 				{ text: this.$i18n.locale == 'en' ? 'Create assignment' : 'Tạo bài tập', value: 0 }
 			],
-			DSSyllabus: [],
-			DSSyllabusNodes: [],
 			vueData,
 		}
 	},
@@ -118,58 +106,16 @@
 		}
 
 	},
-	watch: {
-		isOpen(val) {
-			if (val) {
-				this.getSyllabusList();
-			}
-		},
-		'form.SyllabusID'(newSyllabusID) {
-			this.form.NodeID = null;
-			this.DSSyllabusNodes = [];
-			if (newSyllabusID) {
-				this.getSyllabusTree(newSyllabusID);
-			}
-		},
-		'form.NodeID'(newNodeID) {
-			if (newNodeID) {
-				const node = this.DSSyllabusNodes.find(n => n.NodeID === newNodeID);
-				if (node) {
-					this.form.Chuong = node.Title;
-				}
-			}
-		}
-	},
-	methods: {
-		getSyllabusList() {
-			if (!this.khoiItem?.KhoiID || !this.khoiItem?.MonHocID) return;
-			ajaxCALL('lms/EL_Syllabus_GetByLopMon', {
-				KhoiID: this.khoiItem.KhoiID,
-				MonHocID: this.khoiItem.MonHocID,
-				NienKhoa: vueData.NienKhoa
-			}, res => {
-				this.DSSyllabus = res?.data || res || [];
-			});
-		},
-		getSyllabusTree(syllabusID) {
-			ajaxCALL('lms/EL_Syllabus_GetTree', { SyllabusID: syllabusID }, res => {
-				const rawNodes = res?.data || res || [];
-				this.DSSyllabusNodes = this.flattenTree(rawNodes, null, 0);
-			});
-		},
-		flattenTree(nodes, parentId = null, depth = 0) {
-			let result = [];
-			const currentLevel = nodes.filter(n => n.ParentID === parentId);
-			for (const node of currentLevel) {
-				if (node.NodeType === 'CHAPTER' || node.NodeType === 'LESSON') {
-					result.push({
-						...node,
-						displayName: '  '.repeat(depth) + (node.NodeType === 'CHAPTER' ? '📁 ' : '📄 ') + node.Title
-					});
-					result = result.concat(this.flattenTree(nodes, node.NodeID, depth + 1));
-				}
-			}
-			return result;
+		methods: {
+		saveHocLieuLink(resourceType, resourceID, done) {
+			const link = this.hocLieuLink || {}
+			if (!link.HocLieuID || !link.NoiDungID) return done()
+			ajaxCALL('lms/EL_HocLieuResource_Save', {
+				ResourceType: resourceType,
+				ResourceID: resourceID,
+				HocLieuID: link.HocLieuID,
+				NoiDungID: link.NoiDungID,
+			}, () => done())
 		},
 		clearData() {
 
@@ -178,9 +124,7 @@
 			this.form.Description = ""
 			this.form.TuanHocID = null
 			this.form.Chuong = ""
-			this.form.SyllabusID = null
-			this.form.NodeID = null
-			this.DSSyllabusNodes = []
+			this.hocLieuLink = {}
 		},
 		async handleSubmit() {
 
@@ -193,7 +137,23 @@
 			}
 
 			if (valid) {
-				if (this.form.type == 0) {
+				this.confirmMissingHocLieu(() => this.submitContent())
+			}
+		},
+		confirmMissingHocLieu(onConfirmed) {
+			const link = this.hocLieuLink || {}
+			if (link.HocLieuID && link.NoiDungID) return onConfirmed()
+			this.confirmRef.value.show({
+				title: 'Bài chưa gắn mục lục học liệu số',
+				text: 'Bạn vẫn có thể lưu bài, nhưng nên gắn vào mục lục học liệu số để thuận tiện truy xuất ngược và tái sử dụng bài này ở các niên khóa sau.',
+				type: 'warning',
+				confirmText: 'Vẫn lưu bài',
+				cancelText: 'Quay lại gắn học liệu',
+				maxWidth: 520
+			}).then(ok => { if (ok) onConfirmed() })
+		},
+		submitContent() {
+			if (this.form.type == 0) {
 					ajaxCALL('lms/EL_Assignment_Ins', {
 						...this.form,
 						MonHocID: this.khoiItem.MonHocID,
@@ -201,16 +161,18 @@
 						NienKhoa: vueData.NienKhoa,
 					HocKi: vueData.NienKhoaItem?.HocKi ?? 1
 					}, res => {
-						this.snackbarRef.value.showSnackbar({ message: 'Tạo bài tập thành công', color: 'success' })
-						this.clearData();
-						this.CloseModal();
-						vueData.apiCall3();
-
-						this.iframeRef.value.openWindow({
-							title: "Soạn bài tập",
-							url: `/lms_tc_asm_builder?AssignmentID=${res?.data[0].AssignmentID}`,
-							onclose: () => vueData.initPage()
-						});
+						const resourceID = res?.data?.[0]?.AssignmentID
+						this.saveHocLieuLink('ASSIGNMENT', resourceID, () => {
+							this.snackbarRef.value.showSnackbar({ message: 'Tạo bài tập thành công', color: 'success' })
+							this.clearData();
+							this.CloseModal();
+							vueData.apiCall3();
+							this.iframeRef.value.openWindow({
+								title: "Soạn bài tập",
+								url: `/lms_tc_asm_builder?AssignmentID=${resourceID}`,
+								onclose: () => vueData.initPage()
+							});
+						})
 					},
 						err => {
 							// xử lý khi lỗi
@@ -227,22 +189,24 @@
 						HocKi: vueData.NienKhoaItem?.HocKi ?? 1,
 						Status: 1
 					}, res => {
-						Vue.$toast.success('Tạo bài học thành công', { position: "top" })
-						this.clearData();
-						this.CloseModal();
-						vueData.apiCall3();
-						this.iframeRef.value.openWindow({
-							title: "Soạn bài học",
-							url: `lms_tc_lesson_builder?LessonID=${res?.data[0].LessonID}`,
-							id: "WinSoanBaiGiang",
-							onclose: () => vueData.initPage()
-						});
+						const resourceID = res?.data?.[0]?.LessonID
+						this.saveHocLieuLink('LESSON', resourceID, () => {
+							Vue.$toast.success('Tạo bài học thành công', { position: "top" })
+							this.clearData();
+							this.CloseModal();
+							vueData.apiCall3();
+							this.iframeRef.value.openWindow({
+								title: "Soạn bài học",
+								url: `lms_tc_lesson_builder?LessonID=${resourceID}`,
+								id: "WinSoanBaiGiang",
+								onclose: () => vueData.initPage()
+							});
+						})
 					},
 						err => {
 							// xử lý khi lỗi
 							Vue.$toast.error(err?.response?.data?.Message || 'Có lỗi xảy ra, vui lòng kiểm tra lại dữ liệu nhập vào!', { position: "top" });
 						})
-				}
 			}
 		},
 		getSubjectIcon(subjectName) {

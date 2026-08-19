@@ -24,6 +24,11 @@
 					<v-chip :color="statusInfo.color" class="font-weight-medium" variant="text" size="small">
 						{{ statusInfo.text }}
 					</v-chip>
+					<v-chip v-if="isHocLieuMappingLoaded && !isHocLieuLinked" size="small" label
+						color="warning" variant="tonal" prepend-icon="mdi-file-tree-outline"
+						v-tooltip="'Bài này chưa gán mục lục học liệu số'">
+						Chưa gán mục lục học liệu số
+					</v-chip>
 					<v-menu location="bottom">
 						<template v-slot:activator="{ props }">
 							<v-btn color="primary" v-bind="props" icon="mdi-dots-vertical" variant="tonal"
@@ -233,6 +238,8 @@
 				dataItemOriginal: null,
 				dataAssignedClassList: [],
 				isDialogEditBT: false,
+				isHocLieuMappingLoaded: false,
+				isHocLieuLinked: false,
 				statusItems: [
 					{ text: 'Đã giao', value: 1 },
 					{ text: 'Đang khóa', value: 0 }
@@ -249,11 +256,13 @@
 					if (!oldVal || newVal?.ResourceID !== oldVal?.ResourceID) {
 						this.dataItemOriginal = newVal ? JSON.parse(JSON.stringify(newVal)) : null;
 						this.dataAssignedClassList = this.buildAssignedClassList();
+						this.loadHocLieuMapping();
 	
 					}
 				}
 			}
 		},
+		mounted() { this.loadHocLieuMapping() },
 		computed: {
 			itemInfo() {
 				return this.item.ResourceType === 'ASSIGNMENT'
@@ -316,6 +325,22 @@
 			}
 		},
 		methods: {
+			loadHocLieuMapping() {
+				this.isHocLieuMappingLoaded = false
+				const resourceType = this.item?.ResourceType
+				const resourceID = this.item?.ResourceID
+				if (!resourceType || !resourceID) {
+					this.isHocLieuLinked = !!(this.item?.HocLieuID && this.item?.NoiDungID)
+					this.isHocLieuMappingLoaded = true
+					return
+				}
+				ajaxCALL('lms/EL_HocLieuResource_Get', { ResourceType: resourceType, ResourceID: resourceID }, response => {
+					const rows = response?.data ?? response ?? []
+					const mapping = Array.isArray(rows?.[0]) ? rows[0][0] : (Array.isArray(rows) ? rows[0] : rows)
+					this.isHocLieuLinked = !!(mapping?.HocLieuID && mapping?.NoiDungID)
+					this.isHocLieuMappingLoaded = true
+				})
+			},
 			isDeletedItemInSelectedWeek(item) {
 				const selectedWeekId = vueData.cascadeTuanID
 				if (selectedWeekId != null && item?.TuanHocID != null) {

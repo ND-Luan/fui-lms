@@ -14,7 +14,7 @@
                                 item-value="LopID" return-object :disabled="!KhoiItem" />
                         </v-col>
                         <v-col cols="12" sm="3">
-                            <v-select v-model="SemesterItem" label="Chọn học kỳ" :items="DSSemester" item-title="title"
+                            <v-select v-model="SemesterItem" label="Chọn học kì" :items="DSSemester" item-title="title"
                                 item-value="value" return-object :disabled="!LopItem" />
                         </v-col>
                         <v-col cols="12" sm="3" class="d-flex align-center ga-2 flex-wrap">
@@ -55,7 +55,7 @@
 
         <div v-else class="d-flex flex-column align-center justify-center py-12 text-medium-emphasis">
             <v-icon size="48" class="mb-3 opacity-40">mdi-table-search</v-icon>
-            <p class="text-body-2">Chọn khối, lớp và học kỳ để xem bảng điểm</p>
+            <p class="text-body-2">Chọn khối, lớp và học kì để xem bảng điểm</p>
         </div>
 
         <!-- Dialog Từ chối -->
@@ -131,10 +131,10 @@
         ReasonReject: '',
       },
       DSSemester: [
-        { title: 'Giữa kỳ 1', value: 'GK_HK1' },
-        { title: 'Cuối kỳ 1', value: 'CK_HK1' },
-        { title: 'Giữa kỳ 2', value: 'GK_HK2' },
-        { title: 'Cuối kỳ 2', value: 'CK_HK2' },
+        { title: 'Giữa kì 1', value: 'GK_HK1' },
+        { title: 'Cuối kì 1', value: 'CK_HK1' },
+        { title: 'Giữa kì 2', value: 'GK_HK2' },
+        { title: 'Cuối kì 2', value: 'CK_HK2' },
       ],
       EnumTinhTrang: {
         ChuaLuu: 0, LuuTam: 1, GVBM_GuiDiem: 2, GVCN_TuChoi_GVBM: 3,

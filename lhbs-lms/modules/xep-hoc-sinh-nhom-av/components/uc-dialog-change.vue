@@ -29,7 +29,7 @@
 
 <script>
 	export default {
-		inject: ['snackbarRef'],
+		inject: ['snackbarRef', 'confirmRef'],
 		props: {
 			modelValue: Boolean,
 			HocSinhDetail: Object,
@@ -69,39 +69,39 @@
 					HSNhomID: item.HSNhomID,
 				}, { cache: false })
 			},
-			onSubmit() {
+			async onSubmit() {
 				if (!this.NhomSelected) {
-					this.snackbarRef.value.show({ message: 'Vui lòng chọn nhóm chuyển đến', color: 'warning' })
+					this.snackbarRef.value.showSnackbar({ message: 'Vui lòng chọn nhóm chuyển đến', color: 'warning' })
 					return
 				}
-				const $this = this
-				confirm({
-					title: `Xác nhận chuyển ${$this.HocSinhDetail.HoTen} sang nhóm ${$this.NhomSelected.TenNhom}?`,
-					action: async () => {
-						$this.IsLoading = true
-						try {
-							const item = $this.HocSinhDetail
-							// Bước 1: Xếp bảng điểm sang nhóm mới
-							await $this.apiXepBangdiem(item)
-							// Bước 2: Cập nhật NhomID của học sinh
-							await $this.apiUpdateNhom(item)
-							// Bước 3: Nếu là môn AV (MonHocID=76), cập nhật thêm các nhóm con
-							if ($this.NhomDetail.MonHocID === 76 && $this.NhomSelected.ListNhomID_Child) {
-								const childIDs = $this.NhomSelected.ListNhomID_Child.split(',')
-								for (const nhomID of childIDs) {
-									await $this.apiUpdateNhomChild(item, nhomID)
-								}
-							}
-							$this.snackbarRef.value.show({ message: `Đã chuyển ${item.HoTen} sang nhóm ${$this.NhomSelected.TenNhom}`, color: 'success' })
-							$this.$emit('onSubmitFinish')
-							$this.$emit('update:modelValue', false)
-						} catch (e) {
-							$this.snackbarRef.value.show({ message: 'Chuyển nhóm thất bại', color: 'error' })
-						} finally {
-							$this.IsLoading = false
-						}
-					},
+				
+				const ok = await this.confirmRef.value.show({
+					title: `Xác nhận chuyển ${this.HocSinhDetail.HoTen} sang nhóm ${this.NhomSelected.TenNhom}?`
 				})
+				if (!ok) return
+
+				this.IsLoading = true
+				try {
+					const item = this.HocSinhDetail
+					// Bước 1: Xếp bảng điểm sang nhóm mới
+					await this.apiXepBangdiem(item)
+					// Bước 2: Cập nhật NhomID của học sinh
+					await this.apiUpdateNhom(item)
+					// Bước 3: Nếu là môn AV (MonHocID=76), cập nhật thêm các nhóm con
+					if (this.NhomDetail.MonHocID === 76 && this.NhomSelected.ListNhomID_Child) {
+						const childIDs = this.NhomSelected.ListNhomID_Child.split(',')
+						for (const nhomID of childIDs) {
+							await this.apiUpdateNhomChild(item, nhomID)
+						}
+					}
+					this.snackbarRef.value.showSnackbar({ message: `Đã chuyển ${item.HoTen} sang nhóm ${this.NhomSelected.TenNhom}`, color: 'success' })
+					this.$emit('onSubmitFinish')
+					this.$emit('update:modelValue', false)
+				} catch (e) {
+					this.snackbarRef.value.showSnackbar({ message: 'Chuyển nhóm thất bại', color: 'error' })
+				} finally {
+					this.IsLoading = false
+				}
 			},
 		},
 	}

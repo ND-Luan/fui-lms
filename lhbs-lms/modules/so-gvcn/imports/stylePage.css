@@ -1,213 +1,93 @@
-/* Base Tab & Layout Window */
-.v-window,
-.v-window-item {
-    height: 100%;
-}
 
-.so-gvcn-page .v-tabs {
-    border-bottom: 1px solid #e0e0e0;
-}
-
-.so-gvcn-page .section-title {
-    font-weight: 600;
-    color: #1f2937;
-}
-
-.so-gvcn-page .v-row>.v-col:focus-within {
-    position: relative;
-    z-index: 10;
-}
-
-/* Left Vertical Navigation in Tab 2 */
-.chi-tieu-vertical-tabs .v-list-item--active {
-    background-color: rgba(var(--v-theme-primary), 0.1) !important;
-    border-left: 3px solid rgb(var(--v-theme-primary)) !important;
-}
-
-/* Tab 2 C2/C3: keep the sheet viewport aligned with its columns while scrolling horizontally. */
-.so-gvcn-tab-chi-tieu>.d-flex,
-.so-gvcn-tab-chi-tieu>.d-flex>.flex-grow-1 {
-    min-width: 0;
-}
-
-.so-gvcn-card-sheet-wrap .jss_container,
-.so-gvcn-card-sheet-wrap .jss_content {
-    max-width: 100% !important;
-    min-width: 0 !important;
-    overflow-x: auto !important;
-}
-
-/* Full Sheet Layout Wrap (Tabs 1, 3, 4, 5, 6) */
-.so-gvcn-sheet-wrap {
-    display: flex;
-    flex-direction: column;
-    height: 100%;
-    min-height: 420px;
-    overflow: hidden;
-}
-
-.so-gvcn-sheet {
-    width: 100%;
-}
-
-.so-gvcn-sheet-wrap .wrapper-jexcel,
-.so-gvcn-sheet-wrap .jexcel_container,
-.so-gvcn-sheet-wrap .jspreadsheet_container {
-    flex: 1 1 auto;
-    min-height: 0;
-    max-width: 100%;
-    height: 100%;
-    overflow: auto !important;
-}
-
-.so-gvcn-sheet-wrap .jexcel_content,
-.so-gvcn-sheet-wrap .jspreadsheet_content {
-    flex: 1 1 auto;
-    min-height: 0 !important;
+/* Tab Công tác chủ nhiệm tháng: let the parent tab-window own scrolling. */
+.so-gvcn-cong-tac-thang-wrapper,
+.so-gvcn-cong-tac-thang-wrapper .jss_container {
+    height: auto !important;
     max-height: none !important;
-    overflow: auto !important;
+    overflow: visible !important;
+}
+
+.so-gvcn-cong-tac-thang-wrapper {
+    width: 100% !important;
+    min-width: 0 !important;
+    overflow: visible !important;
+}
+
+.so-gvcn-cong-tac-thang-wrapper .jss_spreadsheet,
+.so-gvcn-cong-tac-thang-wrapper .jss_container {
+    width: 100% !important;
+    min-width: 0 !important;
+}
+
+.so-gvcn-cong-tac-thang-wrapper .jss_content {
+    width: 100% !important;
+    max-width: 100% !important;
+    height: auto !important;
+    max-height: none !important;
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
+}
+
+.so-gvcn-cong-tac-thang-wrapper .jss_worksheet {
+    width: max-content !important;
+    min-width: 1930px !important;
+}
+
+.so-gvcn-cong-tac-thang-wrapper .jss_worksheet tbody tr {
+    height: auto !important;
+}
+
+.so-gvcn-cong-tac-thang-wrapper .jss_worksheet tbody td {
+    height: auto !important;
+    min-height: 68px !important;
 }
 
 /* Card Sheet Wrap (Tab 2 - Allow dropdown to overflow card boundary) */
+.so-gvcn-plan-scroll {
+	min-width: 0;
+	width: 0;
+	flex: 1 1 0;
+	overflow-x: hidden !important;
+}
+
+.so-gvcn-plan-layout,
+.so-gvcn-plan-scroll .v-row,
+.so-gvcn-plan-scroll .wrapper-jexcel,
+.so-gvcn-plan-scroll .jss_container,
+.so-gvcn-plan-scroll .jspreadsheet_container {
+	min-width: 0 !important;
+	max-width: 100% !important;
+}
+
+.so-gvcn-quality-target-sheet table.jss_worksheet thead tr.jss_nested:last-child td:last-child,
+.so-gvcn-quality-target-sheet table.jss_worksheet thead tr:not(.jss_nested) td:last-child,
+.so-gvcn-quality-target-sheet table.jss_worksheet tbody td:last-child {
+    width: 220px !important;
+    min-width: 220px !important;
+}
+
+.so-gvcn-academic-target-sheet table.jss_worksheet thead tr.jss_nested,
+.so-gvcn-academic-target-sheet table.jss_worksheet thead tr.jss_nested td,
+.so-gvcn-academic-target-sheet table.jss_worksheet thead tr.jss_nested th {
+    height: 56px !important;
+    min-height: 56px !important;
+    max-height: 56px !important;
+    line-height: 1.3 !important;
+    vertical-align: middle !important;
+}
+
+.so-gvcn-plan-scroll .so-gvcn-sheet {
+    min-width: 0;
+    max-width: 100%;
+}
+
+.so-gvcn-plan-scroll .jss_content,
+.so-gvcn-plan-scroll .jspreadsheet-content {
+    max-width: 100% !important;
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
+}
+
 .so-gvcn-card-sheet-wrap,
 .so-gvcn-card-sheet-wrap .wrapper-jexcel,
 .so-gvcn-card-sheet-wrap .jexcel_container,
-.so-gvcn-card-sheet-wrap .jspreadsheet_container,
-.so-gvcn-card-sheet-wrap .jexcel_content,
-.so-gvcn-card-sheet-wrap .jspreadsheet_content {
-    overflow: visible !important;
-}
-
-.so-gvcn-card-sheet-wrap .jexcel>tbody>tr>td.dropdown {
-    overflow: visible !important;
-}
-
-.so-gvcn-card-sheet-wrap .jexcel_editor {
-    min-width: 100% !important;
-    box-sizing: border-box !important;
-    z-index: 9999 !important;
-}
-
-.so-gvcn-card-sheet-wrap table {
-    white-space: pre-line;
-}
-
-/* Dropdown Popup Styling & Layering */
-.so-gvcn-card-sheet-wrap .jdropdown-content,
-.so-gvcn-card-sheet-wrap .jdropdown-container,
-.so-gvcn-card-sheet-wrap .jdropdown-picker,
-.jdropdown-content,
-.jdropdown-container,
-.jdropdown-picker {
-    background: #fff !important;
-    border: 1px solid #90caf9 !important;
-    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.18) !important;
-    z-index: 100000 !important;
-    overflow: visible !important;
-}
-
-.so-gvcn-card-sheet-wrap .jdropdown-content,
-.jdropdown-content {
-    max-height: 220px !important;
-    overflow-y: auto !important;
-    overflow-x: hidden !important;
-}
-
-/* Sticky Headers & Freezed Columns Styling */
-.so-gvcn-sheet-wrap table thead tr {
-    height: 28px !important;
-}
-
-.so-gvcn-sheet-wrap table thead tr:first-child,
-.so-gvcn-sheet-wrap table thead tr:first-child td,
-.so-gvcn-sheet-wrap table thead tr:first-child th {
-    position: sticky !important;
-    top: 0 !important;
-    z-index: 33 !important;
-    background: #f5f5f5 !important;
-}
-
-.so-gvcn-sheet-wrap table thead tr:nth-child(2),
-.so-gvcn-sheet-wrap table thead tr:nth-child(2) td,
-.so-gvcn-sheet-wrap table thead tr:nth-child(2) th {
-    position: sticky !important;
-    top: 28px !important;
-    z-index: 30 !important;
-    background: #f5f5f5 !important;
-}
-
-.so-gvcn-sheet-wrap table thead tr:nth-child(3),
-.so-gvcn-sheet-wrap table thead tr:nth-child(3) td,
-.so-gvcn-sheet-wrap table thead tr:nth-child(3) th {
-    position: sticky !important;
-    top: 56px !important;
-    z-index: 29 !important;
-    background: #f5f5f5 !important;
-}
-
-.so-gvcn-sheet-wrap table td.jss_freezed,
-.so-gvcn-sheet-wrap table th.jss_freezed {
-    left: var(--so-gvcn-freeze-left, 0px) !important;
-    background: #fff !important;
-    z-index: 20 !important;
-}
-
-.so-gvcn-sheet-wrap table thead td.jss_freezed,
-.so-gvcn-sheet-wrap table thead th.jss_freezed {
-    background: #f5f5f5 !important;
-    z-index: 40 !important;
-}
-
-.so-gvcn-sheet-wrap table thead tr.jss_nested td.jss_freezed,
-.so-gvcn-sheet-wrap table thead tr.jss_nested th.jss_freezed {
-    position: sticky !important;
-    z-index: 43 !important;
-}
-
-.so-gvcn-sheet-wrap table thead [data-x].jss_freezed {
-    position: sticky !important;
-    z-index: 42 !important;
-}
-
-.so-gvcn-sheet-wrap table tbody [data-x].jss_freezed {
-    position: sticky !important;
-    z-index: 22 !important;
-    background: #fff !important;
-}
-
-.so-gvcn-sheet-wrap table.so-gvcn-manual-freeze .jss_selectall,
-.so-gvcn-sheet-wrap table.so-gvcn-manual-freeze tbody .jss_row {
-    position: static !important;
-    left: auto !important;
-    z-index: 0 !important;
-}
-
-.so-gvcn-so-ket-content {
-    min-width: 0;
-}
-
-.so-gvcn-so-ket-result-sheet,
-.so-gvcn-summary-result-sheet,
-.so-gvcn-so-ket-result-sheet .jss_container,
-.so-gvcn-summary-result-sheet .jss_container,
-.so-gvcn-so-ket-result-sheet .jss_content,
-.so-gvcn-summary-result-sheet .jss_content {
-    width: 100% !important;
-    max-width: 100% !important;
-    min-width: 0 !important;
-    box-sizing: border-box;
-}
-
-.so-gvcn-so-ket-result-sheet .jss_content,
-.so-gvcn-summary-result-sheet .jss_content {
-    height: 205px !important;
-    max-height: 205px !important;
-    overflow-x: auto !important;
-    overflow-y: auto !important;
-}
-
-.so-gvcn-so-ket-result-sheet table.jss_worksheet,
-.so-gvcn-summary-result-sheet table.jss_worksheet {
-    width: max-content !important;
-    min-width: 100% !important;
-}

@@ -1,0 +1,23 @@
+{
+  "ModuleName": "preview: uc-dialog-change — default",
+  "data": [],
+  "watch": {},
+  "controls": [
+    {
+      "prop": "fluid pa-0",
+      "rows": [
+        {
+          "prop": "",
+          "cols": [
+            {
+              "w": "12",
+              "el": "uc-dialog-change",
+              "attr": {}
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "set": {}
+}

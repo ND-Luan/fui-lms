@@ -76,7 +76,7 @@
 
 <script>
 	export default {
-  props: {
+		props: {
     monHocSelected: Array,
     NienKhoa: Number,
     HocSinh: Object
@@ -94,14 +94,11 @@
     "HocSinh.HocSinhID": {
       immediate: true,
       async handler(hocSinhID) {
-        if (!hocSinhID) return
-        this.DSMonHoc = await ajaxCALLPromise(
-          "lms/EL_Student_Get_MonHoc_ByHocSinhID",
-          { HocSinhID: hocSinhID, NienKhoa: this.NienKhoa }
-        )
-        this.currentMonHocSelected = [...this.DSMonHoc]
-        this.emitSelected()
+        if (hocSinhID) this.loadSchoolYearData()
       }
+    },
+    NienKhoa() {
+      if (this.HocSinh?.HocSinhID) this.loadSchoolYearData()
     },
     currentMonHocSelected(newVal) {
       this.isCheckAllMonHoc = newVal.length === this.DSMonHoc.length
@@ -109,6 +106,16 @@
     }
   },
   methods: {
+    async loadSchoolYearData() {
+      const hocSinhID = this.HocSinh?.HocSinhID
+      if (!hocSinhID || !this.NienKhoa) return
+      this.DSMonHoc = await ajaxCALLPromise(
+        "lms/EL_Student_Get_MonHoc_ByHocSinhID",
+        { HocSinhID: hocSinhID, NienKhoa: this.NienKhoa }
+      )
+      this.currentMonHocSelected = [...this.DSMonHoc]
+      this.emitSelected()
+    },
     emitSelected() {
       this.$emit("update:monHocSelected", this.currentMonHocSelected)
     },
@@ -122,5 +129,5 @@
         : [...this.currentMonHocSelected, mh]
     }
   }
-}
-</script> 
+	}
+</script>

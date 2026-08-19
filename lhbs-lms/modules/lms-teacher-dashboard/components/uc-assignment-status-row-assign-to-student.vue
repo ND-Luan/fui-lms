@@ -11,6 +11,11 @@
 							getNameType(assignment.ResourceType) }} </v-chip>
 					<v-chip v-if="assignment.Chuong" size="small" label="" variant="text" class="pa-0 font-weight-medium" color="#d16a6a"> {{
 							$t('message.Chapter') }}: {{ assignment.Chuong }} </v-chip>
+					<v-chip v-if="isHocLieuMappingLoaded && !isHocLieuLinked" size="small" label
+						color="warning" variant="tonal" prepend-icon="mdi-file-tree-outline"
+						v-tooltip="'Bài này chưa gán mục lục học liệu số'">
+						Chưa gán mục lục học liệu số
+					</v-chip>
 				</div>
 				{{ assignment.AssignmentTitle ?? assignment.LessonTitle }}
 			</div>
@@ -97,12 +102,33 @@
 		return {
 			isOpen: false,
 			url: '',
-			assignmentObj: {}
+			assignmentObj: {},
+			isHocLieuMappingLoaded: false,
+			isHocLieuLinked: false
 		}
 	},
-	mounted() {
+	mounted() { this.loadHocLieuMapping() },
+	watch: {
+		assignment: { deep: true, handler() { this.loadHocLieuMapping() } }
 	},
 	methods: {
+		loadHocLieuMapping() {
+			this.isHocLieuMappingLoaded = false
+			const resourceType = this.assignment?.ResourceType
+			const resourceID = this.assignment?.ResourceID
+				|| (resourceType === 'ASSIGNMENT' ? this.assignment?.AssignmentID : this.assignment?.LessonID)
+			if (!resourceType || !resourceID) {
+				this.isHocLieuLinked = !!(this.assignment?.HocLieuID && this.assignment?.NoiDungID)
+				this.isHocLieuMappingLoaded = true
+				return
+			}
+			ajaxCALL('lms/EL_HocLieuResource_Get', { ResourceType: resourceType, ResourceID: resourceID }, response => {
+				const rows = response?.data ?? response ?? []
+				const mapping = Array.isArray(rows?.[0]) ? rows[0][0] : (Array.isArray(rows) ? rows[0] : rows)
+				this.isHocLieuLinked = !!(mapping?.HocLieuID && mapping?.NoiDungID)
+				this.isHocLieuMappingLoaded = true
+			})
+		},
 
 		chamBai(assignment) {
 			this.assignmentObj = _.cloneDeep(assignment)

@@ -1,0 +1,19 @@
+.select-to-dep .v-field {
+    min-height: 40px;
+    /* giảm chiều cao khung */
+    height: 40px;
+}
+
+.select-to-dep .v-field__input {
+    font-size: 18px !important;
+    padding-top: 0px !important;
+    padding-bottom: 0px !important;
+    display: flex;
+    align-items: center;
+    height: 40px;
+}
+
+.select-to-dep .v-select__selection-text {
+    font-size: 18px !important;
+    line-height: 40px;
+}

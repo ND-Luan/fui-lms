@@ -16,6 +16,9 @@ CREATE OR ALTER PROCEDURE [dbo].[spAPI_FP_TaiNguyen_GetAll]
 AS
 BEGIN
     SET NOCOUNT ON;
+    SET XACT_ABORT ON;
+
+    BEGIN TRANSACTION;
 
     SELECT
         hl.HocLieuID,
@@ -259,6 +262,9 @@ BEGIN
     IF @HocLieuID IS NULL
         THROW 50008, N'Không tìm thấy mục tài nguyên hoặc bạn không có quyền xóa.', 1;
 
+    DECLARE @NodesToDelete TABLE (NoiDungID INT PRIMARY KEY);
+    DECLARE @FileIDs TABLE (FileID VARCHAR(100) PRIMARY KEY);
+
     ;WITH NodesToDelete AS (
         SELECT NoiDungID
         FROM dbo.tblNoiDungHocLieu_FP
@@ -269,11 +275,45 @@ BEGIN
         INNER JOIN NodesToDelete parent ON child.ParentID = parent.NoiDungID
         WHERE child.HocLieuID = @HocLieuID AND child.Is_Xoa = 0
     )
+    INSERT INTO @NodesToDelete (NoiDungID)
+    SELECT NoiDungID FROM NodesToDelete;
+
+    INSERT INTO @FileIDs (FileID)
+    SELECT DISTINCT JSON_VALUE(nd.DataJson, '$.fileId')
+    FROM dbo.tblNoiDungHocLieu_FP nd
+    INNER JOIN @NodesToDelete deletedNode ON deletedNode.NoiDungID = nd.NoiDungID
+    WHERE nd.NguonTaiNguyenCode = 'QUAN_LY_TAI_NGUYEN'
+      AND NULLIF(JSON_VALUE(nd.DataJson, '$.fileId'), '') IS NOT NULL;
+
     UPDATE dbo.tblNoiDungHocLieu_FP
     SET Is_Xoa = 1, UpdateUser = @sys_UserID, UpdateTime = GETDATE()
-    WHERE NoiDungID IN (SELECT NoiDungID FROM NodesToDelete);
+    WHERE NoiDungID IN (SELECT NoiDungID FROM @NodesToDelete);
 
-    -- Không xóa FileData tại đây. Metadata có thể còn được học liệu khác tham chiếu.
+    DELETE fd
+    FROM dbo.FileData fd
+    INNER JOIN @FileIDs fileItem ON fileItem.FileID = fd.FileID
+    WHERE NOT EXISTS (
+        SELECT 1
+        FROM dbo.tblNoiDungHocLieu_FP nd
+        WHERE nd.Is_Xoa = 0
+          AND JSON_VALUE(nd.DataJson, '$.fileId') = fileItem.FileID
+    )
+      AND NOT EXISTS (
+        SELECT 1
+        FROM dbo.tblEL_Lessons l
+        INNER JOIN dbo.tblEL_Elements e ON e.LessonID = l.LessonID AND e.IsDeleted = 0
+        WHERE l.IsDeleted = 0
+          AND CHARINDEX('"' + fileItem.FileID + '"', CONVERT(NVARCHAR(MAX), e.ElementData)) > 0
+    )
+      AND NOT EXISTS (
+        SELECT 1
+        FROM dbo.tblEL_Assignments a
+        WHERE a.IsDeleted = 0
+          AND CHARINDEX('"' + fileItem.FileID + '"', CONVERT(NVARCHAR(MAX), a.AssignmentConfig)) > 0
+    );
+
+    COMMIT TRANSACTION;
+
     SELECT Success = 1;
 END;
 GO
@@ -285,6 +325,7 @@ GO
 CREATE OR ALTER PROCEDURE [dbo].[spAPI_FP_TaiNguyen_File_Register]
     @KhoiID INT = NULL,
     @MonHocID INT = NULL,
+    @BoSachID INT = NULL,
     @TenNoiDung NVARCHAR(500),
     @LoaiNoiDung VARCHAR(50),
     @DataJson NVARCHAR(MAX),
@@ -299,6 +340,20 @@ BEGIN
 
     DECLARE @HocLieuID INT;
     DECLARE @TenKho NVARCHAR(255) = N'Tài nguyên đã tải lên';
+
+    /* BoSachID là bắt buộc ở tblHocLieu_FP; 0/null được quy về bộ sách đang hoạt động. */
+    SET @BoSachID = NULLIF(@BoSachID, 0);
+    IF @BoSachID IS NULL
+        SELECT TOP (1) @BoSachID = BoSachID
+        FROM dbo.tblBoSach_FP
+        WHERE Is_Xoa = 0
+        ORDER BY BoSachID;
+
+    IF @BoSachID IS NULL
+        THROW 50010, N'Không tìm thấy bộ sách đang hoạt động để tạo kho tài nguyên.', 1;
+
+    IF NOT EXISTS (SELECT 1 FROM dbo.tblBoSach_FP WHERE BoSachID = @BoSachID AND Is_Xoa = 0)
+        THROW 50011, N'Bộ sách không hợp lệ hoặc đã bị xóa.', 1;
 
     BEGIN TRANSACTION;
 
@@ -315,9 +370,9 @@ BEGIN
     IF @HocLieuID IS NULL
     BEGIN
         INSERT INTO dbo.tblHocLieu_FP
-            (TenHocLieu, MonHocID, KhoiID, TinhTrang, Loai, Is_Xoa, CreateUser, CreateTime)
+            (TenHocLieu, BoSachID, MonHocID, KhoiID, TinhTrang, Loai, Is_Xoa, CreateUser, CreateTime)
         VALUES
-            (@TenKho, @MonHocID, @KhoiID, 'Private', 'TAI_NGUYEN', 0, @sys_UserID, GETDATE());
+            (@TenKho, @BoSachID, @MonHocID, @KhoiID, 'Private', 'TAI_NGUYEN', 0, @sys_UserID, GETDATE());
         SET @HocLieuID = SCOPE_IDENTITY();
     END;
 
@@ -374,7 +429,7 @@ AS
 BEGIN
     SET NOCOUNT ON;
 
-    IF ISNULL(@sys_UserID, '') = '' OR ISNULL(@sys_SystemRight, 0) NOT IN (3, 5, 9)
+    IF ISNULL(@sys_UserID, '') = '' OR ISNULL(@sys_SystemRight, 0) NOT IN (3, 9)
         THROW 50010, N'Bạn không có quyền kiểm tra kho tài nguyên giáo viên.', 1;
 
     SELECT
@@ -411,7 +466,7 @@ AS
 BEGIN
     SET NOCOUNT ON;
 
-    IF ISNULL(@sys_UserID, '') = '' OR ISNULL(@sys_SystemRight, 0) NOT IN (3, 5, 9)
+    IF ISNULL(@sys_UserID, '') = '' OR ISNULL(@sys_SystemRight, 0) NOT IN (3, 9)
         THROW 50011, N'Bạn không có quyền xem chi tiết kho tài nguyên giáo viên.', 1;
 
     SELECT
@@ -441,15 +496,25 @@ GO
 /*
     Quyền thực thi cho API gateway.
     Quyền dữ liệu vẫn được khóa trong từng store bằng @sys_UserID; riêng vùng
-    Audit kiểm tra thêm @sys_SystemRight IN (3, 5, 9).
+    Audit kiểm tra thêm @sys_SystemRight IN (3, 9).
 */
-GRANT EXECUTE ON [dbo].[spAPI_FP_TaiNguyen_GetAll] TO [public];
-GRANT EXECUTE ON [dbo].[spAPI_FP_TaiNguyen_Save] TO [public];
-GRANT EXECUTE ON [dbo].[spAPI_FP_TaiNguyen_Delete] TO [public];
-GRANT EXECUTE ON [dbo].[spAPI_FP_TaiNguyen_GetTree] TO [public];
-GRANT EXECUTE ON [dbo].[spAPI_FP_TaiNguyen_Node_Save] TO [public];
-GRANT EXECUTE ON [dbo].[spAPI_FP_TaiNguyen_Node_Delete] TO [public];
-GRANT EXECUTE ON [dbo].[spAPI_FP_TaiNguyen_File_Register] TO [public];
-GRANT EXECUTE ON [dbo].[spAPI_FP_TaiNguyen_Audit_GetAll] TO [public];
-GRANT EXECUTE ON [dbo].[spAPI_FP_TaiNguyen_Audit_GetTree] TO [public];
+GRANT EXECUTE ON [dbo].[spAPI_FP_TaiNguyen_GetAll] TO [lmslhbs];
+GRANT EXECUTE ON [dbo].[spAPI_FP_TaiNguyen_Save] TO [lmslhbs];
+GRANT EXECUTE ON [dbo].[spAPI_FP_TaiNguyen_Delete] TO [lmslhbs];
+GRANT EXECUTE ON [dbo].[spAPI_FP_TaiNguyen_GetTree] TO [lmslhbs];
+GRANT EXECUTE ON [dbo].[spAPI_FP_TaiNguyen_Node_Save] TO [lmslhbs];
+GRANT EXECUTE ON [dbo].[spAPI_FP_TaiNguyen_Node_Delete] TO [lmslhbs];
+GRANT EXECUTE ON [dbo].[spAPI_FP_TaiNguyen_File_Register] TO [lmslhbs];
+GRANT EXECUTE ON [dbo].[spAPI_FP_TaiNguyen_Audit_GetAll] TO [lmslhbs];
+GRANT EXECUTE ON [dbo].[spAPI_FP_TaiNguyen_Audit_GetTree] TO [lmslhbs];
+
+GRANT ALTER, CONTROL, TAKE OWNERSHIP, VIEW DEFINITION ON OBJECT::[dbo].[spAPI_FP_TaiNguyen_GetAll] TO [lmslhbs];
+GRANT ALTER, CONTROL, TAKE OWNERSHIP, VIEW DEFINITION ON OBJECT::[dbo].[spAPI_FP_TaiNguyen_Save] TO [lmslhbs];
+GRANT ALTER, CONTROL, TAKE OWNERSHIP, VIEW DEFINITION ON OBJECT::[dbo].[spAPI_FP_TaiNguyen_Delete] TO [lmslhbs];
+GRANT ALTER, CONTROL, TAKE OWNERSHIP, VIEW DEFINITION ON OBJECT::[dbo].[spAPI_FP_TaiNguyen_GetTree] TO [lmslhbs];
+GRANT ALTER, CONTROL, TAKE OWNERSHIP, VIEW DEFINITION ON OBJECT::[dbo].[spAPI_FP_TaiNguyen_Node_Save] TO [lmslhbs];
+GRANT ALTER, CONTROL, TAKE OWNERSHIP, VIEW DEFINITION ON OBJECT::[dbo].[spAPI_FP_TaiNguyen_Node_Delete] TO [lmslhbs];
+GRANT ALTER, CONTROL, TAKE OWNERSHIP, VIEW DEFINITION ON OBJECT::[dbo].[spAPI_FP_TaiNguyen_File_Register] TO [lmslhbs];
+GRANT ALTER, CONTROL, TAKE OWNERSHIP, VIEW DEFINITION ON OBJECT::[dbo].[spAPI_FP_TaiNguyen_Audit_GetAll] TO [lmslhbs];
+GRANT ALTER, CONTROL, TAKE OWNERSHIP, VIEW DEFINITION ON OBJECT::[dbo].[spAPI_FP_TaiNguyen_Audit_GetTree] TO [lmslhbs];
 GO

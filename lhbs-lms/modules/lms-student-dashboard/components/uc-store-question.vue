@@ -141,8 +141,8 @@
 </template>
 
 <script>
-export default {
-	name: 'UcStoreQuestion',
+	export default {
+		name: 'UcStoreQuestion',
 	inject: ['iframeRef'],
 	props: {
 		HocSinh: { type: Object, default: () => ({}) },
@@ -174,6 +174,9 @@ export default {
 			handler(id) {
 				if (id) this.getMonHoc();
 			},
+		},
+		NienKhoa() {
+			if (this.hocSinhID) this.getMonHoc();
 		},
 		selectedMonHocID(v) {
 			if (v) this.getDS();
@@ -367,6 +370,5 @@ export default {
 			return map[type] ?? type;
 		},
 	},
-}
+	}
 </script>
-

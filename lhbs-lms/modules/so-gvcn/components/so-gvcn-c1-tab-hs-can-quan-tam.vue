@@ -1,17 +1,20 @@
 <template>
-	<v-card-text class="pa-0 so-gvcn-sheet-wrap" :style="{ height: sheetHeight, 'overflow-y': 'auto' }">
-		<v-alert v-if="selectedLopID === '__ALL__'" type="info" variant="tonal" density="compact" class="ma-2">
-			Chọn một lớp ở thanh trên để theo dõi học sinh cần quan tâm.
-		</v-alert>
-		<div v-else class="so-gvcn-sheet-wrap">
-			<div ref="sheetRef" class="w-100 so-gvcn-sheet so-gvcn-hs-can-quan-tam-sheet"></div>
+	<v-card>
+		<div class="w-100" style="overflow: auto;">
+			<template v-if="selectedLopID !== '__ALL__'">
+				<div ref="sheetRef" class="so-gvcn-sheet"></div>
+			</template>
+			<v-alert v-else type="info" variant="tonal" density="compact" class="ma-2">
+				Chọn một lớp ở thanh trên để theo dõi học sinh cần quan tâm.
+			</v-alert>
 		</div>
-	</v-card-text>
+	</v-card>
 </template>
 
 <script>
 	export default {
 		name: 'so-gvcn-c1-tab-hs-can-quan-tam',
+		emits: ['changed'],
 		props: {
 			selectedLopID: { type: [String, Number], default: '__ALL__' },
 			students: { type: Array, default: () => [] },
@@ -27,21 +30,20 @@
 				timer: null,
 				columns: [
 					{ title: 'MÃ HỌC SINH', width: 120, readOnly: true },
-					{ title: 'SỐ DANH BỘ', width: 120, readOnly: true },
 					{ title: 'HỌ TÊN HỌC SINH', width: 200, readOnly: true },
 					{ title: 'HS cần hỗ trợ đặc biệt (ghi rõ vấn đề-nếu có)', width: 280 },
-					{ title: 'THÁNG 8', width: 160 },
-					{ title: 'THÁNG 9', width: 160 },
-					{ title: 'THÁNG 10', width: 160 },
-					{ title: 'THÁNG 11', width: 160 },
-					{ title: 'THÁNG 12', width: 160 },
-					{ title: 'NHẬN XÉT HKI', width: 250 },
-					{ title: 'KẾT QUẢ HỌC TẬP VÀ RÈN LUYỆN HKI', width: 260 },
-					{ title: 'THÁNG 01 VÀ 02', width: 170 },
-					{ title: 'THÁNG 3', width: 160 },
-					{ title: 'THÁNG 4', width: 160 },
-					{ title: 'THÁNG 5', width: 160 },
-					{ title: 'NHẬN XÉT CUỐI NĂM HỌC', width: 250 },
+					{ title: 'THÁNG 8', width: 320, align: 'justify' },
+					{ title: 'THÁNG 9', width: 320, align: 'justify' },
+					{ title: 'THÁNG 10', width: 320, align: 'justify' },
+					{ title: 'THÁNG 11', width: 320, align: 'justify' },
+					{ title: 'THÁNG 12', width: 320, align: 'justify' },
+					{ title: 'NHẬN XÉT HKI', width: 320 },
+					{ title: 'KẾT QUẢ HỌC TẬP VÀ RÈN LUYỆN HKI', width: 320 },
+					{ title: 'THÁNG 01 VÀ 02', width: 320, align: 'justify' },
+					{ title: 'THÁNG 3', width: 320, align: 'justify' },
+					{ title: 'THÁNG 4', width: 320, align: 'justify' },
+					{ title: 'THÁNG 5', width: 320, align: 'justify' },
+					{ title: 'NHẬN XÉT CUỐI NĂM HỌC', width: 320 },
 					{
 						title: 'KẾT QUẢ HỌC TẬP VÀ RÈN LUYỆN CUỐI NĂM HỌC',
 						width: Math.max(
@@ -85,7 +87,6 @@
 					[
 						{ title: '', colspan: 1 },
 						{ title: '', colspan: 1 },
-						{ title: '', colspan: 1 },
 						{ title: 'GHI NHẬN/ THEO DÕI QUÁ TRÌNH RÈN LUYỆN CỦA HỌC SINH CẦN QUAN TÂM', colspan: 14 }
 					]
 				]
@@ -115,7 +116,6 @@
 					const saved = findSaved(student.HSLopID)
 					return [
 						student.MaHocSinh || student.HocSinhID || '',
-						student.SoDanhBo || '',
 						student.HoTen || student.HoTenHocSinh || '',
 						saved.CanHoTroDacBiet || '',
 						saved.Thang8 || '',
@@ -158,25 +158,50 @@
 				container.innerHTML = ''
 				if (typeof jspreadsheet !== 'function') return
 
-				this.instance = soGvcnJspreadsheet.create(container, {
+					this.instance = soGvcnJspreadsheet.create(container, {
 					worksheets: [{
 						data: this.buildRows(),
 						columns: this.columns,
 						nestedHeaders: this.nestedHeaders,
 						rowResize: true,
 						columnDrag: false,
+						rowDrag: false,
+						columnSorting: false,
 						tableWidth: '100%',
 						tableOverflow: true,
 						tableHeight: this.sheetHeight,
 						lazyLoading: false,
-						freezeColumns: 3,
+						// Freeze 2 cột đầu: Mã học sinh (0), Họ tên học sinh (1)
+						// → người dùng thấy 2 cột cố định khi cuộn ngang (Mã HS + Họ tên HS).
+						freezeColumns: 2,
 						wordWrap: true,
 						allowInsertColumn: false,
 						allowInsertRow: false,
 						showHeader: true
 					}],
-					contextMenu: () => false
-				})
+					onload: () => {
+						this.$nextTick(() => {
+							setTimeout(() => {
+								const sheet = this.getInstance()
+								if (!sheet || typeof sheet.setHeight !== 'function') return
+								this.buildRows().forEach((_, rowIndex) => sheet.setHeight(rowIndex, 96))
+							}, 100)
+						})
+					},
+					contextMenu: () => false,
+					onchange: () => {
+						this.$emit('changed')
+					}
+					})
+					const worksheet = Array.isArray(this.instance) ? this.instance[0] : this.instance
+					if (worksheet && typeof worksheet.setHeight === 'function') {
+						this.buildRows().forEach((_, rowIndex) => worksheet.setHeight(rowIndex, 96))
+					}
+					if (worksheet && typeof worksheet.hideColumn === 'function') {
+						// Chỉ ẩn trên giao diện; vẫn giữ cột và dữ liệu để getData/serialize sử dụng về sau.
+						[8, 9, 14, 15].forEach(columnIndex => worksheet.hideColumn(columnIndex))
+						window.requestAnimationFrame(() => soGvcnJspreadsheet.syncNestedHeaders(container, [2]))
+					}
 			}
 		}
 	}

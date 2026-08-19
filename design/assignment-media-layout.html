@@ -1,0 +1,231 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Assignment Builder - Media layout concept</title>
+  <style>
+    :root {
+      --green: #16834b;
+      --green-soft: #e9f6ef;
+      --blue: #1976d2;
+      --text: #18212b;
+      --muted: #6d7782;
+      --line: #e5e9ed;
+      --panel: #ffffff;
+      --canvas: #f5f7f9;
+      --shadow: 0 8px 24px rgba(31, 48, 64, .08);
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      color: var(--text);
+      background: var(--canvas);
+      font: 14px/1.45 Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    button, input { font: inherit; }
+    button { cursor: pointer; }
+
+    .app { height: 100vh; display: grid; grid-template-columns: 250px minmax(0, 1fr); overflow: hidden; }
+    .library, .properties { background: var(--panel); overflow-y: auto; }
+    .library { border-right: 1px solid var(--line); padding: 18px 14px; }
+    .properties { position: fixed; z-index: 20; top: 0; right: 0; width: 330px; height: 100vh; border-left: 1px solid var(--line); padding: 18px 14px; box-shadow: -10px 0 28px rgba(31, 48, 64, .14); }
+    .brand { font-size: 12px; font-weight: 800; letter-spacing: .08em; color: var(--green); text-transform: uppercase; margin: 4px 8px 22px; }
+    .library-title { font-weight: 700; margin: 0 8px 12px; }
+    .library-subtitle { margin: 18px 8px 7px; color: var(--muted); font-size: 11px; font-weight: 800; letter-spacing: .04em; text-transform: uppercase; }
+    .library-divider { border: 0; border-top: 1px solid var(--line); margin: 14px 8px; }
+    .library-item { display: flex; align-items: center; gap: 10px; width: 100%; border: 0; background: transparent; padding: 11px 10px; border-radius: 8px; color: #34404c; text-align: left; }
+    .library-item:hover, .library-item.active { background: var(--green-soft); color: var(--green); }
+    .library-item span:first-child { font-size: 17px; width: 20px; text-align: center; }
+
+    .workspace { min-width: 0; padding: 22px 28px; overflow-y: auto; }
+    .topbar { display: flex; align-items: center; justify-content: space-between; gap: 14px; margin-bottom: 18px; }
+    .top-actions { display: flex; align-items: center; gap: 7px; }
+    .crumb { color: var(--muted); font-size: 13px; }
+    .crumb strong { color: var(--text); }
+    .save-state { color: var(--green); background: var(--green-soft); border-radius: 999px; padding: 5px 10px; font-size: 12px; }
+    .canvas-card { background: white; border: 1px solid var(--line); border-radius: 12px; box-shadow: var(--shadow); overflow: hidden; }
+    .group-card { border: 1px solid var(--line); border-radius: 10px; margin: 16px; overflow: hidden; background: #fff; }
+    .group-card.selected { border-color: #a9d5bb; box-shadow: 0 0 0 2px #e9f6ef; }
+    .group-title { display: flex; align-items: center; gap: 10px; padding: 13px 15px; background: #fbfcfd; border-bottom: 1px solid var(--line); }
+    .group-title strong { flex: 1; }
+    .group-title small { color: var(--muted); }
+    .header-action { border: 0; background: transparent; color: #6d7782; border-radius: 6px; padding: 5px 7px; font-size: 17px; }
+    .header-action:hover { background: #eef2f5; color: var(--text); }
+    .group-media { display: flex; align-items: center; gap: 10px; margin: 12px 14px 0; padding: 9px 10px; border: 1px dashed #cdd9e2; border-radius: 8px; color: #53616d; background: #fbfdff; }
+    .group-media .group-media-text { flex: 1; min-width: 0; }
+    .group-media strong, .group-media span { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .group-media span { color: var(--muted); font-size: 12px; }
+    .questions { padding: 10px 14px 14px; }
+    .section-head { display: flex; align-items: center; gap: 10px; border-bottom: 1px solid var(--line); padding: 16px 18px; }
+    .section-head h2 { flex: 1; margin: 0; font-size: 16px; }
+    .section-head small { color: var(--muted); }
+    .question { margin: 18px; border: 1px solid #dfe5ea; border-radius: 10px; overflow: hidden; }
+    .question.selected { border-color: #78aef0; box-shadow: 0 0 0 2px #e1efff; }
+    .question-head { display: flex; align-items: center; gap: 10px; padding: 13px 15px; background: #fbfcfd; }
+    .question-head strong { flex: 1; }
+    .question-text { padding: 16px; color: #4c5863; }
+    .answers { display: grid; gap: 6px; padding: 0 16px 14px; }
+    .answer { display: flex; align-items: center; gap: 9px; padding: 8px 10px; border: 1px solid var(--line); border-radius: 7px; color: #4c5863; background: #fff; }
+    .answer.correct { border-color: #a9d5bb; background: var(--green-soft); color: #17663e; }
+    .answer-key { display: grid; place-items: center; width: 22px; height: 22px; border: 1px solid #cbd4dc; border-radius: 50%; font-size: 11px; font-weight: 700; color: #6b7782; }
+    .answer.correct .answer-key { border-color: var(--green); background: var(--green); color: white; }
+    .answer-count { margin-left: auto; color: var(--muted); font-size: 12px; }
+    .media-icons { display: flex; gap: 5px; }
+    .icon { display: inline-grid; place-items: center; width: 25px; height: 25px; border-radius: 7px; font-size: 13px; font-weight: 700; }
+    .icon.video { color: #d64045; background: #fff0f0; }
+    .icon.audio { color: #008b80; background: #e9f8f5; }
+    .icon.file { color: #2877c9; background: #edf5ff; }
+    .canvas-media { display: grid; grid-template-columns: 150px 1fr; gap: 12px; margin: 0 16px 16px; padding: 10px; border: 1px solid var(--line); border-radius: 8px; background: #fafcfd; }
+    .thumb { height: 84px; border-radius: 6px; background: linear-gradient(135deg, #263b4b, #7da2b6); display: grid; place-items: center; color: white; font-size: 26px; }
+    .media-meta strong { display: block; margin: 4px 0; }
+    .media-meta span { color: var(--muted); font-size: 12px; }
+
+    .properties-title { display: flex; align-items: center; gap: 8px; margin-bottom: 16px; }
+    .properties-title h1 { flex: 1; }
+    .drawer-close { border: 0; background: transparent; color: var(--muted); font-size: 20px; padding: 3px 7px; border-radius: 6px; }
+    .drawer-close:hover { background: #eef2f5; color: var(--text); }
+    .properties-title h1 { font-size: 16px; margin: 0; }
+    .properties-title span { color: var(--muted); font-size: 12px; }
+    .field-label { display: block; margin: 14px 0 6px; color: #46515c; font-size: 12px; font-weight: 700; }
+    .input { width: 100%; border: 1px solid #cfd7de; border-radius: 7px; padding: 10px 11px; outline: 0; background: white; }
+    .input:focus { border-color: var(--blue); box-shadow: 0 0 0 3px #e4f0ff; }
+    .right-section { border-top: 1px solid var(--line); margin-top: 16px; padding-top: 14px; }
+    .right-section-title { display: flex; align-items: center; justify-content: space-between; margin-bottom: 9px; }
+    .right-section-title strong { font-size: 13px; }
+    .right-section-title span { color: var(--muted); font-size: 12px; }
+    .answer-editor { display: grid; gap: 7px; }
+    .answer-row { display: flex; align-items: center; gap: 7px; }
+    .answer-row .answer-key { flex: 0 0 auto; }
+    .answer-row .input { padding: 8px 9px; }
+    .answer-row .remove { border: 0; background: transparent; color: #c4343b; font-size: 18px; padding: 2px; }
+    .score-row { display: grid; grid-template-columns: 1fr 100px; gap: 8px; }
+    .media-box { margin-top: 18px; border-top: 1px solid var(--line); padding-top: 16px; }
+    .media-heading { display: flex; align-items: center; gap: 8px; }
+    .media-heading h2 { flex: 1; margin: 0; font-size: 15px; }
+    .media-heading small { color: var(--muted); }
+    .media-tabs { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin: 14px 0; }
+    .media-tab { border: 1px solid var(--line); background: #fff; border-radius: 7px; padding: 8px 4px; color: #5e6974; }
+    .media-tab.active { border-color: #a9d5bb; background: var(--green-soft); color: var(--green); font-weight: 700; }
+    .media-tab span { display: block; font-size: 17px; margin-bottom: 2px; }
+    .media-action { display: flex; gap: 7px; }
+    .media-action .input { flex: 1; min-width: 0; }
+    .btn { border: 1px solid var(--green); border-radius: 7px; padding: 9px 12px; background: white; color: var(--green); white-space: nowrap; }
+    .btn.primary { background: var(--green); color: white; }
+    .btn.danger { border-color: #ffd2d2; color: #c4343b; background: #fff4f4; }
+    .preview { margin-top: 12px; overflow: hidden; border-radius: 8px; background: #1f2933; aspect-ratio: 16 / 9; display: grid; place-items: center; color: white; }
+    .preview .play { width: 48px; height: 48px; border-radius: 50%; background: rgba(255,255,255,.92); color: #263746; display: grid; place-items: center; font-size: 22px; }
+    .helper { color: var(--muted); font-size: 12px; margin: 8px 0 0; }
+    .compact-card { display: flex; align-items: center; gap: 10px; border: 1px solid var(--line); border-radius: 8px; padding: 10px; margin-top: 12px; }
+    .compact-card .file-icon { font-size: 21px; }
+    .compact-card .file-info { flex: 1; min-width: 0; }
+    .compact-card strong, .compact-card span { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .compact-card span { color: var(--muted); font-size: 12px; }
+
+    @media (max-width: 980px) {
+      .app { grid-template-columns: 1fr; }
+      .library { display: none; }
+      .workspace { padding: 16px; }
+      .properties { width: min(100%, 380px); border-left: 0; border-top: 1px solid var(--line); }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <aside class="library">
+      <div class="brand">LHBS LMS</div>
+      <div class="library-title">Thư viện câu hỏi</div>
+      <div class="library-subtitle">Trắc nghiệm tương tác</div>
+      <button class="library-item active"><span>◉</span><span><b>Một đáp án</b><small style="display:block;color:var(--muted);font-size:11px;">Chọn một phương án</small></span></button>
+      <button class="library-item"><span>☑</span><span><b>Nhiều đáp án</b><small style="display:block;color:var(--muted);font-size:11px;">Chọn nhiều phương án</small></span></button>
+      <button class="library-item"><span>✓</span><span>Đúng / Sai</span></button>
+      <button class="library-item"><span>☑</span><span>Nhiều Đúng / Sai</span></button>
+      <button class="library-item"><span>▤</span><span>Điền vào chỗ trống</span></button>
+      <button class="library-item"><span>⌁</span><span>Ghép nối</span></button>
+      <hr class="library-divider">
+      <div class="library-subtitle">Tự luận & thực hành</div>
+      <button class="library-item"><span>≡</span><span>Trả lời ngắn</span></button>
+      <button class="library-item"><span>☷</span><span><b>Tự luận</b><small style="display:block;color:var(--muted);font-size:11px;">Soạn thảo</small></span></button>
+      <button class="library-item"><span>↥</span><span>Nộp file</span></button>
+      <button class="library-item"><span>♩</span><span>Ghi âm trả lời</span></button>
+      <hr class="library-divider">
+      <button class="library-item"><span>⇩</span><span>Import từ học liệu</span></button>
+      <button class="library-item"><span>▣</span><span>Import từ ngân hàng</span></button>
+    </aside>
+
+    <main class="workspace">
+      <div class="topbar">
+        <div class="crumb">Soạn bài tập / <strong>Ôn tập cuối kỳ</strong></div>
+        <div class="top-actions"><div class="save-state">● Đã lưu</div><button class="btn">Xem trước</button><button class="btn primary">Lưu</button><button class="btn" style="border-color:#2e9d68;color:#21834f;">Giao bài</button></div>
+      </div>
+      <section class="canvas-card">
+        <div class="section-head"><h2>Nội dung bài tập</h2><small>2 phần · 5 câu hỏi</small></div>
+
+        <section class="group-card selected">
+          <div class="group-title"><span class="icon">☷</span><strong>Phần 1 · Hãy chọn đáp án đúng</strong><small>3 câu hỏi</small><button class="header-action">＋</button><button class="header-action">⋮</button></div>
+          <div class="group-media"><span class="icon video">▣</span><div class="group-media-text"><strong>Video hướng dẫn phần 1</strong><span>Media của group · YouTube</span></div><button class="btn">Sửa</button></div>
+          <div class="questions">
+            <article class="question selected">
+              <div class="question-head"><strong>Câu 1</strong><div class="media-icons"><span class="icon video">▣</span><span class="icon audio">♫</span><span class="icon file">▤</span></div><button class="header-action">⋮</button></div>
+              <div class="question-text">Hãy xem video sau đây và nhận xét về nội dung được trình bày.</div>
+              <div class="answers">
+                <div class="answer correct"><span class="answer-key">A</span><span>Nội dung chính của video là giới thiệu bài học.</span></div>
+                <div class="answer"><span class="answer-key">B</span><span>Video chỉ trình bày thông tin tham khảo.</span></div>
+                <div class="answer"><span class="answer-key">C</span><span>Video không liên quan đến chủ đề.</span></div>
+              </div>
+              <div class="canvas-media"><div class="thumb">▶</div><div class="media-meta"><strong>Video giới thiệu bài học</strong><span>Video YouTube · 01:10</span></div></div>
+            </article>
+            <article class="question"><div class="question-head"><strong>Câu 2</strong><div class="media-icons"><span class="icon file">▤</span></div><span class="answer-count">4 đáp án</span><span class="icon">⋮</span></div><div class="question-text">Nội dung nào sau đây phù hợp với bài học?</div></article>
+            <article class="question"><div class="question-head"><strong>Câu 3</strong><div class="media-icons"><span class="icon audio">♫</span></div><span class="answer-count">2 đáp án</span><span class="icon">⋮</span></div><div class="question-text">Hãy nghe đoạn audio và chọn đáp án đúng.</div></article>
+          </div>
+        </section>
+
+        <section class="group-card">
+          <div class="group-title"><span class="icon">☷</span><strong>Phần 2 · Tự luận</strong><small>2 câu hỏi</small><button class="header-action">＋</button><button class="header-action">⋮</button></div>
+          <div class="questions">
+            <article class="question"><div class="question-head"><strong>Câu 4</strong><div class="media-icons"><span class="icon file">▤</span></div><span class="answer-count">Tự luận</span><span class="icon">⋮</span></div><div class="question-text">Trình bày suy nghĩ của em về chủ đề trên.</div></article>
+            <article class="question"><div class="question-head"><strong>Câu 5</strong><div class="media-icons"><span class="icon">—</span></div><span class="icon">⋮</span></div><div class="question-text">Nêu một ví dụ thực tế và giải thích.</div></article>
+          </div>
+        </section>
+        <button class="btn primary" style="margin: 0 16px 16px;">＋ Thêm phần</button>
+      </section>
+    </main>
+
+    <aside class="properties">
+      <div class="properties-title"><h1>Thuộc tính câu hỏi</h1><span>Câu 1</span><button class="drawer-close">×</button></div>
+      <label class="field-label">Nội dung câu hỏi</label>
+      <input class="input" value="Hãy xem video sau đây và nhận xét về nội dung được trình bày.">
+
+      <section class="right-section">
+        <div class="right-section-title"><strong>Đáp án</strong><span>Trắc nghiệm một đáp án</span></div>
+        <div class="answer-editor">
+          <div class="answer-row"><span class="answer-key" style="background: var(--green); color: white; border-color: var(--green);">A</span><input class="input" value="Nội dung chính của video là giới thiệu bài học."><button class="remove">×</button></div>
+          <div class="answer-row"><span class="answer-key">B</span><input class="input" value="Video chỉ trình bày thông tin tham khảo."><button class="remove">×</button></div>
+          <div class="answer-row"><span class="answer-key">C</span><input class="input" value="Video không liên quan đến chủ đề."><button class="remove">×</button></div>
+          <button class="btn">＋ Thêm đáp án</button>
+        </div>
+      </section>
+
+      <section class="right-section">
+        <div class="right-section-title"><strong>Chấm điểm</strong><span>Thiết lập nhanh</span></div>
+        <div class="score-row"><input class="input" value="Tự động chấm điểm"><input class="input" value="1 điểm"></div>
+      </section>
+
+      <section class="media-box">
+        <div class="media-heading"><h2>Media</h2><span class="icon video">▣</span><span class="icon audio">♫</span><span class="icon file">▤</span><small>3</small></div>
+        <div class="media-tabs">
+          <button class="media-tab active"><span>▣</span>Video</button>
+          <button class="media-tab"><span>♫</span>Audio</button>
+          <button class="media-tab"><span>▤</span>File</button>
+        </div>
+        <div class="media-action"><input class="input" value="https://youtube.com/watch?v=demo"><button class="btn">Tải lên</button></div>
+        <div class="preview"><div class="play">▶</div></div>
+        <p class="helper">Dán link hoặc tải video. Preview được giới hạn để sidebar không bị chật.</p>
+        <div class="compact-card"><span class="file-icon">▣</span><div class="file-info"><strong>Video giới thiệu bài học</strong><span>YouTube · 01:10</span></div><button class="btn danger">Xóa</button></div>
+      </section>
+    </aside>
+  </div>
+</body>
+</html>

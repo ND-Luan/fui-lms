@@ -1,10 +1,12 @@
 <template>
-	<v-card-text class="pa-0 so-gvcn-sheet-wrap" :style="{ height: sheetHeight, 'overflow-y': 'auto' }">
-		<template v-if="rows && rows.length">
-			<div ref="sheetRef" class="w-100 so-gvcn-sheet so-gvcn-student-sheet"></div>
-		</template>
-		<uc-card-empty v-else />
-	</v-card-text>
+	<v-card>
+		<div class="w-100" style="overflow: auto;">
+			<template v-if="rows && rows.length">
+				<div ref="sheetRef"></div>
+			</template>
+			<uc-card-empty v-else />
+		</div>
+	</v-card>
 </template>
 
 <script>
@@ -12,7 +14,7 @@
 		name: 'so-gvcn-tab-du-lieu-hs',
 	props: {
 		rows: { type: Array, default: () => [] },
-		sheetHeight: { type: String, default: 'calc(100vh - 230px)' },
+		sheetHeight: { type: String },
 		sheetKey: { type: [Number, String], default: 0 },
 		nestedHeaders: { type: Array, default: () => [] },
 		hasNhomAv: { type: Boolean, default: true }
@@ -43,7 +45,7 @@
 				{ title: 'KQRL', width: 65, readOnly: true },
 				{ title: 'KQHT', width: 65, readOnly: true },
 				{ title: 'Danh hiệu', width: 180, readOnly: true },
-				{ title: 'Nhận xét GVCN', width: 380, align: 'left', readOnly: true },
+				{ title: 'Nhận xét GVCN', width: 380, align: 'left', readOnly: true, type: 'html', key: 'NhanXetGVCN' },
 				{ title: 'Cha', width: 140, readOnly: true },
 				{ title: 'Nghề nghiệp cha', width: 130, readOnly: true },
 				{ title: 'SDT cha', width: 105, readOnly: true },
@@ -68,6 +70,26 @@
 			const hideIdx = this.baseColumns.findIndex(col => col.key === 'NhomAV')
 			if (hideIdx < 0) return this.rows
 			return (this.rows || []).map(row => row.filter((_, i) => i !== hideIdx))
+		},
+		htmlColumnIndexes() {
+			const idxs = []
+			this.activeColumns.forEach((col, i) => { if (col.type === 'html') idxs.push(i) })
+			return idxs
+		},
+		renderedRows() {
+			if (!this.htmlColumnIndexes.length) return this.activeRows
+			return (this.activeRows || []).map(row => {
+				const copy = row.slice()
+				this.htmlColumnIndexes.forEach(i => {
+					const raw = copy[i]
+					if (raw) {
+						const text = String(raw)
+						const escaped = this.escapeHtml(text)
+						copy[i] = '<span class="so-gvcn-ellipsis" title="' + escaped + '">' + escaped + '</span>'
+					}
+				})
+				return copy
+			})
 		},
 		computedColumns() {
 			if (!this.activeRows || !this.activeRows.length) return this.activeColumns
@@ -99,6 +121,13 @@
 		}
 	},
 	methods: {
+		escapeHtml(str) {
+			return String(str)
+				.replace(/&/g, '&amp;')
+				.replace(/</g, '&lt;')
+				.replace(/>/g, '&gt;')
+				.replace(/"/g, '&quot;')
+		},
 		destroySheet() {
 			if (!this.sheetInstance) return
 			try {
@@ -121,14 +150,16 @@
 				if (typeof jspreadsheet === 'function') {
 					this.sheetInstance = soGvcnJspreadsheet.create(container, {
 						worksheets: [{
-							data: this.activeRows,
+							data: this.renderedRows,
 							columns: this.computedColumns,
 							nestedHeaders: this.nestedHeaders,
 							rowResize: true,
 							columnDrag: false,
+						rowDrag: false,
+						columnSorting: false,
 							tableWidth: '100%',
 							tableOverflow: true,
-							tableHeight: this.sheetHeight,
+							tableHeight: "calc(100vh - 118px)",
 							lazyLoading: false,
 							freezeColumns: 4,
 							wordWrap: true,
@@ -144,13 +175,11 @@
 	},
 	watch: {
 		rows: {
-			deep: true,
 			handler() {
 				this.initSheet()
 			}
 		},
 		nestedHeaders: {
-			deep: true,
 			handler() {
 				this.initSheet()
 			}

@@ -96,7 +96,7 @@
 			</div>
 
 			<!-- Thành tích -->
-			<uc-achievement-card :HocSinh="HocSinh">
+			<uc-achievement-card :HocSinh="HocSinh" :NienKhoa="NienKhoa">
 				<template #activator="{ activatorProps }">
 					<div class="sp-item" v-bind="activatorProps">
 						<div class="sp-item-icon sp-item-icon--amber">

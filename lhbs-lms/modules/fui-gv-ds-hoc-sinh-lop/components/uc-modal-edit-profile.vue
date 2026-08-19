@@ -1,6 +1,6 @@
 <template>
 	<v-dialog v-model="isShow" max-width="420" persistent>
-		<v-card elevation="4">
+		<v-card v-if="StudentProfile_Comp" elevation="4">
 
 			<!-- Header -->
 			<v-toolbar color="primary" density="compact" flat>
@@ -44,9 +44,10 @@
 		</v-card>
 	</v-dialog>
 </template>
+
 <script>
-export default {
-	props: {
+	export default {
+		props: {
 		modelValue: Boolean,
 		StudentProfile: Object,
 		onSubmitFinish: Function
@@ -63,7 +64,8 @@ export default {
 	watch: {
 		modelValue: function (isShow) {
 			this.isShow = isShow
-			if (isShow) this.StudentProfile_Comp = this.StudentProfile
+			if (isShow && this.StudentProfile) this.StudentProfile_Comp = { ...this.StudentProfile }
+			if (!isShow) this.StudentProfile_Comp = null
 		}
 	},
 	methods: {
@@ -98,5 +100,5 @@ export default {
 			})
 		}
 	},
-}
+	}
 </script>

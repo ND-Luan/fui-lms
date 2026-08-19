@@ -232,11 +232,35 @@ const DataProcessor = {
         return DSCotDiem_ByMaNhomCotDiem.filter(cotDiem => {
             const display = displayColumns.find(d => d.value === cotDiem.value);
             if (display?.isLocked) return false;
+            const apiColumn = apiData?.find(x => x.MaCotDiem === cotDiem.value);
+            const formula = cotDiem.Formula ?? apiColumn?.Formula;
+            const isFormula = DataProcessor.isFormulaColumn(cotDiem, apiColumn);
+            if (isFormula) {
+                // Không dùng giá trị tự tính của formula để xác định đã nhập.
+                // Formula chỉ hoàn tất khi ít nhất một cột đầu vào của nó có
+                // dữ liệu trên từng học sinh (default cũng được tính là dữ liệu).
+                if (!formula) return false;
+                const inputColumns = DSCotDiem_ByMaNhomCotDiem.filter(input =>
+                    !DataProcessor.isFormulaColumn(input, apiData?.find(x => x.MaCotDiem === input.value)) &&
+                    new RegExp(`\\b${DataProcessor.escapeRegExp(input.value)}\\b`).test(formula)
+                );
+                if (!inputColumns.length) return false;
+                return DSHocSinh.every(hs => inputColumns.some(input =>
+                    hs[input.value] !== null && hs[input.value] !== undefined && hs[input.value] !== ''
+                ));
+            }
             return DSHocSinh.every(hs => {
                 const val = hs[cotDiem.value];
                 return val !== null && val !== undefined && val !== '';
             });
         });
+    },
+    isFormulaColumn(column, apiColumn) {
+        const type = String(column?.LoaiCotDiem ?? apiColumn?.LoaiCotDiem ?? '').trim().toLowerCase();
+        return type === CONSTANTS.FORMULA_COLUMN.toLowerCase() || Boolean(column?.Formula ?? apiColumn?.Formula);
+    },
+    escapeRegExp(value) {
+        return String(value).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
     },
     /** Xử lý dữ liệu trước khi push API */
     processBeforePushAPI(editedCells, DSHocSinh, DSHocSinh_API, freezeColumns, filter, instance) {
@@ -289,7 +313,9 @@ const DataProcessor = {
                     cotDiem.DiemMax
                 );
                 if (cotDiem_HS.IsError === 1) {
-                    const cellAddress = jspreadsheet.helpers.getCellNameFromCoords(currentJ, currentI);
+                    // currentJ là index trong danh sách cột điểm, còn ô trên sheet
+                    // phải dùng đúng tọa độ x của editedCells (đã bao gồm freezeColumns).
+                    const cellAddress = jspreadsheet.helpers.getCellNameFromCoords(exists.x, currentI);
                     instance[0].setStyle(cellAddress, 'background-color', 'red');
                     Vue.$toast.error(
                         `Cột điểm ${cotDiem.MaCotDiem} chỉ cho phép nhập thang điểm từ ${cotDiem.DiemMin} đến ${cotDiem.DiemMax}!`,
@@ -955,7 +981,8 @@ const BangDiemService = {
                 title: x.TenCotDiem_VI,
                 value: x.MaCotDiem,
                 LoaiCotDiem: x.LoaiCotDiem,
-                GiaTriCotDiem: x.GiaTriCotDiem
+                GiaTriCotDiem: x.GiaTriCotDiem,
+                Formula: x.Formula
             }));
             console.log("gradeColumns", gradeColumns);
             const headers = [

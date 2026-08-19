@@ -8,7 +8,7 @@
 				style="width: 260px; border-right: 1px solid rgba(0, 0, 0, 0.12);">
 				<v-list density="compact" nav color="primary" class="pa-0">
 					<v-list-subheader class="text-caption font-weight-bold text-primary px-3">
-						ĐÁNH GIÁ HOẠT ĐỘNG LỚP
+						ĐÁNH GIÁ HOẠT ĐỘNG LỚP 
 					</v-list-subheader>
 					<v-list-item v-for="card in cards.slice(0, 3)" :key="card.key" :value="card.key"
 						:active="activeCardKey === card.key" class="mb-1 rounded" @click="scrollToCard(card)">
@@ -47,7 +47,7 @@
 					<v-card-title class="text-subtitle-1 font-weight-bold">{{ card.title }}</v-card-title>
 					<v-card-text class="pa-2">
 						<v-textarea v-model="noteValues[card.key]" label="Nội dung nhận xét" variant="outlined" rows="8"
-							auto-grow hide-details />
+							auto-grow hide-details class="text-body-2" />
 					</v-card-text>
 				</v-card>
 
@@ -71,7 +71,7 @@
 					<v-card-title class="text-subtitle-1 font-weight-bold">{{ cards[5].title }}</v-card-title>
 					<v-card-text class="pa-2">
 						<v-textarea v-model="noteValues[cards[5].key]" label="Nội dung phương hướng" variant="outlined"
-							rows="8" auto-grow hide-details />
+							rows="8" auto-grow hide-details class="text-body-2" />
 					</v-card-text>
 				</v-card>
 			</div>
@@ -174,6 +174,24 @@
 			this.destroySheets()
 		},
 		methods: {
+
+		safeParseJson(val, fallback = null) {
+			if (!val) return fallback;
+			if (typeof val !== 'string') return val;
+			let currentVal = val;
+			while (typeof currentVal === 'string' && (currentVal.trim().startsWith('[') || currentVal.trim().startsWith('{'))) {
+				try {
+					const parsed = JSON.parse(currentVal);
+					if (typeof parsed === 'string') {
+						currentVal = parsed;
+					} else {
+						return parsed;
+					}
+				} catch (e) { break; }
+			}
+			return fallback !== null ? fallback : currentVal;
+		},
+
 			getInstance() {
 				return this.instances
 			},
@@ -185,7 +203,7 @@
 				const json = source.JsonData ?? source
 				if (!json) return {}
 				try {
-					return typeof json === 'string' ? JSON.parse(json) : json
+					return typeof json === 'string' ? this.safeParseJson(json, []) : json
 				} catch (error) {
 					return {}
 				}
@@ -203,7 +221,7 @@
 					const instance = this.instances[key]
 					const sheet = Array.isArray(instance) ? instance[0] : instance
 					if (sheet && typeof sheet.closeEditor === 'function') {
-						try { sheet.closeEditor(true) } catch (error) {}
+						try { sheet.closeEditor(sheet.edition ? sheet.edition[0] : null, true) } catch (error) {}
 					}
 					return sheet && typeof sheet.getData === 'function' ? sheet.getData() : []
 				}
@@ -220,7 +238,7 @@
 					const instance = this.instances[key]
 					const sheet = Array.isArray(instance) ? instance[0] : instance
 					if (sheet && typeof sheet.closeEditor === 'function') {
-						try { sheet.closeEditor(true) } catch (error) {}
+						try { sheet.closeEditor(sheet.edition ? sheet.edition[0] : null, true) } catch (error) {}
 					}
 					return sheet && typeof sheet.getData === 'function' ? sheet.getData() : []
 				}
@@ -425,9 +443,11 @@
 								...config,
 								rowResize: true,
 								columnDrag: false,
+						rowDrag: false,
+						columnSorting: false,
 								tableWidth: '100%',
 								tableOverflow: true,
-								tableHeight: '205px',
+								tableHeight: 'auto',
 								lazyLoading: false,
 								wordWrap: true,
 								allowInsertColumn: false,
@@ -464,7 +484,7 @@
 					if (subjectIndex >= subjectCount) return
 					const quantityColumn = 1 + subjectIndex * 2
 					const percentageColumn = quantityColumn + 1
-					const rowIndexes = changedRow !== null ? [changedRow] : rows.map((row, index) => index)
+					const rowIndexes = rows.map((row, index) => index)
 					rowIndexes.forEach(rowIndex => {
 						const row = rows[rowIndex]
 						if (!Array.isArray(row)) return
@@ -483,3 +503,11 @@
 		}
 	}
 </script>
+
+<style scoped>
+:deep(.so-gvcn-plan-tab .jss_content),
+:deep(.so-gvcn-plan-tab .jspreadsheet-content) {
+	height: auto !important;
+	max-height: none !important;
+}
+</style>

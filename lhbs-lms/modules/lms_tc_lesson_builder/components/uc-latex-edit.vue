@@ -17,7 +17,7 @@
 		<template v-slot:default="{ isActive }">
 			<v-card :title="$t('message.EditContent')">
 				<v-card-text>
-					<f-editor v-model="contentEditor" :imageapi="vueData.v_Set.apiImageAdapter" variant="outlined"
+					<f-editor v-model="contentEditor" :imageapi="vueData.v_Set.apiImageAdapter" :height="400" variant="outlined"
 						rows="6" auto-grow :label="$t('message.ContentHtmlLatex')"
 						@update:modelValue="val => console.log('upd', val)" @input="v => console.log('v', v)" />
 					<!-- Preview -->
@@ -149,7 +149,8 @@
 				})
 			},
 	
-			saveContent(isActive) {
+		async saveContent(isActive) {
+				await this.deleteRemovedUploadedImages(this.content, this.contentEditor)
 				this.$emit('update:content', this.contentEditor)
 				isActive.value = false
 			},
@@ -157,6 +158,34 @@
 			cancelEdit(isActive) {
 				this.contentEditor = this.content
 				isActive.value = false
+			},
+
+			extractImageSources(html) {
+				const sources = new Set()
+				const regex = /<img[^>]+src=["']([^"']+)["']/gi
+				let match
+				while ((match = regex.exec(html || ''))) sources.add(match[1])
+				return sources
+			},
+
+			getLmsFileId(source) {
+				if (!source || typeof source !== 'string') return null
+				const match = source.match(/\/FileData\/([^/?#"']+)/i)
+				return match?.[1] || null
+			},
+
+			async deleteRemovedUploadedImages(previousContent, nextContent) {
+				const previousImages = this.extractImageSources(previousContent)
+				const nextImages = this.extractImageSources(nextContent)
+				const removedFileIds = [...previousImages]
+					.filter(source => !nextImages.has(source))
+					.map(source => this.getLmsFileId(source))
+					.filter(Boolean)
+				if (!removedFileIds.length) return
+
+				const manager = window.UploadManager
+				if (!manager?.deleteLmsFile) return
+				await Promise.allSettled(removedFileIds.map(fileId => manager.deleteLmsFile(fileId)))
 			}
 		}
 	}

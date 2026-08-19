@@ -186,6 +186,7 @@
 
 <script>
 	export default {
+		inject: ['snackbarRef', 'iframeRef', 'confirmRef'],
 		props: [],
 		data() {
 			return {
@@ -296,7 +297,8 @@
 				const currentKhoi = DSKhoi.find(x => normalize(x.TenKhoi) === normalize(this.KhoiItem?.TenKhoiHoc))
 				console.log('[XEP-STT][Calen] currentKhoi:', currentKhoi)
 				if (!currentKhoi) {
-					return Vue.$toast.error("Không tìm thấy khối Calen")
+					this.snackbarRef.value.showSnackbar({ message: "Không tìm thấy khối Calen", color: "error" })
+					return
 				}
 	
 				const DSLop = await fetchPromise("quansinh/Basic_LopHocSelectByKhoiNamHocID", {
@@ -320,7 +322,8 @@
 					.sort((a, b) => normalize(b.TenLop).length - normalize(a.TenLop).length)[0]
 				console.log('[XEP-STT][Calen] currentLop:', currentLop)
 				if (!currentLop) {
-					return Vue.$toast.error("Không tìm thấy lớp Calen")
+					this.snackbarRef.value.showSnackbar({ message: "Không tìm thấy lớp Calen", color: "error" })
+					return
 				}
 	
 				return await fetchPromise("quansinh/Basic_HocSinhSelectByLopHocID", {
@@ -355,7 +358,7 @@
 					})
 				}
 	
-				Vue.$toast.success("Cập nhật số thứ tự thành công!", { position: "top" })
+				this.snackbarRef.value.showSnackbar({ message: "Cập nhật số thứ tự thành công!", color: "success" })
 				await this.onRefresh(true)
 			},
 			async onImportHocSinhCalen() {
@@ -367,7 +370,10 @@
 						return { ...x, HoTen: [x.Ho, x.Ten].filter(Boolean).join(' ').trim(), CalenSTT: x.STT }
 					})
 					.filter(Boolean)
-				if (!students.length) return Vue.$toast.warning('Lớp Calen chưa có học sinh')
+				if (!students.length) {
+					this.snackbarRef.value.showSnackbar({ message: 'Lớp Calen chưa có học sinh', color: 'warning' })
+					return
+				}
 				// Calen là nguồn gốc; danh sách LMS chỉ dùng làm dữ liệu đối chiếu hiện tại.
 				const currentStudents = await fetchPromise('lms/HocSinhNhom_Get_ByNhomID', {
 					NienKhoa: vueData.NienKhoa,
@@ -408,6 +414,9 @@
 				this.IsShowDialogCalen = true
 			},
 			async confirmImportCalen() {
+				const ok = await this.confirmRef.value.show({ title: 'Xác nhận đồng bộ học sinh và STT theo Calen?' })
+				if (!ok) return
+				
 				const studentsLms = await fetchPromise('lms/HocSinh_Get', { NienKhoa: vueData.NienKhoa }, { forceRefresh: true, cache: false })
 				const groupSync = this.CalenCompare.groupSync || []
 				const uniqueNhomIDs = groupSync.map(x => x.NhomID)
@@ -440,12 +449,13 @@
 					}
 				}
 				this.IsShowDialogCalen = false
-				Vue.$toast.success(`Đã thêm ${totalAdded} lượt học sinh và cập nhật STT theo Calen`, { position: 'top' })
+				this.snackbarRef.value.showSnackbar({ message: `Đã thêm ${totalAdded} lượt học sinh và cập nhật STT theo Calen`, color: 'success' })
 				await this.onRefresh(true)
 			},
 			async confirmRemoveExtraCalen() {
 				if (!this.CalenCompare.extra.length) return
-				if (!confirm(`Xóa ${this.CalenCompare.extra.length} học sinh không còn thuộc lớp Calen khỏi nhóm và các nhóm con?`)) return
+				const ok = await this.confirmRef.value.show({ title: `Xác nhận xóa ${this.CalenCompare.extra.length} học sinh không còn thuộc lớp Calen khỏi nhóm và các nhóm con?` })
+				if (!ok) return
 				const nhomIDs = [this.NhomDetail.NhomID, ...(this.NhomDetail.ListNhomID_Child || '').split(',')]
 					.map(x => String(x).trim()).filter(Boolean)
 				const extraIDs = new Set(this.CalenCompare.extra.map(x => String(x.HocSinhID)))
@@ -456,7 +466,7 @@
 					}
 				}
 				this.IsShowDialogCalen = false
-				Vue.$toast.success(`Đã xóa ${this.CalenCompare.extra.length} học sinh khỏi nhóm`, { position: 'top' })
+				this.snackbarRef.value.showSnackbar({ message: `Đã xóa ${this.CalenCompare.extra.length} học sinh khỏi nhóm`, color: 'success' })
 				await this.onRefresh(true)
 			},
 			onChangeNhomHocSinh(item) {
@@ -464,20 +474,18 @@
 				this.IsShowDialogChange = true
 			},
 			onOpenDialogChange() { },
-			onDeleteHocSinh(item) {
-				const $this = this
-				confirm({
+			async onDeleteHocSinh(item) {
+				const ok = await this.confirmRef.value.show({
 					title: "Xác nhận xóa học sinh?",
-					message: "Bạn có chắc muốn xóa học sinh đã chọn vào nhóm này?",
-					action: function () {
-						fetchPromise('lms/HocSinhNhom_Del_HSNhomID', {
-							HSNhomID: item.HSNhomID,
-						}).then(() => {
-							Vue.$toast.success("Đã xóa học sinh!", { position: "top" });
-							$this.onRefresh(true)
-						})
-					}
+					message: "Bạn có chắc muốn xóa học sinh đã chọn khỏi nhóm này?",
 				})
+				if (!ok) return
+				
+				await fetchPromise('lms/HocSinhNhom_Del_HSNhomID', {
+					HSNhomID: item.HSNhomID,
+				}, { cache: false })
+				this.snackbarRef.value.showSnackbar({ message: "Đã xóa học sinh!", color: "success" });
+				this.onRefresh(true)
 			},
 			onSelectNhomDetail(item) { this.NhomDetail = _.cloneDeep(item) },
 			onSoTTBlur(item) {

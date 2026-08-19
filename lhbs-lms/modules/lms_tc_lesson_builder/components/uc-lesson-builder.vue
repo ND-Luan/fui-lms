@@ -1,4 +1,5 @@
 <template>
+	<Global upload-manager>
 	<div class="builder-layout">
 		<!-- Cột trái: Thư viện -->
 		<div class="builder-sidebar left-sidebar">
@@ -17,6 +18,9 @@
 			<uc-lesson-properties v-model:lesson-header="lesson" :element="selectedElement"
 				:index="selectedElementIndex" @update:element="updateElement" />
 			<div class="action-buttons">
+				<v-btn v-if="hasHocLieuLink" variant="outlined" color="primary" block @click="isShowLibraryImport = true" class="mb-2">
+					<v-icon start class="me-1">mdi-database-import-outline</v-icon>Import từ kho học liệu
+				</v-btn>
 				<v-btn variant="outlined" block @click="handleSave(false)" class="mb-2"><v-icon start class="me-1">mdi-file-edit-outline</v-icon>
 					{{ $t('message.SaveDraft')}}</v-btn>
 				<v-btn color="primary" variant="outlined" block @click="handleSave(true)" class="mb-2"><v-icon start class="me-1">mdi-content-save-outline</v-icon>
@@ -98,12 +102,15 @@
 				</v-card-actions>
 			</v-card>
 		</v-dialog>
+		<uc-lesson-from-hoc-lieu v-if="isShowLibraryImport" v-model:isOpen="isShowLibraryImport"
+			:lessonDetail="lesson" :linked-hoc-lieu-i-d="linkedHocLieu?.HocLieuID || 0" @importJson="importElementFromLibrary" />
 	</div>
+	</Global>
 </template>
 
 <script>
-export default {
-	name: 'uc-lesson-builder',
+	export default {
+		name: 'uc-lesson-builder',
 	props: {
 		initialLesson: Object,
 		isEditMode: Boolean,
@@ -126,7 +133,9 @@ export default {
 			timeDialogVisible: false,
 			dateDialogVisible: false,
 			classOptions: [],
-			lessonID: null
+			lessonID: null,
+			isShowLibraryImport: false,
+			linkedHocLieu: null
 		}
 	},
 	computed: {
@@ -140,6 +149,7 @@ export default {
 		isAllSelected: function () {
 			return this.selectedClass.length != 0 && this.selectedClass.length == this.classOptions.length
 		},
+		hasHocLieuLink() { return !!this.linkedHocLieu?.HocLieuID },
 	},
 	mounted() {
 		// ajaxCALL("/lms/EL_Teacher_GetGroupedDashboard", {
@@ -186,6 +196,7 @@ export default {
 						return el;
 					});
 					this.lesson = { ...newVal, elements: processedElements };
+					this.loadHocLieuMapping(newVal.LessonID)
 				}
 			},
 			immediate: true,
@@ -193,6 +204,13 @@ export default {
 		}
 	},
 	methods: {
+		loadHocLieuMapping(lessonID) {
+			if (!lessonID) { this.linkedHocLieu = null; return }
+			ajaxCALL('lms/EL_HocLieuResource_Get', { ResourceType: 'LESSON', ResourceID: lessonID }, response => {
+				const rows = response?.data ?? response ?? []
+				this.linkedHocLieu = Array.isArray(rows?.[0]) ? rows[0][0] : (Array.isArray(rows) ? rows[0] : rows)
+			})
+		},
 		selectedAllClass() {
 			if (this.isAllSelected) {
 				this.selectedClass = []
@@ -266,6 +284,20 @@ export default {
 			})
 			// this.lesson.elements.push(newElement);
 		},
+		importElementFromLibrary(imported) {
+			if (!imported?.elementType || !imported?.elementData) return
+			const newElement = {
+				LessonID: vueData.LessonID || vueData.lesson?.LessonID,
+				ElementType: imported.elementType,
+				ElementData: JSON.parse(JSON.stringify(imported.elementData)),
+				SortOrder: (this.lesson.elements.length + 1) * 10,
+			}
+			ajaxCALL('lms/EL_Element_Save', newElement, () => {
+				CALL('getLessonData')
+				this.selectedElementIndex = this.lesson.elements.length
+				Vue.$toast.success('Đã thêm nội dung từ kho học liệu', { position: 'top' })
+			})
+		},
 		updateElements(newElements) {
 			this.lesson.elements = newElements;
 		},
@@ -315,5 +347,5 @@ export default {
 			this.timeDialogVisible = true;
 		},
 	}
-}
+	}
 </script>

@@ -32,6 +32,10 @@
 			fileUrl: {
 				type: String,
 				required: true
+			},
+			fileType: {
+				type: String,
+				default: ''
 			}
 		},
 		data() {
@@ -46,6 +50,12 @@
 		},
 		mounted() {
 			this.generateViewerUrl(this._fileUrl);
+		},
+		watch: {
+			fileUrl(newVal) {
+				this._fileUrl = newVal;
+				this.generateViewerUrl(newVal);
+			}
 		},
 		computed: {
 			nameFile: function () {
@@ -107,8 +117,18 @@
 				this.viewerUrl = `https://view.officeapps.live.com/op/embed.aspx?src=${encodedUrl}`;
 	
 				const isFileDrive = absoluteUrl.includes("drive.google.com")
-				if (isFileDrive) {
-					this.viewerUrl = absoluteUrl
+				const isGoogleSlides = absoluteUrl.includes("docs.google.com/presentation")
+				const isCanva = absoluteUrl.includes("canva.com")
+				if (isGoogleSlides) {
+					const fileIdMatch = absoluteUrl.match(/\/d\/([^\/]+)/);
+					if (fileIdMatch) {
+						const fileId = fileIdMatch[1];
+						this.viewerUrl = `https://docs.google.com/presentation/d/${fileId}/embed?start=false&loop=false`;
+					} else {
+						this.viewerUrl = absoluteUrl;
+					}
+				} else if (isFileDrive || isCanva) {
+					this.viewerUrl = absoluteUrl;
 				} else {
 					this.renderDocxFromUrl(absoluteUrl, "docx-container");
 				}

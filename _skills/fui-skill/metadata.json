@@ -1,0 +1,73 @@
+﻿{
+  "name": "fui-skill",
+  "version": "1.5.0",
+  "description": "AI operating manual for FUI (Framework UI) low-code module development. Covers module.json authoring, action engine, UI layout system, component selection, tAPI SP design, MCP tool workflows, and publish safety protocols. Documentation-only manifest — the server reads SKILL.md + references/ directly, not this file.",
+  "authoring_rule": "Mỗi reference mở đầu bằng một dòng '> File này sở hữu: ...' khai báo phạm vi (canonical owner). Một sự thật chỉ được viết đầy đủ ở đúng một file; nơi khác chỉ để link + 1 câu tóm tắt. SKILL.md là văn bản chính sách (quy tắc cứng + cổng quyết định), KHÔNG dạy cách làm — mọi hướng dẫn nằm ở references/, tra qua references/INDEX.md.",
+  "activation_triggers": [
+    "module", "module.json", "fui", "f-table", "f-dialog", "f-echart",
+    "controls", "data", "watch", "CALL", "API", "CALLBACK", "OUT",
+    "menuChucNang", "ctrl-update", "hidden-container",
+    "spAPI_", "stored procedure", "tAPI",
+    "session_set", "module_get", "module_publish_html",
+    "websocket", "webSocket_Send", "webSocketJoinGroup", "signalr", "real-time",
+    "httpCall", "httpAPI", "sendMail", "SQL CLR", "ImageResize", "ImageCrop",
+    "FileReader", "FileWriter", "RegexMatch", "RegexReplace"
+  ],
+  "context_loading": {
+    "router": "references/INDEX.md",
+    "tier1_always": [
+      "SKILL.md",
+      "references/controls-patterns.md",
+      "references/module-structure.md",
+      "references/INDEX.md"
+    ],
+    "tier3_on_demand": {
+      "platform": "references/platform-architecture.md, references/module-json-anatomy.md, references/module-data-patterns.md",
+      "system_design": "references/system-design.md",
+      "design_system": "references/design-modes.md, references/controls-styling-vocabulary.md",
+      "ui_patterns": "references/ui-patterns.md, references/ui-table-cell-patterns.md, references/ui-dialog-patterns.md, references/ui-crosswindow-patterns.md, references/ui-layout-patterns.md",
+      "ui_review": "references/ui-screenshot-review.md",
+      "component_selection": "references/component-quickref.md, references/components-input.md, references/components-display.md, references/components-dialog.md, references/component-table.md",
+      "component_design": "references/component-design.md, references/coding-standards.md",
+      "charts": "references/components-echart.md, references/echart-templates.md",
+      "spreadsheet": "references/fsheet.md",
+      "tapi_sp": "references/tapi-reference.md, references/tapi-permission-patterns.md, references/tapi-file-api.md",
+      "permissions": "references/permission-system.md",
+      "database": "references/db-workflow.md, references/db-table-design.md",
+      "fullstack": "references/fullstack-workflow.md",
+      "project_config": "references/project-config.md",
+      "pdf_generation": "references/pdfmake.md",
+      "advanced_scripting": "references/advanced-techniques.md, references/default-function.md, references/script-map.md, references/fastproject.md",
+      "watcher_patterns": "references/watcher-patterns.md",
+      "realtime_messaging": "references/websocket-realtime.md",
+      "sql_clr_functions": "references/sql-clr-functions.md",
+      "tool_safety": "references/tools-registry.md",
+      "definition_of_done": "references/verification.md",
+      "templates": "references/ui-templates.md, examples/"
+    }
+  },
+  "tool_safety": {
+    "registry": "references/tools-registry.md",
+    "default_stance": "RequiresConfirm",
+    "destructive_tools": [
+      "module_publish_html",
+      "module_delete",
+      "db_sp_deploy",
+      "db_sp_delete",
+      "db_sql_execute_nonquery",
+      "file_import_delete",
+      "component_delete"
+    ],
+    "mandatory_workflows": {
+      "module_publish_html": "module_preview → user approves → module_publish_html",
+      "module_delete": "show summary → explicit user confirmation → module_delete",
+      "db_sp_deploy": "show summary → explicit user confirmation → db_sp_deploy"
+    }
+  },
+  "verification": {
+    "checklist": "references/verification.md",
+    "gates": ["module_structure", "action_correctness", "sp_naming", "component_api", "publish_workflow"]
+  },
+  "maintainer": "FUI MCP Team",
+  "last_updated": "2026-07-29"
+}

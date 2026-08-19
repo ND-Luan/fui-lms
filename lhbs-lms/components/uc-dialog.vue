@@ -18,7 +18,10 @@
 				<slot></slot>
 			</v-card-text>
 			<v-card-actions>
-				<!-- <v-btn text @click="onClose" prepend-icon="mdi-close" variant="plain">{{ closeText }}</v-btn> -->
+				<v-btn text color="grey-darken-1" variant="text" prepend-icon="mdi-close"
+					@click="onClose">
+					{{ closeText }}
+				</v-btn>
 				<v-btn v-if="isShowDoneBtn" text color="primary" variant="outlined" prepend-icon="mdi-content-save"
 					@click="handleSubmit">
 					{{ doneText }}
@@ -27,9 +30,10 @@
 		</v-card>
 	</v-dialog>
 </template>
+
 <script>
 	export default {
-	    props: {
+		props: {
 	        modelValue: {
 	            type: Boolean,
 	            required: true,

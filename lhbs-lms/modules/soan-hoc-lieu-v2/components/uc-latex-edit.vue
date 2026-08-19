@@ -17,7 +17,7 @@
 		<template v-slot:default="{ isActive }">
 			<v-card title="Chỉnh sửa nội dung">
 				<v-card-text>
-					<uc-ggb-editor v-model="contentEditor" :imageapi="vueData.v_Set.apiImageAdapter" variant="outlined"
+					<uc-rich-text-editor :plugins="['ggb']" v-model="contentEditor" :imageapi="vueData.v_Set.apiFile" variant="outlined"
 						rows="6" auto-grow label="Nội dung (hỗ trợ HTML, LaTeX & GeoGebra)"
 						@update:modelValue="val => console.log('upd', val)" @input="v => console.log('v', v)" />
 					<!-- Preview -->

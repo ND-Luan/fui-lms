@@ -128,7 +128,7 @@
 		</v-row>
 
 		<uc-student-gradebook-dialog v-model:visible="gradebookVisible" :mon-hoc-id="gradebookMonHocId"
-			:hoc-sinh-id="hocSinhID" :subject-name="gradebookMonHocName" :isMobile />
+			:hoc-sinh-id="hocSinhID" :NienKhoa="NienKhoa" :subject-name="gradebookMonHocName" :isMobile />
 	</div>
 </template>
 
@@ -188,6 +188,11 @@
 						this.isLoading = false
 					}
 				}
+			},
+			NienKhoa() {
+				this.openIdx = null
+				this.DetailMonHoc.DanhSachChiTiet = []
+				if (this.HocSinh?.HocSinhID) this.refreshData()
 			}
 		},
 		methods: {
@@ -226,7 +231,8 @@
 				try {
 					const res = await ajaxCALLPromise('lms/EL_Student_GetSubjectProgressDetail', {
 						MonHocID: td.MonHocID,
-						HocSinhID: this.HocSinh?.HocSinhID
+						HocSinhID: this.HocSinh?.HocSinhID,
+						NienKhoa: this.NienKhoa
 					})
 					this.DetailMonHoc.DanhSachChiTiet = res[0] ?? []
 					this.DetailMonHoc.Tong = res[1]?.[0] ?? null

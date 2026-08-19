@@ -2,72 +2,119 @@
 	<Global>
         <template #header>
             <v-card>
-                <v-card-title>{{ TitlePage }} • {{ TitleCap }}</v-card-title>
-                <v-card-text>
-                    <v-row align="center">
-                        <v-col cols="12" sm="3">
-                            <v-select v-model="LopItem" label="Chọn lớp" :items="DSLop" item-title="TenLopDisplay"
-                                item-value="LopID" return-object />
-                        </v-col>
-
-                        <v-col cols="12" sm="3">
-                            <v-select v-model="MonHocItem" label="Chọn môn học" :items="DSMonHoc" item-title="TenMonHoc"
-                                item-value="MonHocID" :disabled="!LopItem" return-object />
-                        </v-col>
-
-                        <v-col cols="12" sm="3">
-                            <v-select v-model="MaNhomCotDiemItem" label="Nhóm cột điểm" :items="DSMaNhomCotDiem"
-                                item-title="TenNhomCotDiemDisplay" item-value="MaNhomCotDiem" :disabled="!MonHocItem"
-                                return-object />
-                        </v-col>
-
-                        <v-col class="d-flex align-center ga-2 flex-wrap">
-                            <v-btn variant="outlined" color="primary" @click="onRefresh">
-                                <v-icon start>mdi-reload</v-icon>
-                                Làm mới
-                            </v-btn>
-                        </v-col>
-                    </v-row>
-                </v-card-text>
+                <v-card-title class="d-flex align-center">
+                    {{ TitlePage }} • {{ TitleCap }}
+                    <v-spacer />
+                    <v-btn variant="outlined" color="primary" prepend-icon="mdi-reload" @click="onRefresh">
+                        Làm mới
+                    </v-btn>
+                </v-card-title>
             </v-card>
         </template>
 
         <v-divider />
 
-        <v-card-text class="py-2 d-flex align-center ga-2 flex-wrap">
-            <v-chip v-if="selectedStatusFilter !== null" size="small" color="info" variant="tonal">
+        <div class="khoa-cot-diem-layout">
+            <aside class="khoa-cot-diem-tree-panel">
+                <div class="pa-3">
+                    <div class="text-subtitle-1 font-weight-bold">Danh sách khối, lớp, môn</div>
+                    <div class="text-caption text-medium-emphasis">Chọn môn để xem các cột điểm</div>
+                    <v-select v-model="selectedEvaluation" :items="evaluationOptions"
+                        item-title="label" item-value="value" label="Kì đánh giá"
+                        density="compact" hide-details return-object class="mt-3" />
+                    <v-text-field v-model="treeSearch" label="Tìm khối, lớp hoặc môn"
+                        prepend-inner-icon="mdi-magnify" clearable density="compact" hide-details class="mt-3" />
+                </div>
+                <v-divider />
+                <v-treeview v-if="treeNodes.length" v-model:opened="openedTreeNodeIDs"
+                    v-model:activated="activatedTreeNodeIDs" :items="filteredTreeNodes" item-title="title"
+                    item-value="id" item-children="children"
+                    activatable density="compact" color="primary" class="pa-2"
+                    @update:opened="onTreeOpened" @update:activated="onTreeActivated">
+                    <template #append="{ item }">
+                        <v-btn v-if="['khoi', 'lop'].includes((item.raw || item).type)"
+                            size="small" variant="text" color="primary" prepend-icon="mdi-refresh"
+                            @click.stop="onLoadWholeScope(item.raw || item)">
+                            {{ (item.raw || item).type === 'khoi' ? 'Tải khối' : 'Tải lớp' }}
+                        </v-btn>
+                    </template>
+                </v-treeview>
+                <div v-else class="pa-4 text-caption text-medium-emphasis">
+                    {{ selectedEvaluation ? 'Đang tải danh sách khối, lớp, môn...' : 'Vui lòng chọn kỳ đánh giá' }}
+                </div>
+            </aside>
+
+            <main class="khoa-cot-diem-table-panel">
+                <div class="pa-3 d-flex align-center flex-wrap ga-3">
+                    <div>
+                        <div class="text-subtitle-1 font-weight-bold">
+                            {{ isSummaryView ? summaryTitle : (selectedSubjectTitle || 'Danh sách cột điểm') }}
+                        </div>
+                        <div class="text-caption text-medium-emphasis">
+                            {{ isSummaryView ? 'Danh sách tổng hợp lớp, môn và cột điểm' : (selectedSubjectContext || 'Vui lòng chọn môn học trên cây') }}
+                        </div>
+                    </div>
+                    <v-spacer />
+                    <v-select v-if="!isSummaryView" v-model="MaNhomCotDiemItem" label="Nhóm cột điểm" :items="DSMaNhomCotDiem"
+                        item-title="TenNhomCotDiemDisplay" item-value="MaNhomCotDiem" :disabled="!MonHocItem"
+                        return-object density="compact" hide-details style="max-width: 230px" />
+                </div>
+                <v-divider />
+
+                <v-card-text class="py-2 d-flex align-center ga-2 flex-wrap">
+            <template v-if="isSummaryView">
+                <v-btn size="small" color="success" variant="outlined"
+                    :disabled="summaryUnlockedRows.length === 0" @click="openBulkDialog('lock')">
+                    <v-icon start>mdi-lock</v-icon>
+                    Khóa hàng loạt ({{ summaryUnlockedRows.length }})
+                </v-btn>
+                <v-btn size="small" color="warning" variant="outlined"
+                    :disabled="summaryLockedRows.length === 0" @click="openBulkDialog('unlock')">
+                    <v-icon start>mdi-lock-open</v-icon>
+                    Mở khóa hàng loạt ({{ summaryLockedRows.length }})
+                </v-btn>
+            </template>
+            <v-chip v-if="!isSummaryView && selectedStatusFilter !== null" size="small" color="info" variant="tonal">
                 Đang lọc: {{ selectedStatusFilter ? 'Đã khóa' : 'Chưa khóa' }}
             </v-chip>
 
-            <v-chip v-if="hasMixedSelectedStatus" size="small" color="warning" variant="tonal">
+            <v-chip v-if="!isSummaryView && hasMixedSelectedStatus" size="small" color="warning" variant="tonal">
                 Đang chọn lẫn Đã khóa/Chưa khóa
             </v-chip>
 
-            <v-btn v-if="canShowLockButton" size="small" color="success" variant="outlined"
+            <v-btn v-if="!isSummaryView && canShowLockButton" size="small" color="success" variant="outlined"
                 :disabled="selectedUnlockedCount === 0 || hasMixedSelectedStatus"
                 @click="onLockSelected">
                 <v-icon start>mdi-lock</v-icon>
                 Khóa đã chọn ({{ selectedUnlockedCount }})
             </v-btn>
 
-            <v-btn v-if="canShowUnlockButton" size="small" color="warning" variant="outlined"
+            <v-btn v-if="!isSummaryView && canShowUnlockButton" size="small" color="warning" variant="outlined"
                 :disabled="selectedLockedCount === 0 || hasMixedSelectedStatus"
                 @click="onOpenUnlockSelected">
                 <v-icon start>mdi-lock-open</v-icon>
                 Mở khóa đã chọn ({{ selectedLockedCount }})
             </v-btn>
 
-            <v-btn v-if="selectedStatusFilter !== null" size="small" color="primary" variant="text"
+            <v-btn v-if="!isSummaryView && selectedStatusFilter !== null" size="small" color="primary" variant="text"
                 @click="clearSelectionFilter">
                 Hiện tất cả
             </v-btn>
-        </v-card-text>
+                </v-card-text>
 
-        <v-divider />
+                <v-divider />
 
-        <v-data-table v-model="DSSelected" :headers="headers" :items="DSView" :row-props="getRowProps"
+                <v-data-table v-if="isSummaryView" :headers="summaryHeaders" :items="summaryRows"
+                    v-model="summarySelected" item-value="RowKey" show-select
+                    items-per-page="-1" hide-default-footer hover class="khoa-cot-diem-data-table">
+                    <template #item.TenTinhTrang="{ item }">
+                        <v-chip size="x-small" :color="item.MauTinhTrang" variant="tonal">{{ item.TenTinhTrang }}</v-chip>
+                    </template>
+                </v-data-table>
+
+                <v-data-table v-else v-model="DSSelected" :headers="headers" :items="DSView" :row-props="getRowProps"
             item-selectable="IsSelectable" item-value="RowKey" :show-select="true"
-            items-per-page="-1" hide-default-footer hover style="max-height: calc(100dvh - 77px); overflow-y: auto;">
+            items-per-page="-1" hide-default-footer hover class="khoa-cot-diem-data-table">
             <template #item.actions="{ item }">
                 <v-btn size="small" :color="item.IsLocked ? 'warning' : 'success'" variant="outlined"
                     @click="onClickToggle(item)">
@@ -86,10 +133,55 @@
 
                 <div class="d-flex flex-column align-center justify-center py-12 text-medium-emphasis">
                     <v-icon size="48" class="mb-3 opacity-40">mdi-table-search</v-icon>
-                    <p class="text-body-2">Chọn lớp để xem danh sách khóa cột điểm</p>
+                    <p class="text-body-2">Chọn môn học để xem danh sách cột điểm</p>
                 </div>
             </template>
-        </v-data-table>
+                </v-data-table>
+            </main>
+        </div>
+
+        <div v-if="summaryLoading.show" class="summary-loading-panel">
+            <v-card class="pa-4 elevation-8">
+                <div class="text-subtitle-1 font-weight-bold mb-2">Đang tải dữ liệu cột điểm</div>
+                <div class="text-body-2 text-medium-emphasis mb-3">{{ summaryLoading.label }}</div>
+                <v-progress-linear :model-value="summaryLoading.percent" color="primary" rounded height="8" />
+                <div class="text-caption text-center mt-2">
+                    {{ summaryLoading.percent }}% — Đã tải {{ summaryLoading.current }} / {{ summaryLoading.total }} môn
+                </div>
+            </v-card>
+        </div>
+
+        <uc-dialog v-model="dialogBulk.show"
+            :title="dialogBulk.action === 'lock' ? 'Xác nhận khóa hàng loạt' : 'Xác nhận mở khóa hàng loạt'"
+            :done-text="dialogBulk.action === 'lock' ? 'Xác nhận khóa' : 'Xác nhận mở khóa'"
+            :width="1000"
+            @onSubmit="confirmBulkAction">
+            <div class="bulk-preview-scroll">
+            <div class="text-body-2 mb-3">
+                Sẽ xử lý {{ bulkDialogRows.length }} cột điểm được chọn:
+            </div>
+            <v-data-table :headers="bulkSummaryHeaders" :items="bulkDialogGroups"
+                items-per-page="-1" hide-default-footer density="compact" class="bulk-preview-table">
+                <template #item.MaCotDiemDisplay="{ item }">
+                    <div class="bulk-column-list d-flex flex-column align-start">
+                        <v-chip size="x-small" variant="tonal" class="mb-1">
+                            {{ item.MaCotDiemDisplay || 'Chưa có mã cột' }}
+                        </v-chip>
+                    </div>
+                </template>
+                <template #item.TenMonHoc="{ item }">
+                    <div class="bulk-column-list">
+                        <v-chip v-for="subject in item.subjects" :key="subject" size="x-small"
+                            variant="tonal" class="me-1 mb-1">
+                            {{ subject }}
+                        </v-chip>
+                    </div>
+                </template>
+            </v-data-table>
+            <v-textarea v-if="dialogBulk.action === 'unlock'" v-model="dialogBulk.LyDo"
+                class="mt-3" label="Lý do mở khóa*" rows="3" auto-grow />
+            </div>
+        </uc-dialog>
 
         <uc-dialog v-model="dialogKhoa.show" title="Xác nhận mở khóa" done-text="Xác nhận"
             @onSubmit="onConfirmMoKhoa">
@@ -112,6 +204,18 @@
         return {
             vueData,
             CapID: vueData.CapID,
+            treeNodes: [],
+            openedTreeNodeIDs: [],
+            activatedTreeNodeIDs: [],
+            treeSubjectMap: {},
+            treeSearch: '',
+            selectedEvaluation: null,
+            evaluationOptions: [
+                { value: 'GK_HK1', label: 'Giữa kì 1', semester: 'HK1' },
+                { value: 'CK_HK1', label: 'Cuối kì 1', semester: 'HK1' },
+                { value: 'GK_HK2', label: 'Giữa kì 2', semester: 'HK2' },
+                { value: 'CK_HK2', label: 'Cuối kì 2', semester: 'HK2' },
+            ],
             DSLop: [],
             LopItem: null,
             DSMonHoc: [],
@@ -119,6 +223,12 @@
             DSMaNhomCotDiem: [],
             MaNhomCotDiemItem: null,
             DS: [],
+            summaryRows: [],
+            summarySelected: [],
+            viewMode: 'empty',
+            summaryTitleText: '',
+            summaryLoading: { show: false, current: 0, total: 0, percent: 0, label: '' },
+            dialogBulk: { show: false, action: 'lock', LyDo: '' },
             DSSelected: [],
             dialogKhoa: { show: false, item: null, LyDo: '' },
             dialogMoKhoaSelected: { show: false, LyDo: '' },
@@ -129,6 +239,21 @@
                 { title: 'Tình trạng', key: 'TenTinhTrang', minWidth: 120, sortable: false },
                 { title: 'Thao tác', key: 'actions', width: 130, sortable: false },
             ],
+            summaryHeaders: [
+                { title: 'Lớp', key: 'TenLop', minWidth: 120 },
+                { title: 'Môn học', key: 'TenMonHoc', minWidth: 180 },
+                { title: 'Nhóm cột điểm', key: 'TenNhomCotDiem', minWidth: 150 },
+                { title: 'Mã cột điểm', key: 'MaCotDiemDisplay', minWidth: 150 },
+                { title: 'Tên cột điểm', key: 'TenCotDiem_VI', minWidth: 200 },
+                { title: 'Tình trạng', key: 'TenTinhTrang', minWidth: 120, sortable: false },
+            ],
+            bulkSummaryHeaders: [
+                { title: 'Lớp', key: 'TenLop', width: 90 },
+                { title: 'Nhóm cột điểm', key: 'TenNhomCotDiem', minWidth: 130 },
+                { title: 'Cột điểm', key: 'MaCotDiemDisplay', minWidth: 180, sortable: false },
+                { title: 'Môn áp dụng', key: 'TenMonHoc', minWidth: 300, sortable: false },
+                { title: 'SL môn', key: 'SoLuongMon', width: 70, align: 'center' },
+            ],
         }
     },
     computed: {
@@ -136,6 +261,61 @@
         TitlePage() { return getTitlePageByURL(window.location.pathname + window.location.search) },
         HocKi() { return vueData.NienKhoaItem?.HocKi },
         HocKiCode() { return this.HocKi === 1 ? 'HK1' : 'HK2' },
+        SelectedSemester() { return this.selectedEvaluation?.semester || null },
+        isSummaryView() { return this.viewMode === 'summary' },
+        summaryTitle() { return this.summaryTitleText },
+        summarySelectedRows() {
+            const keys = new Set((this.summarySelected || []).map(x => typeof x === 'string' ? x : x?.RowKey).filter(Boolean))
+            return this.summaryRows.filter(x => keys.has(x.RowKey))
+        },
+        summaryLockedRows() { return this.summarySelectedRows.filter(x => x.IsLocked) },
+        summaryUnlockedRows() { return this.summarySelectedRows.filter(x => !x.IsLocked) },
+        bulkDialogRows() {
+            return this.dialogBulk.action === 'lock' ? this.summaryUnlockedRows : this.summaryLockedRows
+        },
+        bulkDialogGroups() {
+            const groups = new Map()
+            this.bulkDialogRows.forEach(row => {
+                const key = `${row.LopID}|${row.TenNhomCotDiem}|${row.MaCotDiemDisplay}`
+                if (!groups.has(key)) {
+                    groups.set(key, {
+                        RowKey: `bulk-${key}`,
+                        TenLop: row.TenLop,
+                        TenNhomCotDiem: row.TenNhomCotDiem,
+                        MaCotDiemDisplay: row.MaCotDiemDisplay,
+                        TenCotDiem_VI: row.TenCotDiem_VI,
+                        subjects: [],
+                        SoLuongMon: 0,
+                    })
+                }
+                const group = groups.get(key)
+                if (!group.subjects.includes(row.TenMonHoc)) group.subjects.push(row.TenMonHoc)
+                if (!group.TenCotDiem_VI && row.TenCotDiem_VI) group.TenCotDiem_VI = row.TenCotDiem_VI
+                group.SoLuongMon += 1
+            })
+            return Array.from(groups.values()).map(group => ({
+                ...group,
+                TenMonHoc: group.subjects.join(', '),
+            }))
+        },
+        selectedSubjectTitle() {
+            return this.MonHocItem?.TenMonHoc || this.MonHocItem?.TenMonHoc_HienThi || ''
+        },
+        selectedSubjectContext() {
+            if (!this.LopItem || !this.MonHocItem) return ''
+            return `${this.LopItem.TenLop || ''} • ${this.LopItem.TenKhoiHoc || ''}`
+        },
+        filteredTreeNodes() {
+            const keyword = this.treeSearch?.trim().toLocaleLowerCase()
+            if (!keyword) return this.treeNodes
+            const filterNodes = nodes => (nodes || []).reduce((result, node) => {
+                const children = filterNodes(node.children)
+                const matched = node.title?.toLocaleLowerCase().includes(keyword)
+                if (matched || children.length) result.push({ ...node, children })
+                return result
+            }, [])
+            return filterNodes(this.treeNodes)
+        },
         selectedRows() {
             if (!this.DSSelected?.length) return []
             const selectedKeys = new Set(
@@ -180,29 +360,26 @@
         },
     },
     watch: {
-        LopItem(v) {
-            this.MonHocItem = null
-            this.DSMonHoc = []
-            this.MaNhomCotDiemItem = null
-            this.DSMaNhomCotDiem = []
-            this.DS = []
-            if (v) this.getMonHoc()
-        },
-        MonHocItem(v) {
-            this.MaNhomCotDiemItem = null
-            this.DSMaNhomCotDiem = []
-            this.DS = []
-            if (v) this.getMaNhomCotDiem()
+        selectedEvaluation() {
+            this.resetTreeData()
+            if (this.selectedEvaluation) this.getAllLop()
         },
         MaNhomCotDiemItem(v) {
             this.DS = []
+            this.summaryRows = []
+            this.summarySelected = []
+            this.viewMode = 'empty'
             if (v) this.getDS()
         },
         HocKi() {
             this.MaNhomCotDiemItem = null
             this.DSMaNhomCotDiem = []
             this.DS = []
-            if (this.MonHocItem) this.getMaNhomCotDiem()
+            this.MonHocItem = null
+            this.LopItem = null
+            this.activatedTreeNodeIDs = []
+            this.resetTreeData()
+            if (this.selectedEvaluation) this.getAllLop()
         },
         DS() {
             this.DSSelected = []
@@ -212,6 +389,28 @@
         this.getAllLop()
     },
     methods: {
+        resetTreeData() {
+            this.treeNodes = []
+            this.openedTreeNodeIDs = []
+            this.activatedTreeNodeIDs = []
+            this.treeSubjectMap = {}
+            this.DSLop = []
+            this.DSMonHoc = []
+            this.LopItem = null
+            this.MonHocItem = null
+            this.DSMaNhomCotDiem = []
+            this.MaNhomCotDiemItem = null
+            this.DS = []
+            this.summaryRows = []
+            this.summarySelected = []
+            this.viewMode = 'empty'
+            this.summaryTitleText = ''
+        },
+        isSelectedEvaluationGroup(group) {
+            if (!group || !this.selectedEvaluation) return false
+            const code = String(group.MaNhomCotDiem || '').replace(/^Diem/, '')
+            return code === this.selectedEvaluation.value
+        },
         normalizeMaCotDiem(maCotDiem) {
             if (typeof maCotDiem !== 'string') return maCotDiem
             const splitIndex = maCotDiem.indexOf('_')
@@ -238,25 +437,274 @@
             return current
         },
         async getAllLop() {
+            if (!this.selectedEvaluation) return
             const resKhoi = await fetchPromise('lms/KhoiHocByCapHoc_Get', { CapID: this.CapID })
             const dsKhoi = resKhoi.data ?? resKhoi ?? []
             if (!dsKhoi.length) return
-            const batch = dsKhoi.map(khoi => ({
-                url: 'lms/Lop_Get_ByKhoiID',
-                params: { NienKhoa: vueData.NienKhoa, KhoiID: khoi.KhoiID },
+            this.treeNodes = dsKhoi.map(khoi => ({
+                id: `khoi-${khoi.KhoiID}`,
+                title: khoi.TenKhoiHoc,
+                type: 'khoi',
+                KhoiID: khoi.KhoiID,
+                loaded: false,
+                children: [{ id: `loading-khoi-${khoi.KhoiID}`, title: 'Mở để tải danh sách lớp', type: 'loading' }],
             }))
-            const results = await fetchBatchPromise(batch)
-            const dsLop = []
-            results.forEach((res, idx) => {
-                const lops = res.data ?? res ?? []
-                const khoi = dsKhoi[idx]
-                lops.forEach(lop => dsLop.push({
-                    ...lop,
-                    TenLopDisplay: `${lop.TenLop} (${khoi.TenKhoiHoc})`,
-                    KhoiID: khoi.KhoiID,
-                }))
+        },
+        findTreeNode(nodes, id) {
+            for (const node of nodes || []) {
+                if (node.id === id) return node
+                const found = this.findTreeNode(node.children, id)
+                if (found) return found
+            }
+            return null
+        },
+        async onTreeOpened(ids) {
+            const openedID = ids?.[ids.length - 1]
+            const node = this.findTreeNode(this.treeNodes, openedID)
+            if (!node || node.loaded) return
+            if (node.type === 'khoi') await this.loadTreeClasses(node)
+            if (node.type === 'lop') await this.loadTreeSubjects(node)
+        },
+        async loadSummaryForNode(node) {
+            let subjectNodes = []
+            this.summaryLoading = {
+                show: true,
+                current: 0,
+                total: subjectNodes.length,
+                percent: 0,
+                label: 'Đang chuẩn bị dữ liệu lớp và môn học...',
+            }
+            try {
+                if (node.type === 'khoi') {
+                    if (!node.loaded) await this.loadTreeClasses(node)
+                    this.LopItem = { TenKhoiHoc: node.title, KhoiID: node.KhoiID }
+                    this.summaryRows = []
+                    for (const lopNode of node.children || []) {
+                        if (!lopNode.loaded) await this.loadTreeSubjects(lopNode)
+                        this.LopItem = lopNode.Lop
+                        subjectNodes.push(...(lopNode.children || []))
+                    }
+                } else if (node.type === 'lop') {
+                    if (!node.loaded) await this.loadTreeSubjects(node)
+                    this.LopItem = node.Lop
+                    subjectNodes = node.children || []
+                } else {
+                    return
+                }
+
+                this.summaryLoading.total = subjectNodes.length
+                this.summaryLoading.label = subjectNodes.length
+                    ? 'Đang tải dữ liệu cột điểm...'
+                    : 'Không có môn học cần tải.'
+                for (const subjectNode of subjectNodes) {
+                    this.summaryLoading.label = `Đang tải ${subjectNode.title}...`
+                    await this.loadSummarySubject(subjectNode)
+                    this.summaryLoading.current += 1
+                    this.summaryLoading.percent = this.summaryLoading.total
+                        ? Math.round(this.summaryLoading.current * 100 / this.summaryLoading.total)
+                        : 100
+                }
+            } finally {
+                this.summaryLoading.show = false
+            }
+        },
+        async onLoadWholeScope(node) {
+            const scopeNode = this.findTreeNode(this.treeNodes, node?.id)
+            if (!scopeNode || !['khoi', 'lop'].includes(scopeNode.type)) return
+            this.viewMode = 'summary'
+            this.summaryTitleText = scopeNode.type === 'khoi'
+                ? `Tổng hợp ${scopeNode.title}`
+                : `Tổng hợp ${scopeNode.title}`
+            this.summaryRows = []
+            await this.loadSummaryForNode(scopeNode)
+        },
+        async loadSummarySubject(subjectNode) {
+            const lop = subjectNode.Lop
+            const mon = subjectNode.MonHoc
+            const groupRes = await fetchPromise('lms/NhomCauTrucDiem_Get_ByTemplateBangDiemID', {
+                TemplateBangDiemID: mon.TemplateBangDiemID,
+            }, { silent: true })
+            const groups = (groupRes.data ?? groupRes ?? []).filter(x => this.isSelectedEvaluationGroup(x))
+            for (const group of groups) {
+                const [scoreRes, lockRes] = await Promise.all([
+                    fetchPromise('lms/HocSinhBangDiem_Get_ByMonHocID_MaNhom', {
+                        LopID: lop.LopID,
+                        MonHocID: mon.MonHocID,
+                        TemplateBangDiemID: mon.TemplateBangDiemID,
+                        MaNhomCotDiem: group.MaNhomCotDiem,
+                        ThuTuNhom: group.ThuTuNhom,
+                        Semester: group.Semester,
+                        NienKhoa: vueData.NienKhoa,
+                        KhoiID: lop.KhoiID,
+                    }, { cache: false, silent: true }),
+                    fetchPromise('lms/KhoaCotDiem_Get', {
+                        LopID: lop.LopID,
+                        MonHocLopID: mon.MonHocLopID,
+                        MaNhomCotDiem: group.MaNhomCotDiem,
+                        Semester: group.Semester,
+                        NienKhoa: vueData.NienKhoa,
+                    }, { cache: false, silent: true }),
+                ])
+                const scores = scoreRes.data ?? scoreRes ?? []
+                const locks = lockRes.data ?? lockRes ?? []
+                const firstStudentID = scores[0]?.HocSinhID
+                const columns = firstStudentID ? scores.filter(x => x.HocSinhID === firstStudentID) : []
+                const lockMap = locks.reduce((map, item) => {
+                    const key = this.getKhoaKey(item.MonHocLopID, item.MaCotDiem)
+                    const current = map[key]
+                    if (!current || Number(item.KhoaCotDiemID || 0) >= Number(current.KhoaCotDiemID || 0)) {
+                        map[key] = item
+                    }
+                    return map
+                }, {})
+                columns.forEach(column => {
+                    const maCotDiem = column.MaCotDiem || ''
+                    const lock = lockMap[this.getKhoaKey(column.MonHocLopID || mon.MonHocLopID, maCotDiem)] || {}
+                    const isLocked = !!lock.TinhTrang
+                    this.summaryRows.push({
+                        RowKey: `summary-${lop.LopID}-${mon.MonHocID}-${group.MaNhomCotDiem}-${maCotDiem}`,
+                        TenLop: lop.TenLop,
+                        TenMonHoc: mon.TenMonHoc,
+                        TenNhomCotDiem: group.TenNhomCotDiem_VI || group.MaNhomCotDiem,
+                        MaCotDiemDisplay: maCotDiem,
+                        TenCotDiem_VI: column.TenCotDiem_VI || maCotDiem,
+                        LopID: lop.LopID,
+                        MonHocLopID: column.MonHocLopID || mon.MonHocLopID,
+                        MaCotDiemSave: this.normalizeMaCotDiem(maCotDiem),
+                        KhoaCotDiemID: lock.KhoaCotDiemID || null,
+                        IsLocked: isLocked,
+                        TenTinhTrang: isLocked ? 'Đã khóa' : 'Chưa khóa',
+                        MauTinhTrang: isLocked ? 'success' : 'warning',
+                    })
+                })
+            }
+        },
+        openBulkDialog(action) {
+            if (action === 'lock' && !this.summaryUnlockedRows.length) return
+            if (action === 'unlock' && !this.summaryLockedRows.length) return
+            this.dialogBulk = { show: true, action, LyDo: '' }
+        },
+        async confirmBulkAction() {
+            const rows = this.bulkDialogRows
+            if (!rows.length) return
+            if (this.dialogBulk.action === 'unlock' && !this.dialogBulk.LyDo?.trim()) {
+                this.snackbarRef.value.showSnackbar({ message: 'Vui lòng nhập lý do mở khóa', color: 'error' })
+                return
+            }
+            for (const item of rows) {
+                if (this.dialogBulk.action === 'lock') {
+                    if (item.KhoaCotDiemID) {
+                        await fetchPromise('lms/KhoaCotDiem_TinhTrang_Upd_ByKhoaCotDiem', {
+                            KhoaCotDiemID: item.KhoaCotDiemID, TinhTrang: 1, LyDo: '',
+                        }, { cache: false, silent: true })
+                    } else {
+                        await fetchPromise('lms/KhoaCotDiem_Ins_And_Upd', {
+                            LopID: item.LopID, MonHocLopID: item.MonHocLopID,
+                            MaCotDiem: item.MaCotDiemSave, IsKhoaCotDiem: true,
+                        }, { cache: false, silent: true })
+                    }
+                } else {
+                    await fetchPromise('lms/KhoaCotDiem_TinhTrang_Upd_ByKhoaCotDiem', {
+                        KhoaCotDiemID: item.KhoaCotDiemID,
+                        TinhTrang: 0,
+                        LyDo: this.dialogBulk.LyDo.trim(),
+                    }, { cache: false, silent: true })
+                }
+            }
+            this.dialogBulk.show = false
+            this.summarySelected = []
+            this.snackbarRef.value.showSnackbar({
+                message: `${this.dialogBulk.action === 'lock' ? 'Khóa' : 'Mở khóa'} thành công ${rows.length} cột điểm`,
+                color: 'success',
             })
-            this.DSLop = dsLop
+        },
+        async loadTreeClasses(node) {
+            node.loading = true
+            const res = await fetchPromise('lms/Lop_Get_ByKhoiID', {
+                NienKhoa: vueData.NienKhoa,
+                KhoiID: node.KhoiID,
+            }, { silent: true })
+            const dsLop = res.data ?? res ?? []
+            const khoi = { KhoiID: node.KhoiID, TenKhoiHoc: node.title }
+            dsLop.forEach(lop => {
+                const item = {
+                    ...lop,
+                    TenLopDisplay: `${lop.TenLop} (${node.title})`,
+                    TenKhoiHoc: node.title,
+                    KhoiID: node.KhoiID,
+                }
+                this.DSLop.push(item)
+            })
+            node.children = dsLop.map(lop => ({
+                id: `lop-${lop.LopID}`,
+                title: lop.TenLop,
+                type: 'lop',
+                Lop: { ...lop, ...khoi, TenKhoiHoc: node.title },
+                LopID: lop.LopID,
+                loaded: false,
+                children: [{ id: `loading-lop-${lop.LopID}`, title: 'Mở để tải danh sách môn', type: 'loading' }],
+            }))
+            node.loaded = true
+            node.loading = false
+        },
+        async loadTreeSubjects(node) {
+            node.loading = true
+            const lop = node.Lop
+            const res = await fetchPromise('lms/MonHoc_Get_ByLopID_BoMon', {
+                LopID: lop.LopID,
+                NienKhoa: vueData.NienKhoa,
+                HocKi: this.HocKi,
+            }, { silent: true })
+            const dsMonHoc = res.data ?? res ?? []
+            const subjects = dsMonHoc.map(mon => ({
+                ...mon,
+                TenMonHoc: mon.TenMonHoc_HienThi || mon.TenMonHoc || '',
+                Lop: lop,
+            }))
+            this.DSMonHoc = subjects
+            this.treeSubjectMap[lop.LopID] = subjects
+            node.children = subjects.map(mon => ({
+                id: `mon-${lop.LopID}-${mon.MonHocID}`,
+                title: mon.TenMonHoc,
+                type: 'mon',
+                Lop: lop,
+                MonHoc: mon,
+            }))
+            node.loaded = true
+            node.loading = false
+        },
+        async onTreeActivated(ids) {
+            const activeID = ids?.[ids.length - 1]
+            if (!activeID) return
+            const node = this.findTreeNode(this.treeNodes, activeID)
+            if (!node || node.type === 'loading') return
+            if (node.type === 'khoi') {
+                if (!node.loaded) await this.loadTreeClasses(node)
+                this.viewMode = 'empty'
+                this.summaryTitleText = ''
+                this.summaryRows = []
+                this.DS = []
+                return
+            }
+            if (node.type === 'lop') {
+                if (!node.loaded) await this.loadTreeSubjects(node)
+                this.viewMode = 'empty'
+                this.summaryTitleText = ''
+                this.summaryRows = []
+                this.DS = []
+                return
+            }
+            if (node.type !== 'mon') return
+            this.viewMode = 'detail'
+            this.summaryTitleText = ''
+            this.summaryRows = []
+            this.LopItem = node.Lop
+            this.MonHocItem = node.MonHoc
+            this.DSMonHoc = this.treeSubjectMap[node.Lop.LopID] || []
+            this.MaNhomCotDiemItem = null
+            this.DSMaNhomCotDiem = []
+            this.DS = []
+            this.getMaNhomCotDiem()
         },
         async getMonHoc() {
             if (!this.LopItem) return
@@ -279,7 +727,7 @@
             })
             const dsNhom = res.data ?? res ?? []
             this.DSMaNhomCotDiem = dsNhom
-                .filter(x => x.Semester === this.HocKiCode)
+                .filter(x => this.isSelectedEvaluationGroup(x))
                 .map(x => ({
                     ...x,
                     TenNhomCotDiemDisplay: x.TenNhomCotDiem_VI || x.MaNhomCotDiem,
@@ -477,14 +925,18 @@
             this.getDS()
         },
         async onRefresh() {
-            if (!this.MaNhomCotDiemItem) {
+            if (!this.selectedEvaluation) {
                 this.snackbarRef.value.showSnackbar({
-                    message: 'Vui lòng chọn đủ bộ lọc trước khi làm mới',
+                    message: 'Vui lòng chọn kỳ đánh giá trước khi làm mới',
                     color: 'warning',
                 })
                 return
             }
-            await this.getDS()
+            if (this.MonHocItem && this.MaNhomCotDiemItem) {
+                await this.getDS()
+                return
+            }
+            await this.getAllLop()
         },
     },
 	}
