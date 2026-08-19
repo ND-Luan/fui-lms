@@ -1,11 +1,11 @@
 <template>
-	<Global>
+	<Global class="bgh-phan-cong-giao-vien">
     <!-- Header with page title and filters -->
     <template #header>
-      <v-card>
-        <v-card-title>{{ TitlePage }} • {{ TitleCap }}</v-card-title>
-        <v-card-text>
-          <v-row align="center">
+      <v-card class="sticky-filter">
+        <v-card-title class="text-primary px-0 pt-0">{{ TitlePage }} • {{ TitleCap }}</v-card-title>
+        <v-card-text class="px-0 pb-0">
+          <v-row align="center" dense>
             <v-col cols="12" sm="4" md="2">
               <v-select v-model="CapID" label="Chọn cấp học" :items="DSCap" item-title="TenCap" item-value="MaCap"
                 hide-details />
@@ -23,23 +23,23 @@
                 hide-details />
             </v-col>
             <v-col cols="12" sm="4" md="3" v-if="viewMode === 'matrix'">
-              <v-select v-model="filterMonHocIds" label="Lọc môn học" :items="DSMonHoc" item-title="MonHocName"
+              <v-autocomplete v-model="filterMonHocIds" label="Lọc môn học" :items="DSMonHoc" item-title="MonHocName"
                 item-value="MonHocID" multiple clearable hide-details />
             </v-col>
             <v-col cols="12" sm="6" md="4" v-if="viewMode === 'list'">
               <v-text-field v-model="Search" label="Tìm kiếm giảng viên..." prepend-inner-icon="mdi-magnify"
                 hide-details clearable />
             </v-col>
-            <v-col class="d-flex align-center ga-2 flex-wrap">
+            <v-col cols="12" md="auto" class="d-flex align-center justify-end ga-2 flex-wrap">
               <v-btn-toggle v-model="viewMode" mandatory color="primary" density="compact" variant="outlined">
                 <v-btn value="list" prepend-icon="mdi-format-list-bulleted" class="text-caption">Danh sách</v-btn>
                 <v-btn value="matrix" prepend-icon="mdi-grid" class="text-caption">Ma trận phân công</v-btn>
               </v-btn-toggle>
-              <v-btn v-if="viewMode === 'list'" color="primary" @click="openAddDialog" class="text-none">
+              <v-btn v-if="viewMode === 'list'" color="primary" variant="outlined" @click="openAddDialog" class="text-none">
                 <v-icon start>mdi-plus</v-icon>
                 Thêm phân công
               </v-btn>
-              <v-btn v-if="viewMode === 'matrix'" color="primary" :loading="savingMatrix"
+              <v-btn v-if="viewMode === 'matrix'" color="primary" variant="outlined" :loading="savingMatrix"
                 :disabled="matrixChangeCount === 0" @click="saveMatrix" class="text-none">
                 <v-icon start>mdi-content-save-outline</v-icon>
                 Lưu thay đổi
@@ -109,21 +109,25 @@
       </div>
 
       <div v-else class="matrix-container">
-        <div class="matrix-summary d-flex align-center ga-3">
-          <v-icon size="18" color="primary">mdi-table-large</v-icon>
-          <span class="text-body-2 font-weight-medium">{{ matrixRows.length }} lớp</span>
-          <span class="text-caption text-medium-emphasis">• {{ filteredMonHocs.length }} môn đang hiển thị</span>
-          <v-spacer />
-          <span v-if="matrixChangeCount" class="text-caption text-warning">
-            {{ matrixChangeCount }} ô chưa lưu
-          </span>
+        <div class="matrix-summary d-flex align-center justify-space-between flex-wrap ga-3">
+          <div class="d-flex align-center ga-3">
+            <v-icon size="18" color="primary">mdi-table-large</v-icon>
+            <span class="text-body-2 font-weight-medium">{{ matrixRows.length }} lớp</span>
+            <span class="text-caption text-medium-emphasis">• {{ filteredMonHocs.length }} môn đang hiển thị</span>
+          </div>
+          <div class="d-flex align-center ga-3">
+            <v-switch v-model="showAssignedMonHocOnly" label="Chỉ môn đã phân công" color="primary" density="compact"
+              readonly hide-details />
+            <span v-if="matrixChangeCount" class="text-caption text-warning">
+              {{ matrixChangeCount }} ô chưa lưu
+            </span>
+          </div>
         </div>
         <!-- Dynamic matrix table -->
         <div class="matrix-shell">
-          <v-table class="matrix-table text-caption" fixed-header style="height: calc(100vh - 181px)">
+        <v-table class="matrix-table text-caption" fixed-header style="height: calc(100dvh - 181px)">
             <thead>
               <tr class="bg-grey-lighten-4">
-                <th class="font-weight-bold text-center" style="width: 50px;">STT</th>
                 <th class="font-weight-bold text-left sticky-col" style="width: 140px; min-width: 120px;">Lớp học</th>
                 <th class="font-weight-bold text-left" style="width: 280px; min-width: 240px;">Giáo viên chủ nhiệm / GV
                   Lớp</th>
@@ -134,21 +138,28 @@
               </tr>
             </thead>
             <tbody>
-              <tr v-for="(row, rIdx) in matrixRows" :key="row.LopID" class="matrix-row">
-                <td class="text-center text-medium-emphasis">{{ rIdx + 1 }}</td>
+              <tr v-for="row in matrixRows" :key="row.LopID" class="matrix-row">
                 <td class="font-weight-bold text-primary sticky-col">{{ row.TenLop }}</td>
                 <!-- GVCN Cell -->
                 <td>
-                  <v-autocomplete v-model="row.GVCN" :items="DSGiaoVien" :item-title="renderTextGiangVien"
-                    item-value="GiaoVienID" multiple chips closable-chips placeholder="Chọn GVCN..." :clearable="false"
-                    hide-details density="compact" variant="underlined" class="matrix-select" />
+                  <v-autocomplete v-model="row.GVCN" :items="getGiaoVienItems(row.GVCN)" :item-title="renderTextGiangVien"
+                    item-value="GiaoVienID" multiple chips closable-chips placeholder="Chọn GVCN..." persistent-placeholder :clearable="false"
+                    menu-icon="mdi-account-plus" hide-details density="compact" variant="underlined" class="matrix-select">
+                    <template #chip="{ item, props }">
+                      <v-chip v-bind="props" class="matrix-teacher-chip" size="small">{{ item.title }}</v-chip>
+                    </template>
+                  </v-autocomplete>
                 </td>
                 <!-- Subject Cells -->
                 <td v-for="sub in filteredMonHocs" :key="sub.MonHocID">
-                  <v-autocomplete v-model="row.Subjects[sub.MonHocID]" :items="DSGiaoVien"
+                  <v-autocomplete v-model="row.Subjects[sub.MonHocID]" :items="getGiaoVienItems(row.Subjects[sub.MonHocID])"
                     :item-title="renderTextGiangVien" item-value="GiaoVienID" multiple chips closable-chips
-                    placeholder="Chọn GV bộ môn..." :clearable="false" hide-details density="compact" variant="underlined"
-                    class="matrix-select" />
+                    placeholder="Chọn GV bộ môn..." persistent-placeholder :clearable="false" menu-icon="mdi-account-plus" hide-details density="compact" variant="underlined"
+                    class="matrix-select">
+                    <template #chip="{ item, props }">
+                      <v-chip v-bind="props" class="matrix-teacher-chip" size="small">{{ item.title }}</v-chip>
+                    </template>
+                  </v-autocomplete>
                 </td>
               </tr>
             </tbody>
@@ -223,6 +234,7 @@
       loadingMatrix: false,
       savingMatrix: false,
       filterMonHocIds: [],
+      showAssignedMonHocOnly: true,
 
       DSCap: [
         { TenCap: 'Cấp 1', MaCap: 1 },
@@ -288,10 +300,14 @@
     },
     filteredMonHocs() {
       if (!this.DSMonHoc) return []
-      if (!this.filterMonHocIds || this.filterMonHocIds.length === 0) {
-        return this.DSMonHoc
-      }
-      return this.DSMonHoc.filter(sub => this.filterMonHocIds.includes(sub.MonHocID))
+      const selectedSubjects = !this.filterMonHocIds || this.filterMonHocIds.length === 0
+        ? this.DSMonHoc
+        : this.DSMonHoc.filter(sub => this.filterMonHocIds.includes(sub.MonHocID))
+
+      if (!this.showAssignedMonHocOnly) return selectedSubjects
+      return selectedSubjects.filter(sub => this.matrixRows.some(row =>
+        (row.Subjects?.[sub.MonHocID] || []).length > 0
+      ))
     },
     matrixChangeCount() {
       if (!this.initialMatrixRows.length) return 0
@@ -681,6 +697,15 @@
       return `[${obj.GiaoVienID}] - ${name}`
     },
 
+    getGiaoVienItems(selectedIds = []) {
+      const selected = new Set((selectedIds || []).map(id => String(id).trim()))
+      const items = this.DSGiaoVien || []
+      return [
+        ...items.filter(item => selected.has(String(item.GiaoVienID).trim())),
+        ...items.filter(item => !selected.has(String(item.GiaoVienID).trim()))
+      ]
+    },
+
     openAddDialog() {
       this.dialog.isEdit = false
       this.dialog.item = {
@@ -796,3 +821,50 @@
   }
 	}
 </script>
+
+<style scoped>
+.bgh-phan-cong-giao-vien .matrix-table tbody td {
+  vertical-align: top;
+  padding-top: 8px;
+}
+
+.bgh-phan-cong-giao-vien .matrix-select .v-field {
+  min-height: 44px;
+  height: auto;
+}
+
+.bgh-phan-cong-giao-vien .matrix-select .v-field__input {
+  flex-wrap: wrap;
+  align-content: flex-start;
+  min-height: 40px;
+  padding-top: 6px;
+  padding-bottom: 6px;
+  row-gap: 4px;
+  column-gap: 4px;
+}
+
+.bgh-phan-cong-giao-vien .matrix-select .v-autocomplete__selection {
+  max-width: 100%;
+  height: auto;
+  margin: 0;
+}
+
+.bgh-phan-cong-giao-vien .matrix-select .v-field__append-inner .v-icon {
+  transform: none !important;
+  transition: none !important;
+}
+
+.bgh-phan-cong-giao-vien .matrix-teacher-chip {
+  flex: 0 1 auto;
+  max-width: 100%;
+  height: auto;
+  min-height: 24px;
+  margin-block: 0;
+}
+
+.bgh-phan-cong-giao-vien .matrix-teacher-chip .v-chip__content {
+  white-space: normal;
+  overflow-wrap: anywhere;
+  line-height: 1.35;
+}
+</style>

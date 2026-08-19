@@ -331,11 +331,18 @@
 .vercel-fab-btn {
     background-color: #1a1a1a !important;
     color: white !important;
+    touch-action: none !important;
+    user-select: none;
+    cursor: grab;
     border: 1px solid rgba(255, 255, 255, 0.1) !important;
     box-shadow: 0 4px 14px rgba(0, 0, 0, 0.3) !important;
     width: 48px !important;
     height: 48px !important;
     transition: transform 0.2s ease, box-shadow 0.2s ease !important;
+}
+
+.vercel-fab-btn:active {
+    cursor: grabbing;
 }
 
 .vercel-fab-btn:hover {

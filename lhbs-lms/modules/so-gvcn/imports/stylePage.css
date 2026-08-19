@@ -43,6 +43,51 @@
 }
 
 /* Card Sheet Wrap (Tab 2 - Allow dropdown to overflow card boundary) */
+.so-gvcn-plan-scroll {
+	min-width: 0;
+	width: 0;
+	flex: 1 1 0;
+	overflow-x: hidden !important;
+}
+
+.so-gvcn-plan-layout,
+.so-gvcn-plan-scroll .v-row,
+.so-gvcn-plan-scroll .wrapper-jexcel,
+.so-gvcn-plan-scroll .jss_container,
+.so-gvcn-plan-scroll .jspreadsheet_container {
+	min-width: 0 !important;
+	max-width: 100% !important;
+}
+
+.so-gvcn-quality-target-sheet table.jss_worksheet thead tr.jss_nested:last-child td:last-child,
+.so-gvcn-quality-target-sheet table.jss_worksheet thead tr:not(.jss_nested) td:last-child,
+.so-gvcn-quality-target-sheet table.jss_worksheet tbody td:last-child {
+    width: 220px !important;
+    min-width: 220px !important;
+}
+
+.so-gvcn-academic-target-sheet table.jss_worksheet thead tr.jss_nested,
+.so-gvcn-academic-target-sheet table.jss_worksheet thead tr.jss_nested td,
+.so-gvcn-academic-target-sheet table.jss_worksheet thead tr.jss_nested th {
+    height: 56px !important;
+    min-height: 56px !important;
+    max-height: 56px !important;
+    line-height: 1.3 !important;
+    vertical-align: middle !important;
+}
+
+.so-gvcn-plan-scroll .so-gvcn-sheet {
+    min-width: 0;
+    max-width: 100%;
+}
+
+.so-gvcn-plan-scroll .jss_content,
+.so-gvcn-plan-scroll .jspreadsheet-content {
+    max-width: 100% !important;
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
+}
+
 .so-gvcn-card-sheet-wrap,
 .so-gvcn-card-sheet-wrap .wrapper-jexcel,
 .so-gvcn-card-sheet-wrap .jexcel_container,

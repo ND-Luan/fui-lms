@@ -824,6 +824,9 @@ class tblDangKyMangLaptop {
    datetime UpdateTime
    nvarchar(50) LoaiThietBi
    tinyint Buoi
+   bit IsDaThongBaoPH
+   varchar(20) NguoiThongBaoPH
+   datetime ThoiGianThongBaoPH
 }
 class tblDangKyMangLaptop_HocSinh {
    int DangKyHocSinhID
@@ -1849,6 +1852,7 @@ class tblLop {
    datetime UpdateTime
    int CapID
    int LopIDQLD
+   bit IsLopToHop
 }
 class tblLop_TinhTrang {
    int Lop_TinhTrangID
@@ -2651,6 +2655,54 @@ class tblThietLap_KiNang_IELTS {
    int MinCorrectAns
    int MaxCorrectAns
    float BandScore
+}
+class tblTKB_Khoi {
+   int KhoiID
+   varchar(20) NamHoc
+   int DonViID
+   nvarchar(200) TenKhoi
+   datetime NgayDongBo
+   varchar(50) Nguon
+}
+class tblTKB_Lich {
+   int TKBLichID
+   varchar(20) NienKhoa
+   int CapHoc
+   int LopID
+   nvarchar(200) Lop
+   int Thu
+   int BuoiID
+   int Tiet
+   int MonHocID
+   varchar(50) MaMon
+   nvarchar(200) TenMonHoc
+   int GiaoVienID
+   nvarchar(max) GhiChu
+   int MaDonVi
+   datetime NgayTao
+   varchar(50) NguoiTao
+   varchar(20) NamHoc
+   int HocKy
+   int Tuan
+   date NgayApDung
+   int LoaiTKB
+   int LopHocID
+}
+class tblTKB_LopHoc {
+   int LopHocID
+   varchar(20) NamHoc
+   int KhoiID
+   nvarchar(200) TenLop
+   nvarchar(200) GVCN
+   nvarchar(200) GVCN_HoTro
+   int HinhThucLop
+   datetime NgayDongBo
+   varchar(50) Nguon
+}
+class tblTKB_MonHoc {
+   int MonHocID
+   varchar(50) MaMon
+   nvarchar(255) TenMonHoc
 }
 class tblToGiangDay {
    int ToGiangDayID

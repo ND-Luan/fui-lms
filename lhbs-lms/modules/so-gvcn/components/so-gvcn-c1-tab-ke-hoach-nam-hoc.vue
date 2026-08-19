@@ -300,7 +300,7 @@
 						domId: 'ke-hoach-nam-hoc-muc-ii-pcnl',
 						refName: 'annualQualityCompetencyRef',
 						title: '2.1. PHẨM CHẤT – NĂNG LỰC\na. CHỈ TIÊU PHẤN ĐẤU',
-						height: '100%',
+						height: 'auto',
 						freezeColumns: 1,
 						columns: this.buildQualityCompetencyColumns(),
 						nestedHeaders: this.buildQualityCompetencyNestedHeaders(),
@@ -314,7 +314,7 @@
 						domId: 'ke-hoach-nam-hoc-muc-ii-mon-hoc',
 						refName: 'annualAcademicTargetRef',
 						title: '2.2. MÔN HỌC VÀ HOẠT ĐỘNG GIÁO DỤC\na. CHỈ TIÊU PHẤN ĐẤU',
-						height: '100%',
+						height: 'auto',
 						freezeColumns: 1,
 						columns: this.buildAcademicColumns(),
 						nestedHeaders: this.buildAcademicNestedHeaders(),
@@ -400,9 +400,13 @@
 				const subjects = this.qualityCompetencySubjects || this.getDefaultQualityCompetencySubjects()
 				return [
 					{ title: 'Xếp loại', width: 150, readOnly: true },
-					...subjects.flatMap(() => [
+					...subjects.flatMap(subject => [
 						{ title: 'Số lượng', width: 95, type: 'numeric' },
-						{ title: 'Tỉ lệ', width: 85, type: 'numeric' }
+						{
+							title: 'Tỉ lệ',
+							width: this.getQualityCompetencyName(subject).includes('Giải quyết vấn đề') ? 150 : 85,
+							type: 'numeric'
+						}
 					])
 				]
 			},
@@ -428,10 +432,8 @@
 			buildQualityCompetencyRows(saved) {
 				const subjects = this.qualityCompetencySubjects || this.getDefaultQualityCompetencySubjects()
 				const savedRows = saved.qualityCompetencyTargets || saved['pham-chat-nang-luc']
-				if (Array.isArray(savedRows)) {
-					return savedRows.map(row => row.slice())
-				}
-				return ['Tốt (T)', 'Đạt (Đ)', 'Cần cố gắng (C)'].map(title => [
+				if (Array.isArray(savedRows)) return savedRows.map(row => [this.getTargetRatingDisplayLabel(row?.[0]), ...row.slice(1)])
+				return ['Tốt (T) >=', 'Đạt (Đ)', 'Cần cố gắng (C)'].map(title => [
 					title,
 					...subjects.flatMap(() => ['', ''])
 				])
@@ -459,11 +461,19 @@
 			buildAcademicRows(saved) {
 				const subjects = this.academicSubjects || this.getDefaultAcademicSubjects()
 				const savedRows = saved.academicTargets || saved['mon-hoc-hoat-dong']
-				if (Array.isArray(savedRows)) return savedRows.map(row => row.slice())
-				return ['Hoàn thành tốt (T)', 'Hoàn thành (H)', 'Chưa hoàn thành (C)'].map(title => [
+				if (Array.isArray(savedRows)) return savedRows.map(row => [this.getTargetRatingDisplayLabel(row?.[0]), ...row.slice(1)])
+				return ['Hoàn thành tốt (T) >=', 'Hoàn thành (H)', 'Chưa hoàn thành (C)'].map(title => [
 					title,
 					...subjects.flatMap(() => ['', ''])
 				])
+			},
+			getTargetRatingDisplayLabel(label) {
+				return {
+					'Tốt (T)': 'Tốt (T) >=',
+					'Tốt (T) >= 75': 'Tốt (T) >=',
+					'Hoàn thành tốt (T)': 'Hoàn thành tốt (T) >=',
+					'Hoàn thành tốt (T) >= 75': 'Hoàn thành tốt (T) >='
+				}[String(label || '').trim()] || label
 			},
 			parseAnnualPlan(value) {
 				if (!value) return {}
@@ -576,7 +586,12 @@
 					if (!container || typeof jspreadsheet !== 'function') return
 					this.destroySheet(card.key)
 					container.innerHTML = ''
-					this.syncTargetPercentages(card, card.rows)
+					container.classList.toggle('so-gvcn-quality-target-sheet', card.key === 'pham-chat-nang-luc')
+					container.classList.toggle('so-gvcn-academic-target-sheet', card.key === 'mon-hoc-hoat-dong')
+					const isTargetCard = ['pham-chat-nang-luc', 'mon-hoc-hoat-dong'].includes(card.key)
+					const targetTableHeight = isTargetCard
+						? `${Math.max(180, (card.rows.length * 40) + (((card.nestedHeaders || []).length + 1) * 42) + 8)}px`
+						: card.height
 					this.sheetInstances[card.key] = soGvcnJspreadsheet.create(container, {
 						worksheets: [{
 							data: card.rows,
@@ -587,9 +602,9 @@
 							columnDrag: false,
 						rowDrag: false,
 						columnSorting: false,
-							tableWidth: '100%',
+							tableWidth: isTargetCard ? 'auto' : '100%',
 							tableOverflow: true,
-							tableHeight: card.height,
+							tableHeight: targetTableHeight,
 							lazyLoading: false,
 							wordWrap: true,
 							allowInsertColumn: false,
@@ -597,20 +612,43 @@
 							showHeader: true
 						}],
 						contextMenu: () => false,
-						onchange: (worksheet, cell, x, y) => {
-							if (this.syncingTargetPercentages) {
-								card.rows = worksheet.getData()
-								return
-							}
-							const rows = worksheet.getData()
-							this.syncingTargetPercentages = true
-							try {
-								this.syncTargetPercentages(card, rows, worksheet, x, y)
-								card.rows = rows
-							} finally {
-								this.syncingTargetPercentages = false
-							}
+						onchange: worksheet => {
+							card.rows = worksheet.getData()
 						}
+					})
+					this.$nextTick(() => {
+						this.hideAnnualPlanColumnsAndRows(container, card)
+					})
+				})
+			},
+			hideAnnualPlanColumnsAndRows(container, card) {
+				const hiddenRowLabels = new Set(['Đạt (Đ)', 'Hoàn thành (H)'])
+				const tables = container?.querySelectorAll?.('table') || []
+				tables.forEach(table => {
+					const quantityColumns = (card?.columns || [])
+						.map((column, index) => column?.title === 'Số lượng' ? index : null)
+						.filter(index => Number.isInteger(index))
+					const columnCount = card?.columns?.length || 0
+					const colgroup = table.querySelectorAll('colgroup col')
+					const colOffset = colgroup.length > columnCount ? 1 : 0
+					quantityColumns.forEach(columnIndex => {
+						table.querySelectorAll(`[data-x="${columnIndex}"]`).forEach(cell => {
+							cell.style.setProperty('display', 'none', 'important')
+						})
+						const col = colgroup[columnIndex + colOffset]
+						if (col) col.style.setProperty('display', 'none', 'important')
+					})
+					table.querySelectorAll('thead tr.jss_nested [data-column]').forEach(cell => {
+						const columns = String(cell.dataset.column || '').split(',').map(Number).filter(Number.isInteger)
+						const visibleColumns = columns.filter(columnIndex => !quantityColumns.includes(columnIndex))
+						if (columns.length && visibleColumns.length !== columns.length) {
+							cell.colSpan = Math.max(1, visibleColumns.length)
+							cell.dataset.column = visibleColumns.join(',')
+						}
+					})
+					table.querySelectorAll('tbody tr').forEach(row => {
+						const labelCell = row.querySelector('[data-x="0"]')
+						if (hiddenRowLabels.has(labelCell?.textContent?.trim())) row.style.display = 'none'
 					})
 				})
 			},

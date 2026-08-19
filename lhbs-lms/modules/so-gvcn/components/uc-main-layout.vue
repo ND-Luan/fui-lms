@@ -81,6 +81,11 @@
 								<v-icon start>mdi-file-excel</v-icon>
 								Xuất Excel
 							</v-btn>
+							<v-btn v-if="canExportAnnualTargets && tab === 'chi-tieu'" color="success" variant="outlined"
+								size="small" :loading="loading.exportAnnualTargets" @click="onExportAnnualTargets">
+								<v-icon start>mdi-file-excel-outline</v-icon>
+								Xuất chỉ tiêu các lớp
+							</v-btn>
 							<v-menu v-if="workflowActionMenuVisible && isCap1 && tab === 'ren-luyen'" location="bottom end">
 								<template #activator="{ props }">
 									<v-btn v-bind="props" color="primary" variant="flat" size="small"
@@ -166,7 +171,7 @@
 							<v-tab value="so-lien-lac">{{ isCap1 ? 'Theo dõi PH đi họp' : 'Sổ liên lạc điện tử' }}
 							</v-tab>
 							<v-tab v-if="isCap1" value="noi-dung-hop-ph">Nội dung họp PHHS</v-tab>
-							<v-tab v-if="isCap1" value="theo-doi-bhyt">Theo dõi BHYT & BHTN</v-tab>
+							<!-- Tab Theo dõi BHYT & BHTN được giữ lại trong dữ liệu cũ nhưng ẩn khỏi giao diện. -->
 							<v-tab v-if="!isCap1" value="huong-nghiep">Hướng nghiệp</v-tab>
 						</v-tabs>
 						<v-divider />
@@ -309,13 +314,6 @@
 									:sheet-height="sheetHeight" />
 							</v-window-item>
 
-							<!-- Tab Theo dõi BHYT, BHTN của HS (C1 only) -->
-			<v-window-item v-if="isCap1" value="theo-doi-bhyt">
-								<so-gvcn-c1-tab-theo-doi-bhyt-bhtn ref="tabTheoDoiBhytRef"
-									:selected-lop-i-d="selectedLopID" :students="getSelectedClassStudents()"
-									:saved-rows="theoDoiBhytSavedRows" :sheet-height="sheetHeight" />
-							</v-window-item>
-
 							<!-- Tab Hướng nghiệp (C2, C3 only) -->
 							<v-window-item v-if="!isCap1" value="huong-nghiep">
 								<so-gvcn-tab-huong-nghiep ref="tabHuongNghiepRef" :rows="huongNghiepRows"
@@ -340,7 +338,7 @@
 			vueData,
 			tab: 'du-lieu-hs',
 			filter: this.getDefaultFilter(),
-			loading: { list: false, detail: false, students: false, save: false, submit: false, month: false, tongKet: false, family: false, export: false },
+			loading: { list: false, detail: false, students: false, save: false, submit: false, month: false, tongKet: false, family: false, export: false, exportAnnualTargets: false },
 			classList: [],
 			soGVCNContexts: [],
 			allTeachers: [],
@@ -695,6 +693,9 @@
 			},
 			isBghOrAdmin() {
 				return [3, 9].includes(this.userSystemRight)
+			},
+			canExportAnnualTargets() {
+				return this.isCap1 && (this.isBghOrAdmin || this.userFunctionRights.some(right => [11, 12, 13, 14, 15].includes(Number(right))))
 			},
 			canSave() {
 				// Tạm mở nút Lưu cho demo/test.
@@ -2743,6 +2744,75 @@
 			}
 			return []
 		},
+		async onExportAnnualTargets() {
+			if (!this.canExportAnnualTargets) return
+			this.loading.exportAnnualTargets = true
+			try {
+				const classItems = (this.classList || []).filter(item => item?.LopID && Number(item.KhoiID) >= 1 && Number(item.KhoiID) <= 5)
+				const sheets = await Promise.all(classItems.map(async item => {
+					const classIDs = item.LopIDs || [item.LopID]
+					const contexts = await Promise.all(classIDs.map(lopID => ajaxCALLPromise('lms/SoGVCNEnsure', {
+						NienKhoa: item.NienKhoa || this.filter.NienKhoa,
+						LopID: lopID
+					}).catch(() => null)))
+					const plans = await Promise.all(contexts.filter(context => context?.SoGVCNID).map(context =>
+						ajaxCALLPromise('lms/SoGVCNKeHoachNamHocGet', { SoGVCNID: context.SoGVCNID }).catch(() => [])
+					))
+					const response = plans.find(plan => plan && (Array.isArray(plan) ? plan.length : true))
+					const firstResult = Array.isArray(response) ? response[0] : response
+					const row = Array.isArray(firstResult) ? (firstResult[0] || {}) : (firstResult || {})
+					const json = row.JsonData || row.KeHoachNamHoc || ''
+					const plan = json ? (typeof json === 'string' ? this.safeParseJson(json, {}) : json) : {}
+					return {
+						name: item.TenLop || item.LopID,
+						aoa: this.buildAnnualTargetsExportAoA(plan, item.TenLop || item.LopID)
+					}
+				}))
+				if (!sheets.length) {
+					this.notify('Không có lớp cấp 1 để xuất dữ liệu.', 'warning')
+					return
+				}
+				this.exportXlsx(sheets, 'ChiTieuPhanDau_TieuHoc_' + this.currentNienKhoa + '.xlsx')
+			} finally {
+				this.loading.exportAnnualTargets = false
+			}
+		},
+		buildAnnualTargetsExportAoA(plan, className) {
+			const planTab = this.$refs.tabKeHoachNamHocRef
+			const qualitySubjects = planTab?.qualityCompetencySubjects?.map(subject => planTab.getQualityCompetencyName(subject)) || [
+				'Yêu nước', 'Nhân ái', 'Chăm chỉ', 'Trung thực', 'Trách nhiệm',
+				'Tự chủ và tự học', 'Giao tiếp và hợp tác', 'Giải quyết vấn đề và sáng tạo',
+				'Ngôn ngữ', 'Tính toán', 'Khoa học', 'Công nghệ', 'Tin học', 'Thẩm mĩ', 'Thể chất'
+			]
+			const academicSubjects = planTab?.academicSubjects?.map(subject => subject.TenMonHoc_HienThi || subject.MonHocName || subject.TenMonHoc || '') || [
+				'Tiếng Việt', 'Toán', 'Ngoại ngữ', 'Lịch sử và Địa lí', 'Khoa học',
+				'Tin học và Công nghệ (Tin học)', 'Tin học và Công nghệ (Công nghệ)', 'Đạo đức',
+				'Giáo dục thể chất', 'Nghệ thuật (Âm nhạc)', 'Nghệ thuật (Mĩ thuật)', 'Hoạt động trải nghiệm'
+			]
+			const getRows = (key, legacyKey, labels) => {
+				const source = plan?.[key] || plan?.[legacyKey] || []
+				return (Array.isArray(source) ? source : []).filter(row => labels.includes(row?.[0]) || labels.includes({ 'Tốt (T)': 'Tốt (T) >=', 'Tốt (T) >= 75': 'Tốt (T) >=', 'Hoàn thành tốt (T)': 'Hoàn thành tốt (T) >=', 'Hoàn thành tốt (T) >= 75': 'Hoàn thành tốt (T) >=' }[row?.[0]]))
+			}
+			const toRows = (rows, subjects) => rows.map(row => [
+				({ 'Tốt (T)': 'Tốt (T) >=', 'Tốt (T) >= 75': 'Tốt (T) >=', 'Hoàn thành tốt (T)': 'Hoàn thành tốt (T) >=', 'Hoàn thành tốt (T) >= 75': 'Hoàn thành tốt (T) >=' }[row[0]] || row[0]),
+				...subjects.map((subject, index) => row[2 + index * 2] ?? '')
+			])
+			const qualityRows = getRows('qualityCompetencyTargets', 'pham-chat-nang-luc', ['Tốt (T) >=', 'Cần cố gắng (C)'])
+			const academicRows = getRows('academicTargets', 'mon-hoc-hoat-dong', ['Hoàn thành tốt (T) >=', 'Chưa hoàn thành (C)'])
+			return [
+				['LỚP ' + className + ' - CHỈ TIÊU PHẤN ĐẤU NĂM HỌC ' + this.getCurrentSchoolYearText()],
+				[],
+				['2.1. PHẨM CHẤT – NĂNG LỰC'],
+				['a. CHỈ TIÊU PHẤN ĐẤU'],
+				['Xếp loại', ...qualitySubjects.map(subject => subject + ' - Tỉ lệ')],
+				...toRows(qualityRows, qualitySubjects),
+				[],
+				['2.2. MÔN HỌC VÀ HOẠT ĐỘNG GIÁO DỤC'],
+				['a. CHỈ TIÊU PHẤN ĐẤU'],
+				['Xếp loại', ...academicSubjects.map(subject => subject + ' - Tỉ lệ')],
+				...toRows(academicRows, academicSubjects)
+			]
+		},
 		async onExportExcel() {
 			this.loading.export = true
 			try {
@@ -3202,14 +3272,36 @@
 		},
 		parseKeHoachWeekData(keHoachTuan) {
 			if (!keHoachTuan) return []
-			if (Array.isArray(keHoachTuan)) return keHoachTuan;
+			const normalizeRow = row => {
+				if (Array.isArray(row)) {
+					return Array.from({ length: 5 }, (_, index) => row[index] == null ? '' : String(row[index]))
+				}
+				if (row && typeof row === 'object') {
+					return [row.Tuan1, row.Tuan2, row.Tuan3, row.Tuan4, row.Tuan5]
+						.map(value => value == null ? '' : String(value))
+				}
+				const text = String(row == null ? '' : row)
+				if (text.trim().startsWith('[') || text.trim().startsWith('"')) {
+					try {
+						const parsed = JSON.parse(text)
+						if (parsed !== text) return normalizeRow(parsed)
+					} catch (e) {}
+				}
+				if (text.includes('\t')) {
+					return text.split('\t').slice(0, 5).map(value => value || '')
+				}
+				return null
+			}
 			let currentVal = keHoachTuan
-			while (typeof currentVal === 'string' && currentVal.trim().startsWith('[')) {
+			for (let depth = 0; depth < 4 && typeof currentVal === 'string'; depth++) {
+				const trimmed = currentVal.trim()
+				if (!trimmed.startsWith('[') && !trimmed.startsWith('{') && !trimmed.startsWith('"')) break
 				try {
 					const parsed = JSON.parse(currentVal)
-					if (Array.isArray(parsed)) return parsed
-					if (typeof parsed === 'string') currentVal = parsed
-					else break
+					if (parsed === currentVal) break
+					currentVal = parsed
+					if (Array.isArray(currentVal)) return currentVal.map(normalizeRow).filter(Boolean)
+					if (typeof currentVal !== 'string') break
 				} catch (e) {
 					let cleaned = currentVal;
 					cleaned = cleaned.replace(/\\*"+,\\*"+/g, '|~|');
@@ -3229,13 +3321,7 @@
 				}
 			}
 			const lines = Array.isArray(currentVal) ? currentVal : String(currentVal).split(/\r?\n/)
-			return lines.map(line => {
-				if (line && line.includes('\t')) {
-					const cols = line.split('\t')
-					return [cols[0] || '', cols[1] || '', cols[2] || '', cols[3] || '', cols[4] || '']
-				}
-				return ['', '', '', '', '']
-			})
+			return lines.map(normalizeRow).filter(Boolean)
 		},
 		getKeHoachWeekValue(item, week, rowIdx = 0, label = '') {
 			if (!item) return ''
@@ -3383,7 +3469,21 @@
 			})
 		},
 		cleanSheetValue(value) {
-			return value == null ? '' : String(value).trim()
+			if (value == null) return ''
+			if (typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean') {
+				return String(value).trim()
+			}
+			if (typeof value === 'object') {
+				const keys = ['value', 'v', 'text', 'textContent', 'innerText', 'innerHTML', 'displayValue']
+				for (const key of keys) {
+					const nested = value[key]
+					if (nested !== null && nested !== undefined && typeof nested !== 'object') {
+						return String(nested).trim()
+					}
+				}
+				return ''
+			}
+			return String(value).trim()
 		},
 		buildNhanXetGVCN(student) {
 			const nhanXetChuanBiNienKhoa = this.htmlToPlainText(student?.NhanXetGVCN)

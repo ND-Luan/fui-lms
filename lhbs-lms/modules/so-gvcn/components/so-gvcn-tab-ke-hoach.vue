@@ -90,8 +90,21 @@
 	beforeUnmount() {
 		this.destroySheet()
 	},
-	methods: {
-		getInstance() {
+		methods: {
+			normalizePasteCell(cell) {
+				if (cell === null || cell === undefined) return ''
+				if (typeof cell === 'string' || typeof cell === 'number' || typeof cell === 'boolean') return String(cell)
+				if (typeof cell === 'object') {
+					const keys = ['value', 'v', 'text', 'textContent', 'innerText', 'innerHTML', 'displayValue']
+					for (const key of keys) {
+						if (cell[key] !== null && cell[key] !== undefined && typeof cell[key] !== 'object') {
+							return String(cell[key])
+						}
+					}
+				}
+				return ''
+			},
+			getInstance() {
 			return this.instance
 		},
 		destroySheet() {
@@ -161,27 +174,18 @@
 					}],
 					onchange: () => { if (this.isInitialized) this.$emit('changed') },
 					onbeforepaste: (worksheet, data, x, y) => {
-						const col = worksheet.options.columns ? worksheet.options.columns[x] : null;
+						const col = worksheet.options.columns ? worksheet.options.columns[x] : null
 						if (this.isInitialized) this.$emit('changed');
 						if (Array.isArray(data)) {
-							const normalizedData = data.map(row => row.map(cell => {
-								if (cell === null || cell === undefined) return '';
-								if (typeof cell === 'string' || typeof cell === 'number') return String(cell);
-								if (typeof cell === 'object') {
-									return cell.innerHTML || cell.textContent || cell.innerText || cell.value || cell.v || '';
-								}
-								return String(cell);
-							}));
-							
-							if (col && (col.type === 'note' || col.type === 'html')) {
-								let text = normalizedData.map(row => row.join('\t')).join('\n');
-								if (text.startsWith('"') && text.endsWith('"')) {
-									text = text.substring(1, text.length - 1).replace(/""/g, '"');
-								}
-								return [[text]];
+							const normalizedData = data.map(row => row.map(cell => this.normalizePasteCell(cell)))
+							// Excel có thể tách một cell chứa xuống dòng thành nhiều row một cột.
+							// Với cột ghi chú/kế hoạch, ghép lại để không đẩy dữ liệu xuống các cell bên dưới.
+							if (col && (col.type === 'note' || col.type === 'html')
+								&& normalizedData.length > 1
+								&& normalizedData.every(row => row.length === 1)) {
+								return [[normalizedData.map(row => row[0]).join('\n')]]
 							}
-							
-							return normalizedData;
+							return normalizedData
 						}
 						return data;
 					},
